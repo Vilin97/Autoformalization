@@ -1,0 +1,848 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{booktabs}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{hypothesis}[theorem]{Hypothesis}
+
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\abs}[1]{\lvert #1 \rvert}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Icc}[2]{[#1,\, #2]}
+\newcommand{\Ico}[2]{[#1,\, #2)}
+\newcommand{\dist}{\mathrm{dist}}
+
+\title{Blueprint: Convergence of the Euler Method for ODEs}
+\author{Formalization Blueprint}
+\date{}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+%% ============================================================
+\section{Setup and Hypotheses}\label{sec:setup}
+%% ============================================================
+
+Let $E$ be a real Banach space (i.e., a complete normed vector space over~$\R$).
+Fix real numbers $a < b$ and an initial value $x_0 \in E$.
+Let $v \colon \R \times E \to E$ be a vector field.
+
+We impose the following three hypotheses on~$v$.
+
+\begin{hypothesis}[Lipschitz in space]\label{hyp:lip-x}
+There exists a constant $K \ge 0$ such that for every $t \in \Icc{a}{b}$
+and every $x, y \in E$,
+\[
+  \norm{v(t,x) - v(t,y)} \;\le\; K\,\norm{x - y}.
+\]
+\end{hypothesis}
+
+\begin{hypothesis}[Lipschitz in time]\label{hyp:lip-t}
+There exists a constant $L \ge 0$ such that for every $t, s \in \Icc{a}{b}$
+and every $x \in E$,
+\[
+  \norm{v(t,x) - v(s,x)} \;\le\; L\,\abs{t - s}.
+\]
+\end{hypothesis}
+
+\begin{hypothesis}[Boundedness]\label{hyp:bdd}
+There exists a constant $M \ge 0$ such that for every $t \in \Icc{a}{b}$
+and every $x \in E$,
+\[
+  \norm{v(t,x)} \;\le\; M.
+\]
+\end{hypothesis}
+
+\begin{remark}
+Hypothesis~\ref{hyp:bdd} is a strong global assumption.
+In practice one works on a ball $\{x : \norm{x - x_0} \le R\}$
+with $R > M(b-a)$, and verifies that all approximations remain
+in this ball. The global formulation simplifies the proof and
+suffices for a first formalization.
+\end{remark}
+
+\begin{remark}\label{rem:continuity}
+Hypotheses~\ref{hyp:lip-x} and~\ref{hyp:lip-t} together imply
+that the map $(t, x) \mapsto v(t, x)$ is continuous on
+$\Icc{a}{b} \times E$. Indeed, for any $(t,x)$ and $(s,y)$
+in $\Icc{a}{b} \times E$,
+\[
+  \norm{v(t,x) - v(s,y)}
+  \;\le\; \norm{v(t,x) - v(s,x)} + \norm{v(s,x) - v(s,y)}
+  \;\le\; L\,\abs{t - s} + K\,\norm{x - y}.
+\]
+\end{remark}
+
+
+%% ============================================================
+\section{The Euler Method}\label{sec:euler-def}
+%% ============================================================
+
+Throughout this section, fix a positive integer $N \ge 1$.
+Define the \emph{step size} and \emph{grid points} by
+\[
+  h \;=\; \frac{b - a}{N}, \qquad
+  t_k \;=\; a + k\,h, \qquad k = 0, 1, \ldots, N.
+\]
+Note that $t_0 = a$, $t_N = b$, and $t_{k+1} - t_k = h$ for all~$k$.
+
+\begin{definition}[Euler grid values]\label{def:euler-grid}
+Define the sequence $x_0, x_1, \ldots, x_N \in E$ recursively by:
+\begin{align}
+  x_0 &\;=\; x_0, \label{eq:euler-init}\\
+  x_{k+1} &\;=\; x_k + h \cdot v(t_k,\, x_k), \qquad k = 0, 1, \ldots, N-1.
+  \label{eq:euler-step}
+\end{align}
+\end{definition}
+
+\begin{definition}[Euler interpolant]\label{def:euler-interp}
+Define the \emph{piecewise-linear Euler interpolant}
+$f_h \colon \Icc{a}{b} \to E$ as follows. For $t \in \Icc{t_k}{t_{k+1}}$
+(with $0 \le k \le N-1$), set
+\begin{equation}\label{eq:interp-def}
+  f_h(t) \;=\; x_k + (t - t_k)\,v(t_k,\, x_k).
+\end{equation}
+Equivalently, $f_h$ is the unique continuous piecewise-affine
+function on $\Icc{a}{b}$ that is affine on each subinterval
+$\Icc{t_k}{t_{k+1}}$ and satisfies $f_h(t_k) = x_k$ for each~$k$.
+\end{definition}
+
+\begin{remark}\label{rem:index-function}
+Given $t \in \Ico{a}{b}$, the index $k = k(t)$ is uniquely
+determined by $t \in \Ico{t_k}{t_{k+1}}$.
+Explicitly,
+\[
+  k(t) \;=\; \Big\lfloor \frac{t - a}{h} \Big\rfloor
+\]
+where $\lfloor \cdot \rfloor$ denotes the floor function.
+For $t = b$ we set $k(b) = N - 1$, so that $b \in \Icc{t_{N-1}}{t_N}$.
+\end{remark}
+
+
+%% ============================================================
+\section{Properties of the Euler Interpolant}\label{sec:interp-props}
+%% ============================================================
+
+\begin{lemma}[Grid-point values]\label{lem:grid-values}
+For each $k \in \{0, 1, \ldots, N\}$,
+\[
+  f_h(t_k) \;=\; x_k.
+\]
+\end{lemma}
+
+\begin{proof}
+For $k = 0$: by~\eqref{eq:interp-def} with $t = t_0$,
+$f_h(t_0) = x_0 + 0 \cdot v(t_0, x_0) = x_0$.
+
+For $k \ge 1$: at $t = t_k$, using the piece on
+$\Icc{t_{k-1}}{t_k}$, we get
+\begin{align*}
+  f_h(t_k)
+  &= x_{k-1} + (t_k - t_{k-1})\,v(t_{k-1},\, x_{k-1}) \\
+  &= x_{k-1} + h\,v(t_{k-1},\, x_{k-1}) \\
+  &= x_k,
+\end{align*}
+where the last equality is the Euler recurrence~\eqref{eq:euler-step}.
+This also equals $x_k + (t_k - t_k)\,v(t_k, x_k) = x_k$
+from the piece on $\Icc{t_k}{t_{k+1}}$ (when $k < N$),
+confirming that the two pieces agree at~$t_k$.
+\end{proof}
+
+
+\begin{lemma}[Continuity]\label{lem:continuity}
+The function $f_h$ is continuous on $\Icc{a}{b}$.
+\end{lemma}
+
+\begin{proof}
+On each closed subinterval $\Icc{t_k}{t_{k+1}}$, the map
+$t \mapsto x_k + (t - t_k)\,v(t_k, x_k)$ is affine (hence
+continuous). By Lemma~\ref{lem:grid-values}, the value at
+$t_k$ from the piece on $\Icc{t_{k-1}}{t_k}$ equals $x_k$,
+and the value at $t_k$ from the piece on $\Icc{t_k}{t_{k+1}}$
+also equals~$x_k$. So the pieces agree at every grid point, and
+$f_h$ is continuous on $\Icc{a}{b}$.
+\end{proof}
+
+
+\begin{lemma}[Right derivative]\label{lem:right-deriv}
+For every $t \in \Ico{a}{b}$, let $k = k(t)$ be the index such
+that $t \in \Ico{t_k}{t_{k+1}}$. Then $f_h$ has a right derivative
+at~$t$, equal to $v(t_k, x_k)$. More precisely, the function $f_h$
+is differentiable from the right at $t$ with
+\begin{equation}\label{eq:right-deriv}
+  \lim_{s \to t^+} \frac{f_h(s) - f_h(t)}{s - t}
+  \;=\; v(t_k,\, x_k).
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+\textbf{Case 1: $t \in (t_k, t_{k+1})$.}
+Then for $s > t$ sufficiently close to~$t$, we have
+$s \in (t_k, t_{k+1})$ as well, so
+\[
+  f_h(s) - f_h(t) = \bigl[x_k + (s - t_k)\,v(t_k, x_k)\bigr]
+                   - \bigl[x_k + (t - t_k)\,v(t_k, x_k)\bigr]
+                   = (s - t)\,v(t_k, x_k).
+\]
+Dividing by $s - t > 0$ gives $v(t_k, x_k)$.
+
+\textbf{Case 2: $t = t_k$ for some $k < N$.}
+For $s \in (t_k, t_{k+1})$,
+\[
+  f_h(s) - f_h(t_k)
+  = x_k + (s - t_k)\,v(t_k, x_k) - x_k
+  = (s - t_k)\,v(t_k, x_k).
+\]
+Dividing by $s - t_k > 0$ gives $v(t_k, x_k)$.
+\end{proof}
+
+
+\begin{lemma}[Deviation from grid point]\label{lem:deviation}
+For $t \in \Icc{t_k}{t_{k+1}}$,
+\begin{equation}\label{eq:deviation}
+  \norm{f_h(t) - x_k} \;=\; \abs{t - t_k}\,\norm{v(t_k, x_k)}
+  \;\le\; h\,M.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+By~\eqref{eq:interp-def},
+$f_h(t) - x_k = (t - t_k)\,v(t_k, x_k)$, so
+\[
+  \norm{f_h(t) - x_k}
+  = \abs{t - t_k}\,\norm{v(t_k, x_k)}
+  \le h\,M,
+\]
+where we used $\abs{t - t_k} \le h$ and Hypothesis~\ref{hyp:bdd}.
+\end{proof}
+
+
+\begin{lemma}[Defect bound]\label{lem:defect}
+Define the \emph{defect} of the Euler interpolant at $t \in \Ico{a}{b}$ as
+\[
+  d(t) \;=\; \norm{f_h'(t) - v\bigl(t,\, f_h(t)\bigr)},
+\]
+where $f_h'(t) = v(t_k, x_k)$ is the right derivative from
+Lemma~\ref{lem:right-deriv}, and $k = k(t)$. Then
+\begin{equation}\label{eq:defect-bound}
+  d(t) \;\le\; (L + K\,M)\,h
+\end{equation}
+for all $t \in \Ico{a}{b}$.
+\end{lemma}
+
+\begin{proof}
+Let $t \in \Ico{t_k}{t_{k+1}}$. By the triangle inequality,
+\begin{equation}\label{eq:defect-split}
+  d(t) \;=\; \norm{v(t_k, x_k) - v(t, f_h(t))}
+  \;\le\; \underbrace{\norm{v(t_k, x_k) - v(t, x_k)}}_{I_1}
+       +  \underbrace{\norm{v(t, x_k) - v(t, f_h(t))}}_{I_2}.
+\end{equation}
+
+\textbf{Bound on $I_1$.}
+By Hypothesis~\ref{hyp:lip-t},
+\begin{equation}\label{eq:I1-bound}
+  I_1 = \norm{v(t_k, x_k) - v(t, x_k)}
+  \le L\,\abs{t_k - t}
+  \le L\,h.
+\end{equation}
+
+\textbf{Bound on $I_2$.}
+By Hypothesis~\ref{hyp:lip-x},
+\[
+  I_2 = \norm{v(t, x_k) - v(t, f_h(t))}
+  \le K\,\norm{x_k - f_h(t)}.
+\]
+By Lemma~\ref{lem:deviation}, $\norm{x_k - f_h(t)} \le h\,M$, so
+\begin{equation}\label{eq:I2-bound}
+  I_2 \;\le\; K\,M\,h.
+\end{equation}
+
+Combining~\eqref{eq:I1-bound} and~\eqref{eq:I2-bound}:
+\[
+  d(t) \;\le\; L\,h + K\,M\,h \;=\; (L + K\,M)\,h.
+  \qedhere
+\]
+\end{proof}
+
+
+%% ============================================================
+\section{Existence of the True Solution}\label{sec:existence}
+%% ============================================================
+
+\begin{lemma}[Existence and regularity of the ODE solution]\label{lem:true-solution}
+Under Hypotheses~\ref{hyp:lip-x}--\ref{hyp:bdd}, there exists
+a function $\alpha \colon \R \to E$ satisfying:
+\begin{enumerate}[label=(\roman*)]
+  \item\label{it:init} $\alpha(a) = x_0$.
+  \item\label{it:cont} $\alpha$ is continuous on $\Icc{a}{b}$.
+  \item\label{it:deriv} For every $t \in \Ico{a}{b}$,
+    $\alpha$ has a right derivative at $t$ equal to $v(t, \alpha(t))$:
+    \[
+      \lim_{s \to t^+} \frac{\alpha(s) - \alpha(t)}{s - t}
+      \;=\; v\bigl(t,\, \alpha(t)\bigr).
+    \]
+    Equivalently, $\alpha$ satisfies the ODE
+    $\alpha'(t) = v(t, \alpha(t))$ on $\Ico{a}{b}$.
+  \item\label{it:integral} For every $t \in \Icc{a}{b}$,
+    \begin{equation}\label{eq:integral-form}
+      \alpha(t) \;=\; x_0 + \int_a^t v\bigl(s,\, \alpha(s)\bigr)\,ds.
+    \end{equation}
+  \item\label{it:exact-defect}
+    The defect of $\alpha$ as an approximate solution is zero:
+    \[
+      \norm{\alpha'(t) - v\bigl(t,\, \alpha(t)\bigr)} = 0
+      \quad \text{for all } t \in \Ico{a}{b}.
+    \]
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+We verify the hypotheses of the Picard--Lindel\"of theorem.
+Set the ball radius $a_{\mathrm{ball}} = M(b - a)$ and $r = 0$.
+Then:
+\begin{itemize}
+  \item By Hypothesis~\ref{hyp:lip-x}, for each
+    $t \in \Icc{a}{b}$, the map $v(t, \cdot)$ is $K$-Lipschitz on
+    the closed ball $\overline{B}(x_0, a_{\mathrm{ball}})$.
+  \item By Remark~\ref{rem:continuity}, for each
+    $x \in \overline{B}(x_0, a_{\mathrm{ball}})$, the map
+    $t \mapsto v(t, x)$ is continuous on~$\Icc{a}{b}$.
+  \item By Hypothesis~\ref{hyp:bdd},
+    $\norm{v(t, x)} \le M$ for $t \in \Icc{a}{b}$,
+    $x \in \overline{B}(x_0, a_{\mathrm{ball}})$.
+  \item The time--interval condition:
+    $M \cdot (b - a) \le a_{\mathrm{ball}} - r = M(b - a) - 0 = M(b - a)$.
+    This holds with equality.
+\end{itemize}
+The Picard--Lindel\"of theorem yields
+$\alpha \colon \R \to E$ satisfying~\ref{it:init}--\ref{it:deriv}.
+
+Property~\ref{it:integral} follows from~\ref{it:deriv} by the
+fundamental theorem of calculus: since $\alpha$ is continuous on
+$\Icc{a}{b}$ and has right derivative $v(t, \alpha(t))$ on
+$\Ico{a}{b}$, and since $t \mapsto v(t, \alpha(t))$ is continuous
+(by Remark~\ref{rem:continuity} and the continuity of~$\alpha$),
+we have $\alpha(t) - \alpha(a) = \int_a^t v(s, \alpha(s))\,ds$.
+
+Property~\ref{it:exact-defect} is immediate from~\ref{it:deriv}.
+\end{proof}
+
+
+\begin{lemma}[Uniqueness]\label{lem:uniqueness}
+Under Hypothesis~\ref{hyp:lip-x}, the solution $\alpha$ from
+Lemma~\ref{lem:true-solution} is unique on $\Icc{a}{b}$.
+That is, if $\beta \colon \R \to E$ also satisfies $\beta(a) = x_0$
+and $\beta'(t) = v(t, \beta(t))$ for all $t \in \Ico{a}{b}$,
+with $\beta$ continuous on $\Icc{a}{b}$, then
+$\beta(t) = \alpha(t)$ for all $t \in \Icc{a}{b}$.
+\end{lemma}
+
+\begin{proof}
+This follows from the Gr\"onwall-based uniqueness theorem
+for ODEs with Lipschitz right-hand side.
+\end{proof}
+
+
+%% ============================================================
+\section{The Gr\"onwall Inequality for Approximate Solutions}
+\label{sec:gronwall}
+%% ============================================================
+
+The following theorem is the key tool that converts the local
+defect bound (Lemma~\ref{lem:defect}) into a global error bound.
+
+\begin{theorem}[Gr\"onwall bound for approximate solutions]
+\label{thm:gronwall-approx}
+Let $f, g \colon \Icc{a}{b} \to E$ be continuous functions that
+possess right derivatives $f'(t)$ and $g'(t)$ for all
+$t \in \Ico{a}{b}$. Suppose that $v(t, \cdot)$ is $K$-Lipschitz
+for every $t$. Suppose there exist constants
+$\varepsilon_f, \varepsilon_g, \delta \ge 0$ such that:
+\begin{enumerate}[label=(\alph*)]
+  \item $\norm{f'(t) - v(t, f(t))} \le \varepsilon_f$
+    for all $t \in \Ico{a}{b}$,
+  \item $\norm{g'(t) - v(t, g(t))} \le \varepsilon_g$
+    for all $t \in \Ico{a}{b}$,
+  \item $\norm{f(a) - g(a)} \le \delta$.
+\end{enumerate}
+Then for all $t \in \Icc{a}{b}$,
+\begin{equation}\label{eq:gronwall-bound}
+  \norm{f(t) - g(t)}
+  \;\le\; G\bigl(\delta,\; K,\; \varepsilon_f + \varepsilon_g,\;
+                    t - a\bigr),
+\end{equation}
+where the \emph{Gr\"onwall bound} $G$ is defined by
+\begin{equation}\label{eq:gronwall-def}
+  G(\delta, K, \varepsilon, x) \;=\;
+  \begin{cases}
+    \delta\,e^{Kx} + \dfrac{\varepsilon}{K}\,\bigl(e^{Kx} - 1\bigr)
+    & \text{if } K \neq 0, \\[6pt]
+    \delta + \varepsilon\,x
+    & \text{if } K = 0.
+  \end{cases}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+This is a standard consequence of the Gr\"onwall inequality.
+The proof proceeds by bounding the right derivative of
+$t \mapsto \norm{f(t) - g(t)}$ and applying the differential
+Gr\"onwall lemma.
+
+Define $e(t) = f(t) - g(t)$. Then $e$ is continuous on $\Icc{a}{b}$,
+and for $t \in \Ico{a}{b}$, the right derivative of $e$ is
+$e'(t) = f'(t) - g'(t)$. We estimate:
+\begin{align*}
+  \norm{e'(t)}
+  &= \norm{f'(t) - g'(t)} \\
+  &\le \norm{f'(t) - v(t, f(t))} + \norm{v(t, f(t)) - v(t, g(t))}
+     + \norm{v(t, g(t)) - g'(t)} \\
+  &\le \varepsilon_f + K\,\norm{f(t) - g(t)} + \varepsilon_g \\
+  &= K\,\norm{e(t)} + (\varepsilon_f + \varepsilon_g).
+\end{align*}
+Since $\norm{e(\cdot)}$ is continuous and its right derivative
+$\norm{e'(\cdot)}$ satisfies
+$\norm{e'(t)} \le K\,\norm{e(t)} + (\varepsilon_f + \varepsilon_g)$,
+the scalar Gr\"onwall inequality (applied to $\norm{e(\cdot)}$)
+gives~\eqref{eq:gronwall-bound}.
+\end{proof}
+
+
+%% ============================================================
+\section{Main Convergence Theorem}\label{sec:convergence}
+%% ============================================================
+
+\begin{theorem}[Convergence of the Euler method]
+\label{thm:main}
+Let $E$ be a real Banach space, let $a < b$ be real numbers,
+let $x_0 \in E$, and let $v \colon \R \times E \to E$ satisfy
+Hypotheses~\ref{hyp:lip-x}--\ref{hyp:bdd} with constants $K, L, M$.
+
+Let $\alpha$ be the unique solution to the initial-value problem
+$\alpha'(t) = v(t, \alpha(t))$, $\alpha(a) = x_0$, on $\Icc{a}{b}$
+(which exists by Lemma~\ref{lem:true-solution}).
+
+For each positive integer $N$, let $f_{(b-a)/N}$ be the Euler
+interpolant from Definition~\ref{def:euler-interp} with step size
+$h = (b-a)/N$.
+
+Then for all $t \in \Icc{a}{b}$,
+\begin{equation}\label{eq:main-bound}
+  \norm{f_h(t) - \alpha(t)}
+  \;\le\; G\bigl(0,\; K,\; (L + KM)\,h,\; t - a\bigr).
+\end{equation}
+Explicitly:
+\begin{equation}\label{eq:main-explicit}
+  \norm{f_h(t) - \alpha(t)}
+  \;\le\;
+  \begin{cases}
+    \dfrac{(L + KM)\,h}{K}\,
+    \bigl(e^{K(t-a)} - 1\bigr)
+    & \text{if } K > 0, \\[6pt]
+    L\,h\,(t - a)
+    & \text{if } K = 0.
+  \end{cases}
+\end{equation}
+In particular, uniformly on $\Icc{a}{b}$,
+\begin{equation}\label{eq:main-uniform}
+  \sup_{t \in \Icc{a}{b}} \norm{f_h(t) - \alpha(t)}
+  \;\le\; C\,h,
+\end{equation}
+where the constant $C$ depends only on $K$, $L$, $M$, and $b - a$:
+\begin{equation}\label{eq:C-def}
+  C \;=\;
+  \begin{cases}
+    \dfrac{L + KM}{K}\,\bigl(e^{K(b-a)} - 1\bigr)
+    & \text{if } K > 0, \\[6pt]
+    L\,(b-a)
+    & \text{if } K = 0.
+  \end{cases}
+\end{equation}
+Consequently, as $N \to \infty$ (equivalently, $h \to 0$),
+the Euler interpolants $f_h$ converge uniformly to $\alpha$ on
+$\Icc{a}{b}$.
+\end{theorem}
+
+\begin{proof}
+We apply Theorem~\ref{thm:gronwall-approx} with:
+\begin{itemize}
+  \item $f = f_h$ (the Euler interpolant),
+  \item $g = \alpha$ (the true solution),
+  \item $\varepsilon_f = (L + KM)\,h$ (from Lemma~\ref{lem:defect}),
+  \item $\varepsilon_g = 0$ (from Lemma~\ref{lem:true-solution}\ref{it:exact-defect}),
+  \item $\delta = 0$ (since $f_h(a) = x_0 = \alpha(a)$).
+\end{itemize}
+
+We verify the hypotheses of Theorem~\ref{thm:gronwall-approx}:
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{$f_h$ is continuous on $\Icc{a}{b}$.}
+    This is Lemma~\ref{lem:continuity}.
+
+  \item \textbf{$f_h$ has a right derivative at every $t \in \Ico{a}{b}$.}
+    This is Lemma~\ref{lem:right-deriv}. The right derivative
+    is $f_h'(t) = v(t_k, x_k)$ where $k = k(t)$.
+
+  \item \textbf{$\alpha$ is continuous on $\Icc{a}{b}$.}
+    This is Lemma~\ref{lem:true-solution}\ref{it:cont}.
+
+  \item \textbf{$\alpha$ has a right derivative at every $t \in \Ico{a}{b}$.}
+    This is Lemma~\ref{lem:true-solution}\ref{it:deriv}, with
+    right derivative $\alpha'(t) = v(t, \alpha(t))$.
+
+  \item \textbf{Defect of $f_h$:}
+    By Lemma~\ref{lem:defect},
+    $\norm{f_h'(t) - v(t, f_h(t))} \le (L + KM)\,h$ for all
+    $t \in \Ico{a}{b}$.
+
+  \item \textbf{Defect of $\alpha$:}
+    $\norm{\alpha'(t) - v(t, \alpha(t))} = 0 \le 0$ for all
+    $t \in \Ico{a}{b}$.
+
+  \item \textbf{Initial condition:}
+    $\norm{f_h(a) - \alpha(a)} = \norm{x_0 - x_0} = 0$.
+\end{enumerate}
+
+Theorem~\ref{thm:gronwall-approx} now gives, for all $t \in \Icc{a}{b}$:
+\[
+  \norm{f_h(t) - \alpha(t)}
+  \;\le\; G\bigl(0,\; K,\; (L + KM)\,h + 0,\; t - a\bigr).
+\]
+
+\textbf{Case $K > 0$.}
+By~\eqref{eq:gronwall-def} with $\delta = 0$,
+\[
+  G(0, K, \varepsilon, x)
+  = 0 \cdot e^{Kx} + \frac{\varepsilon}{K}\,(e^{Kx} - 1)
+  = \frac{\varepsilon}{K}\,(e^{Kx} - 1).
+\]
+With $\varepsilon = (L + KM)\,h$ and $x = t - a \le b - a$:
+\[
+  \norm{f_h(t) - \alpha(t)}
+  \le \frac{(L + KM)\,h}{K}\,(e^{K(t-a)} - 1)
+  \le \frac{(L + KM)}{K}\,(e^{K(b-a)} - 1)\,h.
+\]
+
+\textbf{Case $K = 0$.}
+By~\eqref{eq:gronwall-def},
+$G(0, 0, \varepsilon, x) = 0 + \varepsilon\,x = \varepsilon\,x$.
+Since $K = 0$, we have $\varepsilon = (L + 0)\,h = L\,h$, so
+\[
+  \norm{f_h(t) - \alpha(t)}
+  \le L\,h\,(t - a)
+  \le L\,(b - a)\,h.
+\]
+
+In both cases, $\norm{f_h(t) - \alpha(t)} \le C\,h$ with $C$
+as in~\eqref{eq:C-def}. Since $h = (b-a)/N \to 0$ as $N \to \infty$,
+the convergence is established.
+\end{proof}
+
+
+%% ============================================================
+\section{Dependency Graph}\label{sec:dependency}
+%% ============================================================
+
+The logical dependencies among the results are:
+
+\medskip
+\begin{center}
+\begin{tabular}{@{}lcl@{}}
+\toprule
+\textbf{Result} & \textbf{Depends on} & \textbf{Section} \\
+\midrule
+Lemma~\ref{lem:grid-values} (grid values)
+  & Def.~\ref{def:euler-grid}, Def.~\ref{def:euler-interp}
+  & \S\ref{sec:interp-props} \\
+Lemma~\ref{lem:continuity} (continuity)
+  & Lemma~\ref{lem:grid-values}
+  & \S\ref{sec:interp-props} \\
+Lemma~\ref{lem:right-deriv} (right derivative)
+  & Def.~\ref{def:euler-interp}
+  & \S\ref{sec:interp-props} \\
+Lemma~\ref{lem:deviation} (deviation)
+  & Def.~\ref{def:euler-interp}, Hyp.~\ref{hyp:bdd}
+  & \S\ref{sec:interp-props} \\
+Lemma~\ref{lem:defect} (defect bound)
+  & Lemma~\ref{lem:deviation}, Hyp.~\ref{hyp:lip-x},
+    Hyp.~\ref{hyp:lip-t}
+  & \S\ref{sec:interp-props} \\
+Lemma~\ref{lem:true-solution} (existence)
+  & Hyp.~\ref{hyp:lip-x}--\ref{hyp:bdd},
+    Picard--Lindel\"of (external)
+  & \S\ref{sec:existence} \\
+Theorem~\ref{thm:gronwall-approx} (Gr\"onwall)
+  & Hyp.~\ref{hyp:lip-x}, Gr\"onwall inequality (external)
+  & \S\ref{sec:gronwall} \\
+\textbf{Theorem~\ref{thm:main}} (main)
+  & Lemmas~\ref{lem:continuity},~\ref{lem:right-deriv},
+    \ref{lem:defect},~\ref{lem:true-solution},
+    Thm.~\ref{thm:gronwall-approx}
+  & \S\ref{sec:convergence} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+%% ============================================================
+\section{Existing Mathlib Results}\label{sec:mathlib}
+%% ============================================================
+
+This section catalogs the Mathlib theorems and definitions that
+should be used (not re-proved) in the formalization.
+
+\subsection{ODE Existence: Picard--Lindel\"of}
+\label{ssec:picard}
+
+File: \texttt{Mathlib.Analysis.ODE.PicardLindelof}
+
+\begin{itemize}
+  \item \texttt{IsPicardLindelof} --- Prop structure bundling the
+    hypotheses: Lipschitz in~$x$ on a closed ball, continuous in~$t$,
+    norm bound, time--interval condition.
+
+  \item \texttt{IsPicardLindelof.exists\_eq\_forall\_mem\_Icc\_hasDerivWithinAt}
+    --- Existence of a solution $\alpha$ with $\alpha(t_0) = x$ and
+    $\mathrm{HasDerivWithinAt}\;\alpha\;(f\;t\;(\alpha\;t))\;
+    (\mathrm{Icc}\;t_{\min}\;t_{\max})\;t$
+    for all $t \in \Icc{t_{\min}}{t_{\max}}$.
+    \emph{Use this for Lemma~\ref{lem:true-solution}.}
+
+  \item \texttt{IsPicardLindelof.of\_time\_independent} ---
+    Simplified constructor for autonomous vector fields $v(x)$.
+
+  \item \texttt{ODE.picard\_apply} ---
+    The Picard iteration: $\mathrm{picard}\;f\;t_0\;x_0\;\alpha\;t
+    = x_0 + \int_{t_0}^{t} f(\tau, \alpha(\tau))\,d\tau$.
+\end{itemize}
+
+
+\subsection{Gr\"onwall Inequality}
+\label{ssec:gronwall}
+
+File: \texttt{Mathlib.Analysis.ODE.Gronwall}
+
+\begin{itemize}
+  \item \texttt{gronwallBound} --- The function
+    $G(\delta, K, \varepsilon, x)$ from~\eqref{eq:gronwall-def}.
+
+  \item \texttt{gronwallBound\_x0} ---
+    $G(\delta, K, \varepsilon, 0) = \delta$.
+
+  \item \texttt{gronwallBound\_of\_K\_ne\_0} ---
+    The explicit formula when $K \neq 0$.
+
+  \item \texttt{gronwallBound\_K0} ---
+    The explicit formula when $K = 0$: $G(\delta, 0, \varepsilon, x) = \delta + \varepsilon\,x$.
+
+  \item \texttt{gronwallBound\_epsilon0} ---
+    $G(\delta, K, 0, x) = \delta\,e^{Kx}$.
+
+  \item \texttt{dist\_le\_of\_approx\_trajectories\_ODE} ---
+    \textbf{This is the central external theorem.}
+    Given two approximate solutions $f$ and $g$ with defects
+    $\varepsilon_f$ and $\varepsilon_g$ and initial distance $\delta$,
+    concludes $\dist(f(t), g(t)) \le G(\delta, K,
+    \varepsilon_f + \varepsilon_g, t - a)$.
+    Hypotheses:
+    \begin{itemize}
+      \item \texttt{hv : $\forall$ t, LipschitzWith K (v t)}
+      \item \texttt{hf : ContinuousOn f (Icc a b)}
+      \item \texttt{hf' : $\forall$ t $\in$ Ico a b,
+        HasDerivWithinAt f (f' t) (Ici t) t}
+      \item \texttt{f\_bound : $\forall$ t $\in$ Ico a b,
+        dist (f' t) (v t (f t)) $\le$ $\varepsilon_f$}
+      \item (same for $g$, $g'$, $\varepsilon_g$)
+      \item \texttt{ha : dist (f a) (g a) $\le$ $\delta$}
+    \end{itemize}
+    \emph{Use this for the main step of Theorem~\ref{thm:main}.}
+
+  \item \texttt{ODE\_solution\_unique} ---
+    Uniqueness of ODE solutions.
+    \emph{Use this for Lemma~\ref{lem:uniqueness}.}
+\end{itemize}
+
+
+\subsection{Interval Integrals and Fundamental Theorem of Calculus}
+\label{ssec:ftc}
+
+File: \texttt{Mathlib.MeasureTheory.Integral.IntervalIntegral}
+and related files.
+
+\begin{itemize}
+  \item \texttt{intervalIntegral.integral\_eq\_sub\_of\_hasDerivAt}
+    --- FTC-2: if $f$ has derivative $f'$ on $\Icc{a}{b}$ and $f'$
+    is integrable, then $\int_a^b f'(t)\,dt = f(b) - f(a)$.
+    \emph{Used to establish the integral form~\eqref{eq:integral-form}
+    of the ODE solution.}
+
+  \item \texttt{ContinuousOn.intervalIntegrable} --- A continuous
+    function on $\Icc{a}{b}$ is interval-integrable.
+\end{itemize}
+
+
+\subsection{Lipschitz Functions}
+\label{ssec:lipschitz}
+
+Files: \texttt{Mathlib.Topology.MetricSpace.Lipschitz},
+\texttt{Mathlib.Topology.MetricSpace.Holder}
+
+\begin{itemize}
+  \item \texttt{LipschitzWith} --- The predicate that a function
+    is $K$-Lipschitz: $\dist(f(x), f(y)) \le K \cdot \dist(x, y)$.
+
+  \item \texttt{LipschitzWith.dist\_le\_mul} ---
+    If \texttt{LipschitzWith K f}, then
+    $\dist(f(x), f(y)) \le K \cdot \dist(x, y)$.
+    \emph{Use this to bound $\norm{v(t,x) - v(t,y)} \le K\,\norm{x-y}$
+    in Lemma~\ref{lem:defect}.}
+
+  \item \texttt{LipschitzWith.continuous} --- A Lipschitz function
+    is continuous.
+\end{itemize}
+
+
+\subsection{Norms, Distances, and Basic Estimates}
+\label{ssec:norms}
+
+\begin{itemize}
+  \item \texttt{norm\_smul} ---
+    $\norm{c \cdot x} = \abs{c} \cdot \norm{x}$ for $c \in \R$,
+    $x \in E$.
+    \emph{Used in Lemma~\ref{lem:deviation}:
+    $\norm{(t - t_k) \cdot v(t_k, x_k)} = \abs{t - t_k} \cdot \norm{v(t_k, x_k)}$.}
+
+  \item \texttt{dist\_comm}, \texttt{dist\_eq\_norm} ---
+    $\dist(x, y) = \norm{x - y}$.
+
+  \item \texttt{norm\_sub\_le} ---
+    Triangle inequality: $\norm{x - z} \le \norm{x - y} + \norm{y - z}$.
+    \emph{Used in Lemma~\ref{lem:defect}.}
+\end{itemize}
+
+
+\subsection{HasDerivWithinAt and Differentiability}
+\label{ssec:deriv}
+
+File: \texttt{Mathlib.Analysis.Calculus.Deriv.Basic}
+
+\begin{itemize}
+  \item \texttt{HasDerivWithinAt} ---
+    The predicate that the derivative of $f$ within a set $s$ at
+    a point $x$ is $y$. For the Euler interpolant and the Gronwall
+    theorem, the relevant set is $\mathrm{Ici}\;t = [t, \infty)$
+    (right derivative).
+
+  \item \texttt{hasDerivWithinAt\_const}, \texttt{HasDerivWithinAt.add},
+    \texttt{HasDerivWithinAt.smul} ---
+    Rules for computing derivatives of constants, sums, and scalar
+    multiples. \emph{Used to show that the affine map
+    $t \mapsto x_k + (t - t_k) \cdot c$ has derivative $c$
+    within $[t, \infty)$.}
+
+  \item \texttt{hasDerivAt\_id'} --- The identity function has
+    derivative~$1$.
+\end{itemize}
+
+
+\subsection{Continuous Functions on Intervals}
+\label{ssec:continuous}
+
+\begin{itemize}
+  \item \texttt{ContinuousOn} --- The predicate that a function
+    is continuous on a set.
+
+  \item \texttt{ContinuousOn.mono} --- If $f$ is continuous on $s$
+    and $s' \subseteq s$, then $f$ is continuous on $s'$.
+
+  \item Piecewise continuity: to show $f_h$ is continuous on
+    $\Icc{a}{b}$, one approach is to show it is continuous on
+    each $\Icc{t_k}{t_{k+1}}$ and that the values agree at
+    grid points. Alternatively, use
+    \texttt{ContinuousOn.if} or construct $f_h$ as a
+    continuous map directly.
+\end{itemize}
+
+
+\subsection{Floor Function and Interval Arithmetic}
+\label{ssec:floor}
+
+\begin{itemize}
+  \item \texttt{Nat.floor} / \texttt{Int.floor} ---
+    The floor function. Used to define $k(t)$ in
+    Remark~\ref{rem:index-function}.
+
+  \item \texttt{Nat.floor\_le}, \texttt{Nat.lt\_floor\_add\_one} ---
+    Properties: $\lfloor x \rfloor \le x < \lfloor x \rfloor + 1$.
+\end{itemize}
+
+
+%% ============================================================
+\section{Implementation Notes}\label{sec:implementation}
+%% ============================================================
+
+\begin{enumerate}
+  \item \textbf{Defining the interpolant.}
+    The cleanest Lean definition of $f_h$ may be as a single function
+    using the floor function to determine the subinterval index,
+    rather than as a literal piecewise definition using
+    \texttt{Set.piecewise}. Specifically:
+    \begin{verbatim}
+    noncomputable def eulerInterp (v : R -> E -> E) (x0 : E)
+        (a b : R) (N : Nat) (t : R) : E :=
+      let h := (b - a) / N
+      let k := min (Nat.floor ((t - a) / h)) (N - 1)
+      let xk := eulerGrid v x0 a h k
+      let tk := a + k * h
+      xk + (t - tk) * v(tk, xk)
+    \end{verbatim}
+    The \texttt{min} with $N-1$ handles the right endpoint $t = b$.
+
+  \item \textbf{Right derivatives at grid points.}
+    At $t = t_k$ (a grid point), the interpolant has different
+    left and right derivatives. The Gronwall theorem only requires
+    the right derivative (\texttt{HasDerivWithinAt} with
+    \texttt{Set.Ici t}), which matches the derivative of the
+    piece on $\Icc{t_k}{t_{k+1}}$.
+
+  \item \textbf{Extending $v$ beyond $\Icc{a}{b}$.}
+    The Gronwall theorem \texttt{dist\_le\_of\_approx\_trajectories\_ODE}
+    requires $v(t, \cdot)$ to be $K$-Lipschitz for \emph{all}
+    $t \in \R$, not just $t \in \Icc{a}{b}$. If $v$ is only
+    defined on $\Icc{a}{b}$, extend it by setting
+    $v(t, x) = v(a, x)$ for $t < a$ and $v(t, x) = v(b, x)$ for
+    $t > b$. Alternatively, use the variant
+    \texttt{dist\_le\_of\_approx\_trajectories\_ODE\_of\_mem}
+    with the time-dependent set $s(t) = E$.
+
+  \item \textbf{NNReal for constants.}
+    Following Mathlib conventions, consider using $\R_{\ge 0}$
+    (\texttt{NNReal}) for $K$, $L$, $M$, $h$ to avoid carrying
+    non-negativity proofs.
+
+  \item \textbf{The Picard--Lindel\"of hypotheses.}
+    The structure \texttt{IsPicardLindelof} requires constants
+    as \texttt{NNReal} and the time parameter $t_0$ as a subtype
+    of $\Icc{t_{\min}}{t_{\max}}$. Set $t_0 = a$,
+    $t_{\min} = a$, $t_{\max} = b$, $r = 0$,
+    $a_{\mathrm{ball}} = M \cdot (b - a)$ (as an NNReal, requiring
+    $M \ge 0$ and $b \ge a$), $L_{\mathrm{bound}} = M$, and
+    $K_{\mathrm{lip}} = K$.
+\end{enumerate}
+
+
+\end{document}
