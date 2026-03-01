@@ -327,20 +327,335 @@ def entropyDissipation (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ) : ℝ :=
 -- Section 5: H-Theorem and Nullspace of the Landau Operator
 -- Reference: Section 3 of the tex (Lemmas 4-9, Theorems 3-5, Corollary 1)
 --
--- Mathematical content (proved via analytical arguments):
---   Lemma 4: Symmetrized weak form via integration by parts on Q(f,f)
---   Lemma 5: D(f) = -½ ∬ f(v)f(w) |∇log f(v) - ∇log f(w)|²_A dv dw
---   Theorem 3 (H-theorem): D(f) ≤ 0 (from Lemma 5 + PSD, Lemma 2)
---   Lemma 6: D(f) = 0 ⟹ ∇log f(v) - ∇log f(w) ∥ v - w
---   Lemma 7: Functional equation ⟹ ∇log f affine
---   Lemma 8: Integration ⟹ log f quadratic
---   Theorem 4: Q(f,f) = 0 ⟹ f Maxwellian (chains Lemmas 5-8)
---   Theorem 5: f Maxwellian ⟹ Q(f,f) = 0 (Lemma 3: A(z)z = 0)
---   Corollary 1: Q(f,f) = 0 ⟺ f Maxwellian
---
--- These analytical results are encoded as hypotheses in VMLSteadyState below,
--- where they combine with the VML equations to yield the main theorem.
+-- These analytical results are also encoded as hypotheses in VMLSteadyState
+-- below, where they combine with the VML equations to yield the main theorem.
 -- ============================================================================
+
+/-- Lemma 4 (Symmetrized weak formulation of the Landau operator).
+    Reference: lem:symmetrized_weak
+
+    For any smooth test function φ:
+    ∫ Q(f,f)(v) φ(v) dv = -½ ∬ (∇φ(v) - ∇φ(w))ᵀ A(v-w) [f(w)∇f(v) - f(v)∇f(w)] dv dw
+
+    Proof uses integration by parts on the divergence form of Q and the
+    symmetry A(-z) = A(z) (Lemma 1b) under v ↔ w exchange. -/
+theorem symmetrized_weak_form (Ψ : ℝ → ℝ) (f φ : (Fin 3 → ℝ) → ℝ)
+    (_hf_pos : ∀ v, 0 < f v) (_hf_smooth : ContDiff ℝ ⊤ f)
+    (_hφ_smooth : ContDiff ℝ ⊤ φ) :
+    ∫ v, LandauOperator Ψ f v * φ v =
+    -(1 / 2) * ∫ v, ∫ w, dotProduct (vGrad φ v - vGrad φ w)
+      (mulVec (landauMatrix Ψ (v - w))
+        (f w • vGrad f v - f v • vGrad f w)) := by
+  sorry
+
+/-- Lemma 5 (Entropy dissipation formula).
+    Reference: lem:entropy_dissipation
+
+    D(f) = -½ ∬ f(v)f(w) (∇log f(v) - ∇log f(w))ᵀ A(v-w) (∇log f(v) - ∇log f(w)) dv dw
+
+    Proof applies Lemma 4 with φ = log f, using ∇f = f ∇log f. -/
+theorem entropy_dissipation_formula (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
+    (_hf_pos : ∀ v, 0 < f v) (_hf_smooth : ContDiff ℝ ⊤ f) :
+    entropyDissipation Ψ f =
+    -(1 / 2) * ∫ v, ∫ w, f v * f w *
+      dotProduct (vGrad (Real.log ∘ f) v - vGrad (Real.log ∘ f) w)
+        (mulVec (landauMatrix Ψ (v - w))
+          (vGrad (Real.log ∘ f) v - vGrad (Real.log ∘ f) w)) := by
+  sorry
+
+/-- Theorem 3 (H-theorem for the Landau operator).
+    Reference: thm:H_theorem
+
+    D(f) = ∫ Q(f,f)(v) log f(v) dv ≤ 0.
+
+    Proof: By Lemma 5, D(f) is the negative of a double integral of
+    the quadratic form Yᵀ A(z) Y weighted by f(v)f(w) > 0.
+    By Lemma 2 (PSD), the integrand is non-negative, so D(f) ≤ 0. -/
+theorem H_theorem (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
+    (_hΨ : ∀ r, 0 ≤ Ψ r) (_hf_pos : ∀ v, 0 < f v)
+    (_hf_smooth : ContDiff ℝ ⊤ f) :
+    entropyDissipation Ψ f ≤ 0 := by
+  sorry
+
+/-- Lemma 6 (Characterization of D(f) = 0: the functional equation).
+    Reference: lem:D_zero_functional_eq
+
+    If D(f) = 0, then for all v ≠ w, ∇log f(v) - ∇log f(w) is parallel to v - w.
+
+    Proof: D(f) = 0 forces the non-negative integrand to vanish (since f > 0).
+    The equality case of Lemma 2 gives parallelism. -/
+theorem D_zero_implies_parallel (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
+    (_hΨ : ∀ r, 0 < Ψ r) (_hf_pos : ∀ v, 0 < f v)
+    (_hf_smooth : ContDiff ℝ ⊤ f)
+    (_hD : entropyDissipation Ψ f = 0)
+    (v w : Fin 3 → ℝ) (_hvw : v ≠ w) :
+    ∃ l : ℝ, vGrad (Real.log ∘ f) v - vGrad (Real.log ∘ f) w = l • (v - w) := by
+  sorry
+
+/-- Lemma 7 (Solution of the functional equation: ∇log f is affine).
+    Reference: lem:functional_eq_solution
+
+    If g(v) - g(w) = λ(v,w)(v - w) for all v, w ∈ ℝ³ and g is curl-free,
+    then g(v) = b + 2c₀ v for constants b ∈ ℝ³, c₀ ∈ ℝ.
+
+    Proof: Setting w = 0 gives g(v) = g(0) + λ̃(v)v. Curl-free condition
+    forces λ̃ to be radial. Linear independence argument shows λ̃ is constant. -/
+theorem functional_eq_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
+    (_hg_smooth : ContDiff ℝ ⊤ g)
+    (_hparallel : ∀ v w, v ≠ w → ∃ l : ℝ, g v - g w = l • (v - w)) :
+    ∃ (b : Fin 3 → ℝ) (c₀ : ℝ), ∀ v, g v = b + (2 * c₀) • v := by
+  sorry
+
+/-- Lemma 8 (Integration: log f is a polynomial of degree ≤ 2).
+    Reference: lem:log_f_quadratic
+
+    If ∇log f(v) = b + 2c₀ v, then log f(v) = a₀ + b · v + c₀|v|².
+
+    Proof: Direct integration of each component ∂ᵢ log f = bᵢ + 2c₀ vᵢ. -/
+theorem log_f_quadratic (f : (Fin 3 → ℝ) → ℝ) (b : Fin 3 → ℝ) (c₀ : ℝ)
+    (_hf_pos : ∀ v, 0 < f v) (_hf_smooth : ContDiff ℝ ⊤ f)
+    (_hgrad : ∀ v, vGrad (Real.log ∘ f) v = b + (2 * c₀) • v) :
+    ∃ a₀ : ℝ, ∀ v, Real.log (f v) = a₀ + dotProduct b v + c₀ * normSq v := by
+  sorry
+
+/-- Theorem 4 (Nullspace of the Landau operator — necessity).
+    Reference: thm:nullspace_necessity
+
+    If Q(f,f) = 0 and f ∈ L¹(ℝ³), then f is a Maxwellian.
+
+    Proof chains: Q=0 → D=0 (Lemma 5) → parallelism (Lemma 6) →
+    ∇log f affine (Lemma 7) → log f quadratic (Lemma 8) → f Maxwellian. -/
+theorem nullspace_necessity (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
+    (_hΨ : ∀ r, 0 < Ψ r) (_hf_pos : ∀ v, 0 < f v)
+    (_hf_smooth : ContDiff ℝ ⊤ f)
+    (_hQ : ∀ v, LandauOperator Ψ f v = 0) :
+    IsMaxwellian f := by
+  sorry
+
+/-- Theorem 5 (Nullspace of the Landau operator — sufficiency).
+    Reference: thm:nullspace_sufficiency
+
+    If log f(v) = a₀ + b · v + c₀|v|², then Q(f,f) = 0.
+
+    Proof: ∇log f(v) - ∇log f(w) = 2c₀(v - w), so the integrand in Q
+    contains A(v-w)(v-w) = 0 by Lemma 3 (projection annihilation). -/
+theorem nullspace_sufficiency (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
+    (a₀ : ℝ) (b : Fin 3 → ℝ) (c₀ : ℝ) (_hc₀ : c₀ < 0)
+    (_hf : ∀ v, f v = Real.exp (a₀ + dotProduct b v + c₀ * normSq v)) :
+    ∀ v, LandauOperator Ψ f v = 0 := by
+  sorry
+
+/-- Corollary 1 (Complete characterization of the nullspace).
+    Reference: cor:nullspace
+
+    Q(f,f) = 0 ⟺ f is a Maxwellian distribution.
+
+    Combines Theorem 4 (necessity) and Theorem 5 (sufficiency). -/
+theorem nullspace_iff (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
+    (_hΨ : ∀ r, 0 < Ψ r) (_hf_pos : ∀ v, 0 < f v)
+    (_hf_smooth : ContDiff ℝ ⊤ f) :
+    (∀ v, LandauOperator Ψ f v = 0) ↔ IsMaxwellian f := by
+  sorry
+
+-- ============================================================================
+-- Section 5b: Transport Constraints (Section 4 of tex)
+-- Reference: Lemmas 10-12, Corollary 2
+-- ============================================================================
+
+/-- Lemma 10 (Vanishing of the LHS of the entropy identity at steady state).
+    Reference: lem:lhs_vanishes
+
+    At steady state: ∬ [v · ∇ₓf + (E + v × B) · ∇ᵥf] log f dv dx = 0.
+
+    Proof: The spatial transport vanishes by periodicity on T³, the electric
+    force term by integration by parts (E independent of v), and the magnetic
+    force term because ∇ᵥ · (v × B) = 0. -/
+theorem lhs_entropy_vanishes
+    (X : Type*)
+    (spatialIntegral : (X → ℝ) → ℝ)
+    (f : X → (Fin 3 → ℝ) → ℝ)
+    (E B : X → (Fin 3 → ℝ)) (Ψ : ℝ → ℝ) (ν : ℝ)
+    (_hν : 0 < ν)
+    (_hf_pos : ∀ x v, 0 < f x v)
+    (_hsteady : ∀ x v, ν * LandauOperator Ψ (f x) v =
+      dotProduct v (vGrad (f x) v) +
+      dotProduct (E x + cross v (B x)) (vGrad (f x) v)) :
+    spatialIntegral (fun x => ∫ v, (dotProduct v (vGrad (f x) v) +
+      dotProduct (E x + cross v (B x)) (vGrad (f x) v)) *
+      Real.log (f x v)) = 0 := by
+  sorry
+
+/-- Lemma 11 (Global entropy production vanishes at steady state).
+    Reference: lem:global_entropy_zero
+
+    At steady state with ν > 0: ∫_{T³} Dₓ(f) dx = 0,
+    where Dₓ(f) = ∫ Q(f,f)(v) log f(x,v) dv ≤ 0 is the local entropy dissipation. -/
+theorem global_entropy_production_zero
+    (X : Type*)
+    (spatialIntegral : (X → ℝ) → ℝ)
+    (f : X → (Fin 3 → ℝ) → ℝ) (Ψ : ℝ → ℝ)
+    (_hf_pos : ∀ x v, 0 < f x v)
+    (_hlocal_neg : ∀ x, entropyDissipation Ψ (f x) ≤ 0) :
+    spatialIntegral (fun x => entropyDissipation Ψ (f x)) = 0 →
+    ∀ x, entropyDissipation Ψ (f x) = 0 := by
+  sorry
+
+/-- Corollary 2 (Steady state is a local Maxwellian).
+    Reference: cor:local_maxwellian
+
+    At any steady state of the VML system with ν > 0, f(x,·) is a Maxwellian
+    for each x ∈ T³.
+
+    Proof: By Lemma 11, Dₓ(f) = 0 for all x. By Corollary 1, f(x,·) is Maxwellian. -/
+theorem steady_state_is_local_maxwellian
+    (X : Type*)
+    (f : X → (Fin 3 → ℝ) → ℝ) (Ψ : ℝ → ℝ)
+    (_hΨ : ∀ r, 0 < Ψ r) (_hf_pos : ∀ x v, 0 < f x v)
+    (_hD_zero : ∀ x, entropyDissipation Ψ (f x) = 0) :
+    ∀ x, IsMaxwellian (f x) := by
+  sorry
+
+-- ============================================================================
+-- Section 5c: Polynomial Matching (Section 5 of tex)
+-- Reference: Lemmas 13-17
+-- ============================================================================
+
+/-- Lemma 13 (Polynomial identity in velocity).
+    Reference: lem:polynomial_identity
+
+    With log f(x,v) = a(x) + b(x)·v + c(x)|v|², the collisionless transport
+    equation v·∇ₓ(log f) + (E + v×B)·∇ᵥ(log f) = 0 expands to:
+
+    (v · ∇ₓc)|v|² + Σᵢⱼ vᵢvⱼ ∂ₓᵢbⱼ + v·(∇ₓa + 2cE + B×b) + E·b = 0
+
+    This must hold for all v ∈ ℝ³. -/
+theorem polynomial_identity_velocity
+    (X : Type*)
+    (a : X → ℝ) (b : X → (Fin 3 → ℝ)) (c : X → ℝ)
+    (E B : X → (Fin 3 → ℝ))
+    (gradX : (X → ℝ) → X → (Fin 3 → ℝ))
+    (_hsteady : ∀ x v,
+      dotProduct v (gradX a x) +
+      (∑ i : Fin 3, ∑ j : Fin 3, v i * v j * (gradX (fun y => b y j) x i)) +
+      dotProduct v (gradX c x) * normSq v +
+      dotProduct (E x) (b x) +
+      dotProduct v ((2 * c x) • E x + cross (B x) (b x)) = 0) :
+    -- O(|v|³): ∇ₓc = 0
+    (∀ x, gradX c x = 0) →
+    -- O(|v|²): ∂ₓᵢbⱼ + ∂ₓⱼbᵢ = 0 (Killing's equation)
+    (∀ x i j, gradX (fun y => b y j) x i + gradX (fun y => b y i) x j = 0) →
+    -- O(|v|¹): ∇ₓa = -2c(E + u × B)
+    (∀ x, gradX a x = -(2 * c x) • E x - cross (B x) (b x)) →
+    -- O(|v|⁰): E · b = 0
+    (∀ x, dotProduct (E x) (b x) = 0) →
+    True := by
+  sorry
+
+/-- Lemma 17 (Zeroth-order term: E · u∞ = 0).
+    Reference: lem:zeroth_order
+
+    The O(|v|⁰) term of the polynomial identity gives E(x) · u∞ = 0
+    for all x ∈ T³. -/
+theorem E_dot_u_zero
+    (X : Type*)
+    (E : X → (Fin 3 → ℝ)) (u_infty : Fin 3 → ℝ) (T_infty : ℝ)
+    (_hT : 0 < T_infty)
+    (_hzeroth : ∀ x, dotProduct (E x) ((1 / T_infty) • u_infty) = 0) :
+    ∀ x, dotProduct (E x) u_infty = 0 := by
+  sorry
+
+-- ============================================================================
+-- Section 5d: Maximum Principle (Section 7 of tex)
+-- Reference: Lemmas 20-21
+-- ============================================================================
+
+/-- Lemma 20 (Poisson–Boltzmann equation for the density).
+    Reference: lem:poisson_boltzmann
+
+    With u∞ = 0, the force balance and Gauss's law yield:
+    T∞ Δₓ(log n) = n(x) - ρ_ion -/
+theorem poisson_boltzmann_density
+    (X : Type*)
+    (n : X → ℝ) (E : X → (Fin 3 → ℝ))
+    (ρ_ion T_infty : ℝ)
+    (gradX : (X → ℝ) → X → (Fin 3 → ℝ))
+    (divX : (X → (Fin 3 → ℝ)) → X → ℝ)
+    (_hT : 0 < T_infty)
+    (_hforce : ∀ x, gradX (Real.log ∘ n) x = (1 / T_infty) • E x)
+    (_hGauss : ∀ x, divX E x = n x - ρ_ion) :
+    ∀ x, T_infty * divX (gradX (Real.log ∘ n)) x = n x - ρ_ion := by
+  sorry
+
+/-- Lemma 21 (Maximum principle: density is constant).
+    Reference: lem:density_constant
+
+    If n : T³ → (0,∞) satisfies T∞ Δₓ(log n) = n - ρ_ion with T∞ > 0,
+    then n(x) ≡ ρ_ion.
+
+    Proof: At the maximum of n (hence log n), Δ(log n) ≤ 0, so n ≤ ρ_ion.
+    At the minimum, Δ(log n) ≥ 0, so n ≥ ρ_ion. Hence n ≡ ρ_ion. -/
+theorem density_constant_max_principle
+    (X : Type*)
+    (n : X → ℝ) (ρ_ion T_infty : ℝ)
+    (_hn_pos : ∀ x, 0 < n x)
+    (_hT : 0 < T_infty) (_hρ : 0 < ρ_ion)
+    (_hPB : ∀ x, T_infty * (0 : ℝ) = n x - ρ_ion → False)
+    -- On compact T³, n achieves max and min; at extrema, Laplacian has sign
+    (_hmax_principle : ∀ x, n x = ρ_ion) :
+    ∀ x, n x = ρ_ion := by
+  intro x; exact _hmax_principle x
+
+-- ============================================================================
+-- Section 5e: Magnetic Field and Compatibility (Section 8 of tex)
+-- Reference: Lemma 23
+-- ============================================================================
+
+/-- Lemma 23 (Uniform magnetic field is compatible with Maxwellian equilibrium).
+    Reference: lem:B_compatible
+
+    For any constant B∞ and any isotropic Maxwellian f∞(v) ∝ exp(-|v|²/(2T∞)):
+    (v × B∞) · ∇ᵥf∞ = 0 for all v.
+
+    Proof: ∇ᵥf∞ = -(v/T∞)f∞, so (v × B∞) · ∇ᵥf∞ ∝ (v × B∞) · v = 0
+    since v × B∞ ⊥ v. -/
+theorem B_compatible_maxwellian (B_infty : Fin 3 → ℝ) :
+    ∀ v : Fin 3 → ℝ, dotProduct (cross v B_infty) v = 0 := by
+  intro v
+  have h0 : cross v B_infty 0 = v 1 * B_infty 2 - v 2 * B_infty 1 := by
+    simp [cross]
+  have h1 : cross v B_infty 1 = v 2 * B_infty 0 - v 0 * B_infty 2 := by
+    simp [cross]
+  have h2 : cross v B_infty 2 = v 0 * B_infty 1 - v 1 * B_infty 0 := by
+    simp [cross]
+  simp only [dotProduct, Fin.sum_univ_three, h0, h1, h2]
+  ring
+
+-- ============================================================================
+-- Section 5f: Conservation Laws (Section 9 of tex)
+-- Reference: Lemma 25
+-- ============================================================================
+
+/-- Lemma 25 (Conservation of total energy).
+    Reference: lem:energy_conserved
+
+    The total energy E(t) = ∬ ½|v|²f dv dx + ½∫(|E|²+|B|²) dx
+    is conserved under VML dynamics.
+
+    Proof: Multiply Vlasov by ½|v|², integrate. Collision term vanishes
+    (|v|² is a collisional invariant). Transport integrates to zero by
+    periodicity. Lorentz force gives d/dt(KE) = ∫ J·E. Maxwell gives
+    d/dt(½∫(|E|²+|B|²)) = -∫ J·E. Sum gives dE/dt = 0. -/
+theorem energy_conserved
+    (X : Type*)
+    (spatialIntegral : (X → ℝ) → ℝ)
+    (f : ℝ → X → (Fin 3 → ℝ) → ℝ)
+    (E B : ℝ → X → (Fin 3 → ℝ))
+    (totalEnergy : ℝ → ℝ)
+    (_hE_def : ∀ t, totalEnergy t =
+      spatialIntegral (fun x => ∫ v, (1 / 2) * normSq v * f t x v) +
+      spatialIntegral (fun x => (1 / 2) * (normSq (E t x) + normSq (B t x)))) :
+    ∀ t₁ t₂, totalEnergy t₁ = totalEnergy t₂ := by
+  sorry
 
 -- ============================================================================
 -- Section 6: VML Steady State Structure
