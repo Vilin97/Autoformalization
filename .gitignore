@@ -9,3 +9,5 @@
 *.synctex.gz
 *.STY
 *.out
+.env
+*-output.lean
