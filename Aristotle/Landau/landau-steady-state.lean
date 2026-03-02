@@ -14,6 +14,7 @@
 import Mathlib
 
 set_option linter.all false
+set_option linter.unusedSimpArgs false
 
 open Matrix Finset BigOperators Real MeasureTheory
 
@@ -277,12 +278,6 @@ lemma IsMaxwellian.isLogQuadratic {f : (Fin 3 → ℝ) → ℝ} (hf : IsMaxwelli
   obtain ⟨a₀, b, c₀, _, hv⟩ := hf
   exact ⟨a₀, b, c₀, hv⟩
 
-/-- A global Maxwellian with specified parameters:
-    f(v) = n/(2πT)^(3/2) · exp(-|v-u|²/(2T)) -/
-def globalMaxwellianDensity (n : ℝ) (u : Fin 3 → ℝ) (T : ℝ) (v : Fin 3 → ℝ) : ℝ :=
-  n / (2 * π * T) ^ ((3 : ℝ) / 2) *
-    Real.exp (-(normSq (v - u)) / (2 * T))
-
 /-- The equilibrium Maxwellian (zero drift, density = ρ_ion):
     f∞(v) = ρ_ion/(2πT∞)^(3/2) · exp(-|v|²/(2T∞)) -/
 def equilibriumMaxwellian (ρ_ion T : ℝ) (v : Fin 3 → ℝ) : ℝ :=
@@ -342,7 +337,6 @@ def PSDIntegrand (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ) (v w : Fin 3 �
 -- Analysis Lemmas (to be proved)
 --
 -- Standard facts from real analysis needed for the Landau formalization.
--- Each is stated as a lemma with sorry, to be proved via Aristotle or manually.
 -- ============================================================================
 
 /-- Dot product distributes over Bochner integral. -/
@@ -2288,10 +2282,6 @@ theorem main_from_physics (p : VMLInput) :
 -- This is the main result: any sufficiently smooth steady-state solution
 -- of the VML system on a periodic domain must be a global Maxwellian
 -- equilibrium with E = 0 and B = const.
---
--- Non-physical facts (torus properties, analytical identities) are not
--- hypotheses — they appear as sorry'd steps inside the proof, to be
--- proved as lemmas eventually.
 -- ============================================================================
 
 /-- **Theorem 42** (Global steady state of the VML system).
@@ -2359,7 +2349,7 @@ theorem Theorem42
   have hD_zero : ∀ x, entropyDissipation Ψ (f x) = 0 := by
     sorry -- Lemmas 21–23: Vlasov + periodicity + H-theorem + nonpositive integral
   -- Step 2: Apply the main theorem via VMLInput.
-  -- Non-physical fields (torus properties, analytical facts) are sorry'd.
+  -- Sorry'd lemmas: T³ domain properties, velocity-space analysis, analytical interface.
   have result := main_from_physics {
     X := X
     inst_ne := inst
@@ -2391,28 +2381,16 @@ theorem Theorem42
     hDivB := hDivB
     -- Entropy dissipation vanishes (derived in Step 1)
     hD_zero := hD_zero
-    -- ---- Non-physical fields (to be proved as lemmas) ----
-    -- Score form: D(f) = -(1/2) ∫∫ PSD integrand (Lemma 12, from IBP + Fubini)
-    hScoreForm := by sorry
-    -- PSD integrand continuity and integrability (analysis)
-    hPSD_cont := by sorry
-    hPSD_inner := by sorry
-    hPSD_outer := by sorry
+    -- ---- T³ domain properties (lemmas about the spatial domain) ----
     -- Stokes' theorem on T³: ∫ div F dx = 0
     hStokes := by sorry
     -- Harmonic functions on compact T³ are constant
     hHarmonic_const := by sorry
-    -- Polynomial identity from steady-state collisionless transport (Lemma 25)
-    hPolynomialIdentity := by sorry
-    -- Killing equation on flat T³ → components harmonic (Lemma 27)
+    -- Killing equation on flat T³ → components harmonic
     hKillingToHarmonic := by sorry
     -- Gradient vanishing ↔ spatially constant on T³
     hGradZeroConst := by sorry
     hGradConst := by sorry
-    -- Current density from Gaussian integral of Maxwellian (Lemma 30)
-    hJ_from_maxwellian := by sorry
-    -- Gaussian normalization → equilibrium Maxwellian form
-    hNormalization := by sorry
     -- Linearity of divergence operator
     hDivLinear := by sorry
     -- Compactness of T³: ρ attains its max and min
@@ -2430,7 +2408,21 @@ theorem Theorem42
     -- Integration properties on T³
     hSpatialMul := by sorry
     hSpatialPos := by sorry
-    -- Poisson–Boltzmann equation on T³ (from force balance + Gauss's law)
+    -- ---- Velocity-space analysis (submitted to Aristotle) ----
+    -- Score form: D(f) = -(1/2) ∫∫ PSD integrand (Lemma 12)
+    hScoreForm := by sorry
+    -- PSD integrand continuity and integrability
+    hPSD_cont := by sorry
+    hPSD_inner := by sorry
+    hPSD_outer := by sorry
+    -- ---- Analytical interface facts ----
+    -- Polynomial identity from Vlasov + Maxwellian substitution (Lemma 25)
+    hPolynomialIdentity := by sorry
+    -- Current from Maxwellian Gaussian integral (Lemma 30)
+    hJ_from_maxwellian := by sorry
+    -- Gaussian normalization → equilibrium Maxwellian
+    hNormalization := by sorry
+    -- Poisson–Boltzmann equation on T³
     hPB_eq := by sorry
   }
   -- Step 3: Extract the conclusion
