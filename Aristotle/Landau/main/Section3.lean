@@ -1126,4 +1126,82 @@ lemma density_positive_of_integral
   rw [MeasureTheory.Measure.measure_univ_pos]
   exact NeZero.ne volume
 
+-- ============================================================================
+-- Fubini symmetrization for the Landau weak form (proved by Aristotle)
+-- Reference: Used in Theorem 42 to derive the symmetrized weak form.
+-- Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun>
+-- ============================================================================
+
+/-- landauMatrix is symmetric under swapping arguments of subtraction. -/
+lemma landauMatrix_sub_comm (Ψ : ℝ → ℝ) (v w : Fin 3 → ℝ) :
+    landauMatrix Ψ (w - v) = landauMatrix Ψ (v - w) := by
+  rw [show w - v = -(v - w) from by abel, landauMatrix_even]
+
+set_option maxHeartbeats 800000 in
+/-- Fubini symmetrization for the Landau weak form specialized to φ = log ∘ f.
+    ∫∫ ⟨∇log f(v) - ∇log f(w), A(v-w) · flux⟩ = 2 · ∫∫ ⟨∇log f(v), A(v-w) · flux⟩
+    Proved by Aristotle (project 85302568). -/
+theorem fubini_symmetrization_logf (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
+    (_hf_smooth : ContDiff ℝ ⊤ f)
+    (h_int_double : Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
+      dotProduct (vGrad (Real.log ∘ f) p.1)
+        (mulVec (landauMatrix Ψ (p.1 - p.2))
+          (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2))))
+    (h_int_inner : ∀ v, Integrable (fun w =>
+      dotProduct (vGrad (Real.log ∘ f) v)
+        (mulVec (landauMatrix Ψ (v - w))
+          (f w • vGrad f v - f v • vGrad f w))))
+    (h_int_outer : Integrable (fun v => ∫ w,
+      dotProduct (vGrad (Real.log ∘ f) v)
+        (mulVec (landauMatrix Ψ (v - w))
+          (f w • vGrad f v - f v • vGrad f w)))) :
+    ∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f) v - vGrad (Real.log ∘ f) w)
+        (mulVec (landauMatrix Ψ (v - w))
+          (f w • vGrad f v - f v • vGrad f w)) =
+      2 * ∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f) v)
+        (mulVec (landauMatrix Ψ (v - w))
+          (f w • vGrad f v - f v • vGrad f w)) := by
+  have h_integrable_swap : Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => vGrad (Real.log ∘ f) p.2 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2)) MeasureSpace.volume := by
+    have h_integrable : Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2)) MeasureSpace.volume ∧ Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => f p.2 • (vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ vGrad f p.1) - f p.1 • (vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ vGrad f p.2)) MeasureSpace.volume := by
+      convert h_int_double using 1
+      simp +decide [mul_sub, sub_mul, mul_assoc, mul_comm, Finset.mul_sum _ _ _, Matrix.mulVec, dotProduct]
+    have h_mp : MeasurePreserving (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => (p.2, p.1)) MeasureSpace.volume MeasureSpace.volume :=
+      ⟨measurable_swap, Measure.prod_swap ..⟩
+    have h_swap_int : Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => vGrad (Real.log ∘ f) p.2 ⬝ᵥ landauMatrix Ψ (p.2 - p.1) *ᵥ (f p.1 • vGrad f p.2 - f p.2 • vGrad f p.1)) MeasureSpace.volume := by
+      have : Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2)) (Measure.map (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => (p.2, p.1)) MeasureSpace.volume) := by
+        rw [h_mp.map_eq]; exact h_integrable.1
+      convert this.comp_measurable measurable_swap using 1
+    convert h_swap_int.neg using 1
+    ext p
+    simp only [Pi.neg_apply, neg_neg]
+    rw [landauMatrix_sub_comm]
+    simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_three, Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
+    ring
+  have h_split : ∫ v, ∫ w, (vGrad (Real.log ∘ f) v - vGrad (Real.log ∘ f) w) ⬝ᵥ landauMatrix Ψ (v - w) *ᵥ (f w • vGrad f v - f v • vGrad f w) = (∫ v, ∫ w, vGrad (Real.log ∘ f) v ⬝ᵥ landauMatrix Ψ (v - w) *ᵥ (f w • vGrad f v - f v • vGrad f w)) - (∫ v, ∫ w, vGrad (Real.log ∘ f) w ⬝ᵥ landauMatrix Ψ (v - w) *ᵥ (f w • vGrad f v - f v • vGrad f w)) := by
+    convert MeasureTheory.integral_sub h_int_double h_integrable_swap using 1
+    · erw [MeasureTheory.integral_prod]
+      · simp +decide [sub_mul, dotProduct_sub]
+      · exact Integrable.sub h_int_double h_integrable_swap
+    · erw [MeasureTheory.integral_prod, MeasureTheory.integral_prod]
+      · exact h_integrable_swap
+      · exact h_int_double
+  -- After the split: I₁ - I₂ = 2 * I₁, i.e., I₂ = -I₁
+  rw [h_split]
+  -- Show that the second integral equals minus the first (by Fubini + symmetry)
+  suffices hsuff : (∫ v, ∫ w, vGrad (Real.log ∘ f) w ⬝ᵥ landauMatrix Ψ (v - w) *ᵥ
+      (f w • vGrad f v - f v • vGrad f w)) =
+    -(∫ v, ∫ w, vGrad (Real.log ∘ f) v ⬝ᵥ landauMatrix Ψ (v - w) *ᵥ
+      (f w • vGrad f v - f v • vGrad f w)) by linarith
+  -- Step 1: Swap integration order via Fubini
+  rw [MeasureTheory.integral_integral_swap h_integrable_swap]
+  -- Step 2: The integrand with swapped v↔w = negative of original (by A(-z)=A(z) + flux antisymmetry)
+  have h_symm : ∀ w v : Fin 3 → ℝ, vGrad (Real.log ∘ f) w ⬝ᵥ landauMatrix Ψ (v - w) *ᵥ
+      (f w • vGrad f v - f v • vGrad f w) = -(vGrad (Real.log ∘ f) w ⬝ᵥ landauMatrix Ψ (w - v) *ᵥ
+      (f v • vGrad f w - f w • vGrad f v)) := by
+    intro w v
+    rw [landauMatrix_sub_comm]
+    simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_three, Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
+    ring
+  simp_rw [h_symm, MeasureTheory.integral_neg]
+
 end VML

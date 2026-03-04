@@ -105,21 +105,17 @@ theorem steady_state_is_local_maxwellian
     by velocity-space IBP and the solenoidal property of v×B.
     Reference: Lemma 11 (lem:global_entropy_zero) in H-theorem-formal.tex. -/
 lemma transport_entropy_from_vlasov
-    {X : Type*}
-    (gradX : (X → ℝ) → X → (Fin 3 → ℝ))
-    (divX : (X → (Fin 3 → ℝ)) → X → ℝ)
-    (spatialIntegral : (X → ℝ) → ℝ)
+    {X : Type*} [FlatTorus3 X]
     (f : X → (Fin 3 → ℝ) → ℝ) (E B : X → (Fin 3 → ℝ))
     (Ψ : ℝ → ℝ) (ν : ℝ)
     (_hν : 0 < ν)
     (_hf_pos : ∀ x v, 0 < f x v)
     (_hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
     (hVlasov : ∀ x v,
-      dotProduct v (gradX (fun y => f y v) x) +
+      dotProduct v (FlatTorus3.gradX (fun y => f y v) x) +
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
-      ν * LandauOperator Ψ (f x) v)
-    (_hStokes : ∀ F : X → (Fin 3 → ℝ), spatialIntegral (divX F) = 0) :
-    spatialIntegral (fun x => entropyDissipation Ψ (f x)) = 0 := by
+      ν * LandauOperator Ψ (f x) v) :
+    FlatTorus3.spatialIntegral (fun x => entropyDissipation Ψ (f x)) = 0 := by
   sorry
 
 end VML

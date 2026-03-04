@@ -35,20 +35,20 @@ theorem B_compatible_maxwellian (B_infty : Fin 3 → ℝ) :
 
     With u∞ = 0, J = 0 so ∇×B = 0. Combined with ∇·B = 0,
     each Bᵢ is harmonic on T³, hence constant. -/
-theorem magnetic_field_constant (ss : VMLSteadyState) :
+theorem magnetic_field_constant {X : Type*} [FlatTorus3 X] (ss : VMLSteadyState X) :
     ∃ B₀ : Fin 3 → ℝ, ∀ x, ss.B x = B₀ := by
   have hb0 := bulk_velocity_zero ss
   -- Step 1: J = 0
   have hJ_zero : ∀ x, ss.J x = 0 := by
     intro x; rw [ss.hJ_def, hb0, smul_zero]
   -- Step 2: curl B = 0
-  have hcurl_zero : ∀ x, ss.curlX ss.B x = 0 := by
+  have hcurl_zero : ∀ x, FlatTorus3.curlX ss.B x = 0 := by
     intro x; rw [ss.hAmpere]; exact hJ_zero x
   -- Step 3: Each component is harmonic
-  have hBi_harmonic := ss.hCurlZeroDivZeroHarmonic ss.B hcurl_zero ss.hDivB
+  have hBi_harmonic := FlatTorus3.hCurlZeroDivZeroHarmonic ss.B hcurl_zero ss.hDivB
   -- Step 4: Each component is constant
   have hBi_const : ∀ i, ∀ x y, ss.B x i = ss.B y i := by
-    intro i; exact ss.hHarmonic_const (fun y => ss.B y i) (hBi_harmonic i)
+    intro i; exact FlatTorus3.hHarmonic_const (fun y => ss.B y i) (hBi_harmonic i)
   -- Extract the constant value from x₀
   exact ⟨fun i => ss.B ss.x₀ i, fun x => funext (fun i => hBi_const i x ss.x₀)⟩
 

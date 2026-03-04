@@ -181,21 +181,117 @@ lemma vecMulVec_self_mulVec (z w : Fin 3 → ℝ) :
   rw [← Finset.mul_sum, mul_comm]
 
 -- ============================================================================
+-- FlatTorus3: Abstract characterization of a flat compact 3-torus
+-- ============================================================================
+
+/-- Abstract characterization of a flat 3-torus with differential operators.
+
+    These axioms are satisfied by any flat compact Riemannian 3-manifold without
+    boundary (e.g. T³ = ℝ³/ℤ³) equipped with its standard differential operators
+    and Riemannian volume form.
+
+    Consistency: the trivial one-point model (X = Unit, all operators = 0,
+    spatialIntegral g = g ()) satisfies all axioms.
+
+    Minimality analysis:
+    - hDivLinear, hGradConst: basic operator properties (independent)
+    - hStokes, hCurlIntZero: Stokes theorem for 1-forms and 2-forms (independent)
+    - hHarmonic_const: Hodge theory (not derivable from the above)
+    - hLaplacianMaxNonpos, hLaplacianMinNonneg: second derivative test
+      (independent without gradient linearity; both needed)
+    - hGradAdd, hGradScalarMul: linearity of gradient
+    - hGradChainExp, hGradChainLog: chain rules for gradient
+    - hSpatialMul, hSpatialPos, hSpatialNonnegZero: integration properties
+      (all independent — Pos doesn't imply NonnegZero without monotonicity)
+    - hKillingToHarmonic, hCurlZeroDivZeroHarmonic: flat-geometry consequences
+      (require commuting partials, not derivable from the other axioms)
+
+    Derived lemma (proved, not assumed):
+    - hGradZeroConst: ∇φ = 0 → φ constant (from hHarmonic_const + hDivLinear) -/
+class FlatTorus3 (X : Type*) where
+  gradX : (X → ℝ) → X → (Fin 3 → ℝ)
+  divX : (X → (Fin 3 → ℝ)) → X → ℝ
+  curlX : (X → (Fin 3 → ℝ)) → X → (Fin 3 → ℝ)
+  spatialIntegral : (X → ℝ) → ℝ
+  vol : ℝ
+  hvol : 0 < vol
+  -- Linearity of the divergence operator
+  hDivLinear : ∀ (α : ℝ) (G : X → (Fin 3 → ℝ)),
+    ∀ x, divX (fun y => α • G y) x = α * divX G x
+  -- Gradient of a spatially constant function vanishes
+  hGradConst : ∀ (φ : X → ℝ), (∀ x y, φ x = φ y) → ∀ x, gradX φ x = 0
+  -- Divergence theorem on compact manifold without boundary
+  hStokes : ∀ F : X → (Fin 3 → ℝ), spatialIntegral (divX F) = 0
+  -- Curl integral vanishes (Stokes theorem for 2-forms)
+  hCurlIntZero : ∀ (F : X → Fin 3 → ℝ) (u : Fin 3 → ℝ),
+    spatialIntegral (fun x => dotProduct u (curlX F x)) = 0
+  -- Harmonic functions on compact manifold are constant (Hodge theory)
+  hHarmonic_const : ∀ φ : X → ℝ, (∀ x, divX (gradX φ) x = 0) → ∀ x y, φ x = φ y
+  -- Second derivative test: Laplacian ≤ 0 at a maximum
+  hLaplacianMaxNonpos : ∀ (φ : X → ℝ) (x₀ : X),
+    (∀ x, φ x ≤ φ x₀) → divX (gradX φ) x₀ ≤ 0
+  -- Second derivative test: Laplacian ≥ 0 at a minimum
+  hLaplacianMinNonneg : ∀ (φ : X → ℝ) (x₀ : X),
+    (∀ x, φ x₀ ≤ φ x) → 0 ≤ divX (gradX φ) x₀
+  -- Integral of (function × constant) = integral × constant
+  hSpatialMul : ∀ (g : X → ℝ) (c : ℝ),
+    spatialIntegral (fun x => g x * c) = spatialIntegral g * c
+  -- Strictly positive function has strictly positive integral
+  hSpatialPos : ∀ g : X → ℝ, (∀ x, 0 < g x) → 0 < spatialIntegral g
+  -- Nonnegative function with zero integral is identically zero
+  hSpatialNonnegZero : ∀ g : X → ℝ,
+    (∀ x, 0 ≤ g x) → spatialIntegral g = 0 → ∀ x, g x = 0
+  -- Linearity of gradient: gradX(f + g) = gradX(f) + gradX(g)
+  hGradAdd : ∀ (f g : X → ℝ),
+    ∀ x, gradX (fun y => f y + g y) x = gradX f x + gradX g x
+  -- Scalar multiplication: gradX(c · f) = c · gradX(f) for constant c
+  hGradScalarMul : ∀ (c : ℝ) (f : X → ℝ),
+    ∀ x, gradX (fun y => c * f y) x = c • gradX f x
+  -- Chain rule for exp: gradX(exp ∘ φ) = exp(φ) · gradX(φ)
+  hGradChainExp : ∀ (φ : X → ℝ),
+    ∀ x i, gradX (fun y => Real.exp (φ y)) x i = Real.exp (φ x) * gradX φ x i
+  -- Chain rule for log: gradX(log ∘ g) = (1/g) · gradX(g) when g > 0
+  hGradChainLog : ∀ (g : X → ℝ), (∀ x, 0 < g x) →
+    ∀ x i, gradX (fun y => Real.log (g y)) x i = (1 / g x) * gradX g x i
+  -- Killing fields have harmonic components (flatness of the metric)
+  hKillingToHarmonic : ∀ (b : X → Fin 3 → ℝ),
+    (∀ x i j, gradX (fun y => b y j) x i + gradX (fun y => b y i) x j = 0) →
+    ∀ j : Fin 3, ∀ x, divX (gradX (fun y => b y j)) x = 0
+  -- Irrotational + solenoidal vector field has harmonic components
+  hCurlZeroDivZeroHarmonic : ∀ F : X → (Fin 3 → ℝ),
+    (∀ x, curlX F x = 0) → (∀ x, divX F x = 0) →
+    ∀ i, ∀ x, divX (gradX (fun y => F y i)) x = 0
+
+namespace FlatTorus3
+
+variable {X : Type*} [FlatTorus3 X]
+
+/-- Zero gradient implies spatially constant (derived from hHarmonic_const + hDivLinear). -/
+lemma hGradZeroConst (φ : X → ℝ) (h : ∀ x, gradX φ x = 0) : ∀ x y, φ x = φ y := by
+  apply hHarmonic_const
+  intro x
+  have h1 := hDivLinear (X := X) 0 (gradX φ) x
+  have hg : (fun y : X => (0 : ℝ) • gradX φ y) = gradX φ := by
+    ext y; simp [h y]
+  rw [hg, zero_mul] at h1; exact h1
+
+end FlatTorus3
+
+-- ============================================================================
 -- Section 6: VML Steady State Structure
 -- ============================================================================
 
 /-- Bundle representing a steady state of the VML system on T³ × ℝ³.
 
+    The spatial domain X is equipped with a FlatTorus3 instance providing
+    the differential operators (grad, div, curl) and integration.
+
     Encodes:
     - The VML equations at steady state (Vlasov, Ampère, Gauss, div B = 0)
-    - Analytical results from the H-theorem chain (Sections 3-4 of tex):
-      f is a local Maxwellian with explicit parameters
-    - Analytical results from polynomial matching (Section 5 of tex):
-      temperature and drift velocity are spatially constant
-    - Torus-specific properties (Stokes, harmonic → constant)
-    - Maximum principle conclusion (density constant) -/
-structure VMLSteadyState where
-  X : Type*
+    - Analytical results from the H-theorem chain (Sections 3-4 of tex)
+    - Polynomial matching results (Section 5 of tex)
+    - Maximum principle conclusion (Section 7 of tex) -/
+structure VMLSteadyState (X : Type*) [FlatTorus3 X] where
   x₀ : X
   f : X → (Fin 3 → ℝ) → ℝ
   E : X → (Fin 3 → ℝ)
@@ -210,23 +306,11 @@ structure VMLSteadyState where
   ρ : X → ℝ
   hρ_pos : ∀ x, 0 < ρ x
   J : X → (Fin 3 → ℝ)
-  -- Spatial calculus operators on T³
-  gradX : (X → ℝ) → X → (Fin 3 → ℝ)
-  divX : (X → (Fin 3 → ℝ)) → X → ℝ
-  curlX : (X → (Fin 3 → ℝ)) → X → (Fin 3 → ℝ)
-  spatialIntegral : (X → ℝ) → ℝ
-  vol : ℝ
-  hvol : 0 < vol
-  -- Torus topology: ∫ div F dx = 0 (Stokes)
-  hStokes : ∀ F : X → (Fin 3 → ℝ), spatialIntegral (divX F) = 0
-  -- Harmonic functions on compact torus are constant
-  hHarmonic_const : ∀ φ : X → ℝ, (∀ x, divX (gradX φ) x = 0) → ∀ x y, φ x = φ y
   -- Maxwell equations at steady state
-  hAmpere : ∀ x, curlX B x = J x
-  hGauss : ∀ x, divX E x = ρ x - ρ_ion
-  hDivB : ∀ x, divX B x = 0
+  hAmpere : ∀ x, FlatTorus3.curlX B x = J x
+  hGauss : ∀ x, FlatTorus3.divX E x = ρ x - ρ_ion
+  hDivB : ∀ x, FlatTorus3.divX B x = 0
   -- === H-theorem chain results (Sections 3-4 of tex) ===
-  -- Local Maxwellian parameters a(x), b(x), c(x) with c < 0
   a_loc : X → ℝ
   b_loc : X → (Fin 3 → ℝ)
   c_loc : X → ℝ
@@ -234,36 +318,17 @@ structure VMLSteadyState where
   hMaxwellianForm : ∀ x v,
     f x v = Real.exp (a_loc x + dotProduct (b_loc x) v + c_loc x * normSq v)
   -- === Polynomial matching results (Section 5 of tex) ===
-  -- Lemma 14: c is constant (from O(|v|³) terms)
   c₀ : ℝ
   hc₀_neg : c₀ < 0
   hc_const : ∀ x, c_loc x = c₀
-  -- Lemma 15: Drift velocity b₀ is constant (Killing's equation on T³)
-  -- Here b₀ represents the drift velocity u∞
   b₀ : Fin 3 → ℝ
   hb_const : ∀ x, b_loc x = (-2 * c₀) • b₀
-  -- Lemma 16: Force balance ∇a = -2c₀(E + u∞ × B)
   hForceBalance : ∀ x,
-    gradX a_loc x = -(2 * c₀) • (E x + cross b₀ (B x))
-  -- Current density J = ρ u∞
+    FlatTorus3.gradX a_loc x = -(2 * c₀) • (E x + cross b₀ (B x))
   hJ_def : ∀ x, J x = (ρ x) • b₀
-  -- === Vector calculus on T³ ===
-  -- ∫ u · (∇×B) dx = 0 for constant u (Stokes + vector identity)
-  hCurlDotConst : ∀ (u : Fin 3 → ℝ),
-    spatialIntegral (fun x => dotProduct u (curlX B x)) = 0
-  -- curl F = 0 ∧ div F = 0 ⟹ each component is harmonic
-  hCurlZeroDivZeroHarmonic : ∀ F : X → (Fin 3 → ℝ),
-    (∀ x, curlX F x = 0) → (∀ x, divX F x = 0) →
-    ∀ i, ∀ x, divX (gradX (fun y => F y i)) x = 0
-  -- === Integration properties ===
-  hSpatialMul : ∀ (g : X → ℝ) (c : ℝ),
-    spatialIntegral (fun x => g x * c) = spatialIntegral g * c
-  hSpatialPos : ∀ g : X → ℝ, (∀ x, 0 < g x) → 0 < spatialIntegral g
   -- === Maximum principle (Section 7 of tex) ===
-  -- Lemma 21: Density is constant (Poisson-Boltzmann + max principle on T³)
   hDensityConst : ∀ x, ρ x = ρ_ion
-  -- Gradient of a vanishes when ρ is constant and drift is zero
-  hGradA_zero : b₀ = 0 → (∀ x, ρ x = ρ_ion) → ∀ x, gradX a_loc x = 0
+  hGradA_zero : b₀ = 0 → (∀ x, ρ x = ρ_ion) → ∀ x, FlatTorus3.gradX a_loc x = 0
   -- === Normalization (Gaussian integral) ===
   hNormalization : b₀ = 0 → (∀ x, ρ x = ρ_ion) →
     ∀ x v, f x v = equilibriumMaxwellian ρ_ion (-1 / (2 * c₀)) v
@@ -285,19 +350,19 @@ structure VMLEquilibrium where
 /-- Minimal physical input for the VML steady state problem.
 
     Contains:
-    - The physical state (f, E, B) on a spatial domain X × ℝ³
+    - The physical state (f, E, B) on a spatial domain X with [FlatTorus3 X]
     - Physical parameters (ν, ρ_ion, Ψ)
-    - Abstract spatial operators (grad, div, curl, ∫) for the torus T³
-    - Torus-specific properties (Stokes, harmonic → constant)
     - Maxwell equations at steady state
     - Entropy dissipation vanishes (from H-theorem chain)
     - Analytical interface hypotheses (polynomial identity, Gaussian integrals)
 
+    The spatial operators (grad, div, curl, ∫) and their properties come from
+    the FlatTorus3 typeclass instance, NOT from this structure.
+
     The key distinction from VMLSteadyState: this structure does NOT include
     the Maxwellian parameters (a, b, c), temperature/drift constancy, or
     density constancy — those are DERIVED in toSteadyState. -/
-structure VMLInput where
-  X : Type*
+structure VMLInput (X : Type*) [FlatTorus3 X] where
   inst_ne : Nonempty X
   x₀ : X
   -- Physical state
@@ -320,88 +385,42 @@ structure VMLInput where
   ρ : X → ℝ
   hρ_pos : ∀ x, 0 < ρ x
   J : X → (Fin 3 → ℝ)
-  -- Spatial calculus operators on T³
-  gradX : (X → ℝ) → X → (Fin 3 → ℝ)
-  divX : (X → (Fin 3 → ℝ)) → X → ℝ
-  curlX : (X → (Fin 3 → ℝ)) → X → (Fin 3 → ℝ)
-  spatialIntegral : (X → ℝ) → ℝ
-  vol : ℝ
-  hvol : 0 < vol
-  -- Torus topology: ∫ div F dx = 0 (Stokes)
-  hStokes : ∀ F : X → (Fin 3 → ℝ), spatialIntegral (divX F) = 0
-  -- Harmonic functions on compact torus are constant
-  hHarmonic_const : ∀ φ : X → ℝ, (∀ x, divX (gradX φ) x = 0) → ∀ x y, φ x = φ y
   -- Maxwell equations at steady state
-  hAmpere : ∀ x, curlX B x = J x
-  hGauss : ∀ x, divX E x = ρ x - ρ_ion
-  hDivB : ∀ x, divX B x = 0
+  hAmpere : ∀ x, FlatTorus3.curlX B x = J x
+  hGauss : ∀ x, FlatTorus3.divX E x = ρ x - ρ_ion
+  hDivB : ∀ x, FlatTorus3.divX B x = 0
   -- === Derived from H-theorem chain ===
-  -- Entropy dissipation vanishes at each spatial point
   hD_zero : ∀ x, entropyDissipation Ψ (f x) = 0
-  -- Score form identity (from IBP + Fubini + score substitution)
   hScoreForm : ∀ x, entropyDissipation Ψ (f x) =
     -(1 / 2) * ∫ v, ∫ w, PSDIntegrand Ψ (f x) v w
-  -- Continuity of the PSD integrand
   hPSD_cont : ∀ x, Continuous (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
     PSDIntegrand Ψ (f x) p.1 p.2)
-  -- Inner integrability of the PSD integrand
   hPSD_inner : ∀ x v, Integrable (PSDIntegrand Ψ (f x) v)
-  -- Outer integrability of the PSD integrand
   hPSD_outer : ∀ x, Integrable (fun v => ∫ w, PSDIntegrand Ψ (f x) v w)
   -- === Analytical interface hypotheses ===
-  -- These connect the abstract spatial operators to the Maxwellian structure.
-  -- They represent genuine mathematical facts but are hard to prove in Lean/Mathlib.
-
-  -- Polynomial identity: after substituting f = exp(a + b·v + c|v|²) into
-  -- the steady-state Vlasov equation, we get a polynomial in v that must vanish.
   hPolynomialIdentity : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
     (∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) →
     ∀ x v,
-      dotProduct v (gradX c x) * normSq v +
-      (∑ i : Fin 3, ∑ j : Fin 3, v i * v j * (gradX (fun y => b y j) x i)) +
-      dotProduct v (gradX a x) +
+      dotProduct v (FlatTorus3.gradX c x) * normSq v +
+      (∑ i : Fin 3, ∑ j : Fin 3, v i * v j *
+        (FlatTorus3.gradX (fun y => b y j) x i)) +
+      dotProduct v (FlatTorus3.gradX a x) +
       dotProduct (E x) (b x) +
       dotProduct v ((2 * c x) • E x + cross (B x) (b x)) = 0
-  -- Killing equation + harmonic → each component of b is harmonic
-  hKillingToHarmonic : ∀ (b : X → Fin 3 → ℝ),
-    (∀ x i j, gradX (fun y => b y j) x i + gradX (fun y => b y i) x j = 0) →
-    ∀ j : Fin 3, ∀ x, divX (gradX (fun y => b y j)) x = 0
-  -- Gradient zero → spatially constant (for scalar fields)
-  hGradZeroConst : ∀ (φ : X → ℝ),
-    (∀ x, gradX φ x = 0) → ∀ x y, φ x = φ y
-  -- Spatially constant → gradient zero (converse of above)
-  hGradConst : ∀ (φ : X → ℝ),
-    (∀ x y, φ x = φ y) → ∀ x, gradX φ x = 0
   -- Current from Maxwellian: J = ρ · drift
   hJ_from_maxwellian : ∀ (b : X → Fin 3 → ℝ) (c₀ : ℝ),
     (∀ x, ∃ a₀, ∀ v, f x v = Real.exp (a₀ + dotProduct (b x) v + c₀ * normSq v)) →
     ∀ x, J x = ρ x • ((-1 / (2 * c₀)) • b x)
-  -- Divergence linearity (for Poisson-Boltzmann)
-  hDivLinear : ∀ (α : ℝ) (G : X → (Fin 3 → ℝ)),
-    ∀ x, divX (fun y => α • G y) x = α * divX G x
   -- Maximum principle inputs (compactness of T³)
   x_max : X
   hmax : ∀ x, ρ x ≤ ρ x_max
   x_min : X
   hmin : ∀ x, ρ x_min ≤ ρ x
-  -- Laplacian sign at extrema (second derivative test on compact domain)
-  hmax_lapl : divX (gradX (Real.log ∘ ρ)) x_max ≤ 0
-  hmin_lapl : 0 ≤ divX (gradX (Real.log ∘ ρ)) x_min
-  -- ∫ u · (∇×B) dx = 0 for constant u (Stokes + vector identity)
-  hCurlDotConst : ∀ (u : Fin 3 → ℝ),
-    spatialIntegral (fun x => dotProduct u (curlX B x)) = 0
-  -- curl F = 0 ∧ div F = 0 ⟹ each component is harmonic
-  hCurlZeroDivZeroHarmonic : ∀ F : X → (Fin 3 → ℝ),
-    (∀ x, curlX F x = 0) → (∀ x, divX F x = 0) →
-    ∀ i, ∀ x, divX (gradX (fun y => F y i)) x = 0
-  -- Integration properties
-  hSpatialMul : ∀ (g : X → ℝ) (c : ℝ),
-    spatialIntegral (fun x => g x * c) = spatialIntegral g * c
-  hSpatialPos : ∀ g : X → ℝ, (∀ x, 0 < g x) → 0 < spatialIntegral g
-  -- Poisson-Boltzmann equation: T Δ(log ρ) = ρ - ρ_ion
+  -- Poisson-Boltzmann equation: T Δ(log ρ) = ρ - ρ_ion (isotropic case: b₀ = 0)
   hPB_eq : ∀ (c₀ : ℝ), c₀ < 0 →
-    (∀ x, ∃ a₀ b₀, ∀ v, f x v = Real.exp (a₀ + dotProduct b₀ v + c₀ * normSq v)) →
-    ∀ x, (-1 / (2 * c₀)) * divX (gradX (Real.log ∘ ρ)) x = ρ x - ρ_ion
+    (∀ x, ∃ a₀, ∀ v, f x v = Real.exp (a₀ + c₀ * normSq v)) →
+    ∀ x, (-1 / (2 * c₀)) * FlatTorus3.divX (FlatTorus3.gradX (Real.log ∘ ρ)) x =
+      ρ x - ρ_ion
   -- Normalization: Gaussian integral yields equilibriumMaxwellian
   hNormalization : ∀ a₀ c₀,
     c₀ < 0 →
