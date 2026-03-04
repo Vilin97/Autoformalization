@@ -96,7 +96,7 @@ theorem Theorem42
     intro x; rw [hρ_def x]
     exact density_positive_of_integral (f x) (hf_pos x) (hf_int x)
   have hTransportEntropy : FlatTorus3.spatialIntegral (fun x => entropyDissipation Ψ (f x)) = 0 :=
-    transport_entropy_from_vlasov f E B Ψ ν hν hf_pos hf_smooth hVlasov
+    transport_entropy_from_vlasov f E B Ψ ν hν hf_pos hf_smooth hf_int hVlasov
   have hPolynomialId := polynomial_identity_from_vlasov f E B Ψ ν hf_pos hf_smooth hf_int hΨ hVlasov
   have hPB := poisson_boltzmann_from_vlasov f E B Ψ ν ρ ρ_ion hf_pos hf_smooth hf_int hΨ hρ_def hGauss hVlasov
   -- Extremizers of ρ (extreme value theorem on compact T³)
@@ -105,11 +105,13 @@ theorem Theorem42
   -- Step 1: Symmetrized weak form for each x (the core analytical input).
   -- Decomposed into IBP + Fubini symmetrization (both proved by Aristotle separately).
   -- Sub-step 1a: IBP + pull integral: ∫ Q·logf = -∫∫ ⟨∇logf(v), A·flux⟩
+  -- Decomposes into: (i) vector IBP on ℝ³: ∫ (div_v F)·g = -∫ F·∇g,
+  -- (ii) linearity: ⟨c, ∫_w H dw⟩ = ∫_w ⟨c, H⟩ dw (pull w-integral through dot product).
   have hIBP : ∀ x, ∫ v, LandauOperator Ψ (f x) v * (Real.log ∘ f x) v =
       -(∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f x) v)
           (mulVec (landauMatrix Ψ (v - w))
             (f x w • vGrad (f x) v - f x v • vGrad (f x) w))) := by
-    sorry -- IBP: ∫ (div F)·g = -∫ F·∇g, then pull w-integral inside dot product
+    sorry -- Vector IBP on ℝ³ with Schwartz decay + Fubini linearity
   -- Sub-step 1b: Fubini symmetrization: ∫∫⟨Δ, A·flux⟩ = 2·∫∫⟨∇logf(v), A·flux⟩
   have hFubiniSym : ∀ x, ∫ v, ∫ w, dotProduct
         (vGrad (Real.log ∘ f x) v - vGrad (Real.log ∘ f x) w)
@@ -118,7 +120,7 @@ theorem Theorem42
       2 * ∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f x) v)
           (mulVec (landauMatrix Ψ (v - w))
             (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) := by
-    exact fubini_symmetrization_logf Ψ (f x) (hf_smooth x) (hFubini_double x) (hFubini_inner x) (hFubini_outer x)
+    intro x; exact fubini_symmetrization_logf Ψ (f x) (hf_smooth x) (hFubini_double x) (hFubini_inner x) (hFubini_outer x)
   -- Compose: ∫Q·logf = -I₁ = -(1/2)·(2·I₁) = -(1/2)·I₂
   have hSWF_all : ∀ x, ∫ v, LandauOperator Ψ (f x) v * (Real.log ∘ f x) v =
       -(1 / 2) * ∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f x) v - vGrad (Real.log ∘ f x) w)
