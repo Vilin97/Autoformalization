@@ -261,6 +261,14 @@ class FlatTorus3 (X : Type*) where
   hCurlZeroDivZeroHarmonic : ∀ F : X → (Fin 3 → ℝ),
     (∀ x, curlX F x = 0) → (∀ x, divX F x = 0) →
     ∀ i, ∀ x, divX (gradX (fun y => F y i)) x = 0
+  -- Gradient integral vanishes (Stokes for 0-forms on a closed manifold: ∫_M dg = 0)
+  hGradIntZero : ∀ (g : X → ℝ) (u : Fin 3 → ℝ),
+    spatialIntegral (fun x => dotProduct u (gradX g x)) = 0
+  -- Integration by parts on the torus: ∫ φ · (∇ψ)ᵢ = -∫ ψ · (∇φ)ᵢ
+  -- (Follows from Stokes + Leibniz rule on a closed manifold)
+  hIBP_spatial : ∀ (φ ψ : X → ℝ) (i : Fin 3),
+    spatialIntegral (fun x => φ x * gradX ψ x i) =
+    -(spatialIntegral (fun x => ψ x * gradX φ x i))
 
 namespace FlatTorus3
 

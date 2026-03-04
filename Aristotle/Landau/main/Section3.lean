@@ -1204,4 +1204,104 @@ theorem fubini_symmetrization_logf (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
     ring
   simp_rw [h_symm, MeasureTheory.integral_neg]
 
+-- ============================================================================
+-- Part 9: Integral linearity lemmas (proved by Aristotle)
+-- ============================================================================
+
+/-- Matrix-vector multiplication commutes with Bochner integral.
+    Proved by Aristotle (Harmonic), project 12266ae6. -/
+lemma mulVec_integral_comm (M : Matrix (Fin 3) (Fin 3) ℝ)
+    (F : (Fin 3 → ℝ) → (Fin 3 → ℝ))
+    (hF : Integrable F) :
+    mulVec M (∫ w, F w) = ∫ w, mulVec M (F w) := by
+  have h_comm : ∀ (L : (Fin 3 → ℝ) →L[ℝ] (Fin 3 → ℝ)), ∫ w, L (F w) = L (∫ w, F w) :=
+    fun L => ContinuousLinearMap.integral_comp_comm L hF
+  exact (h_comm (ContinuousLinearMap.pi fun i => ∑ j, M i j • ContinuousLinearMap.proj j)).symm
+
+-- ============================================================================
+-- Part 10: Integration by parts on ℝ (proved by Aristotle, fixed locally)
+-- ============================================================================
+
+open Filter in
+/-- Integration by parts on ℝ: ∫ f'·g = -∫ f·g'.
+    Based on Aristotle proof (project 030a6d39), locally adapted. -/
+lemma ibp_real_line (f g : ℝ → ℝ)
+    (hf_diff : Differentiable ℝ f) (hg_diff : Differentiable ℝ g)
+    (_hf_cont : Continuous (deriv f)) (_hg_cont : Continuous (deriv g))
+    (h_decay_top : Tendsto (fun x => f x * g x) atTop (nhds 0))
+    (h_decay_bot : Tendsto (fun x => f x * g x) atBot (nhds 0))
+    (h_int1 : Integrable (fun x => deriv f x * g x))
+    (h_int2 : Integrable (fun x => f x * deriv g x)) :
+    ∫ x, deriv f x * g x = -(∫ x, f x * deriv g x) := by
+  have h_finite : ∀ a b : ℝ,
+      (∫ x in a..b, deriv f x * g x) + (∫ x in a..b, f x * deriv g x) =
+      f b * g b - f a * g a := by
+    intro a b
+    rw [← intervalIntegral.integral_add
+      (h_int1.intervalIntegrable (a := a) (b := b))
+      (h_int2.intervalIntegrable (a := a) (b := b))]
+    have h := intervalIntegral.integral_eq_sub_of_hasDerivAt (a := a) (b := b)
+      (f := fun x => f x * g x)
+      (fun x _ => HasDerivAt.mul (hf_diff x).hasDerivAt (hg_diff x).hasDerivAt)
+      ((h_int1.intervalIntegrable (a := a) (b := b)).add
+       (h_int2.intervalIntegrable (a := a) (b := b)))
+    rw [← h]
+  set I₁ := ∫ x, deriv f x * g x
+  set I₂ := ∫ x, f x * deriv g x
+  have h_lim1 := intervalIntegral_tendsto_integral h_int1
+    tendsto_neg_atTop_atBot tendsto_id
+  have h_lim2 := intervalIntegral_tendsto_integral h_int2
+    tendsto_neg_atTop_atBot tendsto_id
+  have h_sum_lim := h_lim1.add h_lim2
+  have h_bd_lim : Tendsto (fun n => f n * g n - f (-n) * g (-n)) atTop (nhds (I₁ + I₂)) := by
+    apply Tendsto.congr _ h_sum_lim
+    intro n
+    have := h_finite (-n) n
+    simp only [id] at this ⊢
+    linarith
+  have h_bd_zero : Tendsto (fun n => f n * g n - f (-n) * g (-n)) atTop (nhds 0) := by
+    have h1 : Tendsto (fun n => f n * g n) atTop (nhds 0) := h_decay_top
+    have h2 : Tendsto (fun n => f (-n) * g (-n)) atTop (nhds 0) :=
+      h_decay_bot.comp tendsto_neg_atTop_atBot
+    simpa using h1.sub h2
+  have h_eq : I₁ + I₂ = 0 := tendsto_nhds_unique h_bd_lim h_bd_zero
+  linarith
+
+/-- Dot product commutes with Bochner integral.
+    Proved by Aristotle (Harmonic), project 7ac4c2f5. -/
+lemma dotProduct_integral_comm (c : Fin 3 → ℝ)
+    (F : (Fin 3 → ℝ) → (Fin 3 → ℝ))
+    (hF : Integrable F) :
+    dotProduct c (∫ w, F w) = ∫ w, dotProduct c (F w) := by
+  have h_comm : ∀ (L : (Fin 3 → ℝ) →L[ℝ] ℝ), ∫ w, L (F w) = L (∫ w, F w) := by
+    intros L; exact (by convert (L.integral_comp_comm hF) using 1)
+  convert h_comm (∑ i : Fin 3, ContinuousLinearMap.smulRight (ContinuousLinearMap.proj i) (c i))
+    |>.symm using 1
+  · simp +decide [dotProduct, Fin.sum_univ_three]; ring!
+  · simp +decide [dotProduct, Fin.sum_univ_three]; congr; ext; ring!
+
+open Filter in
+/-- ∫ c · h' = 0 when h → 0 at ±∞.
+    Proved by Aristotle (Harmonic), project b17467db. -/
+lemma const_times_integral_deriv_zero (c : ℝ) (h : ℝ → ℝ)
+    (hh_diff : Differentiable ℝ h)
+    (_hh_cont : Continuous (deriv h))
+    (h_decay_top : Tendsto h atTop (nhds 0))
+    (h_decay_bot : Tendsto h atBot (nhds 0))
+    (h_int : Integrable (deriv h)) :
+    ∫ x, c * deriv h x = 0 := by
+  have h_ftc : ∫ x, deriv h x = 0 := by
+    have h_ftc' : ∀ a b : ℝ, ∫ x in a..b, deriv h x = h b - h a := by
+      intro a b; rw [intervalIntegral.integral_deriv_eq_sub]; aesop
+      exact h_int.intervalIntegrable ..
+    have h_lim : Tendsto (fun R => ∫ x in -R..R, deriv h x) atTop
+        (nhds (∫ x, deriv h x)) := by
+      apply_rules [intervalIntegral_tendsto_integral]
+      · exact tendsto_neg_atTop_atBot
+      · exact tendsto_id
+    have h_bd : Tendsto (fun R => h R - h (-R)) atTop (nhds 0) := by
+      simpa using h_decay_top.sub (h_decay_bot.comp tendsto_neg_atTop_atBot)
+    exact tendsto_nhds_unique h_lim (by simpa [h_ftc'] using h_bd)
+  simp only [integral_const_mul, h_ftc, mul_zero]
+
 end VML
