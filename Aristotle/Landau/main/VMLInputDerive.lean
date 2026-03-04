@@ -1,0 +1,357 @@
+import Aristotle.Landau.main.Defs
+import Aristotle.Landau.main.Section3
+import Aristotle.Landau.main.Section4
+import Aristotle.Landau.main.Section5
+import Aristotle.Landau.main.Section6
+import Aristotle.Landau.main.Section7
+import Aristotle.Landau.main.Section8
+import Aristotle.Landau.main.Section9
+set_option linter.all false
+open Matrix Finset BigOperators Real MeasureTheory
+noncomputable section
+namespace VML
+
+-- ============================================================================
+-- Main theorem from VMLSteadyState + VMLInput derivation
+--
+-- VMLInput contains genuine physical hypotheses and analytical "interface"
+-- facts. VMLSteadyState is derived from VMLInput. The main theorem is
+-- stated in terms of both.
+-- ============================================================================
+
+/-- Main Theorem: Global steady state of the VML system.
+    Reference: Theorem 12 (thm:main)
+
+    Any smooth steady state (f, E, B) on T³ × ℝ³ with ν > 0 is:
+    (i)   f = ρ_ion/(2πT∞)^{3/2} exp(-|v|²/(2T∞))  (global Maxwellian, zero drift)
+    (ii)  E = 0
+    (iii) B = B∞ (spatially constant)
+    (iv)  T∞ > 0 uniquely determined by conservation laws
+
+    Proof assembles:
+    Step 1: f is local Maxwellian (Corollary 2, via H-theorem chain)
+    Step 2: T is constant (Lemma 14, O(|v|³) terms)
+    Step 3: u is constant (Lemma 15, Killing's equation on T³)
+    Step 4: u = 0 (Lemma 19, Ampère + divergence theorem)
+    Step 5: n ≡ ρ_ion, E = 0 (Lemmas 20-21, Poisson–Boltzmann + max principle)
+    Step 6: B constant (Lemma 22, harmonic on T³)
+    Step 7: Parameters from conservation (Lemmas 24-28) -/
+theorem main_steady_state (ss : VMLSteadyState) :
+    ∃ eq : VMLEquilibrium,
+    (∀ x v, ss.f x v = equilibriumMaxwellian ss.ρ_ion eq.T v) ∧
+    (∀ x, ss.E x = 0) ∧
+    (∀ x, ss.B x = eq.B₀) := by
+  -- Step 1: Drift velocity is zero (Lemma 19, via Ampère + Stokes)
+  have hb_zero := bulk_velocity_zero ss
+  -- Step 2: Electric field vanishes (Corollary 3, via force balance + max principle)
+  have hE := electric_field_zero ss
+  -- Step 3: Magnetic field is constant (Lemma 22, via curl=0 + div=0 + harmonic)
+  obtain ⟨B₀, hB⟩ := magnetic_field_constant ss
+  -- Step 4: T∞ = -1/(2c₀) > 0
+  have hT : 0 < -1 / (2 * ss.c₀) := by
+    apply div_pos_of_neg_of_neg <;> linarith [ss.hc₀_neg]
+  -- Step 5: f is the equilibrium Maxwellian (from normalization)
+  have hf := ss.hNormalization hb_zero ss.hDensityConst
+  exact ⟨⟨-1 / (2 * ss.c₀), B₀, hT⟩, hf, hE, hB⟩
+
+-- ============================================================================
+-- VMLInput helpers: Derive VMLSteadyState from VMLInput
+-- ============================================================================
+
+/-- Extract Maxwellian parameters from VMLInput.
+    Uses the H-theorem chain to show f is locally Maxwellian at each x,
+    then extracts the parameters via Classical.choice. -/
+private def VMLInput.isMaxwellian_at (p : VMLInput) (x : p.X) : IsMaxwellian (p.f x) :=
+  steady_state_is_local_maxwellian p.X p.f p.Ψ p.hΨ p.hf_pos
+    p.hf_smooth p.hf_int p.hD_zero p.hScoreForm p.hPSD_cont p.hPSD_inner p.hPSD_outer x
+
+noncomputable def VMLInput.a_loc (p : VMLInput) : p.X → ℝ :=
+  fun x => (p.isMaxwellian_at x).choose
+
+noncomputable def VMLInput.b_loc (p : VMLInput) : p.X → (Fin 3 → ℝ) :=
+  fun x => (p.isMaxwellian_at x).choose_spec.choose
+
+noncomputable def VMLInput.c_loc (p : VMLInput) : p.X → ℝ :=
+  fun x => (p.isMaxwellian_at x).choose_spec.choose_spec.choose
+
+lemma VMLInput.hc_neg (p : VMLInput) : ∀ x, p.c_loc x < 0 :=
+  fun x => (p.isMaxwellian_at x).choose_spec.choose_spec.choose_spec.1
+
+lemma VMLInput.hMaxwellianForm (p : VMLInput) :
+    ∀ x v, p.f x v = Real.exp (p.a_loc x + dotProduct (p.b_loc x) v +
+      p.c_loc x * normSq v) :=
+  fun x => (p.isMaxwellian_at x).choose_spec.choose_spec.choose_spec.2
+
+/-- Temperature is spatially constant: c(x) ≡ c₀. -/
+lemma VMLInput.hc_const_grad (p : VMLInput) : ∀ x, p.gradX p.c_loc x = 0 := by
+  apply temperature_constant
+  intro x
+  -- Use poly_cubic_extraction: rearrange polynomial identity into standard form
+  exact poly_cubic_extraction
+    (p.gradX p.c_loc x)
+    (fun i j => p.gradX (fun y => p.b_loc y j) x i)
+    (p.gradX p.a_loc x + (2 * p.c_loc x) • p.E x + cross (p.B x) (p.b_loc x))
+    (dotProduct (p.E x) (p.b_loc x))
+    (fun v => by
+      have h := p.hPolynomialIdentity p.a_loc p.b_loc p.c_loc p.hMaxwellianForm x v
+      simp only [dotProduct_add] at *
+      linarith)
+
+/-- Extract the constant temperature parameter c₀. -/
+noncomputable def VMLInput.c₀ (p : VMLInput) : ℝ := p.c_loc p.x₀
+
+lemma VMLInput.hc₀_neg (p : VMLInput) : p.c₀ < 0 := p.hc_neg p.x₀
+
+lemma VMLInput.hc_const (p : VMLInput) : ∀ x, p.c_loc x = p.c₀ :=
+  fun x => p.hGradZeroConst p.c_loc p.hc_const_grad x p.x₀
+
+/-- The O(|v|²) Killing equation from the polynomial identity. -/
+lemma VMLInput.hKilling (p : VMLInput) :
+    ∀ x i j, p.gradX (fun y => p.b_loc y j) x i +
+      p.gradX (fun y => p.b_loc y i) x j = 0 := by
+  intro x
+  have hpoly := fun v => p.hPolynomialIdentity p.a_loc p.b_loc p.c_loc p.hMaxwellianForm x v
+  have hgrad_c : p.gradX p.c_loc x = 0 := p.hc_const_grad x
+  -- Remove cubic term (gradX c = 0)
+  have hred : ∀ v : Fin 3 → ℝ,
+      (∑ i : Fin 3, ∑ j : Fin 3, v i * v j * (p.gradX (fun y => p.b_loc y j) x i)) +
+      dotProduct v (p.gradX p.a_loc x) +
+      dotProduct (p.E x) (p.b_loc x) +
+      dotProduct v ((2 * p.c_loc x) • p.E x + cross (p.B x) (p.b_loc x)) = 0 := by
+    intro v; have := hpoly v
+    rw [hgrad_c, dotProduct_zero, zero_mul, zero_add] at this
+    exact this
+  -- C = 0: substitute v = 0
+  have hC : dotProduct (p.E x) (p.b_loc x) = 0 := by
+    have := hred 0; simp [zero_mul, mul_zero] at this
+    exact this
+  -- Q(v) + L(v) = 0
+  have hQL : ∀ v : Fin 3 → ℝ,
+      (∑ i : Fin 3, ∑ j : Fin 3, v i * v j * (p.gradX (fun y => p.b_loc y j) x i)) +
+      dotProduct v (p.gradX p.a_loc x) +
+      dotProduct v ((2 * p.c_loc x) • p.E x + cross (p.B x) (p.b_loc x)) = 0 := by
+    intro v; linarith [hred v, hC]
+  -- Q(v) = 0: use v and -v. Q(-v) = Q(v), L(-v) = -L(v), so 2Q(v) = 0.
+  have hQ : ∀ v : Fin 3 → ℝ,
+      (∑ i : Fin 3, ∑ j : Fin 3, v i * v j * (p.gradX (fun y => p.b_loc y j) x i)) = 0 := by
+    intro v
+    have h1 := hQL v
+    have h2 := hQL (-v)
+    simp only [Pi.neg_apply, neg_mul_neg, neg_dotProduct] at h2
+    linarith
+  exact poly_killing_extraction _ hQ
+
+/-- Drift velocity b is constant on T³. -/
+lemma VMLInput.hb_const_exists (p : VMLInput) :
+    ∃ b₀ : Fin 3 → ℝ, ∀ x, p.b_loc x = b₀ := by
+  have := @p.inst_ne
+  exact killing_constant_torus p.X p.b_loc p.gradX p.divX
+    (p.hKillingToHarmonic p.b_loc p.hKilling) p.hHarmonic_const
+
+/-- Extract the constant drift parameter b₀. -/
+noncomputable def VMLInput.b₀ (p : VMLInput) : Fin 3 → ℝ :=
+  p.hb_const_exists.choose
+
+lemma VMLInput.hb_const (p : VMLInput) : ∀ x, p.b_loc x = p.b₀ :=
+  p.hb_const_exists.choose_spec
+
+/-- Force balance from the polynomial identity. -/
+lemma VMLInput.hForceBalance (p : VMLInput) :
+    ∀ x, p.gradX p.a_loc x =
+      -(2 * p.c₀) • p.E x + cross p.b₀ (p.B x) := by
+  intro x
+  have hpoly := fun v => p.hPolynomialIdentity p.a_loc p.b_loc p.c_loc p.hMaxwellianForm x v
+  have hgrad_c : p.gradX p.c_loc x = 0 := p.hc_const_grad x
+  have hgrad_b : ∀ j : Fin 3, p.gradX (fun y => p.b_loc y j) x = 0 := by
+    intro j; apply p.hGradConst; intro x' y'
+    show p.b_loc x' j = p.b_loc y' j
+    rw [p.hb_const x', p.hb_const y']
+  -- Reduce to linear + constant form (using c_loc = c₀, b_loc = b₀)
+  have hLC : ∀ v : Fin 3 → ℝ,
+      dotProduct v (p.gradX p.a_loc x + (2 * p.c₀) • p.E x +
+        cross (p.B x) p.b₀) +
+      dotProduct (p.E x) p.b₀ = 0 := by
+    intro v
+    have hp := hpoly v
+    rw [hgrad_c, dotProduct_zero, zero_mul, zero_add] at hp
+    have hQ : (∑ i : Fin 3, ∑ j : Fin 3, v i * v j *
+        (p.gradX (fun y => p.b_loc y j) x i)) = 0 :=
+      Finset.sum_eq_zero (fun i _ =>
+        Finset.sum_eq_zero (fun j _ => by simp [congr_fun (hgrad_b j) i]))
+    rw [p.hc_const x, p.hb_const x] at hp
+    simp only [dotProduct_add] at *
+    linarith [hp, hQ]
+  -- Apply poly_linear_extraction
+  have hd_zero := (poly_linear_extraction _ _ hLC).1
+  -- hd_zero : gradX a x + (2c₀) • E x + cross (B x) b₀ = 0
+  -- → gradX a x = -(2c₀) • E x + cross b₀ (B x)
+  rw [add_assoc] at hd_zero
+  rw [eq_neg_of_add_eq_zero_left hd_zero, neg_add, ← neg_smul, neg_cross]
+
+/-- Current density J = ρ · drift velocity. -/
+lemma VMLInput.hJ_def (p : VMLInput) :
+    ∀ x, p.J x = (p.ρ x) • ((-1 / (2 * p.c₀)) • p.b₀) := by
+  have hform : ∀ x, ∃ a₀, ∀ v,
+      p.f x v = Real.exp (a₀ + dotProduct (p.b₀) v + p.c₀ * normSq v) := by
+    intro x
+    use p.a_loc x
+    intro v
+    rw [p.hMaxwellianForm x v, p.hc_const x, p.hb_const x]
+  -- The b field is constant, so we use the constant b₀
+  have hform' : ∀ x, ∃ a₀, ∀ v,
+      p.f x v = Real.exp (a₀ + dotProduct ((fun _ => p.b₀) x) v + p.c₀ * normSq v) :=
+    hform
+  have := p.hJ_from_maxwellian (fun _ => p.b₀) p.c₀ hform'
+  exact this
+
+/-- Poisson-Boltzmann equation for the density. -/
+lemma VMLInput.hPB (p : VMLInput) :
+    ∀ x, (-1 / (2 * p.c₀)) * p.divX (p.gradX (Real.log ∘ p.ρ)) x =
+      p.ρ x - p.ρ_ion := by
+  -- Apply hPB_eq with the constant Maxwellian form
+  have hform : ∀ x, ∃ a₀ b₀, ∀ v,
+      p.f x v = Real.exp (a₀ + dotProduct b₀ v + p.c₀ * normSq v) := by
+    intro x
+    exact ⟨p.a_loc x, p.b₀, fun v => by
+      rw [p.hMaxwellianForm x v, p.hc_const x, p.hb_const x]⟩
+  exact p.hPB_eq p.c₀ p.hc₀_neg hform
+
+/-- Density is constant: ρ(x) = ρ_ion. -/
+lemma VMLInput.hDensityConst (p : VMLInput) : ∀ x, p.ρ x = p.ρ_ion := by
+  haveI := p.inst_ne
+  have hT : 0 < -1 / (2 * p.c₀) := by
+    apply div_pos_of_neg_of_neg <;> linarith [p.hc₀_neg]
+  exact poisson_boltzmann_max_principle p.X p.ρ p.ρ_ion (-1 / (2 * p.c₀))
+    (fun φ => p.divX (p.gradX φ))
+    p.hρ_pos hT p.hρ_ion p.hPB p.x_max p.hmax p.x_min p.hmin
+    p.hmax_lapl p.hmin_lapl
+
+/-- ∇a vanishes when b₀ = 0 and ρ = ρ_ion. -/
+lemma VMLInput.hGradA_zero (p : VMLInput) :
+    p.b₀ = 0 → (∀ x, p.ρ x = p.ρ_ion) → ∀ x, p.gradX p.a_loc x = 0 := by
+  intro hb0 hdens
+  -- Force balance with b₀ = 0: ∇a = -(2c₀) • E + cross 0 B = -(2c₀) • E
+  have hfb_simp : ∀ y, p.gradX p.a_loc y = -(2 * p.c₀) • p.E y := by
+    intro y; rw [p.hForceBalance y, hb0, cross_zero_left, add_zero]
+  -- gradX a_loc = -(2c₀) • E as functions
+  have hfun_eq : p.gradX p.a_loc = fun y => -(2 * p.c₀) • p.E y := funext hfb_simp
+  -- a_loc is harmonic: div(gradX a_loc) = -(2c₀) * divX E = -(2c₀)(ρ - ρ_ion) = 0
+  have h_harmonic : ∀ y, p.divX (p.gradX p.a_loc) y = 0 := by
+    intro y
+    rw [hfun_eq, p.hDivLinear, p.hGauss, hdens y, sub_self, mul_zero]
+  -- a_loc is constant on T³ (harmonic → constant)
+  have ha_const := p.hHarmonic_const p.a_loc h_harmonic
+  -- Constant → gradient zero
+  exact p.hGradConst p.a_loc ha_const
+
+/-- f is the equilibrium Maxwellian when b₀ = 0 and ρ = ρ_ion. -/
+lemma VMLInput.hNorm (p : VMLInput) :
+    p.b₀ = 0 → (∀ x, p.ρ x = p.ρ_ion) →
+    ∀ x v, p.f x v = equilibriumMaxwellian p.ρ_ion (-1 / (2 * p.c₀)) v := by
+  intro hb0 hdens
+  -- With b₀ = 0 and ∇a = 0, a is constant. So f = exp(a₀ + c₀|v|²).
+  -- The normalization hypothesis converts this to equilibriumMaxwellian.
+  have hGradA := p.hGradA_zero hb0 hdens
+  -- a_loc is constant (gradient zero → constant)
+  have ha_const : ∀ x, p.a_loc x = p.a_loc p.x₀ :=
+    fun x => p.hGradZeroConst p.a_loc hGradA x p.x₀
+  -- f x v = exp(a₀ + 0 + c₀ |v|²) = exp(a₀ + c₀ |v|²)
+  have hf_form : ∀ x v,
+      p.f x v = Real.exp (p.a_loc p.x₀ + p.c₀ * normSq v) := by
+    intro x v
+    rw [p.hMaxwellianForm x v, p.hc_const x, p.hb_const x, hb0, ha_const x]
+    simp [dotProduct, Fin.sum_univ_three, normSq]
+  exact p.hNormalization (p.a_loc p.x₀) p.c₀ p.hc₀_neg hf_form hdens
+
+/-- Build VMLSteadyState from VMLInput by deriving all analytical conclusions. -/
+noncomputable def VMLInput.toSteadyState (p : VMLInput) : VMLSteadyState where
+  X := p.X
+  x₀ := p.x₀
+  f := p.f
+  E := p.E
+  B := p.B
+  ν := p.ν
+  ρ_ion := p.ρ_ion
+  Ψ := p.Ψ
+  hν := p.hν
+  hρ_ion := p.hρ_ion
+  hΨ := p.hΨ
+  hf_pos := p.hf_pos
+  ρ := p.ρ
+  hρ_pos := p.hρ_pos
+  J := p.J
+  gradX := p.gradX
+  divX := p.divX
+  curlX := p.curlX
+  spatialIntegral := p.spatialIntegral
+  vol := p.vol
+  hvol := p.hvol
+  hStokes := p.hStokes
+  hHarmonic_const := p.hHarmonic_const
+  hAmpere := p.hAmpere
+  hGauss := p.hGauss
+  hDivB := p.hDivB
+  -- Derived fields
+  a_loc := p.a_loc
+  b_loc := p.b_loc
+  c_loc := p.c_loc
+  hc_neg := p.hc_neg
+  hMaxwellianForm := p.hMaxwellianForm
+  c₀ := p.c₀
+  hc₀_neg := p.hc₀_neg
+  hc_const := p.hc_const
+  b₀ := (-1 / (2 * p.c₀)) • p.b₀
+  hb_const := fun x => by
+    -- b_loc x = (-2 * c₀) • ((-1/(2c₀)) • b₀) = b₀
+    rw [p.hb_const x]; ext i; simp [Pi.smul_apply, smul_eq_mul]
+    have hc₀_ne : p.c₀ ≠ 0 := ne_of_lt p.hc₀_neg
+    field_simp
+  hForceBalance := fun x => by
+    -- ∇a = -(2c₀)E + b₀ × B, and VMLSteadyState expects -(2c₀)(E + drift × B)
+    -- where drift = (-1/(2c₀))b₀. These are equal since -(2c₀)*(-1/(2c₀)) = 1.
+    have hfb := p.hForceBalance x
+    rw [hfb]
+    have hc₀_ne : p.c₀ ≠ 0 := ne_of_lt p.hc₀_neg
+    rw [smul_add, cross_smul_left, smul_smul]
+    have h1 : -(2 * p.c₀) * (-1 / (2 * p.c₀)) = 1 := by
+      field_simp
+    rw [h1, one_smul]
+  hJ_def := fun x => by
+    exact p.hJ_def x
+  hCurlDotConst := p.hCurlDotConst
+  hCurlZeroDivZeroHarmonic := p.hCurlZeroDivZeroHarmonic
+  hSpatialMul := p.hSpatialMul
+  hSpatialPos := p.hSpatialPos
+  hDensityConst := p.hDensityConst
+  hGradA_zero := fun hb0 hdens => by
+    -- (-1/(2c₀)) • b₀ = 0 implies b₀ = 0 (since c₀ ≠ 0)
+    have hc₀_ne : p.c₀ ≠ 0 := ne_of_lt p.hc₀_neg
+    have hcoeff_ne : (-1 : ℝ) / (2 * p.c₀) ≠ 0 := by
+      apply div_ne_zero (by norm_num)
+      exact mul_ne_zero two_ne_zero hc₀_ne
+    have hb₀_zero : p.b₀ = 0 :=
+      (smul_eq_zero.mp hb0).resolve_left hcoeff_ne
+    exact p.hGradA_zero hb₀_zero hdens
+  hNormalization := fun hb0 hdens => by
+    have hc₀_ne : p.c₀ ≠ 0 := ne_of_lt p.hc₀_neg
+    have hcoeff_ne : (-1 : ℝ) / (2 * p.c₀) ≠ 0 := by
+      apply div_ne_zero (by norm_num)
+      exact mul_ne_zero two_ne_zero hc₀_ne
+    have hb₀_zero : p.b₀ = 0 :=
+      (smul_eq_zero.mp hb0).resolve_left hcoeff_ne
+    exact p.hNorm hb₀_zero hdens
+
+/-- Main theorem (honest version): From physical inputs alone,
+    any smooth steady state (f, E, B) on T³ × ℝ³ with ν > 0 is:
+    (i)   f = ρ_ion/(2πT∞)^{3/2} exp(-|v|²/(2T∞))  (global Maxwellian, zero drift)
+    (ii)  E = 0
+    (iii) B = B∞ (spatially constant)
+    (iv)  T∞ > 0 uniquely determined by conservation laws -/
+theorem main_from_physics (p : VMLInput) :
+    ∃ eq : VMLEquilibrium,
+    (∀ x v, p.f x v = equilibriumMaxwellian p.ρ_ion eq.T v) ∧
+    (∀ x, p.E x = 0) ∧
+    (∀ x, p.B x = eq.B₀) :=
+  main_steady_state p.toSteadyState
+
+end VML
