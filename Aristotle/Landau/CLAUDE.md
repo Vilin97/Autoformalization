@@ -1,5 +1,7 @@
 # Project Notes
 
+The goal is not to end up with 0 sorry's! The goal is to make an honest formalization of the main theorem, with only the genuinely needed mathematical/physical assumptions. It is okay to have some sorry's laying around, as long as their statements are actually mathematically correct.
+
 ## Main file: `Aristotle/Landau/landau-steady-state.lean`
 
 - The main theorem (`Theorem42`) must be stated cleanly at the end of the file with only the necessary mathematical hypotheses — no extra assumptions.
@@ -18,3 +20,10 @@
 - If Aristotle proves it: integrate the proof into the main file, delete the submission.
 - If Aristotle times out: decompose the lemma into smaller pieces and resubmit.
 - If Aristotle proves the negation: fix the lemma statement (missing hypotheses, wrong conclusion, etc.).
+
+## Cleanup
+
+From time to time run cleanup:
+
+- Delete the files that are no longer needed, e.g. Aristotle's proofs that have already been processed and integrated in the main file. Do make sure that the file(s) you are deleting is no longer needed.
+- Extract self-contained lemmas from the main theorem (e.g. with `extract_goal`), and attempt to prove them independently. Important: ensure the lemmas are actually correct!
