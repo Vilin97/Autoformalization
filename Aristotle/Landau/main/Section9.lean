@@ -48,10 +48,10 @@ theorem B_mean_conserved
 
 /-- Lemma 26: B∞ is determined as the spatial mean.
     Reference: lem:B_infty -/
-theorem B_infty_determination (ss : VMLSteadyState) (B₀ : Fin 3 → ℝ)
+theorem B_infty_determination {X : Type*} [FlatTorus3 X] (ss : VMLSteadyState X) (B₀ : Fin 3 → ℝ)
     (hB : ∀ x, ss.B x = B₀) :
-    ∀ i, ss.spatialIntegral (fun x => ss.B x i) =
-      ss.spatialIntegral (fun _ => B₀ i) := by
+    ∀ i, FlatTorus3.spatialIntegral (fun x => ss.B x i) =
+      FlatTorus3.spatialIntegral (fun (_ : X) => B₀ i) := by
   intro i
   congr 1; ext x; rw [hB]
 
