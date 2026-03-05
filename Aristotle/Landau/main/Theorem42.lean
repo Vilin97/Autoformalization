@@ -85,7 +85,23 @@ theorem Theorem42
     (hFubini_outer : ∀ x, Integrable (fun v => ∫ w,
       dotProduct (vGrad (Real.log ∘ f x) v)
         (mulVec (landauMatrix Ψ (v - w))
-          (f x w • vGrad (f x) v - f x v • vGrad (f x) w)))) :
+          (f x w • vGrad (f x) v - f x v • vGrad (f x) w))))
+    -- Transport integrability (velocity-space decay condition).
+    -- Needed for decomposing ∫_v (Vlasov · log f) into spatial + force transport terms.
+    (hSpatialTransport_int : ∀ x, Integrable (fun v =>
+      v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v)))
+    (hForceTransport_int : ∀ x, Integrable (fun v =>
+      (E x + cross v (B x)) ⬝ᵥ vGrad (f x) v * Real.log (f x v)))
+    -- Landau flux × log f decay (boundary terms vanish at velocity-space infinity).
+    -- Holds for distribution functions with sub-Gaussian tails.
+    (hLandauFluxDecay : ∀ x i, Filter.Tendsto (fun v =>
+      (∫ w, mulVec (landauMatrix Ψ (v - w))
+        (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i * (Real.log ∘ f x) v)
+      (Filter.cocompact _) (nhds 0))
+    -- Force transport decay (boundary terms vanish for velocity-space IBP in entropy estimate).
+    (hForceDecay : ∀ x i, Filter.Tendsto (fun v =>
+      (E x + cross v (B x)) i * (f x v * Real.log (f x v) - f x v))
+      (Filter.cocompact _) (nhds 0)) :
     -- === Conclusion ===
     ∃ (T_eq : ℝ) (B₀ : Fin 3 → ℝ), 0 < T_eq ∧
     (∀ x v, f x v = equilibriumMaxwellian ρ_ion T_eq v) ∧
@@ -95,8 +111,9 @@ theorem Theorem42
   have hρ_pos : ∀ x, 0 < ρ x := by
     intro x; rw [hρ_def x]
     exact density_positive_of_integral (f x) (hf_pos x) (hf_int x)
-  have hTransportEntropy : FlatTorus3.spatialIntegral (fun x => entropyDissipation Ψ (f x)) = 0 :=
+  have hTransportEntropy : (∫ x, entropyDissipation Ψ (f x)) = 0 :=
     transport_entropy_from_vlasov f E B Ψ ν hν hf_pos hf_smooth hf_int hVlasov
+      hSpatialTransport_int hForceTransport_int hForceDecay
   have hPolynomialId := polynomial_identity_from_vlasov f E B Ψ ν hf_pos hf_smooth hf_int hΨ hVlasov
   have hPB := poisson_boltzmann_from_vlasov f E B Ψ ν ρ ρ_ion hf_pos hf_smooth hf_int hΨ hρ_def hGauss hVlasov
   -- Extremizers of ρ (extreme value theorem on compact T³)
@@ -111,7 +128,7 @@ theorem Theorem42
       -(∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f x) v)
           (mulVec (landauMatrix Ψ (v - w))
             (f x w • vGrad (f x) v - f x v • vGrad (f x) w))) :=
-    fun x => landau_ibp Ψ (f x) (hf_pos x) (hf_smooth x) (hf_int x)
+    fun x => landau_ibp Ψ (f x) (hf_pos x) (hf_smooth x) (hf_int x) (hLandauFluxDecay x)
   -- Sub-step 1b: Fubini symmetrization: ∫∫⟨Δ, A·flux⟩ = 2·∫∫⟨∇logf(v), A·flux⟩
   have hFubiniSym : ∀ x, ∫ v, ∫ w, dotProduct
         (vGrad (Real.log ∘ f x) v - vGrad (Real.log ∘ f x) w)
