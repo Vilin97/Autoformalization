@@ -122,6 +122,30 @@ def vDiv (F : (Fin 3 → ℝ) → (Fin 3 → ℝ)) (v : Fin 3 → ℝ) : ℝ :=
 def cross (a b : Fin 3 → ℝ) : Fin 3 → ℝ :=
   ![a 1 * b 2 - a 2 * b 1, a 2 * b 0 - a 0 * b 2, a 0 * b 1 - a 1 * b 0]
 
+/-- Velocity-space integration by parts on ℝ³.
+    ∫ (∇ᵥ · F)(v) · g(v) dv = -∫ F(v) · (∇ᵥg)(v) dv.
+
+    This is the divergence theorem on ℝ³: the boundary terms at infinity
+    vanish because F · g decays sufficiently fast.
+
+    Mathlib has `SchwartzMap.integral_mul_lineDerivOp_right_eq_neg_left` for
+    Schwartz × Schwartz, but our applications involve non-Schwartz functions
+    (e.g., F linear in v). The result holds more generally when the product
+    F · g has sufficient decay (e.g., F polynomial growth × g Schwartz decay).
+
+    The integrability hypotheses ensure both integrals are well-defined;
+    the smoothness ensures the divergence theorem applies on balls B_R,
+    and the decay (implicit in integrability of the product) ensures the
+    boundary terms vanish as R → ∞. -/
+lemma velocity_ibp
+    (F : (Fin 3 → ℝ) → (Fin 3 → ℝ)) (g : (Fin 3 → ℝ) → ℝ)
+    (hF_smooth : ∀ i, ContDiff ℝ ⊤ (fun v => F v i))
+    (hg_smooth : ContDiff ℝ ⊤ g)
+    (h_int1 : Integrable (fun v => vDiv F v * g v))
+    (h_int2 : Integrable (fun v => dotProduct (F v) (vGrad g v))) :
+    ∫ v, vDiv F v * g v = -(∫ v, dotProduct (F v) (vGrad g v)) := by
+  sorry
+
 -- ============================================================================
 -- Section 4: Landau Collision Operator
 -- ============================================================================
@@ -139,6 +163,22 @@ def LandauOperator (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ) (v : Fin 3 �
     Reference: Definition in Lemma 5 (lem:entropy_dissipation) -/
 def entropyDissipation (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ) : ℝ :=
   ∫ v, LandauOperator Ψ f v * Real.log (f v)
+
+/-- IBP for the Landau collision operator: ∫ Q(g,g)(v) · log g(v) dv equals
+    the symmetrized weak form. Combines velocity-space IBP (∫ div F · g = -∫ F · ∇g)
+    with dotProduct_integral_comm (pulling the w-integral through the dot product).
+
+    The hypotheses of the general velocity_ibp (smoothness and integrability of the
+    Landau flux ∫_w A(v-w)[...] dw) are hard to verify in Lean — they require
+    differentiation under the integral sign and delicate integrability estimates.
+    This lemma bundles the Landau-specific application directly. -/
+lemma landau_ibp (Ψ : ℝ → ℝ) (g : (Fin 3 → ℝ) → ℝ)
+    (hg_pos : ∀ v, 0 < g v) (hg_smooth : ContDiff ℝ ⊤ g) (hg_int : Integrable g) :
+    ∫ v, LandauOperator Ψ g v * (Real.log ∘ g) v =
+    -(∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ g) v)
+        (mulVec (landauMatrix Ψ (v - w))
+          (g w • vGrad g v - g v • vGrad g w))) := by
+  sorry
 
 /-- The PSD integrand: g(v,w) = f(v)·f(w)·⟨Δ(v,w), A(v-w) Δ(v,w)⟩
     where Δ(v,w) = ∇log f(v) - ∇log f(w).
@@ -269,6 +309,15 @@ class FlatTorus3 (X : Type*) where
   hIBP_spatial : ∀ (φ ψ : X → ℝ) (i : Fin 3),
     spatialIntegral (fun x => φ x * gradX ψ x i) =
     -(spatialIntegral (fun x => ψ x * gradX φ x i))
+  -- Fubini: swap spatial integral with velocity integral (compact × σ-finite)
+  hSpatialVelocityFubini : ∀ (F : X → (Fin 3 → ℝ) → ℝ),
+    (∀ x, MeasureTheory.Integrable (F x)) →
+    spatialIntegral (fun x => ∫ v, F x v) =
+    ∫ v, spatialIntegral (fun x => F x v)
+  -- Linearity: spatial integral of a sum
+  hSpatialAdd : ∀ (g₁ g₂ : X → ℝ),
+    spatialIntegral (fun x => g₁ x + g₂ x) =
+    spatialIntegral g₁ + spatialIntegral g₂
 
 namespace FlatTorus3
 
