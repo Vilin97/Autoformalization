@@ -175,7 +175,10 @@ lemma force_transport_zero
     (g : (Fin 3 → ℝ) → ℝ) (E_val B_val : Fin 3 → ℝ)
     (hg_pos : ∀ v, 0 < g v)
     (hg_smooth : ContDiff ℝ ⊤ g)
-    (hg_int : Integrable g) :
+    (hg_int : Integrable g)
+    (h_decay : ∀ i, Filter.Tendsto (fun v =>
+      (E_val + cross v B_val) i * (g v * Real.log (g v) - g v))
+      (Filter.cocompact _) (nhds 0)) :
     ∫ v, dotProduct (E_val + cross v B_val) (vGrad g v) * Real.log (g v) = 0 := by
   -- If the integrand is not integrable, the integral is 0 by Lean's convention
   by_cases h_int : Integrable (fun v =>
@@ -204,6 +207,7 @@ lemma force_transport_zero
         convert integrable_zero (Fin 3 → ℝ) ℝ MeasureTheory.MeasureSpace.volume using 1
         ext v; simp [lorentz_force_div_zero E_val B_val v])
       (by rwa [← h_rw]) -- same as our integrability hypothesis
+      h_decay -- product decay at infinity
     simp_rw [lorentz_force_div_zero E_val B_val, zero_mul, integral_zero] at h_ibp
     linarith
   · exact integral_undef h_int
@@ -213,25 +217,22 @@ lemma force_transport_zero
     Uses hIBP_spatial + hGradChainLog + hGradIntZero. -/
 private lemma spatial_transport_log_zero {X : Type*} [FlatTorus3 X]
     (f : X → (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ x v, 0 < f x v) (v : Fin 3 → ℝ) (i : Fin 3) :
-    FlatTorus3.spatialIntegral (fun x =>
-      FlatTorus3.gradX (fun y => f y v) x i * Real.log (f x v)) = 0 := by
+    (∫ x, FlatTorus3.gradX (fun y => f y v) x i * Real.log (f x v)) = 0 := by
   have h_ibp := FlatTorus3.hIBP_spatial (fun x => f x v) (fun x => Real.log (f x v)) i
   have h_chain : ∀ x, FlatTorus3.gradX (fun y => Real.log (f y v)) x i =
       (1 / f x v) * FlatTorus3.gradX (fun y => f y v) x i :=
     fun x => FlatTorus3.hGradChainLog (fun y => f y v) (fun x => hf_pos x v) x i
-  have h_lhs : FlatTorus3.spatialIntegral
-      (fun x => f x v * FlatTorus3.gradX (fun y => Real.log (f y v)) x i) =
-      FlatTorus3.spatialIntegral (fun x => FlatTorus3.gradX (fun y => f y v) x i) := by
+  have h_lhs : (∫ x, f x v * FlatTorus3.gradX (fun y => Real.log (f y v)) x i) =
+      ∫ x, FlatTorus3.gradX (fun y => f y v) x i := by
     congr 1; ext x; rw [h_chain]; have := ne_of_gt (hf_pos x v); field_simp
   rw [h_lhs] at h_ibp
-  have h_grad_int : FlatTorus3.spatialIntegral
-      (fun x => FlatTorus3.gradX (fun y => f y v) x i) = 0 := by
+  have h_grad_int : (∫ x, FlatTorus3.gradX (fun y => f y v) x i) = 0 := by
     have := FlatTorus3.hGradIntZero (fun y => f y v) (Pi.single i 1)
     simp [dotProduct, Fin.sum_univ_three] at this
     fin_cases i <;> simp_all [Pi.single, Function.update]
   rw [h_grad_int] at h_ibp
-  have h_comm : FlatTorus3.spatialIntegral (fun x =>
-      Real.log (f x v) * FlatTorus3.gradX (fun y => f y v) x i) = 0 := by linarith
+  have h_comm : (∫ x, Real.log (f x v) * FlatTorus3.gradX (fun y => f y v) x i) = 0 := by
+    linarith
   have : (fun x => FlatTorus3.gradX (fun y => f y v) x i * Real.log (f x v)) =
       (fun x => Real.log (f x v) * FlatTorus3.gradX (fun y => f y v) x i) := by ext x; ring
   rw [this]; exact h_comm
@@ -252,20 +253,26 @@ lemma transport_entropy_from_vlasov
     (hVlasov : ∀ x v,
       dotProduct v (FlatTorus3.gradX (fun y => f y v) x) +
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
-      ν * LandauOperator Ψ (f x) v) :
-    FlatTorus3.spatialIntegral (fun x => entropyDissipation Ψ (f x)) = 0 := by
-  -- Strategy: ν * spatialIntegral(D) = 0, and ν > 0.
-  suffices h_zero : ν * FlatTorus3.spatialIntegral (fun x => entropyDissipation Ψ (f x)) = 0 by
+      ν * LandauOperator Ψ (f x) v)
+    -- Velocity-space integrability for transport decomposition
+    (hSpatialTransport_int : ∀ x, Integrable (fun v =>
+      v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v)))
+    (hForceTransport_int : ∀ x, Integrable (fun v =>
+      (E x + cross v (B x)) ⬝ᵥ vGrad (f x) v * Real.log (f x v)))
+    -- Decay at velocity-space infinity for force transport IBP
+    (hForceDecay : ∀ x i, Filter.Tendsto (fun v =>
+      (E x + cross v (B x)) i * (f x v * Real.log (f x v) - f x v))
+      (Filter.cocompact _) (nhds 0)) :
+    (∫ x, entropyDissipation Ψ (f x)) = 0 := by
+  -- Strategy: ν * ∫D = 0, and ν > 0.
+  suffices h_zero : ν * (∫ x, entropyDissipation Ψ (f x)) = 0 by
     rcases mul_eq_zero.mp h_zero with h | h
     · linarith
     · exact h
-  -- ν * spatialIntegral(D) = spatialIntegral(ν * D) via hSpatialMul
-  have h_comm : ν * FlatTorus3.spatialIntegral (fun x => entropyDissipation Ψ (f x)) =
-      FlatTorus3.spatialIntegral (fun x => ν * entropyDissipation Ψ (f x)) := by
-    have := FlatTorus3.hSpatialMul (fun x => entropyDissipation Ψ (f x)) ν
-    have h_eq : (fun x => entropyDissipation Ψ (f x) * ν) =
-        (fun x => ν * entropyDissipation Ψ (f x)) := by ext; ring
-    rw [h_eq] at this; linarith
+  -- ν * ∫D = ∫(ν * D) via integral_mul_left
+  have h_comm : ν * (∫ x, entropyDissipation Ψ (f x)) =
+      ∫ x, ν * entropyDissipation Ψ (f x) := by
+    rw [← integral_mul_left]
   rw [h_comm]
   -- For each x: ν * D(f x) = ∫_v (v · ∇_x f) * log f (force transport = 0)
   have h_key : ∀ x, ν * entropyDissipation Ψ (f x) =
@@ -281,26 +288,23 @@ lemma transport_entropy_from_vlasov
       have : ν * (LandauOperator Ψ (f x) v * Real.log (f x v)) =
           (ν * LandauOperator Ψ (f x) v) * Real.log (f x v) := by ring
       rw [this, ← hV]; ring
-    rw [hrw, integral_add (by sorry) (by sorry)] -- integrability
-    rw [force_transport_zero (f x) (E x) (B x) (hf_pos x) (hf_smooth x) (hf_int x)]
+    rw [hrw, integral_add (hSpatialTransport_int x) (hForceTransport_int x)]
+    rw [force_transport_zero (f x) (E x) (B x) (hf_pos x) (hf_smooth x) (hf_int x) (hForceDecay x)]
     simp [add_zero]
-  -- Rewrite spatialIntegral (ν * D) = spatialIntegral (∫_v transport * log f)
+  -- Rewrite ∫(ν * D) = ∫(∫_v transport * log f)
   have h_eq : (fun x => ν * entropyDissipation Ψ (f x)) =
       (fun x => ∫ v, v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v)) := by
     ext x; exact h_key x
   rw [h_eq]
-  -- Fubini: swap spatialIntegral and ∫_v
-  rw [FlatTorus3.hSpatialVelocityFubini _ (by sorry)] -- integrability
+  -- Fubini: swap ∫_X and ∫_v
+  rw [FlatTorus3.hSpatialVelocityFubini _ hSpatialTransport_int]
   -- For each v, spatial integral vanishes
-  suffices h_v : ∀ v : Fin 3 → ℝ, FlatTorus3.spatialIntegral (fun x =>
+  suffices h_v : ∀ v : Fin 3 → ℝ, (∫ x,
       v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v)) = 0 by
     simp_rw [h_v]
-    have : FlatTorus3.spatialIntegral (fun _ : X => (0 : ℝ)) = 0 := by
-      have := FlatTorus3.hSpatialMul (fun _ : X => (1 : ℝ)) (0 : ℝ)
-      simp at this; exact this
-    convert integral_zero (Fin 3 → ℝ) ℝ
+    exact integral_zero (Fin 3 → ℝ) ℝ
   -- Expand dotProduct v (gradX (f · v)) * log f = ∑_i v_i * gradX(f·v)_i * log f
-  -- Then use hSpatialAdd + hSpatialMul + spatial_transport_log_zero
+  -- Then use hSpatialAdd + integral_mul_right + spatial_transport_log_zero
   intro v
   simp only [dotProduct, Fin.sum_univ_three]
   -- (v₀*g₀ + v₁*g₁ + v₂*g₂) * logf = v₀*g₀*logf + v₁*g₁*logf + v₂*g₂*logf
@@ -312,43 +316,19 @@ lemma transport_entropy_from_vlasov
         v 2 * (FlatTorus3.gradX (fun y => f y v) x 2 * Real.log (f x v)))) := by
     ext x; ring
   rw [hrw, FlatTorus3.hSpatialAdd, FlatTorus3.hSpatialAdd]
-  -- Each term: spatialIntegral (v_i * (grad_i * logf)) = v_i * spatialIntegral(grad_i * logf)
-  -- = v_i * spatial_transport_log_zero = v_i * 0 = 0
   have h0 := spatial_transport_log_zero f hf_pos v (0 : Fin 3)
   have h1 := spatial_transport_log_zero f hf_pos v (1 : Fin 3)
   have h2 := spatial_transport_log_zero f hf_pos v (2 : Fin 3)
-  -- hSpatialMul: spatialIntegral (fun x => g x * c) = spatialIntegral g * c
-  -- We need: spatialIntegral (fun x => c * g x) = c * spatialIntegral g
-  have hm0 : FlatTorus3.spatialIntegral (fun x =>
-      v 0 * (FlatTorus3.gradX (fun y => f y v) x 0 * Real.log (f x v))) =
-      v 0 * FlatTorus3.spatialIntegral (fun x =>
-        FlatTorus3.gradX (fun y => f y v) x 0 * Real.log (f x v)) := by
-    have := FlatTorus3.hSpatialMul (fun x =>
-      FlatTorus3.gradX (fun y => f y v) x 0 * Real.log (f x v)) (v 0)
-    have h_eq : (fun x => FlatTorus3.gradX (fun y => f y v) x 0 * Real.log (f x v) * v 0) =
-        (fun x => v 0 * (FlatTorus3.gradX (fun y => f y v) x 0 * Real.log (f x v))) := by
-      ext; ring
-    rw [h_eq] at this; linarith
-  have hm1 : FlatTorus3.spatialIntegral (fun x =>
-      v 1 * (FlatTorus3.gradX (fun y => f y v) x 1 * Real.log (f x v))) =
-      v 1 * FlatTorus3.spatialIntegral (fun x =>
-        FlatTorus3.gradX (fun y => f y v) x 1 * Real.log (f x v)) := by
-    have := FlatTorus3.hSpatialMul (fun x =>
-      FlatTorus3.gradX (fun y => f y v) x 1 * Real.log (f x v)) (v 1)
-    have h_eq : (fun x => FlatTorus3.gradX (fun y => f y v) x 1 * Real.log (f x v) * v 1) =
-        (fun x => v 1 * (FlatTorus3.gradX (fun y => f y v) x 1 * Real.log (f x v))) := by
-      ext; ring
-    rw [h_eq] at this; linarith
-  have hm2 : FlatTorus3.spatialIntegral (fun x =>
-      v 2 * (FlatTorus3.gradX (fun y => f y v) x 2 * Real.log (f x v))) =
-      v 2 * FlatTorus3.spatialIntegral (fun x =>
-        FlatTorus3.gradX (fun y => f y v) x 2 * Real.log (f x v)) := by
-    have := FlatTorus3.hSpatialMul (fun x =>
-      FlatTorus3.gradX (fun y => f y v) x 2 * Real.log (f x v)) (v 2)
-    have h_eq : (fun x => FlatTorus3.gradX (fun y => f y v) x 2 * Real.log (f x v) * v 2) =
-        (fun x => v 2 * (FlatTorus3.gradX (fun y => f y v) x 2 * Real.log (f x v))) := by
-      ext; ring
-    rw [h_eq] at this; linarith
+  -- ∫ (c * g) = c * ∫ g via integral_mul_left
+  have hm0 : (∫ x, v 0 * (FlatTorus3.gradX (fun y => f y v) x 0 * Real.log (f x v))) =
+      v 0 * ∫ x, FlatTorus3.gradX (fun y => f y v) x 0 * Real.log (f x v) := by
+    rw [← integral_mul_left]
+  have hm1 : (∫ x, v 1 * (FlatTorus3.gradX (fun y => f y v) x 1 * Real.log (f x v))) =
+      v 1 * ∫ x, FlatTorus3.gradX (fun y => f y v) x 1 * Real.log (f x v) := by
+    rw [← integral_mul_left]
+  have hm2 : (∫ x, v 2 * (FlatTorus3.gradX (fun y => f y v) x 2 * Real.log (f x v))) =
+      v 2 * ∫ x, FlatTorus3.gradX (fun y => f y v) x 2 * Real.log (f x v) := by
+    rw [← integral_mul_left]
   rw [hm0, hm1, hm2, h0, h1, h2]; ring
 
 end VML

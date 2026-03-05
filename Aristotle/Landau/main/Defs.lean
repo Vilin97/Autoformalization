@@ -125,24 +125,23 @@ def cross (a b : Fin 3 → ℝ) : Fin 3 → ℝ :=
 /-- Velocity-space integration by parts on ℝ³.
     ∫ (∇ᵥ · F)(v) · g(v) dv = -∫ F(v) · (∇ᵥg)(v) dv.
 
-    This is the divergence theorem on ℝ³: the boundary terms at infinity
-    vanish because F · g decays sufficiently fast.
+    This is the divergence theorem on ℝ³. The boundary terms at infinity
+    vanish by the decay hypothesis: each component Fᵢ·g → 0 at spatial ∞.
 
-    Mathlib has `SchwartzMap.integral_mul_lineDerivOp_right_eq_neg_left` for
-    Schwartz × Schwartz, but our applications involve non-Schwartz functions
-    (e.g., F linear in v). The result holds more generally when the product
-    F · g has sufficient decay (e.g., F polynomial growth × g Schwartz decay).
+    Note: integrability alone is NOT sufficient (counterexample: F=(1,0,0),
+    g=arctan(v₀)·exp(-v₁²-v₂²) — both integrands integrable, but
+    F·g → ±π/2·exp(-v₁²-v₂²) ≠ 0, and the IBP equation fails).
 
-    The integrability hypotheses ensure both integrals are well-defined;
-    the smoothness ensures the divergence theorem applies on balls B_R,
-    and the decay (implicit in integrability of the product) ensures the
-    boundary terms vanish as R → ∞. -/
+    The decay hypothesis ensures the boundary terms in the 1D IBP
+    (applied via Fubini in each coordinate) vanish. -/
 lemma velocity_ibp
     (F : (Fin 3 → ℝ) → (Fin 3 → ℝ)) (g : (Fin 3 → ℝ) → ℝ)
     (hF_smooth : ∀ i, ContDiff ℝ ⊤ (fun v => F v i))
     (hg_smooth : ContDiff ℝ ⊤ g)
     (h_int1 : Integrable (fun v => vDiv F v * g v))
-    (h_int2 : Integrable (fun v => dotProduct (F v) (vGrad g v))) :
+    (h_int2 : Integrable (fun v => dotProduct (F v) (vGrad g v)))
+    (h_decay : ∀ i, Filter.Tendsto (fun v => F v i * g v)
+      (Filter.cocompact _) (nhds 0)) :
     ∫ v, vDiv F v * g v = -(∫ v, dotProduct (F v) (vGrad g v)) := by
   sorry
 
@@ -171,9 +170,18 @@ def entropyDissipation (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ) : ℝ :=
     The hypotheses of the general velocity_ibp (smoothness and integrability of the
     Landau flux ∫_w A(v-w)[...] dw) are hard to verify in Lean — they require
     differentiation under the integral sign and delicate integrability estimates.
-    This lemma bundles the Landau-specific application directly. -/
+    This lemma bundles the Landau-specific application directly.
+
+    The decay hypothesis requires the Landau flux × log g to vanish at
+    spatial infinity. This holds when g has sufficient velocity-space decay
+    (e.g., sub-Gaussian tails), since the flux is bounded by ∫ A·(...)
+    and log g grows at most logarithmically. -/
 lemma landau_ibp (Ψ : ℝ → ℝ) (g : (Fin 3 → ℝ) → ℝ)
-    (hg_pos : ∀ v, 0 < g v) (hg_smooth : ContDiff ℝ ⊤ g) (hg_int : Integrable g) :
+    (hg_pos : ∀ v, 0 < g v) (hg_smooth : ContDiff ℝ ⊤ g) (hg_int : Integrable g)
+    (h_decay : ∀ i, Filter.Tendsto (fun v =>
+      (∫ w, mulVec (landauMatrix Ψ (v - w))
+        (g w • vGrad g v - g v • vGrad g w)) i * (Real.log ∘ g) v)
+      (Filter.cocompact _) (nhds 0)) :
     ∫ v, LandauOperator Ψ g v * (Real.log ∘ g) v =
     -(∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ g) v)
         (mulVec (landauMatrix Ψ (v - w))
@@ -226,61 +234,51 @@ lemma vecMulVec_self_mulVec (z w : Fin 3 → ℝ) :
 
 /-- Abstract characterization of a flat 3-torus with differential operators.
 
+    The spatial domain X is equipped with a MeasureSpace instance (providing
+    a canonical measure for integration via Mathlib's `∫`). The abstract
+    differential operators (grad, div, curl) and their properties are axiomatized.
+
     These axioms are satisfied by any flat compact Riemannian 3-manifold without
     boundary (e.g. T³ = ℝ³/ℤ³) equipped with its standard differential operators
     and Riemannian volume form.
 
-    Consistency: the trivial one-point model (X = Unit, all operators = 0,
-    spatialIntegral g = g ()) satisfies all axioms.
+    Integration uses Mathlib's `∫ x, f x` (Bochner integral over `volume`).
+    Properties like `∫ (f * c) = (∫ f) * c` follow from Mathlib's `integral_mul_right`.
 
-    Minimality analysis:
-    - hDivLinear, hGradConst: basic operator properties (independent)
-    - hStokes, hCurlIntZero: Stokes theorem for 1-forms and 2-forms (independent)
-    - hHarmonic_const: Hodge theory (not derivable from the above)
-    - hLaplacianMaxNonpos, hLaplacianMinNonneg: second derivative test
-      (independent without gradient linearity; both needed)
-    - hGradAdd, hGradScalarMul: linearity of gradient
-    - hGradChainExp, hGradChainLog: chain rules for gradient
-    - hSpatialMul, hSpatialPos, hSpatialNonnegZero: integration properties
-      (all independent — Pos doesn't imply NonnegZero without monotonicity)
-    - hKillingToHarmonic, hCurlZeroDivZeroHarmonic: flat-geometry consequences
-      (require commuting partials, not derivable from the other axioms)
+    Axioms (15, not provable from Mathlib without a concrete model):
+    - Operator properties (5): hDivLinear, hGradConst, hGradAdd, hGradScalarMul, hGradChainExp
+    - Closed manifold integration (2): hCurlIntZero, hIBP_spatial
+    - Analysis on compact manifold (4): hHarmonic_const, hLaplacianMaxNonpos, hSpatialPos, hSpatialNonnegZero
+    - Flat geometry (2): hKillingToHarmonic, hCurlZeroDivZeroHarmonic
+    - Abstract measure (2): hSpatialVelocityFubini, hSpatialAdd
 
-    Derived lemma (proved, not assumed):
-    - hGradZeroConst: ∇φ = 0 → φ constant (from hHarmonic_const + hDivLinear) -/
-class FlatTorus3 (X : Type*) where
+    Derived lemmas (proved in the namespace from the above axioms):
+    - hGradChainLog (from hGradChainExp via exp(log g) = g)
+    - hGradIntZero (from hIBP_spatial + hGradConst + hSpatialAdd)
+    - hLaplacianMinNonneg (from hLaplacianMaxNonpos + hGradScalarMul + hDivLinear)
+    - hSpatialMul (from Mathlib's integral_mul_right) -/
+class FlatTorus3 (X : Type*) extends MeasureSpace X where
   gradX : (X → ℝ) → X → (Fin 3 → ℝ)
   divX : (X → (Fin 3 → ℝ)) → X → ℝ
   curlX : (X → (Fin 3 → ℝ)) → X → (Fin 3 → ℝ)
-  spatialIntegral : (X → ℝ) → ℝ
-  vol : ℝ
-  hvol : 0 < vol
   -- Linearity of the divergence operator
   hDivLinear : ∀ (α : ℝ) (G : X → (Fin 3 → ℝ)),
     ∀ x, divX (fun y => α • G y) x = α * divX G x
   -- Gradient of a spatially constant function vanishes
   hGradConst : ∀ (φ : X → ℝ), (∀ x y, φ x = φ y) → ∀ x, gradX φ x = 0
-  -- Divergence theorem on compact manifold without boundary
-  hStokes : ∀ F : X → (Fin 3 → ℝ), spatialIntegral (divX F) = 0
   -- Curl integral vanishes (Stokes theorem for 2-forms)
   hCurlIntZero : ∀ (F : X → Fin 3 → ℝ) (u : Fin 3 → ℝ),
-    spatialIntegral (fun x => dotProduct u (curlX F x)) = 0
+    ∫ x, dotProduct u (curlX F x) = 0
   -- Harmonic functions on compact manifold are constant (Hodge theory)
   hHarmonic_const : ∀ φ : X → ℝ, (∀ x, divX (gradX φ) x = 0) → ∀ x y, φ x = φ y
   -- Second derivative test: Laplacian ≤ 0 at a maximum
   hLaplacianMaxNonpos : ∀ (φ : X → ℝ) (x₀ : X),
     (∀ x, φ x ≤ φ x₀) → divX (gradX φ) x₀ ≤ 0
-  -- Second derivative test: Laplacian ≥ 0 at a minimum
-  hLaplacianMinNonneg : ∀ (φ : X → ℝ) (x₀ : X),
-    (∀ x, φ x₀ ≤ φ x) → 0 ≤ divX (gradX φ) x₀
-  -- Integral of (function × constant) = integral × constant
-  hSpatialMul : ∀ (g : X → ℝ) (c : ℝ),
-    spatialIntegral (fun x => g x * c) = spatialIntegral g * c
   -- Strictly positive function has strictly positive integral
-  hSpatialPos : ∀ g : X → ℝ, (∀ x, 0 < g x) → 0 < spatialIntegral g
+  hSpatialPos : ∀ g : X → ℝ, (∀ x, 0 < g x) → 0 < ∫ x, g x
   -- Nonnegative function with zero integral is identically zero
   hSpatialNonnegZero : ∀ g : X → ℝ,
-    (∀ x, 0 ≤ g x) → spatialIntegral g = 0 → ∀ x, g x = 0
+    (∀ x, 0 ≤ g x) → ∫ x, g x = 0 → ∀ x, g x = 0
   -- Linearity of gradient: gradX(f + g) = gradX(f) + gradX(g)
   hGradAdd : ∀ (f g : X → ℝ),
     ∀ x, gradX (fun y => f y + g y) x = gradX f x + gradX g x
@@ -290,9 +288,6 @@ class FlatTorus3 (X : Type*) where
   -- Chain rule for exp: gradX(exp ∘ φ) = exp(φ) · gradX(φ)
   hGradChainExp : ∀ (φ : X → ℝ),
     ∀ x i, gradX (fun y => Real.exp (φ y)) x i = Real.exp (φ x) * gradX φ x i
-  -- Chain rule for log: gradX(log ∘ g) = (1/g) · gradX(g) when g > 0
-  hGradChainLog : ∀ (g : X → ℝ), (∀ x, 0 < g x) →
-    ∀ x i, gradX (fun y => Real.log (g y)) x i = (1 / g x) * gradX g x i
   -- Killing fields have harmonic components (flatness of the metric)
   hKillingToHarmonic : ∀ (b : X → Fin 3 → ℝ),
     (∀ x i j, gradX (fun y => b y j) x i + gradX (fun y => b y i) x j = 0) →
@@ -301,27 +296,30 @@ class FlatTorus3 (X : Type*) where
   hCurlZeroDivZeroHarmonic : ∀ F : X → (Fin 3 → ℝ),
     (∀ x, curlX F x = 0) → (∀ x, divX F x = 0) →
     ∀ i, ∀ x, divX (gradX (fun y => F y i)) x = 0
-  -- Gradient integral vanishes (Stokes for 0-forms on a closed manifold: ∫_M dg = 0)
-  hGradIntZero : ∀ (g : X → ℝ) (u : Fin 3 → ℝ),
-    spatialIntegral (fun x => dotProduct u (gradX g x)) = 0
   -- Integration by parts on the torus: ∫ φ · (∇ψ)ᵢ = -∫ ψ · (∇φ)ᵢ
-  -- (Follows from Stokes + Leibniz rule on a closed manifold)
   hIBP_spatial : ∀ (φ ψ : X → ℝ) (i : Fin 3),
-    spatialIntegral (fun x => φ x * gradX ψ x i) =
-    -(spatialIntegral (fun x => ψ x * gradX φ x i))
-  -- Fubini: swap spatial integral with velocity integral (compact × σ-finite)
+    (∫ x, φ x * gradX ψ x i) = -(∫ x, ψ x * gradX φ x i)
+  -- Fubini: swap spatial integral (over compact X) with velocity integral (over ℝ³)
   hSpatialVelocityFubini : ∀ (F : X → (Fin 3 → ℝ) → ℝ),
     (∀ x, MeasureTheory.Integrable (F x)) →
-    spatialIntegral (fun x => ∫ v, F x v) =
-    ∫ v, spatialIntegral (fun x => F x v)
-  -- Linearity: spatial integral of a sum
+    (∫ x, ∫ v, F x v) = ∫ v, ∫ x, F x v
+  -- Additivity of spatial integral (requires integrability of operator outputs)
   hSpatialAdd : ∀ (g₁ g₂ : X → ℝ),
-    spatialIntegral (fun x => g₁ x + g₂ x) =
-    spatialIntegral g₁ + spatialIntegral g₂
+    (∫ x, (g₁ x + g₂ x)) = (∫ x, g₁ x) + ∫ x, g₂ x
 
 namespace FlatTorus3
 
 variable {X : Type*} [FlatTorus3 X]
+
+/-- Compatibility wrapper: spatial integral as Mathlib's Bochner integral.
+    Defined as `abbrev` so it unfolds transparently in rewrites. -/
+noncomputable abbrev spatialIntegral (g : X → ℝ) : ℝ := ∫ x, g x
+
+/-- Scalar multiplication: ∫ g(x) * c = (∫ g) * c.
+    Proved from Mathlib's `integral_mul_right`. -/
+lemma hSpatialMul (g : X → ℝ) (c : ℝ) :
+    spatialIntegral (fun x => g x * c) = spatialIntegral g * c := by
+  simp [spatialIntegral, integral_mul_right]
 
 /-- Zero gradient implies spatially constant (derived from hHarmonic_const + hDivLinear). -/
 lemma hGradZeroConst (φ : X → ℝ) (h : ∀ x, gradX φ x = 0) : ∀ x y, φ x = φ y := by
@@ -331,6 +329,56 @@ lemma hGradZeroConst (φ : X → ℝ) (h : ∀ x, gradX φ x = 0) : ∀ x y, φ 
   have hg : (fun y : X => (0 : ℝ) • gradX φ y) = gradX φ := by
     ext y; simp [h y]
   rw [hg, zero_mul] at h1; exact h1
+
+/-- Chain rule for log: gradX(log ∘ g) = (1/g) · gradX(g) when g > 0.
+    Derived from hGradChainExp: gradX(exp(log g)) = g · gradX(log g) = gradX(g). -/
+lemma hGradChainLog (g : X → ℝ) (hg : ∀ x, 0 < g x) :
+    ∀ x i, gradX (fun y => Real.log (g y)) x i = (1 / g x) * gradX g x i := by
+  intro x i
+  have key := hGradChainExp (fun y => Real.log (g y)) x i
+  have hexplog : (fun y => Real.exp (Real.log (g y))) = g := by
+    ext y; exact Real.exp_log (hg y)
+  rw [hexplog, Real.exp_log (hg x)] at key
+  have hgx_ne : g x ≠ 0 := ne_of_gt (hg x)
+  field_simp at key ⊢; linarith
+
+/-- Integral of a single gradient component vanishes (from IBP with φ=1). -/
+private lemma gradIntZero_component (g : X → ℝ) (i : Fin 3) :
+    ∫ x, gradX g x i = 0 := by
+  have h := hIBP_spatial (fun _ => 1) g i
+  simp only [one_mul] at h
+  have hc : ∀ x : X, gradX (fun _ : X => (1 : ℝ)) x = 0 :=
+    hGradConst (fun _ : X => (1 : ℝ)) (fun _ _ => rfl)
+  simp only [hc, Pi.zero_apply, mul_zero, integral_zero, neg_zero] at h
+  linarith
+
+/-- Gradient integral vanishes (Stokes for 0-forms: ∫_M dg = 0).
+    Derived from hIBP_spatial + hGradConst + hSpatialAdd. -/
+lemma hGradIntZero (g : X → ℝ) (u : Fin 3 → ℝ) :
+    ∫ x, dotProduct u (gradX g x) = 0 := by
+  simp only [dotProduct, Fin.sum_univ_three]
+  rw [hSpatialAdd, hSpatialAdd]
+  have h0 : ∫ x : X, u 0 * gradX g x 0 = u 0 * ∫ x, gradX g x 0 := integral_const_mul _ _
+  have h1 : ∫ x : X, u 1 * gradX g x 1 = u 1 * ∫ x, gradX g x 1 := integral_const_mul _ _
+  have h2 : ∫ x : X, u 2 * gradX g x 2 = u 2 * ∫ x, gradX g x 2 := integral_const_mul _ _
+  rw [h0, h1, h2, gradIntZero_component g 0, gradIntZero_component g 1, gradIntZero_component g 2]
+  ring
+
+/-- Second derivative test: Laplacian ≥ 0 at a minimum.
+    Derived from hLaplacianMaxNonpos applied to -φ, using linearity of grad and div. -/
+lemma hLaplacianMinNonneg (φ : X → ℝ) (x₀ : X)
+    (hmin : ∀ x, φ x₀ ≤ φ x) : 0 ≤ divX (gradX φ) x₀ := by
+  have hmax : ∀ x, (fun y => (-1) * φ y) x ≤ (fun y => (-1) * φ y) x₀ := by
+    intro x; simp; linarith [hmin x]
+  have h := hLaplacianMaxNonpos (fun y => (-1) * φ y) x₀ hmax
+  have h2 : divX (gradX (fun y => (-1) * φ y)) x₀ =
+      (-1) * divX (gradX φ) x₀ := by
+    have hg : gradX (fun y => (-1) * φ y) = fun x => (-1 : ℝ) • gradX φ x := by
+      funext x; exact hGradScalarMul (-1) φ x
+    change divX (gradX (fun y => (-1) * φ y)) x₀ = _
+    conv_lhs => rw [hg]
+    exact hDivLinear (-1) (gradX φ) x₀
+  linarith
 
 end FlatTorus3
 

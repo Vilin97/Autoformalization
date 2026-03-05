@@ -15,15 +15,15 @@ on T^3 x R^3 with collision frequency nu > 0 must satisfy:
   (iii) B = const
   (iv)  T > 0 uniquely determined by conservation laws
 
-The proof is complete modulo 2 sorry's: velocity-space IBP
-for the Landau operator, and the global entropy production identity
-(both require velocity-space analysis beyond current Mathlib).
+The proof is complete modulo 2 sorry's: velocity-space IBP (`velocity_ibp`)
+and Landau operator IBP (`landau_ibp`), both requiring velocity-space
+analysis beyond current Mathlib.
 
 ---
 
 ## File Structure
 
-- `Defs.lean` — FlatTorus3 typeclass, structures (VMLSteadyState, VMLEquilibrium, VMLInput), base definitions
+- `Defs.lean` — FlatTorus3 typeclass (extends MeasureSpace X), structures (VMLSteadyState, VMLEquilibrium, VMLInput), base definitions
 - `Section2.lean` — Algebraic lemmas (Landau matrix properties, Lemmas 1-3)
 - `Section3.lean` — H-theorem chain + analysis lemmas (~1130 lines, Lemmas 4-9)
 - `Section4.lean` — Transport constraints (Lemmas 10-12, Corollary 2)
@@ -60,9 +60,9 @@ for the Landau operator, and the global entropy production identity
 
 ### Section 4: Vlasov--Maxwell Transport Constraints
 
-- **Lemma 11** (Global entropy production vanishes): `global_entropy_production_zero`
-- **Lemma 12** (Pointwise D = 0): `pointwise_entropy_dissipation_zero`
-- **Corollary 2** (Local Maxwellian): `steady_state_is_local_maxwellian`
+- **Lemma 10** (Lorentz force div = 0): `lorentz_force_div_zero`
+- **Lemma 11** (Global entropy production vanishes): `transport_entropy_from_vlasov`
+- **Lemma 12** (Pointwise D = 0): derived in Theorem42
 
 ### Section 5: Polynomial Matching
 
@@ -107,49 +107,78 @@ for the Landau operator, and the global entropy production identity
 
 ## Remaining Sorry's (2)
 
-### Category 1: Velocity-space IBP (1 sorry in Theorem42.lean)
+Both sorry's are in `Defs.lean` and concern velocity-space integration by parts:
 
-1. **`hIBP`** — IBP for the Landau operator:
-   ∫ Q(f,f)(v) log f(v) dv = -∫∫ ⟨∇ log f(v), A(v-w) · flux⟩ dw dv.
-   Requires integration by parts in velocity space with Schwartz-class decay.
+1. **`velocity_ibp`** (Defs.lean:140) — General IBP on ℝ³:
+   ∫ (∇·F)(v) · g(v) dv = -∫ F(v) · (∇g)(v) dv.
+   Requires Fubini + 1D IBP in each coordinate direction.
 
-### Category 2: Global entropy identity (1 sorry in Section4.lean)
+2. **`landau_ibp`** (Defs.lean:175) — IBP for the Landau operator:
+   ∫ Q(g,g)(v) log g(v) dv = -∫∫ ⟨∇ log g(v), A(v-w) · flux⟩ dw dv.
+   Follows from `velocity_ibp` + `dotProduct_integral_comm`, but verifying
+   the smoothness/integrability hypotheses requires differentiation under ∫.
 
-2. **`transport_entropy_from_vlasov`** (Section4.lean) — ∫_X D(f)(x) dx = 0.
-   Multiply Vlasov by log f, integrate over v and X. Spatial transport vanishes
-   by Stokes on T³, Lorentz force term vanishes by velocity-space IBP and
-   div_v(E + v×B) = 0.
+Both now include decay hypotheses (h_decay / h_decay) ensuring boundary terms
+vanish at velocity-space infinity. Earlier versions without decay were correctly
+negated by Aristotle (counterexample: F=(1,0,0), g=arctan(v₀)·exp(-v₁²-v₂²)).
 
-Both sorry's trace to the same root: **vector IBP on ℝ³** with Schwartz-class decay,
-which is beyond current Mathlib.
+Submitted to Aristotle with decay hypotheses (projects 14f30222, 1ecdcc05).
 
 ---
 
 ## Architecture
 
-The `FlatTorus3` typeclass bundles all spatial domain axioms (gradX, divX, curlX,
-spatialIntegral, Stokes, harmonic->constant, Killing->harmonic, Laplacian sign at extrema, etc.).
+The `FlatTorus3` typeclass extends `MeasureSpace X` and bundles spatial domain axioms
+(gradX, divX, curlX, Stokes, harmonic→constant, Killing→harmonic, Laplacian sign at
+extrema, etc.). Spatial integration uses Mathlib's `∫ x, ...` via the inherited measure.
 
 The proof flows through three layers:
 
 1. **Theorem42** (user-facing): Takes physical + decay hypotheses over `[FlatTorus3 X]`.
-   Derives mathematical consequences via sorry'd lemmas. Constructs VMLInput.
+   Derives mathematical consequences. Constructs VMLInput.
 
-2. **VMLInput -> main_from_physics**: Physical hypotheses + analytical interface.
+2. **VMLInput → main_from_physics**: Physical hypotheses + analytical interface.
    Derives VMLSteadyState.
 
-3. **VMLSteadyState -> main_steady_state** (algebraic core): All analytical work done.
+3. **VMLSteadyState → main_steady_state** (algebraic core): All analytical work done.
    Proves u = 0, E = 0, B = const, T > 0.
+
+---
+
+## FlatTorus3 Axioms (15)
+
+The typeclass has 15 axioms, all justified for a flat 3-torus:
+
+**Operator properties (5):** hDivLinear, hGradConst, hGradAdd, hGradScalarMul, hGradChainExp
+
+**Closed manifold integration (2):** hCurlIntZero, hIBP_spatial
+
+**Compact manifold analysis (4):** hHarmonic_const, hLaplacianMaxNonpos, hSpatialPos, hSpatialNonnegZero
+
+**Flat geometry (2):** hKillingToHarmonic, hCurlZeroDivZeroHarmonic
+
+**Abstract measure (2):** hSpatialVelocityFubini, hSpatialAdd
+
+**Removed axioms:**
+- hStokes (∫ div F = 0): removed — never used, derivable from hIBP_spatial + hSpatialAdd + hGradConst
+
+**Derived lemmas (proved from axioms):**
+- hGradChainLog (from hGradChainExp via exp(log g) = g)
+- hGradIntZero (from hIBP_spatial + hGradConst + hSpatialAdd)
+- hLaplacianMinNonneg (from hLaplacianMaxNonpos + hGradScalarMul + hDivLinear)
+- hSpatialMul (from Mathlib's integral_mul_right)
 
 ---
 
 ## Theorem42 Hypotheses
 
-**Physical** (14): f > 0, f smooth, f integrable, nu > 0, rho_ion > 0, Psi > 0,
-Psi continuous, rho = integral f, J = integral vf, rho continuous, Vlasov equation, Maxwell equations.
+**Physical** (14): f > 0, f smooth, f integrable, ν > 0, ρ_ion > 0, Ψ > 0,
+Ψ continuous, ρ = ∫f, J = ∫vf, ρ continuous, Vlasov equation, Maxwell equations.
 
-**Domain** (via `[FlatTorus3 X]`): Stokes theorem, harmonic->constant, Killing->harmonic,
-gradient/divergence/curl properties, Laplacian sign at extrema, spatial integral properties.
+**Domain** (via `[FlatTorus3 X]`): 15 axioms for spatial operators and torus topology.
 
-**Velocity-space decay** (5): PSD integrand integrability (inner and outer),
-Fubini integrability for symmetrized weak form (double, inner, outer).
+**Velocity-space decay** (9): PSD integrand integrability (inner, outer),
+Fubini integrability for symmetrized weak form (double, inner, outer),
+transport integrability (spatial transport, force transport),
+Landau flux decay (boundary terms for landau_ibp),
+force transport decay (boundary terms for velocity_ibp in entropy estimate).
