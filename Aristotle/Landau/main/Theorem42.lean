@@ -110,8 +110,8 @@ theorem Theorem42
   have hIBP : ∀ x, ∫ v, LandauOperator Ψ (f x) v * (Real.log ∘ f x) v =
       -(∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f x) v)
           (mulVec (landauMatrix Ψ (v - w))
-            (f x w • vGrad (f x) v - f x v • vGrad (f x) w))) := by
-    sorry -- Vector IBP on ℝ³ with Schwartz decay + Fubini linearity
+            (f x w • vGrad (f x) v - f x v • vGrad (f x) w))) :=
+    fun x => landau_ibp Ψ (f x) (hf_pos x) (hf_smooth x) (hf_int x)
   -- Sub-step 1b: Fubini symmetrization: ∫∫⟨Δ, A·flux⟩ = 2·∫∫⟨∇logf(v), A·flux⟩
   have hFubiniSym : ∀ x, ∫ v, ∫ w, dotProduct
         (vGrad (Real.log ∘ f x) v - vGrad (Real.log ∘ f x) w)
