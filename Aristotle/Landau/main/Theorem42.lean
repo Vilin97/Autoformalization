@@ -92,16 +92,32 @@ theorem Theorem42
       v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v)))
     (hForceTransport_int : ∀ x, Integrable (fun v =>
       (E x + cross v (B x)) ⬝ᵥ vGrad (f x) v * Real.log (f x v)))
-    -- Landau flux × log f decay (boundary terms vanish at velocity-space infinity).
-    -- Holds for distribution functions with sub-Gaussian tails.
-    (hLandauFluxDecay : ∀ x i, Filter.Tendsto (fun v =>
+    -- Landau flux differentiability (requires differentiation under the integral sign).
+    (hLandauFluxDiff : ∀ x i, Differentiable ℝ (fun v =>
       (∫ w, mulVec (landauMatrix Ψ (v - w))
-        (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i * (Real.log ∘ f x) v)
-      (Filter.cocompact _) (nhds 0))
-    -- Force transport decay (boundary terms vanish for velocity-space IBP in entropy estimate).
-    (hForceDecay : ∀ x i, Filter.Tendsto (fun v =>
-      (E x + cross v (B x)) i * (f x v * Real.log (f x v) - f x v))
-      (Filter.cocompact _) (nhds 0))
+        (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i))
+    -- Per-component integrability for velocity-space IBP of Landau operator.
+    (hLandauIBP_df_g : ∀ x i, Integrable (fun v =>
+      fderiv ℝ (fun v' => (∫ w, mulVec (landauMatrix Ψ (v' - w))
+        (f x w • vGrad (f x) v' - f x v' • vGrad (f x) w)) i) v (Pi.single i 1) *
+      (Real.log ∘ f x) v))
+    (hLandauIBP_f_dg : ∀ x i, Integrable (fun v =>
+      (∫ w, mulVec (landauMatrix Ψ (v - w))
+        (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i *
+      fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)))
+    (hLandauIBP_fg : ∀ x i, Integrable (fun v =>
+      (∫ w, mulVec (landauMatrix Ψ (v - w))
+        (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i * (Real.log ∘ f x) v))
+    -- Integrability of the Landau flux (for pulling dot product through ∫)
+    (hLandauFluxInt : ∀ x v, Integrable (fun w =>
+      mulVec (landauMatrix Ψ (v - w))
+        (f x w • vGrad (f x) v - f x v • vGrad (f x) w)))
+    -- Per-component integrability for velocity-space IBP in entropy estimate.
+    (hForceIBP_f_dg : ∀ x i, Integrable (fun v =>
+      (E x + cross v (B x)) i *
+        fderiv ℝ (fun w => f x w * Real.log (f x w) - f x w) v (Pi.single i 1)))
+    (hForceIBP_fg : ∀ x i, Integrable (fun v =>
+      (E x + cross v (B x)) i * (f x v * Real.log (f x v) - f x v)))
     -- Entropy dissipation is continuous on the spatial domain
     (hD_cont : Continuous (fun x => entropyDissipation Ψ (f x))) :
     -- === Conclusion ===
@@ -115,7 +131,7 @@ theorem Theorem42
     exact density_positive_of_integral (f x) (hf_pos x) (hf_int x)
   have hTransportEntropy : (∫ x, entropyDissipation Ψ (f x)) = 0 :=
     transport_entropy_from_vlasov f E B Ψ ν hν hf_pos hf_smooth hf_int hVlasov
-      hSpatialTransport_int hForceTransport_int hForceDecay
+      hSpatialTransport_int hForceTransport_int hForceIBP_f_dg hForceIBP_fg
   have hPolynomialId := polynomial_identity_from_vlasov f E B Ψ ν hf_pos hf_smooth hf_int hΨ hVlasov
   have hPB := poisson_boltzmann_from_vlasov f E B Ψ ν ρ ρ_ion hf_pos hf_smooth hf_int hΨ hρ_def hGauss hVlasov
   -- Extremizers of ρ (extreme value theorem on compact T³)
@@ -130,7 +146,9 @@ theorem Theorem42
       -(∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f x) v)
           (mulVec (landauMatrix Ψ (v - w))
             (f x w • vGrad (f x) v - f x v • vGrad (f x) w))) :=
-    fun x => landau_ibp Ψ (f x) (hf_pos x) (hf_smooth x) (hf_int x) (hLandauFluxDecay x)
+    fun x => landau_ibp Ψ (f x) (hf_pos x) (hf_smooth x) (hf_int x)
+      (hLandauFluxDiff x) (hLandauIBP_df_g x) (hLandauIBP_f_dg x)
+      (hLandauIBP_fg x) (hLandauFluxInt x)
   -- Sub-step 1b: Fubini symmetrization: ∫∫⟨Δ, A·flux⟩ = 2·∫∫⟨∇logf(v), A·flux⟩
   have hFubiniSym : ∀ x, ∫ v, ∫ w, dotProduct
         (vGrad (Real.log ∘ f x) v - vGrad (Real.log ∘ f x) w)
