@@ -312,12 +312,13 @@ lemma vecMulVec_self_mulVec (z w : Fin 3 → ℝ) :
 
     Integration uses Mathlib's `∫ x, f x` (Bochner integral over `volume`).
 
-    Axioms (16):
+    Axioms (17):
     - Operator properties (5): hDivLinear, hGradConst, hGradAdd, hGradScalarMul, hGradChainExp
     - Closed manifold integration (2): hCurlIntZero, hIBP_spatial
     - Analysis on compact manifold (4): hHarmonic_const, hLaplacianMaxNonpos, hSpatialPos, hSpatialNonnegZero
     - Flat geometry (2): hKillingToHarmonic, hCurlZeroDivZeroHarmonic
     - Abstract measure (3): hSpatialVelocityFubini, hSpatialAdd, hGradIntegrable
+    - Differentiability closure (4): hDiff_const, hDiff_add, hDiff_smul, hDiff_log
 
     Derived lemmas (proved from the above):
     - hGradChainLog, hGradIntZero, hLaplacianMinNonneg, hSpatialMul -/
@@ -344,6 +345,17 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
   hDiff_add : ∀ f g, IsSpatiallyDiff f → IsSpatiallyDiff g →
     IsSpatiallyDiff (fun x => f x + g x)
   hDiff_smul : ∀ c f, IsSpatiallyDiff f → IsSpatiallyDiff (fun x => c * f x)
+  -- Closure under log (for positive functions): if f is C¹ and f > 0, then log∘f is C¹
+  hDiff_log : ∀ f, IsSpatiallyDiff f → (∀ x, 0 < f x) → IsSpatiallyDiff (Real.log ∘ f)
+  -- Differentiation under the velocity integral (dominated convergence):
+  -- If g(·,v) is spatially C¹ for each v, and the spatial gradients of g(·,v) are
+  -- dominated by an integrable (in v) bound, then x ↦ ∫v g(x,v)dv is spatially C¹.
+  -- On the concrete torus: follows from hasFDerivAt_integral_of_dominated_loc_of_lip.
+  hDiff_velocityIntegral : ∀ (g : X → (Fin 3 → ℝ) → ℝ),
+    (∀ v, IsSpatiallyDiff (fun x => g x v)) →
+    (∃ (bound : (Fin 3 → ℝ) → ℝ), Integrable bound ∧
+      ∀ x v i, |gradX (fun y => g y v) x i| ≤ bound v) →
+    IsSpatiallyDiff (fun x => ∫ v, g x v)
   -- Curl integral vanishes (Stokes theorem for 2-forms)
   -- Requires IsSpatiallyDiff for each component of F: without differentiability,
   -- curlX uses fderiv (which is 0 at non-differentiable points), and the integral
@@ -517,6 +529,80 @@ lemma hLaplacianMinNonneg (φ : X → ℝ) (hφ : IsSpatiallyDiff φ) (x₀ : X)
     exact hDivLinear (-1) (gradX φ) x₀
   linarith
 
+/-- Closure under subtraction (derived from hDiff_add + hDiff_smul with c = -1). -/
+lemma hDiff_sub (f g : X → ℝ) (hf : IsSpatiallyDiff f) (hg : IsSpatiallyDiff g) :
+    IsSpatiallyDiff (fun x => f x - g x) := by
+  have : (fun x => f x - g x) = (fun x => f x + (-1) * g x) := funext (fun x => by ring)
+  rw [this]; exact hDiff_add _ _ hf (hDiff_smul (-1) _ hg)
+
+/-- Maxwellian regularity: if f(x,v) = exp(a(x) + b(x)·v + c(x)|v|²) with f > 0 and
+    f(·,v) spatially differentiable for each v, then a, bⱼ, c are spatially differentiable.
+
+    Proof: Evaluate log f at v = 0, eⱼ, 2e₀ to extract the coefficients as linear combinations
+    of the spatially differentiable functions x ↦ log f(x, v). -/
+lemma maxwellian_params_isSpatiallyDiff
+    (f : X → (Fin 3 → ℝ) → ℝ)
+    (hf_pos : ∀ x v, 0 < f x v)
+    (hDiff_fv : ∀ v, IsSpatiallyDiff (fun x => f x v))
+    (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ)
+    (hform : ∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) :
+    IsSpatiallyDiff a ∧ (∀ j, IsSpatiallyDiff (fun x => b x j)) ∧ IsSpatiallyDiff c := by
+  -- log f(x, v) = a x + b x · v + c x * |v|² for all x, v
+  have hDiff_lf : ∀ v, IsSpatiallyDiff (fun x => Real.log (f x v)) := fun v =>
+    hDiff_log _ (hDiff_fv v) (fun x => hf_pos x v)
+  have hlogform : ∀ x v, Real.log (f x v) = a x + dotProduct (b x) v + c x * normSq v := by
+    intros x v; rw [hform x v, Real.log_exp]
+  -- At v = 0: log f(x, 0) = a x
+  have ha_val : ∀ x, a x = Real.log (f x 0) := by
+    intro x; have := hlogform x 0; simp [normSq_zero, dotProduct, Fin.sum_univ_three] at this
+    linarith
+  -- At v = eⱼ: log f(x, eⱼ) = a x + b x j + c x
+  have hform_single : ∀ x (j : Fin 3), Real.log (f x (Pi.single j 1)) = a x + b x j + c x := by
+    intros x j; have h := hlogform x (Pi.single j 1)
+    have h_dot : dotProduct (b x) (Pi.single j (1:ℝ)) = b x j := by
+      simp [dotProduct, Pi.single_apply, Fin.sum_univ_three]
+    have h_ns : normSq (Pi.single j (1:ℝ)) = 1 := by
+      simp [normSq, dotProduct, Pi.single_apply, Fin.sum_univ_three]
+    rw [h_dot, h_ns, mul_one] at h; linarith
+  -- At v = 2e₀: log f(x, 2e₀) = a x + 2*(b x 0) + 4*(c x)
+  have hform_2e₀ : ∀ x, Real.log (f x (2 • Pi.single 0 1)) = a x + 2 * b x 0 + 4 * c x := by
+    intro x; have h := hlogform x (2 • Pi.single 0 (1:ℝ))
+    have h_dot : dotProduct (b x) (2 • Pi.single 0 (1:ℝ)) = 2 * b x 0 := by
+      simp [dotProduct, Pi.smul_apply, smul_eq_mul, Pi.single_apply, Fin.sum_univ_three]
+      ring
+    have h_ns : normSq (2 • Pi.single 0 (1:ℝ)) = 4 := by
+      simp [normSq, dotProduct, Pi.smul_apply, smul_eq_mul, Pi.single_apply, Fin.sum_univ_three]
+      ring
+    rw [h_dot, h_ns] at h; linarith
+  -- c formula: 2 * c x = log f(2e₀) - 2*log f(e₀) + log f(0)
+  have hc_val : ∀ x, 2 * c x = Real.log (f x (2 • Pi.single 0 1)) -
+      2 * Real.log (f x (Pi.single 0 1)) + Real.log (f x 0) := by
+    intro x; linarith [hform_single x 0, hform_2e₀ x, ha_val x]
+  -- bⱼ formula: b x j = log f(eⱼ) - log f(0) - c x
+  have hbj_val : ∀ x (j : Fin 3), b x j = Real.log (f x (Pi.single j 1)) -
+      Real.log (f x 0) - c x := by
+    intros x j; linarith [hform_single x j, ha_val x]
+  -- IsSpatiallyDiff of c
+  have hc_diff : IsSpatiallyDiff c := by
+    have hc_eq : c = fun x => (1/2 : ℝ) * (Real.log (f x (2 • Pi.single 0 1)) +
+        (-2) * Real.log (f x (Pi.single 0 1)) + Real.log (f x 0)) := by
+      funext x; have := hc_val x; field_simp; linarith
+    rw [hc_eq]
+    exact hDiff_smul _ _ (hDiff_add _ _ (hDiff_add _ _ (hDiff_lf _)
+      (hDiff_smul _ _ (hDiff_lf _))) (hDiff_lf _))
+  refine ⟨?_, ?_, hc_diff⟩
+  · -- IsSpatiallyDiff a: a x = log f(x, 0)
+    have : a = fun x => Real.log (f x 0) := funext (fun x => ha_val x)
+    rw [this]; exact hDiff_lf 0
+  · -- IsSpatiallyDiff (b · j): b x j = log f(eⱼ) - log f(0) - c x
+    intro j
+    have hbj_eq : (fun x => b x j) = fun x =>
+        Real.log (f x (Pi.single j 1)) + (-1) * Real.log (f x 0) + (-1) * c x := by
+      funext x; have := hbj_val x j; linarith
+    rw [hbj_eq]
+    exact hDiff_add _ _ (hDiff_add _ _ (hDiff_lf _) (hDiff_smul _ _ (hDiff_lf _)))
+      (hDiff_smul _ _ hc_diff)
+
 end FlatTorus3
 
 -- ============================================================================
@@ -631,6 +717,7 @@ structure VMLInput (X : Type*) [FlatTorus3 X] where
   hf_int : ∀ x, Integrable (f x)
   -- Derived densities
   ρ : X → ℝ
+  hρ_eq : ∀ x, ρ x = ∫ v, f x v
   hρ_pos : ∀ x, 0 < ρ x
   hρ_cont : Continuous ρ
   J : X → (Fin 3 → ℝ)
@@ -638,12 +725,14 @@ structure VMLInput (X : Type*) [FlatTorus3 X] where
   hAmpere : ∀ x, FlatTorus3.curlX B x = J x
   hGauss : ∀ x, FlatTorus3.divX E x = ρ x - ρ_ion
   hDivB : ∀ x, FlatTorus3.divX B x = 0
+  -- Spatial differentiability for f(·,v): each slice f(·,v) is spatially C¹
+  hDiff_fv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => f x v)
   -- Spatial differentiability for B components
   hDiff_B : ∀ i, FlatTorus3.IsSpatiallyDiff (fun y => B y i)
-  -- Spatial differentiability for log(ρ) (needed for Laplacian max principle)
-  -- Analytically: ρ(x) = ∫ f(x,v) dv is C¹ in x (differentiate under integral),
-  -- and ρ > 0 so log(ρ) is C¹. This is an interface hypothesis.
-  hDiff_logRho : FlatTorus3.IsSpatiallyDiff (Real.log ∘ ρ)
+  -- Dominated gradient bound for f(·,v): enables differentiation under the velocity integral.
+  -- Gives IsSpatiallyDiff ρ (hence IsSpatiallyDiff (log ∘ ρ)) via hDiff_velocityIntegral + hDiff_log.
+  hGradFv_dominated : ∃ (bound : (Fin 3 → ℝ) → ℝ), Integrable bound ∧
+    ∀ x v i, |FlatTorus3.gradX (fun y => f y v) x i| ≤ bound v
   -- === Derived from H-theorem chain ===
   hD_zero : ∀ x, entropyDissipation Ψ (f x) = 0
   hScoreForm : ∀ x, entropyDissipation Ψ (f x) =
