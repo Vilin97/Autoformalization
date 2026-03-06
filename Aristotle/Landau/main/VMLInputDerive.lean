@@ -114,7 +114,7 @@ noncomputable def VMLInput.c₀ (p : VMLInput X) : ℝ := p.c_loc p.x₀
 lemma VMLInput.hc₀_neg (p : VMLInput X) : p.c₀ < 0 := p.hc_neg p.x₀
 
 lemma VMLInput.hc_const (p : VMLInput X) : ∀ x, p.c_loc x = p.c₀ :=
-  fun x => FlatTorus3.hGradZeroConst p.c_loc p.hc_const_grad x p.x₀
+  fun x => FlatTorus3.hGradZeroConst p.c_loc p.hDiff_abc.2.2 p.hc_const_grad x p.x₀
 
 /-- The O(|v|²) Killing equation from the polynomial identity. -/
 lemma VMLInput.hKilling (p : VMLInput X) :
@@ -159,8 +159,12 @@ lemma VMLInput.hKilling (p : VMLInput X) :
 /-- Drift velocity b is constant on T³. -/
 lemma VMLInput.hb_const_exists (p : VMLInput X) :
     ∃ b₀ : Fin 3 → ℝ, ∀ x, p.b_loc x = b₀ := by
-  exact killing_constant_torus X p.b_loc FlatTorus3.gradX FlatTorus3.divX
-    (FlatTorus3.hKillingToHarmonic p.b_loc p.hKilling) FlatTorus3.hHarmonic_const
+  have hHarm := FlatTorus3.hKillingToHarmonic p.b_loc
+    p.hDiff_abc.2.1
+    (p.hDiff_maxwellian_C2 p.a_loc p.b_loc p.c_loc p.hMaxwellianForm) p.hKilling
+  use fun j => p.b_loc p.x₀ j
+  intro x; ext j
+  exact FlatTorus3.hHarmonic_const _ (p.hDiff_abc.2.1 j) (hHarm j) x p.x₀
 
 /-- Extract the constant drift parameter b₀. -/
 noncomputable def VMLInput.b₀ (p : VMLInput X) : Fin 3 → ℝ :=
@@ -227,7 +231,7 @@ lemma VMLInput.hb₀_zero (p : VMLInput X) : p.b₀ = 0 := by
   -- Step 1: ∫ u₀ · curlX B = 0 (Stokes on T³)
   have h1 : FlatTorus3.spatialIntegral
       (fun x => dotProduct u₀ (FlatTorus3.curlX p.B x)) = 0 :=
-    FlatTorus3.hCurlIntZero p.B u₀
+    FlatTorus3.hCurlIntZero p.B u₀ p.hDiff_B
   -- Step 2: curlX B = J = ρ • u₀
   have h2 : ∀ x, dotProduct u₀ (FlatTorus3.curlX p.B x) = p.ρ x * normSq u₀ := by
     intro x
@@ -275,8 +279,8 @@ lemma VMLInput.hDensityConst (p : VMLInput X) : ∀ x, p.ρ x = p.ρ_ion := by
     fun x => Real.log_le_log (p.hρ_pos x) (p.hmax x)
   have hmin_logρ : ∀ x, (Real.log ∘ p.ρ) p.x_min ≤ (Real.log ∘ p.ρ) x :=
     fun x => Real.log_le_log (p.hρ_pos p.x_min) (p.hmin x)
-  have hmax_lapl := FlatTorus3.hLaplacianMaxNonpos (Real.log ∘ p.ρ) p.x_max hmax_logρ
-  have hmin_lapl := FlatTorus3.hLaplacianMinNonneg (Real.log ∘ p.ρ) p.x_min hmin_logρ
+  have hmax_lapl := FlatTorus3.hLaplacianMaxNonpos (Real.log ∘ p.ρ) p.x_max p.hDiff_logRho hmax_logρ
+  have hmin_lapl := FlatTorus3.hLaplacianMinNonneg (Real.log ∘ p.ρ) p.hDiff_logRho p.x_min hmin_logρ
   exact poisson_boltzmann_max_principle X p.ρ p.ρ_ion (-1 / (2 * p.c₀))
     (fun φ => FlatTorus3.divX (FlatTorus3.gradX φ))
     p.hρ_pos hT p.hρ_ion p.hPB p.x_max p.hmax p.x_min p.hmin
@@ -296,7 +300,7 @@ lemma VMLInput.hGradA_zero (p : VMLInput X) :
     intro y
     rw [hfun_eq, FlatTorus3.hDivLinear, p.hGauss, hdens y, sub_self, mul_zero]
   -- a_loc is constant on T³ (harmonic → constant)
-  have ha_const := FlatTorus3.hHarmonic_const p.a_loc h_harmonic
+  have ha_const := FlatTorus3.hHarmonic_const p.a_loc p.hDiff_abc.1 h_harmonic
   -- Constant → gradient zero
   exact FlatTorus3.hGradConst p.a_loc ha_const
 
@@ -310,7 +314,7 @@ lemma VMLInput.hNorm (p : VMLInput X) :
   have hGradA := p.hGradA_zero hb0 hdens
   -- a_loc is constant (gradient zero → constant)
   have ha_const : ∀ x, p.a_loc x = p.a_loc p.x₀ :=
-    fun x => FlatTorus3.hGradZeroConst p.a_loc hGradA x p.x₀
+    fun x => FlatTorus3.hGradZeroConst p.a_loc p.hDiff_abc.1 hGradA x p.x₀
   -- f x v = exp(a₀ + 0 + c₀ |v|²) = exp(a₀ + c₀ |v|²)
   have hf_form : ∀ x v,
       p.f x v = Real.exp (p.a_loc p.x₀ + p.c₀ * normSq v) := by
@@ -339,12 +343,15 @@ noncomputable def VMLInput.toSteadyState (p : VMLInput X) : VMLSteadyState X whe
   hAmpere := p.hAmpere
   hGauss := p.hGauss
   hDivB := p.hDivB
+  hDiff_B := p.hDiff_B
+  hDiff_B_C2 := p.hDiff_B_C2
   -- Derived fields
   a_loc := p.a_loc
   b_loc := p.b_loc
   c_loc := p.c_loc
   hc_neg := p.hc_neg
   hMaxwellianForm := p.hMaxwellianForm
+  hDiff_b_C2 := p.hDiff_maxwellian_C2 p.a_loc p.b_loc p.c_loc p.hMaxwellianForm
   c₀ := p.c₀
   hc₀_neg := p.hc₀_neg
   hc_const := p.hc_const

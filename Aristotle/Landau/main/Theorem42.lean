@@ -120,6 +120,8 @@ theorem Theorem42
     (hGauss : ∀ x, FlatTorus3.divX E x = (∫ v, f x v) - ρ_ion)
     -- Solenoidal constraint: ∇·B = 0
     (hDivB : ∀ x, FlatTorus3.divX B x = 0)
+    -- B is spatially differentiable (each component)
+    (hDiff_B : ∀ i, FlatTorus3.IsSpatiallyDiff (fun y => B y i))
     -- === Steady-state Vlasov equation ===
     -- v · ∇ₓf + (E + v×B) · ∇ᵥf = ν Q(f,f)
     (hVlasov : ∀ x v,
@@ -131,7 +133,11 @@ theorem Theorem42
     (hρ_cont : Continuous (fun x => ∫ v, f x v))
     -- Entropy dissipation is continuous on the spatial domain
     (hD_cont : Continuous (fun x => entropyDissipation Ψ (f x)))
-    -- === Spatial differentiability of Maxwellian parameters ===
+    -- === Spatial differentiability ===
+    -- f(·,v) and log f(·,v) are spatially differentiable for each fixed v.
+    -- This is automatic for smooth distribution functions.
+    (hDiff_fv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => f x v))
+    (hDiff_logfv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => Real.log (f x v)))
     -- If f = exp(a + b·v + c|v|²), then a, b, c are spatially differentiable.
     -- This is an analytical consequence of f being smooth (implicit function theorem).
     (hDiff_maxwellian : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
@@ -139,6 +145,16 @@ theorem Theorem42
       FlatTorus3.IsSpatiallyDiff a ∧
       (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) ∧
       FlatTorus3.IsSpatiallyDiff c)
+    -- C² for Maxwellian b parameters: gradient components are spatially differentiable.
+    -- Follows from f being smooth (b_j ∈ C² on the torus).
+    (hDiff_maxwellian_C2 : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
+      (∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) →
+      ∀ j i, FlatTorus3.IsSpatiallyDiff (fun x => FlatTorus3.gradX (fun y => b y j) x i))
+    -- C² for B components: gradient components are spatially differentiable.
+    (hDiff_B_C2 : ∀ i j, FlatTorus3.IsSpatiallyDiff (fun x => FlatTorus3.gradX (fun y => B y i) x j))
+    -- Spatial differentiability of log(ρ), where ρ(x) = ∫ f(x,v) dv.
+    -- Follows from differentiating under the integral sign (dominated convergence).
+    (hDiff_logRho : FlatTorus3.IsSpatiallyDiff (fun x => Real.log (∫ v, f x v)))
     -- === Velocity-space decay conditions ===
     (hDecay : VelocityDecayConditions Ψ f E B) :
     -- === Conclusion ===
@@ -153,8 +169,8 @@ theorem Theorem42
   have hρ_pos : ∀ x, 0 < ρ x := fun x =>
     density_positive_of_integral (f x) (hf_pos x) (hf_int x)
   have hTransportEntropy : (∫ x, entropyDissipation Ψ (f x)) = 0 :=
-    transport_entropy_from_vlasov f E B Ψ ν hν hf_pos hf_smooth hf_int hVlasov
-      hDecay.hSpatialTransport_int hDecay.hForceTransport_int
+    transport_entropy_from_vlasov f E B Ψ ν hν hf_pos hf_smooth hf_int hDiff_fv hDiff_logfv
+      hVlasov hDecay.hSpatialTransport_int hDecay.hForceTransport_int
       hDecay.hForceIBP_f_dg hDecay.hForceIBP_fg hDecay.hSpatialTransport_joint
   have hPolynomialId := polynomial_identity_from_vlasov f E B Ψ ν hf_pos hf_smooth hf_int hΨ hVlasov
   have hPB := poisson_boltzmann_from_vlasov f E B Ψ ν ρ ρ_ion hf_pos hf_smooth hf_int hΨ
@@ -220,6 +236,8 @@ theorem Theorem42
     hAmpere := hAmpere
     hGauss := fun x => hGauss x
     hDivB := hDivB
+    hDiff_B := hDiff_B
+    hDiff_logRho := hDiff_logRho
     hD_zero := hD_zero
     hScoreForm := fun x => entropy_score_form Ψ (f x) (hf_pos x) (hf_smooth x) (hSWF_all x)
     hPSD_cont := fun x =>
@@ -227,6 +245,8 @@ theorem Theorem42
     hPSD_inner := hDecay.hPSD_inner_int
     hPSD_outer := hDecay.hPSD_outer_int
     hDiff_maxwellian := hDiff_maxwellian
+    hDiff_maxwellian_C2 := hDiff_maxwellian_C2
+    hDiff_B_C2 := hDiff_B_C2
     hPolynomialIdentity := fun a b c ha hb hc hform =>
       hPolynomialId a b c ha hb hc hform
     hJ_from_maxwellian := fun b_func c₀ hform => by

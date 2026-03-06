@@ -22,7 +22,7 @@ Update these files after major changes:
 ## Aristotle workflow
 
 - Non-trivial lemmas go to `Aristotle/Landau/aristotle-in/` as standalone files (self-contained, `import Mathlib`, single sorry'd lemma).
-- Submit with: `aristotle prove-from-file FILE --output-file aristotle-out/NAME_aristotle.lean --no-wait`
+- Submit with: `aristotle prove-from-file FILE --output-file aristotle-out/NAME_aristotle.lean --no-wait`. Before submitting to Aristotle, make sure the file has no errors and in particular, that the syntax is correct. The file submitted to aristotle must have sorry's but it must have no errors.
 - API key is in `.env`.
 - If Aristotle proves it: integrate the proof into the main file, delete the submission.
 - If Aristotle times out: decompose the lemma into smaller pieces and resubmit.
