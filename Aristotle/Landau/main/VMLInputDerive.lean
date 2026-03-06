@@ -150,7 +150,6 @@ lemma VMLInput.hKilling (p : VMLInput X) :
 /-- Drift velocity b is constant on T³. -/
 lemma VMLInput.hb_const_exists (p : VMLInput X) :
     ∃ b₀ : Fin 3 → ℝ, ∀ x, p.b_loc x = b₀ := by
-  have := @p.inst_ne
   exact killing_constant_torus X p.b_loc FlatTorus3.gradX FlatTorus3.divX
     (FlatTorus3.hKillingToHarmonic p.b_loc p.hKilling) FlatTorus3.hHarmonic_const
 
@@ -259,7 +258,6 @@ lemma VMLInput.hPB (p : VMLInput X) :
 
 /-- Density is constant: ρ(x) = ρ_ion. -/
 lemma VMLInput.hDensityConst (p : VMLInput X) : ∀ x, p.ρ x = p.ρ_ion := by
-  haveI := p.inst_ne
   have hT : 0 < -1 / (2 * p.c₀) := by
     apply div_pos_of_neg_of_neg <;> linarith [p.hc₀_neg]
   -- Laplacian signs at extrema from FlatTorus3 class axioms
