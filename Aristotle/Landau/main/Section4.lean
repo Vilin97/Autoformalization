@@ -315,7 +315,7 @@ lemma transport_entropy_from_vlasov
        (v 1 * (FlatTorus3.gradX (fun y => f y v) x 1 * Real.log (f x v)) +
         v 2 * (FlatTorus3.gradX (fun y => f y v) x 2 * Real.log (f x v)))) := by
     ext x; ring
-  rw [hrw, FlatTorus3.hSpatialAdd, FlatTorus3.hSpatialAdd]
+  erw [hrw, FlatTorus3.hSpatialAdd, FlatTorus3.hSpatialAdd]
   have h0 := spatial_transport_log_zero f hf_pos v (0 : Fin 3)
   have h1 := spatial_transport_log_zero f hf_pos v (1 : Fin 3)
   have h2 := spatial_transport_log_zero f hf_pos v (2 : Fin 3)
