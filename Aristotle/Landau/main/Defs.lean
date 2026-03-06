@@ -125,25 +125,38 @@ def cross (a b : Fin 3 → ℝ) : Fin 3 → ℝ :=
 /-- Velocity-space integration by parts on ℝ³.
     ∫ (∇ᵥ · F)(v) · g(v) dv = -∫ F(v) · (∇ᵥg)(v) dv.
 
-    This is the divergence theorem on ℝ³. The boundary terms at infinity
-    vanish by the decay hypothesis: each component Fᵢ·g → 0 at spatial ∞.
+    Uses Mathlib's `integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable`
+    (n-dimensional IBP for Fréchet derivatives) applied per component.
 
-    Note: integrability alone is NOT sufficient (counterexample: F=(1,0,0),
-    g=arctan(v₀)·exp(-v₁²-v₂²) — both integrands integrable, but
-    F·g → ±π/2·exp(-v₁²-v₂²) ≠ 0, and the IBP equation fails).
-
-    The decay hypothesis ensures the boundary terms in the 1D IBP
-    (applied via Fubini in each coordinate) vanish. -/
+    The three per-component integrability hypotheses (derivative·g, f·derivative,
+    and f·g) are the natural conditions for Bochner-integral IBP. -/
 lemma velocity_ibp
     (F : (Fin 3 → ℝ) → (Fin 3 → ℝ)) (g : (Fin 3 → ℝ) → ℝ)
-    (hF_smooth : ∀ i, ContDiff ℝ ⊤ (fun v => F v i))
-    (hg_smooth : ContDiff ℝ ⊤ g)
-    (h_int1 : Integrable (fun v => vDiv F v * g v))
-    (h_int2 : Integrable (fun v => dotProduct (F v) (vGrad g v)))
-    (h_decay : ∀ i, Filter.Tendsto (fun v => F v i * g v)
-      (Filter.cocompact _) (nhds 0)) :
+    (hF_diff : ∀ i, Differentiable ℝ (fun v => F v i))
+    (hg_diff : Differentiable ℝ g)
+    (h_int_df_g : ∀ i, Integrable (fun v => fderiv ℝ (fun w => F w i) v (Pi.single i 1) * g v))
+    (h_int_f_dg : ∀ i, Integrable (fun v => F v i * fderiv ℝ g v (Pi.single i 1)))
+    (h_int_fg : ∀ i, Integrable (fun v => F v i * g v)) :
     ∫ v, vDiv F v * g v = -(∫ v, dotProduct (F v) (vGrad g v)) := by
-  sorry
+  -- Strategy: expand into per-component integrals, apply Mathlib IBP per component.
+  -- Step 1: Per-component IBP from Mathlib
+  -- Per-component IBP from Mathlib: ∫ Fᵢ * ∂g/∂vᵢ = -∫ ∂Fᵢ/∂vᵢ * g
+  have hi : ∀ i : Fin 3,
+      ∫ v, F v i * fderiv ℝ g v (Pi.single i 1) =
+      -(∫ v, fderiv ℝ (fun w => F w i) v (Pi.single i 1) * g v) :=
+    fun i => integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable
+      (h_int_df_g i) (h_int_f_dg i) (h_int_fg i) (hF_diff i) hg_diff
+  -- Both sides equal Finset.sum over per-component integrals
+  have lhs_eq : (fun v => vDiv F v * g v) = fun v =>
+      ∑ i : Fin 3, fderiv ℝ (fun w => F w i) v (Pi.single i 1) * g v := by
+    ext v; simp only [vDiv, Fin.sum_univ_three]; ring
+  have rhs_eq : (fun v => dotProduct (F v) (vGrad g v)) = fun v =>
+      ∑ i : Fin 3, F v i * fderiv ℝ g v (Pi.single i 1) := by
+    ext v; simp only [dotProduct, vGrad, Fin.sum_univ_three]
+  rw [lhs_eq, rhs_eq,
+      integral_finset_sum _ (fun i _ => h_int_df_g i),
+      integral_finset_sum _ (fun i _ => h_int_f_dg i)]
+  simp only [Fin.sum_univ_three, hi]; ring
 
 -- ============================================================================
 -- Section 4: Landau Collision Operator
@@ -167,26 +180,63 @@ def entropyDissipation (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ) : ℝ :=
     the symmetrized weak form. Combines velocity-space IBP (∫ div F · g = -∫ F · ∇g)
     with dotProduct_integral_comm (pulling the w-integral through the dot product).
 
-    The hypotheses of the general velocity_ibp (smoothness and integrability of the
-    Landau flux ∫_w A(v-w)[...] dw) are hard to verify in Lean — they require
-    differentiation under the integral sign and delicate integrability estimates.
-    This lemma bundles the Landau-specific application directly.
-
-    The decay hypothesis requires the Landau flux × log g to vanish at
-    spatial infinity. This holds when g has sufficient velocity-space decay
-    (e.g., sub-Gaussian tails), since the flux is bounded by ∫ A·(...)
-    and log g grows at most logarithmically. -/
+    The integrability hypotheses on the Landau flux are the natural conditions for
+    Bochner-integral IBP. They require the flux F(v) = ∫_w A(v-w)[...] dw and
+    its derivatives to be integrable against log g — this holds for distributions
+    with sufficient velocity-space decay (e.g., sub-Gaussian tails). -/
 lemma landau_ibp (Ψ : ℝ → ℝ) (g : (Fin 3 → ℝ) → ℝ)
     (hg_pos : ∀ v, 0 < g v) (hg_smooth : ContDiff ℝ ⊤ g) (hg_int : Integrable g)
-    (h_decay : ∀ i, Filter.Tendsto (fun v =>
+    -- Differentiability of Landau flux components (requires differentiation under ∫)
+    (hFlux_diff : ∀ i, Differentiable ℝ (fun v =>
       (∫ w, mulVec (landauMatrix Ψ (v - w))
-        (g w • vGrad g v - g v • vGrad g w)) i * (Real.log ∘ g) v)
-      (Filter.cocompact _) (nhds 0)) :
+        (g w • vGrad g v - g v • vGrad g w)) i))
+    -- Per-component integrability for IBP
+    (h_int_df_g : ∀ i, Integrable (fun v =>
+      fderiv ℝ (fun v' => (∫ w, mulVec (landauMatrix Ψ (v' - w))
+        (g w • vGrad g v' - g v' • vGrad g w)) i) v (Pi.single i 1) *
+      (Real.log ∘ g) v))
+    (h_int_f_dg : ∀ i, Integrable (fun v =>
+      (∫ w, mulVec (landauMatrix Ψ (v - w))
+        (g w • vGrad g v - g v • vGrad g w)) i *
+      fderiv ℝ (Real.log ∘ g) v (Pi.single i 1)))
+    (h_int_fg : ∀ i, Integrable (fun v =>
+      (∫ w, mulVec (landauMatrix Ψ (v - w))
+        (g w • vGrad g v - g v • vGrad g w)) i * (Real.log ∘ g) v))
+    -- Integrability of the Landau flux (for pulling dot product through ∫)
+    (hFlux_int : ∀ v, Integrable (fun w =>
+      mulVec (landauMatrix Ψ (v - w))
+        (g w • vGrad g v - g v • vGrad g w))) :
     ∫ v, LandauOperator Ψ g v * (Real.log ∘ g) v =
     -(∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ g) v)
         (mulVec (landauMatrix Ψ (v - w))
           (g w • vGrad g v - g v • vGrad g w))) := by
-  sorry
+  -- Step 1: Unfold LandauOperator = vDiv(Flux)
+  unfold LandauOperator
+  -- Step 2: Apply velocity IBP: ∫ vDiv(Flux) · log g = -∫ Flux · ∇(log g)
+  have h_ibp := velocity_ibp
+    (fun v => ∫ w, mulVec (landauMatrix Ψ (v - w))
+      (g w • vGrad g v - g v • vGrad g w))
+    (Real.log ∘ g)
+    hFlux_diff
+    (hg_smooth.differentiable le_top |>.log (fun v => ne_of_gt (hg_pos v)))
+    h_int_df_g h_int_f_dg h_int_fg
+  rw [h_ibp]
+  -- Step 3: Pull w-integral through dot product: ⟨c, ∫ F dw⟩ = ∫ ⟨c, F⟩ dw
+  congr 1; congr 1; funext v
+  rw [dotProduct_comm]
+  -- ⟨∇log g(v), ∫ w, A·flux dw⟩ = ∫ w, ⟨∇log g(v), A·flux(w)⟩ via CLM
+  set c := vGrad (Real.log ∘ g) v
+  set F := fun w => mulVec (landauMatrix Ψ (v - w))
+      (g w • vGrad g v - g v • vGrad g w)
+  -- Express dotProduct c as a continuous linear map
+  let L : (Fin 3 → ℝ) →L[ℝ] ℝ :=
+    ∑ i : Fin 3, ContinuousLinearMap.smulRight (ContinuousLinearMap.proj i) (c i)
+  have hL : ∀ x, L x = dotProduct c x := by
+    intro x; simp +decide [L, dotProduct, Fin.sum_univ_three]; ring
+  rw [show dotProduct c (∫ w, F w) = L (∫ w, F w) from (hL _).symm]
+  rw [show (∫ w, dotProduct c (F w)) = ∫ w, L (F w) from by
+    congr 1; ext w; exact (hL _).symm]
+  exact (L.integral_comp_comm (hFlux_int v)).symm
 
 /-- The PSD integrand: g(v,w) = f(v)·f(w)·⟨Δ(v,w), A(v-w) Δ(v,w)⟩
     where Δ(v,w) = ∇log f(v) - ∇log f(w).

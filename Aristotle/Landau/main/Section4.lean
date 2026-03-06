@@ -169,6 +169,45 @@ private lemma fderiv_entropy_potential (g : (Fin 3 → ℝ) → ℝ) (v : Fin 3 
   simp [ContinuousLinearMap.sub_apply, ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply]
   field_simp; ring
 
+/-- The diagonal partial derivative ∂(E + v×B)_i/∂v_i = 0 for each i.
+    This is because cross product component i depends on v_j, v_k (j,k ≠ i) but not v_i. -/
+private lemma lorentz_partial_diag_zero (E_val B_val : Fin 3 → ℝ) (i : Fin 3) (v : Fin 3 → ℝ) :
+    fderiv ℝ (fun w => (E_val + cross w B_val) i) v (Pi.single i 1) = 0 := by
+  -- Reuse the HasFDerivAt computations from lorentz_force_div_zero.
+  -- Each component's fderiv is a CLM involving proj j for j ≠ i,
+  -- so applying Pi.single i 1 gives 0.
+  have hsimp : ∀ j : Fin 3, (fun w : Fin 3 → ℝ => (E_val + cross w B_val) j) =
+      (fun w => E_val j + cross w B_val j) := fun j => by ext; simp [Pi.add_apply]
+  -- HasFDerivAt for each component (from lorentz_force_div_zero proof)
+  have h0 : HasFDerivAt (fun w : Fin 3 → ℝ => E_val 0 + cross w B_val 0)
+      ((B_val 2 • ContinuousLinearMap.proj 1 - B_val 1 • ContinuousLinearMap.proj 2 :
+        (Fin 3 → ℝ) →L[ℝ] ℝ)) v := by
+    apply HasFDerivAt.const_add; show HasFDerivAt (fun w => cross w B_val 0) _ v
+    unfold cross; simp only [Matrix.cons_val_zero]
+    exact (hasFDerivAt_proj_mul_const 1 (B_val 2) v).sub (hasFDerivAt_proj_mul_const 2 (B_val 1) v)
+  have h1 : HasFDerivAt (fun w : Fin 3 → ℝ => E_val 1 + cross w B_val 1)
+      ((B_val 0 • ContinuousLinearMap.proj 2 - B_val 2 • ContinuousLinearMap.proj 0 :
+        (Fin 3 → ℝ) →L[ℝ] ℝ)) v := by
+    apply HasFDerivAt.const_add; show HasFDerivAt (fun w => cross w B_val 1) _ v
+    unfold cross; simp only [Matrix.cons_val_one]
+    exact (hasFDerivAt_proj_mul_const 2 (B_val 0) v).sub (hasFDerivAt_proj_mul_const 0 (B_val 2) v)
+  have h2 : HasFDerivAt (fun w : Fin 3 → ℝ => E_val 2 + cross w B_val 2)
+      ((B_val 1 • ContinuousLinearMap.proj 0 - B_val 0 • ContinuousLinearMap.proj 1 :
+        (Fin 3 → ℝ) →L[ℝ] ℝ)) v := by
+    apply HasFDerivAt.const_add; show HasFDerivAt (fun w => cross w B_val 2) _ v
+    unfold cross; simp only [Matrix.cons_val_two]
+    exact (hasFDerivAt_proj_mul_const 0 (B_val 1) v).sub (hasFDerivAt_proj_mul_const 1 (B_val 0) v)
+  fin_cases i
+  · change (fderiv ℝ (fun w => (E_val + cross w B_val) 0) v) (Pi.single 0 1) = 0
+    rw [hsimp, h0.fderiv]; simp [ContinuousLinearMap.sub_apply, ContinuousLinearMap.smul_apply,
+      ContinuousLinearMap.proj_apply, Pi.single]
+  · change (fderiv ℝ (fun w => (E_val + cross w B_val) 1) v) (Pi.single 1 1) = 0
+    rw [hsimp, h1.fderiv]; simp [ContinuousLinearMap.sub_apply, ContinuousLinearMap.smul_apply,
+      ContinuousLinearMap.proj_apply, Pi.single]
+  · change (fderiv ℝ (fun w => (E_val + cross w B_val) 2) v) (Pi.single 2 1) = 0
+    rw [hsimp, h2.fderiv]; simp [ContinuousLinearMap.sub_apply, ContinuousLinearMap.smul_apply,
+      ContinuousLinearMap.proj_apply, Pi.single]
+
 /-- Force transport vanishes: ∫_v (E + v×B) · ∇_v f · log f dv = 0.
     Uses: div_v(E + v×B) = 0 + velocity-space IBP (velocity_ibp). -/
 lemma force_transport_zero
@@ -176,9 +215,11 @@ lemma force_transport_zero
     (hg_pos : ∀ v, 0 < g v)
     (hg_smooth : ContDiff ℝ ⊤ g)
     (hg_int : Integrable g)
-    (h_decay : ∀ i, Filter.Tendsto (fun v =>
-      (E_val + cross v B_val) i * (g v * Real.log (g v) - g v))
-      (Filter.cocompact _) (nhds 0)) :
+    (h_int_f_dg : ∀ i, Integrable (fun v =>
+      (E_val + cross v B_val) i *
+        fderiv ℝ (fun w => g w * Real.log (g w) - g w) v (Pi.single i 1)))
+    (h_int_fg : ∀ i, Integrable (fun v =>
+      (E_val + cross v B_val) i * (g v * Real.log (g v) - g v))) :
     ∫ v, dotProduct (E_val + cross v B_val) (vGrad g v) * Real.log (g v) = 0 := by
   -- If the integrand is not integrable, the integral is 0 by Lean's convention
   by_cases h_int : Integrable (fun v =>
@@ -198,16 +239,18 @@ lemma force_transport_zero
     -- Apply velocity_ibp: ∫ (div G)·h = -∫ ⟨G, ∇h⟩. Since div G = 0, get 0 = -∫ ⟨G, ∇h⟩.
     have h_ibp := velocity_ibp (fun v => E_val + cross v B_val)
       (fun w => g w * Real.log (g w) - g w)
-      (by -- smoothness of Lorentz force components (affine in v)
+      (by -- differentiability of Lorentz force components (affine in v)
         intro i; simp only [cross, Pi.add_apply]
         fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one] <;> fun_prop)
-      (by -- smoothness of entropy potential (g smooth, g > 0)
-        exact (hg_smooth.mul (hg_smooth.log (fun v => ne_of_gt (hg_pos v)))).sub hg_smooth)
-      (by -- div G = 0, so integrand is 0
-        convert integrable_zero (Fin 3 → ℝ) ℝ MeasureTheory.MeasureSpace.volume using 1
-        ext v; simp [lorentz_force_div_zero E_val B_val v])
-      (by rwa [← h_rw]) -- same as our integrability hypothesis
-      h_decay -- product decay at infinity
+      (by -- differentiability of entropy potential (g smooth, g > 0)
+        exact ((hg_smooth.mul (hg_smooth.log (fun v => ne_of_gt (hg_pos v)))).sub hg_smooth).differentiable le_top)
+      (by -- ∂(F_i)/∂v_i = 0 for Lorentz force (cross product structure), so integrand = 0
+        intro i
+        have key : ∀ v, fderiv ℝ (fun w => (fun v => E_val + cross v B_val) w i) v
+            (Pi.single i 1) = 0 := lorentz_partial_diag_zero E_val B_val i
+        simp_rw [key, zero_mul]; exact integrable_zero _ _ _)
+      h_int_f_dg
+      h_int_fg
     simp_rw [lorentz_force_div_zero E_val B_val, zero_mul, integral_zero] at h_ibp
     linarith
   · exact integral_undef h_int
@@ -259,10 +302,12 @@ lemma transport_entropy_from_vlasov
       v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v)))
     (hForceTransport_int : ∀ x, Integrable (fun v =>
       (E x + cross v (B x)) ⬝ᵥ vGrad (f x) v * Real.log (f x v)))
-    -- Decay at velocity-space infinity for force transport IBP
-    (hForceDecay : ∀ x i, Filter.Tendsto (fun v =>
-      (E x + cross v (B x)) i * (f x v * Real.log (f x v) - f x v))
-      (Filter.cocompact _) (nhds 0)) :
+    -- Per-component integrability for velocity-space IBP
+    (hForceIBP_f_dg : ∀ x i, Integrable (fun v =>
+      (E x + cross v (B x)) i *
+        fderiv ℝ (fun w => f x w * Real.log (f x w) - f x w) v (Pi.single i 1)))
+    (hForceIBP_fg : ∀ x i, Integrable (fun v =>
+      (E x + cross v (B x)) i * (f x v * Real.log (f x v) - f x v))) :
     (∫ x, entropyDissipation Ψ (f x)) = 0 := by
   -- Strategy: ν * ∫D = 0, and ν > 0.
   suffices h_zero : ν * (∫ x, entropyDissipation Ψ (f x)) = 0 by
@@ -289,7 +334,8 @@ lemma transport_entropy_from_vlasov
           (ν * LandauOperator Ψ (f x) v) * Real.log (f x v) := by ring
       rw [this, ← hV]; ring
     rw [hrw, integral_add (hSpatialTransport_int x) (hForceTransport_int x)]
-    rw [force_transport_zero (f x) (E x) (B x) (hf_pos x) (hf_smooth x) (hf_int x) (hForceDecay x)]
+    rw [force_transport_zero (f x) (E x) (B x) (hf_pos x) (hf_smooth x) (hf_int x)
+      (hForceIBP_f_dg x) (hForceIBP_fg x)]
     simp [add_zero]
   -- Rewrite ∫(ν * D) = ∫(∫_v transport * log f)
   have h_eq : (fun x => ν * entropyDissipation Ψ (f x)) =
