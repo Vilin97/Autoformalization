@@ -22,9 +22,23 @@ Update these files after major changes:
 ## Aristotle workflow
 
 - Non-trivial lemmas go to `Aristotle/Landau/aristotle-in/` as standalone files (self-contained, `import Mathlib`, single sorry'd lemma).
-- Submit with: `aristotle prove-from-file FILE --output-file aristotle-out/NAME_aristotle.lean --no-wait`. Before submitting to Aristotle, make sure the file has no errors and in particular, that the syntax is correct. The file submitted to aristotle must have sorry's but it must have no errors. DO NOT use `axiom`, instead if a lemma is not to be attempted, state the lemma and close it by `admit` instead of `sorry`.
+- **Submit** with the tracking script (records job ID automatically):
+  ```
+  source .env && python Aristotle/Landau/check-aristotle.py submit aristotle-in/NAME.lean
+  ```
+  Or manually: `aristotle prove-from-file FILE --output-file aristotle-out/NAME_aristotle.lean --no-wait`
+  then record the job ID in `Aristotle/Landau/aristotle-jobs.json`.
+- **Check status** of all pending jobs:
+  ```
+  source .env && python Aristotle/Landau/check-aristotle.py
+  ```
+  This downloads solutions automatically for completed jobs.
+- **Rules before submitting:**
+  - File must have no errors (sorry's are fine, syntax errors are not).
+  - Do NOT use `axiom`; use `admit` for lemmas not being attempted.
+  - Verify the lemma is true as stated — not missing obvious hypotheses.
 - API key is in `.env`.
-- If Aristotle proves it: integrate the proof into the main file, delete the submission.
+- If Aristotle proves it: integrate the proof into the main file, delete the submission file.
 - If Aristotle times out: decompose the lemma into smaller pieces and resubmit.
 - If Aristotle proves the negation: fix the lemma statement (missing hypotheses, wrong conclusion, etc.).
 

@@ -304,19 +304,20 @@ lemma vecMulVec_self_mulVec (z w : Fin 3 → ℝ) :
     differentiable inputs, which is why those instance fields are sorry'd — the fix
     is to use distributional derivatives in the instance, not to weaken the axioms.
 
-    Similarly, hSpatialAdd and hSpatialVelocityFubini are stated without explicit
-    integrability hypotheses. On a compact manifold with finite measure, all functions
-    arising in the proof (gradients of smooth functions, products thereof) are bounded
-    hence integrable, so Mathlib's `integral_add` and `integral_integral_swap` apply.
+    hSpatialVelocityFubini is stated without explicit integrability hypothesis at the
+    abstract level; the concrete instance (TorusInstance) provides it via Fubini.
+    hSpatialAdd requires integrability of both summands (honest: Mathlib's `integral_add`).
+    hGradIntegrable provides integrability of gradient components for spatially differentiable
+    functions (on torus: C¹ → continuous → integrable on compact).
 
     Integration uses Mathlib's `∫ x, f x` (Bochner integral over `volume`).
 
-    Axioms (15):
+    Axioms (16):
     - Operator properties (5): hDivLinear, hGradConst, hGradAdd, hGradScalarMul, hGradChainExp
     - Closed manifold integration (2): hCurlIntZero, hIBP_spatial
     - Analysis on compact manifold (4): hHarmonic_const, hLaplacianMaxNonpos, hSpatialPos, hSpatialNonnegZero
     - Flat geometry (2): hKillingToHarmonic, hCurlZeroDivZeroHarmonic
-    - Abstract measure (2): hSpatialVelocityFubini, hSpatialAdd
+    - Abstract measure (3): hSpatialVelocityFubini, hSpatialAdd, hGradIntegrable
 
     Derived lemmas (proved from the above):
     - hGradChainLog, hGradIntZero, hLaplacianMinNonneg, hSpatialMul -/
@@ -394,9 +395,12 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
     MeasureTheory.Integrable (Function.uncurry F)
       (volume.prod (MeasureSpace.volume (α := Fin 3 → ℝ))) →
     (∫ x, ∫ v, F x v) = ∫ v, ∫ x, F x v
-  -- Additivity of spatial integral
-  hSpatialAdd : ∀ (g₁ g₂ : X → ℝ),
+  -- Additivity of spatial integral (requires integrability of both summands)
+  hSpatialAdd : ∀ (g₁ g₂ : X → ℝ), MeasureTheory.Integrable g₁ → MeasureTheory.Integrable g₂ →
     (∫ x, (g₁ x + g₂ x)) = (∫ x, g₁ x) + ∫ x, g₂ x
+  -- Gradient components of spatially differentiable functions are integrable
+  -- (on the concrete torus: C¹ gradient → continuous → integrable on compact domain)
+  hGradIntegrable : ∀ (g : X → ℝ), IsSpatiallyDiff g → ∀ i, MeasureTheory.Integrable (fun x => gradX g x i)
 
 namespace FlatTorus3
 
@@ -450,17 +454,25 @@ private lemma gradIntZero_component (g : X → ℝ) (hg : IsSpatiallyDiff g) (i 
   linarith
 
 /-- Gradient integral vanishes (Stokes for 0-forms: ∫_M dg = 0).
-    Derived from hIBP_spatial + hGradConst + hSpatialAdd. -/
+    Derived from hIBP_spatial + hGradConst + hGradIntegrable. -/
 lemma hGradIntZero (g : X → ℝ) (hg : IsSpatiallyDiff g) (u : Fin 3 → ℝ) :
     ∫ x, dotProduct u (gradX g x) = 0 := by
   simp only [dotProduct, Fin.sum_univ_three]
-  rw [hSpatialAdd, hSpatialAdd]
-  have h0 : ∫ x : X, u 0 * gradX g x 0 = u 0 * ∫ x, gradX g x 0 := integral_const_mul _ _
-  have h1 : ∫ x : X, u 1 * gradX g x 1 = u 1 * ∫ x, gradX g x 1 := integral_const_mul _ _
-  have h2 : ∫ x : X, u 2 * gradX g x 2 = u 2 * ∫ x, gradX g x 2 := integral_const_mul _ _
-  rw [h0, h1, h2, gradIntZero_component g hg 0, gradIntZero_component g hg 1,
-    gradIntZero_component g hg 2]
-  ring
+  have hint : ∀ i : Fin 3, MeasureTheory.Integrable (fun x : X => gradX g x i) :=
+    hGradIntegrable g hg
+  have h0 : ∫ x : X, u 0 * gradX g x 0 = 0 := by
+    rw [integral_const_mul, gradIntZero_component g hg 0, mul_zero]
+  have h1 : ∫ x : X, u 1 * gradX g x 1 = 0 := by
+    rw [integral_const_mul, gradIntZero_component g hg 1, mul_zero]
+  have h2 : ∫ x : X, u 2 * gradX g x 2 = 0 := by
+    rw [integral_const_mul, gradIntZero_component g hg 2, mul_zero]
+  have h01 := MeasureTheory.integral_add ((hint 0).const_mul (u 0)) ((hint 1).const_mul (u 1))
+  have h012 : ∫ (a : X), u 0 * gradX g a 0 + u 1 * gradX g a 1 + u 2 * gradX g a 2 =
+      (∫ (a : X), u 0 * gradX g a 0 + u 1 * gradX g a 1) + ∫ (a : X), u 2 * gradX g a 2 := by
+    have := MeasureTheory.integral_add
+      (((hint 0).const_mul (u 0)).add ((hint 1).const_mul (u 1))) ((hint 2).const_mul (u 2))
+    simp only [Pi.add_apply] at this; exact this
+  linarith
 
 /-- Adding a constant doesn't change the gradient.
     Derived from hGradChainExp + hGradScalarMul via the exp trick:

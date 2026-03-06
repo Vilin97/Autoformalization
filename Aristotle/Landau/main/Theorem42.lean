@@ -75,6 +75,9 @@ structure VelocityDecayConditions {X : Type*} [FlatTorus3 X]
   hSpatialTransport_joint : Integrable (Function.uncurry (fun x v =>
     v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v)))
     (volume.prod volume)
+  -- Per-component spatial integrability for transport × log f decomposition
+  hSpatTransComp : ∀ v i, MeasureTheory.Integrable (fun x =>
+    FlatTorus3.gradX (fun y => f y v) x i * Real.log (f x v))
 
 /-- **Theorem 42** (Global steady state of the VML system).
 
@@ -172,6 +175,7 @@ theorem Theorem42
     transport_entropy_from_vlasov f E B Ψ ν hν hf_pos hf_smooth hf_int hDiff_fv hDiff_logfv
       hVlasov hDecay.hSpatialTransport_int hDecay.hForceTransport_int
       hDecay.hForceIBP_f_dg hDecay.hForceIBP_fg hDecay.hSpatialTransport_joint
+      hDecay.hSpatTransComp
   have hPolynomialId := polynomial_identity_from_vlasov f E B Ψ ν hf_pos hf_smooth hf_int hΨ hVlasov
   have hPB := poisson_boltzmann_from_vlasov f E B Ψ ν ρ ρ_ion hf_pos hf_smooth hf_int hΨ
     (fun x => rfl) hGauss hVlasov

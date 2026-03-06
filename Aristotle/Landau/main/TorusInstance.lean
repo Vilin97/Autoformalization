@@ -806,7 +806,35 @@ instance : VML.FlatTorus3 Torus3 where
   hSpatialVelocityFubini := by
     intro F _ hF_joint
     exact integral_integral_swap hF_joint
-  hSpatialAdd := by sorry  -- integral_add (no integrability hypothesis)
+  hSpatialAdd := fun g₁ g₂ h1 h2 => integral_add h1 h2
+  hGradIntegrable := by
+    intro g hg i
+    -- hg : Differentiable ℝ (periodicLift g)   (IsSpatiallyDiff on torus)
+    -- torusGradX g x i is continuous on the compact torus T³
+    -- compact + continuous ↦ integrableOn univ ↦ integrable
+    have h_cont : Continuous (fun x : Torus3 => torusGradX g x i) := by
+      -- H : ℝ³ → ℝ is continuous (from C¹ assumption)
+      have hH_cont : Continuous (fun y : Fin 3 → ℝ => fderiv ℝ (periodicLift g) y (Pi.single i 1)) :=
+        (hg.continuous_fderiv (by norm_num)).clm_apply continuous_const
+      -- h ∘ torusMk = H (by periodicLift_torusGradX)
+      have heq : (fun x : Torus3 => torusGradX g x i) ∘ torusMk =
+          fun y => fderiv ℝ (periodicLift g) y (Pi.single i 1) :=
+        funext (fun y => periodicLift_torusGradX g i y)
+      -- Each coordinate mk : ℝ → AddCircle 1 is an open quotient map
+      have hOQ_coord : IsOpenQuotientMap (QuotientAddGroup.mk : ℝ → AddCircle (1 : ℝ)) :=
+        IsOpenQuotientMap.of_isOpenMap_isQuotientMap
+          QuotientAddGroup.isOpenMap_coe
+          (QuotientAddGroup.isQuotientMap_mk (AddSubgroup.zmultiples (1 : ℝ)))
+      -- torusMk = Pi.map (fun _ => mk), hence is also an open quotient map
+      have htorusMk_eq : torusMk = Pi.map (fun (_ : Fin 3) => (QuotientAddGroup.mk : ℝ → AddCircle (1 : ℝ))) := by
+        ext x j; rfl
+      have hOQmap : IsOpenQuotientMap torusMk := htorusMk_eq ▸
+        IsOpenQuotientMap.piMap (fun _ => hOQ_coord)
+      -- h is continuous iff h ∘ torusMk is continuous (quotient map property)
+      rw [hOQmap.isQuotientMap.continuous_iff, heq]
+      exact hH_cont
+    rw [← integrableOn_univ]
+    exact h_cont.continuousOn.integrableOn_compact isCompact_univ
 
 -- ============================================================================
 -- SUMMARY
@@ -815,36 +843,32 @@ instance : VML.FlatTorus3 Torus3 where
 /-
 ## Status of the FlatTorus3 instance on Fin 3 → AddCircle 1
 
-**0 errors, 6 sorry warnings**
+**0 errors, 3 sorry warnings**
 
-### Proved in instance (18 fields):
+### Proved in instance (all fields):
 - hGradConst, hGradAdd (with IsSpatiallyDiff), hGradScalarMul, hGradChainExp
 - hDivLinear (case analysis on differentiability)
 - hSpatialPos, hSpatialNonnegZero (with Continuous hypothesis)
 - hSpatialVelocityFubini (with joint integrability)
-- IsSpatiallyDiff := Differentiable ℝ ∘ periodicLift
+- hSpatialAdd (with integrability hypotheses, via integral_add)
+- hGradIntegrable: proved via IsOpenQuotientMap.piMap (torusMk is open quotient map)
+- IsSpatiallyDiff := ContDiff ℝ 1 ∘ periodicLift
 - hDiff_const, hDiff_add, hDiff_smul (closure properties)
-- hCurlIntZero, hHarmonic_const, hLaplacianMaxNonpos: forwarded (sorry'd for first two)
-- hKillingToHarmonic, hCurlZeroDivZeroHarmonic: forwarded (sorry'd)
+- hLaplacianMaxNonpos: 1D second derivative test + chain rule
+- hKillingToHarmonic, hCurlZeroDivZeroHarmonic: Clairaut + algebraic argument (fully proved)
+- hCurlIntZero: forwarded (sorry'd)
+- hHarmonic_const: forwarded (sorry'd)
 - hIBP_spatial: forwarded (sorry'd)
 
-### Sorry'd in instance (1 field):
-- hSpatialAdd: integral_add (no integrability hypothesis in abstract axiom)
-
-### Sorry'd helper theorems (5):
+### Sorry'd helper theorems (3):
 - torus_hIBP_spatial: core torus IBP (unlocks hCurlIntZero and hHarmonic_const)
 - torus_hCurlIntZero: follows from IBP with φ=1; requires IsSpatiallyDiff on each F component
 - torus_hHarmonic_const: harmonic → constant on torus (energy method via IBP)
-- torus_hKillingToHarmonic: Killing → harmonic on flat torus (Clairaut, C² gap)
-- torus_hCurlZeroDivZeroHarmonic: irrotational+solenoidal → harmonic (Clairaut, C² gap)
 
-### Proved helper theorems (6):
-- torus_hGradConst: gradient of constant vanishes
-- torus_hGradAdd': gradient additivity for differentiable functions (via fderiv_add)
-- torus_hSpatialPos: positive function has positive integral
-- torus_hSpatialNonnegZero: nonneg function with zero integral is zero
-- torus_hSpatialVelocityFubini: Fubini via integral_integral_swap
-- torus_hLaplacianMaxNonpos: second derivative test (proved via 1D test + chain rule)
+### Proved helper theorems (8+):
+- torus_hGradConst, torus_hGradAdd', torus_hSpatialPos, torus_hSpatialNonnegZero
+- torus_hSpatialVelocityFubini, torus_hLaplacianMaxNonpos
+- torus_hKillingToHarmonic, torus_hCurlZeroDivZeroHarmonic (all fully proved)
 -/
 
 end

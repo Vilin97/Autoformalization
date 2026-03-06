@@ -10,124 +10,155 @@ The files `Defs.lean`, `Section2-9.lean`, `VMLInputDerive.lean`, `Theorem42.lean
 **0 sorry's and 0 axioms**. The main theorem (`Theorem42`) is fully stated and proved.
 
 `TorusInstance.lean` provides a concrete `FlatTorus3` instance on `Fin 3 -> AddCircle 1` with
-**7 sorry's** (1 in instance field, 6 in helper theorems).
+**3 sorry's** (0 instance fields, 3 helper theorems).
 
 ---
 
-## Issue 1: Differentiability and the IsSpatiallyDiff Predicate
+## Issue 1: The Concrete Instance Is Unfinished (Critical / Showstopper)
 
-**Severity: Low (downgraded from Medium)**
-**Status: FIXED**
+**Severity: Critical**
+**Status: Active — 3 Aristotle jobs submitted**
 
-The original issue was that FlatTorus3 axioms were stated too strongly (without
-differentiability hypotheses), making them false for the concrete torus instance.
+The "0 sorry's" claim applies only to the *abstract* theorem over any `[FlatTorus3 X]`. But
+`FlatTorus3` has never been instantiated to a *fully verified* concrete domain. The only candidate
+instance (`Fin 3 → AddCircle 1`) has three analytically crucial holes:
 
-### What was fixed
+- `torus_hIBP_spatial` — integration by parts on the torus. **Not proved.**
+  The entire proof chain rests on IBP: it is used in
+  `hGradIntZero → transport_entropy_from_vlasov → hD_zero`, and in
+  `hHarmonic_const → magnetic_field_constant`.
+- `torus_hCurlIntZero` — integral of any curl component is zero. **Not proved.** Depends on IBP.
+- `torus_hHarmonic_const` — harmonic functions are constant. **Not proved.** Depends on IBP.
 
-1. **`hGradAdd`** now requires `IsSpatiallyDiff f` and `IsSpatiallyDiff g`. Proved on torus.
+Note: `hGradIntegrable` (instance field) is now **proved** via IsOpenQuotientMap.piMap.
 
-2. **`hGradScalarMul`**, **`hGradChainExp`**, **`hDivLinear`** proved unconditionally
-   via case analysis on differentiability.
+Until these are filled, Theorem42 has never been applied to an actual physical setting.
 
-3. **`hSpatialVelocityFubini`** requires joint integrability. Proved via `integral_integral_swap`.
+### Active Aristotle submissions
 
-4. **`hGradAddConst`** derived lemma via the exp trick (no new axioms needed).
-
-5. **`hDiff_maxwellian`** analytical interface hypothesis in `VMLInput`.
-
-6. **`hIBP_spatial`** now requires `IsSpatiallyDiff φ` and `IsSpatiallyDiff ψ`. The previous
-   statement (for ALL φ, ψ) was **false** on the concrete torus: if φ is non-differentiable,
-   `gradX φ = 0`, but `∫ φ * gradX ψ` can be nonzero. Adding hypotheses fixes correctness.
-   Cascade through `gradIntZero_component` → `hGradIntZero` → `spatial_transport_log_zero`
-   → `transport_entropy_from_vlasov` → `Theorem42` (adds `hDiff_fv`, `hDiff_logfv`).
-
-7. **`hHarmonic_const`** now requires `IsSpatiallyDiff φ`. The previous statement (for ALL φ)
-   was **false** on the concrete torus: non-differentiable φ has `gradX φ = 0`, so `divX(gradX φ) = 0`
-   trivially, but φ isn't constant. Adding `IsSpatiallyDiff` fixes correctness.
-   Cascade through `hGradZeroConst` → VMLInputDerive (3 call sites) + Section8.
-   Also required adding `hDiff_B` field to both VMLSteadyState and VMLInput.
-
-### Remaining minor issue
-
-- **`hSpatialAdd`** (1 instance sorry): `integral(g1 + g2) = integral(g1) + integral(g2)`
-  stated without integrability. Mathematically false without integrability, but the abstract
-  axiom is only used in proofs where integrability holds in practice. Could be fixed by
-  adding `Integrable` hypotheses with a small cascade (2 call sites).
-
----
-
-## Issue 2: Four Sorry's in TorusInstance.lean
-
-**Severity: Medium**
-**Status: Reduced from 12 to 4**
-
-The concrete `FlatTorus3` instance on `Fin 3 -> AddCircle 1` has 4 sorry's.
-
-### By category
-
-**Design issue (1 instance field):**
-- `hSpatialAdd`: integral additivity without integrability hypothesis (see Issue 1)
-
-**Hard analysis (3 helper theorems):**
-These are genuine mathematical results requiring nontrivial formalization:
-- `torus_hIBP_spatial` -- IBP on torus (FTC + periodicity + Fubini); submitted to Aristotle (job 590a7b22)
-- `torus_hCurlIntZero` -- follows from IBP with phi=1; depends on IBP
-- `torus_hHarmonic_const` -- energy method: integral |grad phi|^2 = 0 via IBP; depends on IBP
-
-### What was proved (8 fewer sorry's from 12 original)
-
-- `torus_hGradAdd'`: proved via `fderiv_add` with IsSpatiallyDiff
-- `hDivLinear`, `hGradScalarMul`, `hGradChainExp`: proved via case analysis on differentiability
-- `hSpatialVelocityFubini`: proved via `integral_integral_swap`
-- `torus_hLaplacianMaxNonpos`: proved via 1D second derivative test + chain rule
-- `torus_hKillingToHarmonic`: PROVED -- Clairaut + Killing trace, uses `contDiff2_from_partials` helper
-- `torus_hCurlZeroDivZeroHarmonic`: PROVED -- Clairaut + curl=0 + div=0, uses same helper
-
-### Building blocks proved
-
-- `integral_deriv_periodic_zero'`, `ibp_periodic'` — periodic IBP lemmas (from Aristotle)
-- `clairaut_fderiv` — ∂²f/∂xᵢ∂xⱼ = ∂²f/∂xⱼ∂xᵢ via `IsSymmSndFDerivAt`
-- `periodicLift_torusGradX` — torus gradient = fderiv of periodic lift
-- `contDiff2_from_partials` — derives ContDiff ℝ 2 from C¹ + C¹ partials (finite-dim analysis)
-- `laplacian_nonpos_at_max_rn` — Laplacian ≤ 0 at global max (proved directly, no sorry)
-- `killing_harmonic_rn'` — Killing equation → harmonic on ℝⁿ
-- `curl_div_harmonic_rn'` — curl=0, div=0 → harmonic on ℝⁿ
+- `torus_gradX_integral_zero` (standalone): job 51d9e2a0
+- `torus_hIBP_spatial` + `torus_gradX_integral_zero`: job 4b7ec531 (torus_ibp_v2.lean)
+- `torus_hCurlIntZero`: job 1be0761f (torus_curl_int_zero.lean)
+- `torus_hHarmonic_const`: job be472543 (torus_harmonic_const_submission.lean)
 
 ### Dependency structure
 
-IBP (`torus_hIBP_spatial`) is the key remaining lemma. Proving it would immediately enable:
-- `torus_hCurlIntZero` (take phi = 1 in IBP)
-- `torus_hHarmonic_const` (energy method: integrate |grad phi|² via IBP → zero → phi constant)
+IBP (`torus_hIBP_spatial`) is the key building block. Proving it would immediately enable:
+
+- `torus_hCurlIntZero` (integral of curl = integral of partial derivatives = 0 by IBP with φ=1)
+- `torus_hHarmonic_const` (energy method: ∫|∇φ|² = -∫ φΔφ via IBP → zero → φ constant)
 
 ---
 
-## Issue 3: Verbose Integrability Hypotheses in Theorem42
+## Issue 2: `hSpatialAdd` Is False as Stated (Serious)
+
+**Severity: Serious**
+**Status: FIXED (2026-03-08)**
+
+```lean
+-- Old (false):
+hSpatialAdd : ∀ (g₁ g₂ : X → ℝ), ∫ x, (g₁ x + g₂ x) = (∫ x, g₁ x) + ∫ x, g₂ x
+-- New (honest):
+hSpatialAdd : ∀ (g₁ g₂ : X → ℝ), Integrable g₁ → Integrable g₂ →
+  ∫ x, (g₁ x + g₂ x) = (∫ x, g₁ x) + ∫ x, g₂ x
+```
+
+Also added:
+- `hGradIntegrable : ∀ g, IsSpatiallyDiff g → ∀ i, Integrable (fun x => gradX g x i)` to FlatTorus3
+- `hSpatTransComp : ∀ v i, Integrable (fun x => gradX(f·v) x i * log(f x v))` to VelocityDecayConditions
+
+In TorusInstance: `hSpatialAdd` is now proved by `integral_add` (no sorry). `hGradIntegrable` has
+a sorry for "continuity of C¹ gradient on torus" which is mathematically true but requires
+connecting the `choose`-based `torusGradX` to fderiv continuity.
+
+---
+
+## Issue 3: `IsSpatiallyDiff` Hypotheses Are Inputs, Not Derivations (Medium)
 
 **Severity: Medium**
-**Status: FIXED**
+**Status: Open**
+
+`Theorem42` requires as *input hypotheses*:
+
+- `hDiff_fv : ∀ v, IsSpatiallyDiff (fun x => f x v)`
+- `hDiff_logfv : ∀ v, IsSpatiallyDiff (fun x => Real.log (f x v))`
+- `hDiff_maxwellian`: if f = exp(a+b·v+c|v|²) then a, b, c are spatially C¹
+- `hDiff_maxwellian_C2`: the gradient components of b are spatially C¹
+- `hDiff_B`: each component of B is spatially C¹
+- `hDiff_logRho`: log(ρ) is spatially C¹
+
+These are **non-trivial analytical facts** — in particular, `hDiff_maxwellian` requires an
+implicit function theorem argument to extract C¹ functions `a, b, c` from `f x v = exp(a(x) + ...)`.
+None are derived in Lean; all are *assumed* as hypotheses. A critic would say: "You're not
+actually proving the theorem from the VML PDE — you're assuming the regularity conclusions."
+
+The `IsSpatiallyDiff` predicate is opaque in the typeclass (only 3 closure properties: const,
+add, scalar mul). There is no axiom saying it implies any actual regularity of f, so the
+axioms gated on it (IBP, harmonic→const, Laplacian max, curl integral, grad add) could hold
+vacuously if `IsSpatiallyDiff ≡ ⊥`.
 
 ---
 
-## Issue 4: CompactSpace Not Part of FlatTorus3
+## Issue 4: `VelocityDecayConditions` Are Unverified for Any Concrete f (Medium)
 
-**Severity: Low-Medium**
-**Status: FIXED**
+**Severity: Medium**
+**Status: Open**
+
+The `VelocityDecayConditions` structure bundles **16 integrability/Fubini/IBP conditions**:
+Landau flux differentiability (differentiation under the integral sign), per-component
+integrability for velocity-space IBP, joint integrability for Fubini, etc.
+
+These are all *assumed*. The docstring says they "hold for distributions with Schwartz-class or
+sub-Gaussian tails" but this is not proved in Lean. No `VelocityDecayConditions` is ever
+constructed for any concrete `f` anywhere in the formalization.
+
+Without a concrete construction, a skeptic could claim the full hypothesis set of Theorem42 is
+inconsistent — i.e., the theorem is vacuously true because no `(f, E, B)` satisfies all 24+
+hypotheses simultaneously.
 
 ---
 
-## Issue 5: rho and J Are Parameters With Definitional Hypotheses
+## Issue 5: The "0 Axioms" Claim Is Misleading About `FlatTorus3` (Moderate)
 
-**Severity: Low**
-**Status: FIXED**
+**Severity: Moderate**
+**Status: By design**
+
+The `FlatTorus3` typeclass has **15 typeclass fields that function as axioms** the moment you
+write `[FlatTorus3 X]`. The fact that they're phrased as a typeclass rather than Lean `axiom`
+declarations doesn't change their epistemic status: they are *assumed*, not proved. The only
+thing distinguishing them from axioms is the existence of an instance — but that instance has 4
+sorry's (Issues 1 and 2).
+
+The comment in `Defs.lean` essentially acknowledges this for the operator axioms:
+
+> "The fix is to use distributional derivatives in the instance, not to weaken the axioms."
+
+But distributional derivatives aren't used in `TorusInstance.lean`. The instance uses `fderiv`,
+which returns 0 for non-differentiable functions — a Lean-specific junk-value behavior that makes
+some axioms ("true" for non-differentiable inputs) hold for a coincidental reason.
+
+Specifically, `hGradScalarMul`, `hGradChainExp`, and `hDivLinear` are stated for **all**
+`φ : X → ℝ`. On the concrete torus, for non-differentiable `φ`, `gradX φ x = 0` (fderiv junk),
+so both sides of each equation are 0 — the chain rule isn't actually being verified, both sides
+are just zero.
 
 ---
 
 ## Summary
 
 | Issue | Severity | Status | Remaining Work |
-|-------|----------|--------|----------------|
-| 1. Differentiability / IsSpatiallyDiff | Low | FIXED | hSpatialAdd minor design issue |
-| 2. TorusInstance sorry's | Medium | 4 sorry's | 1 design; 3 hard (IBP + dependents) |
-| 3. Verbose integrability hypotheses | Medium | FIXED | -- |
-| 4. CompactSpace not in FlatTorus3 | Low-Medium | FIXED | -- |
-| 5. rho/J as parameters | Low | FIXED | -- |
+|---|---|---|---|
+| 1. Concrete instance unfinished (IBP + dependents) | Critical | 3 sorry's; 4 Aristotle jobs active | Await Aristotle; integrate proofs |
+| 2. hSpatialAdd false without integrability | Serious | **Fixed** | hSpatialAdd + hGradIntegrable both proved (no sorry's in instance fields) |
+| 3. IsSpatiallyDiff regularity not derived | Medium | Open | Prove hDiff_maxwellian from smooth f |
+| 4. VelocityDecayConditions unverified for any f | Medium | Open | Construct for a concrete example |
+| 5. FlatTorus3 fields are functional axioms | Moderate | By design | Use distributional derivatives |
+
+### Honest statement
+
+The formalization proves: *for any abstract compact flat 3-torus domain satisfying 15 axioms, and
+for any smooth steady-state (f, E, B) satisfying 24+ hypotheses, the conclusion holds.* The
+abstract proof chain is complete and correct. What remains is connecting this abstract result to
+a concrete physical setting: verifying the 15 domain axioms for the standard 3-torus (4 sorry's
+in TorusInstance) and verifying that actual smooth solutions to the VML equations satisfy the
+assumed regularity and decay conditions (Issues 3 and 4).
