@@ -612,20 +612,22 @@ private lemma contDiff2_from_partials {g : (Fin 3 → ℝ) → ℝ}
     (hg_parts : ∀ i : Fin 3, ContDiff ℝ 1 (fun y => fderiv ℝ g y (Pi.single i 1))) :
     ContDiff ℝ 2 g := by
   rw [show (2 : WithTop ℕ∞) = 1 + 1 from rfl, contDiff_succ_iff_fderiv]
-  refine ⟨hg1.differentiable le_rfl, fun h => absurd h one_ne_top, ?_⟩
+  refine ⟨hg1.differentiable le_rfl, fun h => by simp at h, ?_⟩
   rw [contDiff_clm_apply_iff]
   intro v
   have heq : (fun y => fderiv ℝ g y v) =
       fun y => ∑ i : Fin 3, v i * fderiv ℝ g y (Pi.single i 1) := by
     ext y
-    have hv : v = ∑ i : Fin 3, v i • Pi.single i (1 : ℝ) := by
-      funext m
-      simp only [Finset.sum_apply, Pi.smul_apply, Pi.single_apply, smul_eq_mul,
-        mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
-    conv_lhs => rw [hv]
-    simp [map_sum, map_smul, smul_eq_mul]
+    set L := fderiv ℝ g y with hL
+    have hv : v = ∑ i : Fin 3, v i • (Pi.single i (1 : ℝ) : Fin 3 → ℝ) := by
+      ext m; simp [Pi.single_apply, mul_ite, Finset.sum_ite_eq']
+    -- conv_lhs rewrites only the argument of L, not the v inside the sum on the RHS
+    calc L v = L (∑ i : Fin 3, v i • (Pi.single i (1 : ℝ) : Fin 3 → ℝ)) := by
+            conv_lhs => rw [hv]
+      _ = ∑ i : Fin 3, v i * L (Pi.single i (1 : ℝ)) := by
+          simp [map_sum, map_smul, smul_eq_mul]
   rw [heq]
-  exact contDiff_finset_sum _ (fun i _ => (hg_parts i).const_smul (v i))
+  exact ContDiff.sum (fun i _ => (hg_parts i).const_smul (v i))
 
 theorem torus_hKillingToHarmonic (b : Torus3 → Fin 3 → ℝ)
     (hb_C1 : ∀ j, ContDiff ℝ 1 (periodicLift (fun z => b z j)))
@@ -731,8 +733,9 @@ theorem torus_hCurlZeroDivZeroHarmonic (F : Torus3 → Fin 3 → ℝ)
         = ∑ i : Fin 3, fderiv ℝ (periodicLift (fun z => F z i))
             ((torusMk_surjective (torusMk y)).choose) (Pi.single i 1) := by
           apply Finset.sum_congr rfl; intro i _
-          exact congr_fun (periodicLift_fderiv_eq (fun z => F z i) y _
-            ((torusMk_surjective (torusMk y)).choose_spec.symm)) (Pi.single i 1)
+          exact congrFun (congrArg DFunLike.coe
+            (periodicLift_fderiv_eq (fun z => F z i) y _
+            ((torusMk_surjective (torusMk y)).choose_spec.symm))) (Pi.single i 1)
       _ = 0 := key
   -- Main proof
   intro ii x
