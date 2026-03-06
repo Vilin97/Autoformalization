@@ -7,6 +7,13 @@ The goal is not to end up with 0 sorry's! The goal is to make an honest formaliz
 - The main theorem (`Theorem42`) must be stated cleanly at the end of the file with only the necessary mathematical hypotheses — no extra assumptions.
 - Sorry's in the proof body are lemmas to be proved, not missing hypotheses.
 
+## Files
+
+Update these files after major changes:
+
+- `progress.md` and `MEMORY.md` describe the project progress
+- `critique.md` gives the critique of the current state, pointing to the weakest links
+
 ## Proof style
 
 - Decompose results into lemmas. Make lemmas more general than the specific result they serve — this is often easier to prove and leads to better design.

@@ -307,7 +307,11 @@ lemma transport_entropy_from_vlasov
       (E x + cross v (B x)) i *
         fderiv ℝ (fun w => f x w * Real.log (f x w) - f x w) v (Pi.single i 1)))
     (hForceIBP_fg : ∀ x i, Integrable (fun v =>
-      (E x + cross v (B x)) i * (f x v * Real.log (f x v) - f x v))) :
+      (E x + cross v (B x)) i * (f x v * Real.log (f x v) - f x v)))
+    -- Joint integrability for Fubini (spatial × velocity)
+    (hSpatialTransport_joint : Integrable (Function.uncurry (fun x v =>
+      v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v)))
+      (volume.prod volume)) :
     (∫ x, entropyDissipation Ψ (f x)) = 0 := by
   -- Strategy: ν * ∫D = 0, and ν > 0.
   suffices h_zero : ν * (∫ x, entropyDissipation Ψ (f x)) = 0 by
@@ -343,7 +347,7 @@ lemma transport_entropy_from_vlasov
     ext x; exact h_key x
   rw [h_eq]
   -- Fubini: swap ∫_X and ∫_v
-  rw [FlatTorus3.hSpatialVelocityFubini _ hSpatialTransport_int]
+  rw [FlatTorus3.hSpatialVelocityFubini _ hSpatialTransport_int hSpatialTransport_joint]
   -- For each v, spatial integral vanishes
   suffices h_v : ∀ v : Fin 3 → ℝ, (∫ x,
       v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v)) = 0 by

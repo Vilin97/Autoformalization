@@ -190,7 +190,7 @@ theorem torus_hSpatialVelocityFubini (F : Torus3 → (Fin 3 → ℝ) → ℝ)
     (hF : ∀ x, Integrable (F x))
     (hF_joint : Integrable (Function.uncurry F) (volume.prod volume)) :
     (∫ x, ∫ v, F x v) = ∫ v, ∫ x, F x v := by
-  sorry -- integral_integral_swap with correct measure types
+  exact integral_integral_swap hF_joint
 
 -- NOTE: Our abstract axiom only requires pointwise integrability (∀ x, Integrable (F x)).
 -- Mathlib's Fubini needs joint integrability. So the concrete version is slightly stronger.
@@ -285,6 +285,8 @@ theorem torus_hCurlZeroDivZeroHarmonic (F : Torus3 → Fin 3 → ℝ)
 
 instance : VML.FlatTorus3 Torus3 where
   toMeasureSpace := inferInstance
+  instCompact := inferInstance
+  instNonempty := ⟨fun _ => 0⟩
   gradX := torusGradX
   divX := torusDivX
   curlX := torusCurlX
@@ -301,7 +303,7 @@ instance : VML.FlatTorus3 Torus3 where
   hKillingToHarmonic := torus_hKillingToHarmonic
   hCurlZeroDivZeroHarmonic := torus_hCurlZeroDivZeroHarmonic
   hIBP_spatial := torus_hIBP_spatial
-  hSpatialVelocityFubini := by sorry  -- Fubini (measure instance alignment)
+  hSpatialVelocityFubini := fun _ _ hF_joint => integral_integral_swap hF_joint
   hSpatialAdd := by sorry  -- integral_add (no integrability hypothesis)
 
 -- ============================================================================
@@ -311,38 +313,37 @@ instance : VML.FlatTorus3 Torus3 where
 /-
 ## Status of the FlatTorus3 instance on Fin 3 → AddCircle 1
 
-**0 errors, instance compiles (with 5 sorry's in instance fields)**
+**0 errors, instance compiles (with 4 sorry's in instance fields)**
 
-### Proved in instance (10 fields):
-- hGradConst: gradient of constant vanishes ✓
-- hSpatialPos: proved with Continuous hypothesis ✓
-- hSpatialNonnegZero: proved with Continuous hypothesis ✓
+### Proved in instance (11 fields):
+- hGradConst: gradient of constant vanishes
+- hSpatialPos: proved with Continuous hypothesis
+- hSpatialNonnegZero: proved with Continuous hypothesis
+- hSpatialVelocityFubini: Fubini via integral_integral_swap (joint integrability hypothesis)
 - hGradAdd: forwarded to torus_hGradAdd' (sorry'd for non-diff edge case)
 - hCurlIntZero, hHarmonic_const, hLaplacianMaxNonpos: forwarded (sorry'd)
 - hKillingToHarmonic, hCurlZeroDivZeroHarmonic: forwarded (sorry'd)
 - hIBP_spatial: forwarded (sorry'd)
 
-### Sorry'd in instance (5 fields):
+### Sorry'd in instance (4 fields):
 - hDivLinear, hGradScalarMul, hGradChainExp: fderiv linearity/chain rules
   (hold for differentiable functions; abstract axioms don't require differentiability)
-- hSpatialVelocityFubini: Fubini (measure instance alignment)
 - hSpatialAdd: integral_add (no integrability hypothesis in abstract axiom)
 
-### Sorry'd theorems (used transitively, 8 total):
+### Sorry'd theorems (used transitively, 7 total):
 - torus_hGradAdd': non-differentiable edge case
-- torus_hIBP_spatial: core torus IBP
-- torus_hCurlIntZero: ∫ u·(∇×F) = 0 on torus
-- torus_hHarmonic_const: harmonic → constant on torus
-- torus_hLaplacianMaxNonpos: second derivative test
-- torus_hKillingToHarmonic: Killing → harmonic on flat torus
-- torus_hCurlZeroDivZeroHarmonic: irrotational+solenoidal → harmonic
-- torus_hSpatialVelocityFubini: Fubini for product measures
+- torus_hIBP_spatial: core torus IBP (unlocks hCurlIntZero and hHarmonic_const)
+- torus_hCurlIntZero: integral (derivative of periodic function) = 0
+- torus_hHarmonic_const: harmonic -> constant on torus (energy method)
+- torus_hLaplacianMaxNonpos: second derivative test (not in Mathlib)
+- torus_hKillingToHarmonic: Killing -> harmonic on flat torus (Clairaut)
+- torus_hCurlZeroDivZeroHarmonic: irrotational+solenoidal -> harmonic (Clairaut)
 
-### Architecture:
-- `Fin 3 → AddCircle 1` as the concrete type
-- Periodicity is automatic (no IsPeriodic hypotheses)
-- Operators defined via periodic lift + fderiv
-- Instance approach: no refactor of main theorem needed
+### Proved helper theorems (4):
+- torus_hGradConst: gradient of constant vanishes
+- torus_hSpatialPos: positive function has positive integral
+- torus_hSpatialNonnegZero: nonneg function with zero integral is zero
+- torus_hSpatialVelocityFubini: Fubini via integral_integral_swap
 -/
 
 end

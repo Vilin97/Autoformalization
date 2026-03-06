@@ -13,6 +13,69 @@ namespace VML
 -- equilibrium with E = 0 and B = const.
 -- ============================================================================
 
+/-- Velocity-space decay / integrability conditions for the VML steady state theorem.
+
+    These conditions hold for distribution functions with sufficient velocity-space
+    decay (e.g., Schwartz class or sub-Gaussian tails). They ensure that:
+    - The H-theorem chain (IBP + Fubini symmetrization) goes through
+    - The transport entropy equation can be decomposed
+    - The Landau flux is differentiable and integrable
+
+    Bundled into a single structure for readability of the main theorem. -/
+structure VelocityDecayConditions {X : Type*} [FlatTorus3 X]
+    (Ψ : ℝ → ℝ) (f : X → (Fin 3 → ℝ) → ℝ) (E B : X → (Fin 3 → ℝ)) where
+  -- PSD integrand integrability (for "nonneg integral = 0 → pointwise = 0")
+  hPSD_inner_int : ∀ x v, Integrable (PSDIntegrand Ψ (f x) v)
+  hPSD_outer_int : ∀ x, Integrable (fun v => ∫ w, PSDIntegrand Ψ (f x) v w)
+  -- Fubini integrability for the symmetrized weak form
+  hFubini_double : ∀ x, Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
+    dotProduct (vGrad (Real.log ∘ f x) p.1)
+      (mulVec (landauMatrix Ψ (p.1 - p.2))
+        (f x p.2 • vGrad (f x) p.1 - f x p.1 • vGrad (f x) p.2)))
+  hFubini_inner : ∀ x v, Integrable (fun w =>
+    dotProduct (vGrad (Real.log ∘ f x) v)
+      (mulVec (landauMatrix Ψ (v - w))
+        (f x w • vGrad (f x) v - f x v • vGrad (f x) w)))
+  hFubini_outer : ∀ x, Integrable (fun v => ∫ w,
+    dotProduct (vGrad (Real.log ∘ f x) v)
+      (mulVec (landauMatrix Ψ (v - w))
+        (f x w • vGrad (f x) v - f x v • vGrad (f x) w)))
+  -- Transport integrability (for entropy decomposition)
+  hSpatialTransport_int : ∀ x, Integrable (fun v =>
+    v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v))
+  hForceTransport_int : ∀ x, Integrable (fun v =>
+    (E x + cross v (B x)) ⬝ᵥ vGrad (f x) v * Real.log (f x v))
+  -- Landau flux differentiability (differentiation under the integral sign)
+  hLandauFluxDiff : ∀ x i, Differentiable ℝ (fun v =>
+    (∫ w, mulVec (landauMatrix Ψ (v - w))
+      (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i)
+  -- Per-component integrability for velocity-space IBP of Landau operator
+  hLandauIBP_df_g : ∀ x i, Integrable (fun v =>
+    fderiv ℝ (fun v' => (∫ w, mulVec (landauMatrix Ψ (v' - w))
+      (f x w • vGrad (f x) v' - f x v' • vGrad (f x) w)) i) v (Pi.single i 1) *
+    (Real.log ∘ f x) v)
+  hLandauIBP_f_dg : ∀ x i, Integrable (fun v =>
+    (∫ w, mulVec (landauMatrix Ψ (v - w))
+      (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i *
+    fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1))
+  hLandauIBP_fg : ∀ x i, Integrable (fun v =>
+    (∫ w, mulVec (landauMatrix Ψ (v - w))
+      (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i * (Real.log ∘ f x) v)
+  -- Integrability of the Landau flux (for pulling dot product through ∫)
+  hLandauFluxInt : ∀ x v, Integrable (fun w =>
+    mulVec (landauMatrix Ψ (v - w))
+      (f x w • vGrad (f x) v - f x v • vGrad (f x) w))
+  -- Per-component integrability for velocity-space IBP in entropy estimate
+  hForceIBP_f_dg : ∀ x i, Integrable (fun v =>
+    (E x + cross v (B x)) i *
+      fderiv ℝ (fun w => f x w * Real.log (f x w) - f x w) v (Pi.single i 1))
+  hForceIBP_fg : ∀ x i, Integrable (fun v =>
+    (E x + cross v (B x)) i * (f x v * Real.log (f x v) - f x v))
+  -- Joint integrability for Fubini (spatial × velocity transport)
+  hSpatialTransport_joint : Integrable (Function.uncurry (fun x v =>
+    v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v)))
+    (volume.prod volume)
+
 /-- **Theorem 42** (Global steady state of the VML system).
 
     Consider the Vlasov-Maxwell-Landau system on a periodic spatial domain
@@ -29,34 +92,32 @@ namespace VML
 
     (iii) The magnetic field is spatially constant.
 
+    The velocity-space decay conditions (bundled in `VelocityDecayConditions`)
+    hold for distribution functions with sufficient velocity-space decay
+    (e.g., Schwartz class or sub-Gaussian tails).
+
     Reference: H-theorem-formal.pdf, Theorem 42. -/
 theorem Theorem42
     -- === Spatial domain (abstract flat 3-torus) ===
-    {X : Type*} [FlatTorus3 X] [inst : Nonempty X] [CompactSpace X]
+    {X : Type*} [FlatTorus3 X]
     -- === Physical state at steady state ===
     (f : X → (Fin 3 → ℝ) → ℝ)
     (E B : X → (Fin 3 → ℝ))
     -- === Physical parameters ===
     (Ψ : ℝ → ℝ) (ν ρ_ion : ℝ)
-    -- === Derived quantities ===
-    (ρ : X → ℝ) (J : X → (Fin 3 → ℝ))
     -- === Physical hypotheses ===
     (hν : 0 < ν)
     (hρ_ion : 0 < ρ_ion)
     (hΨ : ∀ r, 0 < Ψ r)
     (hΨ_cont : Continuous Ψ)
     (hf_pos : ∀ x v, 0 < f x v)
-    (hρ_def : ∀ x, ρ x = ∫ v, f x v)
-    (hJ_def : ∀ x, J x = fun i => ∫ v, v i * f x v)
     (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
     (hf_int : ∀ x, Integrable (f x))
-    -- Density is continuous on the spatial domain (follows from f smooth + integration)
-    (hρ_cont : Continuous ρ)
     -- === Steady-state Maxwell equations ===
     -- Ampère's law (∂ₜE = 0): ∇×B = J
-    (hAmpere : ∀ x, FlatTorus3.curlX B x = J x)
+    (hAmpere : ∀ x, FlatTorus3.curlX B x = fun i => ∫ v, v i * f x v)
     -- Gauss's law: ∇·E = ρ − ρ_ion
-    (hGauss : ∀ x, FlatTorus3.divX E x = ρ x - ρ_ion)
+    (hGauss : ∀ x, FlatTorus3.divX E x = (∫ v, f x v) - ρ_ion)
     -- Solenoidal constraint: ∇·B = 0
     (hDivB : ∀ x, FlatTorus3.divX B x = 0)
     -- === Steady-state Vlasov equation ===
@@ -65,91 +126,42 @@ theorem Theorem42
       dotProduct v (FlatTorus3.gradX (fun y => f y v) x) +
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
       ν * LandauOperator Ψ (f x) v)
-    -- === Velocity-space decay hypotheses ===
-    -- PSD integrand integrability (velocity-space decay condition).
-    -- These hold for distribution functions with sufficient velocity-space decay
-    -- (e.g., Schwartz class or sub-Gaussian tails). Needed for the
-    -- "nonneg integral = 0 → pointwise = 0" argument in the H-theorem chain.
-    (hPSD_inner_int : ∀ x v, Integrable (PSDIntegrand Ψ (f x) v))
-    (hPSD_outer_int : ∀ x, Integrable (fun v => ∫ w, PSDIntegrand Ψ (f x) v w))
-    -- Fubini integrability for the symmetrized weak form (velocity-space decay condition).
-    -- These hold for distribution functions with sufficient velocity-space decay.
-    (hFubini_double : ∀ x, Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
-      dotProduct (vGrad (Real.log ∘ f x) p.1)
-        (mulVec (landauMatrix Ψ (p.1 - p.2))
-          (f x p.2 • vGrad (f x) p.1 - f x p.1 • vGrad (f x) p.2))))
-    (hFubini_inner : ∀ x v, Integrable (fun w =>
-      dotProduct (vGrad (Real.log ∘ f x) v)
-        (mulVec (landauMatrix Ψ (v - w))
-          (f x w • vGrad (f x) v - f x v • vGrad (f x) w))))
-    (hFubini_outer : ∀ x, Integrable (fun v => ∫ w,
-      dotProduct (vGrad (Real.log ∘ f x) v)
-        (mulVec (landauMatrix Ψ (v - w))
-          (f x w • vGrad (f x) v - f x v • vGrad (f x) w))))
-    -- Transport integrability (velocity-space decay condition).
-    -- Needed for decomposing ∫_v (Vlasov · log f) into spatial + force transport terms.
-    (hSpatialTransport_int : ∀ x, Integrable (fun v =>
-      v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v)))
-    (hForceTransport_int : ∀ x, Integrable (fun v =>
-      (E x + cross v (B x)) ⬝ᵥ vGrad (f x) v * Real.log (f x v)))
-    -- Landau flux differentiability (requires differentiation under the integral sign).
-    (hLandauFluxDiff : ∀ x i, Differentiable ℝ (fun v =>
-      (∫ w, mulVec (landauMatrix Ψ (v - w))
-        (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i))
-    -- Per-component integrability for velocity-space IBP of Landau operator.
-    (hLandauIBP_df_g : ∀ x i, Integrable (fun v =>
-      fderiv ℝ (fun v' => (∫ w, mulVec (landauMatrix Ψ (v' - w))
-        (f x w • vGrad (f x) v' - f x v' • vGrad (f x) w)) i) v (Pi.single i 1) *
-      (Real.log ∘ f x) v))
-    (hLandauIBP_f_dg : ∀ x i, Integrable (fun v =>
-      (∫ w, mulVec (landauMatrix Ψ (v - w))
-        (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i *
-      fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)))
-    (hLandauIBP_fg : ∀ x i, Integrable (fun v =>
-      (∫ w, mulVec (landauMatrix Ψ (v - w))
-        (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i * (Real.log ∘ f x) v))
-    -- Integrability of the Landau flux (for pulling dot product through ∫)
-    (hLandauFluxInt : ∀ x v, Integrable (fun w =>
-      mulVec (landauMatrix Ψ (v - w))
-        (f x w • vGrad (f x) v - f x v • vGrad (f x) w)))
-    -- Per-component integrability for velocity-space IBP in entropy estimate.
-    (hForceIBP_f_dg : ∀ x i, Integrable (fun v =>
-      (E x + cross v (B x)) i *
-        fderiv ℝ (fun w => f x w * Real.log (f x w) - f x w) v (Pi.single i 1)))
-    (hForceIBP_fg : ∀ x i, Integrable (fun v =>
-      (E x + cross v (B x)) i * (f x v * Real.log (f x v) - f x v)))
+    -- === Regularity conditions ===
+    -- Density ρ(x) = ∫ f(x,v) dv is continuous on the spatial domain
+    (hρ_cont : Continuous (fun x => ∫ v, f x v))
     -- Entropy dissipation is continuous on the spatial domain
-    (hD_cont : Continuous (fun x => entropyDissipation Ψ (f x))) :
+    (hD_cont : Continuous (fun x => entropyDissipation Ψ (f x)))
+    -- === Velocity-space decay conditions ===
+    (hDecay : VelocityDecayConditions Ψ f E B) :
     -- === Conclusion ===
     ∃ (T_eq : ℝ) (B₀ : Fin 3 → ℝ), 0 < T_eq ∧
     (∀ x v, f x v = equilibriumMaxwellian ρ_ion T_eq v) ∧
     (∀ x, E x = 0) ∧
     (∀ x, B x = B₀) := by
+  -- Abbreviations for density and current (computed from f)
+  set ρ : X → ℝ := fun x => ∫ v, f x v with hρ_def
+  set J : X → (Fin 3 → ℝ) := fun x i => ∫ v, v i * f x v with hJ_def
   -- Step 0: Derive mathematical consequences of the Vlasov equation.
-  have hρ_pos : ∀ x, 0 < ρ x := by
-    intro x; rw [hρ_def x]
-    exact density_positive_of_integral (f x) (hf_pos x) (hf_int x)
+  have hρ_pos : ∀ x, 0 < ρ x := fun x =>
+    density_positive_of_integral (f x) (hf_pos x) (hf_int x)
   have hTransportEntropy : (∫ x, entropyDissipation Ψ (f x)) = 0 :=
     transport_entropy_from_vlasov f E B Ψ ν hν hf_pos hf_smooth hf_int hVlasov
-      hSpatialTransport_int hForceTransport_int hForceIBP_f_dg hForceIBP_fg
+      hDecay.hSpatialTransport_int hDecay.hForceTransport_int
+      hDecay.hForceIBP_f_dg hDecay.hForceIBP_fg hDecay.hSpatialTransport_joint
   have hPolynomialId := polynomial_identity_from_vlasov f E B Ψ ν hf_pos hf_smooth hf_int hΨ hVlasov
-  have hPB := poisson_boltzmann_from_vlasov f E B Ψ ν ρ ρ_ion hf_pos hf_smooth hf_int hΨ hρ_def hGauss hVlasov
+  have hPB := poisson_boltzmann_from_vlasov f E B Ψ ν ρ ρ_ion hf_pos hf_smooth hf_int hΨ
+    (fun x => rfl) hGauss hVlasov
   -- Extremizers of ρ (extreme value theorem on compact T³)
   obtain ⟨x_max, hmax⟩ := continuous_attains_max ρ hρ_cont
   obtain ⟨x_min, hmin⟩ := continuous_attains_min ρ hρ_cont
   -- Step 1: Symmetrized weak form for each x (the core analytical input).
-  -- Decomposed into IBP + Fubini symmetrization (both proved by Aristotle separately).
-  -- Sub-step 1a: IBP + pull integral: ∫ Q·logf = -∫∫ ⟨∇logf(v), A·flux⟩
-  -- Decomposes into: (i) vector IBP on ℝ³: ∫ (div_v F)·g = -∫ F·∇g,
-  -- (ii) linearity: ⟨c, ∫_w H dw⟩ = ∫_w ⟨c, H⟩ dw (pull w-integral through dot product).
   have hIBP : ∀ x, ∫ v, LandauOperator Ψ (f x) v * (Real.log ∘ f x) v =
       -(∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f x) v)
           (mulVec (landauMatrix Ψ (v - w))
             (f x w • vGrad (f x) v - f x v • vGrad (f x) w))) :=
     fun x => landau_ibp Ψ (f x) (hf_pos x) (hf_smooth x) (hf_int x)
-      (hLandauFluxDiff x) (hLandauIBP_df_g x) (hLandauIBP_f_dg x)
-      (hLandauIBP_fg x) (hLandauFluxInt x)
-  -- Sub-step 1b: Fubini symmetrization: ∫∫⟨Δ, A·flux⟩ = 2·∫∫⟨∇logf(v), A·flux⟩
+      (hDecay.hLandauFluxDiff x) (hDecay.hLandauIBP_df_g x) (hDecay.hLandauIBP_f_dg x)
+      (hDecay.hLandauIBP_fg x) (hDecay.hLandauFluxInt x)
   have hFubiniSym : ∀ x, ∫ v, ∫ w, dotProduct
         (vGrad (Real.log ∘ f x) v - vGrad (Real.log ∘ f x) w)
         (mulVec (landauMatrix Ψ (v - w))
@@ -157,8 +169,8 @@ theorem Theorem42
       2 * ∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f x) v)
           (mulVec (landauMatrix Ψ (v - w))
             (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) := by
-    intro x; exact fubini_symmetrization_logf Ψ (f x) (hf_smooth x) (hFubini_double x) (hFubini_inner x) (hFubini_outer x)
-  -- Compose: ∫Q·logf = -I₁ = -(1/2)·(2·I₁) = -(1/2)·I₂
+    intro x; exact fubini_symmetrization_logf Ψ (f x) (hf_smooth x)
+      (hDecay.hFubini_double x) (hDecay.hFubini_inner x) (hDecay.hFubini_outer x)
   have hSWF_all : ∀ x, ∫ v, LandauOperator Ψ (f x) v * (Real.log ∘ f x) v =
       -(1 / 2) * ∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f x) v - vGrad (Real.log ∘ f x) w)
         (mulVec (landauMatrix Ψ (v - w))
@@ -180,7 +192,6 @@ theorem Theorem42
     linarith [FlatTorus3.hSpatialNonnegZero _ hD_cont.neg hD_neg hD_neg_int x]
   -- Step 3: Apply the main theorem via VMLInput.
   have result := main_from_physics {
-    inst_ne := inst
     x₀ := Classical.arbitrary X
     f := f
     E := E
@@ -199,27 +210,26 @@ theorem Theorem42
     hρ_cont := hρ_cont
     J := J
     hAmpere := hAmpere
-    hGauss := hGauss
+    hGauss := fun x => hGauss x
     hDivB := hDivB
     hD_zero := hD_zero
     hScoreForm := fun x => entropy_score_form Ψ (f x) (hf_pos x) (hf_smooth x) (hSWF_all x)
     hPSD_cont := fun x =>
       PSDIntegrand_continuous Ψ (f x) hΨ_cont (hf_pos x) (hf_smooth x)
-    hPSD_inner := hPSD_inner_int
-    hPSD_outer := hPSD_outer_int
+    hPSD_inner := hDecay.hPSD_inner_int
+    hPSD_outer := hDecay.hPSD_outer_int
     hPolynomialIdentity := hPolynomialId
     hJ_from_maxwellian := fun b_func c₀ hform => by
       intro x
       obtain ⟨a₀, ha₀⟩ := hform x
-      rw [hJ_def x]
+      show J x = ρ x • ((-1 / (2 * c₀)) • b_func x)
+      simp only [J, ρ]
       ext i
       simp only [Pi.smul_apply, smul_eq_mul]
-      -- J x i = ∫ vᵢ f(x,v) dv = ∫ vᵢ exp(a₀ + b·v + c₀|v|²) dv
       have h_rw : ∫ v, v i * f x v = ∫ v, v i *
           Real.exp (a₀ + dotProduct (b_func x) v + c₀ * normSq v) := by
         congr 1; ext v; rw [ha₀]
       rw [h_rw]
-      -- Apply Gaussian first moment
       have hc₀_neg : c₀ < 0 := by
         have := analysis_gaussian_integrability (f x) a₀ (b_func x) c₀
           (hf_pos x) (hf_int x) ha₀
@@ -229,10 +239,9 @@ theorem Theorem42
         convert hf_int x using 1; ext v; rw [ha₀]
       have h_fm := gaussian_first_moment a₀ (b_func x) c₀ hc₀_neg h_int i
       rw [h_fm]
-      -- (-bᵢ/(2c₀)) * ∫ exp = ρ(x) * (-1/(2c₀)) * bᵢ
       have h_rho : ∫ v : Fin 3 → ℝ,
           Real.exp (a₀ + dotProduct (b_func x) v + c₀ * normSq v) = ρ x := by
-        rw [hρ_def x]; congr 1; ext v; rw [ha₀]
+        congr 1; ext v; rw [ha₀]
       rw [h_rho]; ring
     x_max := x_max
     hmax := hmax
@@ -242,7 +251,7 @@ theorem Theorem42
     hNormalization := fun a₀ c₀ hc₀ hf_form hdens => by
       intro x v
       have h_int : ∫ w : Fin 3 → ℝ, f x w = ρ_ion := by
-        rw [← hdens x, hρ_def x]
+        rw [← hdens x]
       exact gaussian_normalization_maxwellian ρ_ion a₀ c₀ hρ_ion hc₀
         (f x) (hf_form x) h_int v
   }

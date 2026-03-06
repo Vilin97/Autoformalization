@@ -2,7 +2,9 @@
 
 **Files**: `Aristotle/Landau/main/*.lean` (split across 11 files)
 **Blueprint**: `Aristotle/Landau/H-theorem-formal.tex` (Sections 1--10)
-**Status**: 0 errors, 2 sorry's
+**Status**: 0 errors, 0 sorry's in main chain; 12 sorry's in TorusInstance.lean
+
+Last updated: 2026-03-05
 
 ## Summary
 
@@ -15,25 +17,28 @@ on T^3 x R^3 with collision frequency nu > 0 must satisfy:
   (iii) B = const
   (iv)  T > 0 uniquely determined by conservation laws
 
-The proof is complete modulo 2 sorry's: velocity-space IBP (`velocity_ibp`)
-and Landau operator IBP (`landau_ibp`), both requiring velocity-space
-analysis beyond current Mathlib.
+The main proof chain (Defs, Section2-9, VMLInputDerive, Theorem42) is
+**complete with 0 sorry's and 0 axioms**.
+
+A concrete FlatTorus3 instance on `Fin 3 -> AddCircle 1` (TorusInstance.lean)
+validates the typeclass with **12 sorry's** (5 instance fields, 7 helper theorems).
 
 ---
 
 ## File Structure
 
-- `Defs.lean` — FlatTorus3 typeclass (extends MeasureSpace X), structures (VMLSteadyState, VMLEquilibrium, VMLInput), base definitions
-- `Section2.lean` — Algebraic lemmas (Landau matrix properties, Lemmas 1-3)
-- `Section3.lean` — H-theorem chain + analysis lemmas (~1130 lines, Lemmas 4-9)
-- `Section4.lean` — Transport constraints (Lemmas 10-12, Corollary 2)
-- `Section5.lean` — Polynomial matching (Lemmas 13-17)
-- `Section6.lean` — Bulk velocity (Lemmas 18-19)
-- `Section7.lean` — Maximum principle (Lemmas 20-21, Corollary 3)
-- `Section8.lean` — Magnetic field (Lemmas 22-23)
-- `Section9.lean` — Conservation laws (Lemmas 24-28)
-- `VMLInputDerive.lean` — VMLInput.toSteadyState, main_steady_state, main_from_physics
-- `Theorem42.lean` — Main theorem statement + proof
+- `Defs.lean` -- FlatTorus3 typeclass (extends MeasureSpace X, TopologicalSpace X, CompactSpace, Nonempty), structures, base definitions
+- `Section2.lean` -- Algebraic lemmas (Landau matrix properties, Lemmas 1-3)
+- `Section3.lean` -- H-theorem chain + analysis lemmas (~1300 lines, Lemmas 4-9)
+- `Section4.lean` -- Transport constraints (Lemmas 10-12, Corollary 2)
+- `Section5.lean` -- Polynomial matching (Lemmas 13-17)
+- `Section6.lean` -- Bulk velocity (Lemmas 18-19)
+- `Section7.lean` -- Maximum principle (Lemmas 20-21, Corollary 3)
+- `Section8.lean` -- Magnetic field (Lemmas 22-23)
+- `Section9.lean` -- Conservation laws (Lemmas 24-28)
+- `VMLInputDerive.lean` -- VMLInput.toSteadyState, main_steady_state, main_from_physics
+- `Theorem42.lean` -- Main theorem statement + proof (VelocityDecayConditions bundle)
+- `TorusInstance.lean` -- Concrete FlatTorus3 instance on T^3
 
 ---
 
@@ -57,6 +62,9 @@ analysis beyond current Mathlib.
 - **Theorem 4** (Nullspace necessity): `nullspace_necessity`
 - **Theorem 5** (Nullspace sufficiency): `nullspace_sufficiency`
 - **Corollary 1** (Complete characterization): `nullspace_iff`
+- **velocity_ibp**: General IBP on R^3. **Fully proved.**
+- **landau_ibp**: IBP for Landau operator. **Fully proved.**
+- **fubini_symmetrization_logf**: Fubini swap for D(f) formula. Proved by Aristotle.
 
 ### Section 4: Vlasov--Maxwell Transport Constraints
 
@@ -100,54 +108,66 @@ analysis beyond current Mathlib.
 
 - `main_steady_state`: VMLSteadyState -> conclusion. **Fully proved.**
 - `main_from_physics`: VMLInput -> conclusion. **Fully proved.**
-- **Fubini symmetrization** (proved by Aristotle): `fubini_symmetrization_logf`
-- `Theorem42`: Clean statement with physical hypotheses. **Proved modulo 2 sorry's.**
+- `Theorem42`: Clean statement with VelocityDecayConditions bundle. **Fully proved.**
 
 ---
 
-## Remaining Sorry's (2)
+## TorusInstance Sorry's (12)
 
-Both sorry's are in `Defs.lean` and concern velocity-space integration by parts:
+### False as stated (5 instance fields)
 
-1. **`velocity_ibp`** (Defs.lean:140) — General IBP on ℝ³:
-   ∫ (∇·F)(v) · g(v) dv = -∫ F(v) · (∇g)(v) dv.
-   Requires Fubini + 1D IBP in each coordinate direction.
+These axioms lack differentiability/integrability hypotheses at the abstract level,
+so the concrete instance cannot prove them for arbitrary functions:
 
-2. **`landau_ibp`** (Defs.lean:175) — IBP for the Landau operator:
-   ∫ Q(g,g)(v) log g(v) dv = -∫∫ ⟨∇ log g(v), A(v-w) · flux⟩ dw dv.
-   Follows from `velocity_ibp` + `dotProduct_integral_comm`, but verifying
-   the smoothness/integrability hypotheses requires differentiation under ∫.
+- `hDivLinear` -- needs differentiability of G components
+- `hGradScalarMul` -- needs differentiability of f
+- `hGradChainExp` -- needs differentiability of phi
+- `hSpatialAdd` -- needs integrability of g1, g2
+- `hSpatialVelocityFubini` -- needs joint integrability (abstract axiom only requires pointwise)
 
-Both now include decay hypotheses (h_decay / h_decay) ensuring boundary terms
-vanish at velocity-space infinity. Earlier versions without decay were correctly
-negated by Aristotle (counterexample: F=(1,0,0), g=arctan(v₀)·exp(-v₁²-v₂²)).
+These cannot be fixed without adding hypotheses to the abstract FlatTorus3 axioms,
+which would require a smoothness predicate (X has no differentiable structure).
+See critique.md Issue 1 for details.
 
-Submitted to Aristotle with decay hypotheses (projects 14f30222, 1ecdcc05).
+### Mathematically correct, hard (7 helper theorems)
+
+- `torus_hGradAdd'` -- fderiv additivity (holds for differentiable functions, sorry'd for non-diff edge)
+- `torus_hIBP_spatial` -- IBP on torus (FTC + periodicity + Fubini)
+- `torus_hCurlIntZero` -- curl integral zero (follows from IBP)
+- `torus_hHarmonic_const` -- harmonic functions constant (energy method via IBP)
+- `torus_hLaplacianMaxNonpos` -- second derivative test (not in Mathlib)
+- `torus_hKillingToHarmonic` -- Killing -> harmonic (Clairaut + trace)
+- `torus_hCurlZeroDivZeroHarmonic` -- irrotational+solenoidal -> harmonic (Clairaut)
+
+### Proved
+
+- `torus_hGradConst` -- gradient of constant vanishes
+- `torus_hSpatialPos` -- positive function has positive integral
+- `torus_hSpatialNonnegZero` -- nonneg function with zero integral is zero
+- `torus_hSpatialVelocityFubini` -- Fubini (helper theorem with proper hypotheses)
 
 ---
 
 ## Architecture
 
-The `FlatTorus3` typeclass extends `MeasureSpace X` and bundles spatial domain axioms
-(gradX, divX, curlX, Stokes, harmonic→constant, Killing→harmonic, Laplacian sign at
-extrema, etc.). Spatial integration uses Mathlib's `∫ x, ...` via the inherited measure.
+The `FlatTorus3` typeclass extends `MeasureSpace X, TopologicalSpace X` and includes
+`CompactSpace X` and `Nonempty X`. It bundles spatial operators + 15 axioms.
+Spatial integration uses Mathlib's `integral` via the inherited measure.
 
 The proof flows through three layers:
 
-1. **Theorem42** (user-facing): Takes physical + decay hypotheses over `[FlatTorus3 X]`.
-   Derives mathematical consequences. Constructs VMLInput.
+1. **Theorem42** (user-facing): Takes physical + VelocityDecayConditions over `[FlatTorus3 X]`.
+   Computes rho and J from f. Constructs VMLInput.
 
-2. **VMLInput → main_from_physics**: Physical hypotheses + analytical interface.
+2. **VMLInput -> main_from_physics**: Physical hypotheses + analytical interface.
    Derives VMLSteadyState.
 
-3. **VMLSteadyState → main_steady_state** (algebraic core): All analytical work done.
+3. **VMLSteadyState -> main_steady_state** (algebraic core): All analytical work done.
    Proves u = 0, E = 0, B = const, T > 0.
 
 ---
 
 ## FlatTorus3 Axioms (15)
-
-The typeclass has 15 axioms, all justified for a flat 3-torus:
 
 **Operator properties (5):** hDivLinear, hGradConst, hGradAdd, hGradScalarMul, hGradChainExp
 
@@ -159,9 +179,6 @@ The typeclass has 15 axioms, all justified for a flat 3-torus:
 
 **Abstract measure (2):** hSpatialVelocityFubini, hSpatialAdd
 
-**Removed axioms:**
-- hStokes (∫ div F = 0): removed — never used, derivable from hIBP_spatial + hSpatialAdd + hGradConst
-
 **Derived lemmas (proved from axioms):**
 - hGradChainLog (from hGradChainExp via exp(log g) = g)
 - hGradIntZero (from hIBP_spatial + hGradConst + hSpatialAdd)
@@ -172,13 +189,11 @@ The typeclass has 15 axioms, all justified for a flat 3-torus:
 
 ## Theorem42 Hypotheses
 
-**Physical** (14): f > 0, f smooth, f integrable, ν > 0, ρ_ion > 0, Ψ > 0,
-Ψ continuous, ρ = ∫f, J = ∫vf, ρ continuous, Vlasov equation, Maxwell equations.
+**Physical** (12): f > 0, f smooth, f integrable, nu > 0, rho_ion > 0, Psi > 0,
+Psi continuous, rho continuous, D continuous, Vlasov equation, Maxwell equations (3).
 
 **Domain** (via `[FlatTorus3 X]`): 15 axioms for spatial operators and torus topology.
+CompactSpace and Nonempty bundled into FlatTorus3.
 
-**Velocity-space decay** (9): PSD integrand integrability (inner, outer),
-Fubini integrability for symmetrized weak form (double, inner, outer),
-transport integrability (spatial transport, force transport),
-Landau flux decay (boundary terms for landau_ibp),
-force transport decay (boundary terms for velocity_ibp in entropy estimate).
+**Velocity-space decay** (1 structure): `VelocityDecayConditions` bundles all 15
+integrability/Fubini/IBP/decay conditions.
