@@ -344,8 +344,15 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
   -- Nonneg continuous function with zero integral is identically zero
   hSpatialNonnegZero : ∀ g : X → ℝ, Continuous g →
     (∀ x, 0 ≤ g x) → ∫ x, g x = 0 → ∀ x, g x = 0
-  -- Linearity of gradient: gradX(f + g) = gradX(f) + gradX(g)
-  hGradAdd : ∀ (f g : X → ℝ),
+  -- Spatial differentiability predicate (abstract; on the concrete torus,
+  -- this is Differentiable ℝ (periodicLift f))
+  IsSpatiallyDiff : (X → ℝ) → Prop
+  hDiff_const : ∀ c, IsSpatiallyDiff (fun _ : X => c)
+  hDiff_add : ∀ f g, IsSpatiallyDiff f → IsSpatiallyDiff g →
+    IsSpatiallyDiff (fun x => f x + g x)
+  hDiff_smul : ∀ c f, IsSpatiallyDiff f → IsSpatiallyDiff (fun x => c * f x)
+  -- Linearity of gradient: gradX(f + g) = gradX(f) + gradX(g) for differentiable f, g
+  hGradAdd : ∀ (f g : X → ℝ), IsSpatiallyDiff f → IsSpatiallyDiff g →
     ∀ x, gradX (fun y => f y + g y) x = gradX f x + gradX g x
   -- Scalar multiplication: gradX(c · f) = c · gradX(f) for constant c
   hGradScalarMul : ∀ (c : ℝ) (f : X → ℝ),
@@ -435,6 +442,33 @@ lemma hGradIntZero (g : X → ℝ) (u : Fin 3 → ℝ) :
   have h2 : ∫ x : X, u 2 * gradX g x 2 = u 2 * ∫ x, gradX g x 2 := integral_const_mul _ _
   rw [h0, h1, h2, gradIntZero_component g 0, gradIntZero_component g 1, gradIntZero_component g 2]
   ring
+
+/-- Adding a constant doesn't change the gradient.
+    Derived from hGradChainExp + hGradScalarMul via the exp trick:
+    exp(f+c) = exp(c)*exp(f), so by the chain rule and scalar multiplication,
+    exp(f(x)+c) * gradX(f+c)(x) = exp(c) * exp(f(x)) * gradX(f)(x).
+    Cancelling exp(f(x)+c) > 0 gives gradX(f+c) = gradX(f). -/
+lemma hGradAddConst (f : X → ℝ) (c : ℝ) :
+    ∀ x, gradX (fun y => f y + c) x = gradX f x := by
+  intro x; ext i
+  have h1 := hGradChainExp (X := X) (fun y => f y + c) x i
+  have h2 := hGradChainExp (X := X) f x i
+  -- exp(f+c) = exp(c) * exp(f)
+  have hfun_eq : (fun y => Real.exp (f y + c)) = (fun y => Real.exp c * Real.exp (f y)) :=
+    funext (fun y => by rw [Real.exp_add]; ring)
+  rw [hfun_eq] at h1
+  -- gradX(exp(c) * exp(f)) = exp(c) • gradX(exp(f)) by hGradScalarMul
+  have h3 := congr_fun (hGradScalarMul (X := X) (Real.exp c) (fun y => Real.exp (f y)) x) i
+  simp only [Pi.smul_apply, smul_eq_mul] at h3
+  rw [h3, h2] at h1
+  -- h1: exp(c) * (exp(f x) * gradX f x i) = exp(f x + c) * gradX(f+c) x i
+  rw [Real.exp_add] at h1
+  -- h1: exp(c) * (exp(f x) * gradX f x i) = exp(f x) * exp(c) * gradX(f+c) x i
+  have hne : Real.exp c * Real.exp (f x) ≠ 0 :=
+    ne_of_gt (mul_pos (Real.exp_pos _) (Real.exp_pos _))
+  have h4 : Real.exp c * Real.exp (f x) * gradX f x i =
+      Real.exp c * Real.exp (f x) * gradX (fun y => f y + c) x i := by linarith
+  exact mul_left_cancel₀ hne h4.symm
 
 /-- Second derivative test: Laplacian ≥ 0 at a minimum.
     Derived from hLaplacianMaxNonpos applied to -φ, using linearity of grad and div. -/
@@ -576,7 +610,16 @@ structure VMLInput (X : Type*) [FlatTorus3 X] where
   hPSD_inner : ∀ x v, Integrable (PSDIntegrand Ψ (f x) v)
   hPSD_outer : ∀ x, Integrable (fun v => ∫ w, PSDIntegrand Ψ (f x) v w)
   -- === Analytical interface hypotheses ===
+  -- Maxwellian parameters are spatially differentiable (follows from f being smooth)
+  hDiff_maxwellian : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
+    (∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) →
+    FlatTorus3.IsSpatiallyDiff a ∧
+    (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) ∧
+    FlatTorus3.IsSpatiallyDiff c
   hPolynomialIdentity : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
+    FlatTorus3.IsSpatiallyDiff a →
+    (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) →
+    FlatTorus3.IsSpatiallyDiff c →
     (∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) →
     ∀ x v,
       dotProduct v (FlatTorus3.gradX c x) * normSq v +

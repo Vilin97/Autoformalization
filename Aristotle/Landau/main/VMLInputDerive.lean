@@ -84,6 +84,13 @@ lemma VMLInput.hMaxwellianForm (p : VMLInput X) :
       p.c_loc x * normSq v) :=
   fun x => (p.isMaxwellian_at x).choose_spec.choose_spec.choose_spec.2
 
+/-- IsSpatiallyDiff for the Maxwellian parameters a_loc, b_loc, c_loc. -/
+private def VMLInput.hDiff_abc (p : VMLInput X) :
+    FlatTorus3.IsSpatiallyDiff p.a_loc ∧
+    (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => p.b_loc y j)) ∧
+    FlatTorus3.IsSpatiallyDiff p.c_loc :=
+  p.hDiff_maxwellian p.a_loc p.b_loc p.c_loc p.hMaxwellianForm
+
 /-- Temperature is spatially constant: c(x) ≡ c₀. -/
 lemma VMLInput.hc_const_grad (p : VMLInput X) :
     ∀ x, FlatTorus3.gradX p.c_loc x = 0 := by
@@ -96,7 +103,8 @@ lemma VMLInput.hc_const_grad (p : VMLInput X) :
     (FlatTorus3.gradX p.a_loc x + (2 * p.c_loc x) • p.E x + cross (p.B x) (p.b_loc x))
     (dotProduct (p.E x) (p.b_loc x))
     (fun v => by
-      have h := p.hPolynomialIdentity p.a_loc p.b_loc p.c_loc p.hMaxwellianForm x v
+      have h := p.hPolynomialIdentity p.a_loc p.b_loc p.c_loc
+        p.hDiff_abc.1 p.hDiff_abc.2.1 p.hDiff_abc.2.2 p.hMaxwellianForm x v
       simp only [dotProduct_add] at *
       linarith)
 
@@ -113,7 +121,8 @@ lemma VMLInput.hKilling (p : VMLInput X) :
     ∀ x i j, FlatTorus3.gradX (fun y => p.b_loc y j) x i +
       FlatTorus3.gradX (fun y => p.b_loc y i) x j = 0 := by
   intro x
-  have hpoly := fun v => p.hPolynomialIdentity p.a_loc p.b_loc p.c_loc p.hMaxwellianForm x v
+  have hpoly := fun v => p.hPolynomialIdentity p.a_loc p.b_loc p.c_loc
+        p.hDiff_abc.1 p.hDiff_abc.2.1 p.hDiff_abc.2.2 p.hMaxwellianForm x v
   have hgrad_c : FlatTorus3.gradX p.c_loc x = 0 := p.hc_const_grad x
   -- Remove cubic term (gradX c = 0)
   have hred : ∀ v : Fin 3 → ℝ,
@@ -165,7 +174,8 @@ lemma VMLInput.hForceBalance (p : VMLInput X) :
     ∀ x, FlatTorus3.gradX p.a_loc x =
       -(2 * p.c₀) • p.E x + cross p.b₀ (p.B x) := by
   intro x
-  have hpoly := fun v => p.hPolynomialIdentity p.a_loc p.b_loc p.c_loc p.hMaxwellianForm x v
+  have hpoly := fun v => p.hPolynomialIdentity p.a_loc p.b_loc p.c_loc
+        p.hDiff_abc.1 p.hDiff_abc.2.1 p.hDiff_abc.2.2 p.hMaxwellianForm x v
   have hgrad_c : FlatTorus3.gradX p.c_loc x = 0 := p.hc_const_grad x
   have hgrad_b : ∀ j : Fin 3, FlatTorus3.gradX (fun y => p.b_loc y j) x = 0 := by
     intro j; apply FlatTorus3.hGradConst; intro x' y'

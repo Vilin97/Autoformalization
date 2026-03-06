@@ -198,10 +198,8 @@ lemma poisson_boltzmann_from_vlasov
     intro x v i
     have hf_eq : (fun y => f y v) = (fun y => Real.exp (a₀ y + c₀ * normSq v)) :=
       funext (fun y => ha₀ y v)
-    rw [hf_eq, FlatTorus3.hGradChainExp, FlatTorus3.hGradAdd]
-    have hconst : FlatTorus3.gradX (fun _ => c₀ * normSq v) x = 0 :=
-      FlatTorus3.hGradConst _ (fun _ _ => rfl) x
-    simp [Pi.add_apply, hconst, ha₀ x v]
+    rw [hf_eq, FlatTorus3.hGradChainExp, FlatTorus3.hGradAddConst]
+    simp [ha₀ x v]
   -- Step 5: Force balance: gradX(a₀) = -(2c₀) E
   have hForce : ∀ x, FlatTorus3.gradX a₀ x = (-2 * c₀) • E x := by
     intro x
@@ -251,9 +249,8 @@ lemma poisson_boltzmann_from_vlasov
     have hlog_eq : Real.log ∘ ρ = fun y => a₀ y + Real.log C := funext (fun y => by
       show Real.log (ρ y) = a₀ y + Real.log C
       rw [hρ_eq y, Real.log_mul (ne_of_gt (Real.exp_pos _)) (ne_of_gt hC_pos), Real.log_exp])
-    -- gradX(log ∘ ρ) = gradX(a₀ + const) = gradX(a₀) + gradX(const) = gradX(a₀)
-    rw [hlog_eq, FlatTorus3.hGradAdd a₀ (fun _ => Real.log C) x,
-      FlatTorus3.hGradConst (fun _ => Real.log C) (fun _ _ => rfl) x, add_zero]
+    -- gradX(log ∘ ρ) = gradX(a₀ + const) = gradX(a₀) by hGradAddConst
+    rw [hlog_eq, FlatTorus3.hGradAddConst]
   -- Step 7: Apply poisson_boltzmann_algebraic
   exact poisson_boltzmann_algebraic FlatTorus3.gradX FlatTorus3.divX E ρ ρ_ion
     a₀ c₀ hc₀ hForce hGradLogRho _hGauss FlatTorus3.hDivLinear

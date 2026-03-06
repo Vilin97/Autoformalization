@@ -147,6 +147,9 @@ lemma polynomial_identity_from_vlasov
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
       ν * LandauOperator Ψ (f x) v) :
     ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
+    FlatTorus3.IsSpatiallyDiff a →
+    (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) →
+    FlatTorus3.IsSpatiallyDiff c →
     (∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) →
     ∀ x v,
       dotProduct v (FlatTorus3.gradX c x) * normSq v +
@@ -155,7 +158,7 @@ lemma polynomial_identity_from_vlasov
       dotProduct v (FlatTorus3.gradX a x) +
       dotProduct (E x) (b x) +
       dotProduct v ((2 * c x) • E x + cross (B x) (b x)) = 0 := by
-  intro a b c hform x v
+  intro a b c ha hb hc hform x v
   -- Step 1: c(x) < 0 for each x (from integrability of f)
   have hc_neg : ∀ x, c x < 0 := fun x =>
     analysis_gaussian_integrability (f x) (a x) (b x) (c x) (_hf_pos x) (_hf_int x) (hform x)
@@ -190,15 +193,25 @@ lemma polynomial_identity_from_vlasov
     -- Decompose gradX(a + b·v + c|v|²) using linearity
     rw [show (fun y => a y + dotProduct (b y) v + c y * normSq v) =
         (fun y => a y + (dotProduct (b y) v + c y * normSq v)) from funext (fun y => by ring)]
-    rw [FlatTorus3.hGradAdd]
-    rw [FlatTorus3.hGradAdd (fun y => dotProduct (b y) v) (fun y => c y * normSq v)]
+    have hbv : FlatTorus3.IsSpatiallyDiff (fun y => dotProduct (b y) v) := by
+      have : (fun y => dotProduct (b y) v) = (fun y => v 0 * b y 0 + (v 1 * b y 1 + v 2 * b y 2)) := by
+        ext y; simp [dotProduct, Fin.sum_univ_three]; ring
+      rw [this]
+      exact FlatTorus3.hDiff_add _ _ (FlatTorus3.hDiff_smul _ _ (hb 0))
+        (FlatTorus3.hDiff_add _ _ (FlatTorus3.hDiff_smul _ _ (hb 1)) (FlatTorus3.hDiff_smul _ _ (hb 2)))
+    have hcv : FlatTorus3.IsSpatiallyDiff (fun y => c y * normSq v) := by
+      have : (fun y => c y * normSq v) = (fun y => normSq v * c y) := funext (fun y => mul_comm _ _)
+      rw [this]; exact FlatTorus3.hDiff_smul _ _ hc
+    rw [FlatTorus3.hGradAdd _ _ ha (FlatTorus3.hDiff_add _ _ hbv hcv)]
+    rw [FlatTorus3.hGradAdd _ _ hbv hcv]
     rw [show (fun y => c y * normSq v) = (fun y => normSq v * c y) from funext (fun y => by ring)]
     rw [FlatTorus3.hGradScalarMul]
     rw [show (fun y => dotProduct (b y) v) =
         (fun y => v 0 * b y 0 + (v 1 * b y 1 + v 2 * b y 2))
         from funext (fun y => by simp [dotProduct, Fin.sum_univ_three]; ring)]
-    rw [FlatTorus3.hGradAdd (fun y => v 0 * b y 0) (fun y => v 1 * b y 1 + v 2 * b y 2)]
-    rw [FlatTorus3.hGradAdd (fun y => v 1 * b y 1) (fun y => v 2 * b y 2)]
+    rw [FlatTorus3.hGradAdd _ _ (FlatTorus3.hDiff_smul _ _ (hb 0))
+      (FlatTorus3.hDiff_add _ _ (FlatTorus3.hDiff_smul _ _ (hb 1)) (FlatTorus3.hDiff_smul _ _ (hb 2)))]
+    rw [FlatTorus3.hGradAdd _ _ (FlatTorus3.hDiff_smul _ _ (hb 1)) (FlatTorus3.hDiff_smul _ _ (hb 2))]
     rw [FlatTorus3.hGradScalarMul (v 0) (fun y => b y 0)]
     rw [FlatTorus3.hGradScalarMul (v 1) (fun y => b y 1)]
     rw [FlatTorus3.hGradScalarMul (v 2) (fun y => b y 2)]

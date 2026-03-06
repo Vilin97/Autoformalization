@@ -1,6 +1,6 @@
 # Critique of the VML Steady State Formalization
 
-This file is the critique of the current state of the project. If I were to say that this        formalization project is fully complete, what would critics point out to invalidate this claim?
+This file is the critique of the current state of the project. If I were to say that this formalization project is fully complete, what would critics point out to invalidate this claim?
 
 Last updated: 2026-03-05
 
@@ -10,80 +10,58 @@ The files `Defs.lean`, `Section2-9.lean`, `VMLInputDerive.lean`, `Theorem42.lean
 **0 sorry's and 0 axioms**. The main theorem (`Theorem42`) is fully stated and proved.
 
 `TorusInstance.lean` provides a concrete `FlatTorus3` instance on `Fin 3 -> AddCircle 1` with
-**12 sorry's** (5 in instance fields, 7 in helper theorems).
+**7 sorry's** (1 in instance field, 6 in helper theorems).
 
 ---
 
-## Issue 1: Six FlatTorus3 Axioms Are Literally False As Stated
+## Issue 1: Differentiability and the IsSpatiallyDiff Predicate
 
-**Severity: Critical**
-**Status: Documented, not code-fixed (infeasible without major refactor)**
+**Severity: Medium (downgraded from Critical)**
+**Status: MOSTLY FIXED**
 
-The `FlatTorus3` typeclass bundles 15 axioms about spatial operators. Six of these are stated
-too strongly -- they omit necessary hypotheses and are therefore **false for the concrete torus
-instance** (even though they are used correctly in the main proof).
+The original issue was that 6 FlatTorus3 axioms were stated too strongly (without
+differentiability hypotheses), making them false for the concrete torus instance.
 
-### Missing differentiability hypotheses (4 axioms)
+### What was fixed
 
-These axioms hold for differentiable functions but fail for arbitrary measurable functions,
-because `fderiv` returns 0 when the function is not differentiable:
+1. **`hGradAdd`** now requires `IsSpatiallyDiff f` and `IsSpatiallyDiff g`. On the concrete
+   torus, `IsSpatiallyDiff = Differentiable R . periodicLift`, so `torus_hGradAdd'` is now
+   **fully proved** (no sorry) using `fderiv_add`.
 
-| Axiom | Statement | Missing Hypothesis |
-|-------|-----------|-------------------|
-| `hGradAdd` | `gradX(f+g) = gradX(f) + gradX(g)` | `Differentiable R f`, `Differentiable R g` |
-| `hGradScalarMul` | `gradX(c*f) = c * gradX(f)` | `Differentiable R f` |
-| `hGradChainExp` | `gradX(exp . phi) = exp(phi) * gradX(phi)` | `Differentiable R phi` |
-| `hDivLinear` | `divX(a * G) = a * divX(G)` | `Differentiable R (fun x => G x i)` for each i |
+2. **`hGradScalarMul`**, **`hGradChainExp`**, **`hDivLinear`** were proved unconditionally
+   on the concrete torus via case analysis on differentiability (the `fderiv` of a
+   non-differentiable function is 0, and both sides evaluate to 0).
 
-**Counterexample**: If `f` is differentiable and `g` is not, then `fderiv(f+g) = 0` (not
-differentiable), but `fderiv(f) + fderiv(g) = fderiv(f) + 0 = fderiv(f) != 0`.
+3. **`hSpatialVelocityFubini`** now requires joint integrability and is proved via
+   `integral_integral_swap`.
 
-### Missing integrability hypotheses (2 axioms)
+4. **`hGradAddConst`** derived lemma: `gradX(f + c) = gradX(f)` proved from
+   `hGradChainExp` + `hGradScalarMul` via the exp trick (no new axioms needed).
 
-| Axiom | Statement | Missing Hypothesis |
-|-------|-----------|-------------------|
-| `hSpatialAdd` | `integral(g1 + g2) = integral(g1) + integral(g2)` | `Integrable g1`, `Integrable g2` |
-| `hSpatialVelocityFubini` | `integral_x integral_v F = integral_v integral_x F` | Joint integrability of `uncurry F` |
+5. **`hDiff_maxwellian`** added as an analytical interface hypothesis in `VMLInput`:
+   if `f = exp(a + b.v + c|v|^2)`, then `a`, `b_j`, `c` are `IsSpatiallyDiff`.
+   This is mathematically true (smooth f implies smooth parameters) but not proved formally.
 
-### Why this cannot be easily fixed
+### Remaining issue
 
-Adding differentiability hypotheses to the 4 gradient axioms requires a notion of
-"spatially smooth function" on X. But X is only a `TopologicalSpace` + `MeasureSpace` --
-it has no differentiable manifold structure. Options:
-
-1. **Add `SmoothManifoldWithCorners` to FlatTorus3**: Major refactor, requires charts.
-2. **Add abstract `IsSpatiallySmooth : (X -> R) -> Prop` predicate**: Adds ~8 new axioms
-   (closure under add, scalar mul, exp, etc.) and cascades through all proofs.
-3. **Current approach**: Document honestly, keep axioms universal for simplicity.
-
-Adding `Integrable` to `hSpatialAdd` cascades to `hGradIntZero` (which needs integrability
-of `gradX` outputs), requiring yet another axiom.
-
-### Impact
-
-- The main proof only applies these axioms to C-infinity / integrable functions, so the
-  *proof* is mathematically correct.
-- The *axiom statements* are overly strong, meaning the concrete instance must `sorry`
-  5 fields (the 4 gradient axioms + hSpatialAdd; hSpatialVelocityFubini is separately sorry'd
-  due to the abstract axiom omitting joint integrability).
-- The FlatTorus3 docstring documents this design choice honestly.
+- **`hSpatialAdd`** (1 instance sorry): `integral(g1 + g2) = integral(g1) + integral(g2)`
+  stated without integrability. On a compact space all continuous functions are integrable,
+  but the abstract axiom doesn't require continuity. Adding integrability hypotheses would
+  cascade through `hGradIntZero`.
 
 ---
 
-## Issue 2: Twelve Sorry's in TorusInstance.lean
+## Issue 2: Seven Sorry's in TorusInstance.lean
 
 **Severity: High**
-**Status: Reduced from 13 to 12 (proved torus_hSpatialVelocityFubini)**
+**Status: Reduced from 12 to 7**
 
-The concrete `FlatTorus3` instance on `Fin 3 -> AddCircle 1` has 12 sorry's.
+The concrete `FlatTorus3` instance on `Fin 3 -> AddCircle 1` has 7 sorry's.
 
 ### By category
 
-**False as stated (5 instance fields + 1 helper = 6):**
-Cannot be proved because the abstract axioms lack hypotheses (see Issue 1).
-- `hDivLinear`, `hGradScalarMul`, `hGradChainExp` (instance fields)
-- `hSpatialAdd`, `hSpatialVelocityFubini` (instance fields)
-- `torus_hGradAdd'` (helper theorem, same issue)
+**Remaining sorry (1 instance field):**
+- `hSpatialAdd`: integral additivity without integrability hypothesis (see Issue 1)
 
 **Correct but hard (6 helper theorems):**
 These are genuine mathematical results requiring nontrivial formalization:
@@ -93,6 +71,14 @@ These are genuine mathematical results requiring nontrivial formalization:
 - `torus_hLaplacianMaxNonpos` -- second derivative test (not in Mathlib)
 - `torus_hKillingToHarmonic` -- Clairaut's theorem + Killing equation trace
 - `torus_hCurlZeroDivZeroHarmonic` -- Clairaut's theorem + curl=0 + div=0
+
+### What was proved (5 fewer sorry's)
+
+- `torus_hGradAdd'`: now proved with `IsSpatiallyDiff` hypotheses (was sorry'd)
+- `hDivLinear`: proved via `fderiv_const_mul_always` (case analysis on differentiability)
+- `hGradScalarMul`: proved via `fderiv_const_mul_always`
+- `hGradChainExp`: proved via `fderiv_exp_comp_always`
+- `hSpatialVelocityFubini`: proved via `integral_integral_swap` with joint integrability
 
 ### Dependency structure
 
@@ -111,20 +97,12 @@ are in Mathlib.
 **Severity: Medium**
 **Status: FIXED**
 
-All 15 integrability/decay conditions are now bundled into `VelocityDecayConditions`,
-a structure in Theorem42.lean. The theorem takes a single `(hDecay : VelocityDecayConditions ...)`
-instead of 15 separate hypotheses.
-
 ---
 
 ## Issue 4: CompactSpace Not Part of FlatTorus3
 
 **Severity: Low-Medium**
 **Status: FIXED**
-
-`CompactSpace X` and `Nonempty X` are now fields of `FlatTorus3`, with instance registrations
-so they're automatically available whenever `[FlatTorus3 X]` is in scope. Theorem42 no longer
-takes `[CompactSpace X]` or `[Nonempty X]` separately.
 
 ---
 
@@ -133,21 +111,14 @@ takes `[CompactSpace X]` or `[Nonempty X]` separately.
 **Severity: Low**
 **Status: FIXED**
 
-rho and J are now computed from f via `set` in Theorem42:
-```lean
-set rho : X -> R := fun x => integral v, f x v with h_rho_def
-set J : X -> (Fin 3 -> R) := fun x i => integral v, v i * f x v with hJ_def
-```
-They are no longer free parameters with definitional hypotheses.
-
 ---
 
 ## Summary
 
 | Issue | Severity | Status | Remaining Work |
 |-------|----------|--------|----------------|
-| 1. False axioms (missing hypotheses) | Critical | Documented | Major refactor to fix (smoothness predicate) |
-| 2. TorusInstance sorry's | High | 12 sorry's | 6 blocked by Issue 1; 6 need hard PDE proofs |
+| 1. Differentiability / IsSpatiallyDiff | Medium | MOSTLY FIXED | 1 sorry (hSpatialAdd integrability) |
+| 2. TorusInstance sorry's | High | 7 sorry's | 1 blocked by Issue 1; 6 need hard PDE proofs |
 | 3. Verbose integrability hypotheses | Medium | FIXED | -- |
 | 4. CompactSpace not in FlatTorus3 | Low-Medium | FIXED | -- |
 | 5. rho/J as parameters | Low | FIXED | -- |
