@@ -257,7 +257,7 @@ lemma vecMulVec_self_mulVec (z w : Fin 3 → ℝ) :
     - hGradIntZero (from hIBP_spatial + hGradConst + hSpatialAdd)
     - hLaplacianMinNonneg (from hLaplacianMaxNonpos + hGradScalarMul + hDivLinear)
     - hSpatialMul (from Mathlib's integral_mul_right) -/
-class FlatTorus3 (X : Type*) extends MeasureSpace X where
+class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
   gradX : (X → ℝ) → X → (Fin 3 → ℝ)
   divX : (X → (Fin 3 → ℝ)) → X → ℝ
   curlX : (X → (Fin 3 → ℝ)) → X → (Fin 3 → ℝ)
@@ -274,10 +274,10 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X where
   -- Second derivative test: Laplacian ≤ 0 at a maximum
   hLaplacianMaxNonpos : ∀ (φ : X → ℝ) (x₀ : X),
     (∀ x, φ x ≤ φ x₀) → divX (gradX φ) x₀ ≤ 0
-  -- Strictly positive function has strictly positive integral
-  hSpatialPos : ∀ g : X → ℝ, (∀ x, 0 < g x) → 0 < ∫ x, g x
-  -- Nonnegative function with zero integral is identically zero
-  hSpatialNonnegZero : ∀ g : X → ℝ,
+  -- Strictly positive continuous function has strictly positive integral
+  hSpatialPos : ∀ g : X → ℝ, Continuous g → (∀ x, 0 < g x) → 0 < ∫ x, g x
+  -- Nonneg continuous function with zero integral is identically zero
+  hSpatialNonnegZero : ∀ g : X → ℝ, Continuous g →
     (∀ x, 0 ≤ g x) → ∫ x, g x = 0 → ∀ x, g x = 0
   -- Linearity of gradient: gradX(f + g) = gradX(f) + gradX(g)
   hGradAdd : ∀ (f g : X → ℝ),
@@ -303,7 +303,7 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X where
   hSpatialVelocityFubini : ∀ (F : X → (Fin 3 → ℝ) → ℝ),
     (∀ x, MeasureTheory.Integrable (F x)) →
     (∫ x, ∫ v, F x v) = ∫ v, ∫ x, F x v
-  -- Additivity of spatial integral (requires integrability of operator outputs)
+  -- Additivity of spatial integral
   hSpatialAdd : ∀ (g₁ g₂ : X → ℝ),
     (∫ x, (g₁ x + g₂ x)) = (∫ x, g₁ x) + ∫ x, g₂ x
 
@@ -410,6 +410,7 @@ structure VMLSteadyState (X : Type*) [FlatTorus3 X] where
   hf_pos : ∀ x v, 0 < f x v
   ρ : X → ℝ
   hρ_pos : ∀ x, 0 < ρ x
+  hρ_cont : Continuous ρ
   J : X → (Fin 3 → ℝ)
   -- Maxwell equations at steady state
   hAmpere : ∀ x, FlatTorus3.curlX B x = J x
@@ -489,6 +490,7 @@ structure VMLInput (X : Type*) [FlatTorus3 X] where
   -- Derived densities
   ρ : X → ℝ
   hρ_pos : ∀ x, 0 < ρ x
+  hρ_cont : Continuous ρ
   J : X → (Fin 3 → ℝ)
   -- Maxwell equations at steady state
   hAmpere : ∀ x, FlatTorus3.curlX B x = J x

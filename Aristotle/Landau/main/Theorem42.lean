@@ -32,7 +32,7 @@ namespace VML
     Reference: H-theorem-formal.pdf, Theorem 42. -/
 theorem Theorem42
     -- === Spatial domain (abstract flat 3-torus) ===
-    {X : Type*} [FlatTorus3 X] [inst : Nonempty X] [TopologicalSpace X] [CompactSpace X]
+    {X : Type*} [FlatTorus3 X] [inst : Nonempty X] [CompactSpace X]
     -- === Physical state at steady state ===
     (f : X → (Fin 3 → ℝ) → ℝ)
     (E B : X → (Fin 3 → ℝ))
@@ -101,7 +101,9 @@ theorem Theorem42
     -- Force transport decay (boundary terms vanish for velocity-space IBP in entropy estimate).
     (hForceDecay : ∀ x i, Filter.Tendsto (fun v =>
       (E x + cross v (B x)) i * (f x v * Real.log (f x v) - f x v))
-      (Filter.cocompact _) (nhds 0)) :
+      (Filter.cocompact _) (nhds 0))
+    -- Entropy dissipation is continuous on the spatial domain
+    (hD_cont : Continuous (fun x => entropyDissipation Ψ (f x))) :
     -- === Conclusion ===
     ∃ (T_eq : ℝ) (B₀ : Fin 3 → ℝ), 0 < T_eq ∧
     (∀ x v, f x v = equilibriumMaxwellian ρ_ion T_eq v) ∧
@@ -157,7 +159,7 @@ theorem Theorem42
       have h := FlatTorus3.hSpatialMul (fun y => entropyDissipation Ψ (f y)) (-1)
       simp only [mul_neg_one] at h
       linarith [hD_int_zero]
-    linarith [FlatTorus3.hSpatialNonnegZero _ hD_neg hD_neg_int x]
+    linarith [FlatTorus3.hSpatialNonnegZero _ hD_cont.neg hD_neg hD_neg_int x]
   -- Step 3: Apply the main theorem via VMLInput.
   have result := main_from_physics {
     inst_ne := inst
@@ -176,6 +178,7 @@ theorem Theorem42
     hf_int := hf_int
     ρ := ρ
     hρ_pos := hρ_pos
+    hρ_cont := hρ_cont
     J := J
     hAmpere := hAmpere
     hGauss := hGauss

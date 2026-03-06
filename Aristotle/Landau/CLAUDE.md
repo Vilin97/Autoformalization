@@ -2,7 +2,7 @@
 
 The goal is not to end up with 0 sorry's! The goal is to make an honest formalization of the main theorem, with only the genuinely needed mathematical/physical assumptions. It is okay to have some sorry's laying around, as long as their statements are actually mathematically correct.
 
-## Main file: `Aristotle/Landau/landau-steady-state.lean`
+## Main file: `Aristotle/Landau/Theorem42.lean`
 
 - The main theorem (`Theorem42`) must be stated cleanly at the end of the file with only the necessary mathematical hypotheses — no extra assumptions.
 - Sorry's in the proof body are lemmas to be proved, not missing hypotheses.
@@ -21,6 +21,10 @@ The goal is not to end up with 0 sorry's! The goal is to make an honest formaliz
 - If Aristotle times out: decompose the lemma into smaller pieces and resubmit.
 - If Aristotle proves the negation: fix the lemma statement (missing hypotheses, wrong conclusion, etc.).
 
+## Gemini
+
+- For planning and reasoning tasks, especially requiring large context or heavy mathematical reasoning, call Gemini. Use `gemini-3.1-pro-preview`.
+
 ## Cleanup
 
 From time to time run cleanup:
@@ -36,3 +40,5 @@ Sometimes Lean decided to rebuild all Mathlib from scratch, which takes forever.
 2. `lake update` to update dependencies and save them to manifest
 3. `lake exe cache get` to fetch Mathlib cache
 4. `lake build` to ensure it worked
+
+Also, sometimes the lean-lsp-mcp is being weird, you can run `lake build` for a more reliable output.

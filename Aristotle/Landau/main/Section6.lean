@@ -57,7 +57,7 @@ theorem bulk_velocity_zero {X : Type*} [FlatTorus3 X] (ss : VMLSteadyState X) :
   have h4 : FlatTorus3.spatialIntegral ss.ρ * normSq ss.b₀ = 0 := by
     rwa [← FlatTorus3.hSpatialMul]
   -- Step 4: Since ∫ ρ > 0, we get |b₀|² = 0, hence b₀ = 0
-  have h5 : 0 < FlatTorus3.spatialIntegral ss.ρ := FlatTorus3.hSpatialPos ss.ρ ss.hρ_pos
+  have h5 : 0 < FlatTorus3.spatialIntegral ss.ρ := FlatTorus3.hSpatialPos ss.ρ ss.hρ_cont ss.hρ_pos
   have h6 : normSq ss.b₀ = 0 := by
     rcases mul_eq_zero.mp h4 with h | h
     · linarith

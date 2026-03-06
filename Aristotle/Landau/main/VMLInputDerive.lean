@@ -231,7 +231,7 @@ lemma VMLInput.hb₀_zero (p : VMLInput X) : p.b₀ = 0 := by
   have h4 : FlatTorus3.spatialIntegral p.ρ * normSq u₀ = 0 := by
     rwa [← FlatTorus3.hSpatialMul]
   -- Step 4: ∫ ρ > 0, so |u₀|² = 0, hence u₀ = 0
-  have h5 : 0 < FlatTorus3.spatialIntegral p.ρ := FlatTorus3.hSpatialPos p.ρ p.hρ_pos
+  have h5 : 0 < FlatTorus3.spatialIntegral p.ρ := FlatTorus3.hSpatialPos p.ρ p.hρ_cont p.hρ_pos
   have h6 : normSq u₀ = 0 := by
     rcases mul_eq_zero.mp h4 with h | h
     · linarith
@@ -326,6 +326,7 @@ noncomputable def VMLInput.toSteadyState (p : VMLInput X) : VMLSteadyState X whe
   hf_pos := p.hf_pos
   ρ := p.ρ
   hρ_pos := p.hρ_pos
+  hρ_cont := p.hρ_cont
   J := p.J
   hAmpere := p.hAmpere
   hGauss := p.hGauss
