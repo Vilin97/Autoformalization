@@ -2,9 +2,9 @@
 
 **Files**: `Aristotle/Landau/main/*.lean` (split across 11 files)
 **Blueprint**: `Aristotle/Landau/H-theorem-formal.tex` (Sections 1--10)
-**Status**: 0 errors, 0 sorry's in main chain; 12 sorry's in TorusInstance.lean
+**Status**: 0 errors, 0 sorry's in main chain; 4 sorry's in TorusInstance.lean
 
-Last updated: 2026-03-05
+Last updated: 2026-03-08
 
 ## Summary
 
@@ -21,7 +21,7 @@ The main proof chain (Defs, Section2-9, VMLInputDerive, Theorem42) is
 **complete with 0 sorry's and 0 axioms**.
 
 A concrete FlatTorus3 instance on `Fin 3 -> AddCircle 1` (TorusInstance.lean)
-validates the typeclass with **12 sorry's** (5 instance fields, 7 helper theorems).
+validates the typeclass with **4 sorry's** (1 instance field, 3 helper theorems).
 
 ---
 
@@ -114,37 +114,25 @@ validates the typeclass with **12 sorry's** (5 instance fields, 7 helper theorem
 
 ## TorusInstance Sorry's (12)
 
-### False as stated (5 instance fields)
+### Design issue (1 instance field)
 
-These axioms lack differentiability/integrability hypotheses at the abstract level,
-so the concrete instance cannot prove them for arbitrary functions:
+- `hSpatialAdd` -- integral additivity stated without integrability hypothesis
 
-- `hDivLinear` -- needs differentiability of G components
-- `hGradScalarMul` -- needs differentiability of f
-- `hGradChainExp` -- needs differentiability of phi
-- `hSpatialAdd` -- needs integrability of g1, g2
-- `hSpatialVelocityFubini` -- needs joint integrability (abstract axiom only requires pointwise)
+### Mathematically correct, hard (3 helper theorems)
 
-These cannot be fixed without adding hypotheses to the abstract FlatTorus3 axioms,
-which would require a smoothness predicate (X has no differentiable structure).
-See critique.md Issue 1 for details.
-
-### Mathematically correct, hard (7 helper theorems)
-
-- `torus_hGradAdd'` -- fderiv additivity (holds for differentiable functions, sorry'd for non-diff edge)
-- `torus_hIBP_spatial` -- IBP on torus (FTC + periodicity + Fubini)
-- `torus_hCurlIntZero` -- curl integral zero (follows from IBP)
+- `torus_hIBP_spatial` -- IBP on torus (FTC + periodicity + Fubini); Aristotle job 590a7b22
+- `torus_hCurlIntZero` -- curl integral zero (follows from IBP with phi=1)
 - `torus_hHarmonic_const` -- harmonic functions constant (energy method via IBP)
-- `torus_hLaplacianMaxNonpos` -- second derivative test (not in Mathlib)
-- `torus_hKillingToHarmonic` -- Killing -> harmonic (Clairaut + trace)
-- `torus_hCurlZeroDivZeroHarmonic` -- irrotational+solenoidal -> harmonic (Clairaut)
 
-### Proved
+### Proved (all others)
 
-- `torus_hGradConst` -- gradient of constant vanishes
-- `torus_hSpatialPos` -- positive function has positive integral
-- `torus_hSpatialNonnegZero` -- nonneg function with zero integral is zero
-- `torus_hSpatialVelocityFubini` -- Fubini (helper theorem with proper hypotheses)
+Instance fields: `hDivLinear`, `hGradScalarMul`, `hGradChainExp`, `hGradAdd`, `hGradConst`,
+`hSpatialPos`, `hSpatialNonnegZero`, `hSpatialVelocityFubini`, `IsSpatiallyDiff` closure
+
+Helper theorems: `torus_hGradAdd'`, `torus_hLaplacianMaxNonpos`, `torus_hKillingToHarmonic`,
+`torus_hCurlZeroDivZeroHarmonic`, `clairaut_fderiv`, `periodicLift_torusGradX`,
+`laplacian_nonpos_at_max_rn`, `killing_harmonic_rn'`, `curl_div_harmonic_rn'`,
+`contDiff2_from_partials`
 
 ---
 

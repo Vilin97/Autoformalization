@@ -2,7 +2,7 @@
 
 This file is the critique of the current state of the project. If I were to say that this formalization project is fully complete, what would critics point out to invalidate this claim?
 
-Last updated: 2026-03-07
+Last updated: 2026-03-08
 
 ## Current Status
 
@@ -56,60 +56,48 @@ differentiability hypotheses), making them false for the concrete torus instance
 
 ---
 
-## Issue 2: Six Sorry's in TorusInstance.lean
+## Issue 2: Four Sorry's in TorusInstance.lean
 
-**Severity: High**
-**Status: Reduced from 12 to 6**
+**Severity: Medium**
+**Status: Reduced from 12 to 4**
 
-The concrete `FlatTorus3` instance on `Fin 3 -> AddCircle 1` has 6 sorry's.
+The concrete `FlatTorus3` instance on `Fin 3 -> AddCircle 1` has 4 sorry's.
 
 ### By category
 
 **Design issue (1 instance field):**
 - `hSpatialAdd`: integral additivity without integrability hypothesis (see Issue 1)
 
-**Hard analysis (5 helper theorems):**
+**Hard analysis (3 helper theorems):**
 These are genuine mathematical results requiring nontrivial formalization:
-- `torus_hIBP_spatial` -- IBP on torus (needs FTC + periodicity + Fubini); submitted to Aristotle
-- `torus_hCurlIntZero` -- follows from IBP with phi=1; also submitted to Aristotle separately
-  (now requires `IsSpatiallyDiff` for each F component -- added to abstract `hCurlIntZero`)
-- `torus_hHarmonic_const` -- energy method: integral |grad phi|^2 = 0 via IBP (requires IsSpatiallyDiff)
-- `torus_hKillingToHarmonic` -- Clairaut's theorem + Killing equation trace; needs C² (only C¹ available from IsSpatiallyDiff)
-- `torus_hCurlZeroDivZeroHarmonic` -- Clairaut's theorem + curl=0 + div=0; same C² gap
+- `torus_hIBP_spatial` -- IBP on torus (FTC + periodicity + Fubini); submitted to Aristotle (job 590a7b22)
+- `torus_hCurlIntZero` -- follows from IBP with phi=1; depends on IBP
+- `torus_hHarmonic_const` -- energy method: integral |grad phi|^2 = 0 via IBP; depends on IBP
 
-### What was proved (6 fewer sorry's from 12 original)
+### What was proved (8 fewer sorry's from 12 original)
 
-- `torus_hGradAdd'`: proved with `IsSpatiallyDiff` hypotheses using `fderiv_add`
-- `hDivLinear`: proved via `fderiv_const_mul_always` (case analysis on differentiability)
-- `hGradScalarMul`: proved via `fderiv_const_mul_always`
-- `hGradChainExp`: proved via `fderiv_exp_comp_always`
-- `hSpatialVelocityFubini`: proved via `integral_integral_swap` with joint integrability
-- `torus_hLaplacianMaxNonpos`: PROVED -- second derivative test via 1D test + chain rule
-
-### Additional improvements (2026-03-07)
-
-- `hCurlIntZero` now requires `IsSpatiallyDiff (F·j)` for each component (correct hypothesis)
-- `integral_deriv_periodic_zero` and `ibp_periodic` integrated as private lemmas in TorusInstance.lean
-- Submitted `torus_hIBP_spatial` and `torus_hCurlIntZero` to Aristotle (jobs ba9478b4 and c5961a9d)
-- Deleted redundant aristotle-out files (second_deriv_max, laplacian_max_nonpos, ibp_periodic, integral_deriv_periodic_zero)
+- `torus_hGradAdd'`: proved via `fderiv_add` with IsSpatiallyDiff
+- `hDivLinear`, `hGradScalarMul`, `hGradChainExp`: proved via case analysis on differentiability
+- `hSpatialVelocityFubini`: proved via `integral_integral_swap`
+- `torus_hLaplacianMaxNonpos`: proved via 1D second derivative test + chain rule
+- `torus_hKillingToHarmonic`: PROVED -- Clairaut + Killing trace, uses `contDiff2_from_partials` helper
+- `torus_hCurlZeroDivZeroHarmonic`: PROVED -- Clairaut + curl=0 + div=0, uses same helper
 
 ### Building blocks proved
 
-The following lemmas are proved and integrated in TorusInstance.lean:
-- `integral_deriv_periodic_zero'` — ∫₀ᵀ f' = 0 for periodic f (private, from Aristotle)
-- `ibp_periodic'` — ∫₀ᵀ f·g' = -∫₀ᵀ f'·g for periodic f, g (private, from Aristotle)
-- `clairaut_fderiv` — ∂²f/∂xᵢ∂xⱼ = ∂²f/∂xⱼ∂xᵢ via Mathlib's `IsSymmSndFDerivAt`
-- `periodicLift_torusGradX` — connects torus gradient to fderiv of periodic lift
+- `integral_deriv_periodic_zero'`, `ibp_periodic'` — periodic IBP lemmas (from Aristotle)
+- `clairaut_fderiv` — ∂²f/∂xᵢ∂xⱼ = ∂²f/∂xⱼ∂xᵢ via `IsSymmSndFDerivAt`
+- `periodicLift_torusGradX` — torus gradient = fderiv of periodic lift
+- `contDiff2_from_partials` — derives ContDiff ℝ 2 from C¹ + C¹ partials (finite-dim analysis)
+- `laplacian_nonpos_at_max_rn` — Laplacian ≤ 0 at global max (proved directly, no sorry)
+- `killing_harmonic_rn'` — Killing equation → harmonic on ℝⁿ
+- `curl_div_harmonic_rn'` — curl=0, div=0 → harmonic on ℝⁿ
 
 ### Dependency structure
 
-IBP (`torus_hIBP_spatial`) is the key lemma. Proving it would immediately enable:
+IBP (`torus_hIBP_spatial`) is the key remaining lemma. Proving it would immediately enable:
 - `torus_hCurlIntZero` (take phi = 1 in IBP)
-- `torus_hHarmonic_const` (energy method: integrate grad phi dot grad phi via IBP)
-
-The Killing/curl-div-harmonic theorems require C² regularity (Clairaut's theorem), but
-`IsSpatiallyDiff` only guarantees C¹. One approach: strengthen `IsSpatiallyDiff` to C²
-(would cascade through all call sites), or add separate C² hypotheses to these axioms.
+- `torus_hHarmonic_const` (energy method: integrate |grad phi|² via IBP → zero → phi constant)
 
 ---
 
@@ -139,7 +127,7 @@ The Killing/curl-div-harmonic theorems require C² regularity (Clairaut's theore
 | Issue | Severity | Status | Remaining Work |
 |-------|----------|--------|----------------|
 | 1. Differentiability / IsSpatiallyDiff | Low | FIXED | hSpatialAdd minor design issue |
-| 2. TorusInstance sorry's | High | 6 sorry's | 1 design; 5 hard analysis proofs |
+| 2. TorusInstance sorry's | Medium | 4 sorry's | 1 design; 3 hard (IBP + dependents) |
 | 3. Verbose integrability hypotheses | Medium | FIXED | -- |
 | 4. CompactSpace not in FlatTorus3 | Low-Medium | FIXED | -- |
 | 5. rho/J as parameters | Low | FIXED | -- |
