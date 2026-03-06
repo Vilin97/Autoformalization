@@ -123,16 +123,16 @@ lemma continuous_attains_min {X : Type*} [TopologicalSpace X] [CompactSpace X] [
 /-- At a global maximum of a function on a FlatTorus3, the Laplacian is non-positive.
     This is a direct consequence of the FlatTorus3 axiom hLaplacianMaxNonpos. -/
 lemma laplacian_nonpos_at_max {X : Type*} [FlatTorus3 X]
-    (φ : X → ℝ) (x_max : X) (hmax : ∀ x, φ x ≤ φ x_max) :
+    (φ : X → ℝ) (hφ : FlatTorus3.IsSpatiallyDiff φ) (x_max : X) (hmax : ∀ x, φ x ≤ φ x_max) :
     FlatTorus3.divX (FlatTorus3.gradX φ) x_max ≤ 0 :=
-  FlatTorus3.hLaplacianMaxNonpos φ x_max hmax
+  FlatTorus3.hLaplacianMaxNonpos φ x_max hφ hmax
 
 /-- At a global minimum of a function on a FlatTorus3, the Laplacian is non-negative.
     This is a direct consequence of the FlatTorus3 axiom hLaplacianMinNonneg. -/
 lemma laplacian_nonneg_at_min {X : Type*} [FlatTorus3 X]
-    (φ : X → ℝ) (x_min : X) (hmin : ∀ x, φ x_min ≤ φ x) :
+    (φ : X → ℝ) (hφ : FlatTorus3.IsSpatiallyDiff φ) (x_min : X) (hmin : ∀ x, φ x_min ≤ φ x) :
     0 ≤ FlatTorus3.divX (FlatTorus3.gradX φ) x_min :=
-  FlatTorus3.hLaplacianMinNonneg φ x_min hmin
+  FlatTorus3.hLaplacianMinNonneg φ hφ x_min hmin
 
 /-- Poisson-Boltzmann equation from the Vlasov equation (isotropic case).
     When f is locally Maxwellian with b₀ = 0 (zero drift) and spatially constant c₀,

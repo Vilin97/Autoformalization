@@ -259,9 +259,14 @@ lemma force_transport_zero
     ∫_X (∂f/∂xᵢ)(x,v) · log f(x,v) dx = 0.
     Uses hIBP_spatial + hGradChainLog + hGradIntZero. -/
 private lemma spatial_transport_log_zero {X : Type*} [FlatTorus3 X]
-    (f : X → (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ x v, 0 < f x v) (v : Fin 3 → ℝ) (i : Fin 3) :
+    (f : X → (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ x v, 0 < f x v)
+    (v : Fin 3 → ℝ)
+    (hDiff_fv : FlatTorus3.IsSpatiallyDiff (fun x => f x v))
+    (hDiff_logfv : FlatTorus3.IsSpatiallyDiff (fun x => Real.log (f x v)))
+    (i : Fin 3) :
     (∫ x, FlatTorus3.gradX (fun y => f y v) x i * Real.log (f x v)) = 0 := by
   have h_ibp := FlatTorus3.hIBP_spatial (fun x => f x v) (fun x => Real.log (f x v)) i
+    hDiff_fv hDiff_logfv
   have h_chain : ∀ x, FlatTorus3.gradX (fun y => Real.log (f y v)) x i =
       (1 / f x v) * FlatTorus3.gradX (fun y => f y v) x i :=
     fun x => FlatTorus3.hGradChainLog (fun y => f y v) (fun x => hf_pos x v) x i
@@ -270,7 +275,7 @@ private lemma spatial_transport_log_zero {X : Type*} [FlatTorus3 X]
     congr 1; ext x; rw [h_chain]; have := ne_of_gt (hf_pos x v); field_simp
   rw [h_lhs] at h_ibp
   have h_grad_int : (∫ x, FlatTorus3.gradX (fun y => f y v) x i) = 0 := by
-    have := FlatTorus3.hGradIntZero (fun y => f y v) (Pi.single i 1)
+    have := FlatTorus3.hGradIntZero (fun y => f y v) hDiff_fv (Pi.single i 1)
     simp [dotProduct, Fin.sum_univ_three] at this
     fin_cases i <;> simp_all [Pi.single, Function.update]
   rw [h_grad_int] at h_ibp
@@ -293,6 +298,9 @@ lemma transport_entropy_from_vlasov
     (hf_pos : ∀ x v, 0 < f x v)
     (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
     (hf_int : ∀ x, Integrable (f x))
+    -- Spatial differentiability of f(·,v) and log f(·,v)
+    (hDiff_fv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => f x v))
+    (hDiff_logfv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => Real.log (f x v)))
     (hVlasov : ∀ x v,
       dotProduct v (FlatTorus3.gradX (fun y => f y v) x) +
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
@@ -366,9 +374,9 @@ lemma transport_entropy_from_vlasov
         v 2 * (FlatTorus3.gradX (fun y => f y v) x 2 * Real.log (f x v)))) := by
     ext x; ring
   erw [hrw, FlatTorus3.hSpatialAdd, FlatTorus3.hSpatialAdd]
-  have h0 := spatial_transport_log_zero f hf_pos v (0 : Fin 3)
-  have h1 := spatial_transport_log_zero f hf_pos v (1 : Fin 3)
-  have h2 := spatial_transport_log_zero f hf_pos v (2 : Fin 3)
+  have h0 := spatial_transport_log_zero f hf_pos v (hDiff_fv v) (hDiff_logfv v) (0 : Fin 3)
+  have h1 := spatial_transport_log_zero f hf_pos v (hDiff_fv v) (hDiff_logfv v) (1 : Fin 3)
+  have h2 := spatial_transport_log_zero f hf_pos v (hDiff_fv v) (hDiff_logfv v) (2 : Fin 3)
   -- ∫ (c * g) = c * ∫ g via integral_mul_left
   have hm0 : (∫ x, v 0 * (FlatTorus3.gradX (fun y => f y v) x 0 * Real.log (f x v))) =
       v 0 * ∫ x, FlatTorus3.gradX (fun y => f y v) x 0 * Real.log (f x v) := by

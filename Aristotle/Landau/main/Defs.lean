@@ -331,26 +331,35 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
     ∀ x, divX (fun y => α • G y) x = α * divX G x
   -- Gradient of a spatially constant function vanishes
   hGradConst : ∀ (φ : X → ℝ), (∀ x y, φ x = φ y) → ∀ x, gradX φ x = 0
-  -- Curl integral vanishes (Stokes theorem for 2-forms)
-  hCurlIntZero : ∀ (F : X → Fin 3 → ℝ) (u : Fin 3 → ℝ),
-    ∫ x, dotProduct u (curlX F x) = 0
-  -- Harmonic functions on compact manifold are constant (Hodge theory)
-  hHarmonic_const : ∀ φ : X → ℝ, (∀ x, divX (gradX φ) x = 0) → ∀ x y, φ x = φ y
-  -- Second derivative test: Laplacian ≤ 0 at a maximum
-  hLaplacianMaxNonpos : ∀ (φ : X → ℝ) (x₀ : X),
-    (∀ x, φ x ≤ φ x₀) → divX (gradX φ) x₀ ≤ 0
   -- Strictly positive continuous function has strictly positive integral
   hSpatialPos : ∀ g : X → ℝ, Continuous g → (∀ x, 0 < g x) → 0 < ∫ x, g x
   -- Nonneg continuous function with zero integral is identically zero
   hSpatialNonnegZero : ∀ g : X → ℝ, Continuous g →
     (∀ x, 0 ≤ g x) → ∫ x, g x = 0 → ∀ x, g x = 0
   -- Spatial differentiability predicate (abstract; on the concrete torus,
-  -- this is Differentiable ℝ (periodicLift f))
+  -- this is ContDiff ℝ 1 (periodicLift f), i.e. the periodic lift is C¹)
   IsSpatiallyDiff : (X → ℝ) → Prop
   hDiff_const : ∀ c, IsSpatiallyDiff (fun _ : X => c)
   hDiff_add : ∀ f g, IsSpatiallyDiff f → IsSpatiallyDiff g →
     IsSpatiallyDiff (fun x => f x + g x)
   hDiff_smul : ∀ c f, IsSpatiallyDiff f → IsSpatiallyDiff (fun x => c * f x)
+  -- Curl integral vanishes (Stokes theorem for 2-forms)
+  -- Requires IsSpatiallyDiff for each component of F: without differentiability,
+  -- curlX uses fderiv (which is 0 at non-differentiable points), and the integral
+  -- of the resulting "gradient" over the torus is not guaranteed to be 0.
+  hCurlIntZero : ∀ (F : X → Fin 3 → ℝ) (u : Fin 3 → ℝ),
+    (∀ j, IsSpatiallyDiff (fun x => F x j)) →
+    ∫ x, dotProduct u (curlX F x) = 0
+  -- Harmonic functions on compact manifold are constant (Hodge theory)
+  -- Requires IsSpatiallyDiff because without it, gradX returns 0 for
+  -- non-differentiable functions, making the hypothesis vacuously true.
+  hHarmonic_const : ∀ φ : X → ℝ, IsSpatiallyDiff φ →
+    (∀ x, divX (gradX φ) x = 0) → ∀ x y, φ x = φ y
+  -- Second derivative test: Laplacian ≤ 0 at a maximum
+  -- Requires IsSpatiallyDiff: without it, gradX uses junk fderiv values,
+  -- making the statement false for non-differentiable functions.
+  hLaplacianMaxNonpos : ∀ (φ : X → ℝ) (x₀ : X), IsSpatiallyDiff φ →
+    (∀ x, φ x ≤ φ x₀) → divX (gradX φ) x₀ ≤ 0
   -- Linearity of gradient: gradX(f + g) = gradX(f) + gradX(g) for differentiable f, g
   hGradAdd : ∀ (f g : X → ℝ), IsSpatiallyDiff f → IsSpatiallyDiff g →
     ∀ x, gradX (fun y => f y + g y) x = gradX f x + gradX g x
@@ -360,16 +369,24 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
   -- Chain rule for exp: gradX(exp ∘ φ) = exp(φ) · gradX(φ)
   hGradChainExp : ∀ (φ : X → ℝ),
     ∀ x i, gradX (fun y => Real.exp (φ y)) x i = Real.exp (φ x) * gradX φ x i
-  -- Killing fields have harmonic components (flatness of the metric)
+  -- Killing fields have harmonic components (flatness of the metric).
+  -- Requires C¹ regularity of b_j and C² regularity of gradient components.
   hKillingToHarmonic : ∀ (b : X → Fin 3 → ℝ),
+    (∀ j, IsSpatiallyDiff (fun y => b y j)) →
+    (∀ j i, IsSpatiallyDiff (fun x => gradX (fun y => b y j) x i)) →
     (∀ x i j, gradX (fun y => b y j) x i + gradX (fun y => b y i) x j = 0) →
     ∀ j : Fin 3, ∀ x, divX (gradX (fun y => b y j)) x = 0
-  -- Irrotational + solenoidal vector field has harmonic components
+  -- Irrotational + solenoidal vector field has harmonic components.
+  -- Requires C¹ regularity of F_i and C² regularity of gradient components.
   hCurlZeroDivZeroHarmonic : ∀ F : X → (Fin 3 → ℝ),
+    (∀ i, IsSpatiallyDiff (fun y => F y i)) →
+    (∀ i j, IsSpatiallyDiff (fun x => gradX (fun y => F y i) x j)) →
     (∀ x, curlX F x = 0) → (∀ x, divX F x = 0) →
     ∀ i, ∀ x, divX (gradX (fun y => F y i)) x = 0
   -- Integration by parts on the torus: ∫ φ · (∇ψ)ᵢ = -∫ ψ · (∇φ)ᵢ
+  -- Requires spatial differentiability of both φ and ψ.
   hIBP_spatial : ∀ (φ ψ : X → ℝ) (i : Fin 3),
+    IsSpatiallyDiff φ → IsSpatiallyDiff ψ →
     (∫ x, φ x * gradX ψ x i) = -(∫ x, ψ x * gradX φ x i)
   -- Fubini: swap spatial integral (over compact X) with velocity integral (over ℝ³)
   hSpatialVelocityFubini : ∀ (F : X → (Fin 3 → ℝ) → ℝ),
@@ -401,8 +418,9 @@ lemma hSpatialMul (g : X → ℝ) (c : ℝ) :
   simp [spatialIntegral, integral_mul_right]
 
 /-- Zero gradient implies spatially constant (derived from hHarmonic_const + hDivLinear). -/
-lemma hGradZeroConst (φ : X → ℝ) (h : ∀ x, gradX φ x = 0) : ∀ x y, φ x = φ y := by
-  apply hHarmonic_const
+lemma hGradZeroConst (φ : X → ℝ) (hd : IsSpatiallyDiff φ) (h : ∀ x, gradX φ x = 0) :
+    ∀ x y, φ x = φ y := by
+  apply hHarmonic_const _ hd
   intro x
   have h1 := hDivLinear (X := X) 0 (gradX φ) x
   have hg : (fun y : X => (0 : ℝ) • gradX φ y) = gradX φ := by
@@ -422,9 +440,9 @@ lemma hGradChainLog (g : X → ℝ) (hg : ∀ x, 0 < g x) :
   field_simp at key ⊢; linarith
 
 /-- Integral of a single gradient component vanishes (from IBP with φ=1). -/
-private lemma gradIntZero_component (g : X → ℝ) (i : Fin 3) :
+private lemma gradIntZero_component (g : X → ℝ) (hg : IsSpatiallyDiff g) (i : Fin 3) :
     ∫ x, gradX g x i = 0 := by
-  have h := hIBP_spatial (fun _ => 1) g i
+  have h := hIBP_spatial (fun _ => 1) g i (hDiff_const 1) hg
   simp only [one_mul] at h
   have hc : ∀ x : X, gradX (fun _ : X => (1 : ℝ)) x = 0 :=
     hGradConst (fun _ : X => (1 : ℝ)) (fun _ _ => rfl)
@@ -433,14 +451,15 @@ private lemma gradIntZero_component (g : X → ℝ) (i : Fin 3) :
 
 /-- Gradient integral vanishes (Stokes for 0-forms: ∫_M dg = 0).
     Derived from hIBP_spatial + hGradConst + hSpatialAdd. -/
-lemma hGradIntZero (g : X → ℝ) (u : Fin 3 → ℝ) :
+lemma hGradIntZero (g : X → ℝ) (hg : IsSpatiallyDiff g) (u : Fin 3 → ℝ) :
     ∫ x, dotProduct u (gradX g x) = 0 := by
   simp only [dotProduct, Fin.sum_univ_three]
   rw [hSpatialAdd, hSpatialAdd]
   have h0 : ∫ x : X, u 0 * gradX g x 0 = u 0 * ∫ x, gradX g x 0 := integral_const_mul _ _
   have h1 : ∫ x : X, u 1 * gradX g x 1 = u 1 * ∫ x, gradX g x 1 := integral_const_mul _ _
   have h2 : ∫ x : X, u 2 * gradX g x 2 = u 2 * ∫ x, gradX g x 2 := integral_const_mul _ _
-  rw [h0, h1, h2, gradIntZero_component g 0, gradIntZero_component g 1, gradIntZero_component g 2]
+  rw [h0, h1, h2, gradIntZero_component g hg 0, gradIntZero_component g hg 1,
+    gradIntZero_component g hg 2]
   ring
 
 /-- Adding a constant doesn't change the gradient.
@@ -472,11 +491,11 @@ lemma hGradAddConst (f : X → ℝ) (c : ℝ) :
 
 /-- Second derivative test: Laplacian ≥ 0 at a minimum.
     Derived from hLaplacianMaxNonpos applied to -φ, using linearity of grad and div. -/
-lemma hLaplacianMinNonneg (φ : X → ℝ) (x₀ : X)
+lemma hLaplacianMinNonneg (φ : X → ℝ) (hφ : IsSpatiallyDiff φ) (x₀ : X)
     (hmin : ∀ x, φ x₀ ≤ φ x) : 0 ≤ divX (gradX φ) x₀ := by
   have hmax : ∀ x, (fun y => (-1) * φ y) x ≤ (fun y => (-1) * φ y) x₀ := by
     intro x; simp; linarith [hmin x]
-  have h := hLaplacianMaxNonpos (fun y => (-1) * φ y) x₀ hmax
+  have h := hLaplacianMaxNonpos (fun y => (-1) * φ y) x₀ (hDiff_smul (-1) φ hφ) hmax
   have h2 : divX (gradX (fun y => (-1) * φ y)) x₀ =
       (-1) * divX (gradX φ) x₀ := by
     have hg : gradX (fun y => (-1) * φ y) = fun x => (-1 : ℝ) • gradX φ x := by
@@ -522,6 +541,10 @@ structure VMLSteadyState (X : Type*) [FlatTorus3 X] where
   hAmpere : ∀ x, FlatTorus3.curlX B x = J x
   hGauss : ∀ x, FlatTorus3.divX E x = ρ x - ρ_ion
   hDivB : ∀ x, FlatTorus3.divX B x = 0
+  -- Spatial differentiability for B (needed for harmonic → constant)
+  hDiff_B : ∀ i, FlatTorus3.IsSpatiallyDiff (fun y => B y i)
+  -- C² for B: gradient components of B_i are spatially differentiable (needed for harmonic)
+  hDiff_B_C2 : ∀ i j, FlatTorus3.IsSpatiallyDiff (fun x => FlatTorus3.gradX (fun y => B y i) x j)
   -- === H-theorem chain results (Sections 3-4 of tex) ===
   a_loc : X → ℝ
   b_loc : X → (Fin 3 → ℝ)
@@ -529,6 +552,8 @@ structure VMLSteadyState (X : Type*) [FlatTorus3 X] where
   hc_neg : ∀ x, c_loc x < 0
   hMaxwellianForm : ∀ x v,
     f x v = Real.exp (a_loc x + dotProduct (b_loc x) v + c_loc x * normSq v)
+  -- C² for b_loc: gradient components of b_loc_j are spatially differentiable (needed for Killing → harmonic)
+  hDiff_b_C2 : ∀ j i, FlatTorus3.IsSpatiallyDiff (fun x => FlatTorus3.gradX (fun y => b_loc y j) x i)
   -- === Polynomial matching results (Section 5 of tex) ===
   c₀ : ℝ
   hc₀_neg : c₀ < 0
@@ -601,6 +626,12 @@ structure VMLInput (X : Type*) [FlatTorus3 X] where
   hAmpere : ∀ x, FlatTorus3.curlX B x = J x
   hGauss : ∀ x, FlatTorus3.divX E x = ρ x - ρ_ion
   hDivB : ∀ x, FlatTorus3.divX B x = 0
+  -- Spatial differentiability for B components
+  hDiff_B : ∀ i, FlatTorus3.IsSpatiallyDiff (fun y => B y i)
+  -- Spatial differentiability for log(ρ) (needed for Laplacian max principle)
+  -- Analytically: ρ(x) = ∫ f(x,v) dv is C¹ in x (differentiate under integral),
+  -- and ρ > 0 so log(ρ) is C¹. This is an interface hypothesis.
+  hDiff_logRho : FlatTorus3.IsSpatiallyDiff (Real.log ∘ ρ)
   -- === Derived from H-theorem chain ===
   hD_zero : ∀ x, entropyDissipation Ψ (f x) = 0
   hScoreForm : ∀ x, entropyDissipation Ψ (f x) =
@@ -616,6 +647,12 @@ structure VMLInput (X : Type*) [FlatTorus3 X] where
     FlatTorus3.IsSpatiallyDiff a ∧
     (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) ∧
     FlatTorus3.IsSpatiallyDiff c
+  -- C² for Maxwellian b parameters (gradient components are spatially differentiable)
+  hDiff_maxwellian_C2 : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
+    (∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) →
+    ∀ j i, FlatTorus3.IsSpatiallyDiff (fun x => FlatTorus3.gradX (fun y => b y j) x i)
+  -- C² for B components
+  hDiff_B_C2 : ∀ i j, FlatTorus3.IsSpatiallyDiff (fun x => FlatTorus3.gradX (fun y => B y i) x j)
   hPolynomialIdentity : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
     FlatTorus3.IsSpatiallyDiff a →
     (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) →

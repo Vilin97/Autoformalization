@@ -45,10 +45,10 @@ theorem magnetic_field_constant {X : Type*} [FlatTorus3 X] (ss : VMLSteadyState 
   have hcurl_zero : ∀ x, FlatTorus3.curlX ss.B x = 0 := by
     intro x; rw [ss.hAmpere]; exact hJ_zero x
   -- Step 3: Each component is harmonic
-  have hBi_harmonic := FlatTorus3.hCurlZeroDivZeroHarmonic ss.B hcurl_zero ss.hDivB
+  have hBi_harmonic := FlatTorus3.hCurlZeroDivZeroHarmonic ss.B ss.hDiff_B ss.hDiff_B_C2 hcurl_zero ss.hDivB
   -- Step 4: Each component is constant
   have hBi_const : ∀ i, ∀ x y, ss.B x i = ss.B y i := by
-    intro i; exact FlatTorus3.hHarmonic_const (fun y => ss.B y i) (hBi_harmonic i)
+    intro i; exact FlatTorus3.hHarmonic_const (fun y => ss.B y i) (ss.hDiff_B i) (hBi_harmonic i)
   -- Extract the constant value from x₀
   exact ⟨fun i => ss.B ss.x₀ i, fun x => funext (fun i => hBi_const i x ss.x₀)⟩
 
