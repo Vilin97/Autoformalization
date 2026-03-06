@@ -76,26 +76,48 @@ connecting the `choose`-based `torusGradX` to fderiv continuity.
 ## Issue 3: `IsSpatiallyDiff` Hypotheses Are Inputs, Not Derivations (Medium)
 
 **Severity: Medium**
-**Status: Open**
+**Status: Partially addressed (2026-03-09)**
 
-`Theorem42` requires as *input hypotheses*:
+`Theorem42` originally required as *input hypotheses*:
 
-- `hDiff_fv : ∀ v, IsSpatiallyDiff (fun x => f x v)`
-- `hDiff_logfv : ∀ v, IsSpatiallyDiff (fun x => Real.log (f x v))`
-- `hDiff_maxwellian`: if f = exp(a+b·v+c|v|²) then a, b, c are spatially C¹
-- `hDiff_maxwellian_C2`: the gradient components of b are spatially C¹
+- `hDiff_fv : ∀ v, IsSpatiallyDiff (fun x => f x v)` — f(·,v) is spatially C¹ for each v
+- ~~`hDiff_logfv`~~ — **DERIVED** from `hDiff_fv + hf_pos + FlatTorus3.hDiff_log`
+- ~~`hDiff_maxwellian`~~ — **DERIVED** via `maxwellian_params_isSpatiallyDiff`
+- ~~`hDiff_logRho`~~ — **DERIVED** via `hDiff_velocityIntegral + hGradFv_dominated + hDiff_log`
+- `hDiff_maxwellian_C2`: gradient components of b are spatially C¹ (C² for b)
 - `hDiff_B`: each component of B is spatially C¹
-- `hDiff_logRho`: log(ρ) is spatially C¹
+- `hDiff_B_C2`: gradient components of B are spatially C¹ (C² for B)
 
-These are **non-trivial analytical facts** — in particular, `hDiff_maxwellian` requires an
-implicit function theorem argument to extract C¹ functions `a, b, c` from `f x v = exp(a(x) + ...)`.
-None are derived in Lean; all are *assumed* as hypotheses. A critic would say: "You're not
-actually proving the theorem from the VML PDE — you're assuming the regularity conclusions."
+### Progress
 
-The `IsSpatiallyDiff` predicate is opaque in the typeclass (only 3 closure properties: const,
-add, scalar mul). There is no axiom saying it implies any actual regularity of f, so the
-axioms gated on it (IBP, harmonic→const, Laplacian max, curl integral, grad add) could hold
-vacuously if `IsSpatiallyDiff ≡ ⊥`.
+1. `hDiff_logfv` derived via `hDiff_log + hDiff_fv + hf_pos`.
+2. `hDiff_maxwellian` derived via `maxwellian_params_isSpatiallyDiff` (evaluating log f at v=0, eⱼ, 2e₀).
+3. `hDiff_logRho` derived (2026-03-09) via new `FlatTorus3.hDiff_velocityIntegral` axiom
+   (differentiation under the velocity integral) + `VelocityDecayConditions.hGradFv_dominated`
+   (integrable dominator for |∇ₓ f(x,v)|) + `hDiff_log` + `hρ_pos`.
+
+### Progress (2026-03-09)
+
+`hDiff_logRho` **eliminated**: now derived internally via:
+- `FlatTorus3.hDiff_velocityIntegral` (new axiom: differentiation under the velocity integral)
+- `VelocityDecayConditions.hGradFv_dominated` (new field: ∃ integrable bound for |∇ₓ f(x,v)|)
+- `FlatTorus3.hDiff_log` + `hρ_pos`
+
+The `hGradFv_dominated` condition is more transparent than `hDiff_logRho`: instead of asserting
+a regularity *conclusion* (log ρ is C¹), it asserts a *physical input* (spatial gradients of f
+are dominated by an integrable function of v), which holds for sub-Gaussian distributions.
+
+### Remaining
+
+- `hDiff_B`: B is spatially C¹. Natural regularity assumption for the magnetic field.
+- `hDiff_B_C2`: B is C² in x. Required by `hCurlZeroDivZeroHarmonic` (Laplacian of each B_i
+  component). Would require C² of B from Maxwell's equations (elliptic regularity).
+- `hDiff_maxwellian_C2`: Maxwellian drift parameters b are C² in x. Required by
+  `hKillingToHarmonic`. Would need `IsSpatiallyDiff` closed under gradients (C¹→C²).
+
+The `IsSpatiallyDiff` predicate is opaque in the typeclass (4 closure properties: const,
+add, scalar mul, log). There is no axiom saying it implies any actual regularity of f, so the
+axioms gated on it could hold vacuously if `IsSpatiallyDiff ≡ ⊥`.
 
 ---
 
@@ -150,15 +172,17 @@ are just zero.
 |---|---|---|---|
 | 1. Concrete instance unfinished (IBP + dependents) | Critical | 3 sorry's; 4 Aristotle jobs active | Await Aristotle; integrate proofs |
 | 2. hSpatialAdd false without integrability | Serious | **Fixed** | hSpatialAdd + hGradIntegrable both proved (no sorry's in instance fields) |
-| 3. IsSpatiallyDiff regularity not derived | Medium | Open | Prove hDiff_maxwellian from smooth f |
+| 3. IsSpatiallyDiff regularity not derived | Medium | Partial — hDiff_logfv, hDiff_maxwellian, hDiff_logRho all derived; hDiff_maxwellian_C2, hDiff_B, hDiff_B_C2 remain | hDiff_B_C2 needs C² for B; hDiff_maxwellian_C2 needs C² for b |
 | 4. VelocityDecayConditions unverified for any f | Medium | Open | Construct for a concrete example |
 | 5. FlatTorus3 fields are functional axioms | Moderate | By design | Use distributional derivatives |
 
 ### Honest statement
 
-The formalization proves: *for any abstract compact flat 3-torus domain satisfying 15 axioms, and
-for any smooth steady-state (f, E, B) satisfying 24+ hypotheses, the conclusion holds.* The
+The formalization proves: *for any abstract compact flat 3-torus domain satisfying 21 axioms, and
+for any smooth steady-state (f, E, B) satisfying ~20 hypotheses, the conclusion holds.* The
 abstract proof chain is complete and correct. What remains is connecting this abstract result to
-a concrete physical setting: verifying the 15 domain axioms for the standard 3-torus (4 sorry's
+a concrete physical setting: verifying the 21 domain axioms for the standard 3-torus (4 sorry's
 in TorusInstance) and verifying that actual smooth solutions to the VML equations satisfy the
 assumed regularity and decay conditions (Issues 3 and 4).
+
+**Last updated: 2026-03-09**

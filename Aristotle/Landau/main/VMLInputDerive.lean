@@ -274,13 +274,22 @@ lemma VMLInput.hPB (p : VMLInput X) :
 lemma VMLInput.hDensityConst (p : VMLInput X) : ∀ x, p.ρ x = p.ρ_ion := by
   have hT : 0 < -1 / (2 * p.c₀) := by
     apply div_pos_of_neg_of_neg <;> linarith [p.hc₀_neg]
+  -- Derive IsSpatiallyDiff (log ∘ ρ) via differentiation under the velocity integral.
+  -- Step 1: IsSpatiallyDiff ρ from hDiff_velocityIntegral + hGradFv_dominated + hDiff_fv.
+  have hDiff_rho : FlatTorus3.IsSpatiallyDiff p.ρ := by
+    have h := FlatTorus3.hDiff_velocityIntegral (fun x v => p.f x v) p.hDiff_fv p.hGradFv_dominated
+    have heq : (fun x => ∫ v, p.f x v) = p.ρ := funext (fun x => (p.hρ_eq x).symm)
+    rwa [heq] at h
+  -- Step 2: IsSpatiallyDiff (log ∘ ρ) from hDiff_log + positivity.
+  have hDiff_logRho : FlatTorus3.IsSpatiallyDiff (Real.log ∘ p.ρ) :=
+    FlatTorus3.hDiff_log p.ρ hDiff_rho p.hρ_pos
   -- Laplacian signs at extrema from FlatTorus3 class axioms
   have hmax_logρ : ∀ x, (Real.log ∘ p.ρ) x ≤ (Real.log ∘ p.ρ) p.x_max :=
     fun x => Real.log_le_log (p.hρ_pos x) (p.hmax x)
   have hmin_logρ : ∀ x, (Real.log ∘ p.ρ) p.x_min ≤ (Real.log ∘ p.ρ) x :=
     fun x => Real.log_le_log (p.hρ_pos p.x_min) (p.hmin x)
-  have hmax_lapl := FlatTorus3.hLaplacianMaxNonpos (Real.log ∘ p.ρ) p.x_max p.hDiff_logRho hmax_logρ
-  have hmin_lapl := FlatTorus3.hLaplacianMinNonneg (Real.log ∘ p.ρ) p.hDiff_logRho p.x_min hmin_logρ
+  have hmax_lapl := FlatTorus3.hLaplacianMaxNonpos (Real.log ∘ p.ρ) p.x_max hDiff_logRho hmax_logρ
+  have hmin_lapl := FlatTorus3.hLaplacianMinNonneg (Real.log ∘ p.ρ) hDiff_logRho p.x_min hmin_logρ
   exact poisson_boltzmann_max_principle X p.ρ p.ρ_ion (-1 / (2 * p.c₀))
     (fun φ => FlatTorus3.divX (FlatTorus3.gradX φ))
     p.hρ_pos hT p.hρ_ion p.hPB p.x_max p.hmax p.x_min p.hmin

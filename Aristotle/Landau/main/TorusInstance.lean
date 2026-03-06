@@ -784,6 +784,20 @@ instance : VML.FlatTorus3 Torus3 where
     have : periodicLift (fun x => c * f x) = fun y => c * periodicLift f y := by
       ext y; simp [periodicLift]
     rw [this]; exact hf.const_smul c
+  hDiff_log := fun f hf hpos => by
+    show ContDiff ℝ 1 (periodicLift (Real.log ∘ f))
+    have hlift : periodicLift (Real.log ∘ f) = Real.log ∘ periodicLift f := rfl
+    rw [hlift]
+    exact hf.log (fun y => ne_of_gt (hpos (torusMk y)))
+  hDiff_velocityIntegral := by
+    -- Differentiation under the integral sign on the concrete torus.
+    -- Proof sketch: the Bochner integral x ↦ ∫v g(x,v)dv is C¹ when:
+    --   (a) x ↦ g(x,v) is C¹ for each v (given by hDiff hypothesis), and
+    --   (b) the spatial gradient components |∇ₓ g(x,v) i| are bounded by an integrable function of v.
+    -- This follows from Mathlib's hasFDerivAt_integral_of_dominated_loc_of_lip applied
+    -- to the periodic lift (which turns the torus integral into an interval integral).
+    intro g hDiff ⟨bound, hbound_int, hbound⟩
+    sorry
   hGradAdd := torus_hGradAdd'
   hGradScalarMul := by
     intro c f x; ext i; simp only [torusGradX, Pi.smul_apply, smul_eq_mul]
