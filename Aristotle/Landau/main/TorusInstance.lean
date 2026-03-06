@@ -144,16 +144,58 @@ def torusCurlX (F : Torus3 → (Fin 3 → ℝ)) (x : Torus3) : Fin 3 → ℝ :=
   ![d 1 2 - d 2 1, d 2 0 - d 0 2, d 0 1 - d 1 0]
 
 -- ============================================================================
+-- Helper lemmas: fderiv for const_mul and exp without differentiability
+-- ============================================================================
+
+/-- fderiv(c * g) = c • fderiv(g) unconditionally.
+    When g is differentiable: by fderiv_const_smul.
+    When g is not differentiable and c ≠ 0: c * g is also not differentiable,
+    so both sides are the zero map.
+    When c = 0: both sides are 0. -/
+lemma fderiv_const_mul_always {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (c : ℝ) (g : E → ℝ) (x : E) :
+    fderiv ℝ (fun y => c * g y) x = c • fderiv ℝ g x := by
+  by_cases hc : c = 0
+  · have : (fun y => c * g y) = fun _ => (0 : ℝ) := by ext y; simp [hc]
+    rw [this]; simp [hc]
+  · by_cases hg : DifferentiableAt ℝ g x
+    · exact fderiv_const_smul hg c
+    · have hcg : ¬ DifferentiableAt ℝ (fun y => c * g y) x := by
+        intro h; apply hg
+        have : (fun y => c⁻¹ * (c * g y)) = g := by ext y; field_simp
+        exact this ▸ h.const_mul c⁻¹
+      rw [fderiv_zero_of_not_differentiableAt hg, fderiv_zero_of_not_differentiableAt hcg]
+      simp
+
+/-- fderiv(exp ∘ g) x = exp(g x) • fderiv g x unconditionally.
+    When g is differentiable: by fderiv_exp.
+    When g is not differentiable: exp ∘ g is also not differentiable
+    (since g = log ∘ exp ∘ g and log is smooth on (0,∞)), so both sides are 0. -/
+lemma fderiv_exp_comp_always {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (g : E → ℝ) (x : E) :
+    fderiv ℝ (fun y => Real.exp (g y)) x = Real.exp (g x) • fderiv ℝ g x := by
+  by_cases hg : DifferentiableAt ℝ g x
+  · exact fderiv_exp hg
+  · have heg : ¬ DifferentiableAt ℝ (fun y => Real.exp (g y)) x := by
+      intro h; apply hg
+      have hlog : DifferentiableAt ℝ Real.log (Real.exp (g x)) :=
+        Real.differentiableAt_log (ne_of_gt (Real.exp_pos (g x)))
+      have h2 := hlog.comp x h
+      have : (Real.log ∘ fun y => Real.exp (g y)) = g := by ext y; simp [Real.log_exp]
+      rwa [this] at h2
+    rw [fderiv_zero_of_not_differentiableAt hg, fderiv_zero_of_not_differentiableAt heg]
+    simp
+
+-- ============================================================================
 -- Proving the 15 FlatTorus3 axioms
 -- ============================================================================
 
 -- NON-DIFFERENTIABILITY NOTE:
--- FlatTorus3 axioms like hGradAdd hold universally (for abstract operators).
--- With concrete fderiv-based operators, they only hold for differentiable functions.
--- Example: if f is differentiable and g is not, fderiv(f+g) may be 0 but
--- fderiv(f) + fderiv(g) = fderiv(f) ≠ 0. So equality fails.
---
--- This is acceptable because all functions in the main proof are C^∞.
+-- hGradAdd is the only gradient axiom that CANNOT be proved without
+-- differentiability hypotheses. The counterexample: if f is differentiable
+-- and g is not, fderiv(f+g) = 0 but fderiv(f) + fderiv(g) = fderiv(f) ≠ 0.
+-- All other gradient axioms (scalar mul, chain exp, div linear) hold
+-- universally via case analysis on differentiability.
 -- We sorry the non-differentiable edge cases in the instance.
 
 -- ============================================================================
@@ -169,10 +211,18 @@ theorem torus_hGradConst (φ : Torus3 → ℝ) (hconst : ∀ x y, φ x = φ y) :
   rw [this]; rw [hasFDerivAt_const (φ x) _ |>.fderiv]; rfl
 
 /-- hGradAdd (sorry'd for non-differentiable edge case). -/
-theorem torus_hGradAdd' (f g : Torus3 → ℝ) :
+theorem torus_hGradAdd' (f g : Torus3 → ℝ)
+    (hf : Differentiable ℝ (periodicLift f)) (hg : Differentiable ℝ (periodicLift g)) :
     ∀ x, torusGradX (fun y => f y + g y) x =
       torusGradX f x + torusGradX g x := by
-  sorry -- from fderiv_add when both lifts are differentiable
+  intro x; ext i; simp only [torusGradX, Pi.add_apply]
+  have hlift : periodicLift (fun y => f y + g y) = fun y => periodicLift f y + periodicLift g y := by
+    ext y; simp [periodicLift]
+  rw [hlift]
+  have pt := (torusMk_surjective x).choose
+  rw [show (fun y => periodicLift f y + periodicLift g y) = (periodicLift f + periodicLift g)
+    from rfl, fderiv_add hf.differentiableAt hg.differentiableAt]
+  rfl
 
 -- ============================================================================
 -- Integration axioms (from Haar measure properties)
@@ -290,20 +340,54 @@ instance : VML.FlatTorus3 Torus3 where
   gradX := torusGradX
   divX := torusDivX
   curlX := torusCurlX
-  hDivLinear := by sorry  -- fderiv linearity (non-diff edge case)
+  hDivLinear := by
+    intro α G x; simp only [torusDivX]
+    simp only [show ∀ i, periodicLift (fun z => (α • G z) i) = fun y => α * periodicLift (fun z => G z i) y
+      from fun i => by ext y; simp [periodicLift, Pi.smul_apply, smul_eq_mul]]
+    simp [fderiv_const_mul_always, Finset.mul_sum]
   hGradConst := torus_hGradConst
   hCurlIntZero := torus_hCurlIntZero
   hHarmonic_const := torus_hHarmonic_const
   hLaplacianMaxNonpos := torus_hLaplacianMaxNonpos
   hSpatialPos := fun g hcont hpos => torus_hSpatialPos g hpos hcont
   hSpatialNonnegZero := fun g hcont hnn hint => torus_hSpatialNonnegZero g hnn hint hcont
+  IsSpatiallyDiff := fun f => Differentiable ℝ (periodicLift f)
+  hDiff_const := fun c => by
+    show Differentiable ℝ (periodicLift (fun _ => c))
+    have : periodicLift (fun _ : Torus3 => c) = fun _ => c := by ext y; simp [periodicLift]
+    rw [this]; exact differentiable_const c
+  hDiff_add := fun f g hf hg => by
+    show Differentiable ℝ (periodicLift (fun x => f x + g x))
+    have : periodicLift (fun x => f x + g x) = fun y => periodicLift f y + periodicLift g y := by
+      ext y; simp [periodicLift]
+    rw [this]; exact hf.add hg
+  hDiff_smul := fun c f hf => by
+    show Differentiable ℝ (periodicLift (fun x => c * f x))
+    have : periodicLift (fun x => c * f x) = fun y => c * periodicLift f y := by
+      ext y; simp [periodicLift]
+    rw [this]; exact hf.const_mul c
   hGradAdd := torus_hGradAdd'
-  hGradScalarMul := by sorry  -- HasFDerivAt.const_mul (non-diff edge case)
-  hGradChainExp := by sorry  -- HasFDerivAt.exp (non-diff edge case)
+  hGradScalarMul := by
+    intro c f x; ext i; simp only [torusGradX, Pi.smul_apply, smul_eq_mul]
+    show fderiv ℝ (periodicLift (fun y => c * f y)) _ (Pi.single i 1) = _
+    simp only [show periodicLift (fun y => c * f y) = fun y => c * periodicLift f y
+      from by ext y; simp [periodicLift]]
+    rw [fderiv_const_mul_always]; rfl
+  hGradChainExp := by
+    intro φ x i; simp only [torusGradX]
+    show fderiv ℝ (periodicLift (fun y => Real.exp (φ y))) _ (Pi.single i 1) = _
+    have hlift : periodicLift (fun y => Real.exp (φ y)) = fun y => Real.exp (periodicLift φ y) :=
+      by ext y; simp [periodicLift]
+    rw [hlift, fderiv_exp_comp_always, ContinuousLinearMap.smul_apply, smul_eq_mul]
+    have hx₀ := (torusMk_surjective x).choose_spec
+    show Real.exp (periodicLift φ _) * _ = Real.exp (φ x) * _
+    simp [periodicLift, hx₀]
   hKillingToHarmonic := torus_hKillingToHarmonic
   hCurlZeroDivZeroHarmonic := torus_hCurlZeroDivZeroHarmonic
   hIBP_spatial := torus_hIBP_spatial
-  hSpatialVelocityFubini := fun _ _ hF_joint => integral_integral_swap hF_joint
+  hSpatialVelocityFubini := by
+    intro F _ hF_joint
+    exact integral_integral_swap hF_joint
   hSpatialAdd := by sorry  -- integral_add (no integrability hypothesis)
 
 -- ============================================================================
@@ -313,34 +397,33 @@ instance : VML.FlatTorus3 Torus3 where
 /-
 ## Status of the FlatTorus3 instance on Fin 3 → AddCircle 1
 
-**0 errors, instance compiles (with 4 sorry's in instance fields)**
+**0 errors, 7 sorry warnings**
 
-### Proved in instance (11 fields):
-- hGradConst: gradient of constant vanishes
-- hSpatialPos: proved with Continuous hypothesis
-- hSpatialNonnegZero: proved with Continuous hypothesis
-- hSpatialVelocityFubini: Fubini via integral_integral_swap (joint integrability hypothesis)
-- hGradAdd: forwarded to torus_hGradAdd' (sorry'd for non-diff edge case)
+### Proved in instance (18 fields):
+- hGradConst, hGradAdd (with IsSpatiallyDiff), hGradScalarMul, hGradChainExp
+- hDivLinear (case analysis on differentiability)
+- hSpatialPos, hSpatialNonnegZero (with Continuous hypothesis)
+- hSpatialVelocityFubini (with joint integrability)
+- IsSpatiallyDiff := Differentiable ℝ ∘ periodicLift
+- hDiff_const, hDiff_add, hDiff_smul (closure properties)
 - hCurlIntZero, hHarmonic_const, hLaplacianMaxNonpos: forwarded (sorry'd)
 - hKillingToHarmonic, hCurlZeroDivZeroHarmonic: forwarded (sorry'd)
 - hIBP_spatial: forwarded (sorry'd)
 
-### Sorry'd in instance (4 fields):
-- hDivLinear, hGradScalarMul, hGradChainExp: fderiv linearity/chain rules
-  (hold for differentiable functions; abstract axioms don't require differentiability)
+### Sorry'd in instance (1 field):
 - hSpatialAdd: integral_add (no integrability hypothesis in abstract axiom)
 
-### Sorry'd theorems (used transitively, 7 total):
-- torus_hGradAdd': non-differentiable edge case
+### Sorry'd helper theorems (6):
 - torus_hIBP_spatial: core torus IBP (unlocks hCurlIntZero and hHarmonic_const)
 - torus_hCurlIntZero: integral (derivative of periodic function) = 0
-- torus_hHarmonic_const: harmonic -> constant on torus (energy method)
+- torus_hHarmonic_const: harmonic → constant on torus (energy method)
 - torus_hLaplacianMaxNonpos: second derivative test (not in Mathlib)
-- torus_hKillingToHarmonic: Killing -> harmonic on flat torus (Clairaut)
-- torus_hCurlZeroDivZeroHarmonic: irrotational+solenoidal -> harmonic (Clairaut)
+- torus_hKillingToHarmonic: Killing → harmonic on flat torus (Clairaut)
+- torus_hCurlZeroDivZeroHarmonic: irrotational+solenoidal → harmonic (Clairaut)
 
-### Proved helper theorems (4):
+### Proved helper theorems (5):
 - torus_hGradConst: gradient of constant vanishes
+- torus_hGradAdd': gradient additivity for differentiable functions (via fderiv_add)
 - torus_hSpatialPos: positive function has positive integral
 - torus_hSpatialNonnegZero: nonneg function with zero integral is zero
 - torus_hSpatialVelocityFubini: Fubini via integral_integral_swap

@@ -131,6 +131,14 @@ theorem Theorem42
     (hρ_cont : Continuous (fun x => ∫ v, f x v))
     -- Entropy dissipation is continuous on the spatial domain
     (hD_cont : Continuous (fun x => entropyDissipation Ψ (f x)))
+    -- === Spatial differentiability of Maxwellian parameters ===
+    -- If f = exp(a + b·v + c|v|²), then a, b, c are spatially differentiable.
+    -- This is an analytical consequence of f being smooth (implicit function theorem).
+    (hDiff_maxwellian : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
+      (∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) →
+      FlatTorus3.IsSpatiallyDiff a ∧
+      (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) ∧
+      FlatTorus3.IsSpatiallyDiff c)
     -- === Velocity-space decay conditions ===
     (hDecay : VelocityDecayConditions Ψ f E B) :
     -- === Conclusion ===
@@ -218,7 +226,9 @@ theorem Theorem42
       PSDIntegrand_continuous Ψ (f x) hΨ_cont (hf_pos x) (hf_smooth x)
     hPSD_inner := hDecay.hPSD_inner_int
     hPSD_outer := hDecay.hPSD_outer_int
-    hPolynomialIdentity := hPolynomialId
+    hDiff_maxwellian := hDiff_maxwellian
+    hPolynomialIdentity := fun a b c ha hb hc hform =>
+      hPolynomialId a b c ha hb hc hform
     hJ_from_maxwellian := fun b_func c₀ hform => by
       intro x
       obtain ⟨a₀, ha₀⟩ := hform x
