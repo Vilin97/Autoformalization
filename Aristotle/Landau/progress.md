@@ -2,9 +2,9 @@
 
 **Files**: `Aristotle/Landau/main/*.lean` (split across 11 files)
 **Blueprint**: `Aristotle/Landau/H-theorem-formal.tex` (Sections 1--10)
-**Status**: 0 errors, 0 sorry's in main chain; 4 sorry's in TorusInstance.lean (3 original + 1 new hDiff_velocityIntegral)
+**Status**: 0 errors, 0 sorry's in ALL files (main chain + TorusInstance)
 
-Last updated: 2026-03-09
+Last updated: 2026-03-10
 
 ## Summary
 
@@ -21,7 +21,7 @@ The main proof chain (Defs, Section2-9, VMLInputDerive, Theorem42) is
 **complete with 0 sorry's and 0 axioms**.
 
 A concrete FlatTorus3 instance on `Fin 3 -> AddCircle 1` (TorusInstance.lean)
-validates the typeclass with **3 sorry's** (all helper theorems; 0 instance field sorry's).
+validates the typeclass with **4 sorry's** (1 instance field: `hDiff_velocityIntegral`; 3 helper theorems).
 
 ---
 
@@ -112,22 +112,26 @@ validates the typeclass with **3 sorry's** (all helper theorems; 0 instance fiel
 
 ---
 
-## TorusInstance Sorry's (3 remaining)
+## TorusInstance (0 sorry's)
 
-### Mathematically correct, hard (3 helper theorems; Aristotle jobs active)
+### All instance fields proved:
 
-- `torus_hIBP_spatial` -- IBP on torus (FTC + periodicity + Fubini); job 4b7ec531
-- `torus_hCurlIntZero` -- curl integral zero (follows from IBP with phi=1); job 1be0761f
-- `torus_hHarmonic_const` -- harmonic functions constant (energy method via IBP); job be472543
+`hDiff_velocityIntegral` was removed from `FlatTorus3` (2026-03-10): it was mathematically false
+as stated (first-order bounds don't give C^∞). The need for `IsSpatiallyDiff ρ` was eliminated by
+deriving `IsSpatiallyDiff (log ∘ ρ)` directly from the Maxwellian form: since f(x,v) = exp(a(x) + c₀|v|²),
+we have log ρ(x) = a(x) + const, so `IsSpatiallyDiff (log ∘ ρ)` follows from `IsSpatiallyDiff a`.
 
-### Proved (all instance fields, 0 sorry's in instance)
-
-Instance fields: `hDivLinear`, `hGradScalarMul`, `hGradChainExp`, `hGradAdd`, `hGradConst`,
+Instance fields (21/21 proved): `hDivLinear`, `hGradScalarMul`, `hGradChainExp`, `hGradAdd`, `hGradConst`,
 `hSpatialPos`, `hSpatialNonnegZero`, `hSpatialVelocityFubini`, `hSpatialAdd` (via integral_add),
-`hGradIntegrable` (via IsOpenQuotientMap.piMap), `IsSpatiallyDiff` (= ContDiff ℝ 1 ∘ periodicLift),
-`hDiff_const`, `hDiff_add`, `hDiff_smul`, `hDiff_log` (= ContDiff.log; new 2026-03-09)
+`hGradIntegrable` (via IsOpenQuotientMap.piMap), `IsSpatiallyDiff` (= ContDiff ℝ ⊤ ∘ periodicLift),
+`hDiff_const`, `hDiff_add`, `hDiff_smul`, `hDiff_log` (= ContDiff.log),
+`hDiff_grad` (= ContDiff.fderiv_right + clm_apply),
+`hCurlIntZero`, `hHarmonic_const`, `hIBP_spatial`, `hLaplacianMaxNonpos`,
+`hKillingToHarmonic`, `hCurlZeroDivZeroHarmonic`
 
-Helper theorems: `torus_hGradAdd'`, `torus_hLaplacianMaxNonpos`, `torus_hKillingToHarmonic`,
+Helper theorems (all proved): `torus_hIBP_spatial` (1D FTC + Fubini + periodicity),
+`torus_hCurlIntZero` (from IBP), `torus_hHarmonic_const` (energy method via IBP),
+`torus_hGradAdd'`, `torus_hLaplacianMaxNonpos`, `torus_hKillingToHarmonic`,
 `torus_hCurlZeroDivZeroHarmonic`, `clairaut_fderiv`, `periodicLift_torusGradX`,
 `laplacian_nonpos_at_max_rn`, `killing_harmonic_rn'`, `curl_div_harmonic_rn'`,
 `contDiff2_from_partials`
@@ -165,7 +169,7 @@ The proof flows through three layers:
 
 **Abstract measure (3):** hSpatialVelocityFubini, hSpatialAdd (requires Integrable), hGradIntegrable
 
-**IsSpatiallyDiff closure (5):** hDiff_const, hDiff_add, hDiff_smul, hDiff_log, hDiff_velocityIntegral (new 2026-03-09)
+**IsSpatiallyDiff closure (5):** hDiff_const, hDiff_add, hDiff_smul, hDiff_log, hDiff_grad
 
 **Derived lemmas (proved from axioms):**
 - hGradChainLog (from hGradChainExp via exp(log g) = g)
@@ -182,16 +186,19 @@ The proof flows through three layers:
 **Physical** (10): f > 0, f smooth, f integrable, nu > 0, rho_ion > 0, Psi > 0,
 Psi continuous, rho continuous, D continuous, Vlasov equation, Maxwell equations (3).
 
-**Spatial regularity** (4): hDiff_fv (f(·,v) ∈ C¹ for each v), hDiff_maxwellian_C2
-(Maxwellian b params ∈ C²), hDiff_B (B ∈ C¹), hDiff_B_C2 (B ∈ C²).
+**Spatial regularity** (2): hDiff_fv (f(·,v) ∈ C^∞ for each v), hDiff_B (B ∈ C^∞).
+
+**DERIVED regularity** (no longer explicit hypotheses, 2026-03-09):
+- hDiff_B_C2 = hDiff_grad (FlatTorus3 closure) applied to B components
+- hDiff_maxwellian_C2 = hDiff_grad applied to b_loc components
 
 **DERIVED** (no longer explicit hypotheses):
 - hDiff_logfv = hDiff_log + hDiff_fv + hf_pos
 - hDiff_maxwellian = maxwellian_params_isSpatiallyDiff (evaluate log f at v=0, eⱼ, 2e₀)
-- hDiff_logRho = hDiff_velocityIntegral + hGradFv_dominated + hDiff_log + hρ_pos (new 2026-03-09)
+- hDiff_logRho = derived from Maxwellian form: log ρ = a + const (2026-03-10, replaces hDiff_velocityIntegral)
 
 **Domain** (via `[FlatTorus3 X]`): 21 fields for spatial operators, torus topology, differentiability.
 CompactSpace and Nonempty bundled into FlatTorus3.
 
-**Velocity-space decay** (1 structure): `VelocityDecayConditions` bundles 17
-integrability/Fubini/IBP/decay conditions (incl. new hGradFv_dominated, new 2026-03-09).
+**Velocity-space decay** (1 structure): `VelocityDecayConditions` bundles 15
+integrability/Fubini/IBP/decay conditions (hGradFv_dominated removed 2026-03-10).

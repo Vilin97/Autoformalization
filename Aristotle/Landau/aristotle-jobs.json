@@ -1,32 +1,29 @@
 {
-  "jobs": [
+  "jobs": [],
+  "completed": [
     {
       "id": "51d9e2a0-58ed-497f-be70-7b136265192b",
-      "submission": "aristotle-in/torus_gradX_integral_zero.lean",
-      "output": "aristotle-out/torus_gradX_integral_zero_aristotle.lean",
       "target": "torus_gradX_integral_zero",
-      "note": "key building block for IBP"
+      "status": "proved_manually",
+      "note": "Aristotle helped with 1D periodic derivative integral; integrated into TorusInstance.lean"
     },
     {
       "id": "4b7ec531-b3ac-4702-8110-294890f79e74",
-      "submission": "aristotle-in/torus_ibp_v2.lean",
-      "output": "aristotle-out/torus_ibp_v2_aristotle.lean",
       "target": "torus_hIBP_spatial",
-      "note": "core IBP; depends on gradX_integral_zero"
+      "status": "proved_manually",
+      "note": "Aristotle helped with 1D periodic IBP; integrated into TorusInstance.lean"
     },
     {
       "id": "1be0761f-4f29-45d0-8ca2-bba659742222",
-      "submission": "aristotle-in/torus_curl_int_zero.lean",
-      "output": "aristotle-out/torus_curl_int_zero_aristotle.lean",
       "target": "torus_hCurlIntZero",
-      "note": "curl integral zero; depends on IBP"
+      "status": "proved_manually",
+      "note": "Proved manually using IBP; integrated into TorusInstance.lean"
     },
     {
       "id": "be472543-6c7f-4b32-8243-d160d5dd5e20",
-      "submission": "aristotle-in/torus_harmonic_const_submission.lean",
-      "output": "aristotle-out/torus_harmonic_const_submission_aristotle.lean",
       "target": "torus_hHarmonic_const",
-      "note": "harmonic \u2192 constant; depends on IBP"
+      "status": "proved_manually",
+      "note": "Aristotle failed; proved manually via energy method; integrated into TorusInstance.lean"
     }
   ]
 }
