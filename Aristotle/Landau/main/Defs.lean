@@ -301,8 +301,8 @@ lemma vecMulVec_self_mulVec (z w : Fin 3 → ℝ) :
     This is intentional: a properly-defined gradient on a compact manifold (e.g. via
     distributional/weak derivatives) IS linear for all L² functions. The concrete
     `fderiv`-based implementation in `TorusInstance.lean` only satisfies these for
-    differentiable inputs, which is why those instance fields are sorry'd — the fix
-    is to use distributional derivatives in the instance, not to weaken the axioms.
+    differentiable inputs (non-differentiable inputs get junk value 0). All instance
+    fields are proved; a principled fix would use distributional derivatives.
 
     hSpatialVelocityFubini is stated without explicit integrability hypothesis at the
     abstract level; the concrete instance (TorusInstance) provides it via Fubini.
