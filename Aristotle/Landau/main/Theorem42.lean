@@ -78,11 +78,7 @@ structure VelocityDecayConditions {X : Type*} [FlatTorus3 X]
   -- Per-component spatial integrability for transport × log f decomposition
   hSpatTransComp : ∀ v i, MeasureTheory.Integrable (fun x =>
     FlatTorus3.gradX (fun y => f y v) x i * Real.log (f x v))
-  -- Dominated gradient bound for f(·,v): enables differentiation under the velocity integral.
-  -- Gives IsSpatiallyDiff ρ (hence IsSpatiallyDiff (log ∘ ρ)) via FlatTorus3.hDiff_velocityIntegral.
-  -- Holds for sub-Gaussian f: |∇ₓ f(x,v)| is bounded by a polynomial-Gaussian in v.
-  hGradFv_dominated : ∃ (bound : (Fin 3 → ℝ) → ℝ), Integrable bound ∧
-    ∀ x v i, |FlatTorus3.gradX (fun y => f y v) x i| ≤ bound v
+
 
 /-- **Theorem 42** (Global steady state of the VML system).
 
@@ -148,13 +144,7 @@ theorem Theorem42
     (hDiff_fv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => f x v))
     -- If f = exp(a + b·v + c|v|²), then a, b, c are spatially differentiable.
     -- Derived from hDiff_fv + hf_pos + FlatTorus3.hDiff_log (via maxwellian_params_isSpatiallyDiff).
-    -- C² for Maxwellian b parameters: gradient components are spatially differentiable.
-    -- Follows from f being smooth (b_j ∈ C² on the torus).
-    (hDiff_maxwellian_C2 : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
-      (∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) →
-      ∀ j i, FlatTorus3.IsSpatiallyDiff (fun x => FlatTorus3.gradX (fun y => b y j) x i))
-    -- C² for B components: gradient components are spatially differentiable.
-    (hDiff_B_C2 : ∀ i j, FlatTorus3.IsSpatiallyDiff (fun x => FlatTorus3.gradX (fun y => B y i) x j))
+    -- C² regularity (hDiff_B_C2, hDiff_maxwellian_C2) derived via FlatTorus3.hDiff_grad.
     -- === Velocity-space decay conditions ===
     (hDecay : VelocityDecayConditions Ψ f E B) :
     -- === Conclusion ===
@@ -179,13 +169,6 @@ theorem Theorem42
       (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) ∧
       FlatTorus3.IsSpatiallyDiff c :=
     fun a b c hform => FlatTorus3.maxwellian_params_isSpatiallyDiff f hf_pos hDiff_fv a b c hform
-  -- Derive IsSpatiallyDiff ρ via differentiation under the velocity integral
-  -- (dominated convergence: spatial gradients of f(·,v) bounded by integrable g(v))
-  have hDiff_rho : FlatTorus3.IsSpatiallyDiff ρ :=
-    FlatTorus3.hDiff_velocityIntegral (fun x v => f x v) hDiff_fv hDecay.hGradFv_dominated
-  -- Derive IsSpatiallyDiff (log ∘ ρ) from hDiff_log + ρ > 0
-  have hDiff_logRho : FlatTorus3.IsSpatiallyDiff (Real.log ∘ ρ) :=
-    FlatTorus3.hDiff_log ρ hDiff_rho hρ_pos
   have hTransportEntropy : (∫ x, entropyDissipation Ψ (f x)) = 0 :=
     transport_entropy_from_vlasov f E B Ψ ν hν hf_pos hf_smooth hf_int hDiff_fv hDiff_logfv
       hVlasov hDecay.hSpatialTransport_int hDecay.hForceTransport_int
@@ -258,7 +241,6 @@ theorem Theorem42
     hDivB := hDivB
     hDiff_fv := hDiff_fv
     hDiff_B := hDiff_B
-    hGradFv_dominated := hDecay.hGradFv_dominated
     hD_zero := hD_zero
     hScoreForm := fun x => entropy_score_form Ψ (f x) (hf_pos x) (hf_smooth x) (hSWF_all x)
     hPSD_cont := fun x =>
@@ -266,8 +248,6 @@ theorem Theorem42
     hPSD_inner := hDecay.hPSD_inner_int
     hPSD_outer := hDecay.hPSD_outer_int
     hDiff_maxwellian := hDiff_maxwellian
-    hDiff_maxwellian_C2 := hDiff_maxwellian_C2
-    hDiff_B_C2 := hDiff_B_C2
     hPolynomialIdentity := fun a b c ha hb hc hform =>
       hPolynomialId a b c ha hb hc hform
     hJ_from_maxwellian := fun b_func c₀ hform => by

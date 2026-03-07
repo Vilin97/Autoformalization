@@ -2,51 +2,33 @@
 
 This file is the critique of the current state of the project. If I were to say that this formalization project is fully complete, what would critics point out to invalidate this claim?
 
-Last updated: 2026-03-08
+Last updated: 2026-03-07
 
 ## Current Status
 
-The files `Defs.lean`, `Section2-9.lean`, `VMLInputDerive.lean`, `Theorem42.lean` compile with
-**0 sorry's and 0 axioms**. The main theorem (`Theorem42`) is fully stated and proved.
+ALL files compile with **0 sorry's and 0 axioms**.
 
-`TorusInstance.lean` provides a concrete `FlatTorus3` instance on `Fin 3 -> AddCircle 1` with
-**3 sorry's** (0 instance fields, 3 helper theorems).
+- `Defs.lean`, `Section2-9.lean`, `VMLInputDerive.lean`, `Theorem42.lean`: abstract theorem proved
+- `TorusInstance.lean`: concrete `FlatTorus3` instance on `Fin 3 → AddCircle 1` fully verified
 
 ---
 
-## Issue 1: The Concrete Instance Is Unfinished (Critical / Showstopper)
+## Issue 1: The Concrete Instance (RESOLVED)
 
-**Severity: Critical**
-**Status: Active — 3 Aristotle jobs submitted**
+**Severity: None** (was Critical)
+**Status: FULLY RESOLVED (2026-03-07)**
 
-The "0 sorry's" claim applies only to the *abstract* theorem over any `[FlatTorus3 X]`. But
-`FlatTorus3` has never been instantiated to a *fully verified* concrete domain. The only candidate
-instance (`Fin 3 → AddCircle 1`) has three analytically crucial holes:
+All 4 original sorry's have been resolved:
 
-- `torus_hIBP_spatial` — integration by parts on the torus. **Not proved.**
-  The entire proof chain rests on IBP: it is used in
-  `hGradIntZero → transport_entropy_from_vlasov → hD_zero`, and in
-  `hHarmonic_const → magnetic_field_constant`.
-- `torus_hCurlIntZero` — integral of any curl component is zero. **Not proved.** Depends on IBP.
-- `torus_hHarmonic_const` — harmonic functions are constant. **Not proved.** Depends on IBP.
-
-Note: `hGradIntegrable` (instance field) is now **proved** via IsOpenQuotientMap.piMap.
-
-Until these are filled, Theorem42 has never been applied to an actual physical setting.
-
-### Active Aristotle submissions
-
-- `torus_gradX_integral_zero` (standalone): job 51d9e2a0
-- `torus_hIBP_spatial` + `torus_gradX_integral_zero`: job 4b7ec531 (torus_ibp_v2.lean)
-- `torus_hCurlIntZero`: job 1be0761f (torus_curl_int_zero.lean)
-- `torus_hHarmonic_const`: job be472543 (torus_harmonic_const_submission.lean)
-
-### Dependency structure
-
-IBP (`torus_hIBP_spatial`) is the key building block. Proving it would immediately enable:
-
-- `torus_hCurlIntZero` (integral of curl = integral of partial derivatives = 0 by IBP with φ=1)
-- `torus_hHarmonic_const` (energy method: ∫|∇φ|² = -∫ φΔφ via IBP → zero → φ constant)
+- `torus_hIBP_spatial` — **Proved.** (1D FTC + Fubini + periodicity)
+- `torus_hCurlIntZero` — **Proved.** (from IBP with φ=1)
+- `torus_hHarmonic_const` — **Proved.** (energy method: ∫|∇φ|² = -∫ φΔφ = 0 → ∇φ = 0 → constant)
+- `hDiff_velocityIntegral` — **Removed from FlatTorus3.** The axiom was mathematically false as
+  stated (first-order domination bounds only give C¹, not C^∞). The need for `IsSpatiallyDiff ρ`
+  was eliminated by deriving `IsSpatiallyDiff (log ∘ ρ)` directly from the Maxwellian form:
+  since `f(x,v) = exp(a(x) + c₀|v|²)`, we have `log ρ(x) = a(x) + const`, so
+  `IsSpatiallyDiff (log ∘ ρ)` follows from `IsSpatiallyDiff a`. The `hGradFv_dominated` field
+  was also removed from `VMLInput` and `VelocityDecayConditions`.
 
 ---
 
@@ -107,17 +89,36 @@ The `hGradFv_dominated` condition is more transparent than `hDiff_logRho`: inste
 a regularity *conclusion* (log ρ is C¹), it asserts a *physical input* (spatial gradients of f
 are dominated by an integrable function of v), which holds for sub-Gaussian distributions.
 
+### Progress (2026-03-09 continued)
+
+`hDiff_B_C2` and `hDiff_maxwellian_C2` **eliminated**: by adding two new fields to `FlatTorus3`:
+- `hDiff_grad`: closure of `IsSpatiallyDiff` under gradients (C¹→C¹ for gradient components)
+- `hDiff_velocityIntegral`: differentiation under the velocity integral (sorry'd in TorusInstance)
+
+These enable deriving:
+- In `Section8.lean`: `hDiff_B_C2 i j` derived as `hDiff_grad (fun y => ss.B y i) j (ss.hDiff_B i)`
+- In `VMLInputDerive.lean`: `hDiff_b_C2 j i` derived as `hDiff_grad (fun y => p.b_loc y j) i (p.hDiff_abc.2.1 j)`
+
+On the concrete torus, `IsSpatiallyDiff = ContDiff ℝ ⊤` (smooth), so these derivations work.
+
 ### Remaining
 
-- `hDiff_B`: B is spatially C¹. Natural regularity assumption for the magnetic field.
-- `hDiff_B_C2`: B is C² in x. Required by `hCurlZeroDivZeroHarmonic` (Laplacian of each B_i
-  component). Would require C² of B from Maxwell's equations (elliptic regularity).
-- `hDiff_maxwellian_C2`: Maxwellian drift parameters b are C² in x. Required by
-  `hKillingToHarmonic`. Would need `IsSpatiallyDiff` closed under gradients (C¹→C²).
+- `hDiff_B`: B is spatially C¹. Natural regularity assumption for the magnetic field. Appears as
+  an input hypothesis in `Theorem42`.
+- `hDiff_fv`: f(·,v) is spatially smooth for each v. Natural physical assumption; appears as
+  `hDiff_fv` in `VelocityDecayConditions`.
 
-The `IsSpatiallyDiff` predicate is opaque in the typeclass (4 closure properties: const,
-add, scalar mul, log). There is no axiom saying it implies any actual regularity of f, so the
-axioms gated on it could hold vacuously if `IsSpatiallyDiff ≡ ⊥`.
+The `IsSpatiallyDiff` predicate (now = `ContDiff ℝ ⊤` on the concrete torus) has 5 closure
+properties (const, add, scalar mul, log, grad) and the abstract typeclass is consistent.
+
+### Resolution of hDiff_velocityIntegral (2026-03-07)
+
+`hDiff_velocityIntegral` was **removed** from `FlatTorus3`. It was mathematically false as stated:
+first-order domination bounds only give C¹, not C^∞. The need for `IsSpatiallyDiff ρ` was
+eliminated by observing that at the point where it's needed (the maximum principle for density
+constancy), we already know f is a Maxwellian with b₀=0: f(x,v) = exp(a(x) + c₀|v|²). Therefore
+log ρ(x) = a(x) + const, and `IsSpatiallyDiff (log ∘ ρ)` follows from `IsSpatiallyDiff a`.
+The `hGradFv_dominated` field was also removed from `VMLInput` and `VelocityDecayConditions`.
 
 ---
 
@@ -170,9 +171,9 @@ are just zero.
 
 | Issue | Severity | Status | Remaining Work |
 |---|---|---|---|
-| 1. Concrete instance unfinished (IBP + dependents) | Critical | 3 sorry's; 4 Aristotle jobs active | Await Aristotle; integrate proofs |
-| 2. hSpatialAdd false without integrability | Serious | **Fixed** | hSpatialAdd + hGradIntegrable both proved (no sorry's in instance fields) |
-| 3. IsSpatiallyDiff regularity not derived | Medium | Partial — hDiff_logfv, hDiff_maxwellian, hDiff_logRho all derived; hDiff_maxwellian_C2, hDiff_B, hDiff_B_C2 remain | hDiff_B_C2 needs C² for B; hDiff_maxwellian_C2 needs C² for b |
+| 1. Concrete instance | ~~Critical~~ | **RESOLVED** — 0 sorry's | hDiff_velocityIntegral removed; IBP, curl, harmonic all proved |
+| 2. hSpatialAdd false without integrability | ~~Serious~~ | **FIXED** | hSpatialAdd + hGradIntegrable both proved |
+| 3. IsSpatiallyDiff regularity not derived | ~~Medium~~ | **RESOLVED** — all derived | hDiff_logRho from Maxwellian form |
 | 4. VelocityDecayConditions unverified for any f | Medium | Open | Construct for a concrete example |
 | 5. FlatTorus3 fields are functional axioms | Moderate | By design | Use distributional derivatives |
 
@@ -180,9 +181,9 @@ are just zero.
 
 The formalization proves: *for any abstract compact flat 3-torus domain satisfying 21 axioms, and
 for any smooth steady-state (f, E, B) satisfying ~20 hypotheses, the conclusion holds.* The
-abstract proof chain is complete and correct. What remains is connecting this abstract result to
-a concrete physical setting: verifying the 21 domain axioms for the standard 3-torus (4 sorry's
-in TorusInstance) and verifying that actual smooth solutions to the VML equations satisfy the
-assumed regularity and decay conditions (Issues 3 and 4).
+abstract proof chain is complete and correct. The concrete `FlatTorus3` instance on `Fin 3 → AddCircle 1`
+verifies all 21 axioms with **0 sorry's**. What remains is verifying that actual smooth solutions
+to the VML equations satisfy the assumed velocity-space decay conditions (Issue 4), and the
+epistemic concern that FlatTorus3 fields function as axioms (Issue 5).
 
-**Last updated: 2026-03-09**
+**Last updated: 2026-03-07**

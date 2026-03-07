@@ -159,9 +159,13 @@ lemma VMLInput.hKilling (p : VMLInput X) :
 /-- Drift velocity b is constant on T³. -/
 lemma VMLInput.hb_const_exists (p : VMLInput X) :
     ∃ b₀ : Fin 3 → ℝ, ∀ x, p.b_loc x = b₀ := by
+  -- Derive C² condition for b_loc from hDiff_grad + C¹ differentiability of b_loc components
+  have hDiff_b_C2 : ∀ j i, FlatTorus3.IsSpatiallyDiff (fun x =>
+      FlatTorus3.gradX (fun y => p.b_loc y j) x i) :=
+    fun j i => FlatTorus3.hDiff_grad (fun y => p.b_loc y j) i (p.hDiff_abc.2.1 j)
   have hHarm := FlatTorus3.hKillingToHarmonic p.b_loc
     p.hDiff_abc.2.1
-    (p.hDiff_maxwellian_C2 p.a_loc p.b_loc p.c_loc p.hMaxwellianForm) p.hKilling
+    hDiff_b_C2 p.hKilling
   use fun j => p.b_loc p.x₀ j
   intro x; ext j
   exact FlatTorus3.hHarmonic_const _ (p.hDiff_abc.2.1 j) (hHarm j) x p.x₀
@@ -274,15 +278,34 @@ lemma VMLInput.hPB (p : VMLInput X) :
 lemma VMLInput.hDensityConst (p : VMLInput X) : ∀ x, p.ρ x = p.ρ_ion := by
   have hT : 0 < -1 / (2 * p.c₀) := by
     apply div_pos_of_neg_of_neg <;> linarith [p.hc₀_neg]
-  -- Derive IsSpatiallyDiff (log ∘ ρ) via differentiation under the velocity integral.
-  -- Step 1: IsSpatiallyDiff ρ from hDiff_velocityIntegral + hGradFv_dominated + hDiff_fv.
-  have hDiff_rho : FlatTorus3.IsSpatiallyDiff p.ρ := by
-    have h := FlatTorus3.hDiff_velocityIntegral (fun x v => p.f x v) p.hDiff_fv p.hGradFv_dominated
-    have heq : (fun x => ∫ v, p.f x v) = p.ρ := funext (fun x => (p.hρ_eq x).symm)
-    rwa [heq] at h
-  -- Step 2: IsSpatiallyDiff (log ∘ ρ) from hDiff_log + positivity.
-  have hDiff_logRho : FlatTorus3.IsSpatiallyDiff (Real.log ∘ p.ρ) :=
-    FlatTorus3.hDiff_log p.ρ hDiff_rho p.hρ_pos
+  -- Derive IsSpatiallyDiff (log ∘ ρ) from Maxwellian form.
+  -- Since b₀ = 0, f(x,v) = exp(a(x) + c₀|v|²), so ρ(x) = exp(a(x)) * C where C = ∫ exp(c₀|v|²) dv.
+  -- Therefore log ρ(x) = a(x) + log C, so log ∘ ρ = a + const, which is IsSpatiallyDiff.
+  have hDiff_logRho : FlatTorus3.IsSpatiallyDiff (Real.log ∘ p.ρ) := by
+    -- log ρ(x) = a(x) + log(∫ exp(c₀|v|²) dv)
+    -- Step 1: show ρ(x) = exp(a(x)) * C
+    have hb0 := p.hb₀_zero
+    set C := ∫ v : Fin 3 → ℝ, Real.exp (p.c₀ * normSq v)
+    have hρ_form : ∀ x, p.ρ x = Real.exp (p.a_loc x) * C := by
+      intro x
+      rw [p.hρ_eq x]
+      have : ∀ v, p.f x v = Real.exp (p.a_loc x) * Real.exp (p.c₀ * normSq v) := by
+        intro v
+        rw [p.hMaxwellianForm x v, p.hc_const x, p.hb_const x, hb0]
+        simp [dotProduct, Fin.sum_univ_three, normSq, Real.exp_add]
+      simp_rw [this]
+      exact integral_mul_left _ _
+    -- Step 2: show log ρ(x) = a(x) + log C
+    have hC_pos : 0 < C := by
+      have h0 := p.hρ_pos p.x₀
+      rw [hρ_form p.x₀] at h0
+      exact pos_of_mul_pos_right h0 (Real.exp_pos _).le
+    have hlog_form : (Real.log ∘ p.ρ) = fun x => p.a_loc x + Real.log C := by
+      ext x; simp only [Function.comp_apply]
+      rw [hρ_form x, Real.log_mul (Real.exp_pos _).ne' hC_pos.ne', Real.log_exp]
+    -- Step 3: IsSpatiallyDiff (a + const) from closure properties
+    rw [hlog_form]
+    exact FlatTorus3.hDiff_add _ _ p.hDiff_abc.1 (FlatTorus3.hDiff_const _)
   -- Laplacian signs at extrema from FlatTorus3 class axioms
   have hmax_logρ : ∀ x, (Real.log ∘ p.ρ) x ≤ (Real.log ∘ p.ρ) p.x_max :=
     fun x => Real.log_le_log (p.hρ_pos x) (p.hmax x)
@@ -353,14 +376,12 @@ noncomputable def VMLInput.toSteadyState (p : VMLInput X) : VMLSteadyState X whe
   hGauss := p.hGauss
   hDivB := p.hDivB
   hDiff_B := p.hDiff_B
-  hDiff_B_C2 := p.hDiff_B_C2
   -- Derived fields
   a_loc := p.a_loc
   b_loc := p.b_loc
   c_loc := p.c_loc
   hc_neg := p.hc_neg
   hMaxwellianForm := p.hMaxwellianForm
-  hDiff_b_C2 := p.hDiff_maxwellian_C2 p.a_loc p.b_loc p.c_loc p.hMaxwellianForm
   c₀ := p.c₀
   hc₀_neg := p.hc₀_neg
   hc_const := p.hc_const

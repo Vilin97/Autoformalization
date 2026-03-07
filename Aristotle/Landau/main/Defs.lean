@@ -347,15 +347,11 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
   hDiff_smul : ∀ c f, IsSpatiallyDiff f → IsSpatiallyDiff (fun x => c * f x)
   -- Closure under log (for positive functions): if f is C¹ and f > 0, then log∘f is C¹
   hDiff_log : ∀ f, IsSpatiallyDiff f → (∀ x, 0 < f x) → IsSpatiallyDiff (Real.log ∘ f)
-  -- Differentiation under the velocity integral (dominated convergence):
-  -- If g(·,v) is spatially C¹ for each v, and the spatial gradients of g(·,v) are
-  -- dominated by an integrable (in v) bound, then x ↦ ∫v g(x,v)dv is spatially C¹.
-  -- On the concrete torus: follows from hasFDerivAt_integral_of_dominated_loc_of_lip.
-  hDiff_velocityIntegral : ∀ (g : X → (Fin 3 → ℝ) → ℝ),
-    (∀ v, IsSpatiallyDiff (fun x => g x v)) →
-    (∃ (bound : (Fin 3 → ℝ) → ℝ), Integrable bound ∧
-      ∀ x v i, |gradX (fun y => g y v) x i| ≤ bound v) →
-    IsSpatiallyDiff (fun x => ∫ v, g x v)
+  -- Gradient closure: if f is spatially differentiable, so is each component of its gradient.
+  -- On the concrete torus: requires IsSpatiallyDiff = ContDiff ℝ ⊤ (smooth);
+  -- then ContDiff.fderiv_right gives ContDiff ℝ ⊤ for the fderiv, and clm_apply gives the component.
+  hDiff_grad : ∀ (f : X → ℝ) (i : Fin 3), IsSpatiallyDiff f →
+    IsSpatiallyDiff (fun x => gradX f x i)
   -- Curl integral vanishes (Stokes theorem for 2-forms)
   -- Requires IsSpatiallyDiff for each component of F: without differentiability,
   -- curlX uses fderiv (which is 0 at non-differentiable points), and the integral
@@ -641,8 +637,6 @@ structure VMLSteadyState (X : Type*) [FlatTorus3 X] where
   hDivB : ∀ x, FlatTorus3.divX B x = 0
   -- Spatial differentiability for B (needed for harmonic → constant)
   hDiff_B : ∀ i, FlatTorus3.IsSpatiallyDiff (fun y => B y i)
-  -- C² for B: gradient components of B_i are spatially differentiable (needed for harmonic)
-  hDiff_B_C2 : ∀ i j, FlatTorus3.IsSpatiallyDiff (fun x => FlatTorus3.gradX (fun y => B y i) x j)
   -- === H-theorem chain results (Sections 3-4 of tex) ===
   a_loc : X → ℝ
   b_loc : X → (Fin 3 → ℝ)
@@ -650,8 +644,6 @@ structure VMLSteadyState (X : Type*) [FlatTorus3 X] where
   hc_neg : ∀ x, c_loc x < 0
   hMaxwellianForm : ∀ x v,
     f x v = Real.exp (a_loc x + dotProduct (b_loc x) v + c_loc x * normSq v)
-  -- C² for b_loc: gradient components of b_loc_j are spatially differentiable (needed for Killing → harmonic)
-  hDiff_b_C2 : ∀ j i, FlatTorus3.IsSpatiallyDiff (fun x => FlatTorus3.gradX (fun y => b_loc y j) x i)
   -- === Polynomial matching results (Section 5 of tex) ===
   c₀ : ℝ
   hc₀_neg : c₀ < 0
@@ -729,10 +721,6 @@ structure VMLInput (X : Type*) [FlatTorus3 X] where
   hDiff_fv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => f x v)
   -- Spatial differentiability for B components
   hDiff_B : ∀ i, FlatTorus3.IsSpatiallyDiff (fun y => B y i)
-  -- Dominated gradient bound for f(·,v): enables differentiation under the velocity integral.
-  -- Gives IsSpatiallyDiff ρ (hence IsSpatiallyDiff (log ∘ ρ)) via hDiff_velocityIntegral + hDiff_log.
-  hGradFv_dominated : ∃ (bound : (Fin 3 → ℝ) → ℝ), Integrable bound ∧
-    ∀ x v i, |FlatTorus3.gradX (fun y => f y v) x i| ≤ bound v
   -- === Derived from H-theorem chain ===
   hD_zero : ∀ x, entropyDissipation Ψ (f x) = 0
   hScoreForm : ∀ x, entropyDissipation Ψ (f x) =
@@ -748,12 +736,7 @@ structure VMLInput (X : Type*) [FlatTorus3 X] where
     FlatTorus3.IsSpatiallyDiff a ∧
     (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) ∧
     FlatTorus3.IsSpatiallyDiff c
-  -- C² for Maxwellian b parameters (gradient components are spatially differentiable)
-  hDiff_maxwellian_C2 : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
-    (∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) →
-    ∀ j i, FlatTorus3.IsSpatiallyDiff (fun x => FlatTorus3.gradX (fun y => b y j) x i)
-  -- C² for B components
-  hDiff_B_C2 : ∀ i j, FlatTorus3.IsSpatiallyDiff (fun x => FlatTorus3.gradX (fun y => B y i) x j)
+  -- Note: hDiff_B_C2 and hDiff_maxwellian_C2 are now DERIVED via FlatTorus3.hDiff_grad.
   hPolynomialIdentity : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
     FlatTorus3.IsSpatiallyDiff a →
     (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) →
