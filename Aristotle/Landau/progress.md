@@ -1,8 +1,8 @@
 # Formalization Progress: Global Steady State of the VML System
 
-**Files**: `Aristotle/Landau/main/*.lean` (split across 11 files)
+**Files**: `Aristotle/Landau/main/*.lean` (split across 12 files)
 **Blueprint**: `Aristotle/Landau/H-theorem-formal.tex` (Sections 1--10)
-**Status**: 0 errors, 0 sorry's in ALL files (main chain + TorusInstance)
+**Status**: 0 errors, 0 sorry's in ALL files (main chain + TorusInstance + VelocityDecayInstance)
 
 Last updated: 2026-03-10
 
@@ -21,7 +21,11 @@ The main proof chain (Defs, Section2-9, VMLInputDerive, Theorem42) is
 **complete with 0 sorry's and 0 axioms**.
 
 A concrete FlatTorus3 instance on `Fin 3 -> AddCircle 1` (TorusInstance.lean)
-validates the typeclass with **4 sorry's** (1 instance field: `hDiff_velocityIntegral`; 3 helper theorems).
+validates the typeclass with **0 sorry's** (all 21 instance fields proved).
+
+A concrete VelocityDecayConditions instance (VelocityDecayInstance.lean) for the
+spatially uniform Maxwellian `f(x,v) = exp(a + c|v|²)` with E = 0, B = 0 validates
+all 15 velocity-decay conditions with **0 sorry's**.
 
 ---
 
@@ -39,6 +43,7 @@ validates the typeclass with **4 sorry's** (1 instance field: `hDiff_velocityInt
 - `VMLInputDerive.lean` -- VMLInput.toSteadyState, main_steady_state, main_from_physics
 - `Theorem42.lean` -- Main theorem statement + proof (VelocityDecayConditions bundle)
 - `TorusInstance.lean` -- Concrete FlatTorus3 instance on T^3
+- `VelocityDecayInstance.lean` -- Concrete VelocityDecayConditions for uniform Maxwellian
 
 ---
 
@@ -135,6 +140,20 @@ Helper theorems (all proved): `torus_hIBP_spatial` (1D FTC + Fubini + periodicit
 `torus_hCurlZeroDivZeroHarmonic`, `clairaut_fderiv`, `periodicLift_torusGradX`,
 `laplacian_nonpos_at_max_rn`, `killing_harmonic_rn'`, `curl_div_harmonic_rn'`,
 `contDiff2_from_partials`
+
+---
+
+## VelocityDecayInstance (0 sorry's)
+
+Constructs `uniformMaxwellianDecay` — a concrete `VelocityDecayConditions` for the spatially
+uniform isotropic Maxwellian `f(x,v) = exp(a + c|v|²)` with `c < 0`, `E = 0`, `B = 0`.
+
+Key lemmas:
+- `uniformMaxwellian_flux_zero`: Landau flux vanishes (delegates to `maxwellian_landau_flux_zero` with b=0)
+- `uniformMaxwellian_psd_zero`: PSD integrand vanishes (via `analysis_fluxFactor` + projection annihilation)
+- `uniformMaxwellian_gradX_zero`: spatial gradient vanishes (constant in x, via `hGradConst`)
+
+All 15 fields proved by showing each integrand is identically 0, then applying `integrable_zero`.
 
 ---
 
