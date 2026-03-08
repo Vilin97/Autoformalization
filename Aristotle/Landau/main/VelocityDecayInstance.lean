@@ -13,6 +13,7 @@
   Therefore every integrand in VelocityDecayConditions is identically 0.
 -/
 import Aristotle.Landau.main.Theorem42
+import Aristotle.Landau.main.LandauMatrixDerivBound
 
 set_option linter.all false
 open Matrix Finset BigOperators Real MeasureTheory
@@ -520,12 +521,6 @@ private lemma vGrad_log_eq_div {φ : (Fin 3 → ℝ) → ℝ}
       fderiv ℝ φ v (Pi.single i 1) / φ v := by
   erw [fderiv_comp] <;> norm_num [hφ_diff.differentiableAt, hφ_pos, ne_of_gt]; ring!
 
-/-- ‖v - w‖² ≤ 2 * (‖v‖² + ‖w‖²). -/
-private lemma norm_sub_sq_le_two_mul (v w : Fin 3 → ℝ) :
-    ‖v - w‖ ^ 2 ≤ 2 * (‖v‖ ^ 2 + ‖w‖ ^ 2) :=
-  le_trans (pow_le_pow_left₀ (norm_nonneg _) (norm_sub_le v w) 2)
-    (by linarith [sq_nonneg (‖v‖ - ‖w‖)])
-
 /-- normSq z ≤ 3 * ‖z‖² (dotProduct z z ≤ n * sup_norm²). -/
 private lemma normSq_le_three_mul_sq_norm (z : Fin 3 → ℝ) :
     normSq z ≤ 3 * ‖z‖ ^ 2 := by
@@ -913,6 +908,33 @@ private lemma psd_integrand_bound
         ((1 + ‖w‖) ^ (2 * Kg + 2) * φ w) := by ring
 
 
+-- ===== Building blocks for flux derivative bound =====
+
+/-- Product rule norm bound (proved by Aristotle, job 85fc02e5). -/
+private lemma fderiv_mul_norm_le {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (f g : E → ℝ) (x : E) (hf : DifferentiableAt ℝ f x) (hg : DifferentiableAt ℝ g x) :
+    ‖fderiv ℝ (fun y => f y * g y) x‖ ≤
+      ‖fderiv ℝ f x‖ * |g x| + |f x| * ‖fderiv ℝ g x‖ := by
+  have hfg := hf.hasFDerivAt.mul hg.hasFDerivAt
+  show ‖fderiv ℝ (f * g) x‖ ≤ _
+  rw [hfg.fderiv]
+  calc ‖f x • fderiv ℝ g x + g x • fderiv ℝ f x‖
+      ≤ ‖f x • fderiv ℝ g x‖ + ‖g x • fderiv ℝ f x‖ := norm_add_le _ _
+    _ = |f x| * ‖fderiv ℝ g x‖ + |g x| * ‖fderiv ℝ f x‖ := by
+        simp [norm_smul, Real.norm_eq_abs]
+    _ = ‖fderiv ℝ f x‖ * |g x| + |f x| * ‖fderiv ℝ g x‖ := by ring
+
+/-- ‖v - w‖ ≤ (1 + ‖v‖) * (1 + ‖w‖) (proved by Aristotle, job a7f0f2c4). -/
+private lemma norm_sub_le_one_add_mul (v w : Fin 3 → ℝ) :
+    ‖v - w‖ ≤ (1 + ‖v‖) * (1 + ‖w‖) := by
+  exact le_trans (norm_sub_le _ _) (by nlinarith [norm_nonneg v, norm_nonneg w])
+
+/-- 1 + ‖v - w‖ ≤ (1 + ‖v‖) * (1 + ‖w‖). Consequence of triangle inequality. -/
+private lemma one_add_norm_sub_le_prod (v w : Fin 3 → ℝ) :
+    1 + ‖v - w‖ ≤ (1 + ‖v‖) * (1 + ‖w‖) := by
+  nlinarith [norm_sub_le v w, norm_nonneg v, norm_nonneg w,
+    mul_nonneg (norm_nonneg v) (norm_nonneg w)]
+
 set_option maxHeartbeats 800000 in
 /-- Each entry of the Landau matrix A_{ij}(v-w) is differentiable in v.
     At z ≠ 0: composition of C¹ functions (Ψ ∘ ‖·‖ smooth, polynomial smooth).
@@ -964,6 +986,102 @@ private lemma landauMatrix_entry_differentiable
   rw [ Real.sq_sqrt ( Finset.sum_nonneg fun _ _ => by nlinarith only [ sq_nonneg ( ( ‹Fin 3 → ℝ› ) ‹_› - w ‹_› ) ] ) ] ; simp +decide [ Fin.sum_univ_three, dotProduct ] ; ring
   fin_cases i <;> fin_cases j <;> simp +decide [ Matrix.one_apply ] <;> ring!
 
+/-- Chain rule for translation: fderiv(f(·-w))(v) = fderiv(f)(v-w). -/
+private lemma fderiv_translate' (f : (Fin 3 → ℝ) → ℝ) (w : Fin 3 → ℝ)
+    (hf : Differentiable ℝ f) :
+    ∀ v, fderiv ℝ (fun v' => f (v' - w)) v = fderiv ℝ f (v - w) := by
+  intro v
+  have h1 : (fun v' => f (v' - w)) = (fun v' => f (v' + (-w))) :=
+    funext fun v' => by simp [sub_eq_add_neg]
+  rw [h1, fderiv_comp_add_right]; simp [sub_eq_add_neg]
+
+/-- Per-summand derivative bound for the Landau flux integrand.
+    Proved by Aristotle (job a743f055). -/
+private lemma single_summand_deriv_bound
+    (A : (Fin 3 → ℝ) → ℝ)
+    (φ dφ : (Fin 3 → ℝ) → ℝ)
+    (hA_diff : Differentiable ℝ A)
+    (hφ_diff : Differentiable ℝ φ) (hdφ_diff : Differentiable ℝ dφ)
+    (hφ_pos : ∀ v, 0 < φ v)
+    (CA CD Cg C₂ Cop : ℝ) (Kg K₂ : ℕ)
+    (hCA_nn : 0 ≤ CA) (hCD_nn : 0 ≤ CD) (hCg_nn : 0 ≤ Cg)
+    (hC₂_nn : 0 ≤ C₂) (hCop_nn : 0 ≤ Cop)
+    (hCA : ∀ z, |A z| ≤ CA * ‖z‖ ^ 2)
+    (hCD : ∀ z, ‖fderiv ℝ A z‖ ≤ CD * (1 + ‖z‖) ^ 2)
+    (hCg : ∀ v, |dφ v| ≤ Cg * (1 + ‖v‖) ^ Kg * φ v)
+    (hC₂ : ∀ v, ‖fderiv ℝ dφ v‖ ≤ C₂ * (1 + ‖v‖) ^ K₂ * φ v)
+    (hCop : ∀ v, ‖fderiv ℝ φ v‖ ≤ Cop * (1 + ‖v‖) ^ Kg * φ v) :
+    ∀ v w : Fin 3 → ℝ,
+      ‖fderiv ℝ (fun v' => A (v' - w) * (φ w * dφ v' - φ v' * dφ w)) v‖ ≤
+      (2 * CD * Cg + CA * (C₂ + Cop * Cg)) *
+        ((1 + ‖v‖) ^ (2 + Kg + K₂) * φ v) *
+        ((1 + ‖w‖) ^ (2 + Kg + K₂) * |φ w|) := by
+  intro v w
+  have h_prod_rule : ‖fderiv ℝ (fun v' => A (v' - w) * (φ w * dφ v' - φ v' * dφ w)) v‖ ≤ ‖fderiv ℝ (fun v' => A (v' - w)) v‖ * |φ w * dφ v - φ v * dφ w| + |A (v - w)| * ‖fderiv ℝ (fun v' => φ w * dφ v' - φ v' * dφ w) v‖ := by
+    convert fderiv_mul_norm_le ( fun v' => A ( v' - w ) ) ( fun v' => φ w * dφ v' - φ v' * dφ w ) v _ _ using 1 <;> norm_num [ hA_diff.differentiableAt, hφ_diff.differentiableAt, hdφ_diff.differentiableAt ];
+    exact hA_diff.differentiableAt.comp _ ( differentiableAt_id.sub_const _ );
+  have h_deriv_bounds : ‖fderiv ℝ (fun v' => A (v' - w)) v‖ ≤ CD * (1 + ‖v - w‖) ^ 2 ∧ |A (v - w)| ≤ CA * ‖v - w‖ ^ 2 ∧ |φ w * dφ v - φ v * dφ w| ≤ φ w * Cg * (1 + ‖v‖) ^ Kg * φ v + φ v * Cg * (1 + ‖w‖) ^ Kg * φ w ∧ ‖fderiv ℝ (fun v' => φ w * dφ v' - φ v' * dφ w) v‖ ≤ φ w * C₂ * (1 + ‖v‖) ^ K₂ * φ v + Cop * (1 + ‖v‖) ^ Kg * φ v * Cg * (1 + ‖w‖) ^ Kg * φ w := by
+    refine' ⟨ _, _, _, _ ⟩ <;> try exact hCA _;
+    · convert fderiv_translate' A w hA_diff v ▸ hCD ( v - w ) using 1;
+    · refine' le_trans ( abs_sub _ _ ) _;
+      rw [ abs_mul, abs_mul, abs_of_pos ( hφ_pos _ ), abs_of_pos ( hφ_pos _ ) ] ; nlinarith [ hCg v, hCg w, hφ_pos v, hφ_pos w ] ;
+    · have h_prod_rule : fderiv ℝ (fun v' => φ w * dφ v' - φ v' * dφ w) v = (φ w) • fderiv ℝ dφ v - (dφ w) • fderiv ℝ φ v := by
+        convert HasFDerivAt.fderiv ( HasFDerivAt.sub ( HasFDerivAt.const_mul ( hdφ_diff.differentiableAt.hasFDerivAt ) _ ) ( HasFDerivAt.mul ( hφ_diff.differentiableAt.hasFDerivAt ) ( hasFDerivAt_const _ _ ) ) ) using 1 ; norm_num;
+      rw [ h_prod_rule ];
+      refine' le_trans ( norm_sub_le _ _ ) _;
+      norm_num [ norm_smul, abs_of_pos ( hφ_pos _ ) ];
+      refine' add_le_add _ _;
+      · simpa only [ mul_assoc ] using mul_le_mul_of_nonneg_left ( hC₂ v ) ( le_of_lt ( hφ_pos w ) );
+      · convert mul_le_mul ( hCg w ) ( hCop v ) ( by positivity ) ( by exact mul_nonneg ( mul_nonneg hCg_nn ( pow_nonneg ( by positivity ) _ ) ) ( le_of_lt ( hφ_pos _ ) ) ) using 1 ; ring;
+  have h_norm_diff_bounds : (1 + ‖v - w‖) ^ 2 ≤ (1 + ‖v‖) ^ 2 * (1 + ‖w‖) ^ 2 ∧ ‖v - w‖ ^ 2 ≤ (1 + ‖v‖) ^ 2 * (1 + ‖w‖) ^ 2 := by
+    constructor <;> nlinarith only [ norm_nonneg ( v - w ), norm_nonneg v, norm_nonneg w, norm_sub_le v w, mul_nonneg ( norm_nonneg v ) ( norm_nonneg w ) ] ;
+  have h_prod_norm_bounds : φ w * Cg * (1 + ‖v‖) ^ Kg * φ v + φ v * Cg * (1 + ‖w‖) ^ Kg * φ w ≤ 2 * Cg * (1 + ‖v‖) ^ (Kg + K₂) * (1 + ‖w‖) ^ (Kg + K₂) * φ v * φ w ∧ φ w * C₂ * (1 + ‖v‖) ^ K₂ * φ v + Cop * (1 + ‖v‖) ^ Kg * φ v * Cg * (1 + ‖w‖) ^ Kg * φ w ≤ (C₂ + Cop * Cg) * (1 + ‖v‖) ^ (Kg + K₂) * (1 + ‖w‖) ^ (Kg + K₂) * φ v * φ w := by
+    constructor <;> ring_nf;
+    · suffices h_simp : (1 + ‖v‖) ^ Kg + (1 + ‖w‖) ^ Kg ≤ 2 * (1 + ‖v‖) ^ Kg * (1 + ‖w‖) ^ Kg * (1 + ‖v‖) ^ K₂ * (1 + ‖w‖) ^ K₂ by
+        nlinarith only [ show 0 ≤ φ w * Cg * φ v by exact mul_nonneg ( mul_nonneg ( le_of_lt ( hφ_pos _ ) ) hCg_nn ) ( le_of_lt ( hφ_pos _ ) ), h_simp ];
+      have h_sum_le : (1 + ‖v‖)^Kg + (1 + ‖w‖)^Kg ≤ 2 * (1 + ‖v‖)^Kg * (1 + ‖w‖)^Kg := by
+        nlinarith only [ show 1 ≤ ( 1 + ‖v‖ ) ^ Kg by exact one_le_pow₀ ( by linarith [ norm_nonneg v ] ), show 1 ≤ ( 1 + ‖w‖ ) ^ Kg by exact one_le_pow₀ ( by linarith [ norm_nonneg w ] ) ];
+      exact le_trans h_sum_le ( le_trans ( le_mul_of_one_le_right ( by positivity ) ( one_le_pow₀ ( by linarith [ norm_nonneg v, norm_nonneg w ] ) ) ) ( le_mul_of_one_le_right ( by positivity ) ( one_le_pow₀ ( by linarith [ norm_nonneg v, norm_nonneg w ] ) ) ) );
+    · refine' add_le_add _ _;
+      · norm_num [ mul_assoc ];
+        gcongr;
+        · exact le_of_lt ( hφ_pos _ );
+        · exact le_of_lt ( hφ_pos v );
+        · exact le_mul_of_one_le_right ( by positivity ) ( one_le_mul_of_one_le_of_one_le ( one_le_pow₀ ( by linarith [ norm_nonneg v ] ) ) ( one_le_mul_of_one_le_of_one_le ( one_le_pow₀ ( by linarith [ norm_nonneg w ] ) ) ( one_le_pow₀ ( by linarith [ norm_nonneg w ] ) ) ) );
+      · norm_num [ mul_assoc, mul_comm, mul_left_comm ];
+        gcongr;
+        · exact le_of_lt ( hφ_pos v );
+        · exact le_of_lt ( hφ_pos _ );
+        · rw [ mul_left_comm ];
+          exact le_mul_of_one_le_right ( by positivity ) ( one_le_mul_of_one_le_of_one_le ( one_le_pow₀ ( by linarith [ norm_nonneg v ] ) ) ( one_le_pow₀ ( by linarith [ norm_nonneg w ] ) ) );
+  have h_final_bound : ‖fderiv ℝ (fun v' => A (v' - w) * (φ w * dφ v' - φ v' * dφ w)) v‖ ≤ CD * (1 + ‖v‖) ^ 2 * (1 + ‖w‖) ^ 2 * 2 * Cg * (1 + ‖v‖) ^ (Kg + K₂) * (1 + ‖w‖) ^ (Kg + K₂) * φ v * φ w + CA * (1 + ‖v‖) ^ 2 * (1 + ‖w‖) ^ 2 * (C₂ + Cop * Cg) * (1 + ‖v‖) ^ (Kg + K₂) * (1 + ‖w‖) ^ (Kg + K₂) * φ v * φ w := by
+    refine le_trans h_prod_rule ?_;
+    refine le_trans ( add_le_add ( mul_le_mul h_deriv_bounds.1 h_deriv_bounds.2.2.1 ( by positivity ) ( by positivity ) ) ( mul_le_mul h_deriv_bounds.2.1 h_deriv_bounds.2.2.2 ( by positivity ) ( by positivity ) ) ) ?_;
+    refine le_trans ( add_le_add ( mul_le_mul_of_nonneg_left h_prod_norm_bounds.1 <| by positivity ) ( mul_le_mul_of_nonneg_left h_prod_norm_bounds.2 <| by positivity ) ) ?_;
+    refine' add_le_add _ _;
+    · convert mul_le_mul_of_nonneg_right ( mul_le_mul_of_nonneg_left h_norm_diff_bounds.1 hCD_nn ) ( show 0 ≤ 2 * Cg * ( 1 + ‖v‖ ) ^ ( Kg + K₂ ) * ( 1 + ‖w‖ ) ^ ( Kg + K₂ ) * φ v * φ w by exact mul_nonneg ( mul_nonneg ( mul_nonneg ( mul_nonneg ( mul_nonneg zero_le_two hCg_nn ) ( pow_nonneg ( by positivity ) _ ) ) ( pow_nonneg ( by positivity ) _ ) ) ( le_of_lt ( hφ_pos _ ) ) ) ( le_of_lt ( hφ_pos _ ) ) ) using 1 ; ring;
+    · convert mul_le_mul_of_nonneg_right ( mul_le_mul_of_nonneg_left h_norm_diff_bounds.2 hCA_nn ) ( show 0 ≤ ( C₂ + Cop * Cg ) * ( 1 + ‖v‖ ) ^ ( Kg + K₂ ) * ( 1 + ‖w‖ ) ^ ( Kg + K₂ ) * φ v * φ w by exact mul_nonneg ( mul_nonneg ( mul_nonneg ( mul_nonneg ( by positivity ) ( by positivity ) ) ( by positivity ) ) ( by exact le_of_lt ( hφ_pos _ ) ) ) ( by exact le_of_lt ( hφ_pos _ ) ) ) using 1 ; ring;
+  convert h_final_bound using 1 ; rw [ abs_of_pos ( hφ_pos w ) ] ; ring
+
+/-- The Landau matrix as a matrix-valued function is continuous. -/
+private lemma landauMatrix_continuous
+    {Ψ : ℝ → ℝ} (hΨ : Continuous Ψ) :
+    Continuous (fun z : Fin 3 → ℝ => landauMatrix Ψ z) := by
+  unfold landauMatrix
+  apply Continuous.smul
+  · -- Continuous (fun z => Ψ(eucNorm z))
+    unfold eucNorm normSq
+    exact hΨ.comp (continuous_sqrt.comp
+      (continuous_finset_sum _ (fun k _ => (continuous_apply k).mul (continuous_apply k))))
+  · -- Continuous (fun z => innerLandauMatrix z)
+    unfold innerLandauMatrix normSq
+    apply Continuous.sub
+    · exact (continuous_finset_sum _ (fun k _ =>
+        (continuous_apply k).mul (continuous_apply k))).smul continuous_const
+    · exact continuous_pi (fun r => continuous_pi (fun c =>
+        (continuous_apply r).mul (continuous_apply c)))
+
+set_option maxHeartbeats 4000000 in
 /-- The Landau flux integrand component is differentiable in v with a product-form bound.
 
     This is the key analysis lemma for flux differentiability. For each fixed w:
@@ -1046,17 +1164,291 @@ private lemma landau_flux_component_diff_with_bound
   -- (b) quadratic bound ‖D A_{ij}(z)‖ ≤ C(1+‖z‖)² (submitted to Aristotle),
   -- (c) AEStronglyMeasurable of fderiv (continuity in w of the explicit product-rule expression),
   -- (d) hasFDerivAt_integral_of_dominated_of_fderiv_le (Mathlib parametric differentiation).
-  have hparts234 :
-      (∃ C₀ M, ∀ v w, ‖fderiv ℝ (fun v' =>
-        (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v‖ ≤
-        C₀ * ((1 + ‖v‖) ^ M * φ v) * ((1 + ‖w‖) ^ M * |φ w|)) ∧
-      (∀ v, Integrable (fun w => fderiv ℝ (fun v' =>
-        (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v)) ∧
-      (∃ C₁ M₁, ∀ v, ‖fderiv ℝ (fun v' =>
-        ∫ w, (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v‖ ≤
-        C₁ * (1 + ‖v‖) ^ M₁ * φ v) := by
-    sorry
-  exact ⟨hpart1, hparts234.1, hparts234.2.1, hparts234.2.2⟩
+  -- Part 2: Product-form derivative bound (the core analysis bound)
+  have hpart2 : ∃ C₀ M, ∀ v w, ‖fderiv ℝ (fun v' =>
+      (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v‖ ≤
+      C₀ * ((1 + ‖v‖) ^ M * φ v) * ((1 + ‖w‖) ^ M * |φ w|) := by
+    -- Get matrix bounds
+    have hmat_fderiv : ∀ j, ∃ C, ∀ z, ‖fderiv ℝ (fun z => landauMatrix Ψ z i j) z‖ ≤
+        C * (1 + ‖z‖) ^ 2 :=
+      fun j => landauMatrix_entry_fderiv_norm_bound' hΨ_diff ⟨CΨ, hCΨ⟩ ⟨CΨ', hCΨ'⟩ i j
+    have hmat_abs : ∀ j, ∃ C, ∀ z, |landauMatrix Ψ z i j| ≤ C * ‖z‖ ^ 2 :=
+      fun j => landauMatrix_entry_abs_bound' ⟨CΨ, hCΨ⟩ i j
+    choose CD hCD using hmat_fderiv
+    choose CA hCA using hmat_abs
+    -- Use operator norm bound: ‖fderiv φ v‖ ≤ 3*Cg*(1+‖v‖)^Kg*φ(v)
+    -- From component bounds via: ‖L‖ ≤ ∑_k |L(e_k)| for sup-norm on Fin 3 → ℝ
+    have hφ_fderiv_norm : ∀ v, ‖fderiv ℝ φ v‖ ≤ 3 * Cg * (1 + ‖v‖) ^ Kg * φ v := by
+      intro v
+      have h_nn : (0 : ℝ) ≤ 3 * Cg * (1 + ‖v‖) ^ Kg * φ v :=
+        mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hCg_nn)
+          (pow_nonneg (by linarith [norm_nonneg v]) Kg)) (le_of_lt (hφ_pos v))
+      rw [ContinuousLinearMap.opNorm_le_iff h_nn]
+      intro x
+      simp only [Real.norm_eq_abs]
+      -- Decompose x into standard basis
+      have hx_eq : (fderiv ℝ φ v) x = x 0 * (fderiv ℝ φ v) (Pi.single 0 1) +
+          x 1 * (fderiv ℝ φ v) (Pi.single 1 1) + x 2 * (fderiv ℝ φ v) (Pi.single 2 1) := by
+        have hd : x = x 0 • (Pi.single 0 1 : Fin 3 → ℝ) +
+            x 1 • (Pi.single 1 1 : Fin 3 → ℝ) + x 2 • (Pi.single 2 1 : Fin 3 → ℝ) := by
+          ext i; fin_cases i <;> simp
+        conv_lhs => rw [hd]
+        rw [map_add, map_add, map_smul, map_smul, map_smul, smul_eq_mul, smul_eq_mul, smul_eq_mul]
+      rw [hx_eq]
+      have h0 := hCg v 0; have h1 := hCg v 1; have h2 := hCg v 2
+      have hb0 : |x 0| ≤ ‖x‖ := by simpa [Real.norm_eq_abs] using norm_le_pi_norm x 0
+      have hb1 : |x 1| ≤ ‖x‖ := by simpa [Real.norm_eq_abs] using norm_le_pi_norm x 1
+      have hb2 : |x 2| ≤ ‖x‖ := by simpa [Real.norm_eq_abs] using norm_le_pi_norm x 2
+      -- Triangle inequality for 3-term sum
+      have tri : |x 0 * (fderiv ℝ φ v) (Pi.single 0 1) +
+          x 1 * (fderiv ℝ φ v) (Pi.single 1 1) +
+          x 2 * (fderiv ℝ φ v) (Pi.single 2 1)| ≤
+          |x 0| * |(fderiv ℝ φ v) (Pi.single 0 1)| +
+          |x 1| * |(fderiv ℝ φ v) (Pi.single 1 1)| +
+          |x 2| * |(fderiv ℝ φ v) (Pi.single 2 1)| := by
+        calc _ ≤ |x 0 * (fderiv ℝ φ v) (Pi.single 0 1) +
+                  x 1 * (fderiv ℝ φ v) (Pi.single 1 1)| +
+                |x 2 * (fderiv ℝ φ v) (Pi.single 2 1)| := abs_add_le _ _
+          _ ≤ _ := by
+              have := abs_add_le (x 0 * (fderiv ℝ φ v) (Pi.single 0 1))
+                (x 1 * (fderiv ℝ φ v) (Pi.single 1 1))
+              simp only [abs_mul] at *; linarith
+      -- Each |x k| * |Lk| ≤ Cg * (1+‖v‖)^Kg * φ(v) * ‖x‖
+      have b0 : |x 0| * |(fderiv ℝ φ v) (Pi.single 0 1)| ≤
+          Cg * (1 + ‖v‖) ^ Kg * φ v * ‖x‖ := by
+        calc _ ≤ ‖x‖ * (Cg * (1 + ‖v‖) ^ Kg * φ v) :=
+              mul_le_mul hb0 h0 (abs_nonneg _) (norm_nonneg _)
+          _ = _ := by ring
+      have b1 : |x 1| * |(fderiv ℝ φ v) (Pi.single 1 1)| ≤
+          Cg * (1 + ‖v‖) ^ Kg * φ v * ‖x‖ := by
+        calc _ ≤ ‖x‖ * (Cg * (1 + ‖v‖) ^ Kg * φ v) :=
+              mul_le_mul hb1 h1 (abs_nonneg _) (norm_nonneg _)
+          _ = _ := by ring
+      have b2 : |x 2| * |(fderiv ℝ φ v) (Pi.single 2 1)| ≤
+          Cg * (1 + ‖v‖) ^ Kg * φ v * ‖x‖ := by
+        calc _ ≤ ‖x‖ * (Cg * (1 + ‖v‖) ^ Kg * φ v) :=
+              mul_le_mul hb2 h2 (abs_nonneg _) (norm_nonneg _)
+          _ = _ := by ring
+      linarith
+    -- Constants: C₀ and M
+    let C_D := max (max (CD 0) (CD 1)) (CD 2)
+    let C_A := max (max (CA 0) (CA 1)) (CA 2)
+    use 3 * (2 * C_D * Cg + C_A * (C₂ + 3 * Cg * Cg)), 2 + Kg + K₂
+    intro v w
+    -- Step 1: Rewrite as sum
+    have hrewrite : (fun v' =>
+        (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) =
+      (fun v' =>
+        ∑ j, landauMatrix Ψ (v' - w) i j *
+          (φ w * fderiv ℝ φ v' (Pi.single j 1) - φ v' * fderiv ℝ φ w (Pi.single j 1))) :=
+      funext (fun v' => hsum_eq v' w)
+    rw [hrewrite]
+    -- Step 2: Per-summand differentiability
+    have hdiff_j : ∀ j : Fin 3, DifferentiableAt ℝ (fun v' =>
+        landauMatrix Ψ (v' - w) i j *
+          (φ w * fderiv ℝ φ v' (Pi.single j 1) - φ v' * fderiv ℝ φ w (Pi.single j 1))) v :=
+      fun j => (landauMatrix_entry_differentiable hΨ_diff ⟨CΨ, hCΨ⟩ w i j v).mul
+        (((hφ_deriv_diff j v).const_mul (φ w)).sub
+          ((hφ_smooth.differentiable le_top v).mul_const (fderiv ℝ φ w (Pi.single j 1))))
+    -- Step 3: Per-summand bound (the core analysis estimate)
+    suffices hsb : ∀ j : Fin 3,
+        ‖fderiv ℝ (fun v' => landauMatrix Ψ (v' - w) i j *
+          (φ w * fderiv ℝ φ v' (Pi.single j 1) - φ v' * fderiv ℝ φ w (Pi.single j 1))) v‖ ≤
+        (2 * CD j * Cg + CA j * (C₂ + 3 * Cg * Cg)) *
+          ((1 + ‖v‖) ^ (2 + Kg + K₂) * φ v) * ((1 + ‖w‖) ^ (2 + Kg + K₂) * |φ w|) by
+      -- Assembly: triangle inequality on Finset sum, bound via max constants
+      have h0 := hsb 0; have h1 := hsb 1; have h2 := hsb 2
+      have hpv : 0 ≤ (1 + ‖v‖) ^ (2 + Kg + K₂) * φ v :=
+        mul_nonneg (pow_nonneg (by linarith [norm_nonneg v]) _) (le_of_lt (hφ_pos v))
+      have hpw : 0 ≤ (1 + ‖w‖) ^ (2 + Kg + K₂) * |φ w| :=
+        mul_nonneg (pow_nonneg (by linarith [norm_nonneg w]) _) (abs_nonneg _)
+      -- Each per-summand const ≤ max const
+      have hCD0 : CD 0 ≤ C_D := le_max_of_le_left (le_max_left _ _)
+      have hCD1 : CD 1 ≤ C_D := le_max_of_le_left (le_max_right _ _)
+      have hCD2 : CD 2 ≤ C_D := le_max_right _ _
+      have hCA0 : CA 0 ≤ C_A := le_max_of_le_left (le_max_left _ _)
+      have hCA1 : CA 1 ≤ C_A := le_max_of_le_left (le_max_right _ _)
+      have hCA2 : CA 2 ≤ C_A := le_max_right _ _
+      -- Expand sum, split fderiv via HasFDerivAt, triangle inequality
+      simp only [Fin.sum_univ_three]
+      have hd012 : HasFDerivAt (fun v' =>
+          landauMatrix Ψ (v' - w) i 0 * (φ w * (fderiv ℝ φ v') (Pi.single 0 1) -
+            φ v' * (fderiv ℝ φ w) (Pi.single 0 1)) +
+          landauMatrix Ψ (v' - w) i 1 * (φ w * (fderiv ℝ φ v') (Pi.single 1 1) -
+            φ v' * (fderiv ℝ φ w) (Pi.single 1 1)) +
+          landauMatrix Ψ (v' - w) i 2 * (φ w * (fderiv ℝ φ v') (Pi.single 2 1) -
+            φ v' * (fderiv ℝ φ w) (Pi.single 2 1)))
+        (fderiv ℝ (fun v' => landauMatrix Ψ (v' - w) i 0 *
+            (φ w * (fderiv ℝ φ v') (Pi.single 0 1) - φ v' * (fderiv ℝ φ w) (Pi.single 0 1))) v +
+          fderiv ℝ (fun v' => landauMatrix Ψ (v' - w) i 1 *
+            (φ w * (fderiv ℝ φ v') (Pi.single 1 1) - φ v' * (fderiv ℝ φ w) (Pi.single 1 1))) v +
+          fderiv ℝ (fun v' => landauMatrix Ψ (v' - w) i 2 *
+            (φ w * (fderiv ℝ φ v') (Pi.single 2 1) - φ v' * (fderiv ℝ φ w) (Pi.single 2 1))) v) v :=
+        ((hdiff_j 0).hasFDerivAt.add (hdiff_j 1).hasFDerivAt).add (hdiff_j 2).hasFDerivAt
+      rw [hd012.fderiv]
+      -- Triangle inequality: ‖a + b + c‖ ≤ ‖a‖ + ‖b‖ + ‖c‖
+      have htri := norm_add_le
+        (fderiv ℝ (fun v' => landauMatrix Ψ (v' - w) i 0 *
+          (φ w * (fderiv ℝ φ v') (Pi.single 0 1) - φ v' * (fderiv ℝ φ w) (Pi.single 0 1))) v +
+        fderiv ℝ (fun v' => landauMatrix Ψ (v' - w) i 1 *
+          (φ w * (fderiv ℝ φ v') (Pi.single 1 1) - φ v' * (fderiv ℝ φ w) (Pi.single 1 1))) v)
+        (fderiv ℝ (fun v' => landauMatrix Ψ (v' - w) i 2 *
+          (φ w * (fderiv ℝ φ v') (Pi.single 2 1) - φ v' * (fderiv ℝ φ w) (Pi.single 2 1))) v)
+      have htri2 := norm_add_le
+        (fderiv ℝ (fun v' => landauMatrix Ψ (v' - w) i 0 *
+          (φ w * (fderiv ℝ φ v') (Pi.single 0 1) - φ v' * (fderiv ℝ φ w) (Pi.single 0 1))) v)
+        (fderiv ℝ (fun v' => landauMatrix Ψ (v' - w) i 1 *
+          (φ w * (fderiv ℝ φ v') (Pi.single 1 1) - φ v' * (fderiv ℝ φ w) (Pi.single 1 1))) v)
+      -- Bound constants via max
+      have hle0 : 2 * CD 0 * Cg + CA 0 * (C₂ + 3 * Cg * Cg) ≤
+          2 * C_D * Cg + C_A * (C₂ + 3 * Cg * Cg) := by
+        nlinarith [hCD0, hCA0, hCg_nn, hC₂_nn, sq_nonneg Cg]
+      have hle1 : 2 * CD 1 * Cg + CA 1 * (C₂ + 3 * Cg * Cg) ≤
+          2 * C_D * Cg + C_A * (C₂ + 3 * Cg * Cg) := by
+        nlinarith [hCD1, hCA1, hCg_nn, hC₂_nn, sq_nonneg Cg]
+      have hle2 : 2 * CD 2 * Cg + CA 2 * (C₂ + 3 * Cg * Cg) ≤
+          2 * C_D * Cg + C_A * (C₂ + 3 * Cg * Cg) := by
+        nlinarith [hCD2, hCA2, hCg_nn, hC₂_nn, sq_nonneg Cg]
+      nlinarith [mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hle0 hpv) hpw,
+                  mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hle1 hpv) hpw,
+                  mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hle2 hpv) hpw]
+    -- Apply Aristotle-proved per-summand bound
+    intro j
+    have hA_diff : Differentiable ℝ (fun z => landauMatrix Ψ z i j) := by
+      intro z
+      have h := landauMatrix_entry_differentiable hΨ_diff ⟨CΨ, hCΨ⟩ 0 i j z
+      simp only [sub_zero] at h; exact h
+    have hCD_nn_j : 0 ≤ CD j := by
+      have h := hCD j 0; simp only [norm_zero, add_zero, one_pow, mul_one] at h
+      exact le_trans (norm_nonneg _) h
+    have hCA_nn_j : 0 ≤ CA j := by
+      by_contra hlt; push_neg at hlt
+      have hone : (1 : Fin 3 → ℝ) ≠ 0 := fun h => one_ne_zero (congr_fun h 0)
+      linarith [hCA j 1, abs_nonneg (landauMatrix Ψ 1 i j),
+                mul_neg_of_neg_of_pos hlt (sq_pos_of_pos (norm_pos_iff.mpr hone))]
+    exact single_summand_deriv_bound
+      (fun z => landauMatrix Ψ z i j) φ (fun v => fderiv ℝ φ v (Pi.single j 1))
+      hA_diff (hφ_smooth.differentiable le_top) (hφ_deriv_diff j) hφ_pos
+      (CA j) (CD j) Cg C₂ (3 * Cg) Kg K₂
+      hCA_nn_j hCD_nn_j hCg_nn hC₂_nn (by linarith)
+      (hCA j) (hCD j) (fun v => hCg v j) (fun v => hC₂ v j) hφ_fderiv_norm
+      v w
+  -- Joint continuity of the integrand (used by Parts 3 and 4)
+  have hcont : Continuous (Function.uncurry (fun (w : Fin 3 → ℝ) (v' : Fin 3 → ℝ) =>
+      (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i)) := by
+    have hφ_cont : Continuous φ := hφ_smooth.continuous
+    have hφ_fderiv_cont : ∀ j, Continuous (fun v => (fderiv ℝ φ v) (Pi.single j 1)) := by
+      intro j
+      exact ((hφ_smooth.of_le le_top : ContDiff ℝ 1 φ).continuous_fderiv le_rfl).clm_apply
+        continuous_const
+    have heq : (Function.uncurry (fun (w : Fin 3 → ℝ) (v' : Fin 3 → ℝ) =>
+        (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i)) =
+      (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
+        ∑ j, landauMatrix Ψ (p.2 - p.1) i j *
+          (φ p.1 * (fderiv ℝ φ p.2) (Pi.single j 1) -
+           φ p.2 * (fderiv ℝ φ p.1) (Pi.single j 1))) := by
+      ext ⟨w, v'⟩; exact hsum_eq v' w
+    rw [heq]
+    exact continuous_finset_sum _ fun j _ =>
+      (((continuous_apply j).comp ((continuous_apply i).comp
+        (landauMatrix_continuous hΨ_cts))).comp
+        (continuous_snd.sub continuous_fst)).mul
+      (((hφ_cont.comp continuous_fst).mul
+        ((hφ_fderiv_cont j).comp continuous_snd)).sub
+       ((hφ_cont.comp continuous_snd).mul
+        ((hφ_fderiv_cont j).comp continuous_fst)))
+  -- Part 3: Derivative integrable (follows from Part 2 + Schwartz decay)
+  have hpart3 : ∀ v, Integrable (fun w => fderiv ℝ (fun v' =>
+      (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v) := by
+    obtain ⟨C₀, M, hC₀⟩ := hpart2
+    intro v
+    refine Integrable.mono'
+      ((integrable_one_add_norm_pow_mul hφ_decay M).const_mul (C₀ * (1 + ‖v‖) ^ M * φ v))
+      ?_ (Filter.Eventually.of_forall fun w =>
+        le_trans (hC₀ v w) (le_of_eq (by ring)))
+    exact ((measurable_fderiv_with_param ℝ hcont).comp
+      (measurable_id.prod_mk measurable_const)).aestronglyMeasurable
+  -- Part 4: Schwartz bound on integral derivative (from Parts 2-3 + norm_integral_le)
+  have hpart4 : ∃ C₁ M₁, ∀ v, ‖fderiv ℝ (fun v' =>
+      ∫ w, (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v‖ ≤
+      C₁ * (1 + ‖v‖) ^ M₁ * φ v := by
+    obtain ⟨C₀, M, hC₀⟩ := hpart2
+    refine ⟨C₀ * ∫ w, (1 + ‖w‖) ^ M * |φ w|, M, fun v => ?_⟩
+    -- Differentiation under the integral sign (Leibniz integral rule)
+    have h_int : HasFDerivAt (fun v' => ∫ w,
+        (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i)
+      (∫ w, fderiv ℝ (fun v' =>
+        (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v)
+      v := by
+        -- Integrability of the original integrand at v
+        have hF_int_v : Integrable (fun w =>
+            (landauMatrix Ψ (v - w) *ᵥ (φ w • vGrad φ v - φ v • vGrad φ w)) i) :=
+          (schwartz_flux_integrable ⟨CΨ, hCΨ⟩ hΨ_cts hφ_pos hφ_smooth hφ_decay
+            ⟨Cg, Kg, hCg⟩ v).eval i
+        -- Bound φ on compact closedBall v 1
+        obtain ⟨v_max, _, hv_max⟩ := (ProperSpace.isCompact_closedBall v 1).exists_isMaxOn
+          ⟨v, Metric.mem_closedBall_self (by norm_num : (0 : ℝ) ≤ 1)⟩
+          hφ_smooth.continuous.continuousOn
+        -- Apply Leibniz integral rule (parametric differentiation)
+        refine hasFDerivAt_integral_of_dominated_of_fderiv_le
+          (F := fun v' w => (landauMatrix Ψ (v' - w) *ᵥ
+            (φ w • vGrad φ v' - φ v' • vGrad φ w)) i)
+          (F' := fun v' w => fderiv ℝ (fun v'' =>
+            (landauMatrix Ψ (v'' - w) *ᵥ
+              (φ w • vGrad φ v'' - φ v'' • vGrad φ w)) i) v')
+          (bound := fun w => C₀ * ((2 + ‖v‖) ^ M * φ v_max) *
+            ((1 + ‖w‖) ^ M * |φ w|))
+          (ε := 1) one_pos ?_ ?_ ?_ ?_ ?_ ?_
+        · -- hF_meas: AEStronglyMeasurable for v' near v
+          exact Filter.Eventually.of_forall fun v' =>
+            (hcont.comp (continuous_id.prod_mk continuous_const)).aestronglyMeasurable
+        · -- hF_int: integrable at v
+          exact hF_int_v
+        · -- hF'_meas: AEStronglyMeasurable of derivative
+          exact (hpart3 v).aestronglyMeasurable
+        · -- h_bound: ‖F'(v', w)‖ ≤ bound(w) for v' ∈ ball v 1
+          refine Filter.Eventually.of_forall fun w v' hv' => ?_
+          have hv'_norm : 1 + ‖v'‖ ≤ 2 + ‖v‖ := by
+            have h1 : dist v' v < 1 := Metric.mem_ball.mp hv'
+            have h2 : ‖v'‖ ≤ ‖v‖ + ‖v' - v‖ := by
+              calc ‖v'‖ = ‖v + (v' - v)‖ := by congr 1; abel
+                _ ≤ ‖v‖ + ‖v' - v‖ := norm_add_le _ _
+            rw [dist_eq_norm] at h1; linarith
+          have hC₀_nn : 0 ≤ C₀ := by
+            have h_nn := le_trans (norm_nonneg (fderiv ℝ (fun v' => (landauMatrix Ψ (v' - w) *ᵥ
+              (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v')) (hC₀ v' w)
+            have h_pos : 0 < ((1 + ‖v'‖) ^ M * φ v') * ((1 + ‖w‖) ^ M * |φ w|) :=
+              mul_pos (mul_pos (pow_pos (by linarith [norm_nonneg v']) M) (hφ_pos v'))
+                (mul_pos (pow_pos (by linarith [norm_nonneg w]) M)
+                  (abs_pos.mpr (ne_of_gt (hφ_pos w))))
+            exact nonneg_of_mul_nonneg_left (by linarith) h_pos
+          exact le_trans (hC₀ v' w) (mul_le_mul_of_nonneg_right
+            (mul_le_mul_of_nonneg_left
+              (mul_le_mul (pow_le_pow_left₀ (by linarith [norm_nonneg v']) hv'_norm M)
+                (hv_max (Metric.ball_subset_closedBall hv'))
+                (le_of_lt (hφ_pos v'))
+                (pow_nonneg (by linarith [norm_nonneg v]) M))
+              hC₀_nn)
+            (mul_nonneg (pow_nonneg (by linarith [norm_nonneg w]) M) (abs_nonneg _)))
+        · -- bound_integrable
+          exact (integrable_one_add_norm_pow_mul hφ_decay M).const_mul _
+        · -- h_diff: HasFDerivAt for each w, at each v' in the ball
+          exact Filter.Eventually.of_forall fun w v' _ => (hpart1 w v').hasFDerivAt
+    rw [h_int.fderiv]
+    calc ‖∫ w, fderiv ℝ (fun v' =>
+            (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v‖
+        ≤ ∫ w, ‖fderiv ℝ (fun v' =>
+            (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v‖ :=
+          norm_integral_le_integral_norm _
+      _ ≤ (C₀ * (1 + ‖v‖) ^ M * φ v) * ∫ w, (1 + ‖w‖) ^ M * |φ w| := by
+          rw [← integral_mul_left]
+          exact integral_mono_of_nonneg
+            (Filter.Eventually.of_forall fun w => norm_nonneg _)
+            ((integrable_one_add_norm_pow_mul hφ_decay M).const_mul _)
+            (Filter.Eventually.of_forall fun w =>
+              le_trans (hC₀ v w) (le_of_eq (by ring)))
+      _ = C₀ * (∫ w, (1 + ‖w‖) ^ M * |φ w|) * (1 + ‖v‖) ^ M * φ v := by ring
+  exact ⟨hpart1, hpart2, hpart3, hpart4⟩
 
 /-- **VelocityDecayConditions for Schwartz-class distributions.**
 

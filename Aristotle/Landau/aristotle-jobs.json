@@ -1,260 +1,161 @@
 {
-  "jobs": [
-    {
-      "id": "79eb688e-7380-4f3c-8c12-17e0b713add8",
-      "submission": "aristotle-in/integrable_one_add_norm_pow_mul.lean",
-      "output": "aristotle-out/integrable_one_add_norm_pow_mul_aristotle.lean",
-      "target": "integrable_one_add_norm_pow_mul",
-      "note": "",
-      "status": "done"
-    },
-    {
-      "id": "8df6bf56-a3a5-4af6-92e3-28d602a4869e",
-      "submission": "aristotle-in/integrable_of_schwartz_bound.lean",
-      "output": "aristotle-out/integrable_of_schwartz_bound_aristotle.lean",
-      "target": "integrable_of_schwartz_bound",
-      "note": "",
-      "status": "done"
-    },
-    {
-      "id": "05dd8e5b-c197-4f15-bced-639bc4487850",
-      "submission": "aristotle-in/integrable_of_schwartz_bound_vec.lean",
-      "output": "aristotle-out/integrable_of_schwartz_bound_vec_aristotle.lean",
-      "target": "integrable_of_schwartz_bound_vec",
-      "note": "",
-      "status": "done"
-    },
-    {
-      "id": "48ac52eb-78ba-4fe2-b13d-b00f3e04dff6",
-      "submission": "aristotle-in/integrable_prod_schwartz_bound.lean",
-      "output": "aristotle-out/integrable_prod_schwartz_bound_aristotle.lean",
-      "target": "integrable_prod_schwartz_bound",
-      "note": "",
-      "status": "done"
-    },
-    {
-      "id": "1b18788b-8185-4ff5-b616-ae60225299a3",
-      "submission": "aristotle-in/integrable_prod_schwartz_bound_vec.lean",
-      "output": "aristotle-out/integrable_prod_schwartz_bound_vec_aristotle.lean",
-      "target": "integrable_prod_schwartz_bound_vec",
-      "note": "",
-      "status": "done"
-    },
-    {
-      "id": "cd7dce7f-be6b-46fd-bfab-80ca1c91c20f",
-      "submission": "aristotle-in/norm_mulVec_le_finset.lean",
-      "output": "aristotle-out/norm_mulVec_le_finset_aristotle.lean",
-      "target": "norm_mulVec_le_finset",
-      "note": "",
-      "status": "done"
-    },
-    {
-      "id": "3744c309-50d2-4528-b6a7-a98e98ddbfdf",
-      "submission": "aristotle-in/innerLandauMatrix_entry_bound.lean",
-      "output": "aristotle-out/innerLandauMatrix_entry_bound_aristotle.lean",
-      "target": "innerLandauMatrix_entry_bound",
-      "note": "",
-      "status": "done"
-    },
-    {
-      "id": "4d566121-8c7c-4008-bfc1-2cbf89bde6b5",
-      "submission": "aristotle-in/vGrad_log_eq_div.lean",
-      "output": "aristotle-out/vGrad_log_eq_div_aristotle.lean",
-      "target": "vGrad_log_eq_div",
-      "note": "",
-      "status": "done"
-    },
-    {
-      "id": "8c1c8712-d13a-4fac-a057-d18d3baa9e6e",
-      "submission": "aristotle-in/norm_smul_sub_le.lean",
-      "output": "aristotle-out/norm_smul_sub_le_aristotle.lean",
-      "target": "norm_smul_sub_le",
-      "note": "",
-      "status": "done"
-    },
-    {
-      "id": "cbe22cd2-5c00-4258-a643-160cbefc951f",
-      "submission": "aristotle-in/integrable_integral_schwartz.lean",
-      "output": "aristotle-out/integrable_integral_schwartz_aristotle.lean",
-      "target": "integrable_integral_schwartz",
-      "note": "",
-      "status": "done"
-    },
-    {
-      "id": "ad2a1483-3ad1-463d-9ad2-fb9a9321feac",
-      "submission": "aristotle-in/differentiable_integral_schwartz.lean",
-      "output": "aristotle-out/differentiable_integral_schwartz_aristotle.lean",
-      "target": "differentiable_integral_schwartz",
-      "note": "",
-      "status": "done"
-    },
-    {
-      "id": "6af741d9-8c2d-4ff5-a408-0a58e364be59",
-      "submission": "aristotle-in/norm_sub_sq_le.lean",
-      "output": "aristotle-out/norm_sub_sq_le_aristotle.lean",
-      "target": "norm_sub_sq_le",
-      "note": "",
-      "status": "done"
-    },
-    {
-      "id": "d1423f6d-c13c-4d18-9bb5-27363070b9de",
-      "submission": "aristotle-in/abs_dotProduct_le.lean",
-      "output": "aristotle-out/abs_dotProduct_le_aristotle.lean",
-      "target": "abs_dotProduct_le",
-      "note": "",
-      "status": "done"
-    },
-    {
-      "id": "b7ca292d-0d2c-4e2a-82a5-ead8ea03bb3a",
-      "submission": "aristotle-in/schwartz_flux_integrable.lean",
-      "output": "aristotle-out/schwartz_flux_integrable_aristotle.lean",
-      "target": "schwartz_flux_integrable",
-      "note": ""
-    },
-    {
-      "id": "814e0920-30de-4389-9567-7fda531b8312",
-      "submission": "aristotle-in/schwartz_psd_inner_integrable.lean",
-      "output": "aristotle-out/schwartz_psd_inner_integrable_aristotle.lean",
-      "target": "schwartz_psd_inner_integrable",
-      "note": ""
-    },
-    {
-      "id": "1c3edc35-2d87-486b-8970-91d7cee9816b",
-      "submission": "aristotle-in/schwartz_psd_outer_integrable.lean",
-      "output": "aristotle-out/schwartz_psd_outer_integrable_aristotle.lean",
-      "target": "schwartz_psd_outer_integrable",
-      "note": ""
-    },
-    {
-      "id": "e09a52ef-db7d-46f8-b1dc-4ec0188b1e70",
-      "submission": "aristotle-in/schwartz_fubini_double.lean",
-      "output": "aristotle-out/schwartz_fubini_double_aristotle.lean",
-      "target": "schwartz_fubini_double",
-      "note": ""
-    },
-    {
-      "id": "77a236d2-4a30-42f0-832f-635792b949d5",
-      "submission": "aristotle-in/schwartz_flux_times_log_integrable.lean",
-      "output": "aristotle-out/schwartz_flux_times_log_integrable_aristotle.lean",
-      "target": "schwartz_flux_times_log_integrable",
-      "note": ""
-    },
-    {
-      "id": "34bb20ec-8434-4985-a1b0-79859e9b23f4",
-      "submission": "aristotle-in/schwartz_flux_differentiable.lean",
-      "output": "aristotle-out/schwartz_flux_differentiable_aristotle.lean",
-      "target": "schwartz_flux_differentiable",
-      "note": ""
-    },
-    {
-      "id": "347bc00b-ce91-4acc-8b7f-271785c26413",
-      "submission": "aristotle-in/schwartz_fubini_inner.lean",
-      "output": "aristotle-out/schwartz_fubini_inner_aristotle.lean",
-      "target": "schwartz_fubini_inner",
-      "note": ""
-    },
-    {
-      "id": "1e5ac03c-e3ef-440d-a9c3-3f23d2be7611",
-      "submission": "aristotle-in/schwartz_fubini_outer.lean",
-      "output": "aristotle-out/schwartz_fubini_outer_aristotle.lean",
-      "target": "schwartz_fubini_outer",
-      "note": ""
-    },
-    {
-      "id": "042ec364-b4b3-4477-8ccc-57b985b1465a",
-      "submission": "aristotle-in/schwartz_flux_deriv_times_log.lean",
-      "output": "aristotle-out/schwartz_flux_deriv_times_log_aristotle.lean",
-      "target": "schwartz_flux_deriv_times_log",
-      "note": ""
-    },
-    {
-      "id": "d2a3907b-3232-49c5-bf83-88dbce73bae6",
-      "submission": "aristotle-in/schwartz_flux_times_dlog.lean",
-      "output": "aristotle-out/schwartz_flux_times_dlog_aristotle.lean",
-      "target": "schwartz_flux_times_dlog",
-      "note": ""
-    },
-    {
-      "id": "35f0ea8f-e0b9-4456-8510-5e13637cd88b",
-      "submission": "aristotle-in/landau_flux_diff.lean",
-      "output": "aristotle-out/landau_flux_diff_aristotle.lean",
-      "target": "landau_flux_diff",
-      "note": ""
-    },
-    {
-      "id": "648b5b5b-db11-4244-8b3a-2739c4aa8e3b",
-      "submission": "aristotle-in/landau_matrix_entry_diff.lean",
-      "output": "aristotle-out/landau_matrix_entry_diff_aristotle.lean",
-      "target": "landau_matrix_entry_diff",
-      "note": ""
-    },
-    {
-      "id": "babb83da-3632-4973-83b1-636921b58b51",
-      "submission": "aristotle-in/landau_matrix_entry_diff_v2.lean",
-      "output": "aristotle-out/landau_matrix_entry_diff_v2_aristotle.lean",
-      "target": "landau_matrix_entry_diff_v2",
-      "note": ""
-    },
-    {
-      "id": "31607b78-5fab-4f9a-ba01-1233bb1e7aa4",
-      "submission": "aristotle-in/landau_flux_diff_v2.lean",
-      "output": "aristotle-out/landau_flux_diff_v2_aristotle.lean",
-      "target": "landau_flux_diff_v2",
-      "note": ""
-    },
-    {
-      "id": "b8508ad1-7318-44aa-bd69-a0a9e2557860",
-      "submission": "aristotle-in/landau_flux_deriv_bound.lean",
-      "output": "aristotle-out/landau_flux_deriv_bound_aristotle.lean",
-      "target": "landau_flux_deriv_bound",
-      "note": ""
-    },
-    {
-      "id": "207db299-6635-4d4e-9750-3187183916e7",
-      "submission": "aristotle-in/landau_matrix_entry_deriv_bound.lean",
-      "output": "aristotle-out/landau_matrix_entry_deriv_bound_aristotle.lean",
-      "target": "landau_matrix_entry_deriv_bound",
-      "note": ""
-    },
-    {
-      "id": "0f6845b7-3613-4003-80e9-66b9caa0edaf",
-      "submission": "aristotle-in/landau_matrix_entry_deriv_bound_v2.lean",
-      "output": "aristotle-out/landau_matrix_entry_deriv_bound_v2_aristotle.lean",
-      "target": "landau_matrix_entry_deriv_bound_v2",
-      "note": ""
-    },
-    {
-      "id": "68c58a76-f34b-46ec-85c5-98a586417012",
-      "submission": "aristotle-in/landau_flux_deriv_bound_v2.lean",
-      "output": "aristotle-out/landau_flux_deriv_bound_v2_aristotle.lean",
-      "target": "landau_flux_deriv_bound_v2",
-      "note": ""
-    }
-  ],
+  "jobs": [],
   "completed": [
     {
       "id": "51d9e2a0-58ed-497f-be70-7b136265192b",
       "target": "torus_gradX_integral_zero",
       "status": "proved_manually",
-      "note": "Aristotle helped with 1D periodic derivative integral; integrated into TorusInstance.lean"
+      "note": "Integrated into TorusInstance.lean"
     },
     {
       "id": "4b7ec531-b3ac-4702-8110-294890f79e74",
       "target": "torus_hIBP_spatial",
       "status": "proved_manually",
-      "note": "Aristotle helped with 1D periodic IBP; integrated into TorusInstance.lean"
+      "note": "Integrated into TorusInstance.lean"
     },
     {
       "id": "1be0761f-4f29-45d0-8ca2-bba659742222",
       "target": "torus_hCurlIntZero",
       "status": "proved_manually",
-      "note": "Proved manually using IBP; integrated into TorusInstance.lean"
+      "note": "Integrated into TorusInstance.lean"
     },
     {
       "id": "be472543-6c7f-4b32-8243-d160d5dd5e20",
       "target": "torus_hHarmonic_const",
       "status": "proved_manually",
-      "note": "Aristotle failed; proved manually via energy method; integrated into TorusInstance.lean"
+      "note": "Proved manually via energy method"
+    },
+    {
+      "id": "648b5b5b-db11-4244-8b3a-2739c4aa8e3b",
+      "target": "landau_matrix_entry_diff",
+      "status": "done",
+      "note": "Integrated into VelocityDecayInstance.lean"
+    },
+    {
+      "id": "0f6845b7-3613-4003-80e9-66b9caa0edaf",
+      "target": "landau_matrix_entry_deriv_bound_v2",
+      "status": "done",
+      "note": "Integrated into LandauMatrixDerivBound.lean"
+    },
+    {
+      "id": "a743f055-2c52-454d-8d7f-55adb809d9a3",
+      "target": "single_summand_v2",
+      "status": "done",
+      "note": "Integrated into VelocityDecayInstance.lean (single_summand_deriv_bound)"
+    },
+    {
+      "id": "6baa4cea-fa16-44b2-967a-d785fcde0622",
+      "target": "single_summand_bound",
+      "status": "done",
+      "note": "Superseded by single_summand_v2"
+    },
+    {
+      "id": "79eb688e-7380-4f3c-8c12-17e0b713add8",
+      "target": "integrable_one_add_norm_pow_mul",
+      "status": "done",
+      "note": "Integrated into VelocityDecayInstance.lean"
+    },
+    {
+      "id": "b7ca292d-0d2c-4e2a-82a5-ead8ea03bb3a",
+      "target": "schwartz_flux_integrable",
+      "status": "done",
+      "note": "Integrated into VelocityDecayInstance.lean"
+    },
+    {
+      "id": "e09a52ef-db7d-46f8-b1dc-4ec0188b1e70",
+      "target": "schwartz_fubini_double",
+      "status": "done",
+      "note": "Integrated into VelocityDecayInstance.lean"
+    },
+    {
+      "id": "77a236d2-4a30-42f0-832f-635792b949d5",
+      "target": "schwartz_flux_times_log_integrable",
+      "status": "done",
+      "note": "Integrated into VelocityDecayInstance.lean"
+    },
+    {
+      "id": "85fc02e5-2fdf-4ee9-8d4a-1ac577ba53a3",
+      "target": "fderiv_mul_bound",
+      "status": "done",
+      "note": "Integrated into VelocityDecayInstance.lean"
+    },
+    {
+      "id": "3032fd16-31dc-464f-be75-988e730ba837",
+      "target": "fderiv_sub_bound",
+      "status": "done",
+      "note": "Integrated into VelocityDecayInstance.lean"
+    },
+    {
+      "id": "207db299-6635-4d4e-9750-3187183916e7",
+      "target": "landau_matrix_entry_deriv_bound",
+      "status": "done",
+      "note": "Proved negation (linear bound false); led to v2 with quadratic bound"
+    },
+    {
+      "id": "c6e17d63-228c-4b9e-8cca-1ebe7c585c04",
+      "target": "flux_deriv_bound_v4",
+      "status": "done",
+      "note": "Superseded — Part 2 proved via single_summand_deriv_bound"
+    },
+    {
+      "id": "66757e71-b16e-43d5-a8d4-abd15c845772",
+      "target": "flux_deriv_bound_v6",
+      "status": "superseded",
+      "note": "Part 2 proved via single_summand_deriv_bound"
+    },
+    {
+      "id": "037b2778-830b-40be-b3e8-8d0acf064094",
+      "target": "flux_parts34",
+      "status": "proved_manually",
+      "note": "Aristotle failed (returned sorry); proved manually in VelocityDecayInstance.lean"
+    },
+    {
+      "id": "4e6b20aa-2713-4e2e-b028-36ce5da9e549",
+      "target": "fderiv_flux_measurable",
+      "status": "proved_manually",
+      "note": "Aristotle failed; proved via measurable_fderiv_with_param"
+    },
+    {
+      "id": "564d9a49-3e33-48da-8fdd-7c78ef2b6c74",
+      "target": "fderiv_integral_interchange",
+      "status": "proved_manually",
+      "note": "Aristotle failed (*ᵥ parse error); proved via hasFDerivAt_integral_of_dominated_of_fderiv_le"
+    },
+    {
+      "id": "2645698f-6d73-429c-a762-086ace9f0659",
+      "target": "fderiv_flux_measurable_v2",
+      "status": "superseded",
+      "note": "Proved manually before Aristotle completed; input deleted"
+    },
+    {
+      "id": "34bb20ec-8434-4985-a1b0-79859e9b23f4",
+      "target": "schwartz_flux_differentiable",
+      "status": "abandoned",
+      "note": "Input file deleted; NOT_STARTED"
+    },
+    {
+      "id": "347bc00b-ce91-4acc-8b7f-271785c26413",
+      "target": "schwartz_fubini_inner",
+      "status": "abandoned",
+      "note": "Input file deleted; NOT_STARTED"
+    },
+    {
+      "id": "1e5ac03c-e3ef-440d-a9c3-3f23d2be7611",
+      "target": "schwartz_fubini_outer",
+      "status": "abandoned",
+      "note": "Input file deleted; NOT_STARTED"
+    },
+    {
+      "id": "042ec364-b4b3-4477-8ccc-57b985b1465a",
+      "target": "schwartz_flux_deriv_times_log",
+      "status": "abandoned",
+      "note": "Input file deleted; NOT_STARTED"
+    },
+    {
+      "id": "d2a3907b-3232-49c5-bf83-88dbce73bae6",
+      "target": "schwartz_flux_times_dlog",
+      "status": "abandoned",
+      "note": "Input file deleted; NOT_STARTED"
     }
   ]
 }

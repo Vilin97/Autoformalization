@@ -48,19 +48,19 @@ async def check_all():
         try:
             p = await Project.from_id(jid)
             status = getattr(p, "status", "unknown")
+            status_str = str(status).lower()
             print(f"\n[{short}] {target}: {status}")
 
-            if status in ("complete", "success", "proved"):
+            if any(s in status_str for s in ("complete", "success", "proved")):
                 sol = await p.get_solution()
                 out_path = HERE / job["output"]
                 out_path.parent.mkdir(exist_ok=True)
-                # sol is a PosixPath to the downloaded file; copy it
                 import shutil
                 shutil.copy(str(sol), str(out_path))
                 job["status"] = "done"
                 job["solution"] = str(out_path)
                 print(f"  ✓ Solution saved to {out_path}")
-            elif status in ("failed", "disproved"):
+            elif any(s in status_str for s in ("failed", "disproved")):
                 job["status"] = "failed"
                 print(f"  ✗ Failed — may need to fix the statement")
             else:
