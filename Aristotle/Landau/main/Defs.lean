@@ -294,15 +294,14 @@ lemma vecMulVec_self_mulVec (z w : Fin 3 → ℝ) :
     on `Fin 3 → AddCircle 1`.
 
     **Axiom design note:**
-    The operator axioms (hGradAdd, hGradScalarMul, hGradChainExp, hDivLinear) describe
-    properties of an abstract differential operator on a compact manifold. They are
-    stated universally (for all functions X → ℝ) rather than restricted to smooth
-    functions, because X has no differentiable structure at this abstraction level.
-    This is intentional: a properly-defined gradient on a compact manifold (e.g. via
-    distributional/weak derivatives) IS linear for all L² functions. The concrete
-    `fderiv`-based implementation in `TorusInstance.lean` only satisfies these for
-    differentiable inputs (non-differentiable inputs get junk value 0). All instance
-    fields are proved; a principled fix would use distributional derivatives.
+    The linear operator axioms (hGradAdd, hGradScalarMul, hDivLinear) are stated
+    universally (for all functions X → ℝ) because linearity of `fderiv` genuinely
+    holds for all functions: `fderiv(c * f) = c * fderiv(f)` is true even for
+    non-differentiable f (both sides are 0 by definition).
+
+    The chain rule axiom (hGradChainExp) requires IsSpatiallyDiff φ: without it,
+    on the concrete torus both sides collapse to 0 via fderiv's junk value, making
+    the axiom vacuously true rather than expressing a genuine chain rule.
 
     hSpatialVelocityFubini is stated without explicit integrability hypothesis at the
     abstract level; the concrete instance (TorusInstance) provides it via Fubini.
@@ -312,13 +311,14 @@ lemma vecMulVec_self_mulVec (z w : Fin 3 → ℝ) :
 
     Integration uses Mathlib's `∫ x, f x` (Bochner integral over `volume`).
 
-    Axioms (17):
+    Property fields (23):
     - Operator properties (5): hDivLinear, hGradConst, hGradAdd, hGradScalarMul, hGradChainExp
     - Closed manifold integration (2): hCurlIntZero, hIBP_spatial
     - Analysis on compact manifold (4): hHarmonic_const, hLaplacianMaxNonpos, hSpatialPos, hSpatialNonnegZero
     - Flat geometry (2): hKillingToHarmonic, hCurlZeroDivZeroHarmonic
     - Abstract measure (3): hSpatialVelocityFubini, hSpatialAdd, hGradIntegrable
-    - Differentiability closure (4): hDiff_const, hDiff_add, hDiff_smul, hDiff_log
+    - Differentiability predicate + closure (7): IsSpatiallyDiff, hDiff_const, hDiff_add,
+      hDiff_smul, hDiff_log, hDiff_continuous, hDiff_grad
 
     Derived lemmas (proved from the above):
     - hGradChainLog, hGradIntZero, hLaplacianMinNonneg, hSpatialMul -/
@@ -380,7 +380,9 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
   hGradScalarMul : ∀ (c : ℝ) (f : X → ℝ),
     ∀ x, gradX (fun y => c * f y) x = c • gradX f x
   -- Chain rule for exp: gradX(exp ∘ φ) = exp(φ) · gradX(φ)
-  hGradChainExp : ∀ (φ : X → ℝ),
+  -- Requires IsSpatiallyDiff φ: without it, on the concrete torus both sides
+  -- collapse to 0 via fderiv's junk value, making the axiom vacuously true.
+  hGradChainExp : ∀ (φ : X → ℝ), IsSpatiallyDiff φ →
     ∀ x i, gradX (fun y => Real.exp (φ y)) x i = Real.exp (φ x) * gradX φ x i
   -- Killing fields have harmonic components (flatness of the metric).
   -- Requires C¹ regularity of b_j and C² regularity of gradient components.
@@ -447,10 +449,10 @@ lemma hGradZeroConst (φ : X → ℝ) (hd : IsSpatiallyDiff φ) (h : ∀ x, grad
 
 /-- Chain rule for log: gradX(log ∘ g) = (1/g) · gradX(g) when g > 0.
     Derived from hGradChainExp: gradX(exp(log g)) = g · gradX(log g) = gradX(g). -/
-lemma hGradChainLog (g : X → ℝ) (hg : ∀ x, 0 < g x) :
+lemma hGradChainLog (g : X → ℝ) (hg_diff : IsSpatiallyDiff g) (hg : ∀ x, 0 < g x) :
     ∀ x i, gradX (fun y => Real.log (g y)) x i = (1 / g x) * gradX g x i := by
   intro x i
-  have key := hGradChainExp (fun y => Real.log (g y)) x i
+  have key := hGradChainExp (fun y => Real.log (g y)) (hDiff_log g hg_diff hg) x i
   have hexplog : (fun y => Real.exp (Real.log (g y))) = g := by
     ext y; exact Real.exp_log (hg y)
   rw [hexplog, Real.exp_log (hg x)] at key
@@ -493,11 +495,12 @@ lemma hGradIntZero (g : X → ℝ) (hg : IsSpatiallyDiff g) (u : Fin 3 → ℝ) 
     exp(f+c) = exp(c)*exp(f), so by the chain rule and scalar multiplication,
     exp(f(x)+c) * gradX(f+c)(x) = exp(c) * exp(f(x)) * gradX(f)(x).
     Cancelling exp(f(x)+c) > 0 gives gradX(f+c) = gradX(f). -/
-lemma hGradAddConst (f : X → ℝ) (c : ℝ) :
+lemma hGradAddConst (f : X → ℝ) (hf : IsSpatiallyDiff f) (c : ℝ) :
     ∀ x, gradX (fun y => f y + c) x = gradX f x := by
   intro x; ext i
-  have h1 := hGradChainExp (X := X) (fun y => f y + c) x i
-  have h2 := hGradChainExp (X := X) f x i
+  have h1 := hGradChainExp (X := X) (fun y => f y + c)
+    (hDiff_add _ _ hf (hDiff_const c)) x i
+  have h2 := hGradChainExp (X := X) f hf x i
   -- exp(f+c) = exp(c) * exp(f)
   have hfun_eq : (fun y => Real.exp (f y + c)) = (fun y => Real.exp c * Real.exp (f y)) :=
     funext (fun y => by rw [Real.exp_add]; ring)

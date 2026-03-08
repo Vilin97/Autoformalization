@@ -184,15 +184,6 @@ lemma polynomial_identity_from_vlasov
     have hf_eq : (fun y => f y v) =
         (fun y => Real.exp (a y + dotProduct (b y) v + c y * normSq v)) :=
       funext (fun y => hform y v)
-    rw [show FlatTorus3.gradX (fun y => f y v) x i =
-        FlatTorus3.gradX (fun y => Real.exp (a y + dotProduct (b y) v + c y * normSq v)) x i
-      from by rw [hf_eq]]
-    rw [FlatTorus3.hGradChainExp]
-    rw [show Real.exp (a x + dotProduct (b x) v + c x * normSq v) = f x v from (hform x v).symm]
-    congr 1
-    -- Decompose gradX(a + b·v + c|v|²) using linearity
-    rw [show (fun y => a y + dotProduct (b y) v + c y * normSq v) =
-        (fun y => a y + (dotProduct (b y) v + c y * normSq v)) from funext (fun y => by ring)]
     have hbv : FlatTorus3.IsSpatiallyDiff (fun y => dotProduct (b y) v) := by
       have : (fun y => dotProduct (b y) v) = (fun y => v 0 * b y 0 + (v 1 * b y 1 + v 2 * b y 2)) := by
         ext y; simp [dotProduct, Fin.sum_univ_three]; ring
@@ -202,6 +193,20 @@ lemma polynomial_identity_from_vlasov
     have hcv : FlatTorus3.IsSpatiallyDiff (fun y => c y * normSq v) := by
       have : (fun y => c y * normSq v) = (fun y => normSq v * c y) := funext (fun y => mul_comm _ _)
       rw [this]; exact FlatTorus3.hDiff_smul _ _ hc
+    have hexp_arg_diff : FlatTorus3.IsSpatiallyDiff
+        (fun y => a y + dotProduct (b y) v + c y * normSq v) := by
+      rw [show (fun y => a y + dotProduct (b y) v + c y * normSq v) =
+          (fun y => a y + (dotProduct (b y) v + c y * normSq v)) from funext (fun y => by ring)]
+      exact FlatTorus3.hDiff_add _ _ ha (FlatTorus3.hDiff_add _ _ hbv hcv)
+    rw [show FlatTorus3.gradX (fun y => f y v) x i =
+        FlatTorus3.gradX (fun y => Real.exp (a y + dotProduct (b y) v + c y * normSq v)) x i
+      from by rw [hf_eq]]
+    rw [FlatTorus3.hGradChainExp _ hexp_arg_diff]
+    rw [show Real.exp (a x + dotProduct (b x) v + c x * normSq v) = f x v from (hform x v).symm]
+    congr 1
+    -- Decompose gradX(a + b·v + c|v|²) using linearity
+    rw [show (fun y => a y + dotProduct (b y) v + c y * normSq v) =
+        (fun y => a y + (dotProduct (b y) v + c y * normSq v)) from funext (fun y => by ring)]
     rw [FlatTorus3.hGradAdd _ _ ha (FlatTorus3.hDiff_add _ _ hbv hcv)]
     rw [FlatTorus3.hGradAdd _ _ hbv hcv]
     rw [show (fun y => c y * normSq v) = (fun y => normSq v * c y) from funext (fun y => by ring)]
