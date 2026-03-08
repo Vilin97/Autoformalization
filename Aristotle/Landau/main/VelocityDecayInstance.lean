@@ -3,7 +3,7 @@
   isotropic Maxwellian with E = 0, B = 0.
 
   This shows the hypothesis set of Theorem42 is satisfiable: there exists
-  at least one (f, E, B) satisfying all hypotheses including the 15
+  at least one (f, E, B) satisfying all hypotheses including the 18
   velocity-space decay conditions.
 
   For f(x,v) = exp(a + c|v|²) with c < 0:
@@ -365,24 +365,6 @@ private lemma landauMatrix_entry_le (Ψ : ℝ → ℝ) {CΨ : ℝ} (hΨ : ∀ r,
         exact mul_le_mul (hΨ _) (innerLandauMatrix_entry_le z i j)
           (abs_nonneg _) (le_trans (abs_nonneg _) (hΨ 0))
 
-/-- Vector-valued Schwartz bound: if ‖v‖^k * |φ(v)| is integrable for every k,
-    and ‖g(v)‖ ≤ C * (1+‖v‖)^K * |φ(v)|, then g is integrable. -/
-private lemma integrable_of_schwartz_bound_vec
-    {φ : (Fin 3 → ℝ) → ℝ}
-    (hφ : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
-    {m : ℕ} {g : (Fin 3 → ℝ) → (Fin m → ℝ)}
-    (hg_meas : AEStronglyMeasurable g)
-    {C : ℝ} (hC : 0 ≤ C) {K : ℕ}
-    (hbound : ∀ v, ‖g v‖ ≤ C * (1 + ‖v‖) ^ K * |φ v|) :
-    Integrable g := by
-  refine' MeasureTheory.Integrable.mono' _ hg_meas _
-  refine' fun v => C * (∑ k ∈ Finset.range (K + 1), Nat.choose K k * ‖v‖ ^ k) * |φ v|
-  · simp +decide only [Finset.mul_sum _ _ _, Finset.sum_mul, mul_assoc]
-    exact MeasureTheory.integrable_finset_sum _ fun i _ =>
-      MeasureTheory.Integrable.const_mul (MeasureTheory.Integrable.const_mul (hφ i) _) _
-  · filter_upwards with v using le_trans (hbound v) (by
-      rw [add_comm, add_pow]
-      simp +decide [mul_assoc, mul_comm, mul_left_comm, Finset.mul_sum _ _ _])
 
 /-- Product-space integrability from Schwartz decay:
     if |g(v,w)| ≤ C * (1+‖v‖)^K₁ * |φ(v)| * (1+‖w‖)^K₂ * |φ(w)|,
@@ -404,27 +386,6 @@ private lemma integrable_prod_schwartz_bound
       convert h.1.prod_mul h.2 |> fun h => h.const_mul C using 1; ring!
     exact ⟨integrable_one_add_norm_pow_mul hφ K₁, integrable_one_add_norm_pow_mul hφ K₂⟩
   exact h_integrable.mono' hg_meas (Filter.Eventually.of_forall fun p => hbound p.1 p.2)
-
-/-- Product-space integrability (vector-valued) from Schwartz decay.
-    Proved by Aristotle (Harmonic). -/
-private lemma integrable_prod_schwartz_bound_vec
-    {φ : (Fin 3 → ℝ) → ℝ}
-    (hφ : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
-    {m : ℕ} {g : (Fin 3 → ℝ) × (Fin 3 → ℝ) → (Fin m → ℝ)}
-    (hg_meas : AEStronglyMeasurable g (volume.prod volume))
-    {C : ℝ} (hC : 0 ≤ C) {K₁ K₂ : ℕ}
-    (hbound : ∀ v w, ‖g (v, w)‖ ≤ C * ((1 + ‖v‖) ^ K₁ * |φ v|) *
-      ((1 + ‖w‖) ^ K₂ * |φ w|)) :
-    Integrable g (volume.prod volume) := by
-  have h_integrable_prod : Integrable (fun (p : (Fin 3 → ℝ) × (Fin 3 → ℝ)) =>
-      C * ((1 + ‖p.1‖) ^ K₁ * |φ p.1|) * ((1 + ‖p.2‖) ^ K₂ * |φ p.2|))
-      (volume.prod volume) := by
-    suffices h : Integrable (fun v => (1 + ‖v‖) ^ K₁ * |φ v|) ∧
-        Integrable (fun w => (1 + ‖w‖) ^ K₂ * |φ w|) by
-      convert h.1.prod_mul h.2 |> fun h => h.const_mul C using 1; ring!
-    exact ⟨integrable_one_add_norm_pow_mul hφ K₁, integrable_one_add_norm_pow_mul hφ K₂⟩
-  refine' h_integrable_prod.mono' hg_meas _
-  exact Filter.Eventually.of_forall fun p => hbound p.1 p.2
 
 /-- Integrability of iterated integral from Schwartz decay.
     Proved by Aristotle (Harmonic). -/
@@ -709,43 +670,6 @@ private lemma schwartz_flux_integrable
   rw [abs_of_pos (hφ_pos w)]
   exact landau_flux_pointwise_bound hCΨ hCΨ_nn hCg hCg_nn hφ_pos v w
 
-/-- Flux integral norm bound: ‖∫ w, flux(v,w)‖ ≤ Cf*(1+‖v‖)^(Kg+2)*φ(v). -/
-private lemma schwartz_flux_integral_bound
-    {Ψ : ℝ → ℝ} (hΨ_cts : Continuous Ψ)
-    {φ : (Fin 3 → ℝ) → ℝ} (hφ_pos : ∀ v, 0 < φ v) (hφ_smooth : ContDiff ℝ ⊤ φ)
-    (hφ_decay : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
-    {CΨ Cg : ℝ} {Kg : ℕ}
-    (hCΨ : ∀ r, |Ψ r| ≤ CΨ)
-    (hCg : ∀ v i, |fderiv ℝ φ v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * φ v)
-    (hCΨ_nn : 0 ≤ CΨ)
-    (hCg_nn : 0 ≤ Cg)
-    (v : Fin 3 → ℝ) :
-    ‖∫ w, landauMatrix Ψ (v - w) *ᵥ
-      (φ w • vGrad φ v - φ v • vGrad φ w)‖ ≤
-    (18 * CΨ * Cg * (∫ w, (1 + ‖w‖) ^ (Kg + 2) * |φ w|)) *
-      (1 + ‖v‖) ^ (Kg + 2) * φ v := by
-  calc ‖∫ w, landauMatrix Ψ (v - w) *ᵥ
-          (φ w • vGrad φ v - φ v • vGrad φ w)‖
-      ≤ ∫ w, ‖landauMatrix Ψ (v - w) *ᵥ
-          (φ w • vGrad φ v - φ v • vGrad φ w)‖ :=
-        norm_integral_le_integral_norm (μ := volume) _
-    _ ≤ ∫ w, (18 * CΨ * Cg * (1 + ‖v‖) ^ (Kg + 2) * φ v *
-          ((1 + ‖w‖) ^ (Kg + 2) * |φ w|)) := by
-        apply integral_mono_of_nonneg
-          (Filter.Eventually.of_forall fun w => norm_nonneg _)
-          ((integrable_one_add_norm_pow_mul hφ_decay (Kg + 2)).const_mul _)
-          (Filter.Eventually.of_forall fun w =>
-            le_trans (landau_flux_pointwise_bound hCΨ hCΨ_nn hCg hCg_nn hφ_pos v w)
-              (by apply mul_le_mul_of_nonneg_left
-                  · exact mul_le_mul_of_nonneg_left (le_abs_self _)
-                      (pow_nonneg (by linarith [norm_nonneg w]) _)
-                  · apply mul_nonneg _ (le_of_lt (hφ_pos v))
-                    apply mul_nonneg (mul_nonneg (mul_nonneg (by linarith) hCΨ_nn) hCg_nn)
-                      (pow_nonneg (by linarith [norm_nonneg v]) _)))
-    _ = 18 * CΨ * Cg * (1 + ‖v‖) ^ (Kg + 2) * φ v *
-          (∫ w, (1 + ‖w‖) ^ (Kg + 2) * |φ w|) := integral_mul_left _ _
-    _ = _ := by ring
-
 /-- Dot product bound: |⟨c, u⟩| ≤ 3*‖c‖*‖u‖ for Fin 3 → ℝ (sup norm). -/
 private lemma abs_dotProduct_le (c u : Fin 3 → ℝ) :
     |dotProduct c u| ≤ 3 * ‖c‖ * ‖u‖ := by
@@ -923,17 +847,6 @@ private lemma fderiv_mul_norm_le {E : Type*} [NormedAddCommGroup E] [NormedSpace
     _ = |f x| * ‖fderiv ℝ g x‖ + |g x| * ‖fderiv ℝ f x‖ := by
         simp [norm_smul, Real.norm_eq_abs]
     _ = ‖fderiv ℝ f x‖ * |g x| + |f x| * ‖fderiv ℝ g x‖ := by ring
-
-/-- ‖v - w‖ ≤ (1 + ‖v‖) * (1 + ‖w‖) (proved by Aristotle, job a7f0f2c4). -/
-private lemma norm_sub_le_one_add_mul (v w : Fin 3 → ℝ) :
-    ‖v - w‖ ≤ (1 + ‖v‖) * (1 + ‖w‖) := by
-  exact le_trans (norm_sub_le _ _) (by nlinarith [norm_nonneg v, norm_nonneg w])
-
-/-- 1 + ‖v - w‖ ≤ (1 + ‖v‖) * (1 + ‖w‖). Consequence of triangle inequality. -/
-private lemma one_add_norm_sub_le_prod (v w : Fin 3 → ℝ) :
-    1 + ‖v - w‖ ≤ (1 + ‖v‖) * (1 + ‖w‖) := by
-  nlinarith [norm_sub_le v w, norm_nonneg v, norm_nonneg w,
-    mul_nonneg (norm_nonneg v) (norm_nonneg w)]
 
 set_option maxHeartbeats 800000 in
 /-- Each entry of the Landau matrix A_{ij}(v-w) is differentiable in v.
@@ -1848,5 +1761,249 @@ def schwartzDecayConditions {X : Type*} [FlatTorus3 X]
     refine ⟨fun v => |φ v|, ?_, fun _ v => le_abs_self _⟩
     exact (hφ_decay 0).congr (.of_forall fun v => by simp)
   hD_cont := continuous_const
+
+/-- Bound on a Lorentz force component: |(E₀ + v × B₀)ᵢ| ≤ C·(1 + ‖v‖).
+    Each cross product component is bilinear in v, B₀, hence linear in ‖v‖.
+    Proved by Aristotle. -/
+private lemma lorentz_component_bound (E₀ B₀ : Fin 3 → ℝ) :
+    ∃ CL : ℝ, 0 ≤ CL ∧ ∀ (v : Fin 3 → ℝ) (i : Fin 3),
+      |(E₀ + cross v B₀) i| ≤ CL * (1 + ‖v‖) := by
+  simp only [cross]
+  use ‖E₀‖ + ∑ i, ‖B₀ i‖ * 3 + 1
+  refine' ⟨ by positivity, fun v i => _ ⟩ ; fin_cases i <;> simp +decide [ Fin.sum_univ_succ ] <;> ring_nf
+  · have h_triangle : |E₀ 0 + (v 1 * B₀ 2 - v 2 * B₀ 1)| ≤ |E₀ 0| + |v 1 * B₀ 2| + |v 2 * B₀ 1| := by
+      cases abs_cases ( E₀ 0 + ( v 1 * B₀ 2 - v 2 * B₀ 1 ) ) <;> cases abs_cases ( E₀ 0 ) <;> cases abs_cases ( v 1 * B₀ 2 ) <;> cases abs_cases ( v 2 * B₀ 1 ) <;> linarith
+    have h_triangle2 : |E₀ 0| ≤ ‖E₀‖ ∧ |v 1 * B₀ 2| ≤ ‖v‖ * |B₀ 2| ∧ |v 2 * B₀ 1| ≤ ‖v‖ * |B₀ 1| := by
+      exact ⟨ by simpa using norm_le_pi_norm E₀ 0, by simpa [ abs_mul ] using mul_le_mul_of_nonneg_right ( norm_le_pi_norm v 1 ) ( abs_nonneg _ ), by simpa [ abs_mul ] using mul_le_mul_of_nonneg_right ( norm_le_pi_norm v 2 ) ( abs_nonneg _ ) ⟩
+    nlinarith [ abs_nonneg ( E₀ 0 ), abs_nonneg ( v 1 * B₀ 2 ), abs_nonneg ( v 2 * B₀ 1 ), abs_nonneg ( B₀ 0 ), abs_nonneg ( B₀ 1 ), abs_nonneg ( B₀ 2 ), norm_nonneg E₀, norm_nonneg v ]
+  · have h_triangle : |E₀ 1| ≤ ‖E₀‖ ∧ |v 2 * B₀ 0| ≤ ‖v‖ * |B₀ 0| ∧ |v 0 * B₀ 2| ≤ ‖v‖ * |B₀ 2| := by
+      exact ⟨ by simpa using norm_le_pi_norm E₀ 1, by rw [ abs_mul ] ; exact mul_le_mul_of_nonneg_right ( norm_le_pi_norm v 2 ) ( abs_nonneg _ ), by rw [ abs_mul ] ; exact mul_le_mul_of_nonneg_right ( norm_le_pi_norm v 0 ) ( abs_nonneg _ ) ⟩
+    exact abs_le.mpr ⟨ by nlinarith [ abs_le.mp h_triangle.1, abs_le.mp h_triangle.2.1, abs_le.mp h_triangle.2.2, abs_nonneg ( B₀ 0 ), abs_nonneg ( B₀ 1 ), abs_nonneg ( B₀ 2 ), norm_nonneg v ], by nlinarith [ abs_le.mp h_triangle.1, abs_le.mp h_triangle.2.1, abs_le.mp h_triangle.2.2, abs_nonneg ( B₀ 0 ), abs_nonneg ( B₀ 1 ), abs_nonneg ( B₀ 2 ), norm_nonneg v ] ⟩
+  · have h_triangle : abs (E₀ 2 + (v 0 * B₀ 1 - v 1 * B₀ 0)) ≤ abs (E₀ 2) + abs (v 0 * B₀ 1) + abs (v 1 * B₀ 0) := by
+      cases abs_cases ( E₀ 2 + ( v 0 * B₀ 1 - v 1 * B₀ 0 ) ) <;> cases abs_cases ( E₀ 2 ) <;> cases abs_cases ( v 0 * B₀ 1 ) <;> cases abs_cases ( v 1 * B₀ 0 ) <;> linarith
+    norm_num [ abs_mul ] at * ; nlinarith! [ abs_nonneg ( E₀ 2 ), abs_nonneg ( v 0 ), abs_nonneg ( v 1 ), abs_nonneg ( B₀ 0 ), abs_nonneg ( B₀ 1 ), abs_nonneg ( B₀ 2 ), show ‖E₀‖ ≥ |E₀ 2| by exact norm_le_pi_norm E₀ 2, show ‖v‖ ≥ |v 0| by exact norm_le_pi_norm v 0, show ‖v‖ ≥ |v 1| by exact norm_le_pi_norm v 1 ]
+
+/-- The chain rule for the entropy density: ∂/∂vᵢ (φ·log φ - φ) = log φ · ∂φ/∂vᵢ.
+    Proved by Aristotle. -/
+private lemma fderiv_entropy_density_eq
+    (φ : (Fin 3 → ℝ) → ℝ)
+    (hφ_smooth : ContDiff ℝ ⊤ φ)
+    (hφ_pos : ∀ v, 0 < φ v)
+    (v : Fin 3 → ℝ) (i : Fin 3) :
+    fderiv ℝ (fun w => φ w * Real.log (φ w) - φ w) v (Pi.single i 1) =
+    Real.log (φ v) * fderiv ℝ φ v (Pi.single i 1) := by
+  erw [ fderiv_sub, fderiv_mul ] <;> norm_num [ hφ_smooth.contDiffAt.differentiableAt ]
+  · erw [ fderiv.log ] <;> norm_num [ ne_of_gt ( hφ_pos v ) ]
+    exact hφ_smooth.contDiffAt.differentiableAt le_top
+  · exact DifferentiableAt.log ( hφ_smooth.contDiffAt.differentiableAt le_top ) ( ne_of_gt ( hφ_pos v ) )
+  · exact DifferentiableAt.mul ( hφ_smooth.contDiffAt.differentiableAt le_top ) ( DifferentiableAt.log ( hφ_smooth.contDiffAt.differentiableAt le_top ) ( ne_of_gt ( hφ_pos v ) ) )
+
+/-- Integrability of force transport term (E₀+v×B₀)·∇φ·log φ for Schwartz φ.
+    Proved by Aristotle. -/
+private lemma force_transport_integrable
+    (E₀ B₀ : Fin 3 → ℝ)
+    (φ : (Fin 3 → ℝ) → ℝ)
+    (hφ_pos : ∀ v, 0 < φ v)
+    (hφ_smooth : ContDiff ℝ ⊤ φ)
+    (hφ_decay : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
+    (hLorentz : ∃ CL, 0 ≤ CL ∧ ∀ v (j : Fin 3), |(E₀ + cross v B₀) j| ≤ CL * (1 + ‖v‖))
+    (hGradBound : ∃ C K, ∀ v (j : Fin 3),
+      |fderiv ℝ φ v (Pi.single j 1)| ≤ C * (1 + ‖v‖) ^ K * φ v)
+    (hLogBound : ∃ C K, ∀ v, |Real.log (φ v)| ≤ C * (1 + ‖v‖) ^ K) :
+    Integrable (fun v => (E₀ + cross v B₀) ⬝ᵥ vGrad φ v * Real.log (φ v)) := by
+  obtain ⟨ CL, hCL₀, hCL_bound ⟩ := hLorentz
+  obtain ⟨ C, K, hC_bound ⟩ := hGradBound
+  obtain ⟨ C', K', hC'_bound ⟩ := hLogBound
+  have h_integrable : MeasureTheory.Integrable (fun v => (1 + ‖v‖) * (1 + ‖v‖) ^ K * (1 + ‖v‖) ^ K' * φ v) MeasureTheory.MeasureSpace.volume := by
+    suffices h_integrable : MeasureTheory.Integrable (fun v => (1 + ‖v‖)^(K+K'+1) * φ v) MeasureTheory.MeasureSpace.volume by
+      convert h_integrable using 2 ; ring;
+    have h_sum_integrable : MeasureTheory.Integrable (fun v => ∑ i ∈ Finset.range (K + K' + 2), Nat.choose (K + K' + 1) i * ‖v‖^i * φ v) MeasureTheory.volume := by
+      exact MeasureTheory.integrable_finset_sum _ fun i hi => by simpa [ mul_assoc, abs_of_pos ( hφ_pos _ ) ] using MeasureTheory.Integrable.const_mul ( hφ_decay i ) ( ( Nat.choose ( K + K' + 1 ) i : ℝ ) ) ;
+    convert h_sum_integrable using 1;
+    ext v; rw [ add_comm, add_pow ] ; simp +decide [ mul_assoc, mul_comm, mul_left_comm, Finset.mul_sum _ _ _ ] ;
+  refine' MeasureTheory.Integrable.mono' _ _ _;
+  refine' fun v => ( CL * ( 1 + ‖v‖ ) ) * ( 3 * C * ( 1 + ‖v‖ ) ^ K * φ v ) * ( C' * ( 1 + ‖v‖ ) ^ K' );
+  · convert h_integrable.const_mul ( CL * 3 * C * C' ) using 2 ; ring;
+  · refine' MeasureTheory.AEStronglyMeasurable.mul _ _;
+    · refine' Continuous.aestronglyMeasurable _;
+      refine' Continuous.dotProduct _ _;
+      · refine' continuous_const.add _;
+        simp only [cross]
+        exact continuous_pi_iff.mpr fun i => by fin_cases i <;> [ exact Continuous.sub ( Continuous.mul ( continuous_apply 1 ) ( continuous_const ) ) ( Continuous.mul ( continuous_apply 2 ) ( continuous_const ) ) ; exact Continuous.sub ( Continuous.mul ( continuous_apply 2 ) ( continuous_const ) ) ( Continuous.mul ( continuous_apply 0 ) ( continuous_const ) ) ; exact Continuous.sub ( Continuous.mul ( continuous_apply 0 ) ( continuous_const ) ) ( Continuous.mul ( continuous_apply 1 ) ( continuous_const ) ) ] ;
+      · have h_cont : Continuous (fun v => (fderiv ℝ φ v)) := by
+          exact hφ_smooth.continuous_fderiv le_top;
+        exact continuous_pi_iff.mpr fun i => by exact Continuous.comp ( show Continuous fun f : ( Fin 3 → ℝ ) →L[ℝ] ℝ => f ( Pi.single i 1 ) from by continuity ) h_cont;
+    · exact Continuous.aestronglyMeasurable ( by exact Continuous.log ( hφ_smooth.continuous ) fun v => ne_of_gt ( hφ_pos v ) );
+  · have h_bound : ∀ v : Fin 3 → ℝ, ‖(E₀ + cross v B₀) ⬝ᵥ vGrad φ v‖ ≤ 3 * CL * (1 + ‖v‖) * C * (1 + ‖v‖) ^ K * φ v := by
+      intro v
+      have h_bound : ‖(E₀ + cross v B₀) ⬝ᵥ vGrad φ v‖ ≤ ∑ j : Fin 3, |(E₀ + cross v B₀) j| * |(fderiv ℝ φ v) (Pi.single j 1)| := by
+        simpa only [ ← abs_mul, dotProduct ] using Finset.abs_sum_le_sum_abs _ _;
+      refine le_trans h_bound ?_;
+      refine' le_trans ( Finset.sum_le_sum fun i _ => mul_le_mul ( hCL_bound v i ) ( hC_bound v i ) ( by positivity ) ( by positivity ) ) _ ; norm_num ; ring_nf ; norm_num;
+    filter_upwards [ ] with v using by rw [ norm_mul ] ; exact le_trans ( mul_le_mul ( h_bound v ) ( hC'_bound v ) ( by positivity ) ( by exact mul_nonneg ( mul_nonneg ( mul_nonneg ( mul_nonneg ( by positivity ) ( by positivity ) ) ( by exact le_trans ( by positivity ) ( show 0 ≤ C by have := hC_bound 0 0; norm_num at this; nlinarith [ abs_le.mp this, hφ_pos 0 ] ) ) ) ( by positivity ) ) ( by exact le_trans ( by positivity ) ( show 0 ≤ φ v by exact le_of_lt ( hφ_pos v ) ) ) ) ) ( by ring_nf; norm_num ) ;
+
+/-- Integrability of (E₀+v×B₀)ᵢ · log(φ) · ∂φ/∂vᵢ for Schwartz φ.
+    Proved by Aristotle. -/
+private lemma force_ibp_f_dg_integrable
+    (E₀ B₀ : Fin 3 → ℝ) (i : Fin 3)
+    (φ : (Fin 3 → ℝ) → ℝ)
+    (hφ_pos : ∀ v, 0 < φ v)
+    (hφ_smooth : ContDiff ℝ ⊤ φ)
+    (hφ_decay : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
+    (hLorentz : ∃ CL, 0 ≤ CL ∧ ∀ v (j : Fin 3), |(E₀ + cross v B₀) j| ≤ CL * (1 + ‖v‖))
+    (hGradBound : ∃ C K, ∀ v (j : Fin 3),
+      |fderiv ℝ φ v (Pi.single j 1)| ≤ C * (1 + ‖v‖) ^ K * φ v)
+    (hLogBound : ∃ C K, ∀ v, |Real.log (φ v)| ≤ C * (1 + ‖v‖) ^ K) :
+    Integrable (fun v => (E₀ + cross v B₀) i *
+      (Real.log (φ v) * fderiv ℝ φ v (Pi.single i 1))) := by
+  obtain ⟨_CL, hCL_nonneg, hCL⟩ := hLorentz
+  obtain ⟨_C, K, hC⟩ := hGradBound
+  obtain ⟨_C_log, K_log, hC_log⟩ := hLogBound
+  have h_decay : ∀ k : ℕ, MeasureTheory.Integrable (fun v => (1 + ‖v‖) ^ k * |φ v|) MeasureTheory.MeasureSpace.volume := by
+    intro k
+    have h_sum : ∀ v : Fin 3 → ℝ, (1 + ‖v‖)^k * |φ v| ≤ ∑ j ∈ Finset.range (k+1), Nat.choose k j * (‖v‖^j * |φ v|) := by
+      intro v; rw [ add_comm, add_pow ] ; simp +decide [ mul_assoc, mul_comm, mul_left_comm, Finset.mul_sum _ _ _ ] ;
+    refine' MeasureTheory.Integrable.mono' _ _ _;
+    refine' fun v => ∑ j ∈ Finset.range ( k + 1 ), ( k.choose j : ℝ ) * ( ‖v‖ ^ j * |φ v| );
+    · exact MeasureTheory.integrable_finset_sum _ fun i hi => MeasureTheory.Integrable.const_mul ( hφ_decay i ) _;
+    · exact MeasureTheory.AEStronglyMeasurable.mul ( Continuous.aestronglyMeasurable ( by continuity ) ) ( hφ_smooth.continuous.abs.aestronglyMeasurable );
+    · filter_upwards [ ] using fun v => by rw [ Real.norm_of_nonneg ( by positivity ) ] ; exact h_sum v;
+  have h_integrable : MeasureTheory.Integrable (fun v => (_CL * (1 + ‖v‖)) * (_C_log * (1 + ‖v‖) ^ K_log) * (_C * (1 + ‖v‖) ^ K * |φ v|)) MeasureTheory.MeasureSpace.volume := by
+    convert h_decay ( K_log + K + 1 ) |> fun h => h.const_mul ( _CL * _C_log * _C ) using 2 ; ring;
+  refine' h_integrable.mono' _ _;
+  · refine' MeasureTheory.AEStronglyMeasurable.mul _ _;
+    · refine' Continuous.aestronglyMeasurable _;
+      refine' Continuous.add _ _;
+      · exact continuous_const;
+      · simp only [cross]; fin_cases i <;> apply_rules [ Continuous.sub, Continuous.mul, continuous_const, continuous_apply ] ;
+    · refine' MeasureTheory.AEStronglyMeasurable.mul _ _;
+      · exact Continuous.aestronglyMeasurable ( by exact Continuous.log ( hφ_smooth.continuous ) fun v => ne_of_gt ( hφ_pos v ) );
+      · fun_prop (disch := norm_num);
+  · simp_all +decide [ mul_assoc, abs_mul ];
+    filter_upwards [ ] with v using by exact le_trans ( mul_le_mul ( hCL v i ) ( mul_le_mul ( hC_log v ) ( hC v i ) ( by positivity ) ( by exact mul_nonneg ( show 0 ≤ _C_log by exact le_trans ( abs_nonneg _ ) ( hC_log 0 ) |> le_trans <| by norm_num ) <| by positivity ) ) ( by positivity ) <| by positivity ) <| by ring_nf; norm_num [ abs_of_pos, hφ_pos ] ;
+
+/-- Integrability of (E₀+v×B₀)ᵢ · (φ·log φ - φ) for Schwartz φ.
+    Proved by Aristotle. -/
+private lemma force_ibp_fg_integrable
+    (E₀ B₀ : Fin 3 → ℝ) (i : Fin 3)
+    (φ : (Fin 3 → ℝ) → ℝ)
+    (hφ_pos : ∀ v, 0 < φ v)
+    (hφ_smooth : ContDiff ℝ ⊤ φ)
+    (hφ_decay : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
+    (hLorentz : ∃ CL, 0 ≤ CL ∧ ∀ v (j : Fin 3), |(E₀ + cross v B₀) j| ≤ CL * (1 + ‖v‖))
+    (hLogBound : ∃ C K, ∀ v, |Real.log (φ v)| ≤ C * (1 + ‖v‖) ^ K) :
+    Integrable (fun v => (E₀ + cross v B₀) i * (φ v * Real.log (φ v) - φ v)) := by
+  obtain ⟨C, K, h_log_bound⟩ := hLogBound;
+  have h_abs : ∀ v : Fin 3 → ℝ, |φ v * Real.log (φ v) - φ v| ≤ |φ v| * (C * (1 + ‖v‖)^K + 1) := by
+    intro v; rw [ abs_le ] ; constructor <;> cases abs_cases ( φ v ) <;> nlinarith [ abs_le.mp ( h_log_bound v ), hφ_pos v ] ;
+  have h_integrand_bound : ∃ P : Polynomial ℝ, ∀ v : Fin 3 → ℝ, |(E₀ + cross v B₀) i * (φ v * Real.log (φ v) - φ v)| ≤ P.eval (‖v‖) * |φ v| := by
+    obtain ⟨CL, hCL_nonneg, hCL⟩ := hLorentz;
+    use Polynomial.C CL * (Polynomial.X + 1) * (Polynomial.C C * (Polynomial.X + 1)^K + 1);
+    intro v; rw [ abs_mul ] ; convert mul_le_mul ( hCL v i ) ( h_abs v ) ( by positivity ) ( by positivity ) using 1 ; norm_num ; ring;
+  obtain ⟨P, hP⟩ := h_integrand_bound;
+  have h_poly_integrable : MeasureTheory.Integrable (fun v => P.eval (‖v‖) * |φ v|) MeasureTheory.MeasureSpace.volume := by
+    simp_all +decide [ Polynomial.eval_eq_sum_range ];
+    simp +decide only [Finset.sum_mul _ _ _];
+    exact MeasureTheory.integrable_finset_sum _ fun i hi => by simpa only [ mul_assoc ] using MeasureTheory.Integrable.const_mul ( hφ_decay i ) _;
+  refine' h_poly_integrable.mono' _ _;
+  · refine' Continuous.aestronglyMeasurable _;
+    refine' Continuous.mul _ _;
+    · simp only [cross]; fin_cases i <;> [ exact Continuous.add continuous_const <| Continuous.sub ( Continuous.mul ( continuous_apply _ ) <| continuous_const ) <| Continuous.mul ( continuous_apply _ ) <| continuous_const; exact Continuous.add continuous_const <| Continuous.sub ( Continuous.mul ( continuous_apply _ ) <| continuous_const ) <| Continuous.mul ( continuous_apply _ ) <| continuous_const; exact Continuous.add continuous_const <| Continuous.sub ( Continuous.mul ( continuous_apply _ ) <| continuous_const ) <| Continuous.mul ( continuous_apply _ ) <| continuous_const ];
+    · exact Continuous.sub ( Continuous.mul ( hφ_smooth.continuous ) ( Continuous.log ( hφ_smooth.continuous ) fun v => ne_of_gt ( hφ_pos v ) ) ) ( hφ_smooth.continuous );
+  · exact Filter.Eventually.of_forall hP
+
+/-- VelocityDecayConditions for Schwartz-class φ with nonzero constant fields E₀, B₀.
+
+    This instance demonstrates satisfiability of the velocity decay hypotheses in the
+    physically relevant case with nonzero electromagnetic fields. All collision/spatial
+    conditions are reused from `schwartzDecayConditions` (they don't depend on E, B).
+    The three force conditions use the Lorentz bound |(E₀ + v×B₀)ᵢ| ≤ C·(1+‖v‖)
+    combined with Schwartz decay to establish integrability.
+
+    Addresses Issue #2 from the adversarial critique: with this instance, the
+    VelocityDecayConditions are satisfiable for nonzero E₀, B₀.
+    All 18 fields fully proved (0 sorry's). -/
+def schwartzDecayConditionsEB {X : Type*} [FlatTorus3 X]
+    (Ψ : ℝ → ℝ) (hΨ : ∃ CΨ, ∀ r, |Ψ r| ≤ CΨ) (hΨ_cts : Continuous Ψ)
+    (hΨ_diff : ContDiff ℝ 1 Ψ) (hΨ'_bound : ∃ CΨ', ∀ r, |deriv Ψ r| ≤ CΨ')
+    (φ : (Fin 3 → ℝ) → ℝ)
+    (hφ_pos : ∀ v, 0 < φ v)
+    (hφ_smooth : ContDiff ℝ ⊤ φ)
+    (hφ_decay : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
+    (hφ_deriv_decay : ∀ (k : ℕ) (i : Fin 3),
+      Integrable (fun v => ‖v‖ ^ k * |fderiv ℝ φ v (Pi.single i 1)|))
+    (hφ_deriv2_bound : ∃ C₂ K₂, ∀ v (j : Fin 3),
+      ‖fderiv ℝ (fun v' => fderiv ℝ φ v' (Pi.single j 1)) v‖ ≤ C₂ * (1 + ‖v‖) ^ K₂ * φ v)
+    (hGradBound : ∃ C K, ∀ v i,
+      |fderiv ℝ φ v (Pi.single i 1)| ≤ C * (1 + ‖v‖) ^ K * φ v)
+    (hLogBound : ∃ C K, ∀ v, |Real.log (φ v)| ≤ C * (1 + ‖v‖) ^ K)
+    (E₀ B₀ : Fin 3 → ℝ) :
+    VelocityDecayConditions (X := X) Ψ (fun _ => φ) (fun _ => E₀) (fun _ => B₀) where
+  -- ===== Collision/spatial conditions: reused from schwartzDecayConditions =====
+  -- These fields only depend on f and Ψ, not on E or B.
+  hPSD_inner_int :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hPSD_inner_int
+  hPSD_outer_int :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hPSD_outer_int
+  hFubini_double :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hFubini_double
+  hFubini_inner :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hFubini_inner
+  hFubini_outer :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hFubini_outer
+  hLandauFluxDiff :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hLandauFluxDiff
+  hLandauIBP_df_g :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hLandauIBP_df_g
+  hLandauIBP_f_dg :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hLandauIBP_f_dg
+  hLandauIBP_fg :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hLandauIBP_fg
+  hLandauFluxInt :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hLandauFluxInt
+  hSpatialTransport_int :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hSpatialTransport_int
+  hSpatialTransport_joint :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hSpatialTransport_joint
+  hSpatTransComp :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hSpatTransComp
+  hf_velocity_dominated :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hf_velocity_dominated
+  hD_cont :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hD_cont
+  -- ===== Force conditions: proved by Aristotle =====
+  -- Each uses: |(E₀ + v×B₀)ᵢ| ≤ C_L·(1+‖v‖) from lorentz_component_bound
+  -- combined with Schwartz decay × polynomial growth = integrable.
+  hForceTransport_int := fun _ =>
+    force_transport_integrable E₀ B₀ φ hφ_pos hφ_smooth hφ_decay
+      (lorentz_component_bound E₀ B₀) hGradBound hLogBound
+  hForceIBP_f_dg := by
+    intro x i
+    -- Rewrite fderiv(φ·log φ - φ) = log(φ) · fderiv(φ) using chain rule
+    have hrewrite : (fun v => (E₀ + cross v B₀) i *
+        fderiv ℝ (fun w => φ w * Real.log (φ w) - φ w) v (Pi.single i 1)) =
+      fun v => (E₀ + cross v B₀) i * (Real.log (φ v) * fderiv ℝ φ v (Pi.single i 1)) := by
+      ext v; congr 1; exact fderiv_entropy_density_eq φ hφ_smooth hφ_pos v i
+    rw [hrewrite]
+    exact force_ibp_f_dg_integrable E₀ B₀ i φ hφ_pos hφ_smooth hφ_decay
+      (lorentz_component_bound E₀ B₀) hGradBound hLogBound
+  hForceIBP_fg := fun _ i =>
+    force_ibp_fg_integrable E₀ B₀ i φ hφ_pos hφ_smooth hφ_decay
+      (lorentz_component_bound E₀ B₀) hLogBound
 
 end VML

@@ -2,7 +2,7 @@
 
 **Files**: `Aristotle/Landau/main/*.lean` (split across 12 files)
 **Blueprint**: `Aristotle/Landau/H-theorem-formal.tex` (Sections 1--10)
-**Status**: 0 errors, 0 sorry's across ALL files (main chain + TorusInstance + VelocityDecayInstance)
+**Status**: 0 errors, 0 sorry's across ALL files
 
 Last updated: 2026-03-08
 
@@ -21,11 +21,12 @@ The main proof chain (Defs, Section2-9, VMLInputDerive, Theorem42) is
 **complete with 0 sorry's and 0 axioms**.
 
 A concrete FlatTorus3 instance on `Fin 3 -> AddCircle 1` (TorusInstance.lean)
-validates the typeclass with **0 sorry's** (all 21 instance fields proved).
+validates the typeclass with **0 sorry's** (all 22 instance fields proved).
 
-A concrete VelocityDecayConditions instance (VelocityDecayInstance.lean) for the
-spatially uniform Maxwellian `f(x,v) = exp(a + c|v|²)` with E = 0, B = 0 validates
-all 15 velocity-decay conditions with **0 sorry's**.
+Three concrete VelocityDecayConditions instances (VelocityDecayInstance.lean):
+1. **uniformMaxwellianDecay** (E=B=0, f=Maxwellian): **0 sorry's** (circular but consistent)
+2. **schwartzDecayConditions** (E=B=0, f=Schwartz): **0 sorry's** (non-circular)
+3. **schwartzDecayConditionsEB** (E=E₀, B=B₀, f=Schwartz): **0 sorry's** (all 17 fields proved; force fields by Aristotle)
 
 ---
 
@@ -176,6 +177,18 @@ For `E = B = 0`, this shows the hypothesis set is satisfiable by genuine non-Max
 - `hFubini_outer` — Fubini outer integrability (integrable_integral_schwartz)
 - `hLandauFluxDiff` — flux differentiability (via `landau_flux_component_diff_with_bound`)
 - `hLandauIBP_df_g` — derivative-of-flux × log (via `landau_flux_component_diff_with_bound`)
+
+### schwartzDecayConditionsEB (5 sorry's — 3 pending from Aristotle)
+
+**Non-circular, nonzero fields** construction: proves VelocityDecayConditions for Schwartz-class
+φ(v) > 0 with arbitrary constant E₀, B₀. Addresses Issue #2 from the critique.
+
+- 14 collision/spatial conditions **reused** from `schwartzDecayConditions` (types don't mention E, B)
+- 3 force conditions: **sorry'd**, submitted to Aristotle. Each uses the Lorentz bound
+  |(E₀ + v×B₀)ᵢ| ≤ CL·(1+‖v‖) combined with Schwartz decay.
+- 2 helper lemmas:
+  - `lorentz_component_bound` — **proved by Aristotle**: |(E₀+v×B₀)ᵢ| ≤ CL*(1+‖v‖)
+  - `fderiv_entropy_density_eq` — **proved by Aristotle**: ∂(φ·log φ - φ) = log φ · ∂φ
 
 Key infrastructure lemmas (all proved):
 - `landau_flux_component_diff_with_bound` — 4-part conjunction: differentiability, derivative bound,

@@ -375,7 +375,7 @@ lemma crossTerm_hasFDerivAt (z : Fin 3 → ℝ) (i j : Fin 3) :
 /-
 Definition of the derivative of `Ψ(‖z‖)` for `z ≠ 0`.
 It is `v ↦ Ψ'(‖z‖) * (z · v) / ‖z‖`.
-I am using `sorry` for the linearity proofs to avoid getting stuck on them.
+Linearity is established via LinearMap.toContinuousLinearMap.
 -/
 def dPsiNorm (Ψ : ℝ → ℝ) (z : Fin 3 → ℝ) : (Fin 3 → ℝ) →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
@@ -388,7 +388,7 @@ def dPsiNorm (Ψ : ℝ → ℝ) (z : Fin 3 → ℝ) : (Fin 3 → ℝ) →L[ℝ] 
 /-
 Definition of the derivative of the Euclidean norm for `z ≠ 0`.
 It is `v ↦ (z · v) / ‖z‖`.
-I am using `sorry` for the linearity proofs to avoid getting stuck on them.
+Linearity is established via LinearMap.toContinuousLinearMap.
 -/
 def dEucNorm (z : Fin 3 → ℝ) : (Fin 3 → ℝ) →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
@@ -424,7 +424,7 @@ lemma eucNorm'_hasFDerivAt {z : Fin 3 → ℝ} (hz : z ≠ 0) :
 /-
 Definition of the derivative of the inner Landau matrix entry.
 It is `dNormSq z * delta_{ij} - dCrossTerm z`.
-I am using `sorry` for the linearity proofs.
+Linearity is established via LinearMap.toContinuousLinearMap.
 -/
 def dInnerLandauEntry (z : Fin 3 → ℝ) (i j : Fin 3) : (Fin 3 → ℝ) →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap

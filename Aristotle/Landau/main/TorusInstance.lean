@@ -234,7 +234,7 @@ theorem clairaut_fderiv {n : ℕ} (g : (Fin n → ℝ) → ℝ) (x : Fin n → �
 -- and g is not, fderiv(f+g) = 0 but fderiv(f) + fderiv(g) = fderiv(f) ≠ 0.
 -- All other gradient axioms (scalar mul, chain exp, div linear) hold
 -- universally via case analysis on differentiability.
--- We sorry the non-differentiable edge cases in the instance.
+-- hGradAdd and hGradChainExp require IsSpatiallyDiff guards in the abstract axiom.
 
 -- ============================================================================
 -- AXIOM PROOFS (attempted)
@@ -282,7 +282,7 @@ theorem torus_hSpatialVelocityFubini (F : Torus3 → (Fin 3 → ℝ) → ℝ)
 
 -- NOTE: Our abstract axiom only requires pointwise integrability (∀ x, Integrable (F x)).
 -- Mathlib's Fubini needs joint integrability. So the concrete version is slightly stronger.
--- We'd either strengthen the hypothesis in the abstract axiom or sorry this gap.
+-- The abstract axiom now requires joint integrability (hSpatialVelocityFubini).
 
 -- ============================================================================
 -- Compact manifold axioms
@@ -315,40 +315,6 @@ theorem torus_hSpatialNonnegZero (g : Torus3 → ℝ)
   exact fun x => congr_fun h3 x
 
 -- ============================================================================
--- 1D integration lemmas (proved by Aristotle, used for torus IBP)
--- ============================================================================
-
-/-- The integral of the derivative of a periodic function over one period is zero.
-    Proved by Aristotle. -/
-private theorem integral_deriv_periodic_zero' {f : ℝ → ℝ} {T : ℝ} (hT : 0 < T)
-    (hf_periodic : Function.Periodic f T)
-    (hf_diff : Differentiable ℝ f)
-    (hf_cont : Continuous (deriv f)) :
-    ∫ x in (0 : ℝ)..T, deriv f x = 0 := by
-  rw [intervalIntegral.integral_deriv_eq_sub]
-  · exact sub_eq_zero_of_eq (hf_periodic 0 ▸ by norm_num)
-  · aesop
-  · exact hf_cont.intervalIntegrable _ _
-
-/-- Integration by parts for periodic functions over one period.
-    Proved by Aristotle. -/
-private theorem ibp_periodic' {f g : ℝ → ℝ} {T : ℝ} (hT : 0 < T)
-    (hf_periodic : Function.Periodic f T)
-    (hg_periodic : Function.Periodic g T)
-    (hf_diff : Differentiable ℝ f)
-    (hg_diff : Differentiable ℝ g)
-    (hf'_cont : Continuous (deriv f))
-    (hg'_cont : Continuous (deriv g)) :
-    ∫ x in (0 : ℝ)..T, f x * deriv g x = -(∫ x in (0 : ℝ)..T, deriv f x * g x) := by
-  have h_parts : ∫ x in (0 : ℝ)..T, f x * deriv g x =
-      f T * g T - f 0 * g 0 - ∫ x in (0 : ℝ)..T, deriv f x * g x := by
-    rw [intervalIntegral.integral_mul_deriv_eq_deriv_mul] <;> norm_num [hf_diff.differentiableAt, hg_diff.differentiableAt]
-    · exact hf'_cont.intervalIntegrable _ _
-    · exact hg'_cont.intervalIntegrable _ _
-  have hfT : f T = f 0 := by have := hf_periodic 0; simpa using this
-  have hgT : g T = g 0 := by have := hg_periodic 0; simpa using this
-  rw [h_parts, hfT, hgT]; ring
-
 -- ============================================================================
 -- Helper lemmas for torus IBP
 -- ============================================================================
@@ -954,7 +920,7 @@ theorem torus_hLaplacianMaxNonpos (φ : Torus3 → ℝ) (x₀ : Torus3)
     1. Convert C² hypothesis via periodicLift_torusGradX
     2. Derive ContDiff ℝ 2 from differentiable first-order partials (finite-dim analysis)
     3. Apply killing_harmonic_rn' to the periodic lift
-    Sorry'd: the ContDiff ℝ 2 derivation step (finite-dimensional analysis gap). -/
+    The ContDiff ℝ 2 derivation uses contDiff2_from_partials. -/
 -- Helper used by both Killing and curl/div proofs:
 -- derive ContDiff ℝ 2 from C¹ + C¹ of each partial
 private lemma contDiff2_from_partials {g : (Fin 3 → ℝ) → ℝ}
@@ -1022,7 +988,7 @@ theorem torus_hKillingToHarmonic (b : Torus3 → Fin 3 → ℝ)
     2. Derive ContDiff ℝ 2 (finite-dim analysis)
     3. Convert curl=0 and div=0 to ℝⁿ form
     4. Apply curl_div_harmonic_rn' to the periodic lift
-    Sorry'd: the ContDiff ℝ 2 and torus-to-ℝⁿ conversion steps. -/
+    The ContDiff ℝ 2 derivation uses contDiff2_from_partials. -/
 theorem torus_hCurlZeroDivZeroHarmonic (F : Torus3 → Fin 3 → ℝ)
     (hF_C1 : ∀ i, ContDiff ℝ 1 (periodicLift (fun z => F z i)))
     (hF_C2 : ∀ i j, ContDiff ℝ 1 (periodicLift (fun x => torusGradX (fun y => F y i) x j)))
@@ -1172,7 +1138,7 @@ instance : VML.FlatTorus3 Torus3 where
       from by ext y; simp [periodicLift]]
     rw [fderiv_const_mul_always]; rfl
   hGradChainExp := by
-    intro φ x i; simp only [torusGradX]
+    intro φ _hφ x i; simp only [torusGradX]
     show fderiv ℝ (periodicLift (fun y => Real.exp (φ y))) _ (Pi.single i 1) = _
     have hlift : periodicLift (fun y => Real.exp (φ y)) = fun y => Real.exp (periodicLift φ y) :=
       by ext y; simp [periodicLift]

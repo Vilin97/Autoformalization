@@ -186,7 +186,7 @@ theorem Theorem42
       hDecay.hSpatTransComp
   have hPolynomialId := polynomial_identity_from_vlasov f E B Ψ ν hf_pos hf_smooth hf_int hΨ hVlasov
   have hPB := poisson_boltzmann_from_vlasov f E B Ψ ν ρ ρ_ion hf_pos hf_smooth hf_int hΨ
-    (fun x => rfl) hGauss hVlasov
+    (fun x => rfl) hGauss hDiff_fv hVlasov
   -- Extremizers of ρ (extreme value theorem on compact T³)
   obtain ⟨x_max, hmax⟩ := continuous_attains_max ρ hρ_cont
   obtain ⟨x_min, hmin⟩ := continuous_attains_min ρ hρ_cont
