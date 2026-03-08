@@ -1105,6 +1105,7 @@ instance : VML.FlatTorus3 Torus3 where
   toMeasureSpace := inferInstance
   instCompact := inferInstance
   instNonempty := ⟨fun _ => 0⟩
+  instFirstCountable := inferInstance
   gradX := torusGradX
   divX := torusDivX
   curlX := torusCurlX
@@ -1136,6 +1137,21 @@ instance : VML.FlatTorus3 Torus3 where
     have hlift : periodicLift (Real.log ∘ f) = Real.log ∘ periodicLift f := rfl
     rw [hlift]
     exact hf.log (fun y => ne_of_gt (hpos (torusMk y)))
+  hDiff_continuous := fun f hf => by
+    -- hf : ContDiff ℝ ⊤ (periodicLift f), so periodicLift f is continuous
+    -- periodicLift f = f ∘ torusMk, and torusMk is a quotient map
+    -- Therefore f is continuous by the quotient map property
+    have hOQ_coord : IsOpenQuotientMap (QuotientAddGroup.mk : ℝ → AddCircle (1 : ℝ)) :=
+      IsOpenQuotientMap.of_isOpenMap_isQuotientMap
+        QuotientAddGroup.isOpenMap_coe
+        (QuotientAddGroup.isQuotientMap_mk (AddSubgroup.zmultiples (1 : ℝ)))
+    have htorusMk_eq : torusMk = Pi.map (fun (_ : Fin 3) => (QuotientAddGroup.mk : ℝ → AddCircle (1 : ℝ))) := by
+      ext x j; rfl
+    have hOQmap : IsOpenQuotientMap torusMk := htorusMk_eq ▸
+      IsOpenQuotientMap.piMap (fun _ => hOQ_coord)
+    rw [hOQmap.isQuotientMap.continuous_iff]
+    show Continuous (periodicLift f)
+    exact hf.continuous
   hDiff_grad := fun f i hf => by
     -- periodicLift (fun x => gradX f x i) = fun y => fderiv ℝ (periodicLift f) y (Pi.single i 1)
     show ContDiff ℝ ⊤ (periodicLift (fun x => torusGradX f x i))

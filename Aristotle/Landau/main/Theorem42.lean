@@ -78,6 +78,11 @@ structure VelocityDecayConditions {X : Type*} [FlatTorus3 X]
   -- Per-component spatial integrability for transport × log f decomposition
   hSpatTransComp : ∀ v i, MeasureTheory.Integrable (fun x =>
     FlatTorus3.gradX (fun y => f y v) x i * Real.log (f x v))
+  -- Uniform velocity domination: f(x,v) ≤ g(v) for some integrable g
+  -- (needed for dominated convergence → continuity of ρ = ∫f dv)
+  hf_velocity_dominated : ∃ g, Integrable g ∧ ∀ x v, f x v ≤ g v
+  -- Entropy dissipation is continuous on the spatial domain
+  hD_cont : Continuous (fun x => entropyDissipation Ψ (f x))
 
 
 /-- **Theorem 42** (Global steady state of the VML system).
@@ -132,11 +137,6 @@ theorem Theorem42
       dotProduct v (FlatTorus3.gradX (fun y => f y v) x) +
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
       ν * LandauOperator Ψ (f x) v)
-    -- === Regularity conditions ===
-    -- Density ρ(x) = ∫ f(x,v) dv is continuous on the spatial domain
-    (hρ_cont : Continuous (fun x => ∫ v, f x v))
-    -- Entropy dissipation is continuous on the spatial domain
-    (hD_cont : Continuous (fun x => entropyDissipation Ψ (f x)))
     -- === Spatial differentiability ===
     -- f(·,v) is spatially differentiable for each fixed v.
     -- This is automatic for smooth distribution functions.
@@ -169,6 +169,16 @@ theorem Theorem42
       (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) ∧
       FlatTorus3.IsSpatiallyDiff c :=
     fun a b c hform => FlatTorus3.maxwellian_params_isSpatiallyDiff f hf_pos hDiff_fv a b c hform
+  -- Derive continuity of ρ = ∫ f(·,v) dv via dominated convergence
+  have hρ_cont : Continuous ρ := by
+    show Continuous (fun x => ∫ v, f x v)
+    obtain ⟨g, hg_int, hg_bound⟩ := hDecay.hf_velocity_dominated
+    exact continuous_of_dominated
+      (fun x => (hf_smooth x).continuous.aestronglyMeasurable)
+      (fun x => .of_forall fun v => by
+        rw [Real.norm_eq_abs, abs_of_pos (hf_pos x v)]; exact hg_bound x v)
+      hg_int
+      (.of_forall fun v => FlatTorus3.hDiff_continuous _ (hDiff_fv v))
   have hTransportEntropy : (∫ x, entropyDissipation Ψ (f x)) = 0 :=
     transport_entropy_from_vlasov f E B Ψ ν hν hf_pos hf_smooth hf_int hDiff_fv hDiff_logfv
       hVlasov hDecay.hSpatialTransport_int hDecay.hForceTransport_int
@@ -215,7 +225,7 @@ theorem Theorem42
       have h := FlatTorus3.hSpatialMul (fun y => entropyDissipation Ψ (f y)) (-1)
       simp only [mul_neg_one] at h
       linarith [hD_int_zero]
-    linarith [FlatTorus3.hSpatialNonnegZero _ hD_cont.neg hD_neg hD_neg_int x]
+    linarith [FlatTorus3.hSpatialNonnegZero _ hDecay.hD_cont.neg hD_neg hD_neg_int x]
   -- Step 3: Apply the main theorem via VMLInput.
   have result := main_from_physics {
     x₀ := Classical.arbitrary X

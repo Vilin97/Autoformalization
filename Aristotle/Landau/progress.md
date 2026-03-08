@@ -183,7 +183,10 @@ For `E = B = 0`, this shows the hypothesis set is satisfiable by genuine non-Max
   (4) flux integral derivative Schwartz bound.
 - **Part (1) is PROVED**: uses `landauMatrix_entry_differentiable` (proved by Aristotle, job 648b5b5b)
   + `Fin.sum_univ_three` + `DifferentiableAt.add`/`.mul` for the finite sum decomposition.
-- Parts (2)-(4) remain sorry'd. Submitted to Aristotle (jobs 31607b78, b8508ad1).
+- Parts (2)-(4) combined into 1 sorry (was 3 separate sorry's).
+  Key finding: the linear derivative bound ‖D A_{ij}(z)‖ ≤ C(1+‖z‖) is **FALSE**
+  (Aristotle proved negation, job 207db299). Correct bound is quadratic: C(1+‖z‖)².
+  Submitted corrected quadratic bound (job 0f6845b7) and full flux bound (job 68c58a76).
 
 Key infrastructure lemmas (proved):
 - `psd_integrand_bound` — |PSD(v,w)| ≤ 108CΨCg²(1+‖v‖)^(2K+2)|φv|(1+‖w‖)^(2K+2)|φw|
