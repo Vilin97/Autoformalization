@@ -2,9 +2,9 @@
 
 **Files**: `Aristotle/Landau/main/*.lean` (split across 12 files)
 **Blueprint**: `Aristotle/Landau/H-theorem-formal.tex` (Sections 1--10)
-**Status**: 0 errors, 0 sorry's in ALL files (main chain + TorusInstance + VelocityDecayInstance)
+**Status**: 0 errors, 0 sorry's in main chain + TorusInstance; 1 sorry in VelocityDecayInstance (Schwartz construction)
 
-Last updated: 2026-03-10
+Last updated: 2026-03-07
 
 ## Summary
 
@@ -143,17 +143,63 @@ Helper theorems (all proved): `torus_hIBP_spatial` (1D FTC + Fubini + periodicit
 
 ---
 
-## VelocityDecayInstance (0 sorry's)
+## VelocityDecayInstance
 
-Constructs `uniformMaxwellianDecay` — a concrete `VelocityDecayConditions` for the spatially
+### uniformMaxwellianDecay (0 sorry's)
+
+Constructs a concrete `VelocityDecayConditions` for the spatially
 uniform isotropic Maxwellian `f(x,v) = exp(a + c|v|²)` with `c < 0`, `E = 0`, `B = 0`.
-
-Key lemmas:
-- `uniformMaxwellian_flux_zero`: Landau flux vanishes (delegates to `maxwellian_landau_flux_zero` with b=0)
-- `uniformMaxwellian_psd_zero`: PSD integrand vanishes (via `analysis_fluxFactor` + projection annihilation)
-- `uniformMaxwellian_gradX_zero`: spatial gradient vanishes (constant in x, via `hGradConst`)
-
 All 15 fields proved by showing each integrand is identically 0, then applying `integrable_zero`.
+**Note:** This instance is circular (the Maxwellian is the theorem's conclusion).
+
+### schwartzDecayConditions (1 sorry, 14 proved)
+
+**Non-circular** construction: proves VelocityDecayConditions for Schwartz-class distributions
+`φ(v) > 0` with `‖v‖^k * |φ(v)|` integrable for all k, C¹ bounded Ψ, gradient/log bounds.
+For `E = B = 0`, this shows the hypothesis set is satisfiable by genuine non-Maxwellians
+(e.g., `φ(v) = exp(-|v|⁴)`).
+
+**Hypotheses** (added to unblock flux differentiability):
+- `hΨ_diff : ContDiff ℝ 1 Ψ` — Ψ is C¹
+- `hΨ'_bound : ∃ CΨ', ∀ r, |deriv Ψ r| ≤ CΨ'` — Ψ' bounded
+- `hφ_deriv2_bound` — pointwise second derivative bound: `‖∂²φ/∂vⱼ∂vₖ‖ ≤ C₂(1+‖v‖)^K₂ φ(v)`
+
+**Status:** 14/15 conditions proved:
+- 5 transport/force conditions (trivially 0 since E=B=0, gradX=0)
+- `hLandauFluxInt` — flux integrability (pointwise bound + Schwartz domination)
+- `hLandauIBP_fg` — flux × log integrability (flux integral bound + log bound)
+- `hLandauIBP_f_dg` — flux × d(log) integrability (flux bound + gradient/value bound)
+- `hPSD_inner_int` — PSD inner integrability (psd_integrand_bound + integrable_of_schwartz_bound)
+- `hPSD_outer_int` — PSD outer integrability (integrable_integral_schwartz + psd_integrand_bound)
+- `hFubini_double` — Fubini double integrability (integrable_prod_schwartz_bound)
+- `hFubini_inner` — Fubini inner integrability (flux projection + dotProduct decomposition)
+- `hFubini_outer` — Fubini outer integrability (integrable_integral_schwartz)
+- `hLandauFluxDiff` — flux differentiability (**proved** modulo `landau_flux_component_diff_with_bound`)
+- `hLandauIBP_df_g` — derivative-of-flux × log (**proved** modulo `landau_flux_component_diff_with_bound`)
+
+1 condition remains (reduced from `landau_flux_component_diff_with_bound`):
+- This single helper lemma bundles: (1) flux integrand differentiability in v,
+  (2) product-form derivative bound, (3) derivative integrability,
+  (4) flux integral derivative Schwartz bound.
+- **Part (1) is PROVED**: uses `landauMatrix_entry_differentiable` (proved by Aristotle, job 648b5b5b)
+  + `Fin.sum_univ_three` + `DifferentiableAt.add`/`.mul` for the finite sum decomposition.
+- Parts (2)-(4) remain sorry'd. Submitted to Aristotle (jobs 31607b78, b8508ad1).
+
+Key infrastructure lemmas (proved):
+- `psd_integrand_bound` — |PSD(v,w)| ≤ 108CΨCg²(1+‖v‖)^(2K+2)|φv|(1+‖w‖)^(2K+2)|φw|
+- `psd_integrand_continuous_joint` — joint continuity of PSD integrand in (v,w)
+- `fubini_integrand_bound` — |⟨∇logφ(v), flux(v,w)⟩| ≤ C P(v) Q(w) (product Schwartz bound)
+- `fubini_integrand_continuous` — joint continuity of Fubini integrand
+- `differentiable_integral_of_schwartz_dominated` — differentiation under integral sign (v-uniform bound)
+- `differentiable_integral_of_product_dominated` — differentiation under integral sign (product-form bound)
+- `landau_flux_component_diff_with_bound` — **1 sorry** — flux integrand differentiability + bounds
+- `landau_flux_pointwise_bound` — ‖A(v-w)(φ(w)∇φ(v)-φ(v)∇φ(w))‖ ≤ C(1+‖v‖)^M φ(v)(1+‖w‖)^M φ(w)
+- `landau_flux_continuous_w` — continuity of flux integrand in w
+- `landau_flux_continuous_joint` — joint continuity of flux integrand in (v,w)
+- `landau_flux_integral_aestronglyMeasurable` — measurability of flux integral (via Fubini)
+- Helper lemmas: `integrable_one_add_norm_pow_mul`, `integrable_of_schwartz_bound[_vec]`,
+  `integrable_prod_schwartz_bound`, `integrable_integral_schwartz`, `norm_mulVec_le_of_entry_bound`,
+  `landauMatrix_entry_le`, `vGrad_log_eq_div`, `vGrad_log_norm_le`, `normSq_le_three_mul_sq_norm`
 
 ---
 
