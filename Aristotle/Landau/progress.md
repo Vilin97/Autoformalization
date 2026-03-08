@@ -2,9 +2,9 @@
 
 **Files**: `Aristotle/Landau/main/*.lean` (split across 12 files)
 **Blueprint**: `Aristotle/Landau/H-theorem-formal.tex` (Sections 1--10)
-**Status**: 0 errors, 0 sorry's in main chain + TorusInstance; 1 sorry in VelocityDecayInstance (Schwartz construction)
+**Status**: 0 errors, 0 sorry's across ALL files (main chain + TorusInstance + VelocityDecayInstance)
 
-Last updated: 2026-03-07
+Last updated: 2026-03-08
 
 ## Summary
 
@@ -152,7 +152,7 @@ uniform isotropic Maxwellian `f(x,v) = exp(a + c|v|²)` with `c < 0`, `E = 0`, `
 All 15 fields proved by showing each integrand is identically 0, then applying `integrable_zero`.
 **Note:** This instance is circular (the Maxwellian is the theorem's conclusion).
 
-### schwartzDecayConditions (1 sorry, 14 proved)
+### schwartzDecayConditions (0 sorry's, all 15 proved)
 
 **Non-circular** construction: proves VelocityDecayConditions for Schwartz-class distributions
 `φ(v) > 0` with `‖v‖^k * |φ(v)|` integrable for all k, C¹ bounded Ψ, gradient/log bounds.
@@ -164,7 +164,7 @@ For `E = B = 0`, this shows the hypothesis set is satisfiable by genuine non-Max
 - `hΨ'_bound : ∃ CΨ', ∀ r, |deriv Ψ r| ≤ CΨ'` — Ψ' bounded
 - `hφ_deriv2_bound` — pointwise second derivative bound: `‖∂²φ/∂vⱼ∂vₖ‖ ≤ C₂(1+‖v‖)^K₂ φ(v)`
 
-**Status:** 14/15 conditions proved:
+**Status:** All 15/15 conditions proved:
 - 5 transport/force conditions (trivially 0 since E=B=0, gradX=0)
 - `hLandauFluxInt` — flux integrability (pointwise bound + Schwartz domination)
 - `hLandauIBP_fg` — flux × log integrability (flux integral bound + log bound)
@@ -174,32 +174,20 @@ For `E = B = 0`, this shows the hypothesis set is satisfiable by genuine non-Max
 - `hFubini_double` — Fubini double integrability (integrable_prod_schwartz_bound)
 - `hFubini_inner` — Fubini inner integrability (flux projection + dotProduct decomposition)
 - `hFubini_outer` — Fubini outer integrability (integrable_integral_schwartz)
-- `hLandauFluxDiff` — flux differentiability (**proved** modulo `landau_flux_component_diff_with_bound`)
-- `hLandauIBP_df_g` — derivative-of-flux × log (**proved** modulo `landau_flux_component_diff_with_bound`)
+- `hLandauFluxDiff` — flux differentiability (via `landau_flux_component_diff_with_bound`)
+- `hLandauIBP_df_g` — derivative-of-flux × log (via `landau_flux_component_diff_with_bound`)
 
-1 condition remains (reduced from `landau_flux_component_diff_with_bound`):
-- This single helper lemma bundles: (1) flux integrand differentiability in v,
-  (2) product-form derivative bound, (3) derivative integrability,
-  (4) flux integral derivative Schwartz bound.
-- **Part (1) is PROVED**: uses `landauMatrix_entry_differentiable` (proved by Aristotle, job 648b5b5b)
-  + `Fin.sum_univ_three` + `DifferentiableAt.add`/`.mul` for the finite sum decomposition.
-- Parts (2)-(4) combined into 1 sorry (was 3 separate sorry's).
-  Key finding: the linear derivative bound ‖D A_{ij}(z)‖ ≤ C(1+‖z‖) is **FALSE**
-  (Aristotle proved negation, job 207db299). Correct bound is quadratic: C(1+‖z‖)².
-  Submitted corrected quadratic bound (job 0f6845b7) and full flux bound (job 68c58a76).
-
-Key infrastructure lemmas (proved):
-- `psd_integrand_bound` — |PSD(v,w)| ≤ 108CΨCg²(1+‖v‖)^(2K+2)|φv|(1+‖w‖)^(2K+2)|φw|
-- `psd_integrand_continuous_joint` — joint continuity of PSD integrand in (v,w)
-- `fubini_integrand_bound` — |⟨∇logφ(v), flux(v,w)⟩| ≤ C P(v) Q(w) (product Schwartz bound)
-- `fubini_integrand_continuous` — joint continuity of Fubini integrand
-- `differentiable_integral_of_schwartz_dominated` — differentiation under integral sign (v-uniform bound)
-- `differentiable_integral_of_product_dominated` — differentiation under integral sign (product-form bound)
-- `landau_flux_component_diff_with_bound` — **1 sorry** — flux integrand differentiability + bounds
-- `landau_flux_pointwise_bound` — ‖A(v-w)(φ(w)∇φ(v)-φ(v)∇φ(w))‖ ≤ C(1+‖v‖)^M φ(v)(1+‖w‖)^M φ(w)
-- `landau_flux_continuous_w` — continuity of flux integrand in w
-- `landau_flux_continuous_joint` — joint continuity of flux integrand in (v,w)
-- `landau_flux_integral_aestronglyMeasurable` — measurability of flux integral (via Fubini)
+Key infrastructure lemmas (all proved):
+- `landau_flux_component_diff_with_bound` — 4-part conjunction: differentiability, derivative bound,
+  integrability, Schwartz bound. All parts proved:
+  - Part 1: `landauMatrix_entry_differentiable` (Aristotle) + `Fin.sum_univ_three`
+  - Part 2: `single_summand_deriv_bound` (Aristotle) + sum over Fin 3
+  - Part 3: `Integrable.mono'` + Part 2 bound
+  - Part 4: `hasFDerivAt_integral_of_dominated_of_fderiv_le` (Leibniz integral rule) +
+    extreme value theorem on compact ball + monotonicity of Schwartz bounds
+- `psd_integrand_bound`, `psd_integrand_continuous_joint`, `fubini_integrand_bound`,
+  `fubini_integrand_continuous`, `landau_flux_pointwise_bound`, `landau_flux_continuous_joint`,
+  `landau_flux_integral_aestronglyMeasurable`
 - Helper lemmas: `integrable_one_add_norm_pow_mul`, `integrable_of_schwartz_bound[_vec]`,
   `integrable_prod_schwartz_bound`, `integrable_integral_schwartz`, `norm_mulVec_le_of_entry_bound`,
   `landauMatrix_entry_le`, `vGrad_log_eq_div`, `vGrad_log_norm_le`, `normSq_le_three_mul_sq_norm`

@@ -53,6 +53,15 @@ From time to time run cleanup:
 - Delete the files that are no longer needed, e.g. Aristotle's proofs that have already been processed and integrated in the main file. Do make sure that the file(s) you are deleting is no longer needed.
 - Extract self-contained lemmas from the main theorem (e.g. with `extract_goal`), and attempt to prove them independently. Important: ensure the lemmas are actually correct!
 
+## Slash commands
+
+### /critique
+Comprehensively analyze the project. If I were to say that this formalization project is fully complete, what would critics point out to invalidate this claim? Write the analysis in `critique.md`.
+
+### /cleanup
+- Delete files that are no longer needed, e.g. Aristotle's proofs that have already been processed and integrated in the main file. Make sure the file(s) you are deleting are no longer needed.
+- Extract self-contained lemmas from the main theorem (e.g. with `extract_goal`), and attempt to prove them independently. Ensure the lemmas are actually correct!
+
 ## Building the project
 
 Sometimes Lean decided to rebuild all Mathlib from scratch, which takes forever. If basic commands `lake build` take >30 seconds, that's why. In this case, run
