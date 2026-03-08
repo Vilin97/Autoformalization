@@ -325,6 +325,7 @@ lemma vecMulVec_self_mulVec (z w : Fin 3 → ℝ) :
 class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
   instCompact : CompactSpace X
   instNonempty : Nonempty X
+  instFirstCountable : FirstCountableTopology X
   gradX : (X → ℝ) → X → (Fin 3 → ℝ)
   divX : (X → (Fin 3 → ℝ)) → X → ℝ
   curlX : (X → (Fin 3 → ℝ)) → X → (Fin 3 → ℝ)
@@ -347,6 +348,9 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
   hDiff_smul : ∀ c f, IsSpatiallyDiff f → IsSpatiallyDiff (fun x => c * f x)
   -- Closure under log (for positive functions): if f is C¹ and f > 0, then log∘f is C¹
   hDiff_log : ∀ f, IsSpatiallyDiff f → (∀ x, 0 < f x) → IsSpatiallyDiff (Real.log ∘ f)
+  -- Spatially differentiable functions are continuous.
+  -- On the concrete torus: ContDiff ℝ ⊤ (periodicLift f) → Continuous f.
+  hDiff_continuous : ∀ f, IsSpatiallyDiff f → Continuous f
   -- Gradient closure: if f is spatially differentiable, so is each component of its gradient.
   -- On the concrete torus: requires IsSpatiallyDiff = ContDiff ℝ ⊤ (smooth);
   -- then ContDiff.fderiv_right gives ContDiff ℝ ⊤ for the fderiv, and clm_apply gives the component.
@@ -418,6 +422,8 @@ variable {X : Type*} [FlatTorus3 X]
 -- available whenever [FlatTorus3 X] is in scope.
 instance (priority := 100) instCompactSpace : CompactSpace X := FlatTorus3.instCompact
 instance (priority := 100) instNonemptySpace : Nonempty X := FlatTorus3.instNonempty
+instance (priority := 100) instFirstCountableTopology : FirstCountableTopology X :=
+  FlatTorus3.instFirstCountable
 
 /-- Compatibility wrapper: spatial integral as Mathlib's Bochner integral.
     Defined as `abbrev` so it unfolds transparently in rewrites. -/

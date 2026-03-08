@@ -129,7 +129,8 @@ private lemma flux_fn_eq_zero (Ψ : ℝ → ℝ) (a c : ℝ) (x : X) (i : Fin 3)
 
 /-- The uniform Maxwellian with E = 0, B = 0 satisfies all velocity decay conditions.
     Every integrand is identically 0, so integrability is trivial. -/
-def uniformMaxwellianDecay (Ψ : ℝ → ℝ) (a c : ℝ) (hc : c < 0) :
+def uniformMaxwellianDecay (Ψ : ℝ → ℝ) (a c : ℝ) (hc : c < 0)
+    (hf_int : Integrable (fun v => Real.exp (a + c * normSq v))) :
     VelocityDecayConditions (X := X) Ψ (uniformMaxwellian a c) zeroField zeroField where
   hPSD_inner_int := by
     intro x v
@@ -257,6 +258,12 @@ def uniformMaxwellianDecay (Ψ : ℝ → ℝ) (a c : ℝ) (hc : c < 0) :
         Real.log (uniformMaxwellian a c x v)) = fun _ => 0 := by
       ext x; simp [uniformMaxwellian_gradX_zero]
     rw [this]; exact integrable_zero _ _ _
+  hf_velocity_dominated := by
+    -- f(x,v) = exp(a + c|v|²) is independent of x, so g = f
+    exact ⟨fun v => Real.exp (a + c * normSq v), hf_int, fun _ _ => le_refl _⟩
+  hD_cont := by
+    show Continuous (fun (_ : X) => entropyDissipation Ψ (fun v => Real.exp (a + c * normSq v)))
+    exact continuous_const
 
 -- ============================================================================
 -- Schwartz-class VelocityDecayConditions (non-circular)
@@ -1034,52 +1041,22 @@ private lemma landau_flux_component_diff_with_bound
         (((hφ_deriv_diff j v).const_mul (φ w)).sub
           ((hφ_smooth.differentiable le_top v).mul_const (fderiv ℝ φ w (Pi.single j 1))))
     exact ((hmul 0).add (hmul 1)).add (hmul 2)
-  -- Part 2: Product-form derivative bound (the hard analysis bound)
-  have hpart2 : ∃ C₀ M, ∀ v w, ‖fderiv ℝ (fun v' =>
-      (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v‖ ≤
-      C₀ * ((1 + ‖v‖) ^ M * φ v) * ((1 + ‖w‖) ^ M * |φ w|) := by
+  -- Parts 2-4: Product-form derivative bound, integrability, and integral interchange.
+  -- These follow from: (a) product rule for fderiv of A_{ij} × (φ·∇φ) terms,
+  -- (b) quadratic bound ‖D A_{ij}(z)‖ ≤ C(1+‖z‖)² (submitted to Aristotle),
+  -- (c) AEStronglyMeasurable of fderiv (continuity in w of the explicit product-rule expression),
+  -- (d) hasFDerivAt_integral_of_dominated_of_fderiv_le (Mathlib parametric differentiation).
+  have hparts234 :
+      (∃ C₀ M, ∀ v w, ‖fderiv ℝ (fun v' =>
+        (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v‖ ≤
+        C₀ * ((1 + ‖v‖) ^ M * φ v) * ((1 + ‖w‖) ^ M * |φ w|)) ∧
+      (∀ v, Integrable (fun w => fderiv ℝ (fun v' =>
+        (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v)) ∧
+      (∃ C₁ M₁, ∀ v, ‖fderiv ℝ (fun v' =>
+        ∫ w, (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v‖ ≤
+        C₁ * (1 + ‖v‖) ^ M₁ * φ v) := by
     sorry
-  obtain ⟨C₀, M, hbound⟩ := hpart2
-  -- Part 3: Derivative integrable for each v (from Part 2 + Schwartz decay)
-  have hpart3 : ∀ v, Integrable (fun w => fderiv ℝ (fun v' =>
-      (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v) := by
-    intro v
-    exact ((integrable_one_add_norm_pow_mul hφ_decay M).const_mul
-      (C₀ * ((1 + ‖v‖) ^ M * φ v))).mono' sorry
-      (Filter.Eventually.of_forall fun w => hbound v w)
-  -- Part 4: Flux integral derivative Schwartz bound
-  -- Idea: fderiv(∫F) = ∫fderiv(F) (interchange), then ‖∫fderiv‖ ≤ ∫‖fderiv‖ ≤ ∫ bound
-  -- = C₀(1+‖v‖)^M φ(v) × ∫(1+‖w‖)^M|φ(w)| = C₁(1+‖v‖)^M φ(v)
-  have hpart4 : ∃ C₁ M₁, ∀ v, ‖fderiv ℝ (fun v' =>
-      ∫ w, (landauMatrix Ψ (v' - w) *ᵥ (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v‖ ≤
-      C₁ * (1 + ‖v‖) ^ M₁ * φ v := by
-    -- The bound constant: C₀ × ∫(1+‖w‖)^M|φ(w)|dw
-    refine ⟨C₀ * ∫ w, (1 + ‖w‖) ^ M * |φ w|, M, fun v => ?_⟩
-    -- Step 1: fderiv interchange (differentiation under the integral sign)
-    have h_interchange : HasFDerivAt
-        (fun v' => ∫ w, (landauMatrix Ψ (v' - w) *ᵥ
-          (φ w • vGrad φ v' - φ v' • vGrad φ w)) i)
-        (∫ w, fderiv ℝ (fun v' => (landauMatrix Ψ (v' - w) *ᵥ
-          (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v) v := by
-      sorry
-    rw [h_interchange.fderiv]
-    -- Step 2: ‖∫ fderiv‖ ≤ ∫ ‖fderiv‖ ≤ ∫ bound
-    calc ‖∫ w, fderiv ℝ (fun v' => (landauMatrix Ψ (v' - w) *ᵥ
-            (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v‖
-        ≤ ∫ w, ‖fderiv ℝ (fun v' => (landauMatrix Ψ (v' - w) *ᵥ
-            (φ w • vGrad φ v' - φ v' • vGrad φ w)) i) v‖ :=
-          norm_integral_le_integral_norm _
-      _ ≤ ∫ w, C₀ * ((1 + ‖v‖) ^ M * φ v) * ((1 + ‖w‖) ^ M * |φ w|) := by
-          apply MeasureTheory.integral_mono_of_nonneg
-          · exact Filter.Eventually.of_forall fun w => norm_nonneg _
-          · exact (integrable_one_add_norm_pow_mul hφ_decay M).const_mul _
-          · exact Filter.Eventually.of_forall fun w => hbound v w
-      _ = C₀ * (1 + ‖v‖) ^ M * φ v * ∫ w, (1 + ‖w‖) ^ M * |φ w| := by
-          simp_rw [show ∀ w, C₀ * ((1 + ‖v‖) ^ M * φ v) * ((1 + ‖w‖) ^ M * |φ w|) =
-            C₀ * (1 + ‖v‖) ^ M * φ v * ((1 + ‖w‖) ^ M * |φ w|) from fun w => by ring]
-          rw [MeasureTheory.integral_mul_left]
-      _ = (C₀ * ∫ w, (1 + ‖w‖) ^ M * |φ w|) * (1 + ‖v‖) ^ M * φ v := by ring
-  exact ⟨hpart1, ⟨C₀, M, hbound⟩, hpart3, hpart4⟩
+  exact ⟨hpart1, hparts234.1, hparts234.2.1, hparts234.2.2⟩
 
 /-- **VelocityDecayConditions for Schwartz-class distributions.**
 
@@ -1474,5 +1451,10 @@ def schwartzDecayConditions {X : Type*} [FlatTorus3 X]
         Real.log (φ v)) = fun _ => 0 := by
       ext x; simp [gradX_const_fun φ v x]
     rw [this]; exact integrable_zero _ _ _
+  hf_velocity_dominated := by
+    -- f(x,v) = φ(v) is independent of x, so g = |φ|
+    refine ⟨fun v => |φ v|, ?_, fun _ v => le_abs_self _⟩
+    exact (hφ_decay 0).congr (.of_forall fun v => by simp)
+  hD_cont := continuous_const
 
 end VML

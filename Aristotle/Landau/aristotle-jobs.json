@@ -215,6 +215,20 @@
       "output": "aristotle-out/landau_matrix_entry_deriv_bound_aristotle.lean",
       "target": "landau_matrix_entry_deriv_bound",
       "note": ""
+    },
+    {
+      "id": "0f6845b7-3613-4003-80e9-66b9caa0edaf",
+      "submission": "aristotle-in/landau_matrix_entry_deriv_bound_v2.lean",
+      "output": "aristotle-out/landau_matrix_entry_deriv_bound_v2_aristotle.lean",
+      "target": "landau_matrix_entry_deriv_bound_v2",
+      "note": ""
+    },
+    {
+      "id": "68c58a76-f34b-46ec-85c5-98a586417012",
+      "submission": "aristotle-in/landau_flux_deriv_bound_v2.lean",
+      "output": "aristotle-out/landau_flux_deriv_bound_v2_aristotle.lean",
+      "target": "landau_flux_deriv_bound_v2",
+      "note": ""
     }
   ],
   "completed": [
