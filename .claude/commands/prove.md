@@ -1,31 +1,66 @@
-Systematically work on closing remaining sorry's and addressing issues from the critique.
+Prove sorry's directly. This is hands-on theorem proving — not planning (use `/plan`) and not Aristotle submission (use `/submit-aristotle`).
 
-Steps:
+## Scope
 
-1. **Assess the current state:**
-   - Read `Aristotle/Landau/critique.md` for known issues and priorities.
-   - Grep for `sorry` across all files in `Aristotle/Landau/main/` to find remaining gaps.
-   - Run `/check-aristotle` (via `source .env && python Aristotle/Landau/check-aristotle.py`) to check if any Aristotle jobs have completed and integrate results.
+This command covers:
+- Closing sorry's with direct proofs (Mathlib one-liners, algebraic identities, tactic chains)
+- Decomposing sorry's into sub-lemmas and proving the sub-lemmas
+- Introducing useful definitions that make proofs tractable
+- Refactoring proof strategies (e.g., changing approach when stuck)
 
-2. **Plan the attack:**
-   - For each remaining sorry, assess: can it be proved directly (simple Mathlib argument), or does it need decomposition and Aristotle submission?
-   - Consult the Gemini MCP (`mcp__gemini-cli__ask-gemini`) for planning complex proof strategies.
-   - Prioritize: fix issues from critique.md in severity order (completeness > epistemic > scope > cosmetic).
+This command does NOT cover:
+- Planning what to work on (use `/plan`)
+- Submitting to Aristotle (use `/submit-aristotle`)
+- Code simplification without closing sorry's (use `/simplify`)
 
-3. **Attempt direct proofs:**
-   - For simple sorry's (algebraic identities, bound calculations, Mathlib one-liners): try proving them directly using `lean_multi_attempt`, `lean_goal`, and `lean_completions`.
-   - Use `lean_leansearch`, `lean_loogle`, `lean_leanfinder`, `lean_state_search`, and `lean_hammer_premise` to find relevant Mathlib lemmas.
-   - If a direct proof works, edit the file to replace the sorry.
+## Steps
 
-4. **Decompose and submit to Aristotle:**
-   - For sorry's that are too complex to prove directly, decompose into smaller sub-lemmas.
-   - Create standalone files in `Aristotle/Landau/aristotle-in/` (self-contained, `import Mathlib`, single sorry'd lemma).
-   - Add `-- Harmonic \`generalize_proofs\` tactic` comment to avoid Aristotle injecting its custom tactic.
-   - Verify each file compiles (sorry warnings OK, errors not OK) before submitting.
-   - Submit via `source .env && python Aristotle/Landau/check-aristotle.py submit aristotle-in/NAME.lean`.
+### 1. Pick a target
 
-5. **Verify and report:**
-   - After making changes, check diagnostics on modified files using `lean_diagnostic_messages`.
-   - Report what was proved, what was submitted, and what remains.
+- Read `Aristotle/Landau/critique.md` for priorities.
+- Grep for `sorry` in `Aristotle/Landau/main/*.lean`.
+- Pick the highest-priority sorry that is feasible to prove directly (not blocked on other sorry's or Aristotle).
+- If all remaining sorry's are hard, pick one and decompose it and work on it.
 
-Reference: See `Aristotle/Landau/CLAUDE.md` for Aristotle workflow rules and proof style guidelines.
+### 2. Understand the goal
+
+- Use `lean_goal` to see the exact proof state at the sorry.
+- Read the surrounding context (hypotheses, definitions used).
+- Understand what mathematical fact is being asserted.
+
+### 3. Search for Mathlib lemmas
+
+Use search tools in this order:
+1. `lean_local_search` — check if a relevant lemma already exists in the project.
+2. `lean_leansearch` — natural language search ("integral of bounded function is bounded").
+3. `lean_loogle` — type pattern search (`?a ≤ ?b → ∫ ?f ≤ ∫ ?g`).
+4. `lean_leanfinder` — semantic/conceptual search.
+5. `lean_state_search` — find lemmas that close the current goal.
+6. `lean_hammer_premise` — find premises for `simp`/`aesop`.
+
+### 4. Attempt the proof
+
+- Use `lean_multi_attempt` to try multiple tactics without editing: `["simp", "ring", "omega", "exact?", "apply?"]`.
+- For multi-step proofs, edit the file incrementally. Use `lean_goal` after each step to verify progress.
+- For complex proofs:
+  1. Start with `have` statements for intermediate claims.
+  2. Prove each `have` separately.
+  3. Combine with `exact` or `linarith` or `calc`.
+
+### 5. Decompose if stuck
+
+If a sorry can't be proved directly in ~15 minutes:
+- Extract the sorry as a standalone `private lemma` above the current proof.
+- Give it a descriptive name and explicit hypotheses (use `lean_goal` to get the exact type).
+- Make the lemma more general than needed — this is often easier to prove and more reusable.
+- Try to prove the new lemma. If still too hard, consider creating an Aristotle submission (use `/submit-aristotle`).
+
+### 6. Verify
+
+- After each sorry closed, run `lean_diagnostic_messages` on the modified file.
+- Confirm no new errors (sorry warnings for OTHER sorry's are fine).
+- Report: what was proved, what was decomposed, what remains.
+
+## Reference
+
+See `Aristotle/Landau/CLAUDE.md` for proof style guidelines.
