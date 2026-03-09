@@ -1,5 +1,12 @@
 Prove sorry's directly. This is hands-on theorem proving — not planning (use `/plan`) and not Aristotle submission (use `/submit-aristotle`).
 
+**CRITICAL RULE: You MUST make concrete progress on at least one sorry every time this command runs.** "All sorry's are too hard" or "blocked on Aristotle" are NOT acceptable outcomes. If the sorry is hard:
+- Decompose it into 3-5 sub-lemmas. Prove at least one sub-lemma.
+- If sub-lemmas are still hard, decompose further until you reach something provable.
+- Even replacing `by sorry` with `by have h1 := sorry; have h2 := sorry; exact sorry` is progress if h1 and h2 are well-chosen intermediate claims.
+
+**Aristotle submission does NOT excuse you from working on the proof.** Aristotle might fail, return sorry, or prove the negation. Always work on sorry's in parallel with Aristotle.
+
 ## Scope
 
 This command covers:
@@ -7,6 +14,7 @@ This command covers:
 - Decomposing sorry's into sub-lemmas and proving the sub-lemmas
 - Introducing useful definitions that make proofs tractable
 - Refactoring proof strategies (e.g., changing approach when stuck)
+- Proving helper lemmas that building blocks for sorry's (e.g., a `‖z‖⁻²` local integrability lemma)
 
 This command does NOT cover:
 - Planning what to work on (use `/plan`)
@@ -19,14 +27,15 @@ This command does NOT cover:
 
 - Read `Aristotle/Landau/critique.md` for priorities.
 - Grep for `sorry` in `Aristotle/Landau/main/*.lean`.
-- Pick the highest-priority sorry that is feasible to prove directly (not blocked on other sorry's or Aristotle).
-- If all remaining sorry's are hard, pick one and decompose it and work on it.
+- Pick the highest-priority sorry that is feasible to prove directly.
+- **If all sorry's are hard: pick the hardest one and decompose it.** Do not skip this step.
 
 ### 2. Understand the goal
 
 - Use `lean_goal` to see the exact proof state at the sorry.
 - Read the surrounding context (hypotheses, definitions used).
 - Understand what mathematical fact is being asserted.
+- If the goal is too complex, identify which parts you CAN prove and which you need to decompose.
 
 ### 3. Search for Mathlib lemmas
 
@@ -50,10 +59,13 @@ Use search tools in this order:
 ### 5. Decompose if stuck
 
 If a sorry can't be proved directly in ~15 minutes:
-- Extract the sorry as a standalone `private lemma` above the current proof.
-- Give it a descriptive name and explicit hypotheses (use `lean_goal` to get the exact type).
-- Make the lemma more general than needed — this is often easier to prove and more reusable.
-- Try to prove the new lemma. If still too hard, consider creating an Aristotle submission (use `/submit-aristotle`).
+- Extract sub-goals as standalone lemmas above the current proof.
+- Give each a descriptive name and explicit hypotheses (use `lean_goal` to get the exact type).
+- Make lemmas more general than needed — this is often easier to prove and more reusable.
+- Try to prove each new lemma. Close as many as you can.
+- Any remaining sorry'd sub-lemmas are now smaller, better-defined targets for the next cycle.
+
+**The goal of decomposition is to make measurable progress every cycle, even on hard proofs.** A sorry that was 1 opaque block is now 4 well-defined sub-lemmas, 2 of which are proved. That's real progress.
 
 ### 6. Verify
 
