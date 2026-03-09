@@ -1,6 +1,14 @@
 # Babysit
 
-Run one full cycle of the autonomous autoformalization lifecycle:
+Run one full cycle of the autonomous autoformalization lifecycle.
+
+## State tracking
+
+Before starting, check if `state.md` exists in the project root. If it does, read it to find which step to resume from. If not, start from step 1.
+
+Before each step, write the current step number and name to `state.md`. After completing all steps, delete `state.md`.
+
+## Steps
 
 1. `/check-aristotle` — Fetch and integrate completed Aristotle proofs
 2. `/plan` — Assess current state and produce prioritized work plan
