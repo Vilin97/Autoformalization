@@ -34,6 +34,13 @@
       "output": "aristotle-out/fubini_double_integrable_aristotle.lean",
       "target": "fubini_double_integrable",
       "note": ""
+    },
+    {
+      "id": "97da955d-87fc-4609-abbc-45fbd4eb9b8b",
+      "submission": "aristotle-in/landau_ibp_df_g.lean",
+      "output": "aristotle-out/landau_ibp_df_g_aristotle.lean",
+      "target": "landau_ibp_df_g",
+      "note": ""
     }
   ],
   "completed": [

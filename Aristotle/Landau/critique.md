@@ -3,7 +3,7 @@
 An honest, adversarial analysis of the formalization's completeness. What would a
 determined critic attack?
 
-Last updated: 2026-03-09
+Last updated: 2026-03-10
 
 ---
 
@@ -15,14 +15,14 @@ Last updated: 2026-03-09
 | FlatTorus3 instance (TorusInstance) | **0** | Complete |
 | VelocityDecayInstance (3 instances) | **0** | Complete |
 | ConcreteTheorem42 (shared defs) | **0** | Stub |
-| CoulombConcreteTheorem42 | **6** | Incomplete (6 main + 0 helper) |
+| CoulombConcreteTheorem42 | **6** | Incomplete (6 sorry's, all submitted to Aristotle) |
 
 Abstract proof chain: **0 sorry's, 0 axioms, 0 admits** across 14 files.
 `lean_verify` on `VML.Theorem42`: only `propext`, `Classical.choice`, `Quot.sound`.
 
 ---
 
-## Issue 1: CoulombConcreteTheorem42 Has 7 Sorry's
+## Issue 1: CoulombConcreteTheorem42 Has 6 Sorry's
 
 **Severity: HIGH**
 
@@ -30,25 +30,20 @@ The Coulomb case (Psi(r) = r^{-3}) -- the entire physical motivation -- has **6 
 (0 helper + 6 main). All are in the proof body (deriving VelocityDecayConditions from
 Schwartz + ExpDecay), not in the theorem statement.
 
-| Sorry | Line | What's needed | Difficulty |
-|-------|------|---------------|------------|
-| hIBP_f_dg | 1712 | Landau flux_i * fderiv(log f) integrable | Hard |
-| hPSD_inner_int | 1720 | PSD integrand integrable in w for each v | Hard |
-| hPSD_outer_int | 1721 | Iterated PSD integral integrable in v | Hard |
-| hFubini_double | 1722 | Joint (v,w) integrability for Fubini swap | Hard |
-| hLandauFluxDiff | 1752 | Landau flux differentiable in v (diff under integral) | Moderate |
-| hLandauIBP_df_g | 1753 | d(flux_i) * log(f) integrable | Moderate |
+| Sorry | File:Line | What's needed | Aristotle Job |
+|-------|-----------|---------------|---------------|
+| hIBP_f_dg | CoulombConcreteTheorem42:86 | flux_i * fderiv(log f) integrable | landau_ibp_f_dg |
+| hPSD_inner_int | CoulombConcreteTheorem42:94 | PSD integrand integrable in w | psd_inner_integrable |
+| hPSD_outer_int | CoulombConcreteTheorem42:95 | Iterated PSD integral integrable in v | psd_outer_integrable |
+| hFubini_double | CoulombConcreteTheorem42:96 | Joint (v,w) integrability for Fubini | fubini_double_integrable |
+| hLandauFluxDiff | CoulombConcreteTheorem42:126 | Flux differentiable (diff under integral) | coulomb_flux_diff |
+| hLandauIBP_df_g | CoulombConcreteTheorem42:127 | d(flux_i) * log(f) integrable | landau_ibp_df_g |
 
-**Recently proved:** Flux AEStronglyMeasurable (was at line 1395) — via
-`flux_component_aestronglyMeasurable` lemma using `eval_integral` + joint measurability on
-product space + `AEStronglyMeasurable.integral_prod_right'`. Coulomb kernel measurability
-via `Measurable.ite measurableSet_Iic`, vector part via `Continuous.clm_apply`.
-Integral bound (was at line 1294), dominating function integrability (was at line 1273),
-`hLandauIBP_fg` (flux × log integrable), `hD_cont` (entropy dissipation continuity).
+**All 6 sorry's are submitted to Aristotle** (all IN_PROGRESS as of 2026-03-10).
 
 ### Mathematical assessment
 
-**All 8 sorry'd statements are mathematically true.** They are analytical estimates that
+**All 6 sorry'd statements are mathematically true.** They are analytical estimates that
 follow from the Schwartz + stretched-exponential decay hypotheses combined with the key
 Coulomb cancellation: the Landau matrix A(z) = |z|^{-3}(|z|^2 I - zz^T) has entries
 bounded by |z|^{-1} (proved: `coulomb_landauMatrix_entry_le`), and the score difference
@@ -62,6 +57,14 @@ polynomially (from the log bound lemma) and f is Schwartz, the integrand is boun
 (proved) gives integrability of |z|^{-1} * Schwartz, but composing this into the full
 double-integral estimate requires careful multi-step bounds.
 
+The **flux derivative cluster** (hLandauFluxDiff, hLandauIBP_df_g) requires differentiation
+under the integral sign with the singular Coulomb kernel. The smooth kernel proof uses
+`landau_flux_component_diff_with_bound` (needs `Continuous Psi`, `ContDiff 1 Psi`, bounded
+Psi') -- none of which hold for Coulomb. A custom argument using local integrability of
+`‖z‖⁻²` in 3D is needed. Note: the smooth kernel bound `‖fderiv(flux)‖ ≤ C*poly*f(v)`
+does NOT carry over to Coulomb (|∂f|/f can grow exponentially); the correct bound is
+Schwartz-class decay `‖fderiv(flux)‖ * (1+‖v‖)^N ≤ C` for any N.
+
 **Critic's attack:** "The abstract Theorem42 is correct, but the Coulomb case --
 the entire physical motivation -- has 6 unproved lemmas (down from 14). This is not a complete
 formalization of the physically relevant result."
@@ -72,8 +75,7 @@ formalization of the physically relevant result."
 
 **Severity: HIGH (epistemic)**
 
-The `VelocityDecayConditions` structure has **19 fields** (not 15 as some documentation
-claims):
+The `VelocityDecayConditions` structure has **19 fields**:
 
 1. hPSD_inner_int
 2. hPSD_outer_int
@@ -122,7 +124,7 @@ The three VelocityDecayConditions instances are:
 
 This means there is **no formally verified instance demonstrating that the theorem's
 hypotheses are satisfiable for the Coulomb kernel by a non-equilibrium distribution**.
-The CoulombConcreteTheorem42 attempts to construct one but has 8 sorry's.
+The CoulombConcreteTheorem42 attempts to construct one but has 6 sorry's.
 
 ---
 
@@ -193,7 +195,7 @@ satisfies them, so the exclusion (if any) is of physically irrelevant pathologie
 
 **Severity: MINOR**
 
-- `MEMORY.md` says "7 sorry's" for CoulombConcreteTheorem42. Actual count: **7**. (Current)
+- `MEMORY.md` says "6 sorry's" for CoulombConcreteTheorem42. Actual count: **6**. (Current)
 - `progress.md` may have stale sorry counts.
 - `progress.md` says "15 conditions" for VelocityDecayConditions. Actual count: **19**.
 - The VelocityDecayConditions docstring says "18 fields." Actual count: **19** (hD_cont
@@ -207,11 +209,18 @@ satisfies them, so the exclusion (if any) is of physically irrelevant pathologie
 
 **Severity: COSMETIC**
 
-- **`set_option linter.all false`** in every file (all 16). This suppresses all quality
+- **`set_option linter.all false`** in every file (all 21). This suppresses all quality
   warnings including unused variables, unused simp arguments, and style issues.
 
-- **High heartbeat settings:** Several files use `maxHeartbeats 800000` to `1600000`
-  (default 200000). Indicates fragile proofs that may break under Lean/Mathlib updates.
+- **High heartbeat settings:** Several files use `maxHeartbeats 800000` to `3200000`
+  (default 200000). The worst offenders:
+  - `VelocityDecayInstance.lean:1002`: `maxHeartbeats 4000000`
+  - `NewtonianPotential.lean:241`: `maxHeartbeats 3200000`
+  - `CoulombFlux.lean:131`: `maxHeartbeats 3200000`
+  These indicate fragile proofs that may break under Lean/Mathlib updates.
+
+- **Large files:** VelocityDecayInstance.lean (2019 lines), Section3.lean (1308 lines),
+  TorusInstance.lean (1223 lines). The VelocityDecayInstance could benefit from splitting.
 
 - **Aristotle-generated proofs:** Machine-generated proofs (e.g., `gaussian_normalization_maxwellian`,
   `gaussian_first_moment`, `psd_continuous_coulomb`) are correct but dense and
@@ -262,15 +271,14 @@ non-circular ones (but not for Coulomb).
 CoulombConcreteTheorem42 has **6 sorry's** (0 helper + 6 main) -- all in
 VelocityDecayConditions construction from Schwartz + ExpDecay hypotheses. These are:
 - 3 PSD/Fubini integrability (hard, Coulomb-specific double-integral estimates)
-- 1 hIBP_f_dg (hard, flux × score integrable — score grows non-polynomially)
-- 2 Landau IBP/differentiability (moderate, diff under integral sign)
+- 1 hIBP_f_dg (hard, flux * score integrable)
+- 2 Landau IBP/differentiability (moderate, diff under integral sign + derivative integrability)
 
-All 6 are mathematically true and provable with sufficient effort.
-3 submitted to Aristotle (hIBP_f_dg, coulomb_flux_diff, psd_inner_integrable).
+All 6 are mathematically true, provable with sufficient effort, and submitted to Aristotle.
 
 ### Bottom line:
 
 The abstract formalization is **solid and complete**. Lean's kernel confirms it.
-The Coulomb specialization is **incomplete** with 8 sorry's. A claim of "full completion"
+The Coulomb specialization is **incomplete** with 6 sorry's. A claim of "full completion"
 is defensible for the abstract theorem but not for the Coulomb case, which is the result
 physicists actually care about.
