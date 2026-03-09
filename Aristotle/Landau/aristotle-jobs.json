@@ -1,42 +1,6 @@
 {
   "jobs": [
     {
-      "id": "3a0ec4f6-926d-4356-b91e-1baab6b3d0f1",
-      "submission": "aristotle-in/inverse_poly_integrable.lean",
-      "output": "aristotle-out/inverse_poly_integrable_aristotle.lean",
-      "target": "inverse_poly_integrable",
-      "note": "",
-      "status": "done",
-      "solution": "/Users/vasil/Github/aristotle/Aristotle/Landau/aristotle-out/inverse_poly_integrable_aristotle.lean"
-    },
-    {
-      "id": "644e0f36-633e-4bdd-9a58-768a0a1fc8b8",
-      "submission": "aristotle-in/schwartz_integrable.lean",
-      "output": "aristotle-out/schwartz_integrable_aristotle.lean",
-      "target": "schwartz_integrable",
-      "note": "",
-      "status": "done",
-      "solution": "/Users/vasil/Github/aristotle/Aristotle/Landau/aristotle-out/schwartz_integrable_aristotle.lean"
-    },
-    {
-      "id": "3dae6085-6289-4fcb-866b-ab845b1b1095",
-      "submission": "aristotle-in/schwartz_log_bound.lean",
-      "output": "aristotle-out/schwartz_log_bound_aristotle.lean",
-      "target": "schwartz_log_bound",
-      "note": "",
-      "status": "done",
-      "solution": "/Users/vasil/Github/aristotle/Aristotle/Landau/aristotle-out/schwartz_log_bound_aristotle.lean"
-    },
-    {
-      "id": "06cbe646-74a1-449a-a65b-6fbb2b3ec152",
-      "submission": "aristotle-in/dotprod_schwartz_log_integrable.lean",
-      "output": "aristotle-out/dotprod_schwartz_log_integrable_aristotle.lean",
-      "target": "dotprod_schwartz_log_integrable",
-      "note": "",
-      "status": "done",
-      "solution": "/Users/vasil/Github/aristotle/Aristotle/Landau/aristotle-out/dotprod_schwartz_log_integrable_aristotle.lean"
-    },
-    {
       "id": "23440e88-fead-489f-ada0-66674eabd2d2",
       "submission": "aristotle-in/force_schwartz_log_integrable.lean",
       "output": "aristotle-out/force_schwartz_log_integrable_aristotle.lean",
@@ -51,27 +15,11 @@
       "note": ""
     },
     {
-      "id": "b67bf816-a26e-45cd-b0fd-79accf4a4357",
-      "submission": "aristotle-in/force_entropy_deriv_integrable.lean",
-      "output": "aristotle-out/force_entropy_deriv_integrable_aristotle.lean",
-      "target": "force_entropy_deriv_integrable",
-      "note": "",
-      "status": "failed"
-    },
-    {
-      "id": "84bf48ba-c130-40f4-8c2c-cfef35f8aa4c",
-      "submission": "aristotle-in/coulomb_matrix_entry_bound.lean",
-      "output": "aristotle-out/coulomb_matrix_entry_bound_aristotle.lean",
-      "target": "coulomb_matrix_entry_bound",
-      "note": "",
-      "status": "failed"
-    },
-    {
       "id": "403eee35-dd6f-462c-bac4-5615b6947d06",
       "submission": "aristotle-in/inv_norm_schwartz_integrable.lean",
       "output": "aristotle-out/inv_norm_schwartz_integrable_aristotle.lean",
       "target": "inv_norm_schwartz_integrable",
-      "note": ""
+      "note": "KEY: once proved, unlocks 12 VelocityDecayConditions fields in CoulombConcreteTheorem42"
     },
     {
       "id": "fb8f0314-d31e-4459-be24-0a9282e3f9f2",
@@ -99,14 +47,9 @@
       "submission": "aristotle-in/inv_norm_local_integrable.lean",
       "output": "aristotle-out/inv_norm_local_integrable_aristotle.lean",
       "target": "inv_norm_local_integrable",
-      "note": ""
-    },
-    {
-      "id": "1ba752be-d63d-478b-9620-9ea7a9260511",
-      "submission": "aristotle-in/inv_norm_schwartz_from_local.lean",
-      "output": "aristotle-out/inv_norm_schwartz_from_local_aristotle.lean",
-      "target": "inv_norm_schwartz_from_local",
-      "note": ""
+      "note": "Once proved, combine with convolution_local_int_schwartz to get inv_norm_schwartz_integrable",
+      "status": "done",
+      "solution": "/Users/vasil/Github/aristotle/Aristotle/Landau/aristotle-out/inv_norm_local_integrable_aristotle.lean"
     }
   ],
   "completed": [
@@ -295,6 +238,48 @@
       "target": "schwartz_flux_times_dlog",
       "status": "abandoned",
       "note": "Input file deleted; NOT_STARTED"
+    },
+    {
+      "id": "3a0ec4f6-926d-4356-b91e-1baab6b3d0f1",
+      "target": "inverse_poly_integrable",
+      "status": "done",
+      "note": "Integrated into ConcreteTheorem42.lean; input/output deleted"
+    },
+    {
+      "id": "644e0f36-633e-4bdd-9a58-768a0a1fc8b8",
+      "target": "schwartz_integrable",
+      "status": "done",
+      "note": "Superseded; input/output deleted"
+    },
+    {
+      "id": "3dae6085-6289-4fcb-866b-ab845b1b1095",
+      "target": "schwartz_log_bound",
+      "status": "done",
+      "note": "Integrated into CoulombConcreteTheorem42.lean; input/output deleted"
+    },
+    {
+      "id": "06cbe646-74a1-449a-a65b-6fbb2b3ec152",
+      "target": "dotprod_schwartz_log_integrable",
+      "status": "done",
+      "note": "Output kept for reference; used in CoulombConcreteTheorem42"
+    },
+    {
+      "id": "b67bf816-a26e-45cd-b0fd-79accf4a4357",
+      "target": "force_entropy_deriv_integrable",
+      "status": "failed",
+      "note": "Aristotle failed; input deleted"
+    },
+    {
+      "id": "84bf48ba-c130-40f4-8c2c-cfef35f8aa4c",
+      "target": "coulomb_matrix_entry_bound",
+      "status": "failed",
+      "note": "Aristotle failed; proved manually as coulomb_landauMatrix_entry_le in CoulombConcreteTheorem42"
+    },
+    {
+      "id": "1ba752be-d63d-478b-9620-9ea7a9260511",
+      "target": "inv_norm_schwartz_from_local",
+      "status": "done",
+      "note": "Proved convolution_local_int_schwartz; pending integration (needs inv_norm_local_integrable first)"
     }
   ]
 }

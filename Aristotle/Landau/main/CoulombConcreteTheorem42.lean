@@ -204,7 +204,20 @@ private lemma force_fderiv_log_component_integrable
   obtain ⟨CL, hCL_nn, hCL⟩ := lorentz_component_bound (E x) (B x)
   obtain ⟨C_fder, hC_fder_pos, hbound_fder⟩ := hSchwartz.hDecay (K_log + 6) 1
   apply (inverse_poly_integrable (CL * |C_log| * C_fder + 1)).mono'
-  · sorry -- AEStronglyMeasurable (joint v-regularity of fderiv)
+  · -- AEStronglyMeasurable: each factor is continuous in v
+    refine Continuous.aestronglyMeasurable ?_
+    have h1 : Continuous (fun v => (E x + cross v (B x)) i) := by
+      show Continuous (fun v => E x i + (cross v (B x)) i)
+      apply Continuous.add continuous_const
+      unfold cross
+      fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one] <;>
+        exact (continuous_apply _ |>.mul continuous_const).sub
+          (continuous_apply _ |>.mul continuous_const)
+    have h2 : Continuous (fun v => fderiv ℝ (f x) v (Pi.single i 1)) :=
+      ((hf_smooth x).continuous_fderiv le_top).clm_apply continuous_const
+    have h3 : Continuous (fun v => Real.log (f x v)) :=
+      (hf_smooth x).continuous.log (fun v => ne_of_gt (hf_pos x v))
+    exact (h1.mul h2).mul h3
   · filter_upwards [] with v
     rw [Real.norm_eq_abs, le_div_iff₀ (pow_pos (by linarith [norm_nonneg v] : (0:ℝ) < 1 + ‖v‖) 4)]
     have h1v : (1 : ℝ) ≤ 1 + ‖v‖ := le_add_of_nonneg_right (norm_nonneg v)
@@ -331,7 +344,19 @@ lemma force_ibp_fg_integrable_coulomb
   apply integrable_of_schwartz_bound
     (fun k => schwartz_norm_pow_integrable hf_pos hf_smooth hSchwartz x k)
   · -- AEStronglyMeasurable: force term * entropy density is continuous in v
-    sorry
+    refine Continuous.aestronglyMeasurable ?_
+    have h1 : Continuous (fun v => (E x + cross v (B x)) i) := by
+      show Continuous (fun v => E x i + (cross v (B x)) i)
+      apply Continuous.add continuous_const
+      unfold cross
+      fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one] <;>
+        exact (continuous_apply _ |>.mul continuous_const).sub
+          (continuous_apply _ |>.mul continuous_const)
+    have h2 : Continuous (fun v => f x v * Real.log (f x v) - f x v) :=
+      ((hf_smooth x).continuous.mul
+        ((hf_smooth x).continuous.log (fun v => ne_of_gt (hf_pos x v)))).sub
+        (hf_smooth x).continuous
+    exact h1.mul h2
   · exact mul_nonneg hCL_nn (by positivity : 0 ≤ |C_log| + 1)
   · intro v
     rw [Real.norm_eq_abs]
@@ -442,9 +467,28 @@ lemma spatial_transport_joint_integrable
                 (pow_succ' _ _).symm]
             exact mul_le_mul_of_nonneg_left (by nlinarith [pow_nonneg h1v_nn 4])
               (pow_nonneg h1v_nn _)
-          nlinarith [abs_nonneg C_log, hC0.le, hC1.le, hC2.le,
-            mul_nonneg (mul_nonneg hC0.le (abs_nonneg C_log))
-              (div_nonneg (mul_nonneg h1v_nn (pow_nonneg h1v_nn _)) (pow_nonneg h1v_nn _))]
+          -- Each summand bounded via hpow_bound
+          have h_factor : ∀ Ci : ℝ, 0 < Ci →
+              (1 + ‖v‖) * Ci / (1 + ‖v‖) ^ (K_log + 6) * (|C_log| * (1 + ‖v‖) ^ K_log) ≤
+              Ci * |C_log| / (1 + ‖v‖) ^ 4 := by
+            intro Ci hCi
+            rw [show (1 + ‖v‖) * Ci / (1 + ‖v‖) ^ (K_log + 6) * (|C_log| * (1 + ‖v‖) ^ K_log) =
+                Ci * |C_log| * ((1 + ‖v‖) * (1 + ‖v‖) ^ K_log / (1 + ‖v‖) ^ (K_log + 6))
+                from by ring,
+              show Ci * |C_log| / (1 + ‖v‖) ^ 4 =
+                Ci * |C_log| * (1 / (1 + ‖v‖) ^ 4) from by ring]
+            exact mul_le_mul_of_nonneg_left hpow_bound (by positivity)
+          have hp4 : (0 : ℝ) < (1 + ‖v‖) ^ 4 := pow_pos (by linarith) 4
+          have h_sum_bound : C0 * |C_log| / (1 + ‖v‖) ^ 4 + C1 * |C_log| / (1 + ‖v‖) ^ 4 +
+              C2 * |C_log| / (1 + ‖v‖) ^ 4 ≤
+              (C0 + C1 + C2) * (|C_log| + 1) / (1 + ‖v‖) ^ 4 := by
+            rw [show C0 * |C_log| / (1 + ‖v‖) ^ 4 + C1 * |C_log| / (1 + ‖v‖) ^ 4 +
+                C2 * |C_log| / (1 + ‖v‖) ^ 4 =
+                (C0 + C1 + C2) * |C_log| / (1 + ‖v‖) ^ 4 from by ring,
+              div_le_div_iff₀ hp4 hp4]
+            exact mul_le_mul_of_nonneg_right
+              (mul_le_mul_of_nonneg_left (by linarith [abs_nonneg C_log]) (by linarith)) hp4.le
+          linarith [h_factor C0 hC0, h_factor C1 hC1, h_factor C2 hC2]
       _ ≤ ((C0 + C1 + C2) * (|C_log| + 1) + 1) / (1 + ‖v‖) ^ 4 := by
           gcongr; linarith
   obtain ⟨C_total, hC_total_pos, h_bound⟩ := h_unif_bound
@@ -513,6 +557,32 @@ lemma coulomb_landauMatrix_entry_le (z : Fin 3 → ℝ) (i j : Fin 3) :
           rw [← rpow_natCast (eucNorm z) 2, ← rpow_add henz]
           show eucNorm z ^ ((-3 : ℝ) + (2 : ℝ)) = (eucNorm z)⁻¹
           norm_num [rpow_neg_one]
+
+/-- Pi norm ≤ Euclidean norm in ℝ³: ‖z‖_∞ ≤ √(z·z). -/
+private lemma pi_norm_le_eucNorm (z : Fin 3 → ℝ) : ‖z‖ ≤ eucNorm z := by
+  rw [pi_norm_le_iff_of_nonneg (eucNorm_nonneg z)]
+  intro i; rw [Real.norm_eq_abs, eucNorm, ← Real.sqrt_sq_eq_abs]
+  apply Real.sqrt_le_sqrt
+  unfold normSq dotProduct; simp only [Fin.sum_univ_three]
+  fin_cases i <;> simp <;>
+    nlinarith [mul_self_nonneg (z 0), mul_self_nonneg (z 1), mul_self_nonneg (z 2)]
+
+/-- Coulomb matrix entry bound in Pi norm: |A(z)_{ij}| ≤ ‖z‖⁻¹ for z ≠ 0. -/
+private lemma coulomb_landauMatrix_entry_le_pi (z : Fin 3 → ℝ) (i j : Fin 3)
+    (hz : z ≠ 0) :
+    |landauMatrix coulombKernel z i j| ≤ ‖z‖⁻¹ := by
+  have h := coulomb_landauMatrix_entry_le z i j
+  simp [hz] at h
+  exact le_trans h (inv_anti₀ (norm_pos_iff.mpr hz) (pi_norm_le_eucNorm z))
+
+/-- Key integrability fact for Coulomb kernel: ‖·‖⁻¹ × Schwartz is integrable in ℝ³.
+    Awaiting Aristotle proof (jobs 403eee35, 3dc1b4dc, 1ba752be). -/
+private lemma inv_norm_schwartz_integrable
+    (g : (Fin 3 → ℝ) → ℝ)
+    (hg_decay : ∀ N : ℕ, ∃ C > 0, ∀ w : Fin 3 → ℝ, |g w| * (1 + ‖w‖) ^ N ≤ C)
+    (hg_meas : AEStronglyMeasurable g volume)
+    (v : Fin 3 → ℝ) :
+    Integrable (fun w => ‖v - w‖⁻¹ * g w) := by sorry
 
 /-- **Coulomb Theorem 42.** Characterization of smooth steady states of the
     Vlasov–Maxwell–Landau system with Coulomb collisions on T³ = (ℝ/ℤ)³.

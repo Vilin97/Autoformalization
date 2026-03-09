@@ -13,6 +13,7 @@ Update these files after major changes:
 
 - `progress.md` and `MEMORY.md` describe the project progress
 - `critique.md` gives the critique of the current state, pointing to the weakest links
+- `LOG.md` records session logs in reverse chronological order
 
 ## Proof style
 
@@ -52,12 +53,15 @@ From time to time run cleanup:
 
 - Delete the files that are no longer needed, e.g. Aristotle's proofs that have already been processed and integrated in the main file. Do make sure that the file(s) you are deleting is no longer needed.
 - Extract self-contained lemmas from the main theorem (e.g. with `extract_goal`), and attempt to prove them independently. Important: ensure the lemmas are actually correct!
-- Write what was done since the previous cleanup in `HISTORY.md`, with a timestamp.
+- Run `/log` to record what was done.
 
 ## Slash commands
 
 ### /critique
 Comprehensively analyze the project. If I were to say that this formalization project is fully complete, what would critics point out to invalidate this claim? Write the analysis in `critique.md`.
+
+### /log
+Write what was done since the last timestamp in `LOG.md`. Entries are in reverse chronological order (newest first). Each entry has an exact timestamp and a concise summary of what was accomplished, what was submitted, and what remains.
 
 ### /cleanup
 - Delete files that are no longer needed, e.g. Aristotle's proofs that have already been processed and integrated in the main file. Make sure the file(s) you are deleting are no longer needed.
