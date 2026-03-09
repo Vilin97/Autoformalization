@@ -10,7 +10,7 @@ This is NOT just about closing sorry's — it covers all issues: sorry's, code q
 - Grep for `sorry` across `Aristotle/Landau/main/*.lean` to find remaining gaps.
 - Check `Aristotle/Landau/aristotle-jobs.json` for pending/failed jobs.
 - Scan for code smells: files over 600 lines, proofs over 50 lines, `maxHeartbeats` above 800000.
-- Check documentation accuracy in `progress.md`, `MEMORY.md`, `critique.md`.
+- Check documentation accuracy in `critique.md`.
 
 ### 2. Classify issues
 

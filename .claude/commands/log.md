@@ -5,4 +5,4 @@ Rules:
 - Each entry has a timestamp and a concise summary.
 - Record: what was accomplished, what was submitted to Aristotle, what sorry's were closed, what remains.
 - Include the current sorry count.
-- Also update `MEMORY.md` if any stable patterns, key decisions, or project structure changed.
+- Update `critique.md` if the critique is now stale.
