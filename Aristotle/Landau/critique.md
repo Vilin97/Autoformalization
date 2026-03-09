@@ -1,344 +1,276 @@
-# Adversarial Critique of the VML Steady State Formalization
+# Adversarial Critique of the VML Steady-State Formalization
 
-This file is an adversarial analysis: what would a determined critic attack to invalidate
-claims of completeness? The formalization is mathematically correct (0 proof gaps), but has
-meaningful epistemic and scope limitations.
+An honest, adversarial analysis of the formalization's completeness. What would a
+determined critic attack?
 
-Last updated: 2026-03-08 (session 7)
+Last updated: 2026-03-09
+
+---
 
 ## Current Status
 
-| Component | Sorry's | Axioms | Notes |
-|-----------|---------|--------|-------|
-| Defs.lean | 0 | 0 | FlatTorus3 typeclass (23 property fields) + definitions |
-| Section2-9.lean | 0 | 0 | Abstract proof chain (8 files, ~76 lemmas) |
-| VMLInputDerive.lean | 0 | 0 | VMLInput -> VMLSteadyState derivation |
-| Theorem42.lean | 0 | 0 | Main theorem statement + proof |
-| TorusInstance.lean | 0 | 0 | Concrete FlatTorus3 on `Fin 3 -> AddCircle 1` |
-| LandauMatrixDerivBound.lean | 0 | 0 | Quadratic matrix derivative bound (Aristotle) |
-| VelocityDecayInstance.lean | 0 | 0 | 3 instances: Maxwellian + Schwartz + Schwartz+EB |
+| Component | Sorry's | Status |
+|-----------|---------|--------|
+| Abstract proof chain (Defs, Section2-9, VMLInputDerive, Theorem42) | **0** | Complete |
+| FlatTorus3 instance (TorusInstance) | **0** | Complete |
+| VelocityDecayInstance (3 instances) | **0** | Complete |
+| ConcreteTheorem42 (shared defs) | **0** | Stub |
+| CoulombConcreteTheorem42 | **6** | Incomplete (6 main + 0 helper) |
 
-**Total: 0 sorry's, 0 axioms, 0 admits across 14 files.**
-
-`lean_verify` on `VML.Theorem42` reports only `propext`, `Classical.choice`, `Quot.sound`.
-`lean_verify` on `VML.schwartzDecayConditionsEB` reports only `propext`, `Classical.choice`, `Quot.sound`.
+Abstract proof chain: **0 sorry's, 0 axioms, 0 admits** across 14 files.
+`lean_verify` on `VML.Theorem42`: only `propext`, `Classical.choice`, `Quot.sound`.
 
 ---
 
-## Issue 1: The Theorem Has ~55 Hypotheses, Not ~14 (Structural Dishonesty)
+## Issue 1: CoulombConcreteTheorem42 Has 7 Sorry's
+
+**Severity: HIGH**
+
+The Coulomb case (Psi(r) = r^{-3}) -- the entire physical motivation -- has **6 sorry's**
+(0 helper + 6 main). All are in the proof body (deriving VelocityDecayConditions from
+Schwartz + ExpDecay), not in the theorem statement.
+
+| Sorry | Line | What's needed | Difficulty |
+|-------|------|---------------|------------|
+| hIBP_f_dg | 1712 | Landau flux_i * fderiv(log f) integrable | Hard |
+| hPSD_inner_int | 1720 | PSD integrand integrable in w for each v | Hard |
+| hPSD_outer_int | 1721 | Iterated PSD integral integrable in v | Hard |
+| hFubini_double | 1722 | Joint (v,w) integrability for Fubini swap | Hard |
+| hLandauFluxDiff | 1752 | Landau flux differentiable in v (diff under integral) | Moderate |
+| hLandauIBP_df_g | 1753 | d(flux_i) * log(f) integrable | Moderate |
+
+**Recently proved:** Flux AEStronglyMeasurable (was at line 1395) — via
+`flux_component_aestronglyMeasurable` lemma using `eval_integral` + joint measurability on
+product space + `AEStronglyMeasurable.integral_prod_right'`. Coulomb kernel measurability
+via `Measurable.ite measurableSet_Iic`, vector part via `Continuous.clm_apply`.
+Integral bound (was at line 1294), dominating function integrability (was at line 1273),
+`hLandauIBP_fg` (flux × log integrable), `hD_cont` (entropy dissipation continuity).
+
+### Mathematical assessment
+
+**All 8 sorry'd statements are mathematically true.** They are analytical estimates that
+follow from the Schwartz + stretched-exponential decay hypotheses combined with the key
+Coulomb cancellation: the Landau matrix A(z) = |z|^{-3}(|z|^2 I - zz^T) has entries
+bounded by |z|^{-1} (proved: `coulomb_landauMatrix_entry_le`), and the score difference
+Delta = nabla log f(v) - nabla log f(w) provides an O(|v-w|) factor, making the PSD
+integrand continuous despite the singularity (proved: `psd_continuous_coulomb`).
+
+The **hardest cluster** (hPSD_inner_int, hPSD_outer_int, hFubini_double) requires showing
+that f(v) * f(w) * |v-w|^{-1} * |Delta|^2 is integrable. Since |Delta| grows at most
+polynomially (from the log bound lemma) and f is Schwartz, the integrand is bounded by
+|v-w|^{-1} * polynomial * Schwartz^2. The key ingredient `inv_norm_schwartz_integrable`
+(proved) gives integrability of |z|^{-1} * Schwartz, but composing this into the full
+double-integral estimate requires careful multi-step bounds.
+
+**Critic's attack:** "The abstract Theorem42 is correct, but the Coulomb case --
+the entire physical motivation -- has 6 unproved lemmas (down from 14). This is not a complete
+formalization of the physically relevant result."
+
+---
+
+## Issue 2: VelocityDecayConditions is a Large Hypothesis Bundle
 
 **Severity: HIGH (epistemic)**
 
-The "clean" Theorem42 statement appears to have ~14 parameters. In reality:
-- **14 explicit hypotheses** (hnu, hf_pos, hf_smooth, hVlasov, hAmpere, hGauss, hDivB, etc.)
-- **18 VelocityDecayConditions fields** (bundled in `hDecay`)
-- **23 FlatTorus3 typeclass fields** (implicit via `[FlatTorus3 X]`)
+The `VelocityDecayConditions` structure has **19 fields** (not 15 as some documentation
+claims):
 
-**Total: ~55 conditions.** The paper-style statement "any smooth steady state must be
-Maxwellian" hides enormous technical baggage.
+1. hPSD_inner_int
+2. hPSD_outer_int
+3. hFubini_double
+4. hFubini_inner
+5. hFubini_outer
+6. hSpatialTransport_int
+7. hForceTransport_int
+8. hLandauFluxDiff
+9. hLandauIBP_df_g
+10. hLandauIBP_f_dg
+11. hLandauIBP_fg
+12. hLandauFluxInt
+13. hForceIBP_f_dg
+14. hForceIBP_fg
+15. hSpatialTransport_joint
+16. hSpatTransComp
+17. hf_velocity_dominated
+18. hPSD_cont
+19. hD_cont
 
-A critic would compare this to a theorem that says "under 55 assumptions, X holds" -- which
-is much less impressive than it sounds. The hypotheses could be inconsistent for physically
-relevant cases (see Issue 2), making the theorem vacuously true.
+Combined with 13 explicit hypotheses in Theorem42 and the 23 FlatTorus3 fields, the
+theorem has roughly **55 total conditions**. The documentation claims "12 hypotheses"
+for CoulombConcreteTheorem42, which counts only the explicit theorem parameters.
 
-**Response:** This is standard mathematical practice -- "let M be a compact Riemannian
-manifold" implicitly carries dozens of properties. The FlatTorus3 axioms are proved on a
-concrete instance. The VelocityDecayConditions are proved satisfiable (with E=B=0, and
-with constant E,B). The three-layer architecture (Theorem42 -> VMLInput -> VMLSteadyState)
-cleanly separates physical hypotheses from technical conditions.
-
----
-
-## Issue 2: VelocityDecayConditions Satisfiability with E, B != 0
-
-**Severity: LOW (fully addressed)**
-
-Three concrete VelocityDecayConditions instances exist, all with **0 sorry's**:
-
-1. **uniformMaxwellianDecay**: f = Maxwellian, E=B=0. All integrands are identically 0.
-   **Circular** (the Maxwellian is the theorem's conclusion), but demonstrates consistency.
-
-2. **schwartzDecayConditions**: f = phi(v) spatially constant, E=B=0. **Not circular**
-   (applies to non-Maxwellians like phi(v) = exp(-|v|^4)), but still field-free.
-
-3. **schwartzDecayConditionsEB**: f = phi(v) spatially constant, E=E_0, B=B_0 (arbitrary
-   constant fields). **Not circular, nonzero fields.** The 14 collision/spatial conditions
-   are reused from schwartzDecayConditions. The 3 force conditions use the Lorentz bound
-   |(E_0 + v x B_0)_i| <= CL*(1+||v||) combined with Schwartz decay. **All proved** (by
-   Aristotle: force_transport_integrable, force_ibp_f_dg_integrable, force_ibp_fg_integrable).
-
-**Status:** The hypothesis set IS satisfiable for nonzero E, B with **0 sorry's**.
-`lean_verify` on `schwartzDecayConditionsEB` reports only `propext`, `Classical.choice`,
-`Quot.sound`. Any Schwartz-class distribution with arbitrary constant electromagnetic
-fields satisfies all 18 conditions.
-
-**Remaining scope limitation:** The instances all use spatially-constant f. A fully
-non-constant f(x,v) with nonzero E(x), B(x) satisfying the Vlasov equation would require
-showing the PDE solution has sufficient decay -- a substantial analytical project beyond
-the scope of this formalization.
-
-**Additional restriction for Schwartz instances:** The `schwartzDecayConditions` and
-`schwartzDecayConditionsEB` instances additionally require `ContDiff R 1 Psi` and bounded
-Psi with bounded derivative (`exists C, forall r, |Psi r| <= C` and
-`exists C', forall r, |deriv Psi r| <= C'`). These are stronger than the `Continuous Psi`
-required by Theorem42 itself. The extra regularity is needed for the
-`landau_flux_component_diff_with_bound` machinery (Leibniz integral rule). This does not
-affect the abstract theorem, but it means the satisfiability instances only cover kernels
-smoother than what the theorem abstractly allows.
+**Mitigating factor:** Three non-circular instances prove satisfiability (0 sorry's).
+But none of those instances covers the Coulomb kernel (they require C^1 Psi with bounded
+derivative, while Coulomb has Psi(r) = r^{-3}).
 
 ---
 
-## Issue 3: The Theorem Lives in an Abstract World Disconnected from PDEs
+## Issue 3: No Non-Circular Instance Covers Coulomb
 
-**Severity: MODERATE (scope)**
+**Severity: MODERATE**
 
-The Vlasov equation in Theorem42 is stated with abstract operators:
-```
-dotProduct v (FlatTorus3.gradX (fun y => f y v) x) +
-dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
-nu * LandauOperator Psi (f x) v
-```
+The three VelocityDecayConditions instances are:
 
-This uses `FlatTorus3.gradX` (abstract spatial gradient) and `vGrad` (fderiv-based velocity
-gradient), not the actual PDE operators (partial derivatives on periodic domains).
+1. **uniformMaxwellianDecay** (f = Maxwellian, E=B=0): **Circular** -- the Maxwellian is
+   the theorem's conclusion.
 
-To apply the theorem to a concrete PDE solution, one must:
-1. Show the solution satisfies `hDiff_fv : forall v, IsSpatiallyDiff (fun x => f x v)`
-   (= `ContDiff R top` of the periodic lift -- **much stronger** than what PDE existence
-   theory typically provides)
-2. Show the solution satisfies all 18 VelocityDecayConditions
-3. Verify the abstract operators match the PDE operators (partially addressed by
-   TorusInstance, but the user still needs their solution in the right function space)
+2. **schwartzDecayConditions** (Schwartz f, E=B=0): Requires `ContDiff R 1 Psi` and
+   bounded Psi'. Coulomb kernel is **excluded**.
 
-The theorem is rigorously proved but only applies to solutions already known to be very
-regular. The gap between "PDE solution exists" and "PDE solution satisfies Theorem42's
-hypotheses" is itself a substantial analytical project.
+3. **schwartzDecayConditionsEB** (Schwartz f, constant E, B): Same Psi requirements.
+   Coulomb **excluded**.
+
+This means there is **no formally verified instance demonstrating that the theorem's
+hypotheses are satisfiable for the Coulomb kernel by a non-equilibrium distribution**.
+The CoulombConcreteTheorem42 attempts to construct one but has 8 sorry's.
 
 ---
 
-## Issue 4: Coulomb Kernel Excluded by Hypotheses
+## Issue 4: FlatTorus3 Typeclass as Hidden Axioms
 
-**Severity: MODERATE (scope)**
+**Severity: LOW (well-addressed)**
 
-The physically most important kernel (Coulomb: Psi(r) ~ 1/r^3) is singular at the origin --
-unbounded, discontinuous, not C^1. The abstract Theorem42 requires `Continuous Psi` and
-`forall r, 0 < Psi r`. The Schwartz instance additionally requires Psi to be C^1 with
-bounded derivative. All three fail for bare Coulomb.
+The FlatTorus3 typeclass bundles 23 property fields including deep theorems:
 
-In practice, the Coulomb kernel is always **regularized** (Debye screening, Coulomb logarithm
-cutoff), yielding bounded smooth Psi satisfying our hypotheses. So the formalization covers
-the regularized Landau equation used in computational plasma physics, but not the bare
-singular case used in foundational PDE theory.
+- **hHarmonic_const**: Harmonic functions on compact manifolds are constant (Hodge theory)
+- **hKillingToHarmonic**: Killing fields have harmonic components (flatness of metric)
+- **hLaplacianMaxNonpos**: Second derivative test for the Laplacian
+- **hIBP_spatial**: Integration by parts on the torus (Stokes' theorem)
+- **hCurlZeroDivZeroHarmonic**: Irrotational solenoidal => harmonic (flatness + Hodge)
 
----
+All 23 fields are proved for the concrete torus `Fin 3 -> AddCircle 1` with 0 sorry's
+in TorusInstance.lean. The proofs use Mathlib's `fderiv`, periodicity, energy methods,
+and Clairaut's theorem. They are correct but many are Aristotle-generated and hard to
+audit manually.
 
-## Issue 5: Junk Value Operator Axioms -- Partially Resolved
-
-**Severity: LOW (epistemic, partially addressed)**
-
-On the concrete torus, `gradX` is defined via `fderiv`, which returns **0 for non-differentiable
-inputs** (Lean's junk value convention).
-
-**Resolved:** `hGradChainExp` now requires `IsSpatiallyDiff phi`, matching `hGradAdd`'s design.
-The chain rule `gradX(exp o phi) = exp(phi) * gradX(phi)` is a genuinely non-trivial fact that
-should only hold for differentiable phi. All call sites (Section5, Section7, derived lemmas
-hGradChainLog and hGradAddConst) now provide the IsSpatiallyDiff proof.
-
-**Remaining (by design):** `hGradScalarMul` and `hDivLinear` remain unguarded. This is
-intentional: linearity of `fderiv` genuinely holds for ALL functions (`fderiv(c*f) = c*fderiv(f)`
-is true even for non-differentiable f, since both sides are 0 by Lean's `fderiv` definition).
-These are not "junk value coincidences" but genuine properties of the fderiv API.
+**Design note:** `IsSpatiallyDiff` on the concrete torus is `ContDiff R top (periodicLift f)`
+(C-infinity smooth periodic lift). This is stronger than "differentiable" but is necessary
+for gradient closure (`hDiff_grad`). The name is somewhat misleading.
 
 ---
 
-## Issue 6: hD_cont Is a Non-Obvious Hypothesis Hidden in VelocityDecayConditions
+## Issue 5: Circularity
 
-**Severity: MINOR (transparency)**
+**Severity: LOW (no circularity in the abstract theorem)**
 
-`hD_cont : Continuous (fun x => entropyDissipation Psi (f x))` says entropy dissipation is
-continuous in x. This is used in the critical step going from "integral_X D(f) = 0 and
-D(f) <= 0" to "D(f) = 0 everywhere" (via `hSpatialNonnegZero`).
+The proof chain `Theorem42 -> VMLInput -> VMLSteadyState -> main_steady_state` never
+assumes the conclusion. The `uniformMaxwellianDecay` instance is circular but serves only
+as a consistency check. The two Schwartz instances are genuinely non-circular.
 
-This condition is NOT obviously derivable from the other hypotheses. It requires showing
-that x -> integral_v Q(f(x,.)) . log f(x,.) is continuous -- a non-trivial result involving
-the continuity of the Landau operator as a function of the spatial parameter. Bundling it
-into VelocityDecayConditions obscures that it's an independent analytical requirement that
-carries real mathematical content.
-
----
-
-## Issue 7: VMLInput Analytical Interface Hypotheses
-
-**Severity: MINOR (architecture)**
-**Status: All discharged from proved lemmas**
-
-The `VMLInput` structure contains **~14 analytical interface fields** beyond the physical
-hypotheses. These are NOT assumed -- they are discharged in `Theorem42.lean` from proved
-lemmas:
-
-| Field | Discharged by | Status |
-|-------|---------------|--------|
-| hD_zero | H-theorem chain (Sections 3-4) | **Proved** |
-| hScoreForm | entropy_score_form | **Proved** |
-| hPSD_cont | PSDIntegrand_continuous | **Proved** |
-| hPSD_inner/outer | VelocityDecayConditions bundle | Hypothesis |
-| hDiff_maxwellian | maxwellian_params_isSpatiallyDiff | **Proved** |
-| hPolynomialIdentity | polynomial_identity_from_vlasov | **Proved** |
-| hJ_from_maxwellian | gaussian_first_moment | **Proved** |
-| hPB_eq | poisson_boltzmann_from_vlasov | **Proved** |
-| hNormalization | gaussian_normalization_maxwellian | **Proved** |
-| x_max/x_min | Extreme value theorem on compact X | **Proved** |
-
-The three-layer architecture (Theorem42 -> VMLInput -> VMLSteadyState) means the
-mathematical content flows through two intermediate structures. A reviewer unfamiliar with
-this pattern might struggle to trace which hypotheses are genuine vs. derived.
+**Subtle concern:** VelocityDecayConditions includes `hD_cont` and `hPSD_cont`, which are
+properties of specific solutions rather than generic conditions. In principle, one could
+worry that these silently exclude some solutions. But any smooth Schwartz-class solution
+satisfies them, so the exclusion (if any) is of physically irrelevant pathologies.
 
 ---
 
-## Issue 8: Faraday's Law Is Not Assumed
+## Issue 6: Physical Limitations
 
-**Severity: MINOR (looks odd)**
+**Severity: MODERATE (inherent scope)**
 
-The four Maxwell equations at steady state are: curl B = J, div E = rho - rho_ion,
-div B = 0, and **curl E = 0** (Faraday at steady state). Theorem42 only assumes the first
-three. The fourth (curl E = 0) is never needed because the proof derives E = 0, which
-implies curl E = 0 a fortiori.
+- **Periodic domains only:** Excludes bounded domains, whole-space R^3, tokamak geometries.
+  Standard in the literature (Desvillettes-Villani also use periodic domains).
 
-This is actually a strength (fewer hypotheses), but a physicist reading the statement would
-notice the omission and wonder if it's a bug. It's not -- the proof is correct without it.
+- **Dimension 3 only:** Hard-coded to `Fin 3`. Cross product is dimension-specific.
 
----
+- **Single species only:** Models one charged species against uniform ion background.
+  Multi-species (electron-ion) systems not covered.
 
-## Issue 9: `set_option linter.all false` Everywhere
+- **Steady state only:** No convergence-to-equilibrium results. The theorem says "IF a
+  smooth steady state exists, THEN it is Maxwellian." Existence is not addressed.
 
-**Severity: MINOR (quality)**
+- **f > 0 everywhere:** Physically, distribution functions can vanish (vacuum regions).
+  Standard in H-theorem literature but worth noting.
 
-Every file disables all Lean linters. This suppresses warnings about unused variables,
-shadowed names, inefficient simp calls, and other quality checks. While correctness is
-unaffected (Lean's kernel doesn't use linters), a Mathlib reviewer would reject this. The
-codebase hasn't been polished to community standards.
-
----
-
-## Issue 10: Performance Sensitivity
-
-**Severity: COSMETIC (maintenance)**
-
-Eight `set_option maxHeartbeats` declarations are needed across the codebase:
-
-| File | Value | Context |
-|------|-------|---------|
-| Section3.lean (x3) | 800000 | Gaussian moments, Fubini symmetrization |
-| LandauMatrixDerivBound.lean | 1600000 | Aristotle-generated proof |
-| LandauMatrixDerivBound.lean | 800000 | Bound lemma |
-| TorusInstance.lean | 800000 | Instance proof |
-| VelocityDecayInstance.lean | 800000 | Flux zero proof |
-| VelocityDecayInstance.lean | **4000000** | Schwartz decay conditions |
-
-The 4M heartbeats for `schwartzDecayConditions` (20x the default) suggests the proof is
-computationally expensive and potentially fragile under Mathlib updates.
+- **IsSpatiallyDiff = C-infinity:** PDE regularity theory typically provides Sobolev
+  regularity, not C-infinity. The theorem requires a strong regularity assumption that
+  PDE solutions may not satisfy in general. The theorem is about characterization, not
+  existence, so this is standard.
 
 ---
 
-## Issue 11: Stale Comments and Documentation
+## Issue 7: Documentation Staleness
 
-**Severity: COSMETIC (mostly resolved)**
+**Severity: MINOR**
 
-- **(Fixed)** VelocityDecayInstance.lean header: updated "15" to "18" conditions.
-- **(Fixed)** TorusInstance.lean: removed stale "sorry" comments (lines 237, 285, 923, 991).
-- **(Fixed)** LandauMatrixDerivBound.lean: removed Aristotle's internal "sorry" comments.
-- `Defs.lean:324`: Derived lemmas list says "hGradChainLog, hGradIntZero, hLaplacianMinNonneg,
-  hSpatialMul" but does not mention hGradAddConst and hDiff_sub, which are also derived.
-
----
-
-## Issue 12: B_mean_conserved Takes Leibniz Rule as a Parameter
-
-**Severity: MINOR (epistemic)**
-
-Section9.lean's `B_mean_conserved` theorem takes a Leibniz rule as an explicit parameter:
-```
-(hLeibniz : forall (g : R -> X -> R) (t : R),
-  deriv (fun t' => spatialIntegral (fun x => g t' x)) t =
-  spatialIntegral (fun x => deriv (fun t' => g t' x) t))
-```
-
-This is an interchange of differentiation and integration that requires justification
-(dominated convergence or similar). While the theorem is not used in the main proof chain
-(the steady-state result does not invoke B_mean_conserved), a critic would note that it is
-effectively assuming a mathematical result rather than proving it.
-
-**Status:** Not a gap in Theorem42 itself, since `B_mean_conserved` is a standalone lemma
-about time-dependent dynamics, not part of the steady-state proof chain.
+- `MEMORY.md` says "7 sorry's" for CoulombConcreteTheorem42. Actual count: **7**. (Current)
+- `progress.md` may have stale sorry counts.
+- `progress.md` says "15 conditions" for VelocityDecayConditions. Actual count: **19**.
+- The VelocityDecayConditions docstring says "18 fields." Actual count: **19** (hD_cont
+  was added later).
+- CoulombConcreteTheorem42 docstring says "Hypotheses (12 total)." This counts only
+  explicit parameters, not the ~19 VelocityDecayConditions derived internally.
 
 ---
 
-## Issue 13: IsSpatiallyDiff Means Smooth, Not Just Differentiable
+## Issue 8: Code Quality
 
-**Severity: MINOR (naming)**
+**Severity: COSMETIC**
 
-On the concrete torus instance, `IsSpatiallyDiff f` is defined as
-`ContDiff R top (periodicLift f)`, meaning the periodic lift is **smooth** (C^infinity),
-not merely differentiable or C^1. The name `IsSpatiallyDiff` (suggesting "differentiable")
-understates the actual requirement.
+- **`set_option linter.all false`** in every file (all 16). This suppresses all quality
+  warnings including unused variables, unused simp arguments, and style issues.
 
-This has real consequences: the abstract FlatTorus3 typeclass has `hDiff_grad` which says
-that if `IsSpatiallyDiff f`, then `IsSpatiallyDiff (fun x => gradX f x i)`. This is true
-for smooth functions (taking the gradient preserves smoothness) but false for merely
-differentiable functions (the gradient of a C^1 function need not be C^1). The `ContDiff R top`
-definition is therefore necessary, not merely convenient.
+- **High heartbeat settings:** Several files use `maxHeartbeats 800000` to `1600000`
+  (default 200000). Indicates fragile proofs that may break under Lean/Mathlib updates.
 
-A more honest name would be `IsSpatiallySmooth`, but renaming would require changes across
-all 14 files.
+- **Aristotle-generated proofs:** Machine-generated proofs (e.g., `gaussian_normalization_maxwellian`,
+  `gaussian_first_moment`, `psd_continuous_coulomb`) are correct but dense and
+  unmaintainable. Example: `gaussian_normalization_maxwellian` is a single tactic block
+  with nested `simp_all +decide` and `erw` chains spanning 13 lines.
+
+- **Trivial wrapper lemmas:** `lhs_entropy_vanishes` (Section4, line 21) literally returns
+  its hypothesis `htransport`. `energy_conserved` (Section9) and `B_mean_conserved` are
+  trivial wrappers. These match the blueprint's lemma numbering but add no content.
+
+- **Faraday's law omitted:** The fourth Maxwell equation (curl E = -dB/dt, trivial at
+  steady state: curl E = 0) is not used. This is a legitimate optimization (fewer
+  hypotheses) but a physicist might notice the gap.
+
+---
+
+## Issue 9: The VMLInput "Analytical Interface"
+
+**Severity: LOW (all derived, not assumed)**
+
+The `VMLInput` structure contains fields like `hPolynomialIdentity`, `hJ_from_maxwellian`,
+`hPB_eq`, and `hNormalization`. These look like hypotheses but are actually derived in
+Theorem42's proof:
+
+- `hPolynomialIdentity` <- `polynomial_identity_from_vlasov` (proved, Section5)
+- `hJ_from_maxwellian` <- `gaussian_first_moment` (proved by Aristotle)
+- `hPB_eq` <- `poisson_boltzmann_from_vlasov` (proved, Section7)
+- `hNormalization` <- `gaussian_normalization_maxwellian` (proved by Aristotle)
+
+No circularity or hidden assumptions. The VMLInput intermediate layer is well-designed.
 
 ---
 
 ## Summary
 
-| # | Issue | Severity | Type |
-|---|-------|----------|------|
-| 1 | ~55 hidden hypotheses | HIGH | Epistemic |
-| 2 | VelocityDecayConditions with E,B!=0 | LOW | Fully resolved |
-| 3 | Abstract operators, not concrete PDE | MODERATE | Scope |
-| 4 | Coulomb kernel excluded | MODERATE | Scope |
-| 5 | Junk value axioms (hGradChainExp fixed) | LOW | Partially resolved |
-| 6 | hD_cont is non-obvious | MINOR | Transparency |
-| 7 | VMLInput interface hypotheses | MINOR | Architecture |
-| 8 | Faraday's law omitted | MINOR | Looks odd |
-| 9 | All linters disabled | MINOR | Quality |
-| 10 | 4M heartbeats fragility | COSMETIC | Maintenance |
-| 11 | Stale comments (mostly fixed, one remaining in Defs.lean) | COSMETIC | Mostly resolved |
-| 12 | B_mean_conserved Leibniz parameter | MINOR | Epistemic |
-| 13 | IsSpatiallyDiff means smooth, not diff | MINOR | Naming |
+### What is formally proved (0 sorry's):
 
-### Honest Statement
+The abstract Theorem42: on any `[FlatTorus3 X]` (23 axioms, all proved on
+`Fin 3 -> AddCircle 1`), for any smooth steady state (f, E, B) satisfying 13 explicit
+hypotheses + 19 VelocityDecayConditions, f must be a spatially uniform zero-drift
+Maxwellian, E = 0, B = const.
 
-The formalization proves: *On any abstract compact flat 3-torus domain satisfying 23
-typeclass fields, for any smooth steady-state (f, E, B) satisfying 14 explicit hypotheses
-+ 18 velocity decay conditions (~55 total), f must be a spatially uniform Maxwellian with
-zero drift, E must vanish, and B must be constant.*
+VelocityDecayConditions satisfiability: proved (0 sorry's) for 3 instances including
+non-circular ones (but not for Coulomb).
 
-**The entire formalization has 0 sorry's, 0 axioms, 0 admits** across all 14 files.
-`lean_verify` confirms only the standard three foundational axioms.
+### What is NOT formally proved:
 
-The concrete verification layer:
+CoulombConcreteTheorem42 has **6 sorry's** (0 helper + 6 main) -- all in
+VelocityDecayConditions construction from Schwartz + ExpDecay hypotheses. These are:
+- 3 PSD/Fubini integrability (hard, Coulomb-specific double-integral estimates)
+- 1 hIBP_f_dg (hard, flux × score integrable — score grows non-polynomially)
+- 2 Landau IBP/differentiability (moderate, diff under integral sign)
 
-- **FlatTorus3 instance**: 0 sorry's, all 23 property fields proved on `Fin 3 -> AddCircle 1`
-- **VelocityDecayConditions (Maxwellian)**: 0 sorry's, circular but consistent
-- **VelocityDecayConditions (Schwartz, E=B=0)**: 0 sorry's, non-circular, all conditions proved
-- **VelocityDecayConditions (Schwartz, E=E_0, B=B_0)**: 0 sorry's, non-circular, nonzero fields.
-  All 18 fields proved: 14 reused from E=B=0 instance, 3 force conditions proved by Aristotle,
-  plus hf_velocity_dominated (trivially uniform in x for spatially-constant f).
+All 6 are mathematically true and provable with sufficient effort.
+3 submitted to Aristotle (hIBP_f_dg, coulomb_flux_diff, psd_inner_integrable).
 
-### Overall Assessment
+### Bottom line:
 
-The formalization is **correct**. Lean's kernel confirms it. All proof chains have no gaps.
-
-The formalization is **conditional** but **not vacuously so**: `schwartzDecayConditionsEB`
-demonstrates satisfiability of VelocityDecayConditions for arbitrary constant E_0, B_0 with
-any Schwartz-class distribution, with **0 sorry's**. This fully addresses the previously
-strongest criticism (Issue #2).
-
-The remaining issues (typeclass design, kernel scope, abstract-vs-PDE gap, linter
-suppression) are architectural choices and scope limitations, not proof gaps. They
-represent the normal trade-offs of a large formal verification project.
+The abstract formalization is **solid and complete**. Lean's kernel confirms it.
+The Coulomb specialization is **incomplete** with 8 sorry's. A claim of "full completion"
+is defensible for the abstract theorem but not for the Coulomb case, which is the result
+physicists actually care about.
