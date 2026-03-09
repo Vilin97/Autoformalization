@@ -14,7 +14,7 @@ For EACH of the following, either find a real problem or explicitly state "I fou
 
 4. **Hypothesis audit** — List every hypothesis of the main theorem (explicit + typeclass + VelocityDecayConditions). For each: is it necessary? Is it physically reasonable? Could it be weakened? Is it secretly assuming the conclusion?
 
-5. **Mathematical correctness** — Are there ANY steps where the formalization diverges from the standard mathematical proof? Wrong signs, swapped quantifiers, missing edge cases, incorrect normalizations?
+5. **Mathematical correctness** — Are there ANY steps where the formalization diverges from the standard mathematical proof?
 
 6. **Code quality** — `maxHeartbeats` above 800000, files over 600 lines, `set_option linter.all false`, Aristotle-generated proofs that are unmaintainable. These are real problems, not cosmetic.
 
