@@ -65,6 +65,48 @@
       "target": "coulomb_matrix_entry_bound",
       "note": "",
       "status": "failed"
+    },
+    {
+      "id": "403eee35-dd6f-462c-bac4-5615b6947d06",
+      "submission": "aristotle-in/inv_norm_schwartz_integrable.lean",
+      "output": "aristotle-out/inv_norm_schwartz_integrable_aristotle.lean",
+      "target": "inv_norm_schwartz_integrable",
+      "note": ""
+    },
+    {
+      "id": "fb8f0314-d31e-4459-be24-0a9282e3f9f2",
+      "submission": "aristotle-in/inv_norm_schwartz_product_integrable.lean",
+      "output": "aristotle-out/inv_norm_schwartz_product_integrable_aristotle.lean",
+      "target": "inv_norm_schwartz_product_integrable",
+      "note": ""
+    },
+    {
+      "id": "14300a69-4f89-4d5c-ae43-aeef17e05b98",
+      "submission": "aristotle-in/psd_continuous_coulomb.lean",
+      "output": "aristotle-out/psd_continuous_coulomb_aristotle.lean",
+      "target": "psd_continuous_coulomb",
+      "note": ""
+    },
+    {
+      "id": "7d8c95bb-5a9a-428b-adca-f6919204eb46",
+      "submission": "aristotle-in/landau_flux_integrable_coulomb.lean",
+      "output": "aristotle-out/landau_flux_integrable_coulomb_aristotle.lean",
+      "target": "landau_flux_integrable_coulomb",
+      "note": ""
+    },
+    {
+      "id": "3dc1b4dc-f2e7-4f33-9e4e-a6b01f802672",
+      "submission": "aristotle-in/inv_norm_local_integrable.lean",
+      "output": "aristotle-out/inv_norm_local_integrable_aristotle.lean",
+      "target": "inv_norm_local_integrable",
+      "note": ""
+    },
+    {
+      "id": "1ba752be-d63d-478b-9620-9ea7a9260511",
+      "submission": "aristotle-in/inv_norm_schwartz_from_local.lean",
+      "output": "aristotle-out/inv_norm_schwartz_from_local_aristotle.lean",
+      "target": "inv_norm_schwartz_from_local",
+      "note": ""
     }
   ],
   "completed": [
