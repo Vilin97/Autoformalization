@@ -22,54 +22,42 @@ Update these files after major changes:
 
 ## Aristotle workflow
 
-- Non-trivial lemmas go to `Aristotle/Landau/aristotle-in/` as standalone files (self-contained, `import Mathlib`, single sorry'd lemma).
-- **Submit** with the tracking script (records job ID automatically):
-  ```
-  source .env && python Aristotle/Landau/check-aristotle.py submit aristotle-in/NAME.lean
-  ```
-  Or manually: `aristotle prove-from-file FILE --output-file aristotle-out/NAME_aristotle.lean --no-wait`
-  then record the job ID in `Aristotle/Landau/aristotle-jobs.json`.
-- **Check status** of all pending jobs:
-  ```
-  source .env && python Aristotle/Landau/check-aristotle.py
-  ```
-  This downloads solutions automatically for completed jobs.
-- **Rules before submitting:**
-  - File must have no errors (sorry's are fine, syntax errors are not).
-  - Do NOT use `axiom`; use `admit` for lemmas not being attempted.
-  - Verify the lemma is true as stated — not missing obvious hypotheses.
+See `/submit-aristotle` command for the full workflow, including error handling and common pitfalls.
+
+Quick reference:
+- Submit: `cd /home/vilin/aristotle && source .env && python3.10 Aristotle/Landau/check-aristotle.py submit aristotle-in/NAME.lean`
+- Check: `cd /home/vilin/aristotle && source .env && python3.10 Aristotle/Landau/check-aristotle.py`
+- Use `python3.10`, NOT `python` (default is 3.7, too old for aristotlelib).
 - API key is in `.env`.
-- If Aristotle proves it: integrate the proof into the main file, delete the submission file.
-- If Aristotle times out: decompose the lemma into smaller pieces and resubmit.
-- If Aristotle proves the negation: fix the lemma statement (missing hypotheses, wrong conclusion, etc.).
 
 ## Gemini
 
 - For planning and reasoning tasks, especially requiring large context or heavy mathematical reasoning, call Gemini. Use `gemini-3.1-pro-preview`.
 
-## Cleanup
-
-From time to time run cleanup:
-
-- Delete the files that are no longer needed, e.g. Aristotle's proofs that have already been processed and integrated in the main file. Do make sure that the file(s) you are deleting is no longer needed.
-- Extract self-contained lemmas from the main theorem (e.g. with `extract_goal`), and attempt to prove them independently. Important: ensure the lemmas are actually correct!
-- Run `/log` to record what was done.
-
 ## Slash commands
 
-### /critique
-Comprehensively analyze the project. If I were to say that this formalization project is fully complete, what would critics point out to invalidate this claim? Write the analysis in `critique.md`.
+All commands are defined in `.claude/commands/`. The full autonomous lifecycle is:
 
-### /log
-Write what was done since the last timestamp in `LOG.md`. Entries are in reverse chronological order (newest first). Each entry has an exact timestamp and a concise summary of what was accomplished, what was submitted, and what remains.
+```
+/babysit = /check-aristotle → /plan → /prove → /submit-aristotle → /simplify → /log → /cleanup → /critique → /commit
+```
 
-### /cleanup
-- Delete files that are no longer needed, e.g. Aristotle's proofs that have already been processed and integrated in the main file. Make sure the file(s) you are deleting are no longer needed.
-- Extract self-contained lemmas from the main theorem (e.g. with `extract_goal`), and attempt to prove them independently. Ensure the lemmas are actually correct!
+| Command | Purpose |
+|---------|---------|
+| `/check-aristotle` | Fetch and integrate completed Aristotle proofs |
+| `/plan` | Assess state, classify issues, produce prioritized work plan |
+| `/prove` | Close sorry's directly (decompose, define, prove) |
+| `/submit-aristotle` | Prepare and submit hard lemmas to Aristotle |
+| `/simplify` | Fix code smells, decompose long proofs, reduce heartbeats |
+| `/log` | Record progress in LOG.md and update MEMORY.md |
+| `/cleanup` | Delete stale Aristotle files and dead code |
+| `/critique` | Adversarial analysis, write to critique.md |
+| `/commit` | Build-verify, commit, and push |
+| `/babysit` | Run the full lifecycle above in order |
 
 ## Building the project
 
-Sometimes Lean decided to rebuild all Mathlib from scratch, which takes forever. If basic commands `lake build` take >30 seconds, that's why. In this case, run
+Sometimes Lean decides to rebuild all Mathlib from scratch, which takes forever. If basic commands `lake build` take >30 seconds, that's why. In this case, run
 
 1. `lake clean` to clean build outputs
 2. `lake update` to update dependencies and save them to manifest
