@@ -1,5 +1,28 @@
 # Log
 
+## 2026-03-10 22:00 UTC — Babysit cycle 16: Aristotle back, submitted hLandauIBP_df_g
+
+### Status
+- Aristotle API back online. All 5 previous jobs now IN_PROGRESS (were stuck due to API timeouts).
+- Submitted `landau_ibp_df_g` (fderiv(flux) × log(f) integrable) as job `97da955d`.
+  - Admitted building blocks: flux integrability, differentiability, Schwartz decay of flux derivative, inverse-polynomial integrability.
+  - Fixed incorrect bound: original `C * poly * f(v)` replaced with correct Schwartz-class decay form `‖fderiv‖ * (1+‖v‖)^N ≤ C`.
+- All 6 sorry's now have active Aristotle jobs.
+- No sorry's closed directly — all are hard Coulomb singular-integral analysis.
+- Reordered babysit.md: `/submit-aristotle` now runs before `/prove`.
+
+### Aristotle jobs (6 active)
+| Job ID | Target | Status |
+|--------|--------|--------|
+| 23198617 | landau_ibp_f_dg | IN_PROGRESS |
+| a9f127b6 | coulomb_flux_diff | IN_PROGRESS |
+| 06e28c3f | psd_inner_integrable | IN_PROGRESS |
+| 1062b892 | psd_outer_integrable | IN_PROGRESS |
+| 50fc290c | fubini_double_integrable | IN_PROGRESS |
+| 97da955d | landau_ibp_df_g | NEW |
+
+### Sorry count: 6 — unchanged
+
 ## 2026-03-10 21:00 UTC — Babysit cycle 15: Aristotle still down
 
 ### Status
