@@ -81,6 +81,9 @@ structure VelocityDecayConditions {X : Type*} [FlatTorus3 X]
   -- Uniform velocity domination: f(x,v) ≤ g(v) for some integrable g
   -- (needed for dominated convergence → continuity of ρ = ∫f dv)
   hf_velocity_dominated : ∃ g, Integrable g ∧ ∀ x v, f x v ≤ g v
+  -- PSD integrand is jointly continuous (needed even when Ψ is singular, e.g. Coulomb)
+  hPSD_cont : ∀ x, Continuous (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
+    PSDIntegrand Ψ (f x) p.1 p.2)
   -- Entropy dissipation is continuous on the spatial domain
   hD_cont : Continuous (fun x => entropyDissipation Ψ (f x))
 
@@ -118,7 +121,6 @@ theorem Theorem42
     (hν : 0 < ν)
     (hρ_ion : 0 < ρ_ion)
     (hΨ : ∀ r, 0 < Ψ r)
-    (hΨ_cont : Continuous Ψ)
     (hf_pos : ∀ x v, 0 < f x v)
     (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
     (hf_int : ∀ x, Integrable (f x))
@@ -253,8 +255,7 @@ theorem Theorem42
     hDiff_B := hDiff_B
     hD_zero := hD_zero
     hScoreForm := fun x => entropy_score_form Ψ (f x) (hf_pos x) (hf_smooth x) (hSWF_all x)
-    hPSD_cont := fun x =>
-      PSDIntegrand_continuous Ψ (f x) hΨ_cont (hf_pos x) (hf_smooth x)
+    hPSD_cont := hDecay.hPSD_cont
     hPSD_inner := hDecay.hPSD_inner_int
     hPSD_outer := hDecay.hPSD_outer_int
     hDiff_maxwellian := hDiff_maxwellian

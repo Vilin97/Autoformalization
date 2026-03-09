@@ -52,6 +52,7 @@ From time to time run cleanup:
 
 - Delete the files that are no longer needed, e.g. Aristotle's proofs that have already been processed and integrated in the main file. Do make sure that the file(s) you are deleting is no longer needed.
 - Extract self-contained lemmas from the main theorem (e.g. with `extract_goal`), and attempt to prove them independently. Important: ensure the lemmas are actually correct!
+- Write what was done since the previous cleanup in `HISTORY.md`, with a timestamp.
 
 ## Slash commands
 

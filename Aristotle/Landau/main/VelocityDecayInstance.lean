@@ -262,6 +262,11 @@ def uniformMaxwellianDecay (Ψ : ℝ → ℝ) (a c : ℝ) (hc : c < 0)
   hf_velocity_dominated := by
     -- f(x,v) = exp(a + c|v|²) is independent of x, so g = f
     exact ⟨fun v => Real.exp (a + c * normSq v), hf_int, fun _ _ => le_refl _⟩
+  hPSD_cont := fun x => by
+    have h : (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
+        PSDIntegrand Ψ (uniformMaxwellian a c x) p.1 p.2) = fun _ => 0 :=
+      funext fun ⟨v, w⟩ => uniformMaxwellian_psd_zero Ψ a c x v w
+    rw [h]; exact continuous_const
   hD_cont := by
     show Continuous (fun (_ : X) => entropyDissipation Ψ (fun v => Real.exp (a + c * normSq v)))
     exact continuous_const
@@ -281,7 +286,7 @@ def uniformMaxwellianDecay (Ψ : ℝ → ℝ) (a c : ℝ) (hc : c < 0)
 
 /-- If ‖v‖^k * |φ(v)| is integrable for every k, then (1+‖v‖)^K * |φ(v)| is too.
     Uses the binomial theorem to expand (1+‖v‖)^K as a finite sum. -/
-private lemma integrable_one_add_norm_pow_mul
+lemma integrable_one_add_norm_pow_mul
     {φ : (Fin 3 → ℝ) → ℝ}
     (hφ : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
     (K : ℕ) :
@@ -296,7 +301,7 @@ private lemma integrable_one_add_norm_pow_mul
 
 /-- If ‖v‖^k * |φ(v)| is integrable for every k, and ‖g(v)‖ ≤ C*(1+‖v‖)^K*|φ(v)|,
     then g is integrable. Core tool for Schwartz-dominance arguments. -/
-private lemma integrable_of_schwartz_bound
+lemma integrable_of_schwartz_bound
     {φ : (Fin 3 → ℝ) → ℝ}
     (hφ : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
     {g : (Fin 3 → ℝ) → ℝ}
@@ -321,7 +326,7 @@ private lemma norm_smul_sub_le_of_smul (a b : Fin 3 → ℝ) (α β : ℝ) :
   _ = |α| * ‖a‖ + |β| * ‖b‖ := by simp [norm_smul]
 
 /-- ‖M *ᵥ u‖ ≤ 3 * B * ‖u‖ when all |M i j| ≤ B (for 3×3 matrices). -/
-private lemma norm_mulVec_le_of_entry_bound (M : Matrix (Fin 3) (Fin 3) ℝ)
+lemma norm_mulVec_le_of_entry_bound (M : Matrix (Fin 3) (Fin 3) ℝ)
     (u : Fin 3 → ℝ) {B : ℝ} (hB : 0 ≤ B)
     (hM : ∀ i j, |M i j| ≤ B) :
     ‖mulVec M u‖ ≤ 3 * B * ‖u‖ := by
@@ -336,7 +341,7 @@ private lemma norm_mulVec_le_of_entry_bound (M : Matrix (Fin 3) (Fin 3) ℝ)
     _ = 3 * B * ‖u‖ := by simp [Fin.sum_univ_three]; ring
 
 /-- Each entry of innerLandauMatrix z is bounded by normSq z. -/
-private lemma innerLandauMatrix_entry_le (z : Fin 3 → ℝ) (i j : Fin 3) :
+lemma innerLandauMatrix_entry_le (z : Fin 3 → ℝ) (i j : Fin 3) :
     |innerLandauMatrix z i j| ≤ normSq z := by
   rw [innerLandauMatrix_apply]
   have hns : normSq z = ∑ k : Fin 3, z k * z k := by
@@ -355,7 +360,7 @@ private lemma innerLandauMatrix_entry_le (z : Fin 3 → ℝ) (i j : Fin 3) :
         abs_mul_abs_self (z 0), abs_mul_abs_self (z 1), abs_mul_abs_self (z 2)]
 
 /-- Bound on landauMatrix entries: |A(z)_{ij}| ≤ CΨ * normSq z. -/
-private lemma landauMatrix_entry_le (Ψ : ℝ → ℝ) {CΨ : ℝ} (hΨ : ∀ r, |Ψ r| ≤ CΨ)
+lemma landauMatrix_entry_le (Ψ : ℝ → ℝ) {CΨ : ℝ} (hΨ : ∀ r, |Ψ r| ≤ CΨ)
     (z : Fin 3 → ℝ) (i j : Fin 3) :
     |landauMatrix Ψ z i j| ≤ CΨ * normSq z := by
   simp only [landauMatrix, smul_apply, smul_eq_mul]
@@ -369,7 +374,7 @@ private lemma landauMatrix_entry_le (Ψ : ℝ → ℝ) {CΨ : ℝ} (hΨ : ∀ r,
 /-- Product-space integrability from Schwartz decay:
     if |g(v,w)| ≤ C * (1+‖v‖)^K₁ * |φ(v)| * (1+‖w‖)^K₂ * |φ(w)|,
     then g is integrable on the product space. -/
-private lemma integrable_prod_schwartz_bound
+lemma integrable_prod_schwartz_bound
     {φ : (Fin 3 → ℝ) → ℝ}
     (hφ : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
     {g : (Fin 3 → ℝ) × (Fin 3 → ℝ) → ℝ}
@@ -494,7 +499,7 @@ private lemma normSq_le_three_mul_sq_norm (z : Fin 3 → ℝ) :
   linarith [h 0, h 1, h 2]
 
 /-- The pi norm of vGrad φ is bounded by C*(1+‖v‖)^K*φ(v) when we have a per-component bound. -/
-private lemma vGrad_norm_le {φ : (Fin 3 → ℝ) → ℝ} {C : ℝ} {K : ℕ}
+lemma vGrad_norm_le {φ : (Fin 3 → ℝ) → ℝ} {C : ℝ} {K : ℕ}
     (hbound : ∀ v i, |fderiv ℝ φ v (Pi.single i 1)| ≤ C * (1 + ‖v‖) ^ K * φ v)
     (v : Fin 3 → ℝ) :
     ‖vGrad φ v‖ ≤ C * (1 + ‖v‖) ^ K * φ v := by
@@ -503,7 +508,7 @@ private lemma vGrad_norm_le {φ : (Fin 3 → ℝ) → ℝ} {C : ℝ} {K : ℕ}
 
 /-- Pointwise norm bound on the Landau flux integrand:
   ‖A(v-w)(φ(w)∇φ(v) - φ(v)∇φ(w))‖ ≤ 18CΨCg(1+‖v‖)^{Kg+2}φ(v)(1+‖w‖)^{Kg+2}φ(w). -/
-private lemma landau_flux_pointwise_bound
+lemma landau_flux_pointwise_bound
     {Ψ : ℝ → ℝ} {φ : (Fin 3 → ℝ) → ℝ}
     {CΨ : ℝ} (hCΨ : ∀ r, |Ψ r| ≤ CΨ) (hCΨ_nn : 0 ≤ CΨ)
     {Cg : ℝ} {Kg : ℕ}
@@ -631,7 +636,7 @@ private lemma gradX_const_fun (g : (Fin 3 → ℝ) → ℝ) (v : Fin 3 → ℝ) 
   FlatTorus3.hGradConst _ (fun _ _ => rfl) x
 
 /-- Grad-log bound: ‖∇(log∘φ)(v)‖ ≤ Cg*(1+‖v‖)^Kg from grad/value bound. -/
-private lemma vGrad_log_norm_le {φ : (Fin 3 → ℝ) → ℝ}
+lemma vGrad_log_norm_le {φ : (Fin 3 → ℝ) → ℝ}
     (hφ_smooth : ContDiff ℝ ⊤ φ) (hφ_pos : ∀ v, 0 < φ v)
     {Cg : ℝ} {Kg : ℕ} (hCg_nn : 0 ≤ Cg)
     (hCg : ∀ v i, |fderiv ℝ φ v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * φ v)
@@ -647,7 +652,7 @@ private lemma vGrad_log_norm_le {φ : (Fin 3 → ℝ) → ℝ}
     (mul_nonneg hCg_nn (pow_nonneg (by linarith [norm_nonneg v]) _)) (hCg v i)
 
 /-- Flux integrability for Schwartz-class φ. -/
-private lemma schwartz_flux_integrable
+lemma schwartz_flux_integrable
     {Ψ : ℝ → ℝ} (hΨ : ∃ CΨ, ∀ r, |Ψ r| ≤ CΨ) (hΨ_cts : Continuous Ψ)
     {φ : (Fin 3 → ℝ) → ℝ} (hφ_pos : ∀ v, 0 < φ v) (hφ_smooth : ContDiff ℝ ⊤ φ)
     (hφ_decay : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
@@ -683,7 +688,7 @@ private lemma abs_dotProduct_le (c u : Fin 3 → ℝ) :
     _ = 3 * ‖c‖ * ‖u‖ := by simp [Fin.sum_univ_three]; ring
 
 /-- Fubini integrand pointwise bound. Combines dotProduct bound + flux bound + grad-log bound. -/
-private lemma fubini_integrand_bound
+lemma fubini_integrand_bound
     {Ψ : ℝ → ℝ} {φ : (Fin 3 → ℝ) → ℝ}
     (hφ_smooth : ContDiff ℝ ⊤ φ) (hφ_pos : ∀ v, 0 < φ v)
     {CΨ : ℝ} (hCΨ : ∀ r, |Ψ r| ≤ CΨ) (hCΨ_nn : 0 ≤ CΨ)
@@ -758,7 +763,7 @@ private lemma psd_integrand_continuous_joint
     (Continuous.dotProduct hΔ (hA.matrix_mulVec hΔ))
 
 /-- PSD integrand pointwise bound. -/
-private lemma psd_integrand_bound
+lemma psd_integrand_bound
     {Ψ : ℝ → ℝ} {φ : (Fin 3 → ℝ) → ℝ}
     (hφ_smooth : ContDiff ℝ ⊤ φ) (hφ_pos : ∀ v, 0 < φ v)
     {CΨ : ℝ} (hCΨ : ∀ r, |Ψ r| ≤ CΨ) (hCΨ_nn : 0 ≤ CΨ)
@@ -1005,7 +1010,7 @@ set_option maxHeartbeats 4000000 in
     - Away from v = w: Ψ ∘ ‖·‖ is C¹ (since ‖·‖ smooth for z ≠ 0 and Ψ is C¹)
     - At v = w: A(0) *ᵥ Δ(w,w) = 0 and the integrand is O(‖v-w‖³) (bounded Ψ × vanishing A × vanishing Δ)
     - The bound combines the Landau matrix bound (O(‖v-w‖²)), gradient bounds, and Schwartz decay. -/
-private lemma landau_flux_component_diff_with_bound
+lemma landau_flux_component_diff_with_bound
     {Ψ : ℝ → ℝ} (hΨ : ∃ CΨ, ∀ r, |Ψ r| ≤ CΨ) (hΨ_cts : Continuous Ψ)
     (hΨ_diff : ContDiff ℝ 1 Ψ) (hΨ'_bound : ∃ CΨ', ∀ r, |deriv Ψ r| ≤ CΨ')
     {φ : (Fin 3 → ℝ) → ℝ} (hφ_pos : ∀ v, 0 < φ v) (hφ_smooth : ContDiff ℝ ⊤ φ)
@@ -1760,12 +1765,14 @@ def schwartzDecayConditions {X : Type*} [FlatTorus3 X]
     -- f(x,v) = φ(v) is independent of x, so g = |φ|
     refine ⟨fun v => |φ v|, ?_, fun _ v => le_abs_self _⟩
     exact (hφ_decay 0).congr (.of_forall fun v => by simp)
+  hPSD_cont := fun _ =>
+    psd_integrand_continuous_joint hΨ_cts hφ_smooth hφ_pos
   hD_cont := continuous_const
 
 /-- Bound on a Lorentz force component: |(E₀ + v × B₀)ᵢ| ≤ C·(1 + ‖v‖).
     Each cross product component is bilinear in v, B₀, hence linear in ‖v‖.
     Proved by Aristotle. -/
-private lemma lorentz_component_bound (E₀ B₀ : Fin 3 → ℝ) :
+lemma lorentz_component_bound (E₀ B₀ : Fin 3 → ℝ) :
     ∃ CL : ℝ, 0 ≤ CL ∧ ∀ (v : Fin 3 → ℝ) (i : Fin 3),
       |(E₀ + cross v B₀) i| ≤ CL * (1 + ‖v‖) := by
   simp only [cross]
@@ -1785,7 +1792,7 @@ private lemma lorentz_component_bound (E₀ B₀ : Fin 3 → ℝ) :
 
 /-- The chain rule for the entropy density: ∂/∂vᵢ (φ·log φ - φ) = log φ · ∂φ/∂vᵢ.
     Proved by Aristotle. -/
-private lemma fderiv_entropy_density_eq
+lemma fderiv_entropy_density_eq
     (φ : (Fin 3 → ℝ) → ℝ)
     (hφ_smooth : ContDiff ℝ ⊤ φ)
     (hφ_pos : ∀ v, 0 < φ v)
@@ -1800,7 +1807,7 @@ private lemma fderiv_entropy_density_eq
 
 /-- Integrability of force transport term (E₀+v×B₀)·∇φ·log φ for Schwartz φ.
     Proved by Aristotle. -/
-private lemma force_transport_integrable
+lemma force_transport_integrable
     (E₀ B₀ : Fin 3 → ℝ)
     (φ : (Fin 3 → ℝ) → ℝ)
     (hφ_pos : ∀ v, 0 < φ v)
@@ -1844,7 +1851,7 @@ private lemma force_transport_integrable
 
 /-- Integrability of (E₀+v×B₀)ᵢ · log(φ) · ∂φ/∂vᵢ for Schwartz φ.
     Proved by Aristotle. -/
-private lemma force_ibp_f_dg_integrable
+lemma force_ibp_f_dg_integrable
     (E₀ B₀ : Fin 3 → ℝ) (i : Fin 3)
     (φ : (Fin 3 → ℝ) → ℝ)
     (hφ_pos : ∀ v, 0 < φ v)
@@ -1884,7 +1891,7 @@ private lemma force_ibp_f_dg_integrable
 
 /-- Integrability of (E₀+v×B₀)ᵢ · (φ·log φ - φ) for Schwartz φ.
     Proved by Aristotle. -/
-private lemma force_ibp_fg_integrable
+lemma force_ibp_fg_integrable
     (E₀ B₀ : Fin 3 → ℝ) (i : Fin 3)
     (φ : (Fin 3 → ℝ) → ℝ)
     (hφ_pos : ∀ v, 0 < φ v)
@@ -1983,6 +1990,9 @@ def schwartzDecayConditionsEB {X : Type*} [FlatTorus3 X]
   hf_velocity_dominated :=
     (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
       hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hf_velocity_dominated
+  hPSD_cont :=
+    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hPSD_cont
   hD_cont :=
     (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
       hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hD_cont
