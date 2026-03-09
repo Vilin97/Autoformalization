@@ -1,58 +1,90 @@
 {
   "jobs": [
     {
-      "id": "23440e88-fead-489f-ada0-66674eabd2d2",
-      "submission": "aristotle-in/force_schwartz_log_integrable.lean",
-      "output": "aristotle-out/force_schwartz_log_integrable_aristotle.lean",
-      "target": "force_schwartz_log_integrable",
+      "id": "23198617-028c-48ea-aee3-41985df8903a",
+      "submission": "aristotle-in/landau_ibp_f_dg.lean",
+      "output": "aristotle-out/landau_ibp_f_dg_aristotle.lean",
+      "target": "landau_ibp_f_dg",
       "note": ""
     },
     {
-      "id": "b85fc67d-99d4-4200-83b9-430067f84194",
-      "submission": "aristotle-in/force_entropy_integrable.lean",
-      "output": "aristotle-out/force_entropy_integrable_aristotle.lean",
-      "target": "force_entropy_integrable",
+      "id": "a9f127b6-bd23-4b99-baff-1ebc513f2500",
+      "submission": "aristotle-in/coulomb_flux_diff.lean",
+      "output": "aristotle-out/coulomb_flux_diff_aristotle.lean",
+      "target": "coulomb_flux_diff",
       "note": ""
     },
     {
-      "id": "403eee35-dd6f-462c-bac4-5615b6947d06",
-      "submission": "aristotle-in/inv_norm_schwartz_integrable.lean",
-      "output": "aristotle-out/inv_norm_schwartz_integrable_aristotle.lean",
-      "target": "inv_norm_schwartz_integrable",
-      "note": "KEY: once proved, unlocks 12 VelocityDecayConditions fields in CoulombConcreteTheorem42"
-    },
-    {
-      "id": "fb8f0314-d31e-4459-be24-0a9282e3f9f2",
-      "submission": "aristotle-in/inv_norm_schwartz_product_integrable.lean",
-      "output": "aristotle-out/inv_norm_schwartz_product_integrable_aristotle.lean",
-      "target": "inv_norm_schwartz_product_integrable",
+      "id": "06e28c3f-f043-4127-862e-4310a6c614ad",
+      "submission": "aristotle-in/psd_inner_integrable.lean",
+      "output": "aristotle-out/psd_inner_integrable_aristotle.lean",
+      "target": "psd_inner_integrable",
       "note": ""
     },
     {
-      "id": "14300a69-4f89-4d5c-ae43-aeef17e05b98",
-      "submission": "aristotle-in/psd_continuous_coulomb.lean",
-      "output": "aristotle-out/psd_continuous_coulomb_aristotle.lean",
-      "target": "psd_continuous_coulomb",
+      "id": "1062b892-d888-4dc9-991a-10daa20e3d05",
+      "submission": "aristotle-in/psd_outer_integrable.lean",
+      "output": "aristotle-out/psd_outer_integrable_aristotle.lean",
+      "target": "psd_outer_integrable",
       "note": ""
     },
     {
-      "id": "7d8c95bb-5a9a-428b-adca-f6919204eb46",
-      "submission": "aristotle-in/landau_flux_integrable_coulomb.lean",
-      "output": "aristotle-out/landau_flux_integrable_coulomb_aristotle.lean",
-      "target": "landau_flux_integrable_coulomb",
+      "id": "50fc290c-3a9f-4f37-81df-c4aa17748d0b",
+      "submission": "aristotle-in/fubini_double_integrable.lean",
+      "output": "aristotle-out/fubini_double_integrable_aristotle.lean",
+      "target": "fubini_double_integrable",
       "note": ""
-    },
-    {
-      "id": "3dc1b4dc-f2e7-4f33-9e4e-a6b01f802672",
-      "submission": "aristotle-in/inv_norm_local_integrable.lean",
-      "output": "aristotle-out/inv_norm_local_integrable_aristotle.lean",
-      "target": "inv_norm_local_integrable",
-      "note": "Once proved, combine with convolution_local_int_schwartz to get inv_norm_schwartz_integrable",
-      "status": "done",
-      "solution": "/Users/vasil/Github/aristotle/Aristotle/Landau/aristotle-out/inv_norm_local_integrable_aristotle.lean"
     }
   ],
   "completed": [
+    {
+      "id": "21e52da7-bd45-4ed7-b96a-1221009ce610",
+      "target": "landau_ibp_fg",
+      "status": "proved_manually",
+      "note": "Proved directly via flux_times_log_integrable_coulomb + newtonian_schwartz_uniform_bound"
+    },
+    {
+      "id": "aabe3f3d-c5ea-4de8-986c-29e97baba862",
+      "target": "landau_flux_int_v2",
+      "status": "done",
+      "note": "Already integrated into CoulombConcreteTheorem42.lean as landau_flux_integrable_coulomb"
+    },
+    {
+      "id": "23440e88-fead-489f-ada0-66674eabd2d2",
+      "target": "force_schwartz_log_integrable",
+      "status": "negated",
+      "note": "NEGATED by Aristotle: F not assumed measurable, Vitali set counterexample. Output kept for reference."
+    },
+    {
+      "id": "b85fc67d-99d4-4200-83b9-430067f84194",
+      "target": "force_entropy_integrable",
+      "status": "negated",
+      "note": "NEGATED by Aristotle: same Vitali set counterexample. Output kept for reference."
+    },
+    {
+      "id": "403eee35-dd6f-462c-bac4-5615b6947d06",
+      "target": "inv_norm_schwartz_integrable",
+      "status": "done",
+      "note": "REDUNDANT: already proved by combining inv_norm_local_integrable + convolution_local_int_schwartz"
+    },
+    {
+      "id": "fb8f0314-d31e-4459-be24-0a9282e3f9f2",
+      "target": "inv_norm_schwartz_product_integrable",
+      "status": "done",
+      "note": "REDUNDANT: covered by inv_norm_schwartz_integrable"
+    },
+    {
+      "id": "14300a69-4f89-4d5c-ae43-aeef17e05b98",
+      "target": "psd_continuous_coulomb",
+      "status": "done",
+      "note": "Integrated into CoulombConcreteTheorem42.lean (closes hPSD_cont sorry)"
+    },
+    {
+      "id": "3dc1b4dc-f2e7-4f33-9e4e-a6b01f802672",
+      "target": "inv_norm_local_integrable",
+      "status": "done",
+      "note": "Integrated into CoulombConcreteTheorem42.lean"
+    },
     {
       "id": "c0717cfc-8431-448e-9b36-edef885e9060",
       "target": "force_ibp_fg",
@@ -279,7 +311,13 @@
       "id": "1ba752be-d63d-478b-9620-9ea7a9260511",
       "target": "inv_norm_schwartz_from_local",
       "status": "done",
-      "note": "Proved convolution_local_int_schwartz; pending integration (needs inv_norm_local_integrable first)"
+      "note": "Integrated into CoulombConcreteTheorem42.lean as convolution_local_int_schwartz"
+    },
+    {
+      "id": "7d8c95bb-5a9a-428b-adca-f6919204eb46",
+      "target": "landau_flux_integrable_coulomb",
+      "status": "failed",
+      "note": "Aristotle failed (returned sorry). Need to decompose into smaller pieces."
     }
   ]
 }

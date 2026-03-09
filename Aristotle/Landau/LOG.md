@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-10 21:00 UTC — Babysit cycle 15: Aristotle still down
+
+### Status
+- Aristotle API still completely unreachable (timeout on both check and submit).
+- Analyzed `hLandauFluxDiff` (Coulomb flux differentiability): requires differentiation under the integral sign with a singular kernel. The smooth kernel proof uses `landau_flux_component_diff_with_bound` which needs `Continuous Ψ`, `ContDiff ℝ 1 Ψ`, bounded Ψ, and bounded Ψ' — none of which hold for Coulomb. A custom argument using local integrability of `‖z‖⁻²` in 3D is needed.
+- Dependencies building (LSP shows 5 failed deps, awaiting compilation).
+- No sorry's closed.
+
+### Sorry count: 6 — unchanged
+
 ## 2026-03-10 20:00 UTC — Babysit cycle 14: Aristotle down, analysis of PSD sorry's
 
 ### Status
