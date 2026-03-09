@@ -1,6 +1,13 @@
 Analyze the current state and produce a prioritized work plan.
 
-This is NOT just about closing sorry's — it covers all issues: sorry's, code quality, documentation, architectural problems, and anything from `critique.md`.
+**CRITICAL RULE: The plan MUST contain at least one actionable item that you can execute RIGHT NOW.** "Waiting for Aristotle" is not a plan. If all sorry's are submitted to Aristotle, then:
+- Work on the sorry's yourself IN PARALLEL with Aristotle. Aristotle might fail. You are the backup.
+- Decompose hard sorry's into sub-lemmas and prove what you can.
+- Improve code quality: reduce heartbeats, split large files, clean up proofs.
+- Fix documentation inaccuracies.
+- Strengthen the formalization: weaken hypotheses, add missing edge cases.
+
+**"Nothing to do" is NEVER an acceptable output.** If you think there's nothing to do, you haven't looked hard enough.
 
 ## Steps
 
@@ -29,14 +36,18 @@ For each issue, assign a category and priority:
 - **Direct proof** (< 30 min): simple Mathlib argument, algebraic identity, one-liner.
 - **Decompose + prove** (30 min – 2 hrs): split into sub-lemmas, prove each.
 - **Submit to Aristotle**: non-trivial lemma that Aristotle might handle.
-- **Blocked**: depends on another sorry or on Aristotle results.
+- **Already submitted but work on it anyway**: Aristotle is not reliable. Attempt the proof yourself in parallel.
+
+**There is no "blocked" category.** If a sorry depends on another sorry, decompose it so that the dependency is explicit and you can work on the pieces independently.
 
 ### 4. Output the plan
 
 Write a numbered work plan to stdout. Each item has:
 - What to do
 - Which file(s) to touch
-- Estimated approach (direct / decompose / Aristotle / blocked)
+- Estimated approach (direct / decompose / parallel-with-Aristotle)
 - Dependencies (what must be done first)
+
+The FIRST item must be something you can start immediately.
 
 Do NOT execute the plan — just output it. The user or `/babysit` will decide what to execute.
