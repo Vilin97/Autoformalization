@@ -14,7 +14,7 @@
   ∀ r, 0 < coulombKernel r. The value at 0 is irrelevant since
   landauMatrix Ψ 0 = 0 always (the projection |z|²I - zz^T vanishes at z = 0).
 
-  Hypotheses (13 total, down from 15 in ConcreteTheorem42):
+  Hypotheses (13 total, 12 independent + 1 likely derivable):
   - 2 physical parameters (ν > 0, ρ_ion > 0)
   - 1 strict positivity (f > 0)
   - 3 smoothness (f smooth in v and x, B smooth)
@@ -39,17 +39,19 @@ namespace VML
     at r = 0 but the formalization handles this via the PSD continuity condition
     in VelocityDecayConditions (the singularity cancels in the quadratic form).
 
-    **Hypotheses** (13 total):
+    **Hypotheses** (13 total, 12 independent + 1 likely derivable):
     - 2 physical parameters (ν > 0, ρ_ion > 0)
     - 1 strict positivity (f > 0)
     - 3 smoothness (f smooth in v and x, B smooth)
     - 3 decay (Schwartz in v; stretched-exponential lower bound; polynomial score)
     - 4 equations (Vlasov, Ampère, Gauss, div B = 0)
 
-    The polynomial score bound (hypothesis 9) says |∂ᵢf(x,v)| ≤ C(1+‖v‖)^K f(x,v),
-    equivalently |∇(log f)| grows at most polynomially. This is the same hypothesis
-    used by the smooth kernel instance (schwartzDecayConditions). It is satisfied by
-    any Maxwellian (K=1) and any steady-state solution with polynomial score growth. -/
+    **Non-minimality note:** Hypothesis 9 (hGradBound, polynomial score bound) is
+    likely derivable from hypotheses 7-8 (Schwartz decay + stretched-exponential
+    lower bound): Schwartz |∂f| decays faster than any polynomial, while the lower
+    bound f ≥ exp(-C(1+‖v‖)^K) only decays sub-exponentially, so |∂f|/f grows at
+    most polynomially. Formalizing this derivation in Lean is nontrivial, so the
+    hypothesis is stated separately. The hypothesis list is not minimal. -/
 theorem CoulombConcreteTheorem42
     -- === Physical state at steady state ===
     (f : Torus3 → (Fin 3 → ℝ) → ℝ)

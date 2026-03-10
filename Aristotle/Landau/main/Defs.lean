@@ -591,10 +591,12 @@ end FlatTorus3
 -- Section 6: VML Steady State Structure
 -- ============================================================================
 
-/-- Bundle representing a steady state of the VML system on T³ × ℝ³.
+/-- Intermediate bundle of DERIVED facts about a VML steady state on T³ × ℝ³.
 
-    The spatial domain X is equipped with a FlatTorus3 instance providing
-    the differential operators (grad, div, curl) and integration.
+    This is NOT an input specification — all fields are proved from physical
+    hypotheses in `VMLInput.toSteadyState` (VMLInputDerive.lean). It serves as
+    an internal API between the derivation logic (Sections 3-7) and the final
+    assembly (`main_steady_state`).
 
     Encodes:
     - The VML equations at steady state (Vlasov, Ampère, Gauss, div B = 0)
