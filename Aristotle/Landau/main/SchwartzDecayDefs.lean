@@ -1,20 +1,12 @@
 /-
-  Helper definitions for concrete Theorem 42 on T³ = (ℝ/ℤ)³.
+  Schwartz decay definitions and integrability lemmas for T³ = (ℝ/ℤ)³.
 
-  This file defines `UniformSchwartzDecay` (the standard Schwartz-class
-  assumption for kinetic theory) and proves basic integrability lemmas.
-  These are used by both the Coulomb concrete theorem
-  (CoulombConcreteTheorem42.lean) and the smooth-kernel infrastructure
-  (VelocityDecayInstance.lean).
-
-  NOTE: No theorem is stated here. The concrete theorems are:
-  - CoulombConcreteTheorem42 (Coulomb kernel, 13 hypotheses)
-  - For smooth bounded kernels, use `schwartzDecayConditions` +
-    `Theorem42` (assembly required; no user-facing theorem yet).
+  Defines `UniformSchwartzDecay` (the standard Schwartz-class assumption
+  for kinetic theory) and proves basic integrability lemmas. Used by
+  CoulombKernel.lean and the Coulomb concrete theorem.
 -/
 import Aristotle.Landau.main.Theorem42
 import Aristotle.Landau.main.TorusInstance
-import Aristotle.Landau.main.VelocityDecayInstance
 
 open MeasureTheory Matrix Finset BigOperators Real
 

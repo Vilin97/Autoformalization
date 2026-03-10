@@ -1,4 +1,6 @@
 import Aristotle.Landau.main.CoulombKernel
+import Aristotle.Landau.main.VelocityDecayInstance
+import Aristotle.Landau.main.VelocityDecayHelpers
 
 open MeasureTheory Matrix Finset BigOperators Real
 

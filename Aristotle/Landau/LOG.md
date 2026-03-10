@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 52: Remove dead schwartzDecayConditions, rename ConcreteTheorem42
+
+### Changes
+- **VelocityDecayInstance.lean (809 → 35, -774 lines):** Removed dead `schwartzDecayConditions` (~400 lines) and dead `landau_flux_component_diff_with_bound` (~370 lines). Only `lorentz_component_bound` remains (still used by CoulombSpatialTransport).
+- **ConcreteTheorem42.lean → SchwartzDecayDefs.lean:** Renamed to reflect actual contents (defines `UniformSchwartzDecay` and integrability helpers; no theorem). Removed stale `import VelocityDecayInstance`. Updated header.
+- **CoulombKernel.lean:** Updated import from `ConcreteTheorem42` to `SchwartzDecayDefs`.
+- **CoulombSpatialTransport.lean:** Added direct imports for `VelocityDecayInstance` and `VelocityDecayHelpers` (previously obtained transitively through the removed ConcreteTheorem42 → VelocityDecayInstance chain).
+- All builds pass. 0 sorry's. 23 files, ~9,000 lines.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 51: Remove dead smooth-kernel helpers, fix docs
 
 ### Changes

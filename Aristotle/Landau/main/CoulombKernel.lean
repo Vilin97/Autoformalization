@@ -2,7 +2,7 @@
   Coulomb kernel definition and basic Schwartz helpers.
   Extracted from CoulombConcreteTheorem42.lean.
 -/
-import Aristotle.Landau.main.ConcreteTheorem42
+import Aristotle.Landau.main.SchwartzDecayDefs
 
 open MeasureTheory Matrix Finset BigOperators Real
 
