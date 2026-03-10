@@ -1,5 +1,23 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 59: Eliminate all primed definitions, fix LandauMatrixDerivBound compilation
+
+### Changes
+- **Eliminated ALL primed definitions** across 4 files:
+  - **CoulombFlux.lean**: Removed 7 primed defs (`normSq'`, `eucNorm'`, `innerLandauMatrix'`, `coulombKernel'`, `landauMatrix'`, `vGrad'`) + 6 bridging lemmas. Replaced all proof references with VML namespace versions.
+  - **CoulombFluxDiff.lean**: Replaced ~20 primed references with canonical names. Extracted `landauMatrix_coulombKernel_zero` helper lemma (was copy-pasted 5 times inline).
+  - **CoulombPSD.lean**: Removed `PSDIntegrand'` def + bridging lemma. Replaced ~30 primed references.
+  - **LandauMatrixDerivBound.lean**: Removed 4 primed defs, added `open VML`, renamed all lemmas from primed to unprimed.
+- **Fixed LandauMatrixDerivBound.lean compilation errors** introduced by primed→VML migration:
+  - Added `import Mathlib.Analysis.SpecialFunctions.Sqrt` (fixed `HasFDerivAt.sqrt` unknown constant)
+  - Removed duplicate `normSq_pos` and `eucNorm_nonneg` lemmas (clashed with `open VML` imports)
+  - Added scoped `maxHeartbeats 400000` for Aristotle-generated proof (needed after def migration)
+- **Removed dead code**: 2 unused wrapper lemmas (`landauMatrix_entry_fderiv_norm_bound'`, `landauMatrix_entry_abs_bound'`) + orphaned `namespace VML`/`end VML` block.
+- Fixed missing trailing newline in LandauMatrixDerivBound.lean.
+- Net change: -72 lines across 4 files. All builds pass. 0 sorry's. 22 files.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 58: Eliminate all maxHeartbeats 3200000 overrides
 
 ### Changes
