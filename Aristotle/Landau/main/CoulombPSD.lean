@@ -14,7 +14,6 @@ def PSDIntegrand' (f : (Fin 3 → ℝ) → ℝ) (v w : Fin 3 → ℝ) : ℝ :=
 -- Bridging lemma: primed PSDIntegrand equals VML.PSDIntegrand with Coulomb kernel
 lemma PSDIntegrand'_eq : PSDIntegrand' = PSDIntegrand coulombKernel := rfl
 
-set_option maxHeartbeats 800000 in
 lemma landau_bound (z u : Fin 3 → ℝ) :
     abs (dotProduct u (mulVec (landauMatrix' z) u)) ≤
     (if eucNorm' z = 0 then 0 else (eucNorm' z)⁻¹) * (eucNorm' u)^2 := by

@@ -1,8 +1,8 @@
-# Adversarial Critique — 2026-03-10 UTC (Cycle 54)
+# Adversarial Critique — 2026-03-10 UTC (Cycle 55)
 
 ## Verdict: ACCEPT WITH MINOR REVISIONS
 
-Cycle 54 added bridging lemmas for primed definitions. However, 9 of 11 bridging lemmas are unused dead code — the "fix" added more dead code than it removed. Remaining issues are minor but persistent.
+Cycle 55 reduced one heartbeat override and fixed MEMORY.md drift. All remaining issues are minor.
 
 ---
 
@@ -89,16 +89,16 @@ I found no divergence from the standard mathematical proof. The proof follows th
 | CoulombFluxDiff.lean | 627 | Borderline |
 | CoulombFlux.lean | 616 | Borderline |
 
-### 6b. maxHeartbeats overrides (29 maxHeartbeats + 1 synthInstance = 30 total)
+### 6b. maxHeartbeats overrides (28 maxHeartbeats + 1 synthInstance = 29 total)
 
 | Value | Count | Files |
 |-------|-------|-------|
-| 800000 | 12 | CoulombFlux, CoulombSpatialTransport, CoulombPSD, LandauMatrixDerivBound, Section3, Section3Helpers, TorusInstance |
+| 800000 | 11 | CoulombFlux, CoulombSpatialTransport, LandauMatrixDerivBound, Section3, Section3Helpers, TorusInstance |
 | 1600000 | 11 | CoulombFluxDiff, CoulombPSD, CoulombSpatialTransport, LandauMatrixDerivBound, NewtonianPotential, CoulombFlux |
 | 3200000 | 6 | CoulombFlux (2), CoulombPSD (3), NewtonianPotential (1) |
 | synthInstance 160000 | 1 | CoulombSpatialTransport |
 
-30 heartbeat overrides across 10 files. The 6 values at 3200000 (8× default) indicate proofs that could break with Mathlib updates. These are fragile.
+29 heartbeat overrides across 10 files. The 6 values at 3200000 (8× default) indicate proofs that could break with Mathlib updates. These are fragile. `landau_bound` (CoulombPSD) was reduced from 800000 to default in cycle 55.
 
 ### 6c. Primed definitions (11 duplicates across 3 files) — PARTIALLY ADDRESSED (cycle 54)
 
@@ -123,9 +123,9 @@ The bridging lemmas document the intended relationship but do not enforce it at 
 
 Claims 22 files, ~8,300 lines, 0 sorry's. Actual: 22 files, 8,317 lines, 0 sorry's. No issues.
 
-### MEMORY.md — MINOR DRIFT
+### MEMORY.md — ACCURATE (verified cycle 55)
 
-On-disk MEMORY.md says CoulombFlux.lean has ~608 lines (actual: 616) and CoulombPSD.lean has ~713 lines (actual: 716). These drifted by 8 and 3 lines respectively due to the bridging lemma additions in cycle 54. Trivial but technically stale.
+Line counts updated in cycle 55. No issues.
 
 ### Docstrings
 
@@ -185,13 +185,13 @@ Elementary linear algebra bound. **Not worth upstreaming.**
 | 2 | 11 primed definitions + 9 unused bridging lemmas (20 lines dead code) | Minor | Partially addressed (cycle 54) |
 | 3 | ~~progress.md severely stale~~ | ~~Major~~ | **RESOLVED** (cycle 53) |
 | 4 | ~~MEMORY.md stale~~ | ~~Minor~~ | **RESOLVED** (cycle 53) |
-| 5 | 30 heartbeat overrides (6 at 3200000) | Minor | Open |
+| 5 | 29 heartbeat overrides (6 at 3200000) | Minor | Open |
 | 6 | 7 files over 600 lines (TorusInstance at 1164) | Minor | Open |
 | 7 | hGradBound "likely derivable" claim may be incorrect | Epistemic | Open |
 | 8 | No non-equilibrium VDC instance for Coulomb kernel | Epistemic | Open |
 | 9 | C^∞ smoothness overkill (C² likely suffices) | Minor | Open |
 | 10 | Uniqueness of T_eq not proved | Minor | Open |
-| 11 | MEMORY.md line counts drifted (CoulombFlux 608→616, CoulombPSD 713→716) | Trivial | Open |
+| 11 | ~~MEMORY.md line counts drifted~~ | ~~Trivial~~ | **RESOLVED** (cycle 55) |
 
 ### Remaining work (all recommended, none required)
 
