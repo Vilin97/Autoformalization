@@ -1,5 +1,22 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 49: Remove 24 dead declarations across 10 files (~265 lines)
+
+### Changes
+- **Section4.lean:** Removed `global_entropy_production_zero`, `pointwise_entropy_dissipation_zero` (-34 lines)
+- **Section5.lean:** Removed `bulk_velocity_constant`, `force_balance`, `E_dot_u_zero` (-49 lines)
+- **Section6.lean:** Removed `ampere_steady_state` (-10 lines)
+- **Section7.lean:** Removed `poisson_boltzmann_density`, `density_constant_max_principle`, `laplacian_nonpos_at_max`, `laplacian_nonneg_at_min` (-29 lines)
+- **Section8.lean:** Removed `B_compatible_maxwellian` (-11 lines)
+- **Section9.lean:** Removed `B_infty_determination`, `T_infty_determination`, `T_positive` (-39 lines)
+- **Section2.lean:** Removed `innerLandauMatrix_symmetric`, `landauMatrix_symmetric` (-19 lines)
+- **Section3Helpers.lean:** Removed 4 transitively dead lemmas: `nonpositive_integral_zero_compact`, `killing_constant_torus`, `divergence_scalar_linear`, `force_balance_from_polynomial` (-52 lines)
+- **LandauMatrixDerivBound.lean:** Removed `norm_le_eucNorm'`, `innerLandauEntry_val` (-11 lines)
+- **TorusInstance.lean:** Removed `torusMk_continuous`, `laplacian_nonpos_at_max_rn` (-44 lines)
+- All builds pass. 0 sorry's.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 48: Major dead code removal (-459 lines)
 
 ### Changes

@@ -15,25 +15,6 @@ lemma dotProduct_smul_self (c : ℝ) (v : Fin 3 → ℝ) :
   simp only [Pi.smul_apply, smul_eq_mul, Fin.sum_univ_three]
   ring
 
-/-- Lemma 18 (Ampère's law at steady state).
-    Reference: lem:ampere_steady
-
-    At steady state (∂_t E = 0), Ampère's law gives ∇ₓ × B = J = n(x) u∞.
-
-    Proof: At steady state ∂_t E = 0, so Ampère becomes ∇×B = J.
-    For a local Maxwellian with constant bulk velocity u∞,
-    J(x) = ∫ v f dv = n(x) u∞. -/
-theorem ampere_steady_state
-    (X : Type*)
-    (B : X → (Fin 3 → ℝ))
-    (J : X → (Fin 3 → ℝ))
-    (ρ : X → ℝ) (u_infty : Fin 3 → ℝ)
-    (curlX : (X → (Fin 3 → ℝ)) → X → (Fin 3 → ℝ))
-    (_hAmpere : ∀ x, curlX B x = J x)
-    (_hJ_def : ∀ x, J x = ρ x • u_infty) :
-    ∀ x, curlX B x = ρ x • u_infty := by
-  intro x; rw [_hAmpere, _hJ_def]
-
 /-- Lemma 19: The drift velocity vanishes: u∞ = 0.
     Reference: lem:u_zero
 

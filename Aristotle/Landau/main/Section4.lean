@@ -9,41 +9,6 @@ namespace VML
 -- Reference: Lemmas 10-12, Corollary 2
 -- ============================================================================
 
-/-- Lemma 11 (Global entropy production vanishes at steady state).
-    Reference: lem:global_entropy_zero
-
-    At steady state with ν > 0: ∫_{T³} Dₓ(f) dx = 0,
-    where Dₓ(f) = ∫ Q(f,f)(v) log f(x,v) dv ≤ 0 is the local entropy dissipation. -/
-theorem global_entropy_production_zero
-    (X : Type*)
-    (spatialIntegral : (X → ℝ) → ℝ)
-    (f : X → (Fin 3 → ℝ) → ℝ) (Ψ : ℝ → ℝ)
-    (_hf_pos : ∀ x v, 0 < f x v)
-    (hlocal_neg : ∀ x, entropyDissipation Ψ (f x) ≤ 0)
-    (hfaithful : ∀ h : X → ℝ, (∀ x, h x ≤ 0) → spatialIntegral h = 0 → ∀ x, h x = 0) :
-    spatialIntegral (fun x => entropyDissipation Ψ (f x)) = 0 →
-    ∀ x, entropyDissipation Ψ (f x) = 0 := by
-  intro hInt
-  exact nonpositive_integral_zero_compact X spatialIntegral _ hlocal_neg hInt hfaithful
-
-/-- Lemma 12 (Pointwise vanishing of entropy dissipation).
-    Reference: lem:pointwise_D_zero
-
-    If D_x(f) ≤ 0 for all x ∈ T³ (H-theorem) and ∫ D_x(f) dx = 0
-    (Lemma 11), then D_x(f) = 0 for all x ∈ T³.
-
-    Proof: A non-positive continuous function whose integral over a domain
-    of positive measure vanishes must be identically zero. -/
-theorem pointwise_entropy_dissipation_zero
-    (X : Type*)
-    (spatialIntegral : (X → ℝ) → ℝ)
-    (g : X → ℝ)
-    (hnonpos : ∀ x, g x ≤ 0)
-    (hintegral : spatialIntegral g = 0)
-    (hfaithful : ∀ h : X → ℝ, (∀ x, h x ≤ 0) → spatialIntegral h = 0 → ∀ x, h x = 0) :
-    ∀ x, g x = 0 :=
-  nonpositive_integral_zero_compact X spatialIntegral g hnonpos hintegral hfaithful
-
 /-- Corollary 2 (Steady state is a local Maxwellian).
     Reference: cor:local_maxwellian
 

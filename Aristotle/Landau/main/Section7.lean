@@ -38,51 +38,6 @@ lemma poisson_boltzmann_algebraic
 -- Reference: Lemmas 20-21, Corollary 3
 -- ============================================================================
 
-/-- Lemma 20 (Poisson–Boltzmann equation for the density).
-    Reference: lem:poisson_boltzmann
-
-    With u∞ = 0, the force balance and Gauss's law yield:
-    T∞ Δₓ(log n) = n(x) - ρ_ion -/
-theorem poisson_boltzmann_density
-    (X : Type*)
-    (n : X → ℝ) (E : X → (Fin 3 → ℝ))
-    (ρ_ion T_infty : ℝ)
-    (gradX : (X → ℝ) → X → (Fin 3 → ℝ))
-    (divX : (X → (Fin 3 → ℝ)) → X → ℝ)
-    (_hT : 0 < T_infty)
-    (_hforce : ∀ x, gradX (Real.log ∘ n) x = (1 / T_infty) • E x)
-    (_hGauss : ∀ x, divX E x = n x - ρ_ion)
-    (hDivLinear : ∀ (α : ℝ) (G : X → (Fin 3 → ℝ)),
-      ∀ x, divX (fun y => α • G y) x = α * divX G x) :
-    ∀ x, T_infty * divX (gradX (Real.log ∘ n)) x = n x - ρ_ion := by
-  intro x
-  have hgrad_eq : gradX (Real.log ∘ n) = fun y => (1 / T_infty) • E y := funext _hforce
-  rw [hgrad_eq, divergence_scalar_linear X divX _ _ hDivLinear, _hGauss]
-  field_simp
-
-/-- Lemma 21 (Maximum principle: density is constant).
-    Reference: lem:density_constant
-
-    If n : T³ → (0,∞) satisfies T∞ Δₓ(log n) = n - ρ_ion with T∞ > 0,
-    then n(x) ≡ ρ_ion.
-
-    Proof: At the maximum of n (hence log n), Δ(log n) ≤ 0, so n ≤ ρ_ion.
-    At the minimum, Δ(log n) ≥ 0, so n ≥ ρ_ion. Hence n ≡ ρ_ion. -/
-theorem density_constant_max_principle
-    (X : Type*) [Nonempty X]
-    (n : X → ℝ) (ρ_ion T_infty : ℝ)
-    (laplacian : (X → ℝ) → X → ℝ)
-    (hn_pos : ∀ x, 0 < n x)
-    (hT : 0 < T_infty) (hρ : 0 < ρ_ion)
-    (hPB : ∀ x, T_infty * laplacian (Real.log ∘ n) x = n x - ρ_ion)
-    (x_max : X) (hmax : ∀ x, n x ≤ n x_max)
-    (x_min : X) (hmin : ∀ x, n x_min ≤ n x)
-    (hmax_lapl : laplacian (Real.log ∘ n) x_max ≤ 0)
-    (hmin_lapl : 0 ≤ laplacian (Real.log ∘ n) x_min) :
-    ∀ x, n x = ρ_ion :=
-  poisson_boltzmann_max_principle X n ρ_ion T_infty laplacian hn_pos hT hρ hPB
-    x_max hmax x_min hmin hmax_lapl hmin_lapl
-
 /-- Corollary 3: The electric field vanishes: E(x) = 0.
     Reference: cor:E_zero
 
@@ -118,20 +73,6 @@ lemma continuous_attains_min {X : Type*} [TopologicalSpace X] [CompactSpace X] [
     ∃ x_min : X, ∀ x, g x_min ≤ g x := by
   obtain ⟨x, _, hx⟩ := isCompact_univ.exists_isMinOn Set.univ_nonempty hg.continuousOn
   exact ⟨x, fun y => hx (Set.mem_univ y)⟩
-
-/-- At a global maximum of a function on a FlatTorus3, the Laplacian is non-positive.
-    This is a direct consequence of the FlatTorus3 axiom hLaplacianMaxNonpos. -/
-lemma laplacian_nonpos_at_max {X : Type*} [FlatTorus3 X]
-    (φ : X → ℝ) (hφ : FlatTorus3.IsSpatiallyDiff φ) (x_max : X) (hmax : ∀ x, φ x ≤ φ x_max) :
-    FlatTorus3.divX (FlatTorus3.gradX φ) x_max ≤ 0 :=
-  FlatTorus3.hLaplacianMaxNonpos φ x_max hφ hmax
-
-/-- At a global minimum of a function on a FlatTorus3, the Laplacian is non-negative.
-    This is a direct consequence of the FlatTorus3 axiom hLaplacianMinNonneg. -/
-lemma laplacian_nonneg_at_min {X : Type*} [FlatTorus3 X]
-    (φ : X → ℝ) (hφ : FlatTorus3.IsSpatiallyDiff φ) (x_min : X) (hmin : ∀ x, φ x_min ≤ φ x) :
-    0 ≤ FlatTorus3.divX (FlatTorus3.gradX φ) x_min :=
-  FlatTorus3.hLaplacianMinNonneg φ hφ x_min hmin
 
 /-- Poisson-Boltzmann equation from the Vlasov equation (isotropic case).
     When f is locally Maxwellian with b₀ = 0 (zero drift) and spatially constant c₀,

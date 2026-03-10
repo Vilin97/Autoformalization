@@ -58,14 +58,6 @@ noncomputable section AristotleLemmas
 /-
 The sup norm of z is less than or equal to the Euclidean norm of z.
 -/
-lemma norm_le_eucNorm' (z : Fin 3 → ℝ) : ‖z‖ ≤ eucNorm' z := by
-  norm_num [ eucNorm' ];
-  norm_num [ normSq', eucNorm' ] at *;
-  norm_num [ dotProduct, Norm.norm ] at *;
-  norm_num [ Fin.univ_succ ] at *;
-  simp +zetaDelta at *;
-  exact ⟨ Real.abs_le_sqrt ( by nlinarith ), Real.abs_le_sqrt ( by nlinarith ), Real.abs_le_sqrt ( by nlinarith ) ⟩
-
 /-
 The Euclidean norm is bounded by sqrt(3) times the sup norm.
 -/
@@ -125,11 +117,6 @@ lemma normSq'_hasFDerivAt (z : Fin 3 → ℝ) :
 /-
 Explicit formula for the entries of the inner Landau matrix.
 -/
-lemma innerLandauEntry_val (z : Fin 3 → ℝ) (i j : Fin 3) :
-    innerLandauMatrix' z i j = normSq' z * (if i = j then 1 else 0) - z i * z j := by
-      unfold innerLandauMatrix';
-      fin_cases i <;> fin_cases j <;> norm_num [ Matrix.vecMulVec ]
-
 /-
 Bound on the entries of the inner Landau matrix.
 If i = j, the entry is sum_{k != i} z_k^2, which is bounded by 2 * ||z||^2.

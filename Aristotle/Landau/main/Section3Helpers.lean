@@ -554,20 +554,6 @@ lemma maxwellian_landau_flux_zero (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
   · simp +decide [mul_assoc, mul_comm, mul_left_comm, Finset.mul_sum _ _ _, Finset.sum_add_distrib, Matrix.mulVec, dotProduct]; ring!
   · norm_num [Algebra.smul_def]
 
-/-- Gap 10: On a compact domain, ∫ g = 0 with g ≤ 0 implies g ≡ 0.
-    For continuous g on T³ (compact, positive measure), non-positive with
-    zero integral implies pointwise vanishing.
-    Reference: Used in Lemmas 11-12 (lem:global_entropy_zero, lem:pointwise_D_zero). -/
-lemma nonpositive_integral_zero_compact
-    (X : Type*)
-    (spatialIntegral : (X → ℝ) → ℝ)
-    (g : X → ℝ) (hnonpos : ∀ x, g x ≤ 0)
-    (hintegral : spatialIntegral g = 0)
-    -- Hypothesis: faithful spatial integral (from compactness + positive measure)
-    (hfaithful : ∀ h : X → ℝ, (∀ x, h x ≤ 0) → spatialIntegral h = 0 → ∀ x, h x = 0) :
-    ∀ x, g x = 0 :=
-  hfaithful g hnonpos hintegral
-
 /-- Gap 11: D(f) = 0 implies f is a Maxwellian.
     Chains: D=0 → parallelism (Lemma 6) → ∇log f affine (Lemma 7) →
     log f quadratic (Lemma 8) → f = exp(quadratic) → c₀ < 0 (L¹ integrability).
@@ -622,37 +608,6 @@ lemma cubic_coeff_zero (a : Fin 3 → ℝ) (h : ∀ v, dotProduct v a * normSq v
   simp_all +decide [mul_assoc, Fin.sum_univ_three, dotProduct]
   fin_cases j <;> simp_all +decide [Fin.sum_univ_three, VML.normSq]
 
-/-- Gap 13: Killing vector fields on the flat torus T³ are constant.
-    Killing equation + harmonic → constant axiom.
-    Reference: Proof of Lemma 15 (lem:u_constant). -/
-lemma killing_constant_torus
-    (X : Type*)
-    (b : X → (Fin 3 → ℝ))
-    (gradX : (X → ℝ) → X → (Fin 3 → ℝ))
-    (divX : (X → (Fin 3 → ℝ)) → X → ℝ)
-    -- Each component of b is harmonic (Δbⱼ = 0)
-    (hHarmonic : ∀ j : Fin 3, ∀ x, divX (gradX (fun y => b y j)) x = 0)
-    -- Harmonic functions on T³ are constant
-    (hConst : ∀ φ : X → ℝ, (∀ x, divX (gradX φ) x = 0) → ∀ x y, φ x = φ y)
-    [Nonempty X] :
-    ∃ b₀ : Fin 3 → ℝ, ∀ x, b x = b₀ := by
-  -- Proved by Aristotle (Harmonic)
-  use fun j => b (Classical.arbitrary X) j; intro x; ext j
-  exact hConst _ (hHarmonic j) x (Classical.arbitrary X) ▸ rfl
-
-/-- Gap 14: Linearity of divergence with respect to scalar multiplication.
-    div(c · F) = c · div F for constant scalar c.
-    Reference: Step in the proof of Lemma 20 (lem:poisson_boltzmann). -/
-lemma divergence_scalar_linear
-    (X : Type*)
-    (divX : (X → (Fin 3 → ℝ)) → X → ℝ)
-    (c : ℝ) (F : X → (Fin 3 → ℝ))
-    (hLinear : ∀ (α : ℝ) (G : X → (Fin 3 → ℝ)),
-      ∀ x, divX (fun y => α • G y) x = α * divX G x) :
-    ∀ x, divX (fun y => c • F y) x = c * divX F x := by
-  -- Proved by Aristotle (Harmonic)
-  exact fun x => hLinear c F x
-
 /-- Gap 15: Maximum principle for the Poisson–Boltzmann equation on T³.
     If T∞ Δ(log n) = n - ρ_ion with T∞ > 0 and n > 0, then n ≡ ρ_ion.
     At the maximum of n: Δ(log n) ≤ 0 → n ≤ ρ_ion.
@@ -677,25 +632,6 @@ lemma poisson_boltzmann_max_principle
   have h_eq : n x_max = ρ_ion ∧ n x_min = ρ_ion := by
     constructor <;> nlinarith [hPB x_max, hPB x_min, hmax x_min, hmin x_max]
   exact fun x => le_antisymm (by linarith [hmax x]) (by linarith [hmin x])
-
-/-- Gap 19: Force balance from polynomial identity O(|v|¹) coefficient.
-    With c and b constant, the polynomial identity at O(|v|¹) gives
-    ∇ₓa = -2c₀ E - B × b∞.
-    Reference: Proof of Lemma 16 (lem:force_balance). -/
-lemma force_balance_from_polynomial
-    (X : Type*)
-    (a : X → ℝ) (E B : X → (Fin 3 → ℝ))
-    (b_infty : Fin 3 → ℝ) (c_infty : ℝ)
-    (gradX : (X → ℝ) → X → (Fin 3 → ℝ))
-    (hSteady : ∀ x v,
-      dotProduct v (gradX a x) +
-      dotProduct v ((2 * c_infty) • E x + cross (B x) b_infty) = 0) :
-    ∀ x, gradX a x = -(2 * c_infty) • E x - cross (B x) b_infty := by
-  -- Proved by Aristotle (Harmonic)
-  intro x; ext i
-  have := hSteady x (Pi.single i 1)
-  simp_all +decide [mul_comm, Fin.sum_univ_three]
-  linarith
 
 
 end VML
