@@ -6,27 +6,6 @@ noncomputable section
 namespace VML
 
 -- ============================================================================
--- Inline definitions for standalone Aristotle proofs (all equal to VML defs by rfl)
--- ============================================================================
-def normSq' (z : Fin 3 → ℝ) : ℝ := dotProduct z z
-def eucNorm' (z : Fin 3 → ℝ) : ℝ := Real.sqrt (normSq' z)
-def innerLandauMatrix' (z : Fin 3 → ℝ) : Matrix (Fin 3) (Fin 3) ℝ :=
-  normSq' z • (1 : Matrix (Fin 3) (Fin 3) ℝ) - vecMulVec z z
-def coulombKernel' (r : ℝ) : ℝ := if r ≤ 0 then 1 else r ^ (-3 : ℝ)
-def landauMatrix' (z : Fin 3 → ℝ) : Matrix (Fin 3) (Fin 3) ℝ :=
-  coulombKernel' (eucNorm' z) • innerLandauMatrix' z
-def vGrad' (f : (Fin 3 → ℝ) → ℝ) (v : Fin 3 → ℝ) : Fin 3 → ℝ :=
-  fun i => fderiv ℝ f v (Pi.single i 1)
-
--- Bridging lemmas: primed defs equal VML namespace defs (by definitional equality)
-lemma normSq'_eq : normSq' = normSq := rfl
-lemma eucNorm'_eq : eucNorm' = eucNorm := rfl
-lemma innerLandauMatrix'_eq : innerLandauMatrix' = innerLandauMatrix := rfl
-lemma coulombKernel'_eq : coulombKernel' = coulombKernel := rfl
-lemma landauMatrix'_eq : landauMatrix' = landauMatrix coulombKernel := rfl
-lemma vGrad'_eq : vGrad' = vGrad := rfl
-
--- ============================================================================
 -- Landau flux integrability for Coulomb kernel (proved by Aristotle, job aabe3f3d)
 -- Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun>
 -- ============================================================================
@@ -42,19 +21,15 @@ lemma landau_flux_integrable_coulomb
     Integrable (fun w =>
       mulVec (landauMatrix coulombKernel (v - w))
         (f w • vGrad f v - f v • vGrad f w)) := by
-  -- Bridge: landauMatrix coulombKernel = landauMatrix' and vGrad = vGrad' by rfl
-  show Integrable (fun w =>
-      mulVec (landauMatrix' (v - w))
-        (f w • vGrad' f v - f v • vGrad' f w))
   -- Each component (i,j) is integrable via ‖v-w‖⁻¹ × Schwartz bound
   have h_comp : ∀ i j : Fin 3, Integrable (fun w =>
-      (landauMatrix' (v - w)) i j *
-      (f w • vGrad' f v - f v • vGrad' f w) j) := by
+      (landauMatrix coulombKernel (v - w)) i j *
+      (f w • vGrad f v - f v • vGrad f w) j) := by
     have h_inv : ∀ i j : Fin 3, Integrable (fun w =>
-        ‖v - w‖⁻¹ * (f w • vGrad' f v - f v • vGrad' f w) j) := by
+        ‖v - w‖⁻¹ * (f w • vGrad f v - f v • vGrad f w) j) := by
       intro i j
       have h_int : Integrable (fun w => ‖v - w‖⁻¹ * f w) ∧
-          Integrable (fun w => ‖v - w‖⁻¹ * (vGrad' f w) j) := by
+          Integrable (fun w => ‖v - w‖⁻¹ * (vGrad f w) j) := by
         constructor
         · apply inv_norm_schwartz_integrable
           · intro N; specialize hf_schwartz N 0; aesop
@@ -63,7 +38,7 @@ lemma landau_flux_integrable_coulomb
           · intro N
             obtain ⟨C, hC_pos, hC⟩ := hf_schwartz N 1
             use C, hC_pos; intro w
-            have h_deriv_bound : |vGrad' f w j| ≤ ‖iteratedFDeriv ℝ 1 f w‖ := by
+            have h_deriv_bound : |vGrad f w j| ≤ ‖iteratedFDeriv ℝ 1 f w‖ := by
               have : |fderiv ℝ f w (Pi.single j 1)| ≤ ‖fderiv ℝ f w‖ := by
                 simpa using (ContinuousLinearMap.le_opNorm (fderiv ℝ f w) (Pi.single j 1))
                   |> le_trans <| mul_le_of_le_one_right (norm_nonneg _) <|
@@ -78,23 +53,23 @@ lemma landau_flux_integrable_coulomb
               · exact (LinearIsometryEquiv.differentiable _) _
             exact le_trans (mul_le_mul_of_nonneg_right h_deriv_bound (by positivity)) (hC w)
           · exact ((hf_smooth.continuous_fderiv le_top).eval_const (Pi.single j 1)).aestronglyMeasurable
-      convert h_int.1.mul_const ((vGrad' f v) j) |>.sub (h_int.2.const_mul (f v)) using 2
+      convert h_int.1.mul_const ((vGrad f v) j) |>.sub (h_int.2.const_mul (f v)) using 2
       simp [Pi.smul_apply, Pi.sub_apply, smul_eq_mul]; ring
     intro i j
     refine (h_inv i j).norm.mono' ?_ ?_
     · refine AEStronglyMeasurable.mul ?_ ?_
       · refine Measurable.aestronglyMeasurable ?_
         refine Measurable.mul ?_ ?_
-        · refine Measurable.ite ?_ ?_ ?_ <;> norm_num [eucNorm', coulombKernel']
+        · refine Measurable.ite ?_ ?_ ?_ <;> norm_num [eucNorm, coulombKernel]
           · exact measurableSet_Iic.mem.comp (Real.continuous_sqrt.measurable.comp
-              (show Measurable fun a : Fin 3 → ℝ => normSq' (v - a) from
+              (show Measurable fun a : Fin 3 → ℝ => normSq (v - a) from
                 Continuous.measurable (Continuous.dotProduct
                   (continuous_const.sub continuous_id') (continuous_const.sub continuous_id'))))
           · exact Measurable.pow_const (Measurable.sqrt <| Continuous.measurable <|
               Continuous.dotProduct (continuous_const.sub continuous_id')
                 (continuous_const.sub continuous_id')) _
-        · unfold innerLandauMatrix'
-          simp +decide [normSq', Matrix.vecMulVec]
+        · unfold innerLandauMatrix
+          simp +decide [normSq, Matrix.vecMulVec]
           fun_prop (disch := norm_num)
       · exact AEStronglyMeasurable.sub
           (Continuous.aestronglyMeasurable (hf_smooth.continuous.mul continuous_const))
@@ -102,7 +77,7 @@ lemma landau_flux_integrable_coulomb
             ((hf_smooth.continuous_fderiv le_top).eval_const (Pi.single j 1)).aestronglyMeasurable)
     · filter_upwards [] with w
       by_cases hw : v - w = 0 <;> simp_all +decide
-      · simp_all +decide [sub_eq_zero, landauMatrix']
+      · simp_all +decide [sub_eq_zero, landauMatrix coulombKernel]
       · exact mul_le_mul_of_nonneg_right
           (coulomb_landauMatrix_entry_le_pi _ _ _ hw) (abs_nonneg _)
   exact integrable_pi_iff.mpr fun i => by
