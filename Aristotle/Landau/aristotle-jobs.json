@@ -40,7 +40,8 @@
       "output": "aristotle-out/coulomb_conv_deriv_decay_aristotle.lean",
       "target": "coulomb_conv_deriv_decay",
       "note": "OBSOLETE: original statement was FALSE (Schwartz decay). Replaced with coulomb_entry_conv_deriv_bounded (uniform bound) and proved manually. All files deleted.",
-      "status": "obsolete"
+      "status": "done",
+      "solution": "/home/vilin/aristotle/Aristotle/Landau/aristotle-out/coulomb_conv_deriv_decay_aristotle.lean"
     }
   ],
   "completed": [

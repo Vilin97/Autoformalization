@@ -24,6 +24,7 @@
 import Aristotle.Landau.main.CoulombSpatialTransport
 import Aristotle.Landau.main.CoulombFlux
 import Aristotle.Landau.main.CoulombPSD
+import Aristotle.Landau.main.CoulombFluxDiff
 
 open MeasureTheory Matrix Finset BigOperators Real
 
