@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 64: Eliminate deprecated refine', non-vacuousness theorem
+
+### Changes
+- **Eliminated all 36 deprecated `refine'`** across 5 files (CoulombPSD 13, TorusInstance 10, NewtonianPotential 8, Section3Helpers 4, SchwartzDecayDefs 1). Replaced with `refine` + `?_` placeholders.
+- **Added `equilibriumMaxwellian_pos`** (Defs.lean): standalone lemma proving the equilibrium Maxwellian is strictly positive for ρ > 0, T > 0.
+- **Added `CoulombConcreteTheorem42_nonvacuous`** (CoulombConcreteTheorem42.lean): non-vacuousness theorem showing the equilibrium Maxwellian with E=0, B=0 satisfies all 13 hypotheses. Hypothesis (3) proved; (4)-(13) sorry'd with detailed documentation explaining why each holds.
+- **Fixed MEMORY.md**: updated file count (21→22) and line count (~7,895→~7,838).
+- **Investigated spatial smoothness weakening** (C^∞ → C¹): blocked by `hDiff_grad` in FlatTorus3 typeclass requiring same smoothness level for gradient components. Would need two-level predicate design.
+
+### Sorry count: 10 (all in `CoulombConcreteTheorem42_nonvacuous`, non-critical)
+
 ## 2026-03-10 UTC — Babysit cycle 63: Split TorusInstance, weaken C^∞ → C³ velocity smoothness
 
 ### Changes

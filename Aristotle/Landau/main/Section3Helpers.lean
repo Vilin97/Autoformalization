@@ -89,7 +89,7 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
               · norm_num;
               · ring;
             convert h_integrable.norm using 2 ; norm_num [ abs_mul, abs_of_nonneg, Real.exp_nonneg ];
-          refine' MeasureTheory.Integrable.mono' _ _ _;
+          refine MeasureTheory.Integrable.mono' ?_ ?_ ?_;
           exacts [ fun v => |v| * Real.exp ( c * v ^ 2 / 2 ) * Real.exp ( b ^ 2 / ( 2 * |c| ) ), h_integrable.mul_const _, Continuous.aestronglyMeasurable ( by continuity ), Filter.Eventually.of_forall h_gauss ];
         convert h_integrable.mul_const ( Real.exp a ) using 2 ; ring;
         rw [ mul_assoc, ← Real.exp_add ];
@@ -191,7 +191,7 @@ lemma analysis_gaussian_integrability
   contrapose! hf_int
   by_contra h_contra
   have h_integrable : MeasureTheory.Integrable (fun v : Fin 3 → ℝ => Real.exp (a₀ + b ⬝ᵥ v)) MeasureTheory.MeasureSpace.volume := by
-    refine' h_contra.mono' _ _
+    refine h_contra.mono' ?_ ?_
     · fun_prop
     · simp_all +decide [ Real.exp_pos ]
       exact Filter.Eventually.of_forall fun x => mul_nonneg hf_int ( by exact ( show 0 ≤ VML.normSq x from by exact ( by exact ( by exact ( by exact ( by exact ( by exact ( by exact ( by exact ( by exact ( by exact ( by exact ( by exact ( by exact ( by exact by unfold VML.normSq; exact Finset.sum_nonneg fun i _ => mul_self_nonneg _ ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
@@ -214,7 +214,7 @@ lemma analysis_gaussian_integrability
         rw [ h_iso, MeasureTheory.integrable_map_measure ]
         · rfl
         · exact Continuous.aestronglyMeasurable ( by exact Real.continuous_exp.comp <| continuous_const.dotProduct continuous_id' )
-        · refine' Continuous.aemeasurable _
+        · refine Continuous.aemeasurable ?_
           exact continuous_pi_iff.mpr fun i => by fin_cases i <;> [ exact continuous_fst; exact continuous_apply 0 |> Continuous.comp <| continuous_snd; exact continuous_apply 1 |> Continuous.comp <| continuous_snd ]
       rw [ MeasureTheory.integrable_prod_iff ] at h_integrable
       · simp_all +decide [ Real.exp_add, MeasureTheory.integral_const_mul, MeasureTheory.integral_mul_const ]
@@ -239,7 +239,7 @@ lemma analysis_vGrad_smooth
     (g : (Fin 3 → ℝ) → ℝ) (hg : ContDiff ℝ 3 g) :
     ContDiff ℝ 2 (fun v => vGrad g v) := by
   -- Proved by Aristotle (Harmonic)
-  refine' contDiff_pi.2 fun i => _
+  refine contDiff_pi.2 fun i => ?_
   apply_rules [ ContDiff.fderiv_apply, contDiff_id, contDiff_const ]
   fun_prop (disch := solve_by_elim)
   norm_num

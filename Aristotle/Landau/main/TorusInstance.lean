@@ -64,7 +64,7 @@ lemma integral_torus_eq_integral_box (g : Torus3 → ℝ) (hg : Continuous g) :
       · convert MeasureTheory.integral_map _ _ using 3;
         · rw [ ← MeasureTheory.integral_map ];
           · rw [ ← measure_torus_eq_map ];
-          · refine' Continuous.aemeasurable _;
+          · refine Continuous.aemeasurable ?_;
             exact continuous_pi_iff.mpr fun i => QuotientAddGroup.continuous_mk.comp ( continuous_apply i );
           · exact hg.aestronglyMeasurable;
         · exact measurable_id.aemeasurable;
@@ -93,7 +93,7 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
                   fin_cases i <;> simp +decide [ Fin.forall_fin_succ ];
                   · tauto;
                   · tauto;
-              · refine' measurable_pi_iff.mpr _;
+              · refine measurable_pi_iff.mpr ?_;
                 intro a; fin_cases a <;> simp +decide [ Fin.insertNth ] ;
                 · fin_cases i <;> simp +decide [ Fin.succAboveCases ];
                   · exact measurable_fst;
@@ -113,8 +113,8 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
                 rfl;
               · simp +decide [ Fin.insertNth ];
                 simp +decide [ Fin.succAboveCases ] ; congr ; ext ; split_ifs <;> tauto;
-            · refine' Measurable.aemeasurable _;
-              refine' measurable_pi_iff.mpr _;
+            · refine Measurable.aemeasurable ?_;
+              refine measurable_pi_iff.mpr ?_;
               intro a; fin_cases a <;> simp +decide [ Fin.insertNth ] ;
               · fin_cases i <;> simp +decide [ Fin.succAboveCases ];
                 · exact measurable_fst;
@@ -128,17 +128,17 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
                 · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd;
                 · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd;
                 · exact measurable_fst;
-            · refine' Measurable.aestronglyMeasurable _;
+            · refine Measurable.aestronglyMeasurable ?_;
               exact Measurable.indicator ( hg.measurable ) ( MeasurableSet.univ_pi fun _ => measurableSet_Ioc );
           · exact measurableSet_Ioc.prod ( MeasurableSet.univ_pi fun _ => measurableSet_Ioc );
           · exact MeasurableSet.univ_pi fun _ => measurableSet_Ioc;
         erw [ h_fubini, MeasureTheory.setIntegral_prod ];
         have h_integrable : ContinuousOn (fun y : ℝ × (Fin 2 → ℝ) => g (Fin.insertNth i y.1 y.2)) (Set.Icc 0 1 ×ˢ Set.pi Set.univ (fun _ => Set.Icc 0 1)) := by
-          refine' hg.comp_continuousOn _;
-          refine' Continuous.continuousOn _;
+          refine hg.comp_continuousOn ?_;
+          refine Continuous.continuousOn ?_;
           fin_cases i <;> simp +decide [ Fin.insertNth ];
           · exact continuous_pi_iff.mpr fun i => by fin_cases i <;> [ exact continuous_fst; exact continuous_apply 0 |> Continuous.comp <| continuous_snd; exact continuous_apply 1 |> Continuous.comp <| continuous_snd ] ;
-          · refine' continuous_pi_iff.mpr _;
+          · refine continuous_pi_iff.mpr ?_;
             intro i; fin_cases i <;> simp +decide [ Fin.insertNth ] ;
             · exact continuous_apply 0 |> Continuous.comp <| continuous_snd;
             · exact continuous_fst;
@@ -180,8 +180,8 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
             have h_cont : Continuous (fun p : ℝ × (Fin 2 → ℝ) => fderiv ℝ F (i.insertNth p.1 p.2)) := by
               have h_cont : Continuous (fun p : Fin 3 → ℝ => fderiv ℝ F p) := by
                 exact hF.continuous_fderiv le_rfl;
-              refine' h_cont.comp _;
-              refine' continuous_pi_iff.mpr _;
+              refine h_cont.comp ?_;
+              refine continuous_pi_iff.mpr ?_;
               intro j; fin_cases j <;> simp +decide [ Fin.insertNth ] ;
               · fin_cases i <;> simp +decide [ Fin.succAboveCases ];
                 · exact continuous_fst;
