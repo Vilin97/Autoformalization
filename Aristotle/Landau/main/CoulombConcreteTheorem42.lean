@@ -14,11 +14,11 @@
   ∀ r, 0 < coulombKernel r. The value at 0 is irrelevant since
   landauMatrix Ψ 0 = 0 always (the projection |z|²I - zz^T vanishes at z = 0).
 
-  Hypotheses (12 total, down from 15 in ConcreteTheorem42):
+  Hypotheses (13 total, down from 15 in ConcreteTheorem42):
   - 2 physical parameters (ν > 0, ρ_ion > 0)
   - 1 strict positivity (f > 0)
   - 3 smoothness (f smooth in v and x, B smooth)
-  - 2 decay (Schwartz in v, stretched-exponential lower bound)
+  - 3 decay (Schwartz in v; stretched-exponential lower bound; polynomial score)
   - 4 equations (Vlasov, Ampère, Gauss, div B = 0)
 -/
 import Aristotle.Landau.main.CoulombSpatialTransport
@@ -39,12 +39,17 @@ namespace VML
     at r = 0 but the formalization handles this via the PSD continuity condition
     in VelocityDecayConditions (the singularity cancels in the quadratic form).
 
-    **Hypotheses** (12 total):
+    **Hypotheses** (13 total):
     - 2 physical parameters (ν > 0, ρ_ion > 0)
     - 1 strict positivity (f > 0)
     - 3 smoothness (f smooth in v and x, B smooth)
-    - 2 decay (f Schwartz in v uniform in x; at most stretched-exponential decay)
-    - 4 equations (Vlasov, Ampère, Gauss, div B = 0) -/
+    - 3 decay (Schwartz in v; stretched-exponential lower bound; polynomial score)
+    - 4 equations (Vlasov, Ampère, Gauss, div B = 0)
+
+    The polynomial score bound (hypothesis 9) says |∂ᵢf(x,v)| ≤ C(1+‖v‖)^K f(x,v),
+    equivalently |∇(log f)| grows at most polynomially. This is the same hypothesis
+    used by the smooth kernel instance (schwartzDecayConditions). It is satisfied by
+    any Maxwellian (K=1) and any steady-state solution with polynomial score growth. -/
 theorem CoulombConcreteTheorem42
     -- === Physical state at steady state ===
     (f : Torus3 → (Fin 3 → ℝ) → ℝ)
@@ -62,11 +67,14 @@ theorem CoulombConcreteTheorem42
     (hSchwartz : UniformSchwartzDecay f)         -- (7)
     (hExpDecay : ∃ (C : ℝ) (K : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
       Real.exp (-C * (1 + ‖v‖) ^ K) ≤ f x v)   -- (8)
+    -- === Polynomial score bound (same as smooth kernel's hGradBound) ===
+    (hGradBound : ∃ (Cg : ℝ) (Kg : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ) (i : Fin 3),
+      |fderiv ℝ (f x) v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f x v) -- (9)
     -- === Steady-state Vlasov equation with Coulomb kernel ===
     (hVlasov : ∀ x v,
       dotProduct v (torusGradX (fun y => f y v) x) +
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
-      ν * LandauOperator coulombKernel (f x) v)  -- (9)
+      ν * LandauOperator coulombKernel (f x) v)  -- (10)
     -- === Steady-state Maxwell equations ===
     (hAmpere : ∀ x, torusCurlX B x = fun i => ∫ v, v i * f x v)       -- (10)
     (hGauss : ∀ x, torusDivX E x = (∫ v, f x v) - ρ_ion)              -- (11)
@@ -83,7 +91,59 @@ theorem CoulombConcreteTheorem42
   have hIBP_f_dg : ∀ x i, Integrable (fun v =>
       (∫ w, mulVec (landauMatrix coulombKernel (v - w))
         (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i *
-      fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)) := by sorry
+      fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)) := by
+    obtain ⟨Cg, Kg, hCg⟩ := hGradBound
+    intro x i
+    -- Step 1: Score bound |d(log f)/dv_i| ≤ Cg(1+‖v‖)^Kg
+    -- (from chain rule: d(log∘f)/dv_i = (df/dv_i)/f, and hGradBound gives |df/dv_i| ≤ Cg(1+‖v‖)^Kg * f)
+    have h_score : ∀ v, |fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)| ≤
+        Cg * (1 + ‖v‖) ^ Kg := by
+      intro v
+      have hfv_pos := hf_pos x v
+      have hfv_ne : f x v ≠ 0 := ne_of_gt hfv_pos
+      have hf_diff : DifferentiableAt ℝ (f x) v :=
+        ((hf_smooth_v x).differentiable le_top).differentiableAt
+      rw [show Real.log ∘ f x = fun v => Real.log (f x v) from rfl,
+          fderiv.log hf_diff hfv_ne]
+      simp only [ContinuousLinearMap.smul_apply, smul_eq_mul, abs_mul,
+        abs_of_pos (inv_pos.mpr hfv_pos)]
+      rw [inv_mul_le_iff₀ hfv_pos]
+      linarith [hCg x v i]
+    -- Step 2: Flux component bound
+    -- |(∫ w, A(v-w)(f(w)∇f(v) - f(v)∇f(w)))_i| ≤ Cf * f(v) * (1+‖v‖)^Kg
+    -- (uses |A(v-w)_{ij}| ≤ ‖v-w‖⁻¹, newtonian_schwartz_uniform_bound, hGradBound)
+    have h_flux : ∃ Cf > 0, ∀ v,
+        |(∫ w, mulVec (landauMatrix coulombKernel (v - w))
+          (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i| ≤
+        Cf * f x v * (1 + ‖v‖) ^ Kg :=
+      coulomb_flux_component_bound (f x) (hf_pos x) (hf_smooth_v x)
+        (fun N k => hSchwartz.hDecay N k |>.imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩)
+        (fun v j => hCg x v j) i
+    -- Step 3: Combine → product ≤ Cf*Cg * f(v) * (1+‖v‖)^{2Kg} → integrable
+    obtain ⟨Cf, hCf_pos, hCf⟩ := h_flux
+    apply ((hSchwartz.integrable_poly_mul hf_smooth_v x (2 * Kg)).const_mul (Cf * Cg)).mono'
+    · -- Measurability: score is continuous (smooth log∘f), flux is parametric integral
+      have h_score_meas : AEStronglyMeasurable
+          (fun v => fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)) volume :=
+        ((ContDiff.log (hf_smooth_v x) (fun v => ne_of_gt (hf_pos x v))).continuous_fderiv le_top
+          |>.clm_apply continuous_const).aestronglyMeasurable
+      exact AEStronglyMeasurable.mul
+        (flux_component_aestronglyMeasurable (f x) (hf_smooth_v x)
+          (fun v => landau_flux_integrable_coulomb (f x) (hf_pos x) (hf_smooth_v x)
+            (fun N k => hSchwartz.hDecay N k |>.imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩) v) i)
+        h_score_meas
+    · filter_upwards with v
+      rw [Real.norm_eq_abs, abs_mul]
+      have hCf_nn : (0 : ℝ) ≤ Cf * f x v * (1 + ‖v‖) ^ Kg :=
+        mul_nonneg (mul_nonneg (le_of_lt hCf_pos) (le_of_lt (hf_pos x v)))
+          (pow_nonneg (by linarith [norm_nonneg v]) _)
+      calc |(∫ w, mulVec (landauMatrix coulombKernel (v - w))
+              (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i| *
+            |fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)|
+          ≤ (Cf * f x v * (1 + ‖v‖) ^ Kg) * (Cg * (1 + ‖v‖) ^ Kg) :=
+            mul_le_mul (hCf v) (h_score v) (abs_nonneg _) hCf_nn
+        _ = Cf * Cg * ((1 + ‖v‖) ^ (2 * Kg) * f x v) := by
+            rw [show 2 * Kg = Kg + Kg from by omega, pow_add]; ring
   -- Extract hFluxInt for reuse
   have hFluxInt : ∀ x v, Integrable (fun w =>
       mulVec (landauMatrix coulombKernel (v - w))

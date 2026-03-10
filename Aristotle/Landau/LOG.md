@@ -1,5 +1,24 @@
 # Log
 
+## 2026-03-10 23:30 UTC — Babysit cycle 17: h_flux closed, 5 sorry's remaining
+
+### Status
+- Closed h_flux sorry (flux component bound) in CoulombConcreteTheorem42.lean.
+- Added `coulomb_flux_component_bound` lemma (~130 lines) to CoulombFlux.lean.
+  - Combines Newtonian potential bounds with polynomial gradient bound (hGradBound).
+  - Key argument: |flux_i(v)| ≤ (∑|∂_j g(v)|) * M₀ + g(v) * M_df ≤ Cf * g(v) * (1+‖v‖)^Kg.
+- hIBP_f_dg is now fully proved (all 4 sub-parts: h_score, h_flux, measurability, combining step).
+- Fixed CoulombPSD.lean import bug (CoulombKernel → CoulombFlux).
+
+### Sorry count: 5 (down from 6)
+| Sorry | File | Status |
+|-------|------|--------|
+| hPSD_inner_int | CoulombConcreteTheorem42 | Aristotle pending |
+| hPSD_outer_int | CoulombConcreteTheorem42 | Aristotle pending |
+| hFubini_double | CoulombConcreteTheorem42 | Aristotle pending |
+| hLandauFluxDiff | CoulombConcreteTheorem42 | Blocked (needs inv_norm_sq_local_integrable) |
+| hLandauIBP_df_g | CoulombConcreteTheorem42 | Aristotle pending |
+
 ## 2026-03-10 22:00 UTC — Babysit cycle 16: Aristotle back, submitted hLandauIBP_df_g
 
 ### Status

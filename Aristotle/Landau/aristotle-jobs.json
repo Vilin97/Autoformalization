@@ -1,13 +1,6 @@
 {
   "jobs": [
     {
-      "id": "23198617-028c-48ea-aee3-41985df8903a",
-      "submission": "aristotle-in/landau_ibp_f_dg.lean",
-      "output": "aristotle-out/landau_ibp_f_dg_aristotle.lean",
-      "target": "landau_ibp_f_dg",
-      "note": ""
-    },
-    {
       "id": "a9f127b6-bd23-4b99-baff-1ebc513f2500",
       "submission": "aristotle-in/coulomb_flux_diff.lean",
       "output": "aristotle-out/coulomb_flux_diff_aristotle.lean",
@@ -44,6 +37,12 @@
     }
   ],
   "completed": [
+    {
+      "id": "23198617-028c-48ea-aee3-41985df8903a",
+      "target": "landau_ibp_f_dg",
+      "status": "proved_manually",
+      "note": "Proved manually via coulomb_flux_component_bound + hGradBound score chain rule"
+    },
     {
       "id": "21e52da7-bd45-4ed7-b96a-1221009ce610",
       "target": "landau_ibp_fg",
