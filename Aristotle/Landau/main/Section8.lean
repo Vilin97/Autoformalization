@@ -9,26 +9,6 @@ namespace VML
 -- Reference: Lemma 23
 -- ============================================================================
 
-/-- Lemma 23 (Uniform magnetic field is compatible with Maxwellian equilibrium).
-    Reference: lem:B_compatible
-
-    For any constant B∞ and any isotropic Maxwellian f∞(v) ∝ exp(-|v|²/(2T∞)):
-    (v × B∞) · ∇ᵥf∞ = 0 for all v.
-
-    Proof: ∇ᵥf∞ = -(v/T∞)f∞, so (v × B∞) · ∇ᵥf∞ ∝ (v × B∞) · v = 0
-    since v × B∞ ⊥ v. -/
-theorem B_compatible_maxwellian (B_infty : Fin 3 → ℝ) :
-    ∀ v : Fin 3 → ℝ, dotProduct (cross v B_infty) v = 0 := by
-  intro v
-  have h0 : cross v B_infty 0 = v 1 * B_infty 2 - v 2 * B_infty 1 := by
-    simp [cross]
-  have h1 : cross v B_infty 1 = v 2 * B_infty 0 - v 0 * B_infty 2 := by
-    simp [cross]
-  have h2 : cross v B_infty 2 = v 0 * B_infty 1 - v 1 * B_infty 0 := by
-    simp [cross]
-  simp only [dotProduct, Fin.sum_univ_three, h0, h1, h2]
-  ring
-
 /-- Lemma 22: Magnetic field is spatially constant.
     Reference: lem:B_constant
 

@@ -9,26 +9,6 @@ namespace VML
 -- ============================================================================
 
 -- ============================================================================
--- Lemma 1(a): A(z) is symmetric  [lem:A_symmetric]
--- ============================================================================
-
-/-- The inner Landau matrix is symmetric: B(z)ᵀ = B(z). -/
-theorem innerLandauMatrix_symmetric (z : Fin 3 → ℝ) :
-    (innerLandauMatrix z)ᵀ = innerLandauMatrix z := by
-  ext i j
-  simp only [transpose_apply, innerLandauMatrix_apply]
-  by_cases h : i = j
-  · subst h; ring
-  · have hne : j ≠ i := fun hji => h hji.symm
-    simp [h, hne, mul_comm (z i) (z j)]
-
-/-- Lemma 1(a): A(z) is symmetric. Reference: lem:A_symmetric -/
-theorem landauMatrix_symmetric (Ψ : ℝ → ℝ) (z : Fin 3 → ℝ) :
-    (landauMatrix Ψ z)ᵀ = landauMatrix Ψ z := by
-  unfold landauMatrix
-  rw [transpose_smul, innerLandauMatrix_symmetric]
-
--- ============================================================================
 -- Lemma 1(b): A(z) is even: A(-z) = A(z)  [lem:A_symmetric]
 -- ============================================================================
 

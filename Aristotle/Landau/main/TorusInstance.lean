@@ -37,10 +37,6 @@ instance : SigmaFinite (volume : Measure Torus3) := inferInstance
 /-- The quotient map ℝ³ → T³, sending each coordinate to its equivalence class. -/
 def torusMk (x : Fin 3 → ℝ) : Torus3 := fun i => QuotientAddGroup.mk (x i)
 
--- torusMk is continuous (quotient maps are continuous)
-lemma torusMk_continuous : Continuous torusMk :=
-  continuous_pi (fun i => continuous_coinduced_rng.comp (continuous_apply i))
-
 -- torusMk is surjective (every point in T³ has a preimage)
 lemma torusMk_surjective : Function.Surjective torusMk := by
   intro x
@@ -723,49 +719,6 @@ private theorem second_deriv_nonpos_at_local_max' {f : ℝ → ℝ} {x₀ : ℝ}
     (not_lt_of_ge <| hδ' <| mem_ball_iff_norm.mpr <| abs_lt.mpr
       ⟨by linarith [lt_min hε.1 hδ, min_le_left ε δ, min_le_right ε δ],
        by linarith [lt_min hε.1 hδ, min_le_left ε δ, min_le_right ε δ]⟩)
-
-/-- At a global maximum of a C² function on ℝⁿ, the Laplacian ≤ 0. -/
-private theorem laplacian_nonpos_at_max_rn {n : ℕ} (g : (Fin n → ℝ) → ℝ) (x₀ : Fin n → ℝ)
-    (hmax : ∀ x, g x ≤ g x₀)
-    (hg : ContDiff ℝ 2 g) :
-    ∑ i : Fin n, fderiv ℝ (fun y => fderiv ℝ g y (Pi.single i 1)) x₀ (Pi.single i 1) ≤ 0 := by
-  apply Finset.sum_nonpos
-  intro i _
-  let eᵢ : Fin n → ℝ := Pi.single i 1
-  let p : ℝ → Fin n → ℝ := fun t => x₀ + t • eᵢ
-  have hg_diff : Differentiable ℝ g := hg.differentiable (by norm_num)
-  have hp0 : p 0 = x₀ := by simp [p]
-  have hp_hd : ∀ t, HasDerivAt p eᵢ t := by
-    intro t
-    have h1 : HasDerivAt (fun t : ℝ => t • eᵢ) eᵢ t := by
-      have := (hasDerivAt_id t).smul_const eᵢ; simpa using this
-    simpa using (hasDerivAt_const t x₀).add h1
-  have hmax_gi : IsLocalMax (fun t => g (p t)) 0 :=
-    Filter.Eventually.mono Filter.univ_mem fun t _ => by
-      simp only [p, zero_smul, add_zero]; exact hmax _
-  have hgi_diff : ∀ t, DifferentiableAt ℝ (fun t => g (p t)) t := fun t =>
-    hg_diff.differentiableAt.comp t (hp_hd t).differentiableAt
-  have hh_c1 : ContDiff ℝ 1 (fun y => fderiv ℝ g y eᵢ) :=
-    ContDiff.clm_apply (hg.fderiv_right (by norm_num)) contDiff_const
-  have hh_diff : DifferentiableAt ℝ (fun y => fderiv ℝ g y eᵢ) x₀ :=
-    (hh_c1.differentiable le_rfl).differentiableAt
-  have hderiv_gi : ∀ t, deriv (fun t => g (p t)) t = fderiv ℝ g (p t) eᵢ := fun t =>
-    (hg_diff.differentiableAt.hasFDerivAt.comp_hasDerivAt t (hp_hd t)).deriv
-  have hchain2 : HasDerivAt (fun t => fderiv ℝ g (p t) eᵢ)
-      (fderiv ℝ (fun y => fderiv ℝ g y eᵢ) x₀ eᵢ) 0 := by
-    have h_at_p0 : HasFDerivAt (fun y => fderiv ℝ g y eᵢ)
-        (fderiv ℝ (fun y => fderiv ℝ g y eᵢ) x₀) (p 0) := by
-      rw [hp0]; exact hh_diff.hasFDerivAt
-    exact h_at_p0.comp_hasDerivAt 0 (hp_hd 0)
-  have hderiv_gi_diff : DifferentiableAt ℝ (deriv (fun t => g (p t))) 0 := by
-    rw [show deriv (fun t => g (p t)) = fun t => fderiv ℝ g (p t) eᵢ from funext hderiv_gi]
-    exact hchain2.differentiableAt
-  have h1d : deriv (deriv (fun t => g (p t))) 0 ≤ 0 :=
-    second_deriv_nonpos_at_local_max' hmax_gi
-      (Filter.Eventually.mono Filter.univ_mem (fun t _ => hgi_diff t))
-      hderiv_gi_diff
-  rw [show deriv (fun t => g (p t)) = fun t => fderiv ℝ g (p t) eᵢ from funext hderiv_gi] at h1d
-  linarith [hchain2.deriv ▸ h1d]
 
 /-- Killing equation on ℝⁿ implies each component is harmonic. -/
 private theorem killing_harmonic_rn' {n : ℕ} (b : (Fin n → ℝ) → (Fin n → ℝ))
