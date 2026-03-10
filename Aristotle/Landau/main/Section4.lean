@@ -9,34 +9,6 @@ namespace VML
 -- Reference: Lemmas 10-12, Corollary 2
 -- ============================================================================
 
-/-- Lemma 10 (Vanishing of the LHS of the entropy identity at steady state).
-    Reference: lem:lhs_vanishes
-
-    At steady state: ∬ [v · ∇ₓf + (E + v × B) · ∇ᵥf] log f dv dx = 0.
-
-    Proof: The spatial transport vanishes by periodicity on T³, the electric
-    force term by integration by parts (E independent of v), and the magnetic
-    force term because ∇ᵥ · (v × B) = 0. -/
-theorem lhs_entropy_vanishes
-    (X : Type*)
-    (spatialIntegral : (X → ℝ) → ℝ)
-    (f : X → (Fin 3 → ℝ) → ℝ)
-    (E B : X → (Fin 3 → ℝ)) (_Ψ : ℝ → ℝ) (_ν : ℝ)
-    (_hν : 0 < _ν)
-    (hf_pos : ∀ x v, 0 < f x v)
-    (_hsteady : ∀ x v, _ν * LandauOperator _Ψ (f x) v =
-      dotProduct v (vGrad (f x) v) +
-      dotProduct (E x + cross v (B x)) (vGrad (f x) v))
-    -- Hypothesis: transport integral vanishes (periodicity + IBP + div(v×B)=0)
-    (htransport : spatialIntegral (fun x => ∫ v,
-      (dotProduct v (vGrad (f x) v) +
-      dotProduct (E x + cross v (B x)) (vGrad (f x) v)) *
-      Real.log (f x v)) = 0) :
-    spatialIntegral (fun x => ∫ v, (dotProduct v (vGrad (f x) v) +
-      dotProduct (E x + cross v (B x)) (vGrad (f x) v)) *
-      Real.log (f x v)) = 0 :=
-  htransport
-
 /-- Lemma 11 (Global entropy production vanishes at steady state).
     Reference: lem:global_entropy_zero
 

@@ -9,42 +9,6 @@ namespace VML
 -- Reference: Lemma 25
 -- ============================================================================
 
-/-- Lemma 25 (Conservation of total energy).
-    Reference: lem:energy_conserved
-
-    The total energy E(t) = ∬ ½|v|²f dv dx + ½∫(|E|²+|B|²) dx
-    is conserved under VML dynamics.
-
-    Proof: Multiply Vlasov by ½|v|², integrate. Collision term vanishes
-    (|v|² is a collisional invariant). Transport integrates to zero by
-    periodicity. Lorentz force gives d/dt(KE) = ∫ J·E. Maxwell gives
-    d/dt(½∫(|E|²+|B|²)) = -∫ J·E. Sum gives dE/dt = 0. -/
-theorem energy_conserved
-    (totalEnergy : ℝ → ℝ) (a b c : ℝ)
-    (_hE_def : ∀ t, totalEnergy t = a + b + c) :
-    ∀ t₁ t₂, totalEnergy t₁ = totalEnergy t₂ :=
-  vml_energy_conservation a b c totalEnergy _hE_def
-
-/-- Lemma 24 (Conservation of spatial mean of B).
-    Reference: lem:B_mean_conserved
-
-    Under Faraday's law ∂_t B = -∇ₓ × E on the periodic domain T³:
-    d/dt ∫_{T³} B(t,x) dx = 0.
-
-    Proof: d/dt ∫ B dx = -∫ ∇×E dx = 0 by Stokes' theorem on T³. -/
-theorem B_mean_conserved
-    (X : Type*)
-    (spatialIntegral : (X → ℝ) → ℝ)
-    (B : ℝ → X → (Fin 3 → ℝ))
-    -- Leibniz rule axiom
-    (hLeibniz : ∀ (g : ℝ → X → ℝ) (t : ℝ),
-      deriv (fun t' => spatialIntegral (fun x => g t' x)) t =
-      spatialIntegral (fun x => deriv (fun t' => g t' x) t))
-    -- Component-wise: ∫ ∂_t B_i = 0 (from Faraday + Stokes)
-    (hComponent : ∀ t i, spatialIntegral (fun x => deriv (fun t' => B t' x i) t) = 0) :
-    ∀ t i, deriv (fun t' => spatialIntegral (fun x => B t' x i)) t = 0 :=
-  B_mean_conserved_from_axioms X spatialIntegral B hLeibniz hComponent
-
 /-- Lemma 26: B∞ is determined as the spatial mean.
     Reference: lem:B_infty -/
 theorem B_infty_determination {X : Type*} [FlatTorus3 X] (ss : VMLSteadyState X) (B₀ : Fin 3 → ℝ)
