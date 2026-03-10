@@ -82,22 +82,11 @@ lemma innerLandauMatrix_apply (z : Fin 3 → ℝ) (i j : Fin 3) :
 -- Section 3: Maxwellian Distributions
 -- ============================================================================
 
-/-- A function f : ℝ³ → ℝ has log-quadratic form if log f is an affine-quadratic
-    polynomial in v. This is the characterization of Maxwellians.
-    Specifically: ∃ a₀ b c₀, f(v) = exp(a₀ + b · v + c₀ |v|²) -/
-def IsLogQuadratic (f : (Fin 3 → ℝ) → ℝ) : Prop :=
-  ∃ (a₀ : ℝ) (b : Fin 3 → ℝ) (c₀ : ℝ),
-    ∀ v, f v = Real.exp (a₀ + dotProduct b v + c₀ * normSq v)
-
-/-- A Maxwellian distribution: log-quadratic with c₀ < 0 (ensuring integrability). -/
+/-- A Maxwellian distribution: log-quadratic with c₀ < 0 (ensuring integrability).
+    Specifically: ∃ a₀ b c₀, c₀ < 0 ∧ f(v) = exp(a₀ + b · v + c₀ |v|²) -/
 def IsMaxwellian (f : (Fin 3 → ℝ) → ℝ) : Prop :=
   ∃ (a₀ : ℝ) (b : Fin 3 → ℝ) (c₀ : ℝ),
     c₀ < 0 ∧ ∀ v, f v = Real.exp (a₀ + dotProduct b v + c₀ * normSq v)
-
-lemma IsMaxwellian.isLogQuadratic {f : (Fin 3 → ℝ) → ℝ} (hf : IsMaxwellian f) :
-    IsLogQuadratic f := by
-  obtain ⟨a₀, b, c₀, _, hv⟩ := hf
-  exact ⟨a₀, b, c₀, hv⟩
 
 /-- The equilibrium Maxwellian (zero drift, density = ρ_ion):
     f∞(v) = ρ_ion/(2πT∞)^(3/2) · exp(-|v|²/(2T∞)) -/
@@ -527,12 +516,6 @@ lemma hLaplacianMinNonneg (φ : X → ℝ) (hφ : IsSpatiallyDiff φ) (x₀ : X)
     conv_lhs => rw [hg]
     exact hDivLinear (-1) (gradX φ) x₀
   linarith
-
-/-- Closure under subtraction (derived from hDiff_add + hDiff_smul with c = -1). -/
-lemma hDiff_sub (f g : X → ℝ) (hf : IsSpatiallyDiff f) (hg : IsSpatiallyDiff g) :
-    IsSpatiallyDiff (fun x => f x - g x) := by
-  have : (fun x => f x - g x) = (fun x => f x + (-1) * g x) := funext (fun x => by ring)
-  rw [this]; exact hDiff_add _ _ hf (hDiff_smul (-1) _ hg)
 
 /-- Maxwellian regularity: if f(x,v) = exp(a(x) + b(x)·v + c(x)|v|²) with f > 0 and
     f(·,v) spatially differentiable for each v, then a, bⱼ, c are spatially differentiable.
