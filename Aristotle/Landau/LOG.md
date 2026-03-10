@@ -1,5 +1,25 @@
 # Log
 
+## 2026-03-11 06:00 UTC — Babysit cycle 21: Decomposed sorry's, proved schwartz_fderiv_component_schwartz
+
+### Status
+- Decomposed `coulomb_flux_differentiable` and `coulomb_flux_deriv_schwartz_decay` into clean sub-lemma structure:
+  - Added `coulomb_entry_conv_differentiable` (sorry'd) — convolution of Coulomb entry with Schwartz function is differentiable.
+  - Added `coulomb_entry_conv_deriv_decay` (sorry'd) — derivative of such convolution has Schwartz decay.
+  - These are the "hard analysis" sub-lemmas; the original 2 sorry's now reduce to these + routine algebra (product/sum rules).
+- Proved `schwartz_fderiv_component_schwartz`: ∂_j f is Schwartz given f is Schwartz.
+  - Uses `ContinuousLinearMap.iteratedFDeriv_comp_left` + `norm_iteratedFDeriv_fderiv`.
+  - Extracted as standalone lemma (was duplicated inline in both flux lemmas).
+- Aristotle jobs still running: `landau_ibp_df_g` (97da955d), `coulomb_conv_diff` (b419ae41).
+
+### Sorry count: 4 (was 2, but structurally better)
+| Sorry | File | Status |
+|-------|------|--------|
+| coulomb_entry_conv_differentiable | CoulombPSD:757 | Core sub-lemma; matches Aristotle submission |
+| coulomb_entry_conv_deriv_decay | CoulombPSD:768 | Core sub-lemma; needs Aristotle submission |
+| coulomb_flux_differentiable (combination) | CoulombPSD:798 | Routine: apply product/sum rules to K_{ij}, L_{ij} |
+| coulomb_flux_deriv_schwartz_decay (combination) | CoulombPSD:823 | Routine: Schwartz decay of product/sum |
+
 ## 2026-03-11 05:00 UTC — Babysit cycle 20: Decomposition analysis, Aristotle submission
 
 ### Status

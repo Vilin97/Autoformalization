@@ -714,15 +714,65 @@ lemma fubini_double_integrable_coulomb
     exact (h_poly_int.const_mul C_out).mono' h_norm_meas (ae_of_all _ fun v => by
       exact le_trans (h_int_bound v) (le_of_eq rfl))
 
+/-- Partial derivatives of a Schwartz function are Schwartz. Uses
+    `ContinuousLinearMap.iteratedFDeriv_comp_left` + `norm_iteratedFDeriv_fderiv`. -/
+lemma schwartz_fderiv_component_schwartz
+    (f : (Fin 3 → ℝ) → ℝ) (hf_smooth : ContDiff ℝ ⊤ f)
+    (hf_schwartz : ∀ N k, ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
+    (j : Fin 3) (N k : ℕ) :
+    ∃ C > 0, ∀ v : Fin 3 → ℝ,
+      ‖iteratedFDeriv ℝ k (fun w => fderiv ℝ f w (Pi.single j 1)) v‖ *
+        (1 + ‖v‖) ^ N ≤ C := by
+  obtain ⟨C, hC_pos, hC⟩ := hf_schwartz N (k + 1)
+  refine ⟨C, hC_pos, fun v => ?_⟩
+  have h1 : (fun w => fderiv ℝ f w (Pi.single j 1)) =
+      (ContinuousLinearMap.apply ℝ ℝ (Pi.single j 1 : Fin 3 → ℝ)) ∘ (fderiv ℝ f) := rfl
+  rw [h1, ContinuousLinearMap.iteratedFDeriv_comp_left _
+    (hf_smooth.fderiv_right le_top).contDiffAt le_top]
+  have h_norm_eval : ‖(ContinuousLinearMap.apply ℝ ℝ (Pi.single j 1 : Fin 3 → ℝ))‖ ≤ 1 := by
+    apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
+    intro L
+    simp only [ContinuousLinearMap.apply_apply]
+    exact le_trans (L.le_opNorm _) (by simp [Pi.norm_single])
+  calc ‖(ContinuousLinearMap.apply ℝ ℝ (Pi.single j 1 : Fin 3 → ℝ)).compContinuousMultilinearMap
+        (iteratedFDeriv ℝ k (fderiv ℝ f) v)‖ * (1 + ‖v‖) ^ N
+      ≤ ‖ContinuousLinearMap.apply ℝ ℝ (Pi.single j 1 : Fin 3 → ℝ)‖ *
+        ‖iteratedFDeriv ℝ k (fderiv ℝ f) v‖ * (1 + ‖v‖) ^ N := by
+          gcongr; exact ContinuousLinearMap.norm_compContinuousMultilinearMap_le _ _
+    _ ≤ 1 * ‖iteratedFDeriv ℝ k (fderiv ℝ f) v‖ * (1 + ‖v‖) ^ N := by gcongr
+    _ = ‖iteratedFDeriv ℝ (k + 1) f v‖ * (1 + ‖v‖) ^ N := by
+          rw [one_mul, norm_iteratedFDeriv_fderiv]
+    _ ≤ C := hC v
+
+/-- Convolution of a Coulomb kernel matrix entry with a Schwartz function is differentiable.
+    After substituting u = v - w, the kernel A(u) doesn't depend on v, so differentiation
+    under the integral sign applies via hasFDerivAt_integral_of_dominated_of_fderiv_le:
+    the v-derivative acts only on g(v-u), giving a bound
+    |A(u)_{ij}| * ‖fderiv g(v-u)‖ ≤ ‖u‖⁻¹ * C/(1+‖u‖)^4 which is integrable in ℝ³. -/
+lemma coulomb_entry_conv_differentiable
+    (g : (Fin 3 → ℝ) → ℝ) (hg_smooth : ContDiff ℝ ⊤ g)
+    (hg_schwartz : ∀ N k, ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k g v‖ * (1 + ‖v‖) ^ N ≤ C)
+    (i j : Fin 3) :
+    Differentiable ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * g w) := by
+  sorry
+
+/-- The derivative of a Coulomb entry convolution with a Schwartz function has Schwartz decay.
+    Since |A(u)_{ij}| ≤ ‖u‖⁻¹ and derivatives of g decay faster than any polynomial,
+    the derivative ∫ A(u)_{ij} * fderiv(g)(v-u) du decays faster than any polynomial in v. -/
+lemma coulomb_entry_conv_deriv_decay
+    (g : (Fin 3 → ℝ) → ℝ) (hg_smooth : ContDiff ℝ ⊤ g)
+    (hg_schwartz : ∀ N k, ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k g v‖ * (1 + ‖v‖) ^ N ≤ C)
+    (i j : Fin 3) (N : ℕ) :
+    ∃ C > 0, ∀ v, ‖fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * g w) v‖ *
+      (1 + ‖v‖) ^ N ≤ C := by
+  sorry
+
 /-- The Coulomb flux component v ↦ (∫_w A(v-w)·[f(w)∇f(v)-f(v)∇f(w)])_i is differentiable.
 
     Proof strategy: Decompose the flux as
       flux_i(v) = Σ_j (∂_j f)(v) * K_{ij}(v) - f(v) * Σ_j L_{ij}(v)
     where K_{ij}(v) = ∫ A_{ij}(v-w) f(w) dw and L_{ij}(v) = ∫ A_{ij}(v-w) (∂_j f)(w) dw.
-    After substituting u = v - w, the kernel A(u) doesn't depend on v, so differentiation
-    under the integral sign applies via hasFDerivAt_integral_of_dominated_of_fderiv_le:
-    the v-derivative passes to the Schwartz factor g(v-u), giving a bound
-    |A(u)_{ij}| * ‖fderiv g(v-u)‖ ≤ ‖u‖⁻¹ * C/(1+‖u‖)^4 which is integrable in ℝ³.
+    Each K_{ij} and L_{ij} is differentiable by coulomb_entry_conv_differentiable.
     Then flux_i is differentiable by product/sum rules. -/
 lemma coulomb_flux_differentiable
     (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
@@ -731,11 +781,25 @@ lemma coulomb_flux_differentiable
     Differentiable ℝ (fun v =>
       (∫ w, mulVec (landauMatrix coulombKernel (v - w))
         (f w • vGrad f v - f v • vGrad f w)) i) := by
+  -- K_{ij}(v) = ∫ A_{ij}(v-w) f(w) dw is differentiable
+  have hK_diff : ∀ j, Differentiable ℝ
+      (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * f w) :=
+    fun j => coulomb_entry_conv_differentiable f hf_smooth hf_schwartz i j
+  -- ∂_j f is Schwartz
+  have hdf_schwartz := fun j => schwartz_fderiv_component_schwartz f hf_smooth hf_schwartz j
+  -- L_{ij}(v) = ∫ A_{ij}(v-w) (∂_j f)(w) dw is differentiable
+  have hL_diff : ∀ j, Differentiable ℝ
+      (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j *
+        fderiv ℝ f w (Pi.single j 1)) :=
+    fun j => coulomb_entry_conv_differentiable _ (hf_smooth.fderiv_right le_top |>.clm_apply
+      contDiff_const) (hdf_schwartz j) i j
+  -- The flux decomposes as Σ_j [∂_j f(v) * K_{ij}(v) - f(v) * L_{ij}(v)]
+  -- which is differentiable by product/sum rules
   sorry
 
 /-- The derivative of the Coulomb flux component has Schwartz-class decay.
-    Since the flux is a convolution of ‖z‖⁻¹-type kernels with Schwartz functions,
-    its derivatives inherit Schwartz decay. -/
+    Since the flux decomposes into convolutions of Coulomb entries with Schwartz functions,
+    its derivatives inherit Schwartz decay via coulomb_entry_conv_deriv_decay. -/
 lemma coulomb_flux_deriv_schwartz_decay
     (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
     (hf_schwartz : ∀ N k, ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
@@ -743,6 +807,19 @@ lemma coulomb_flux_deriv_schwartz_decay
     ∃ C > 0, ∀ v, ‖fderiv ℝ (fun v =>
       (∫ w, mulVec (landauMatrix coulombKernel (v - w))
         (f w • vGrad f v - f v • vGrad f w)) i) v‖ * (1 + ‖v‖) ^ N ≤ C := by
+  -- Each convolution K_{ij}, L_{ij} has Schwartz derivative decay
+  have hK_decay : ∀ j N, ∃ C > 0, ∀ v,
+      ‖fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * f w) v‖ *
+        (1 + ‖v‖) ^ N ≤ C :=
+    fun j N => coulomb_entry_conv_deriv_decay f hf_smooth hf_schwartz i j N
+  -- ∂_j f is Schwartz
+  have hdf_schwartz := fun j => schwartz_fderiv_component_schwartz f hf_smooth hf_schwartz j
+  have hL_decay : ∀ j N, ∃ C > 0, ∀ v,
+      ‖fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j *
+        fderiv ℝ f w (Pi.single j 1)) v‖ * (1 + ‖v‖) ^ N ≤ C :=
+    fun j N => coulomb_entry_conv_deriv_decay _ (hf_smooth.fderiv_right le_top |>.clm_apply
+      contDiff_const) (hdf_schwartz j) i j N
+  -- The flux derivative decomposes via product/sum rules, each factor has Schwartz decay
   sorry
 
 /-- The product fderiv(flux_i)(v) * log(f(v)) is integrable for the Coulomb kernel.
