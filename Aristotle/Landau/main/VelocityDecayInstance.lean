@@ -4,7 +4,6 @@
   Contains:
   - landau_flux_component_diff_with_bound (differentiability + bound for flux component)
   - schwartzDecayConditions (all 18 VelocityDecayConditions fields for Schwartz φ)
-  - schwartzDecayConditionsEB (extends with E, B force transport conditions)
 
   Split from VelocityDecayInstance.lean (cycle 41) for maintainability.
 -/
@@ -936,66 +935,5 @@ lemma force_ibp_fg_integrable
   · exact Filter.Eventually.of_forall hP
 
 /-- VelocityDecayConditions for Schwartz-class φ with nonzero constant fields E₀, B₀.
-
-    This instance demonstrates satisfiability of the velocity decay hypotheses in the
-    physically relevant case with nonzero electromagnetic fields. All collision/spatial
-    conditions are reused from `schwartzDecayConditions` (they don't depend on E, B).
-    The three force conditions use the Lorentz bound |(E₀ + v×B₀)ᵢ| ≤ C·(1+‖v‖)
-    combined with Schwartz decay to establish integrability.
-
-    Addresses Issue #2 from the adversarial critique: with this instance, the
-    VelocityDecayConditions are satisfiable for nonzero E₀, B₀.
-    All 18 fields fully proved (0 sorry's). -/
-def schwartzDecayConditionsEB {X : Type*} [FlatTorus3 X]
-    (Ψ : ℝ → ℝ) (hΨ : ∃ CΨ, ∀ r, |Ψ r| ≤ CΨ) (hΨ_cts : Continuous Ψ)
-    (hΨ_diff : ContDiff ℝ 1 Ψ) (hΨ'_bound : ∃ CΨ', ∀ r, |deriv Ψ r| ≤ CΨ')
-    (φ : (Fin 3 → ℝ) → ℝ)
-    (hφ_pos : ∀ v, 0 < φ v)
-    (hφ_smooth : ContDiff ℝ ⊤ φ)
-    (hφ_decay : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
-    (hφ_deriv_decay : ∀ (k : ℕ) (i : Fin 3),
-      Integrable (fun v => ‖v‖ ^ k * |fderiv ℝ φ v (Pi.single i 1)|))
-    (hφ_deriv2_bound : ∃ C₂ K₂, ∀ v (j : Fin 3),
-      ‖fderiv ℝ (fun v' => fderiv ℝ φ v' (Pi.single j 1)) v‖ ≤ C₂ * (1 + ‖v‖) ^ K₂ * φ v)
-    (hGradBound : ∃ C K, ∀ v i,
-      |fderiv ℝ φ v (Pi.single i 1)| ≤ C * (1 + ‖v‖) ^ K * φ v)
-    (hLogBound : ∃ C K, ∀ v, |Real.log (φ v)| ≤ C * (1 + ‖v‖) ^ K)
-    (E₀ B₀ : Fin 3 → ℝ) :
-    VelocityDecayConditions (X := X) Ψ (fun _ => φ) (fun _ => E₀) (fun _ => B₀) :=
-  -- Reuse all collision/spatial fields from the zero-field instance (they don't depend on E, B)
-  let base := schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-    hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound
-  { hPSD_inner_int := base.hPSD_inner_int
-    hPSD_outer_int := base.hPSD_outer_int
-    hFubini_double := base.hFubini_double
-    hFubini_inner := base.hFubini_inner
-    hFubini_outer := base.hFubini_outer
-    hLandauFluxDiff := base.hLandauFluxDiff
-    hLandauIBP_df_g := base.hLandauIBP_df_g
-    hLandauIBP_f_dg := base.hLandauIBP_f_dg
-    hLandauIBP_fg := base.hLandauIBP_fg
-    hLandauFluxInt := base.hLandauFluxInt
-    hSpatialTransport_int := base.hSpatialTransport_int
-    hSpatialTransport_joint := base.hSpatialTransport_joint
-    hSpatTransComp := base.hSpatTransComp
-    hf_velocity_dominated := base.hf_velocity_dominated
-    hPSD_cont := base.hPSD_cont
-    hD_cont := base.hD_cont
-    -- Force conditions: |(E₀ + v×B₀)ᵢ| ≤ C·(1+‖v‖) × Schwartz decay = integrable
-    hForceTransport_int := fun _ =>
-      force_transport_integrable E₀ B₀ φ hφ_pos hφ_smooth hφ_decay
-        (lorentz_component_bound E₀ B₀) hGradBound hLogBound
-    hForceIBP_f_dg := by
-      intro x i
-      have hrewrite : (fun v => (E₀ + cross v B₀) i *
-          fderiv ℝ (fun w => φ w * Real.log (φ w) - φ w) v (Pi.single i 1)) =
-        fun v => (E₀ + cross v B₀) i * (Real.log (φ v) * fderiv ℝ φ v (Pi.single i 1)) := by
-        ext v; congr 1; exact fderiv_entropy_density_eq φ hφ_smooth hφ_pos v i
-      rw [hrewrite]
-      exact force_ibp_f_dg_integrable E₀ B₀ i φ hφ_pos hφ_smooth hφ_decay
-        (lorentz_component_bound E₀ B₀) hGradBound hLogBound
-    hForceIBP_fg := fun _ i =>
-      force_ibp_fg_integrable E₀ B₀ i φ hφ_pos hφ_smooth hφ_decay
-        (lorentz_component_bound E₀ B₀) hLogBound }
 
 end VML

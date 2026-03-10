@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 50: Delete Section9.lean, remove schwartzDecayConditionsEB, doc fixes
+
+### Changes
+- **Section9.lean:** Deleted empty file (12 lines of boilerplate, no content). Removed import from VMLInputDerive.lean.
+- **VelocityDecayInstance.lean:** Removed dead `schwartzDecayConditionsEB` (~60 lines). Updated file header.
+- **Defs.lean:** Clarified VMLSteadyState docstring — now explicitly states it is an intermediate bundle of DERIVED facts, not input assumptions.
+- **CoulombConcreteTheorem42.lean:** Updated docstring to document hGradBound non-minimality prominently ("13 total, 12 independent + 1 likely derivable").
+- All builds pass. 0 sorry's. Now 23 files.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 49: Remove 24 dead declarations across 10 files (~265 lines)
 
 ### Changes
