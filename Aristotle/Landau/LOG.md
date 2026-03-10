@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 55: Reduce heartbeats, fix MEMORY.md drift
+
+### Changes
+- **CoulombPSD.lean:** Removed `maxHeartbeats 800000` from `landau_bound` (works at default 400000). Heartbeat override count: 30 → 29.
+- **MEMORY.md:** Updated line counts for CoulombFlux (~608→~616), CoulombPSD (~713→~716), LandauMatrixDerivBound (~412→~415).
+- All builds pass. 0 sorry's. 22 files.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 54: Add bridging lemmas for primed definitions
 
 ### Changes
