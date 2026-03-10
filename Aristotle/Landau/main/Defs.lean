@@ -107,7 +107,7 @@ lemma equilibriumMaxwellian_T_unique (ρ T₁ T₂ : ℝ) (hρ : 0 < ρ) (hT₁ 
   -- rpow injectivity: 2πT₁ = 2πT₂, hence T₁ = T₂
   have h_base := Real.rpow_left_injOn (by norm_num : (3 : ℝ) / 2 ≠ 0)
     (Set.mem_Ici.mpr (le_of_lt hπT₁)) (Set.mem_Ici.mpr (le_of_lt hπT₂)) h_eq
-  linarith
+  nlinarith [Real.pi_pos]
 
 -- ============================================================================
 -- Section 3b: Velocity Calculus
