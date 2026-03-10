@@ -41,4 +41,4 @@ For EACH of the following, either find a real problem or explicitly state "I fou
 
 Write as if you are a referee who has been asked "should this paper be accepted?" and your default answer is NO. The formalization must earn your approval through evidence, not through charity.
 
-Do NOT write a "summary" section that softens the critique. End with a verdict: ACCEPT, CONDITIONAL ACCEPT, REVISE, or REJECT, with specific conditions for each open issue.
+Do NOT write a "summary" section that softens the critique. End with a verdict: ACCEPT, CONDITIONAL ACCEPT, REVISE, or REJECT, with specific conditions for each open issue. The acceptance condition is that **all** flagged issues are fixed.

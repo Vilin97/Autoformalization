@@ -541,15 +541,15 @@ lemma maxwellian_landau_flux_zero (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
     rw [show f = _ from funext hf]; intro v; ext i; rw [fderiv_exp]; norm_num [dotProduct, Fin.sum_univ_three]; ring
     · unfold VML.normSq; norm_num [Fin.sum_univ_three, dotProduct]; ring
       erw [HasFDerivAt.fderiv (HasFDerivAt.add (HasFDerivAt.add (HasFDerivAt.add (HasFDerivAt.add (HasFDerivAt.add (HasFDerivAt.add (hasFDerivAt_const _ _) (HasFDerivAt.mul (hasFDerivAt_const _ _) (hasFDerivAt_apply _ _))) (HasFDerivAt.mul (hasFDerivAt_apply _ _ |> HasFDerivAt.pow <| 2) (hasFDerivAt_const _ _))) (HasFDerivAt.mul (hasFDerivAt_const _ _) (hasFDerivAt_apply _ _))) (HasFDerivAt.mul (hasFDerivAt_apply _ _ |> HasFDerivAt.pow <| 2) (hasFDerivAt_const _ _))) (HasFDerivAt.mul (hasFDerivAt_const _ _) (hasFDerivAt_apply _ _))) (HasFDerivAt.mul (hasFDerivAt_apply _ _ |> HasFDerivAt.pow <| 2) (hasFDerivAt_const _ _)))]; norm_num; ring; fin_cases i <;> norm_num <;> ring!
-      · simp +decide [Pi.single_apply]
-      · simp +decide [Pi.single_apply]
-      · simp +decide [Pi.single_apply]
+      · simp +decide
+      · simp +decide
+      · simp +decide
     · apply_rules [DifferentiableAt.add, DifferentiableAt.mul, differentiableAt_id, differentiableAt_const]
       all_goals apply_rules [differentiableAt_pi.1, differentiableAt_id]
   intros v w
   simp [h_grad]
   convert congr_arg (fun x : Fin 3 → ℝ => f w • f v • c₀ • (2 : ℝ) • x) (landauMatrix_mulVec_self Ψ (v - w)) using 1; ext; norm_num; ring!
-  · simp +decide [mul_assoc, mul_comm, mul_left_comm, Finset.mul_sum _ _ _, Finset.sum_add_distrib, Matrix.mulVec, dotProduct]; ring!
+  · simp +decide [mul_assoc, mul_comm, mul_left_comm, Finset.mul_sum _ _ _, Matrix.mulVec, dotProduct]; ring!
   · norm_num [Algebra.smul_def]
 
 /-- Gap 11: D(f) = 0 implies f is a Maxwellian.
@@ -603,8 +603,8 @@ lemma cubic_coeff_zero (a : Fin 3 → ℝ) (h : ∀ v, dotProduct v a * normSq v
     a = 0 := by
   -- Proved by Aristotle (Harmonic)
   ext j; by_contra h_a_nonzero; specialize h (Pi.single j 1)
-  simp_all +decide [mul_assoc, Fin.sum_univ_three, dotProduct]
-  fin_cases j <;> simp_all +decide [Fin.sum_univ_three, VML.normSq]
+  simp_all +decide [Fin.sum_univ_three, dotProduct]
+  fin_cases j <;> simp_all +decide [VML.normSq]
 
 /-- Gap 15: Maximum principle for the Poisson–Boltzmann equation on T³.
     If T∞ Δ(log n) = n - ρ_ion with T∞ > 0 and n > 0, then n ≡ ρ_ion.
@@ -615,7 +615,7 @@ lemma poisson_boltzmann_max_principle
     (X : Type*) [Nonempty X]
     (n : X → ℝ) (ρ_ion T_infty : ℝ)
     (laplacian : (X → ℝ) → X → ℝ)
-    (hn_pos : ∀ x, 0 < n x) (hT : 0 < T_infty) (hρ : 0 < ρ_ion)
+    (_hn_pos : ∀ x, 0 < n x) (hT : 0 < T_infty) (_hρ : 0 < ρ_ion)
     -- PB equation: T∞ Δ(log n) = n - ρ_ion
     (hPB : ∀ x, T_infty * laplacian (Real.log ∘ n) x = n x - ρ_ion)
     -- Maximum principle: n attains its max and min (compactness)
