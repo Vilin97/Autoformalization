@@ -1,38 +1,40 @@
-# Plan — Cycle 63
+# Plan — Cycle 64
 
 ## Status summary
 
 - **Sorry count**: 0
-- **Files**: 21 files, 7,895 lines
+- **Files**: 22 files, 7,838 lines
 - **Heartbeat overrides**: 1 (`synthInstance.maxHeartbeats 160000`)
-- **Linter warnings**: CLEAN (no unused simp/vars/refine'). Only cosmetic: long lines, multiGoal.
-- **Critique verdict**: CONDITIONAL ACCEPT (no blocking conditions)
+- **Deprecated `refine'`**: 36 uses across 5 files
+- **Critique verdict**: CONDITIONAL ACCEPT
 
 ## Active multi-cycle strategies
 
-### C^∞ → C^k weakening (audited cycle 62, not yet started)
-C³ velocity + C¹ spatial suffices. ~80 occurrences across 15 files. Implementation strategy: start with velocity regularity in the abstract chain, leave spatial for later.
-
-### Split TorusInstance.lean (not yet started)
-1,162 lines. Extract Torus3 type definition + basic infrastructure into separate file.
+### C^∞ → C^k weakening
+Velocity smoothness weakened to C³ in cycle 63 (DONE). Spatial smoothness still C^∞ — C¹ suffices but requires changing `IsSpatiallyDiff` in the `FlatTorus3` typeclass. Deferred to backlog.
 
 ## This cycle's work items
 
-### 1. Split TorusInstance.lean (`/simplify`)
-- **Why**: Critique #6. Largest file at 1,162 lines, nearly 2x the next largest.
-- **Approach**: Extract the `Torus3` type definition, `periodicLift`, `torusGradX`/`torusDivX`/`torusCurlX` operators, and basic lemmas into `TorusDefs.lean`. Keep the FlatTorus3 instance proofs in `TorusInstance.lean`.
-- **Files**: `Aristotle/Landau/main/TorusInstance.lean` → split into `TorusDefs.lean` + `TorusInstance.lean`
+### 1. Replace 36 deprecated `refine'` with `refine` (`/simplify`)
+- **Why**: Critique #16. `refine'` is deprecated in Lean 4. 36 uses across 5 files.
+- **Files**: CoulombPSD.lean (13), TorusInstance.lean (10), NewtonianPotential.lean (8), Section3Helpers.lean (4), SchwartzDecayDefs.lean (1)
+- **Approach**: Mechanical replacement. `refine'` → `refine` with `?_` placeholders where needed.
 
-### 2. Begin C^∞ → C³ for velocity (`/strengthen`)
-- **Why**: Critique #9. The smoothness audit identifies C³ as sufficient for velocity.
-- **Approach**: Start with the abstract chain. Change `hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x)` to `ContDiff ℝ 3` in Theorem42 and VMLSteadyState, then fix downstream breakage.
-- **Risk**: High — may cascade through many files. If it gets stuck, document findings and revert.
+### 2. Fix MEMORY.md (`/simplify`)
+- **Why**: Critique #19. Says 21 files — now 22.
+- **Approach**: Update file count and line counts.
+
+### 3. Strengthen: make progress on one epistemic/generalization issue (`/strengthen`)
+- **Why**: Critique conditions require progress on #6, #8, or #21.
+- **Options (pick one)**:
+  - Split Defs.lean (776 lines) — extract VMLInput/VMLSteadyState structures into separate file
+  - Begin spatial smoothness weakening (C^∞ → C¹) — requires typeclass change, high risk
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
-| #6: 4 remaining files over 600 lines | Code quality | After TorusInstance split |
+| #6: 6 files over 600 lines | Code quality | TorusInstance 816, Defs 776, CoulombPSD 703 |
 | #8: No non-equilibrium VDC instance | Epistemic | Hard |
-| #9: C^∞ → C^k full implementation | Epistemic | Multi-cycle |
 | #18: multiGoal violations, long lines | Cosmetic | Low priority |
+| #21: C^∞ spatial smoothness overkill | Epistemic | Requires typeclass change |

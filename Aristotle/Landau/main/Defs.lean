@@ -109,6 +109,15 @@ lemma equilibriumMaxwellian_T_unique (ρ T₁ T₂ : ℝ) (hρ : 0 < ρ) (hT₁ 
     (Set.mem_Ici.mpr (le_of_lt hπT₁)) (Set.mem_Ici.mpr (le_of_lt hπT₂)) h_eq
   nlinarith [Real.pi_pos]
 
+/-- The equilibrium Maxwellian is strictly positive for ρ > 0, T > 0. -/
+lemma equilibriumMaxwellian_pos (ρ T : ℝ) (hρ : 0 < ρ) (hT : 0 < T) (v : Fin 3 → ℝ) :
+    0 < equilibriumMaxwellian ρ T v := by
+  unfold equilibriumMaxwellian
+  apply mul_pos
+  · apply div_pos hρ
+    exact Real.rpow_pos (by positivity)
+  · exact Real.exp_pos _
+
 -- ============================================================================
 -- Section 3b: Velocity Calculus
 -- ============================================================================
