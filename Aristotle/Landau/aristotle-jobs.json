@@ -24,6 +24,13 @@
       "output": "aristotle-out/landau_ibp_df_g_aristotle.lean",
       "target": "landau_ibp_df_g",
       "note": ""
+    },
+    {
+      "id": "b419ae41-85e5-4a04-a68d-0a7a4960d351",
+      "submission": "aristotle-in/coulomb_conv_diff.lean",
+      "output": "aristotle-out/coulomb_conv_diff_aristotle.lean",
+      "target": "coulomb_conv_diff",
+      "note": ""
     }
   ],
   "completed": [

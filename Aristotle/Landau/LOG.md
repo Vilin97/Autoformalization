@@ -1,5 +1,21 @@
 # Log
 
+## 2026-03-11 05:00 UTC — Babysit cycle 20: Decomposition analysis, Aristotle submission
+
+### Status
+- Analyzed proof strategy for remaining 2 sorry's (coulomb_flux_differentiable, coulomb_flux_deriv_schwartz_decay).
+- Key insight: after substitution u = v-w, the Coulomb kernel A(u) doesn't depend on v, so hasFDerivAt_integral_of_dominated_of_fderiv_le applies with dominator ‖u‖⁻¹ * C/(1+‖u‖)^4 (integrable in ℝ³).
+- Decomposition: flux_i = Σ_j (∂_j f) * (A_{ij} * f) - f * Σ_j (A_{ij} * ∂_j f), differentiable by product/sum rules.
+- Submitted `coulomb_conv_diff` to Aristotle (job b419ae41) — cleaner sub-lemma for convolution differentiability.
+- Updated docstrings with proof strategy.
+- `landau_ibp_df_g` Aristotle job still running.
+
+### Sorry count: 2 (unchanged)
+| Sorry | File | Status |
+|-------|------|--------|
+| coulomb_flux_differentiable | CoulombPSD | Proof strategy documented; Aristotle sub-lemma submitted |
+| coulomb_flux_deriv_schwartz_decay | CoulombPSD | Follows same strategy as above |
+
 ## 2026-03-11 04:00 UTC — Babysit cycle 19: Fubini+IBP closed, 2 sorry's remaining
 
 ### Status
