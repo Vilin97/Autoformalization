@@ -83,4 +83,36 @@ lemma UniformSchwartzDecay.integrable_poly_mul {f : Torus3 → (Fin 3 → ℝ) �
     _ ≤ C := hb
 
 
+/-- If ‖v‖^k * |φ(v)| is integrable for every k, then (1+‖v‖)^K * |φ(v)| is too.
+    Uses the binomial theorem to expand (1+‖v‖)^K as a finite sum. -/
+lemma integrable_one_add_norm_pow_mul
+    {φ : (Fin 3 → ℝ) → ℝ}
+    (hφ : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
+    (K : ℕ) :
+    Integrable (fun v => (1 + ‖v‖) ^ K * |φ v|) := by
+  have h_binom : ∀ v : (Fin 3 → ℝ), (1 + ‖v‖) ^ K * |φ v| =
+      ∑ k ∈ Finset.range (K + 1), Nat.choose K k * ‖v‖ ^ k * |φ v| := by
+    simp +decide [add_comm (1 : ℝ), add_pow, mul_assoc, mul_comm, mul_left_comm,
+      Finset.mul_sum _ _ _]
+  simp_rw [h_binom]
+  exact MeasureTheory.integrable_finset_sum _ fun k _ => by
+    simpa only [mul_assoc] using MeasureTheory.Integrable.const_mul (hφ k) _
+
+/-- If ‖v‖^k * |φ(v)| is integrable for every k, and ‖g(v)‖ ≤ C*(1+‖v‖)^K*|φ(v)|,
+    then g is integrable. Core tool for Schwartz-dominance arguments. -/
+lemma integrable_of_schwartz_bound
+    {φ : (Fin 3 → ℝ) → ℝ}
+    (hφ : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
+    {g : (Fin 3 → ℝ) → ℝ}
+    (hg_meas : AEStronglyMeasurable g)
+    {C : ℝ} (_ : 0 ≤ C) {K : ℕ}
+    (hbound : ∀ v, ‖g v‖ ≤ C * (1 + ‖v‖) ^ K * |φ v|) :
+    Integrable g := by
+  have hdom : Integrable (fun v => C * ((1 + ‖v‖) ^ K * |φ v|)) :=
+    (integrable_one_add_norm_pow_mul hφ K).const_mul C
+  exact hdom.mono' hg_meas (by
+    filter_upwards with v
+    calc ‖g v‖ ≤ C * (1 + ‖v‖) ^ K * |φ v| := hbound v
+    _ = C * ((1 + ‖v‖) ^ K * |φ v|) := by ring)
+
 end VML
