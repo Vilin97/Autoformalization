@@ -1,5 +1,13 @@
 # Log
 
+## 2026-03-11 16:00 UTC — Babysit cycle 25: Code quality cleanup
+
+### Changes
+- Refactored `schwartzDecayConditionsEB` in VelocityDecayInstance.lean: extracted `let base` binding to eliminate 16× copy-paste of `schwartzDecayConditions` call (~50 lines removed)
+- Updated MEMORY.md: corrected sorry count (0), line counts for CoulombPSD.lean and CoulombConcreteTheorem42.lean
+
+### Sorry count: 0
+
 ## 2026-03-11 14:00 UTC — Babysit cycle 24: **0 SORRY'S — FORMALIZATION COMPLETE**
 
 ### Status

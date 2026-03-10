@@ -152,7 +152,7 @@ Both have all 18 fields proved with 0 sorry's. These demonstrate the hypotheses 
 
 | File | Lines | Assessment |
 |------|-------|------------|
-| VelocityDecayInstance.lean | 2,019 | **Too large.** Contains copy-paste in `schwartzDecayConditionsEB`. |
+| VelocityDecayInstance.lean | ~1,970 | **Too large.** Copy-paste in `schwartzDecayConditionsEB` fixed (cycle 25). |
 | CoulombPSD.lean | 1,325 | **Large.** Five logically distinct topics in one file. |
 | Section3.lean | 1,308 | **Too large.** H-theorem + Gaussian integrals + gap lemmas. |
 | TorusInstance.lean | 1,223 | Acceptable for a single typeclass instance. |
@@ -243,7 +243,7 @@ Both have all 18 fields proved with 0 sorry's. These demonstrate the hypotheses 
 3. **Duplicate primed definitions** with namespace collision
 4. **232 lines of custom tactic code** (Aristotle's `generalize_proofs'`)
 5. **3 files exceed 1100 lines** (should be split)
-6. **87 lines of copy-paste** in `schwartzDecayConditionsEB`
+6. ~~87 lines of copy-paste in `schwartzDecayConditionsEB`~~ **FIXED** (cycle 25: `let base` refactoring)
 7. **Stale MEMORY.md** (wrong line counts and sorry counts)
 8. **C^∞ overshoot** in IsSpatiallyDiff when C^2 would suffice
 9. **`import Mathlib`** in 2 files instead of granular imports
@@ -258,6 +258,6 @@ The structural concerns above are code quality issues, not soundness issues. The
 1. Update MEMORY.md with correct line counts and sorry counts
 2. Re-enable linters in top-level theorem files
 3. Split VelocityDecayInstance.lean, Section3.lean, CoulombPSD.lean
-4. Replace copy-paste in `schwartzDecayConditionsEB` with `let`-binding
+4. ~~Replace copy-paste in `schwartzDecayConditionsEB` with `let`-binding~~ **DONE**
 5. Reduce the 4M-heartbeat proof
 6. Consolidate primed definitions

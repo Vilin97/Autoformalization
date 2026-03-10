@@ -1945,75 +1945,41 @@ def schwartzDecayConditionsEB {X : Type*} [FlatTorus3 X]
       |fderiv ℝ φ v (Pi.single i 1)| ≤ C * (1 + ‖v‖) ^ K * φ v)
     (hLogBound : ∃ C K, ∀ v, |Real.log (φ v)| ≤ C * (1 + ‖v‖) ^ K)
     (E₀ B₀ : Fin 3 → ℝ) :
-    VelocityDecayConditions (X := X) Ψ (fun _ => φ) (fun _ => E₀) (fun _ => B₀) where
-  -- ===== Collision/spatial conditions: reused from schwartzDecayConditions =====
-  -- These fields only depend on f and Ψ, not on E or B.
-  hPSD_inner_int :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hPSD_inner_int
-  hPSD_outer_int :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hPSD_outer_int
-  hFubini_double :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hFubini_double
-  hFubini_inner :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hFubini_inner
-  hFubini_outer :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hFubini_outer
-  hLandauFluxDiff :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hLandauFluxDiff
-  hLandauIBP_df_g :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hLandauIBP_df_g
-  hLandauIBP_f_dg :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hLandauIBP_f_dg
-  hLandauIBP_fg :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hLandauIBP_fg
-  hLandauFluxInt :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hLandauFluxInt
-  hSpatialTransport_int :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hSpatialTransport_int
-  hSpatialTransport_joint :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hSpatialTransport_joint
-  hSpatTransComp :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hSpatTransComp
-  hf_velocity_dominated :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hf_velocity_dominated
-  hPSD_cont :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hPSD_cont
-  hD_cont :=
-    (schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
-      hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound).hD_cont
-  -- ===== Force conditions: proved by Aristotle =====
-  -- Each uses: |(E₀ + v×B₀)ᵢ| ≤ C_L·(1+‖v‖) from lorentz_component_bound
-  -- combined with Schwartz decay × polynomial growth = integrable.
-  hForceTransport_int := fun _ =>
-    force_transport_integrable E₀ B₀ φ hφ_pos hφ_smooth hφ_decay
-      (lorentz_component_bound E₀ B₀) hGradBound hLogBound
-  hForceIBP_f_dg := by
-    intro x i
-    -- Rewrite fderiv(φ·log φ - φ) = log(φ) · fderiv(φ) using chain rule
-    have hrewrite : (fun v => (E₀ + cross v B₀) i *
-        fderiv ℝ (fun w => φ w * Real.log (φ w) - φ w) v (Pi.single i 1)) =
-      fun v => (E₀ + cross v B₀) i * (Real.log (φ v) * fderiv ℝ φ v (Pi.single i 1)) := by
-      ext v; congr 1; exact fderiv_entropy_density_eq φ hφ_smooth hφ_pos v i
-    rw [hrewrite]
-    exact force_ibp_f_dg_integrable E₀ B₀ i φ hφ_pos hφ_smooth hφ_decay
-      (lorentz_component_bound E₀ B₀) hGradBound hLogBound
-  hForceIBP_fg := fun _ i =>
-    force_ibp_fg_integrable E₀ B₀ i φ hφ_pos hφ_smooth hφ_decay
-      (lorentz_component_bound E₀ B₀) hLogBound
+    VelocityDecayConditions (X := X) Ψ (fun _ => φ) (fun _ => E₀) (fun _ => B₀) :=
+  -- Reuse all collision/spatial fields from the zero-field instance (they don't depend on E, B)
+  let base := schwartzDecayConditions Ψ hΨ hΨ_cts hΨ_diff hΨ'_bound φ hφ_pos hφ_smooth
+    hφ_decay hφ_deriv_decay hφ_deriv2_bound hGradBound hLogBound
+  { hPSD_inner_int := base.hPSD_inner_int
+    hPSD_outer_int := base.hPSD_outer_int
+    hFubini_double := base.hFubini_double
+    hFubini_inner := base.hFubini_inner
+    hFubini_outer := base.hFubini_outer
+    hLandauFluxDiff := base.hLandauFluxDiff
+    hLandauIBP_df_g := base.hLandauIBP_df_g
+    hLandauIBP_f_dg := base.hLandauIBP_f_dg
+    hLandauIBP_fg := base.hLandauIBP_fg
+    hLandauFluxInt := base.hLandauFluxInt
+    hSpatialTransport_int := base.hSpatialTransport_int
+    hSpatialTransport_joint := base.hSpatialTransport_joint
+    hSpatTransComp := base.hSpatTransComp
+    hf_velocity_dominated := base.hf_velocity_dominated
+    hPSD_cont := base.hPSD_cont
+    hD_cont := base.hD_cont
+    -- Force conditions: |(E₀ + v×B₀)ᵢ| ≤ C·(1+‖v‖) × Schwartz decay = integrable
+    hForceTransport_int := fun _ =>
+      force_transport_integrable E₀ B₀ φ hφ_pos hφ_smooth hφ_decay
+        (lorentz_component_bound E₀ B₀) hGradBound hLogBound
+    hForceIBP_f_dg := by
+      intro x i
+      have hrewrite : (fun v => (E₀ + cross v B₀) i *
+          fderiv ℝ (fun w => φ w * Real.log (φ w) - φ w) v (Pi.single i 1)) =
+        fun v => (E₀ + cross v B₀) i * (Real.log (φ v) * fderiv ℝ φ v (Pi.single i 1)) := by
+        ext v; congr 1; exact fderiv_entropy_density_eq φ hφ_smooth hφ_pos v i
+      rw [hrewrite]
+      exact force_ibp_f_dg_integrable E₀ B₀ i φ hφ_pos hφ_smooth hφ_decay
+        (lorentz_component_bound E₀ B₀) hGradBound hLogBound
+    hForceIBP_fg := fun _ i =>
+      force_ibp_fg_integrable E₀ B₀ i φ hφ_pos hφ_smooth hφ_decay
+        (lorentz_component_bound E₀ B₀) hLogBound }
 
 end VML
