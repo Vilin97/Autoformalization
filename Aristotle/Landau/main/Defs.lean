@@ -189,7 +189,7 @@ def entropyDissipation (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ) : ℝ :=
     its derivatives to be integrable against log g — this holds for distributions
     with sufficient velocity-space decay (e.g., sub-Gaussian tails). -/
 lemma landau_ibp (Ψ : ℝ → ℝ) (g : (Fin 3 → ℝ) → ℝ)
-    (hg_pos : ∀ v, 0 < g v) (hg_smooth : ContDiff ℝ ⊤ g) (hg_int : Integrable g)
+    (hg_pos : ∀ v, 0 < g v) (hg_smooth : ContDiff ℝ ⊤ g) (_hg_int : Integrable g)
     -- Differentiability of Landau flux components (requires differentiation under ∫)
     (hFlux_diff : ∀ i, Differentiable ℝ (fun v =>
       (∫ w, mulVec (landauMatrix Ψ (v - w))

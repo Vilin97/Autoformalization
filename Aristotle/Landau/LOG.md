@@ -1,5 +1,19 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 62: Fix build regression, linter cleanup, smoothness audit
+
+### Changes
+- **Fixed build-breaking regression** from cycle 61: `linarith` in `equilibriumMaxwellian_T_unique` couldn't handle nonlinear reasoning about π. Fix: `nlinarith [Real.pi_pos]`.
+- **Fixed 6 unused simp args in Section3Helpers.lean**: lines 544-546 (`Pi.single_apply`), 552 (`Finset.sum_add_distrib`), 606 (`mul_assoc`), 607 (`Fin.sum_univ_three`).
+- **Fixed 2 unused variables** in Section3Helpers.lean (line 618: `hn_pos`, `hρ`).
+- **Fixed 1 unused variable** in Defs.lean (line 192: `hg_int`).
+- **Fixed 1 deprecated `refine'`** in VelocityDecayInstance.lean (line 21).
+- **Updated MEMORY.md** line counts and added build verification note.
+- **Hardened `/commit` command**: now force-recompiles modified `.lean` files from source.
+- **Smoothness audit** (experiments/smoothness_audit.md): C³ velocity + C¹ spatial suffices. ~80 occurrences across 15 files to change. Multi-cycle effort.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 61: T_eq uniqueness, hGradBound independence, simp cleanup
 
 ### Changes
