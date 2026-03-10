@@ -1,300 +1,233 @@
-# Adversarial Review: Lean 4 Formalization of VML Steady-State Theorem
+# Adversarial Critique — 2026-03-10 UTC (Cycle 52)
 
-**Reviewer posture:** Hostile -- looking for every weakness, gap, and issue.
+## Verdict: CONDITIONAL ACCEPT
 
-**Scope:** 23 `.lean` files in `Aristotle/Landau/main/`, 9,801 lines total.
-
-**Date:** 2026-03-10
+Conditions for acceptance listed in Section 10.
 
 ---
 
-## Verdict: ACCEPT WITH MINOR REVISIONS
+## 1. Sorry's
 
-The formalization is technically sound (0 sorry's, all FlatTorus3 axioms discharged on a concrete instance, Coulomb theorem fully kernel-verified). However, significant dead code, primed-definition duplication, hypothesis non-minimality, and an incomplete smooth-kernel path weaken the contribution.
-
----
-
-## 1. Sorry Count
-
-**Result: 0 sorry's.**
-
-Grep for `sorry` across all 23 files returns exactly 2 hits, both in comments:
-- `TorusInstance.lean:1008` -- "0 sorry's" in a status comment
-- `TorusInstance.lean:1137` -- "0 sorry's" in a summary comment
-
-No `sorry` token appears in any proof term. No `axiom` declarations found. No `admit`, `native_decide`, or `unsafe` declarations found.
-
-**Residual risk:** A stale `.olean` cache could mask a sorry. A fresh `lake clean && lake build` should be run to verify.
-
-**Assessment: PASS.**
+**0 sorry's across 23 files.** Grep confirms no `sorry`, `admit`, `axiom`, or `native_decide` keywords in any `.lean` file. I found no issue.
 
 ---
 
-## 2. Typeclass Fields as Axioms
+## 2. Hidden Axioms
 
-### 2a. FlatTorus3 (23 property fields)
+The formalization relies on Lean's standard axioms (`propext`, `Classical.choice`, `Quot.sound`) and Mathlib's foundations. No custom `axiom` declarations exist. No `native_decide` usage. No `admit`.
 
-`FlatTorus3` (Defs.lean:308) is a typeclass with 23 property fields plus 3 instance fields and 3 operator fields. **All 23 property fields are fully proved** in the concrete instance on `Torus3 = Fin 3 -> AddCircle 1` (TorusInstance.lean:1011-1129). No field is left as `sorry` or `by exact?`.
+The real "hidden axioms" are the **22 axiom fields of `FlatTorus3`** (Defs.lean:308-400). These are proved for the concrete `Torus3` instance in TorusInstance.lean with 0 sorry's. However:
 
-**Concerns:**
+- **FlatTorus3 is an abstract interface**, not a concrete mathematical object. It encodes "a compact 3-manifold with flat metric, integration, IBP, etc." as uninterpreted axioms. The axioms could be inconsistent if poorly chosen, but the concrete Torus3 instance validates them.
+- The `IsSpatiallyDiff` predicate is abstract. On Torus3 it means `ContDiff ℝ ⊤ ∘ periodicLift`. This means **the formalization assumes C^∞ spatial regularity** everywhere, which is stronger than needed (C² typically suffices).
 
-1. **Over-axiomatization.** Several fields are trivial consequences of Mathlib:
-   - `hSpatialAdd` is literally `fun g1 g2 h1 h2 => integral_add h1 h2` -- this is Mathlib's `integral_add`, not a deep property.
-   - `hGradIntegrable` is proved from continuity + compactness, a generic pattern.
-   - `hDivLinear` follows directly from `fderiv` linearity.
-
-   Stuffing these into the typeclass inflates the interface (23 fields!) and obscures which properties are genuinely deep (hHarmonic_const, hLaplacianMaxNonpos, hKillingToHarmonic).
-
-2. **IsSpatiallyDiff = ContDiff R top (C-infinity).** The spatial differentiability predicate is set to "C-infinity" (`ContDiff R top (periodicLift f)`), which is stronger than the C^1 or C^2 regularity that suffices mathematically. This forces unnecessarily strong smoothness hypotheses at the theorem level. However, it simplifies closure properties (e.g., `hDiff_grad` giving `ContDiff top (fderiv)` for free) and is physically defensible for the smooth steady states under consideration.
-
-3. **hSpatialVelocityFubini takes an unused hypothesis.** The field signature takes `(forall x, Integrable (F x))` AND joint integrability. The concrete instance ignores the per-section hypothesis entirely, using only `integral_integral_swap hF_joint`. The pointwise integrability argument is dead weight in the axiom signature.
-
-### 2b. VMLSteadyState (intermediate derived structure)
-
-`VMLSteadyState` (Defs.lean:606) is a structure with 26 fields. Its docstring correctly says "NOT an input specification -- all fields are proved from physical hypotheses in `VMLInput.toSteadyState`." All 26 fields are derived in VMLInputDerive.lean:357-421. This is sound design.
-
-### 2c. VMLInput (physical input structure)
-
-`VMLInput` (Defs.lean:680) has ~30 fields including 6 "analytical interface hypotheses" (hDiff_maxwellian, hPolynomialIdentity, hJ_from_maxwellian, hPB_eq, hNormalization, hD_zero/hScoreForm).
-
-**Key finding:** In `Theorem42` (Theorem42.lean:111), all 6 analytical interface hypotheses are derived from genuine physical hypotheses before the VMLInput is constructed. The VMLInput is an internal API, not the theorem statement. The top-level Theorem42 takes only physical hypotheses + VelocityDecayConditions.
-
-### 2d. VelocityDecayConditions (18 fields)
-
-`VelocityDecayConditions` (Theorem42.lean:24) bundles 18 integrability/decay conditions. For the Coulomb case, all 18 are proved in CoulombConcreteTheorem42.lean (~230 lines of field-filling).
-
-**Concern:** The `hPSD_cont` field (PSD integrand jointly continuous) is a non-trivial mathematical result, not merely a "decay condition." For Coulomb, proving it requires showing the score-difference cancels the kernel singularity. The bundling name is misleading.
-
-**Assessment: PASS with concerns noted.**
+**I found no issue** with hidden axioms beyond the FlatTorus3 abstraction, which is validated by a concrete instance.
 
 ---
 
-## 3. Dead Code
+## 3. Circularity
 
-### 3a. `schwartzDecayConditions` (DEAD -- ~400 lines)
+**Is VelocityDecayConditions satisfiable by a non-equilibrium distribution for the Coulomb kernel?**
 
-`schwartzDecayConditions` (VelocityDecayInstance.lean:400) constructs a `VelocityDecayConditions` for smooth bounded kernels. It proves all 18 fields. But **no user-facing theorem ever calls it**. It is only mentioned in comments (ConcreteTheorem42.lean:12, VelocityDecayInstance.lean:6). The smooth-kernel concrete theorem does not exist.
+NO — and this is the single most important structural weakness. The dead `schwartzDecayConditions` (removed this cycle) proved satisfiability only for **bounded smooth kernels** (Ψ bounded, C¹). The Coulomb kernel Ψ(r) = r⁻³ is unbounded and not C¹ at r = 0. **No non-equilibrium VelocityDecayConditions instance exists for Coulomb.**
 
-This means approximately 400+ lines in VelocityDecayInstance.lean serve no purpose in the current build.
+The `CoulombConcreteTheorem42` proof constructs a VelocityDecayConditions instance inline for each hypothesis configuration, proving all 19 fields. But the hypotheses include `hSchwartz`, `hExpDecay`, `hGradBound` — these constrain f to be "Schwartz-like." **Is the conjunction (hf_pos ∧ hSchwartz ∧ hExpDecay ∧ hGradBound ∧ hVlasov) satisfiable by a non-Maxwellian f?**
 
-### 3b. Dependent dead lemmas
+The answer is almost certainly yes (e.g., perturb a Maxwellian slightly), but this is NOT formally verified. The closest evidence is the (now-deleted) smooth-kernel instance, which doesn't apply to Coulomb. **The formalization does not prove that its hypotheses are consistent with a non-trivial steady state.**
 
-`lorentz_component_bound` (VelocityDecayInstance.lean:790) is used only inside `schwartzDecayConditions`. Therefore it is transitively dead.
-
-### 3c. Missing smooth-kernel theorem
-
-`ConcreteTheorem42.lean` (94 lines) defines `UniformSchwartzDecay`, `inverse_poly_integrable`, and two integrability lemmas, but **no theorem statement is present**. The file header says "For smooth bounded kernels, use `schwartzDecayConditions` + `Theorem42` (assembly required; no user-facing theorem yet)." This is an incomplete code path.
-
-### 3d. All other declarations are live
-
-Every other theorem/lemma/def (outside the smooth-kernel path) has at least one usage beyond its definition site. I checked all declarations with grep usage count = 2 (definition + one use) and confirmed each is genuinely used in the proof chain. There are no orphaned proofs in the Coulomb path.
-
-**Assessment: MINOR ISSUE.** ~400 lines of dead code should be removed or clearly marked as future work. The incomplete smooth-kernel path should be documented or completed.
+This is a genuine weakness but NOT a fatal one: the theorem is of the form "IF these hypotheses hold THEN equilibrium," and the hypotheses are standard in kinetic theory literature.
 
 ---
 
-## 4. Code Quality
+## 4. Hypothesis Audit
 
-### 4a. File sizes
+### CoulombConcreteTheorem42 (13 explicit hypotheses)
 
-| File | Lines | Notes |
-|---|---|---|
-| TorusInstance.lean | 1,164 | Justified (proves 23 non-trivial axioms) |
-| VelocityDecayInstance.lean | 809 | ~400 lines dead code |
-| Defs.lean | 761 | Definitions + FlatTorus3 class + helpers |
-| VelocityDecayHelpers.lean | 749 | Smooth-kernel helper lemmas |
-| CoulombPSD.lean | 713 | PSD continuity + integrability |
-| CoulombSpatialTransport.lean | 661 | Transport integrability |
-| Section3Helpers.lean | 637 | Analytical gap lemmas |
-| CoulombFluxDiff.lean | 627 | Flux differentiability |
-| CoulombFlux.lean | 608 | Flux integrability |
+| # | Name | Necessary? | Could weaken? |
+|---|------|-----------|--------------|
+| 1 | `hν : 0 < ν` | Yes | No |
+| 2 | `hρ_ion : 0 < ρ_ion` | Yes | No |
+| 3 | `hf_pos : ∀ x v, 0 < f x v` | Yes (log f) | Could use a.e. positivity, but complicates everything |
+| 4 | `hf_smooth_v : ∀ x, ContDiff ℝ ⊤ (f x)` | Overkill | C² or C³ suffices for all calculus used |
+| 5 | `hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift ...)` | Overkill | C² suffices (only need grad, div, IBP) |
+| 6 | `hB_smooth : ∀ i, ContDiff ℝ ⊤ (periodicLift ...)` | Overkill | C¹ suffices (curl needs one derivative) |
+| 7 | `hSchwartz : UniformSchwartzDecay f` | Yes | Could weaken to specific polynomial decay rates |
+| 8 | `hExpDecay` | Likely derivable from 7+9 | See non-minimality note in docstring |
+| 9 | `hGradBound` | Likely derivable from 7+8 | See non-minimality note in docstring |
+| 10 | `hVlasov` | Yes (the PDE) | No |
+| 11 | `hAmpere` | Yes | No |
+| 12 | `hGauss` | Yes | No |
+| 13 | `hDivB` | Yes | No |
 
-9 of 23 files exceed 600 lines. This is borderline for maintainability but individually each file has a coherent theme.
+### FlatTorus3 typeclass (implicit)
 
-### 4b. `maxHeartbeats` overrides: 31 total
+22 axiom fields + 3 instance fields + 3 operator fields + 1 predicate = 29 total fields. All validated by the Torus3 instance. The typeclass design is adequate but the abstraction level is questionable — `IsSpatiallyDiff` is an opaque predicate rather than leveraging Mathlib's `ContDiff` infrastructure directly.
 
-31 `set_option maxHeartbeats` overrides across 11 files, plus 1 `synthInstance.maxHeartbeats`:
+### VelocityDecayConditions (19 fields)
 
-| Heartbeat level | Count | Peak files |
-|---|---|---|
-| 4,000,000 (20x default) | 1 | VelocityDecayInstance (dead code) |
-| 3,200,000 (16x default) | 6 | CoulombPSD (3), CoulombFlux (2), NewtonianPotential (1) |
-| 1,600,000 (8x default) | 9 | Various |
-| 800,000 (4x default) | 12 | Various |
-| synthInstance 160,000 | 1 | CoulombSpatialTransport |
-
-The highest live-code override is 3,200,000 (16x default), appearing 6 times. These indicate heavy typeclass resolution from `Fin 3 -> R` interacting with Mathlib's `Pi` instances, especially for the Coulomb kernel. This is a maintenance risk on Mathlib updates but not a correctness issue.
-
-### 4c. AI-generated proof style
-
-Several lemmas in Section3Helpers.lean, LandauMatrixDerivBound.lean, CoulombFlux.lean, and CoulombPSD.lean are annotated "Proved by Aristotle" (the Harmonic automated prover). These proofs tend to use compressed tactics with heavy `simp_all +decide`, `nlinarith`, and `generalize_proofs` chains. Example: `gaussian_normalization_maxwellian` (Section3Helpers.lean:33-52) is 20 lines of dense chain reasoning. The proofs ARE kernel-checked, so correctness is guaranteed, but auditability suffers.
-
-**Assessment: MINOR ISSUES.** The heartbeat overrides and file sizes could be improved. AI proof style reduces readability but not correctness.
+All 19 fields are proved inline in CoulombConcreteTheorem42. The structure bundles integrability, Fubini, IBP, differentiability, and continuity conditions. This is an honest engineering choice (keeps Theorem42 statement readable) but makes the theorem's actual strength hard to assess without expanding the bundle.
 
 ---
 
-## 5. Duplicate Primed Definitions
+## 5. Mathematical Correctness
 
-11 primed definitions duplicate VML namespace originals across 3 files:
+I found no divergence from the standard mathematical proof. The proof follows the blueprint (H-theorem-formal.pdf, Sections 1-10) faithfully:
+1. Entropy dissipation D(f) ≤ 0 (H-theorem)
+2. Transport entropy equation → ∫D(f) = 0 → D(f) = 0 pointwise
+3. D = 0 → log f is affine in v → f = exp(a + b·v + c|v|²)
+4. Polynomial matching from Vlasov → c constant, b constant
+5. Killing field + flatness → b = 0
+6. Maximum principle → ρ constant → E = 0
+7. Maxwell → B constant
 
-| Primed name | Defined in | Canonical VML name |
-|---|---|---|
-| `normSq'` | CoulombFlux.lean:11, LandauMatrixDerivBound.lean:36 | `VML.normSq` |
-| `eucNorm'` | CoulombFlux.lean:12, LandauMatrixDerivBound.lean:38 | `VML.eucNorm` |
-| `innerLandauMatrix'` | CoulombFlux.lean:13, LandauMatrixDerivBound.lean:40 | `VML.innerLandauMatrix` |
-| `landauMatrix'` | CoulombFlux.lean:16, LandauMatrixDerivBound.lean:43 | `VML.landauMatrix` |
-| `coulombKernel'` | CoulombFlux.lean:15 | `VML.coulombKernel` |
-| `vGrad'` | CoulombFlux.lean:18 | `VML.vGrad` |
-| `PSDIntegrand'` | CoulombPSD.lean:8 | `VML.PSDIntegrand` |
-
-**Issues:**
-1. **Double definition.** `normSq'`, `eucNorm'`, `innerLandauMatrix'`, `landauMatrix'` are each defined **twice** -- in both `LandauMatrixDerivBound.lean` and `CoulombFlux.lean`. Due to namespace scoping (LandauMatrixDerivBound.lean is outside VML namespace; CoulombFlux.lean is inside VML namespace), these do not collide, but the duplication is confusing.
-
-2. **Minimal bridging.** Only 1 formal bridging lemma exists (`landauMatrix'_eq_VML : landauMatrix' = VML.landauMatrix := rfl` at LandauMatrixDerivBound.lean:364). The other 10 primed definitions rely on definitional equality without formal verification.
-
-3. **Origin.** These exist because the Aristotle prover generates standalone proofs with local definition copies. The CoulombFlux.lean header explicitly says "Inline definitions for standalone Aristotle proofs (all equal to VML defs by rfl)."
-
-**Assessment: MINOR ISSUE.** The primed definitions are definitionally equal to their unprimed counterparts (`rfl`-equal by inspection), but the duplication and lack of systematic bridging is poor hygiene.
+The only question is whether the Lean formalization of steps 3-4 (polynomial identity matching) is complete and correct. Since there are 0 sorry's and the kernel verifies it, this is formally settled.
 
 ---
 
-## 6. Documentation Accuracy
+## 6. Code Quality
 
-### 6a. Hypothesis count for CoulombConcreteTheorem42
+### 6a. Files over 600 lines (8 files)
 
-The header claims "13 total, 12 independent + 1 likely derivable." Counting the actual explicit parameters in the theorem signature:
+| File | Lines | Issue |
+|------|-------|-------|
+| TorusInstance.lean | 1164 | Far too large. Could split into TorusOperators + TorusAnalysis + TorusGeometry |
+| Defs.lean | 761 | Borderline. Contains FlatTorus3 + all definitions + VMLInput/VMLSteadyState |
+| VelocityDecayHelpers.lean | 749 | **~95% dead code.** Only `integrable_of_schwartz_bound` (and its dependency `integrable_one_add_norm_pow_mul`) are live. ~700 lines are dead smooth-kernel helpers. |
+| CoulombPSD.lean | 713 | Acceptable (complex proofs) |
+| CoulombSpatialTransport.lean | 663 | Borderline |
+| Section3Helpers.lean | 637 | Borderline |
+| CoulombFluxDiff.lean | 627 | Borderline |
+| CoulombFlux.lean | 608 | Borderline |
 
-1. `hnu` (nu > 0)
-2. `hrho_ion` (rho_ion > 0)
-3. `hf_pos` (f > 0)
-4. `hf_smooth_v` (f smooth in v)
-5. `hf_smooth_x` (f smooth in x)
-6. `hB_smooth` (B smooth)
-7. `hSchwartz` (uniform Schwartz decay)
-8. `hExpDecay` (stretched-exponential lower bound)
-9. `hGradBound` (polynomial score bound -- the "likely derivable" one)
-10. `hVlasov` (Vlasov equation)
-11. `hAmpere` (Ampere's law)
-12. `hGauss` (Gauss's law)
-13. `hDivB` (div B = 0)
+### 6b. maxHeartbeats overrides (30 total)
 
-**Count is accurate.** The documentation is honest about hypothesis 9 being likely redundant.
+| Value | Count | Files |
+|-------|-------|-------|
+| 800000 | 12 | CoulombFlux, CoulombSpatialTransport, LandauMatrixDerivBound, Section3, Section3Helpers, TorusInstance, VelocityDecayHelpers |
+| 1600000 | 10 | CoulombFluxDiff, CoulombPSD, CoulombSpatialTransport, LandauMatrixDerivBound, NewtonianPotential |
+| 3200000 | 8 | CoulombFlux, CoulombPSD, NewtonianPotential |
 
-### 6b. ConcreteTheorem42.lean misleading header
+30 heartbeat overrides is a lot. The 3200000 values (8x default) indicate proofs that are fragile and could break with Mathlib updates.
 
-The file header says: "For smooth bounded kernels, use `schwartzDecayConditions` + `Theorem42` (assembly required; no user-facing theorem yet)." This is honest about the absence of a smooth-kernel theorem, but the file name `ConcreteTheorem42.lean` suggests a complete result.
+### 6c. Primed definitions (11 duplicates across 3 files)
 
-### 6c. Physical limitations are documented
+Inline copies of VML namespace definitions used by Aristotle-generated proofs:
 
-The `CoulombConcreteTheorem42` docstring explicitly states: "Single species, non-relativistic, 3D flat torus, Coulomb kernel." Scope limitations are not hidden.
+- **CoulombFlux.lean:11-18**: `normSq'`, `eucNorm'`, `innerLandauMatrix'`, `coulombKernel'`, `landauMatrix'`, `vGrad'`
+- **LandauMatrixDerivBound.lean:36-43**: `normSq'`, `eucNorm'`, `innerLandauMatrix'`, `landauMatrix'`
+- **CoulombPSD.lean:8**: `PSDIntegrand'`
 
-**Assessment: PASS.**
+These are unmaintainable: any change to the VML-namespace definition must be manually propagated to every primed copy, with no compiler enforcement. Bridging lemmas (`normSq' = normSq` by `rfl`) would let Aristotle proofs reference the real definitions.
 
----
+### 6d. Linter suppressions
 
-## 7. Physical Limitations
-
-### 7a. Kernel coverage
-
-| Kernel | gamma | Status |
-|---|---|---|
-| Coulomb | -3 | Fully proved (CoulombConcreteTheorem42) |
-| Smooth bounded | N/A | Infrastructure built but no theorem stated |
-| Soft potentials | -3 < gamma < 0 | NOT covered |
-| Hard potentials | gamma > 0 | NOT covered |
-| Maxwell molecules | gamma = 0 | NOT covered |
-| Hard spheres | compact support | Excluded by `hPsi : forall r, 0 < Psi r` |
-
-Only the Coulomb case has a complete end-to-end theorem. The Coulomb kernel is the physically most important case.
-
-### 7b. Dimension and domain
-
-- Velocity space: hardcoded to `Fin 3 -> R`. The mathematical argument works in any dimension d >= 2, but `cross` is 3D-specific and the polynomial extraction lemmas are hardcoded for `Fin 3`.
-- Spatial domain: flat tori only. `FlatTorus3` requires flatness axioms (Killing -> harmonic, curl-free + div-free -> harmonic). Curved geometries would fail.
-
-### 7c. Other restrictions
-
-- **Single species** against uniform ion background. No multi-species plasmas.
-- **Non-relativistic** Vlasov equation.
-- **Existence assumed.** The theorem characterizes solutions conditional on their existence. Existence of smooth steady states for VML is itself a major open problem.
-- **Coulomb kernel value at 0:** Defined as `if r <= 0 then 1 else r ^ (-3)`. The value at 0 is irrelevant since `landauMatrix Psi 0 = 0` always (the projection |z|^2 I - z z^T vanishes at z = 0). This design choice is documented and sound.
-
-**Assessment: PASS (within stated scope).** The physical limitations are inherent and documented.
+3 files suppress `linter.unusedSimpArgs`: Defs.lean, Section3Helpers.lean, Section7.lean. Minor.
 
 ---
 
-## 8. Architecture Analysis
+## 7. Documentation Lies
 
-### 8a. Proof chain depth
+### progress.md — SEVERELY STALE
 
-The proof traverses 4 layers:
-1. `CoulombConcreteTheorem42` (13 hypotheses, concrete torus, Coulomb kernel)
-2. `Theorem42` (abstract FlatTorus3, abstract kernel, VelocityDecayConditions)
-3. `main_from_physics` / `VMLInput.toSteadyState` (derives VMLSteadyState from VMLInput)
-4. `main_steady_state` (uses VMLSteadyState to invoke individual section lemmas)
+| Claim | Reality |
+|-------|---------|
+| "split across 14 files" (line 3) | 23 files |
+| "8 sorry's in CoulombConcreteTheorem42" (line 5) | 0 sorry's |
+| "Last updated: 2026-03-09" (line 7) | Stale by 1+ day |
+| Lists Section9.lean (line 43) | Deleted in cycle 50 |
+| Lists `schwartzDecayConditions` (line 28) | Deleted in cycle 52 |
+| Lists `schwartzDecayConditionsEB` (line 29) | Deleted in cycle 50 |
+| "15 integrability conditions" (line 271) | 19 fields in VelocityDecayConditions |
+| "21 axioms" in FlatTorus3 (line 228) | 22 axiom fields |
+| Lists many deleted lemmas (lines 55, 85-111) | Dead code removed in cycles 49-52 |
 
-Each layer serves a purpose: (1) is user-facing with concrete types, (2) separates kernel-independent logic, (3) derives analytical conclusions from physical inputs, (4) assembles the final result from section-by-section proofs. The indirection is defensible but makes tracing a single mathematical fact through the codebase nontrivial.
+### MEMORY.md
 
-### 8b. Classical.choice for parameter extraction
+| Claim | Reality |
+|-------|---------|
+| "21 files, ~11,400 lines" | 23 files, ~9,021 lines |
+| "18 VelocityDecayConditions fields" | 19 fields |
 
-Maxwellian parameters (a_loc, b_loc, c_loc) are extracted via `Classical.choice` (VMLInputDerive.lean:64-76). The parameters are uniquely determined by f, but the extraction creates definitionally opaque functions. This is standard Lean practice and does not affect soundness.
+### Docstrings
 
-### 8c. The b_0 rescaling in VMLSteadyState
-
-In `VMLInput.toSteadyState` (VMLInputDerive.lean:386), the drift parameter `b_0` in VMLSteadyState is defined as `(-1 / (2 * p.c0)) * p.b0` rather than `p.b0` directly. This rescaling (drift velocity = (-1/(2c)) * b) corresponds to the physical drift velocity u = b/(-2c). The factor threading is correct but makes the code harder to follow. The proof that u = 0 (VMLInputDerive.lean:231-259) correctly shows that the rescaled b_0 being zero implies the original b_0 is zero (since c_0 != 0).
-
-### 8d. Theorem42 has 54 effective conditions
-
-Theorem42 takes 13 explicit hypotheses + 18 bundled in VelocityDecayConditions + the abstract `[FlatTorus3 X]` instance (23 fields) = 54 total conditions. The concrete CoulombConcreteTheorem42 collapses this to 13 hypotheses (all FlatTorus3 fields from the instance, all VelocityDecayConditions proved inline). This is the version a reader should evaluate.
-
-**Assessment: PASS.** The architecture is complex but each abstraction layer is justified.
-
----
-
-## Summary Table
-
-| # | Category | Finding | Severity |
-|---|---|---|---|
-| 1 | Sorry count | 0 sorry's confirmed | None (strength) |
-| 2a | FlatTorus3 axioms | All 23 fields proved on concrete torus | None (strength) |
-| 2b | IsSpatiallyDiff | = ContDiff R top, stronger than needed | Minor |
-| 2c | VMLInput interface | All analytical hypotheses honestly discharged | None (strength) |
-| 2d | VelocityDecayConditions | All 18 fields proved for Coulomb | None (strength) |
-| 3a | Dead code | ~400 lines: `schwartzDecayConditions` + helpers | Minor |
-| 3b | Missing smooth theorem | ConcreteTheorem42.lean has no theorem | Minor |
-| 4a | File sizes | 9 of 23 over 600 lines, max 1,164 | Minor |
-| 4b | maxHeartbeats | 31 overrides, max 3.2M in live code | Minor |
-| 4c | AI proof style | ~36 AI-generated proofs, compressed | Minor |
-| 5 | Primed definitions | 11 duplicates across 3 files, 4 doubly-defined | Minor |
-| 6 | Documentation | Accurate hypothesis counts, honest about gaps | Pass |
-| 7a | Kernel coverage | Only Coulomb fully instantiated | Moderate |
-| 7b | Dimension/domain | Hardcoded to 3D flat torus | Limitation |
-| 7c | Physical scope | Single species, non-relativistic, existence assumed | Limitation |
-| 8 | Architecture | 4-layer abstraction, justified but complex | Minor |
+CoulombConcreteTheorem42 docstring is accurate (13 hypotheses, non-minimality note, scope note). No issues found in theorem-level documentation.
 
 ---
 
-## Recommendations
+## 8. Generalization Opportunities
 
-**Required for acceptance:**
-1. Remove or clearly mark as "future work" the ~400 lines of dead smooth-kernel code (`schwartzDecayConditions` and its exclusive dependencies).
-2. Either complete `ConcreteTheorem42.lean` with an actual smooth-kernel theorem statement, or rename the file to `CoulombHelpers.lean` to avoid suggesting a missing theorem.
+### 8a. Weaken smoothness: C^∞ → finite regularity (FEASIBLE)
 
-**Strongly recommended:**
-3. Eliminate primed duplicates. Replace all primed uses with canonical VML namespace names, or at minimum add `rfl` bridging lemmas for all 11 primed definitions.
-4. Remove the unused first argument of `hSpatialVelocityFubini` (the pointwise integrability hypothesis that is never used).
+The proof uses at most second derivatives in spatial variables and finite-order velocity derivatives. Replacing `ContDiff ℝ ⊤` with `ContDiff ℝ k` for specific `k` (likely k = 2 or 3) throughout would:
+- Make the theorem stronger (weaker hypotheses)
+- Better match the physics literature (which assumes finite regularity)
+- Require auditing every use of `hf_smooth` to determine the actual derivative order needed
 
-**Recommended:**
-5. Document physical limitations (single species, 3D, non-relativistic) in the main theorem (`CoulombConcreteTheorem42`) docstring. Currently documented but could be more prominent.
-6. Consider splitting Defs.lean (761 lines) into pure definitions and the FlatTorus3 typeclass.
-7. Audit 3.2M heartbeat proofs for simplification opportunities.
+**Effort: Medium.** The main obstacle is `IsSpatiallyDiff = ContDiff ℝ ⊤ ∘ periodicLift` in TorusInstance.lean. Changing to `ContDiff ℝ n` requires parameterizing the typeclass.
+
+### 8b. Remove hGradBound: prove it from hSchwartz + hExpDecay (UNCERTAIN)
+
+The docstring claims hGradBound is "likely derivable from hSchwartz + hExpDecay." The argument sketch: Schwartz decay gives `|∂f/∂v_i| ≤ C_N(1+‖v‖)^{-N}` for all N, while the lower bound gives `f ≥ exp(-C(1+‖v‖)^K)`. Then `|∂f|/f ≤ C_N(1+‖v‖)^{-N} · exp(C(1+‖v‖)^K)`.
+
+For this to be polynomial, we need the exponential factor to be dominated by some polynomial — which it is NOT for large ‖v‖. However, the Schwartz numerator decays faster than ANY polynomial, so for any fixed K in the exponential lower bound, we can choose N large enough that C_N(1+‖v‖)^{-N+K} → 0. This gives `|∂f|/f → 0` but not necessarily a polynomial bound.
+
+**The derivability claim needs careful mathematical analysis.** It may be true (via a more refined argument using the specific form of Schwartz decay), but it is not obvious. The docstring should be softened to "conjectured" rather than "likely."
+
+**Effort: High** (requires mathematical analysis, not just formalization).
+
+### 8c. Generalize beyond Coulomb: soft potentials Ψ(r) = r^γ (HARD)
+
+The current formalization handles only Coulomb (γ = -3). The abstract Theorem42 works for any Ψ > 0, but VelocityDecayConditions must be verified for each kernel. For soft potentials (γ > -3), the singularity is milder. For very soft potentials (γ < -3), the singularity is worse.
+
+**Effort: Very High.** Each kernel family needs its own concrete theorem file.
+
+### 8d. Strengthen conclusion: uniqueness of T_eq (EASY)
+
+The conclusion asserts ∃ T_eq > 0, but doesn't prove uniqueness. Since the Maxwellian is parametrized by (ρ_ion, T), and ρ_ion is fixed, T is uniquely determined. Adding `∀ T₁ T₂, (∀ x v, f x v = equilibriumMaxwellian ρ_ion T₁ v) → (∀ x v, f x v = equilibriumMaxwellian ρ_ion T₂ v) → T₁ = T₂` would strengthen the result.
+
+**Effort: Low.** The Gaussian integral `∫ exp(-|v|²/(2T)) dv = (2πT)^{3/2}` is injective in T.
 
 ---
 
-## Final Assessment
+## 9. Mathlib Upstreamability
 
-This is a genuine, substantial formalization. The zero-sorry achievement across ~9,800 lines covering the full VML steady-state theorem for Coulomb collisions is technically impressive. The core mathematics -- H-theorem, nullspace characterization, polynomial identity extraction, Killing's equation on T^3, Poisson-Boltzmann maximum principle, Coulomb PSD continuity, flux differentiability -- is all correctly formalized and kernel-verified. The concrete theorem `CoulombConcreteTheorem42` has a clean 13-hypothesis statement that matches the physical content of Theorem 42 from the referenced paper.
+### 9a. `inverse_poly_integrable` (SchwartzDecayDefs.lean:38)
 
-The issues identified (dead code, primed definitions, missing smooth theorem, over-axiomatization of FlatTorus3) are engineering concerns that do not compromise mathematical validity. The physical limitations (dimension, domain, species, kernel) are inherent scope choices, honestly documented.
+Shows `C/(1+‖v‖)^4` is integrable on ℝ³. Special case of existing Mathlib lemmas. **Not worth upstreaming** — too specialized.
 
-**ACCEPT WITH MINOR REVISIONS.**
+### 9b. Torus IBP and harmonic function lemmas (TorusInstance.lean)
+
+`torus_hIBP_spatial`, `torus_hHarmonic_const`, `torus_hCurlIntZero` are general facts about functions on `(ℝ/ℤ)³`. **Medium priority** — but would need significant refactoring to use Mathlib's `AddCircle` API idiomatically.
+
+### 9c. `integrable_of_schwartz_bound` (VelocityDecayHelpers.lean:50)
+
+If `‖v‖^k|φ(v)|` integrable for all k and `‖g(v)‖ ≤ C(1+‖v‖)^K|φ(v)|`, then g integrable. Useful domination lemma. **Medium priority** — could fit in `MeasureTheory.Function.L1Space`.
+
+### 9d. `lorentz_component_bound` (VelocityDecayInstance.lean:17)
+
+Elementary linear algebra bound. **Not worth upstreaming.**
+
+---
+
+## 10. Summary Table
+
+| # | Issue | Severity | Status |
+|---|-------|----------|--------|
+| 1 | VelocityDecayHelpers.lean: ~700 lines dead code | Major | Open |
+| 2 | 11 primed duplicate definitions across 3 files | Major | Open |
+| 3 | progress.md severely stale (wrong file count, sorry count, deleted lemmas) | Major | Open |
+| 4 | MEMORY.md stale (wrong file count, line count, VDC field count) | Minor | Open |
+| 5 | 30 maxHeartbeats overrides (8 at 3200000) | Minor | Open |
+| 6 | 8 files over 600 lines (TorusInstance at 1164) | Minor | Open |
+| 7 | hGradBound "likely derivable" claim may be incorrect | Epistemic | Open |
+| 8 | No non-equilibrium VDC instance for Coulomb kernel | Epistemic | Open |
+| 9 | C^∞ smoothness overkill (C² likely suffices) | Minor | Open |
+| 10 | Uniqueness of T_eq not proved | Minor | Open |
+
+### Conditions for ACCEPT
+
+1. **Required:** Fix progress.md (stale data is misleading)
+2. **Required:** Fix MEMORY.md (wrong counts)
+3. **Required:** Remove dead code from VelocityDecayHelpers.lean (move 2 live lemmas elsewhere, delete file)
+4. **Recommended:** Add bridging lemmas for primed definitions OR inline-expand them
+5. **Recommended:** Investigate and correct hGradBound "likely derivable" claim
