@@ -27,34 +27,6 @@ lemma vGrad_exp_quadratic (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) :
   · norm_num [ dotProduct ];
     fun_prop (disch := norm_num)
 
--- ============================================================================
--- Part 2: PSDIntegrand_continuous through analysis_vGrad_smooth
--- ============================================================================
-
-/-- The PSD integrand is continuous as a function on ℝ³ × ℝ³.
-    Proved by Aristotle (Harmonic). -/
-lemma PSDIntegrand_continuous (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
-    (hΨ_cont : Continuous Ψ) (hf_pos : ∀ v, 0 < f v)
-    (hf_smooth : ContDiff ℝ ⊤ f) :
-    Continuous (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => PSDIntegrand Ψ f p.1 p.2) := by
-  have h_grad_log_cont : Continuous (fun v => vGrad (Real.log ∘ f) v) := by
-    refine continuous_pi fun i => ?_
-    have h_cont : Continuous (fun v => fderiv ℝ (Real.log ∘ f) v) := by
-      exact (ContDiff.log hf_smooth fun v => ne_of_gt (hf_pos v)).continuous_fderiv le_top
-    exact Continuous.comp (show Continuous fun v => v (Pi.single i 1) from by continuity) h_cont
-  refine Continuous.mul (Continuous.mul ?_ ?_) ?_
-  · exact hf_smooth.continuous.comp continuous_fst
-  · exact hf_smooth.continuous.comp continuous_snd
-  · have h_inner_landau_cont : Continuous (fun z : Fin 3 → ℝ => innerLandauMatrix z) := by
-      refine Continuous.add ?_ ?_
-      · exact Continuous.smul (continuous_id'.dotProduct continuous_id') continuous_const
-      · exact continuous_pi_iff.mpr fun i => continuous_pi_iff.mpr fun j =>
-          Continuous.neg (Continuous.mul (continuous_apply i) (continuous_apply j))
-    have h_landau_cont : Continuous (fun z : Fin 3 → ℝ => landauMatrix Ψ z) :=
-      Continuous.smul (hΨ_cont.comp <| Real.continuous_sqrt.comp <|
-        Continuous.dotProduct continuous_id' continuous_id') h_inner_landau_cont
-    fun_prop (disch := norm_num)
-
 /-- Gaussian normalization: if f(v) = exp(a₀ + c₀|v|²) with c₀ < 0 and ∫f = ρ_ion,
     then f = equilibriumMaxwellian ρ_ion T with T = -1/(2c₀).
     Proved by Aristotle (project 1236b757). -/
@@ -151,84 +123,6 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
     rw [ ← Finset.mul_prod_erase _ _ ( Finset.mem_univ i ) ] ; ring;
     simp +decide [ Real.exp_add, mul_add, add_comm, add_left_comm, mul_assoc, mul_comm, mul_left_comm, MeasureTheory.integral_const_mul, MeasureTheory.integral_mul_const ]
   exact h_gauss
-
-/-- If g ≥ 0 everywhere, then -(1/2) ∫∫ g ≤ 0. -/
-lemma neg_half_double_integral_nonpos
-    (g : (Fin 3 → ℝ) → (Fin 3 → ℝ) → ℝ)
-    (hg_nn : ∀ v w, 0 ≤ g v w)
-    (hg_inner : ∀ v, Integrable (g v))
-    (hg_outer : Integrable (fun v => ∫ w, g v w)) :
-    -(1 / 2) * ∫ v, ∫ w, g v w ≤ 0 := by
-  apply mul_nonpos_of_nonpos_of_nonneg (by norm_num)
-  apply integral_nonneg
-  intro v
-  exact integral_nonneg (hg_nn v)
-
-/-- The PSD integrand is non-negative.
-    Proved by Aristotle (project 4a3a2470). -/
-lemma PSDIntegrand_nonneg (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
-    (hΨ : ∀ r, 0 < Ψ r) (hf_pos : ∀ v, 0 < f v)
-    (v w : Fin 3 → ℝ) :
-    0 ≤ PSDIntegrand Ψ f v w := by
-  have h_landauMatrix_posSemidef : ∀ z : Fin 3 → ℝ, ∀ x : Fin 3 → ℝ,
-      0 ≤ dotProduct x (mulVec (landauMatrix Ψ z) x) := by
-    intros z x; unfold landauMatrix; simp +decide [ Matrix.mulVec, dotProduct ] ; ring_nf; (
-    simp +decide [ Fin.sum_univ_three, innerLandauMatrix ] ; ring_nf ; (
-    simp +decide [ Matrix.vecMulVec, normSq ] ; ring_nf ; (
-    norm_num [ Fin.sum_univ_three, dotProduct ] ; ring_nf ; (
-    nlinarith [ sq_nonneg ( x 0 * z 1 - x 1 * z 0 ), sq_nonneg ( x 0 * z 2 - x 2 * z 0 ),
-      sq_nonneg ( x 1 * z 2 - x 2 * z 1 ), hΨ ( eucNorm z ) ]))););
-  exact mul_nonneg (mul_nonneg (le_of_lt (hf_pos v)) (le_of_lt (hf_pos w)))
-    (h_landauMatrix_posSemidef _ _)
-
--- ============================================================================
--- Analysis Lemmas (to be proved)
---
--- Standard facts from real analysis needed for the Landau formalization.
--- ============================================================================
-
-/-- Dot product distributes over Bochner integral. -/
-lemma analysis_dot_integral
-    (a : Fin 3 → ℝ) (G : (Fin 3 → ℝ) → Fin 3 → ℝ)
-    (hG : Integrable G) :
-    dotProduct a (∫ w, G w) = ∫ w, dotProduct a (G w) := by
-  -- Proved directly: express dotProduct as a ContinuousLinearMap, use integral_comp_comm
-  let L : (Fin 3 → ℝ) →L[ℝ] ℝ := (∑ i, a i • ContinuousLinearMap.proj i)
-  have hL : ∀ v, L v = dotProduct a v := by
-    intro v; simp [L, dotProduct, ContinuousLinearMap.proj, Finset.sum_apply]
-  rw [show dotProduct a (∫ w, G w) = L (∫ w, G w) from (hL _).symm]
-  simp_rw [show ∀ w, dotProduct a (G w) = L (G w) from fun w => (hL _).symm]
-  exact (L.integral_comp_comm hG).symm
-
-/-- Double integral of a difference splits. -/
-lemma analysis_dbl_sub
-    (H₁ H₂ : (Fin 3 → ℝ) → (Fin 3 → ℝ) → ℝ)
-    (h1_inner : ∀ v, Integrable (H₁ v))
-    (h2_inner : ∀ v, Integrable (H₂ v))
-    (h1_outer : Integrable (fun v => ∫ w, H₁ v w))
-    (h2_outer : Integrable (fun v => ∫ w, H₂ v w)) :
-    ∫ v, ∫ w, (H₁ v w - H₂ v w) =
-    (∫ v, ∫ w, H₁ v w) - ∫ v, ∫ w, H₂ v w := by
-  -- Proved directly: integral_sub applied twice
-  simp_rw [integral_sub (h1_inner _) (h2_inner _)]
-  exact integral_sub h1_outer h2_outer
-
-/-- Log derivative identity: ∇f(v) = f(v) · ∇(log f)(v) for f > 0. -/
-lemma analysis_logDeriv
-    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) :
-    ∀ v, vGrad f v = f v • vGrad (Real.log ∘ f) v := by
-  -- Proved by Aristotle (Harmonic)
-  intro v
-  have h_fderiv : fderiv ℝ (Real.log ∘ f) v = (1 / f v) • fderiv ℝ f v := by
-    by_cases H : DifferentiableAt ℝ f v <;> simp_all +decide [ fderiv_neg, fderiv_comp ]
-    · erw [ fderiv_comp ] <;> norm_num [ H, ne_of_gt ( hf_pos v ) ]
-      erw [ fderiv.log ] <;> norm_num [ ne_of_gt ( hf_pos v ) ]
-    · rw [ fderiv_zero_of_not_differentiableAt H, fderiv_zero_of_not_differentiableAt ]
-      · norm_num
-      · contrapose! H
-        convert H.exp using 1 ; ext ; simp +decide [ Real.exp_log ( hf_pos _ ) ]
-  simp_all +decide [ VML.vGrad, funext_iff ]
-  exact fun x => by rw [ ← mul_assoc, mul_inv_cancel₀ ( ne_of_gt ( hf_pos v ) ), one_mul ]
 
 /-- Flux factoring: f(w)∇f(v) - f(v)∇f(w) = f(v)f(w)(∇logf(v) - ∇logf(w)). -/
 lemma analysis_fluxFactor
@@ -420,45 +314,6 @@ lemma poly_linear_extraction
   <;> have := h (fun i => if i = 2 then 1 else 0)
   <;> simp_all +decide [Fin.sum_univ_three, dotProduct]
   exact funext fun i => by fin_cases i <;> assumption
-
-/-- Log of a Gaussian integral: log(∫ exp(a + g)) = a + log(∫ exp(g)).
-    Used in the Poisson-Boltzmann derivation to show ∇(log ρ) = ∇a when
-    b and c are spatially constant. -/
-lemma log_density_decomposition (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
-    (h_int_pos : 0 < ∫ v : Fin 3 → ℝ,
-      Real.exp (dotProduct b v + c * normSq v)) :
-    Real.log (∫ v : Fin 3 → ℝ,
-        Real.exp (a + dotProduct b v + c * normSq v)) =
-    a + Real.log (∫ v : Fin 3 → ℝ,
-        Real.exp (dotProduct b v + c * normSq v)) := by
-  have h_factor : ∀ v : Fin 3 → ℝ,
-    Real.exp (a + dotProduct b v + c * normSq v) =
-    Real.exp a * Real.exp (dotProduct b v + c * normSq v) := by
-    intro v; rw [← Real.exp_add]; ring_nf
-  simp_rw [h_factor, integral_mul_left,
-    Real.log_mul (ne_of_gt (Real.exp_pos a)) (ne_of_gt h_int_pos),
-    Real.log_exp]
-
-/-- Algebraic core of the polynomial identity: the divided Vlasov equation
-    (after dividing by f > 0 and using Q=0, chain rule, vGrad formula)
-    is equivalent to the polynomial identity used in the VML proof. -/
-lemma polynomial_identity_algebraic
-    (E B b gradA gradC : Fin 3 → ℝ) (c : ℝ) (gradB : Fin 3 → Fin 3 → ℝ)
-    (hVlasov_divided : ∀ v : Fin 3 → ℝ,
-      (∑ i : Fin 3, v i * (gradA i + (∑ j : Fin 3, v j * gradB j i) +
-        normSq v * gradC i)) +
-      dotProduct (E + cross v B) (b + (2 * c) • v) = 0) :
-    ∀ v : Fin 3 → ℝ,
-      dotProduct v gradC * normSq v +
-      (∑ i : Fin 3, ∑ j : Fin 3, v i * v j * gradB j i) +
-      dotProduct v gradA +
-      dotProduct E b +
-      dotProduct v ((2 * c) • E + cross B b) = 0 := by
-  intro v
-  have h := hVlasov_divided v
-  simp +decide [dotProduct, Fin.sum_univ_three, cross, normSq,
-    Pi.add_apply, Pi.smul_apply, smul_eq_mul] at h ⊢
-  nlinarith [h]
 
 -- ============================================================================
 -- Analytical Gap Lemmas (proved using axioms above)
@@ -766,18 +621,6 @@ lemma cubic_coeff_zero (a : Fin 3 → ℝ) (h : ∀ v, dotProduct v a * normSq v
   ext j; by_contra h_a_nonzero; specialize h (Pi.single j 1)
   simp_all +decide [mul_assoc, Fin.sum_univ_three, dotProduct]
   fin_cases j <;> simp_all +decide [Fin.sum_univ_three, VML.normSq]
-
-/-- Gap 13 (algebraic core): Killing equation implies all second derivatives vanish.
-    Reference: Proof of Lemma 15 (lem:u_constant). -/
-lemma killing_second_deriv_zero
-    (d : Fin 3 → Fin 3 → Fin 3 → ℝ)
-    (hKill : ∀ i j, d i j + d j i = 0)
-    (d2 : Fin 3 → Fin 3 → Fin 3 → ℝ)
-    (hKill2 : ∀ k i j, d2 k i j + d2 k j i = 0)
-    (hSymm : ∀ k i j, d2 k i j = d2 i k j) :
-    ∀ k i j, d2 k i j = 0 := by
-  -- Proved by Aristotle (Harmonic)
-  grind +ring
 
 /-- Gap 13: Killing vector fields on the flat torus T³ are constant.
     Killing equation + harmonic → constant axiom.

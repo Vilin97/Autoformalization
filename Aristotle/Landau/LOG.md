@@ -1,5 +1,22 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 47: Remove 11 dead declarations (Section3Helpers + Defs)
+
+### Changes
+- Removed 9 dead lemmas from Section3Helpers.lean:
+  - `PSDIntegrand_continuous`, `neg_half_double_integral_nonpos`, `PSDIntegrand_nonneg`
+  - `analysis_dot_integral`, `analysis_dbl_sub`, `analysis_logDeriv`
+  - `log_density_decomposition`, `polynomial_identity_algebraic`, `killing_second_deriv_zero`
+- Removed 2 dead definitions from Defs.lean:
+  - `IsLogQuadratic` (unused, `IsMaxwellian` is used directly)
+  - `IsMaxwellian.isLogQuadratic` (depended on `IsLogQuadratic`)
+  - `hDiff_sub` (never called)
+- Section3Helpers.lean: 858 → 701 lines (-157)
+- Defs.lean: 776 → 759 lines (-17)
+- Total: 24 files, ~10,837 lines (down from ~11,011)
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 46: Remove dead code in Section3Helpers
 
 ### Changes
