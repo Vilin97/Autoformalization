@@ -11,9 +11,9 @@ Steps:
 
 3. Compose a 1-2 sentence summary of what was done (e.g. "Closed 1 sorry, submitted 2 lemmas to Aristotle").
 
-4. Send a Telegram message via curl:
+4. Send a Telegram message via curl (token from env):
    ```
-   curl -s -X POST "https://api.telegram.org/bot6632610666:AAGkTwe0YsnhcE468ALqcf-qmQmN6fP0o-Q/sendMessage" \
+   source .env && curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
      -d chat_id=398863010 \
      -d parse_mode=Markdown \
      --data-urlencode "text=<summary>. [Diff](<github-url>)"
