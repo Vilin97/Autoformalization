@@ -1,5 +1,18 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 48: Major dead code removal (-459 lines)
+
+### Changes
+- **VelocityDecayHelpers.lean (1002 → 749, -253 lines):** Removed entire `uniformMaxwellianDecay` block — ~240 lines of dead code including `uniformMaxwellian`, `uniformMaxwellian_flux_zero`, `uniformMaxwellian_flux_integral_zero`, `uniformMaxwellian_flux_component_zero`, `uniformMaxwellian_psd_zero`, `uniformMaxwellian_gradX_zero`, 3 private helpers. Kept `zeroField` (used externally).
+- **Section3.lean (378 → 194, -184 lines):** Removed 4 dead named theorems (`entropy_dissipation_formula`, `D_zero_implies_parallel`, `functional_eq_affine`, `nullspace_iff`) and 4 dead helper lemmas (`mulVec_integral_comm`, `ibp_real_line`, `dotProduct_integral_comm`, `const_times_integral_deriv_zero`).
+- **Section2.lean (-14):** Removed dead `vecMul_landauMatrix_self`.
+- **TorusInstance.lean (-11):** Removed dead `periodicLift_continuous` and `torus_hSpatialAdd`.
+- **LandauMatrixDerivBound.lean (-3):** Removed 3 dead bridging lemmas (`normSq'_eq_VML`, `eucNorm'_eq_VML`, `innerLandauMatrix'_eq_VML`).
+- **CoulombPSD.lean (-3):** Removed dead `PSDIntegrand'_eq_PSDIntegrand`.
+- Total: 24 files, 10,378 lines (down from 10,837)
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 47: Remove 11 dead declarations (Section3Helpers + Defs)
 
 ### Changes

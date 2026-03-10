@@ -11,9 +11,6 @@ def PSDIntegrand' (f : (Fin 3 → ℝ) → ℝ) (v w : Fin 3 → ℝ) : ℝ :=
       (mulVec (landauMatrix' (v - w))
         (vGrad' (Real.log ∘ f) v - vGrad' (Real.log ∘ f) w))
 
-lemma PSDIntegrand'_eq_PSDIntegrand (f : (Fin 3 → ℝ) → ℝ) (v w : Fin 3 → ℝ) :
-    PSDIntegrand' f v w = PSDIntegrand coulombKernel f v w := rfl
-
 set_option maxHeartbeats 800000 in
 lemma landau_bound (z u : Fin 3 → ℝ) :
     abs (dotProduct u (mulVec (landauMatrix' z) u)) ≤
