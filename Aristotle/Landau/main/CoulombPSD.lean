@@ -35,7 +35,7 @@ lemma landau_bound (z u : Fin 3 → ℝ) :
         norm_num [ Fin.sum_univ_three, dotProduct ] at *;
         exact abs_le.mpr ⟨ by nlinarith [ sq_nonneg ( z 0 * u 1 - z 1 * u 0 ), sq_nonneg ( z 0 * u 2 - z 2 * u 0 ), sq_nonneg ( z 1 * u 2 - z 2 * u 1 ) ], by nlinarith [ sq_nonneg ( z 0 * u 1 - z 1 * u 0 ), sq_nonneg ( z 0 * u 2 - z 2 * u 0 ), sq_nonneg ( z 1 * u 2 - z 2 * u 1 ) ] ⟩
 
-set_option maxHeartbeats 1600000 in
+
 lemma tendsto_landau_quadratic_diag
     (G : (Fin 3 → ℝ) → (Fin 3 → ℝ))
     (hG : ContDiff ℝ 1 G)
@@ -107,7 +107,7 @@ lemma tendsto_landau_quadratic_diag
         · exact Continuous.mul continuous_const <| Real.continuous_sqrt.comp <| Continuous.dotProduct ( continuous_fst.sub continuous_snd ) ( continuous_fst.sub continuous_snd );
         · norm_num [ normSq' ]
 
-set_option maxHeartbeats 1600000 in
+
 lemma continuous_landau_quadratic
     (G : (Fin 3 → ℝ) → (Fin 3 → ℝ))
     (hG : ContDiff ℝ 1 G) :
@@ -165,7 +165,7 @@ lemma psd_continuous_coulomb
   convert continuous_landau_quadratic ( fun v => ( fun i => G v ( Pi.single i 1 ) ) ) _ using 1;
   exact contDiff_pi.mpr fun i => h_G_smooth.clm_apply ( contDiff_const )
 
-set_option maxHeartbeats 1600000 in
+
 /-- Pointwise bound on PSD integrand for Coulomb kernel:
     |PSD(v,w)| ≤ 18Cg²f(v) * ((1+‖v‖)^{2Kg}·‖v-w‖⁻¹f(w) + ‖v-w‖⁻¹·(1+‖w‖)^{2Kg}f(w)) -/
 lemma psd_pointwise_bound_coulomb

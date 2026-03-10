@@ -63,7 +63,7 @@ lemma coulomb_landauMatrix_entry_le_pi (z : Fin 3 → ℝ) (i j : Fin 3)
   simp [hz] at h
   exact le_trans h (inv_anti₀ (norm_pos_iff.mpr hz) (pi_norm_le_eucNorm z))
 
-set_option maxHeartbeats 1600000 in
+
 /-- ‖·‖⁻¹ is locally integrable in ℝ³. Proved by Aristotle (job 3dc1b4dc).
     Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun> -/
 lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
@@ -131,7 +131,7 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
   rw [ MeasureTheory.ae_eq_set ] ; norm_num;
   exact MeasureTheory.measure_mono_null ( fun x hx => by aesop ) ( MeasureTheory.measure_singleton 0 )
 
-set_option maxHeartbeats 1600000 in
+
 /-- Convolution of a locally integrable kernel with a Schwartz function is integrable.
     Proved by Aristotle (job 1ba752be).
     Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun> -/
@@ -214,7 +214,7 @@ lemma newtonian_near_bound
           (h_inv_loc.const_mul _) h_pw
     _ = C₀ * ∫ z in Metric.closedBall (0 : Fin 3 → ℝ) 1, ‖z‖⁻¹ := integral_const_mul _ _
 
-set_option maxHeartbeats 1600000 in
+
 lemma newtonian_far_bound
     (g : (Fin 3 → ℝ) → ℝ)
     (hg_abs_int : Integrable (fun w => |g w|))

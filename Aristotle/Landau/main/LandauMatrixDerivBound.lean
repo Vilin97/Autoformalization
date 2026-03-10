@@ -310,7 +310,6 @@ lemma landauEntry_hasFDerivAt_of_ne_zero
 
 end AristotleLemmas
 
-set_option maxHeartbeats 1600000 in
 lemma landauMatrix_entry_fderiv_norm_bound
     {Ψ : ℝ → ℝ} (hΨ_diff : ContDiff ℝ 1 Ψ) (hΨ_bound : ∃ CΨ, ∀ r, |Ψ r| ≤ CΨ)
     (hΨ'_bound : ∃ CΨ', ∀ r, |deriv Ψ r| ≤ CΨ')
