@@ -31,6 +31,13 @@
       "output": "aristotle-out/coulomb_conv_diff_aristotle.lean",
       "target": "coulomb_conv_diff",
       "note": ""
+    },
+    {
+      "id": "28a741f0-54c2-42fb-a919-24289959c2c9",
+      "submission": "aristotle-in/coulomb_conv_deriv_decay.lean",
+      "output": "aristotle-out/coulomb_conv_deriv_decay_aristotle.lean",
+      "target": "coulomb_conv_deriv_decay",
+      "note": ""
     }
   ],
   "completed": [
