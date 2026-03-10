@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 54: Add bridging lemmas for primed definitions
+
+### Changes
+- **CoulombFlux.lean:** Added 6 bridging lemmas (`normSq'_eq`, `eucNorm'_eq`, `innerLandauMatrix'_eq`, `coulombKernel'_eq`, `landauMatrix'_eq`, `vGrad'_eq`) connecting primed Aristotle-generated defs to VML namespace defs via `rfl`.
+- **CoulombPSD.lean:** Added bridging lemma `PSDIntegrand'_eq : PSDIntegrand' = PSDIntegrand coulombKernel := rfl`.
+- **LandauMatrixDerivBound.lean:** Added 3 bridging lemmas (`normSq'_eq_VML`, `eucNorm'_eq_VML`, `innerLandauMatrix'_eq_VML`) alongside existing `landauMatrix'_eq_VML`.
+- All builds pass. 0 sorry's. 22 files.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 53: Delete VelocityDecayHelpers.lean, fix stale docs
 
 ### Changes

@@ -360,7 +360,10 @@ lemma landauMatrix_entry_fderiv_norm_bound
       exact le_trans ( norm_add_le _ _ ) ( by linarith [ hC₁ z hz, hC₂ z hz ] ) ;); -- Apply the triangle inequality to the sum of the derivatives.;
     exact False.elim <| h_zero ⟨ C, hC ⟩
 
--- Bridge: show standalone defs equal VML defs
+-- Bridging lemmas: standalone defs equal VML namespace defs
+lemma normSq'_eq_VML : normSq' = VML.normSq := rfl
+lemma eucNorm'_eq_VML : eucNorm' = VML.eucNorm := rfl
+lemma innerLandauMatrix'_eq_VML : innerLandauMatrix' = VML.innerLandauMatrix := rfl
 lemma landauMatrix'_eq_VML : landauMatrix' = VML.landauMatrix := rfl
 
 -- Aristotle-proved: |A_{ij}(z)| ≤ C * ‖z‖²
