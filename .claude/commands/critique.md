@@ -17,6 +17,7 @@ Write the full adversarial critique to `Aristotle/Landau/critique.md` with the e
 ## Mandatory sections
 
 For EACH of the following, either find a real problem or explicitly state "I found no issue" (do not skip silently):
+0. **Errors** — run `lake build Aristotle/Landau/main/CoulombConcreteTheorem42.lean` to see if there are any errors. This is P0!
 
 1. **Sorry's** — List every `sorry` with file:line. For each: is the statement actually true? Could the hypotheses be wrong? Could Aristotle prove the negation? What's the worst-case scenario if this sorry hides a bug?
 
