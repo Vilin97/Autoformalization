@@ -31,7 +31,6 @@ lemma vGrad'_eq : vGrad' = vGrad := rfl
 -- Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun>
 -- ============================================================================
 
-set_option maxHeartbeats 800000 in
 /-- The Landau collision flux is integrable for the Coulomb kernel. -/
 lemma landau_flux_integrable_coulomb
     (f : (Fin 3 → ℝ) → ℝ)

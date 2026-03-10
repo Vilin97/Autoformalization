@@ -51,7 +51,7 @@ lemma gaussian_normalization_maxwellian
   intro v; rw [ ← hf_int ] ; unfold equilibriumMaxwellian; ring;
   norm_num [ mul_assoc, mul_comm, mul_left_comm, ne_of_gt ( Real.rpow_pos_of_pos ( show 0 < - ( Real.pi * c₀⁻¹ ) by nlinarith [ Real.pi_pos, mul_inv_cancel₀ ( ne_of_lt hc₀ ) ] ) _ ) ]
 
-set_option maxHeartbeats 800000 in
+
 /-- Gaussian first moment: ∫ vᵢ exp(a+b·v+c|v|²) = (-bᵢ/(2c)) · ∫ exp(a+b·v+c|v|²).
     Proved by Aristotle (project 4c5e7998). -/
 lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
@@ -390,7 +390,7 @@ lemma entropy_zero_quadform_zero (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ
   unfold PSDIntegrand at this
   nlinarith [mul_pos (hf_pos v) (hf_pos w)]
 
-set_option maxHeartbeats 800000 in
+
 /-- Gap 6: Solution of the functional equation: parallel + curl-free → affine.
     If g(v) - g(w) ∥ (v - w) for all v ≠ w and g is smooth (hence curl-free),
     then g(v) = b + 2c₀ v for constants b, c₀.

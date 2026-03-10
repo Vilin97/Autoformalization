@@ -367,7 +367,6 @@ lemma innerLandauMatrix'_eq_VML : innerLandauMatrix' = VML.innerLandauMatrix := 
 lemma landauMatrix'_eq_VML : landauMatrix' = VML.landauMatrix := rfl
 
 -- Aristotle-proved: |A_{ij}(z)| ≤ C * ‖z‖²
-set_option maxHeartbeats 800000 in
 lemma landauMatrix_entry_abs_bound
     {Ψ : ℝ → ℝ} (hΨ_bound : ∃ CΨ, ∀ r, |Ψ r| ≤ CΨ)
     (i j : Fin 3) :

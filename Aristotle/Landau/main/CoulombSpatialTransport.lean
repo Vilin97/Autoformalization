@@ -53,7 +53,7 @@ lemma torusGradX_aestronglyMeasurable
   exact aestronglyMeasurable_of_tendsto_ae Filter.atTop hG_meas
     (Filter.Eventually.of_forall hG_lim)
 
-set_option maxHeartbeats 800000 in
+
 /-- Spatial transport integrand is dominated by inverse polynomial
     (from Schwartz grad decay + log bound). -/
 lemma spatial_transport_integrable
@@ -111,7 +111,7 @@ lemma spatial_transport_integrable
       _ ≤ |C_log| * Ci := by gcongr
       _ ≤ Ci * (|C_log| + 1) := by nlinarith [abs_nonneg C_log, hCi.le]
 
-set_option maxHeartbeats 800000 in
+
 /-- Each force × fderiv × log component is integrable (shared helper for
     force_transport and force_ibp_f_dg). -/
 lemma force_fderiv_log_component_integrable
@@ -205,7 +205,7 @@ lemma force_transport_integrable_coulomb
   rw [heq]; exact integrable_finset_sum _ fun i _ =>
     force_fderiv_log_component_integrable E B hf_pos hf_smooth hSchwartz C_log K_log hLB x i
 
-set_option maxHeartbeats 800000 in
+
 /-- Force IBP (f·dg form) integrand is integrable.
     Uses chain rule: d/dv(f·log f - f) = f'·log f. -/
 lemma force_ibp_f_dg_integrable_coulomb
@@ -361,7 +361,7 @@ lemma gradX_stronglyMeasurable_v
   simp only [smul_eq_mul, Function.comp_def, inv_inv, zero_smul, add_zero, zero_add] at h
   convert h using 1
 
-set_option maxHeartbeats 800000 in
+
 /-- Spatial transport joint integrability (Fubini on compact torus × ℝ³).
     Uses: uniform Schwartz grad decay → uniform velocity integral bound,
     combined with finite measure on compact T³ → joint integrability. -/
@@ -541,7 +541,7 @@ lemma spatial_transport_joint_integrable
         _ = C_total * ∫ v, (1 + ‖v‖)⁻¹ ^ 4 := by
             simp_rw [div_eq_mul_inv, inv_pow]; exact integral_mul_left _ _
 
-set_option maxHeartbeats 800000 in
+
 /-- The parametric integral `x ↦ ∫ v, v ⬝ᵥ gradX(f)(x) * log(f(x,v))` is continuous
     on the torus. Proved via `continuous_of_dominated` using the uniform Schwartz+log bound
     from `spatial_transport_joint_integrable`. -/

@@ -1,5 +1,21 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 56: Eliminate all maxHeartbeats 800000 overrides
+
+### Changes
+- Removed ALL 11 remaining `maxHeartbeats 800000` overrides across 6 files:
+  - **CoulombSpatialTransport.lean:** 5 overrides removed
+  - **Section3Helpers.lean:** 2 overrides removed
+  - **Section3.lean:** 1 override removed
+  - **CoulombFlux.lean:** 1 override removed
+  - **LandauMatrixDerivBound.lean:** 1 override removed
+  - **TorusInstance.lean:** 1 section-wide override removed
+- All proofs compile at default heartbeats (400000). The 800000 overrides were unnecessary.
+- Heartbeat overrides reduced from 29 → 18 (11 at 1600000, 6 at 3200000, 1 synthInstance).
+- All builds pass. 0 sorry's. 22 files.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 55: Reduce heartbeats, fix MEMORY.md drift
 
 ### Changes

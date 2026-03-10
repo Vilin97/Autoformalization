@@ -124,7 +124,6 @@ lemma landauMatrix_sub_comm (Ψ : ℝ → ℝ) (v w : Fin 3 → ℝ) :
     landauMatrix Ψ (w - v) = landauMatrix Ψ (v - w) := by
   rw [show w - v = -(v - w) from by abel, landauMatrix_even]
 
-set_option maxHeartbeats 800000 in
 /-- Fubini symmetrization for the Landau weak form specialized to φ = log ∘ f.
     ∫∫ ⟨∇log f(v) - ∇log f(w), A(v-w) · flux⟩ = 2 · ∫∫ ⟨∇log f(v), A(v-w) · flux⟩
     Proved by Aristotle (project 85302568). -/

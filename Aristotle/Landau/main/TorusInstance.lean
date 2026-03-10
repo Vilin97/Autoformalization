@@ -326,8 +326,6 @@ private lemma continuous_torusGradX (f : Torus3 → ℝ) (i : Fin 3)
 -- Box integral machinery (proved by Aristotle)
 -- ============================================================================
 
-set_option maxHeartbeats 800000
-
 section AristotleLemmas
 open intervalIntegral
 
