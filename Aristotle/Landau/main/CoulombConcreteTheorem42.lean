@@ -68,6 +68,9 @@ theorem CoulombConcreteTheorem42
     (hExpDecay : ∃ (C : ℝ) (K : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
       Real.exp (-C * (1 + ‖v‖) ^ K) ≤ f x v)   -- (8)
     -- === Polynomial score bound (same as smooth kernel's hGradBound) ===
+    -- NOTE: Likely derivable from hSchwartz + hExpDecay (Schwartz numerator /
+    -- stretched-exponential denominator → polynomial growth), but proving this
+    -- in Lean is nontrivial. Stated separately; the hypothesis list is not minimal.
     (hGradBound : ∃ (Cg : ℝ) (Kg : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ) (i : Fin 3),
       |fderiv ℝ (f x) v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f x v) -- (9)
     -- === Steady-state Vlasov equation with Coulomb kernel ===

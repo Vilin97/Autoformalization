@@ -11,28 +11,6 @@ namespace VML
 -- Reference: Section 3 of the tex (Lemmas 4-9, Theorems 3-5, Corollary 1)
 -- ============================================================================
 
-/-- Lemma 4 (Symmetrized weak formulation of the Landau operator).
-    Reference: lem:symmetrized_weak
-
-    For any smooth test function φ:
-    ∫ Q(f,f)(v) φ(v) dv = -½ ∬ (∇φ(v) - ∇φ(w))ᵀ A(v-w) [f(w)∇f(v) - f(v)∇f(w)] dv dw
-
-    Proof uses integration by parts on the divergence form of Q and the
-    symmetry A(-z) = A(z) (Lemma 1b) under v ↔ w exchange. -/
-theorem symmetrized_weak_form (Ψ : ℝ → ℝ) (f φ : (Fin 3 → ℝ) → ℝ)
-    (_hf_pos : ∀ v, 0 < f v) (_hf_smooth : ContDiff ℝ ⊤ f)
-    (_hφ_smooth : ContDiff ℝ ⊤ φ)
-    -- Hypothesis: SWF identity (from IBP + Fubini + A(-z)=A(z) symmetry)
-    (hSWF : ∫ v, LandauOperator Ψ f v * φ v =
-      -(1 / 2) * ∫ v, ∫ w, dotProduct (vGrad φ v - vGrad φ w)
-        (mulVec (landauMatrix Ψ (v - w))
-          (f w • vGrad f v - f v • vGrad f w))) :
-    ∫ v, LandauOperator Ψ f v * φ v =
-    -(1 / 2) * ∫ v, ∫ w, dotProduct (vGrad φ v - vGrad φ w)
-      (mulVec (landauMatrix Ψ (v - w))
-        (f w • vGrad f v - f v • vGrad f w)) :=
-  hSWF
-
 /-- Lemma 5 (Entropy dissipation formula).
     Reference: lem:entropy_dissipation
 

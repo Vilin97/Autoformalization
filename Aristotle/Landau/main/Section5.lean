@@ -21,37 +21,6 @@ lemma lorentz_force_expansion (E b B v : Fin 3 → ℝ) (c : ℝ) :
 -- Reference: Lemmas 13-17
 -- ============================================================================
 
-/-- Lemma 13 (Polynomial identity in velocity).
-    Reference: lem:polynomial_identity
-
-    With log f(x,v) = a(x) + b(x)·v + c(x)|v|², the collisionless transport
-    equation v·∇ₓ(log f) + (E + v×B)·∇ᵥ(log f) = 0 expands to:
-
-    (v · ∇ₓc)|v|² + Σᵢⱼ vᵢvⱼ ∂ₓᵢbⱼ + v·(∇ₓa + 2cE + B×b) + E·b = 0
-
-    This must hold for all v ∈ ℝ³. -/
-theorem polynomial_identity_velocity
-    (X : Type*)
-    (a : X → ℝ) (b : X → (Fin 3 → ℝ)) (c : X → ℝ)
-    (E B : X → (Fin 3 → ℝ))
-    (gradX : (X → ℝ) → X → (Fin 3 → ℝ))
-    (_hsteady : ∀ x v,
-      dotProduct v (gradX a x) +
-      (∑ i : Fin 3, ∑ j : Fin 3, v i * v j * (gradX (fun y => b y j) x i)) +
-      dotProduct v (gradX c x) * normSq v +
-      dotProduct (E x) (b x) +
-      dotProduct v ((2 * c x) • E x + cross (B x) (b x)) = 0) :
-    -- O(|v|³): ∇ₓc = 0
-    (∀ x, gradX c x = 0) →
-    -- O(|v|²): ∂ₓᵢbⱼ + ∂ₓⱼbᵢ = 0 (Killing's equation)
-    (∀ x i j, gradX (fun y => b y j) x i + gradX (fun y => b y i) x j = 0) →
-    -- O(|v|¹): ∇ₓa = -2c(E + u × B)
-    (∀ x, gradX a x = -(2 * c x) • E x - cross (B x) (b x)) →
-    -- O(|v|⁰): E · b = 0
-    (∀ x, dotProduct (E x) (b x) = 0) →
-    True := by
-  intros; trivial
-
 /-- Lemma 14 (Temperature is spatially constant).
     Reference: lem:T_constant
 

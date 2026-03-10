@@ -1,5 +1,19 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 45: Remove tautological theorems + document hGradBound
+
+### Changes
+- Removed 5 tautological/dead theorems:
+  - `lhs_entropy_vanishes` (Section4.lean) — proof was just `htransport`
+  - `symmetrized_weak_form` (Section3.lean) — proof was just `hSWF`
+  - `polynomial_identity_velocity` (Section5.lean) — conclusion was `True`, proof was `intros; trivial`
+  - `energy_conserved` (Section9.lean) — forwarded to `vml_energy_conservation`
+  - `B_mean_conserved` (Section9.lean) — forwarded to `B_mean_conserved_from_axioms`
+- Added comment in CoulombConcreteTheorem42.lean documenting that hGradBound (hypothesis 9) is likely derivable from hSchwartz + hExpDecay
+- Total: 24 files, 11,079 lines (down from 11,193)
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 44: Remove custom generalize_proofs fork + dead code
 
 ### Changes
