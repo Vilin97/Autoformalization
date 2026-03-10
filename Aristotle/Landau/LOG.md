@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 39: Split CoulombPSD.lean
+
+### Changes
+- Split CoulombPSD.lean (1325 lines) into:
+  - CoulombPSD.lean (716 lines): PSD integrand, continuity, pointwise bounds, inner/outer integrability, Fubini
+  - CoulombFluxDiff.lean (627 lines): Schwartz fderiv, convolution differentiability, flux differentiability, flux decay, IBP integrability
+- Updated CoulombConcreteTheorem42.lean imports to include CoulombFluxDiff
+- Both files compile cleanly, 0 sorry's
+
+### Sorry count: 0
+
 ## 2026-03-11 20:00 UTC — Babysit cycle 27: Assessed remaining tech debt
 
 ### Assessment
