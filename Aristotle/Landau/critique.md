@@ -2,9 +2,9 @@
 
 **Reviewer posture:** Hostile. Default verdict is REJECT. The formalization must earn approval through evidence.
 
-**Reviewed:** Full codebase at `Aristotle/Landau/main/` (21 .lean files, 10,972 total lines)
+**Reviewed:** Full codebase at `Aristotle/Landau/main/` (21 .lean files, 11,046 total lines)
 **Main theorem:** `CoulombConcreteTheorem42` in `CoulombConcreteTheorem42.lean` (280 lines)
-**Date:** 2026-03-09 (updated)
+**Date:** 2026-03-09 (fresh analysis, supersedes all prior reviews)
 
 **Claim:** Any sufficiently smooth, positive, Schwartz-class steady-state solution of the Vlasov-Maxwell-Landau system with Coulomb collisions on T^3 is a global Maxwellian equilibrium with E = 0 and B = const.
 
@@ -12,21 +12,27 @@
 
 ## 1. Remaining Sorry's and Their Mathematical Status
 
-There are **3 sorry tokens** in the codebase, all in `CoulombPSD.lean`. They occur in 3 distinct lemmas: 2 "base" lemmas (entry-level convolution results) and 1 "derived" lemma (`coulomb_flux_deriv_schwartz_decay`, which has a partial proof body reducing to the base lemmas). A previously sorry'd lemma (`coulomb_flux_differentiable`) was proved in cycle 22 by decomposing the flux integral via `eval_integral` + `integral_finset_sum` + `integral_sub` + `integral_const_mul_of_integrable`. Two downstream lemmas (`coulomb_ibp_df_g_integrable` and the `hLandauFluxDiff` field) have fully-written proof bodies that compile modulo the 3 remaining sorry's.
+There are **2 sorry tokens** in the codebase, all in `CoulombPSD.lean`. They are 2 independent "base" lemmas with empty proof bodies (sorry 1 and sorry 2). All derived lemmas that depend on them have complete proof bodies.
+
+Three further lemmas (`coulomb_flux_differentiable`, `coulomb_flux_deriv_schwartz_decay`, and `coulomb_ibp_df_g_integrable`) have complete proof bodies that are formally verified modulo the 2 sorry'd base lemmas.
 
 ### Sorry inventory
 
 | # | Lemma | File:Line | Statement | Proof body | Deps |
 |---|-------|-----------|-----------|------------|------|
-| 1 | `coulomb_entry_conv_differentiable` | CoulombPSD.lean:787-792 | `Differentiable R (v -> integral_w A_{ij}(v-w) * g(w))` for Schwartz g | Empty (`sorry`) | None |
-| 2 | `coulomb_entry_conv_deriv_decay` | CoulombPSD.lean:797-803 | `exists C > 0, forall v, norm(fderiv(entry_conv)(v)) * (1+norm(v))^N <= C` | Empty (`sorry`) | None |
-| ~~3~~ | ~~`coulomb_flux_differentiable`~~ | CoulombPSD.lean:808-876 | `Differentiable R (v -> flux_i(v))` | **PROVED** (cycle 22): K/L decomposition + `eval_integral` + `integral_finset_sum` + `integral_const_mul_of_integrable` | Uses 1 |
-| 3 | `coulomb_flux_deriv_schwartz_decay` | CoulombPSD.lean:878-897 | `exists C > 0, forall v, norm(fderiv(flux_i)(v)) * (1+norm(v))^N <= C` | Substantial (reduces to sorry 2 via K/L decomposition, ends in sorry for product/sum assembly) | Uses 2 |
-| (4) | `coulomb_ibp_df_g_integrable` | CoulombPSD.lean:899-948 | `Integrable (v -> fderiv(flux_i)(v)(e_i) * log(f(v)))` | Complete (compiles modulo 1, 2, 3) | Uses 1, 2, 3 |
+| 1 | `coulomb_entry_conv_differentiable` | CoulombPSD.lean:792 | `Differentiable R (v -> integral_w A_{ij}(v-w) * g(w))` for Schwartz g | Empty (`sorry`) | None |
+| 2 | `coulomb_entry_conv_deriv_decay` | CoulombPSD.lean:803 | `exists C > 0, forall v, norm(fderiv(entry_conv)(v)) * (1+norm(v))^N <= C` | Empty (`sorry`) | None |
+| (*) | `coulomb_flux_differentiable` | CoulombPSD.lean:812-872 | `Differentiable R (v -> flux_i(v))` | **COMPLETE** (depends on sorry 1) | Uses 1 |
+| (*) | `coulomb_flux_deriv_schwartz_decay` | CoulombPSD.lean:916-1124 | `exists C > 0, forall v, norm(fderiv(flux_i)(v)) * (1+norm(v))^N <= C` | **COMPLETE** (~200 lines; depends on sorry 2) | Uses 2 |
+| (*) | `coulomb_ibp_df_g_integrable` | CoulombPSD.lean:1144-1191 | `Integrable (v -> fderiv(flux_i)(v)(e_i) * log(f(v)))` | **COMPLETE** (depends on sorry's 1-2 via call chain) | Uses (*) |
 
-### Previous critique discrepancy
+### Correction from previous critique
 
-The previous version of this critique stated "2 sorry tokens" and then was updated to "4 sorry tokens." The 4-sorry count was correct at the time but is now stale: `coulomb_flux_differentiable` was proved in cycle 22 (via K/L decomposition with `eval_integral`, `integral_finset_sum`, `integral_sub`, `integral_const_mul_of_integrable`). **The honest count is now 3 sorry's.**
+The previous critique counted **3 sorry tokens**. This is now **2**. The change is that `coulomb_flux_deriv_schwartz_decay` has been fully proved: a ~200-line proof body that:
+1. Decomposes flux into K_{ij}/L_{ij} convolutions via `coulomb_flux_eq_decomposed`
+2. Establishes Schwartz decay of fderiv(K), fderiv(L) from sorry 2
+3. Bounds each of 4 product-rule terms using `mul_le_mul`
+4. Combines using `nlinarith` with the key identity `‖fderiv f v‖ = ‖iteratedFDeriv 1 f v‖` (via `norm_iteratedFDeriv_fderiv` + `norm_iteratedFDeriv_zero`)
 
 ### Assessment of sorry 1: `coulomb_entry_conv_differentiable`
 
@@ -34,33 +40,21 @@ The previous version of this critique stated "2 sorry tokens" and then was updat
 
 **Is it mathematically true?** Yes. After the substitution `u = v - w`, the integral becomes `integral_u A_{ij}(u) * g(v - u)`, a standard convolution. The v-derivative acts only on `g(v - u)`, producing `integral_u A_{ij}(u) * (fderiv g)(v - u)(e_k)`. Since `|A_{ij}(u)| <= ||u||^{-1}` is locally integrable in R^3 (the singularity is `r^{-1}` which integrates against `r^2 dr`) and `fderiv g` is Schwartz (hence bounded and integrable), the dominated convergence theorem applies via Mathlib's `hasFDerivAt_integral_of_dominated_of_fderiv_le`.
 
-The docstring of the lemma itself sketches this argument. The difficulty is not mathematical but API-level: constructing the dominated convergence hypotheses for Mathlib's `hasFDerivAt_integral_of_dominated_of_fderiv_le` requires careful bookkeeping of measurability, pointwise bounds, and neighborhood uniformity.
-
-**Difficulty of filling in Lean:** Moderate-hard. Estimated 100-200 lines. The argument is *explicitly described in the docstring* and the Mathlib API exists. The main obstacle is showing the dominator `||u||^{-1} * C / (1+||u||)^4` is integrable (proved elsewhere in the codebase as `inv_norm_schwartz_integrable`) and that the fderiv of the integrand satisfies the pointwise bound uniformly on a neighborhood of each v.
+**Difficulty of filling in Lean:** Moderate-hard. Estimated 100-200 lines. The argument is explicitly described in the docstring and the Mathlib API exists. The main obstacle is showing the dominator `||u||^{-1} * C / (1+||u||)^4` is integrable (proved elsewhere in the codebase as `inv_norm_schwartz_integrable`) and that the fderiv of the integrand satisfies the pointwise bound uniformly on a neighborhood of each v.
 
 ### Assessment of sorry 2: `coulomb_entry_conv_deriv_decay`
 
 **Statement:** The derivative of the entry convolution has Schwartz decay: for every N, `||fderiv(entry_conv)(v)|| * (1+||v||)^N <= C`.
 
-**Is it mathematically true?** Yes. The derivative equals `integral_u A_{ij}(u) * (fderiv g)(v - u)(e_k)`. For any N, split:
-- Near part (||u|| <= ||v||/2): `|(fderiv g)(v-u)| <= C_N / (1+||v-u||)^N <= C_N' / (1+||v||)^N` since ||v-u|| >= ||v||/2, and `|A_{ij}(u)| <= ||u||^{-1}` is locally integrable.
-- Far part (||u|| > ||v||/2): `|A_{ij}(u)| <= ||u||^{-1}`, and `|(fderiv g)(v-u)|` is bounded, so the integral over ||u|| > ||v||/2 is bounded by `C * integral_{||u||>||v||/2} ||u||^{-1} du` which is O(||v||^2), but the Schwartz factor from g provides the needed polynomial cancellation.
-
-More rigorously: the convolution of an L^1_loc function with a Schwartz function is Schwartz. This is standard (see Folland, "Real Analysis," Proposition 8.10).
+**Is it mathematically true?** Yes. The derivative equals `integral_u A_{ij}(u) * (fderiv g)(v - u)(e_k)`. The convolution of an L^1_loc function with a Schwartz function is Schwartz (Folland, "Real Analysis," Proposition 8.10). The near/far splitting argument gives polynomial decay at any order.
 
 **Difficulty of filling in Lean:** Hard. Estimated 200-400 lines. Requires splitting the integral into near/far regions, bounding each separately with polynomial weights, and combining. No ready-made Mathlib lemma for "convolution with L^1_loc preserves Schwartz class."
 
-### Assessment of sorry 3 (formerly sorry 4): `coulomb_flux_deriv_schwartz_decay`
-
-**Status of former sorry 3 (`coulomb_flux_differentiable`): PROVED.** Cycle 22 closed this by decomposing the flux integral via `eval_integral` + `integral_finset_sum` + `integral_sub` + `integral_const_mul_of_integrable`, reducing to product/sum rules for differentiable functions.
-
-**Remaining sorry 3:** Similar structure to the (now proved) flux differentiability: has a proof body that derives Schwartz decay of K and L derivatives via sorry 2, then needs the product rule for Schwartz-class functions. This requires showing that products and sums of Schwartz-decay functions have Schwartz decay, which is straightforward but tedious. Estimated 30-60 lines conditional on sorry 2.
-
 ### Impact analysis
 
-The 3 sorry's taint exactly **2 of 18** VelocityDecayConditions fields:
-- `hLandauFluxDiff` (uses sorry 1 via `coulomb_flux_differentiable`, which is now proved modulo sorry 1)
-- `hLandauIBP_df_g` (uses sorry's 1, 2, 3 via `coulomb_ibp_df_g_integrable`)
+The 2 sorry's taint exactly **2 of 18** VelocityDecayConditions fields:
+- `hLandauFluxDiff` (uses sorry 1 via `coulomb_flux_differentiable`)
+- `hLandauIBP_df_g` (uses sorry's 1-3 via `coulomb_ibp_df_g_integrable`)
 
 The remaining 16 fields are fully proved. **Completeness: 16/18 = 89%.**
 
@@ -68,31 +62,27 @@ The remaining 16 fields are fully proved. **Completeness: 16/18 = 89%.**
 
 ```
 coulomb_entry_conv_differentiable (SORRY 1)
-  -> coulomb_flux_differentiable (PROVED, cycle 22)
+  -> coulomb_flux_differentiable (PROVED, depends on sorry 1)
      -> hLandauFluxDiff (field of VelocityDecayConditions)
      -> coulomb_ibp_df_g_integrable (measurability sub-proof)
 
 coulomb_entry_conv_deriv_decay (SORRY 2)
-  -> coulomb_flux_deriv_schwartz_decay (SORRY 3)
-     -> coulomb_ibp_df_g_integrable
+  -> coulomb_flux_deriv_schwartz_decay (PROVED, depends on sorry 2)
+     -> coulomb_ibp_df_g_integrable (PROVED, depends on sorry 2 via chain)
         -> hLandauIBP_df_g (field of VelocityDecayConditions)
 ```
 
 ---
 
-## 2. Sorry Count Trajectory: Progress or Regression?
+## 2. Sorry Count Trajectory
 
-The sorry count has decreased from 4 (previous revision) to **3 sorry tokens** following the proof of `coulomb_flux_differentiable` in cycle 22.
+| Version | Sorry tokens | Independent base sorry's | Derived sorry's with partial proof | VDC completeness |
+|---------|-------------|-------------------------|-----------------------------------|-----------------|
+| Previous critique | 4 | 2 | 2 (flux_diff, flux_decay) | 16/18 = 89% |
+| Cycle 22 | 3 | 2 | 1 (flux_decay only) | 16/18 = 89% |
+| Current (cycle 23) | **2** | 2 | 0 (all derived lemmas proved) | 16/18 = 89% |
 
-| Metric | Previous state | Current state | Assessment |
-|--------|---------------|---------------|------------|
-| Sorry tokens | 4 | 3 | Progress |
-| Independent sorry'd *statements* | 2 (base) + 2 (derived) | 2 (base) + 1 (derived) | Progress |
-| `coulomb_flux_differentiable` | SORRY (partial proof body) | PROVED | Progress |
-| `coulomb_ibp_df_g_integrable` | Complete modulo 4 sorry's | Complete modulo 3 sorry's | Progress |
-| VelocityDecayConditions completeness | 89% (16/18) | 89% (16/18) | Same (the 2 tainted fields still depend on base sorry's) |
-
-**3 sorry tokens is 3 sorry tokens.** Lean does not care about proof sketches. Until these are filled, the theorem depends on 3 unverified axioms.
+`coulomb_flux_differentiable` was promoted from sorry'd to fully proved (cycle 22). `coulomb_flux_deriv_schwartz_decay` was promoted from sorry'd to fully proved (cycle 23): a ~200-line proof decomposing the flux into K/L convolutions, establishing derivative bounds via `mul_le_mul` on 4 product-rule terms, and combining with `nlinarith`. All 3 derived lemmas now have complete proof bodies; only the 2 independent base lemmas remain sorry'd.
 
 ---
 
@@ -102,9 +92,7 @@ The sorry count has decreased from 4 (previous revision) to **3 sorry tokens** f
 
 The `VelocityDecayConditions` structure (Theorem42.lean:25-88) has 18 fields encoding integrability, differentiability, continuity, and Fubini conditions needed for the H-theorem chain. These are consumed by `Theorem42` as a single bundled hypothesis `hDecay`.
 
-**The positive framing:** All 18 fields are explicitly instantiated in `CoulombConcreteTheorem42.lean:158-274`. Each field is filled with a call to a named lemma, and 16 of those lemma bodies are complete proofs. This is not a black box -- the user can inspect exactly what is assumed.
-
-**The negative framing:** The structure is 64 lines of type signatures. A reader must verify that each field is not smuggling in a non-obvious consequence of the conclusion. Specifically:
+All 18 fields are explicitly instantiated in `CoulombConcreteTheorem42.lean:158-274`. Each field is filled with a call to a named lemma. 16 of those lemma bodies are complete proofs.
 
 ### Field-by-field non-circularity audit
 
@@ -117,8 +105,8 @@ The `VelocityDecayConditions` structure (Theorem42.lean:25-88) has 18 fields enc
 | `hFubini_outer` | PROVED | No -- outer Fubini integrability |
 | `hSpatialTransport_int` | PROVED | No -- transport term integrability |
 | `hForceTransport_int` | PROVED | No -- force transport integrability |
-| `hLandauFluxDiff` | **SORRY** | **Risk: differentiability of the flux is used in the IBP that leads to D(f)=0. But the statement itself (differentiability) does not imply D(f)=0 or the Maxwellian form.** |
-| `hLandauIBP_df_g` | **SORRY** | Same as above -- integrability for IBP, not a conclusion-equivalent. |
+| `hLandauFluxDiff` | **SORRY** | No -- differentiability does not imply equilibrium |
+| `hLandauIBP_df_g` | **SORRY** | No -- integrability for IBP does not imply equilibrium |
 | `hLandauIBP_f_dg` | PROVED | No |
 | `hLandauIBP_fg` | PROVED | No |
 | `hLandauFluxInt` | PROVED | No |
@@ -127,16 +115,31 @@ The `VelocityDecayConditions` structure (Theorem42.lean:25-88) has 18 fields enc
 | `hSpatialTransport_joint` | PROVED | No |
 | `hSpatTransComp` | PROVED | No |
 | `hf_velocity_dominated` | PROVED | No |
-| `hPSD_cont` | PROVED | **Note: this field asserts continuity of the PSD integrand for Coulomb. Proved via `psd_continuous_coulomb`, which is a genuine 170-line proof handling the cancellation at the diagonal. This is the hardest proved field.** |
+| `hPSD_cont` | PROVED | No |
 | `hD_cont` | PROVED | No |
 
-**Verdict on hidden axioms:** None of the 18 fields encodes a statement equivalent to or implying the conclusion (f = Maxwellian, E = 0, B = const). They are all analytical regularity conditions. The sorry'd fields are the weakest link, but their statements are differentiability and integrability claims, not structural claims about f.
+**Verdict on hidden axioms:** None of the 18 fields encodes a statement equivalent to or implying the conclusion. They are all analytical regularity conditions.
+
+### Concern: hD_cont proof uses Vlasov equation
+
+The `hD_cont` field (CoulombConcreteTheorem42.lean:237-273) proves continuity of `entropyDissipation coulombKernel (f x)` by expressing it as `nu^{-1} * integral(spatial_transport * log f)`. This identity comes from the Vlasov equation, so it requires `hVlasov` as input. The proof chain is:
+
+1. Use Vlasov to write `nu * Q(f,f) = spatial_transport + force_transport`
+2. Show force transport integral is zero (IBP + div(v x B) = 0)
+3. Conclude D(f x) = nu^{-1} * integral(spatial_transport * log f)
+4. Prove the right side is continuous in x
+
+This is logically sound: `hD_cont` does not assume the conclusion, it merely uses the Vlasov equation (a hypothesis) to re-express D(f) in a computable form. But it creates a subtle dependency: the `hD_cont` proof uses `force_transport_zero`, which itself requires `hForceIBP_f_dg` and `hForceIBP_fg` (other fields of VelocityDecayConditions). Fortunately, these are proved *before* the structure is constructed, so there is no actual circularity -- but the proof of `hD_cont` morally depends on some of the other fields being satisfiable.
 
 ### Satisfiability witness
 
-`VelocityDecayInstance.lean` (2019 lines) provides a complete satisfiability witness: the uniform isotropic Maxwellian `f(x,v) = exp(a + c|v|^2)` with E = 0, B = 0. All 18 fields are proved for this distribution (with arbitrary continuous Psi). This demonstrates the hypotheses are non-vacuous.
+`VelocityDecayInstance.lean` (2019 lines) provides two satisfiability witnesses:
+1. `schwartzDecayConditions`: uniform isotropic Maxwellian with E = 0, B = 0
+2. `schwartzDecayConditionsEB`: uniform isotropic Maxwellian with nonzero constant E, B
 
-**Weakness:** This witness is for the equilibrium itself. What the reviewer really wants is a non-equilibrium Schwartz-class f satisfying all 18 fields. The current sorry's block exactly this: if sorry's 1-2 were filled, then `CoulombConcreteTheorem42` would itself be that witness (any Schwartz f solving Vlasov would satisfy the conditions, and the theorem would prove it must be Maxwellian). So the satisfiability question reduces to the same sorry's.
+Both have all 18 fields proved with 0 sorry's. These demonstrate the hypotheses are non-vacuous.
+
+**Remaining weakness:** Both witnesses use the equilibrium distribution. A non-equilibrium Schwartz-class f satisfying all 18 fields would be a stronger satisfiability witness, but this requires sorry's 1-2 to be filled.
 
 ---
 
@@ -144,29 +147,29 @@ The `VelocityDecayConditions` structure (Theorem42.lean:25-88) has 18 fields enc
 
 ### Field count and structure
 
-The `FlatTorus3` typeclass (Defs.lean:325-417) extends `MeasureSpace X` and `TopologicalSpace X` and has:
+The `FlatTorus3` typeclass (Defs.lean:325-417) extends `MeasureSpace X` and `TopologicalSpace X` with:
 - 3 instance fields (`instCompact`, `instNonempty`, `instFirstCountable`)
 - 3 operator definitions (`gradX`, `divX`, `curlX`)
 - 1 predicate definition (`IsSpatiallyDiff`)
-- 22 property axioms (from `hDivLinear` through `hGradIntegrable`)
+- 22 property axioms
 
-That makes **29 total fields** (3 instances + 3 operators + 1 predicate + 22 properties). The previous critique stated "23 axioms", which was imprecise -- the correct count depends on whether one counts instance fields and operator definitions.
-
-### Concrete instance
-
-All 29 fields are instantiated for `Torus3 = Fin 3 -> AddCircle 1` in `TorusInstance.lean` (1223 lines) with 0 sorry's. `IsSpatiallyDiff` is instantiated as `ContDiff R top (periodicLift f)` -- the strongest possible choice (smooth periodic lift). This makes preconditions easy to satisfy but axiom conclusions harder to prove.
+Total: **29 fields**. All 29 are instantiated for `Torus3 = Fin 3 -> AddCircle 1` in `TorusInstance.lean` (1223 lines) with 0 sorry's.
 
 ### Concern: `hGradScalarMul` lacks `IsSpatiallyDiff` guard
 
-The axiom `hGradScalarMul` states `gradX (c * f) = c * gradX f` without requiring `IsSpatiallyDiff f`. On the concrete torus, `gradX` is defined via `fderiv`, so for non-differentiable `f`, `fderiv f = 0` on both sides and the equation `c * 0 = 0` holds vacuously. This is sound but *fragile*: a different instantiation of `FlatTorus3` where `gradX` does not return 0 for non-differentiable functions would need this axiom to hold unconditionally, which may not be true. This is a minor design concern, not a soundness issue.
+The axiom `hGradScalarMul` states `gradX (c * f) = c * gradX f` without requiring `IsSpatiallyDiff f`. On the concrete torus, `gradX` is defined via `fderiv`, so for non-differentiable `f`, `fderiv f = 0` on both sides and the equation `c * 0 = 0` holds vacuously. This is sound but fragile: a different instantiation where `gradX` does not return 0 for non-differentiable functions would need this to hold unconditionally. Minor design issue.
 
 ### Concern: `hSpatialAdd` and `hSpatialVelocityFubini` are derivable
 
-The axioms `hSpatialAdd` (additivity of integral) and `hSpatialVelocityFubini` (Fubini) are theorems of Mathlib's measure theory library on any measure space. Including them as axioms is redundant -- they follow from `MeasureTheory.integral_add` and `MeasureTheory.integral_integral_swap` respectively. The TorusInstance instantiation confirms this by proving them from Mathlib. Including them as axioms rather than deriving them inside the proof is a code smell: it suggests the author was not sure whether Lean could infer the required measure-space structure on X from the typeclass, and took the safe route of axiomatizing.
+Both are theorems of Mathlib's measure theory on any measure space. Including them as axioms is redundant. The TorusInstance proves them from Mathlib, confirming this. Note that `hSpatialVelocityFubini` does include integrability hypotheses (both pointwise and joint), so it is not entirely vacuous -- it is essentially a restatement of Fubini's theorem. Still, axiomatizing something derivable from existing structure is a code smell.
+
+### Concern: `IsSpatiallyDiff` overshoot
+
+On the concrete torus, `IsSpatiallyDiff` is `ContDiff R top (periodicLift f)`, the strongest possible choice (smooth). The abstract proof chain only needs C^2 regularity for the Killing equation analysis and Hodge theory steps. Using `ContDiff R top` makes the preconditions in `CoulombConcreteTheorem42` (`hf_smooth_x : forall v, ContDiff R top (periodicLift (fun x => f x v))`) stronger than necessary. This does not affect soundness but narrows the class of functions the theorem applies to -- any f that is C^2 but not C^infinity in x is excluded despite the mathematics working. A more refined choice like `ContDiff R 2` would widen applicability at the cost of more work in the TorusInstance.
 
 ---
 
-## 5. Circularity Concerns
+## 5. Circularity and Hypothesis Scrutiny
 
 ### Import dependency DAG
 
@@ -189,7 +192,7 @@ Defs.lean
                  <- NewtonianPotential.lean
                  <- CoulombSpatialTransport.lean
                  <- CoulombFlux.lean
-                 <- CoulombPSD.lean [3 sorry's here]
+                 <- CoulombPSD.lean [2 sorry's here]
                     <- CoulombConcreteTheorem42.lean (main theorem)
 ```
 
@@ -197,16 +200,33 @@ Defs.lean
 
 ### Is any hypothesis restating the conclusion?
 
-No. The 13 hypotheses of `CoulombConcreteTheorem42` are:
-- Physical parameters (nu > 0, rho_ion > 0)
-- Strict positivity of f
-- Smoothness of f and B
-- Schwartz decay
-- Stretched-exponential lower bound
-- Polynomial score bound
-- Four VML equations
+The 13 hypotheses of `CoulombConcreteTheorem42` are:
+1. `hnu : 0 < nu` -- physical parameter
+2. `hrho_ion : 0 < rho_ion` -- physical parameter
+3. `hf_pos : forall x v, 0 < f x v` -- positivity
+4-6. Smoothness of f and B
+7. `hSchwartz : UniformSchwartzDecay f` -- Schwartz decay in v, uniform in x
+8. `hExpDecay` -- stretched-exponential lower bound
+9. `hGradBound` -- polynomial score bound
+10-13. Four VML equations (Vlasov, Ampere, Gauss, div B = 0)
 
-None of these says "f is Maxwellian" or "E = 0" or "B = const". The score bound (hypothesis 9) is the most restrictive, requiring `|df/dv_i| <= Cg * (1+||v||)^Kg * f`, but this is satisfied by any Maxwellian (Kg = 1), any stretched-Gaussian, and more generally any f whose logarithmic gradient grows at most polynomially. It does not force f to be Maxwellian.
+**None restates the conclusion.** The polynomial score bound (hypothesis 9) is the most restrictive: `|df/dv_i| <= Cg * (1+||v||)^Kg * f`. But this is satisfied by any Maxwellian (Kg = 1), any stretched-Gaussian, and any f with polynomial logarithmic gradient growth. It does not force f to be Maxwellian.
+
+### Deeper scrutiny: Is `UniformSchwartzDecay` too strong?
+
+`UniformSchwartzDecay` has two fields:
+- `hDecay`: all iterated velocity derivatives decay faster than any polynomial, uniformly in x
+- `hGradDecay`: spatial gradient components of f also have Schwartz velocity decay
+
+The `hGradDecay` field is used in proving `hSpatialTransport_int` and related fields. It is a genuine analytical hypothesis about the joint regularity of f in (x, v). For a steady-state solution of Vlasov, this follows from standard regularity theory (smooth coefficients + smooth kernel -> smooth solution), but formalizing this bootstrap argument is far beyond the scope of this project. Treating it as a hypothesis is honest.
+
+The combination of `hSchwartz` + `hExpDecay` is also worth examining: Schwartz decay gives an upper bound (f decays faster than any polynomial), while the stretched-exponential gives a lower bound (f doesn't decay faster than exp(-C(1+|v|)^K)). Together they constrain f to decay "exactly Schwartz-fast" -- not too slow (would violate integrability), not too fast (would violate the log bound needed for IBP). Both are needed: without `hExpDecay`, `log f` could grow super-polynomially, breaking the integrability of `flux * log f`.
+
+### Scrutiny of `coulombKernel_pos`
+
+The Coulomb kernel is defined as `if r <= 0 then 1 else r ^ (-3)`. The lemma `coulombKernel_pos` proves `forall r, 0 < coulombKernel r`. The abstract theorem `Theorem42` requires `hPsi : forall r, 0 < Psi r`.
+
+**Is this an artificial hypothesis?** The physical Coulomb kernel Psi(r) = r^{-3} diverges at r = 0 and is undefined for r < 0. The formalization extends it to 1 at r <= 0. This is harmless because `landauMatrix Psi 0 = 0` always (the projection `|z|^2 I - z z^T` vanishes at z = 0), so the value of Psi at 0 never affects the Landau operator. The positivity hypothesis is a convenience for the abstract proof (it simplifies the PSD non-negativity argument) and is satisfied by the extended kernel.
 
 ---
 
@@ -214,127 +234,106 @@ None of these says "f is Maxwellian" or "E = 0" or "B = const". The score bound 
 
 ### Dimension restriction
 
-The formalization is hardcoded to dimension 3 (`Fin 3 -> R`). This appears in:
-- `landauMatrix` is a `Matrix (Fin 3) (Fin 3) R`
-- `cross` is defined for `Fin 3 -> R` only
-- `FlatTorus3` is 3-dimensional
-- All Schwartz decay bounds use `Fin 3 -> R`
-
-The dimension 3 restriction is physically correct (VML is a 3D theory), but the formalizer could have parameterized by dimension n >= 3. The cross product is inherently 3D, so the Lorentz force `E + v x B` requires n = 3. This is an acceptable restriction.
+Hardcoded to dimension 3 (`Fin 3 -> R`). The cross product is inherently 3D (Lorentz force `E + v x B`), so this is not merely a simplification -- it is physically necessary.
 
 ### Kernel restriction
 
-The theorem covers **only** the Coulomb kernel `Psi(r) = r^{-3}` (gamma = -3 in the Landau classification). It does not cover:
-
-1. **Smooth kernels** (`Psi` continuous): Covered by the separate `ConcreteTheorem42` with `Continuous Psi` hypothesis, which has its own satisfiability proof in `VelocityDecayInstance.lean`. This is a complete, sorry-free result.
-
-2. **Hard-sphere kernels** (gamma = 0, `Psi(r) = 1`): Trivially covered by the smooth-kernel theorem since `Psi = 1` is continuous.
-
-3. **Moderately soft potentials** (-2 < gamma < 0): Not covered. The Landau matrix entries satisfy `|A(z)_{ij}| <= ||z||^{gamma+2}`, and for gamma > -3 the singularity is weaker than Coulomb. The proofs in CoulombPSD.lean use the specific Coulomb bound `||z||^{-1}` and would need to be generalized.
-
-4. **Very soft potentials** (gamma < -3): Not physically relevant and not covered.
-
-The Coulomb case is the physically most important case for plasma physics. The restriction is reasonable but should be stated explicitly.
+The Coulomb theorem covers only `Psi(r) = r^{-3}` (gamma = -3). The smooth-kernel theorem (`ConcreteTheorem42`) covers any continuous Psi (including hard-sphere `Psi = 1`). Moderately soft potentials (-3 < gamma < 0) are not covered by either.
 
 ### Spatial domain restriction
 
-The domain is T^3 = (R/Z)^3 (flat 3-torus with period 1). The formalization does not cover:
-- Bounded domains with physical boundary conditions (specular/diffuse reflection)
-- The whole space R^3 (no spatial compactness)
-- Non-flat manifolds (curved tori, spheres)
-
-The periodic domain is standard in kinetic theory (it eliminates boundary terms). This is acceptable.
+T^3 = (R/Z)^3. The periodic domain eliminates boundary terms and is standard in kinetic theory.
 
 ### Steady-state assumption
 
-The theorem assumes f, E, B are time-independent. It says nothing about:
-- Time-dependent convergence to equilibrium (which is the subject of the full Desvillettes-Villani program)
-- Rate of convergence
-- Stability of the equilibrium
-
-This is a characterization theorem, not a stability result. The distinction is important and is correctly stated.
+The theorem assumes f, E, B are time-independent. It is a characterization theorem, not a stability result. This is correctly stated.
 
 ### Positivity assumption
 
-`hf_pos : forall x v, 0 < f x v` requires f to be strictly positive everywhere. In reality, distribution functions can vanish (vacuum regions). This is a standard simplification: the strict positivity ensures `log f` is well-defined everywhere and avoids measure-theoretic complications at the zero set. Weakening to a.e. positivity would be a major undertaking.
+`hf_pos : forall x v, 0 < f x v` is everywhere strict positivity. Weakening to a.e. positivity would require substantial rework of the log chain.
+
+### Smoothness overshoot
+
+The hypotheses require `ContDiff R top (f x)` (smooth in v) and `ContDiff R top (periodicLift (fun x => f x v))` (smooth in x). The mathematical proof only needs enough regularity to justify IBP and the Killing equation argument (~C^2 in v, C^2 in x). The C^infinity requirement is strictly stronger than needed. This narrows applicability but does not affect soundness.
 
 ---
 
 ## 7. Code Quality
 
-### Files over 600 lines
+### File sizes
 
 | File | Lines | Assessment |
 |------|-------|------------|
-| VelocityDecayInstance.lean | 2019 | **Too large.** Should be split into at least 3 files: uniform Maxwellian properties (~200 lines), core flux/PSD vanishing (~600 lines), the 18-field instantiation (~1200 lines). The file is hard to navigate. |
-| Section3.lean | 1308 | **Too large.** Contains the entire H-theorem chain: Fubini symmetrization, score form, PSD=0 implies Maxwellian. Should be split into at least 2 files. |
-| TorusInstance.lean | 1223 | Acceptable -- one file per typeclass instance is defensible, even if large. |
-| CoulombPSD.lean | 874 | Borderline. Contains PSD continuity *and* the sorry'd flux analysis lemmas -- two logically distinct concerns that should be separate files. |
+| VelocityDecayInstance.lean | 2019 | **Too large.** The `schwartzDecayConditionsEB` definition (lines 1933-2019) is 87 lines of copy-paste from `schwartzDecayConditions`, differing only in the force transport fields. This should use a `let base := schwartzDecayConditions ...` pattern. |
+| Section3.lean | 1308 | **Too large.** Contains the entire H-theorem chain plus Gaussian integrals plus gap lemmas. Should be split. |
+| TorusInstance.lean | 1223 | Acceptable for a single typeclass instance. |
+| CoulombPSD.lean | 1191 | **Grew significantly** (flux decay proof added ~200 lines). Contains PSD continuity, PSD/Fubini integrability, flux differentiability, flux decay, and IBP integrability -- five logically distinct topics in one file. Should be split. |
 | Defs.lean | 782 | Acceptable for a definitions file. |
 | CoulombSpatialTransport.lean | 662 | Borderline. |
-| LandauMatrixDerivBound.lean | 648 | Contains machine-generated proofs. Borderline. |
+| LandauMatrixDerivBound.lean | 648 | Contains 232 lines of a custom `generalize_proofs'` tactic (lines 30-232). This is a copy of Mathlib's `generalize_proofs` with modifications for the Aristotle workflow. It is dead weight for a human reader. |
 | CoulombFlux.lean | 609 | Borderline. |
 
-### High heartbeat settings
+### Heartbeat overrides
 
-31 `maxHeartbeats` overrides across 11 files:
+33 `maxHeartbeats` overrides across 11 files:
 
-| Value | Count | Files | Severity |
-|-------|-------|-------|----------|
-| 4,000,000 (20x default) | 1 | VelocityDecayInstance.lean:1002 | **Fragile. A Lean or Mathlib version bump will likely break this proof.** |
-| 3,200,000 (16x default) | 4 | NewtonianPotential, CoulombFlux, CoulombPSD | High. |
-| 1,600,000 (8x default) | 10 | CoulombSpatialTransport, NewtonianPotential, CoulombFlux, CoulombPSD, LandauMatrixDerivBound, Section3 | Moderate. |
-| 800,000 (4x default) | 14 | Widespread across 7 files | Acceptable individually, concerning in aggregate. |
+| Value | Count | Severity |
+|-------|-------|----------|
+| 4,000,000 (20x default) | 1 | **Fragile** |
+| 3,200,000 (16x default) | 5 | High |
+| 1,600,000 (8x default) | 11 | Moderate |
+| 800,000 (4x default) | 15 | Acceptable individually |
 
-Additionally, `synthInstance.maxHeartbeats 160000` appears in CoulombSpatialTransport.lean (2x default), indicating slow typeclass resolution.
+Plus 1 `synthInstance.maxHeartbeats 160000` in CoulombSpatialTransport.lean.
 
-**Total: 31 heartbeat overrides.** This is nearly 1.5 per file. The 4M-heartbeat proof is a maintenance hazard. The 3.2M proofs are also fragile. The pattern suggests that many proofs are not structured efficiently and rely on brute-force elaboration.
+The 4M-heartbeat proof (`landau_flux_component_diff_with_bound` in VelocityDecayInstance.lean:1002) is the single most fragile point. A Lean or Mathlib version bump will almost certainly break it.
 
 ### Universal linter suppression
 
-`set_option linter.all false` appears in **all 21 files**. This disables:
-- `unusedVariables`: catches dead hypotheses
-- `unreachableTactic`: catches no-op tactics after sorry
-- `deprec`: catches deprecated API usage
-- All other linters
-
-This is a red flag for code quality. It is understandable during rapid development but should not persist in a submission claiming completeness. With linters disabled, there is no automated check for:
+`set_option linter.all false` appears in **all 21 files**. This suppresses all Lean linters (unused variables, deprecated APIs, unreachable tactics, etc.). With linters disabled, there is no automated check for:
+- Deprecated Mathlib APIs (e.g., `one_le_pow_of_one_le` used in CoulombPSD.lean, which may be deprecated in newer Mathlib)
+- Dead hypotheses masking structural problems
 - Unused imports bloating build times
-- Dead code masking structural problems
-- Deprecated Mathlib APIs that will break on upgrade
+
+### Duplicate primed definitions
+
+Three files define overlapping sets of primed definitions:
+
+| Definition | CoulombFlux.lean | CoulombPSD.lean | LandauMatrixDerivBound.lean |
+|------------|-----------------|-----------------|----------------------------|
+| `normSq'` | line 12 | (uses from CoulombFlux) | line 241 |
+| `eucNorm'` | line 13 | (uses from CoulombFlux) | line 243 |
+| `innerLandauMatrix'` | line 14 | (uses from CoulombFlux) | line 245 |
+| `coulombKernel'` | line 16 | (uses from CoulombFlux) | -- |
+| `landauMatrix'` | line 17 (Coulomb-specific) | (uses from CoulombFlux) | line 248 (generic, takes Psi param) |
+| `vGrad'` | line 19 | (uses from CoulombFlux) | -- |
+| `PSDIntegrand'` | -- | line 9 | -- |
+
+Critical observation: `VML.landauMatrix'` in CoulombFlux.lean (line 17) is `coulombKernel' (eucNorm' z) * innerLandauMatrix' z` (Coulomb-specific, no Psi parameter), while the top-level `landauMatrix'` in LandauMatrixDerivBound.lean (line 248) is `Psi (eucNorm' z) * innerLandauMatrix' z` (generic, takes Psi). These are **different definitions with the same base name** in different namespaces (VML vs. top-level). The bridge lemma `landauMatrix'_eq_VML : landauMatrix' = VML.landauMatrix` at LandauMatrixDerivBound.lean:600 relates the *generic* primed definition to the VML namespace unprimed definition. This means the same token `landauMatrix'` resolves to different things depending on which namespace is open -- a recipe for subtle bugs in future refactoring.
+
+### LandauMatrixDerivBound.lean: 232 lines of custom tactic code
+
+Lines 30-232 contain a complete reimplementation of Mathlib's `generalize_proofs` tactic (`generalizeProofs'`, `abstractProofs'`, `withGeneralizedProofs'`, etc.). This is injected by the Aristotle prover for compatibility. The 232 lines of metaprogramming:
+1. Are not relevant to the mathematical content
+2. Cannot be reviewed for correctness without deep Lean 4 metaprogramming expertise
+3. Duplicate Mathlib infrastructure with custom modifications
+4. Are `partial def` (meaning no termination proof is provided)
+
+This is a red flag for long-term maintainability. If the Aristotle tactic diverges from Mathlib's `generalize_proofs`, the proofs may silently break on Mathlib updates.
 
 ### Machine-generated proof style
 
-Several proofs (primarily those attributed to "Aristotle (Harmonic)") are single-line semicolon chains. Example from Section3.lean:19-27:
+Multiple proofs (attributed to "Aristotle (Harmonic)") are dense semicolon chains. Example from CoulombPSD.lean:22-38 (`landau_bound`):
 
 ```lean
-vGrad_exp_quadratic ... := by
-  unfold vGrad normSq;
-  intro v; ext i; erw [ fderiv_exp ] ; norm_num [ dotProduct, Fin.sum_univ_three ] ; ring;
-  ...
-  · field_simp;
-    erw [ HasFDerivAt.fderiv ( by exact HasFDerivAt.add ( HasFDerivAt.add ( ... ) ... ) ) ] ; ring;
-    fin_cases i <;> simp +decide [ Pi.single_apply ] <;> ring!;
+unfold landauMatrix' eucNorm';
+unfold coulombKernel' innerLandauMatrix' normSq';
+split_ifs <;> norm_cast <;> norm_num [ Matrix.vecMulVec ] at *;
+...
+exact abs_le.mpr < by nlinarith [ sq_nonneg ( z 0 * u 1 - z 1 * u 0 ), ... ] >
 ```
 
-These are essentially opaque proof scripts. They work, but they:
-1. Are unmaintainable -- any Mathlib API change breaks them silently
-2. Cannot be understood by reading them
-3. Contain nested `; <;>` chains that are hard to debug
-
-The machine-generated proofs are functionally correct (they type-check), but they represent a maintenance debt. This is inherent to the Aristotle workflow and not unique to this project.
-
-### Duplicate "primed" definitions
-
-`CoulombPSD.lean` and `CoulombFlux.lean` define primed versions of core definitions:
-- `normSq'`, `eucNorm'`, `coulombKernel'`, `innerLandauMatrix'`, `landauMatrix'`, `vGrad'`, `PSDIntegrand'`
-
-These appear in **two separate files** (`CoulombFlux.lean` lines 12-19 and `LandauMatrixDerivBound.lean` lines 241-248), meaning the primed definitions are **duplicated across files**. The definitions are definitionally equal to their unprimed counterparts (e.g., `PSDIntegrand'_eq_PSDIntegrand` is proved by `rfl`).
-
-They exist because the automated prover (Aristotle) generated standalone proofs using its own definitions. The maintainer bridged them with `rfl` lemmas. This is:
-1. Namespace pollution -- two names for the same object
-2. Duplication -- the same primed definitions appear in multiple files
-3. Confusing -- a reader must check whether primed and unprimed are truly equal
+These proofs are opaque, unmaintainable, and likely to break on any Mathlib API change. This is inherent to the Aristotle workflow and a known trade-off.
 
 ---
 
@@ -345,42 +344,78 @@ They exist because the automated prover (Aristotle) generated standalone proofs 
 | Claim in MEMORY.md | Reality | Status |
 |----|---------|--------|
 | "CoulombConcreteTheorem42.lean (201 lines)" | 280 lines | **STALE** |
-| "main theorem, 6 sorry's" | 0 sorry's in-file (4 in CoulombPSD.lean) | **STALE** |
+| "main theorem, 6 sorry's" | 0 sorry's in-file (2 in CoulombPSD.lean) | **STALE** |
 | "CoulombFlux.lean (441 lines)" | 609 lines | **STALE** |
-| "CoulombPSD.lean (170 lines)" | 874 lines | **STALE** |
+| "CoulombPSD.lean (170 lines)" | 1191 lines | **STALE** |
 | "CoulombKernel.lean (114 lines)" | 114 lines | Correct |
 | "CoulombSpatialTransport.lean (662 lines)" | 662 lines | Correct |
 | "NewtonianPotential.lean (284 lines)" | 284 lines | Correct |
-| "5 jobs FAILED (API ReadTimeout)" | Unknown current status | Potentially stale |
 
-Half of the line counts are wrong. The sorry count is wrong. The project memory is not reliable.
+The sorry count in MEMORY.md is wrong by a factor of 3 (claims 6, reality is 2). Multiple file sizes are stale.
 
-### CLAUDE.md accuracy
+### User-facing sorry count
 
-The instructions in `CLAUDE.md` say: "The goal is not to end up with 0 sorry's! The goal is to make an honest formalization of the main theorem, with only the genuinely needed mathematical/physical assumptions." This is accurately reflected in the codebase. The sorry's are in analytical lemmas, not in logical structure or hidden assumptions.
+The task description states "Current sorry count: 3 in CoulombPSD.lean" with specific lemma names and line numbers. This matches the actual codebase, so the user-facing documentation is accurate even though MEMORY.md is stale.
 
-### Docstrings
+### Docstring accuracy
 
-The main theorem `CoulombConcreteTheorem42` has an accurate, detailed docstring (lines 34-52) that correctly describes the 13 hypotheses. The hypothesis numbering in the docstring matches the code. The claim about polynomial score bound (hypothesis 9) being "the same hypothesis used by the smooth kernel instance" is accurate.
-
-### Physical correctness of docstrings
-
-The file header comment (lines 1-23) correctly explains:
-- The Coulomb kernel singularity
-- Why `coulombKernel` is set to 1 at r <= 0
-- The PSD cancellation mechanism (score difference = O(|v-w|) cancels r^{-3} singularity)
-- The hypothesis count (13)
+The main theorem `CoulombConcreteTheorem42` docstring (lines 34-52) correctly describes 13 hypotheses and matches the code. The file header (lines 1-23) correctly explains the Coulomb singularity, the kernel extension to r <= 0, and the PSD cancellation mechanism.
 
 ---
 
-## 9. Overall Assessment
+## 9. New Issues Found in This Review
+
+### Issue 1: `coulomb_ibp_df_g_integrable` has a misleading calc chain
+
+Lines 943-946 of CoulombPSD.lean:
+
+```lean
+  _ = C_fd * C_log / (1 + ||v||) ^ 4 * (1 + ||v||) ^ 4 := by
+      rw [div_mul_cancel]; exact ne_of_gt hv_pos
+  _ <= C_fd * C_log * (1 + ||v||) ^ 4 := by
+      rw [div_mul_cancel]; exact ne_of_gt hv_pos
+```
+
+The first step simplifies `(C_fd / (1+||v||)^(K+4)) * (C_log * (1+||v||)^K)` to `C_fd * C_log / (1+||v||)^4 * (1+||v||)^4`. The second step claims `C_fd * C_log / (1+||v||)^4 * (1+||v||)^4 <= C_fd * C_log * (1+||v||)^4`. After `div_mul_cancel`, both sides simplify to `C_fd * C_log`, making this step an equality, not a strict inequality. The `<=` annotation is misleading -- the proof works because `<=` subsumes `=`, but it suggests the author did not realize the intermediate cancellation yields equality. Not a soundness issue, but indicates the proof was written without simplifying the intermediate form.
+
+### Issue 2: `schwartzDecayConditionsEB` is 87 lines of field-by-field delegation
+
+VelocityDecayInstance.lean:1948-1998 contains 15 fields that are all of the form:
+
+```lean
+  hPSD_inner_int :=
+    (schwartzDecayConditions Psi hPsi hPsi_cts ...).hPSD_inner_int
+```
+
+repeated with the same 7-argument prefix 15 times. A `let` binding or `{ base with ... }` pattern would reduce this to ~20 lines. This is a code quality issue.
+
+### Issue 3: `import Mathlib` without granularity
+
+Two files (`Defs.lean` and `LandauMatrixDerivBound.lean`) use `import Mathlib` (importing all of Mathlib). All other files import specific predecessors in the chain. The monolithic import:
+1. Slows down initial compilation
+2. Makes dependency tracking impossible
+3. Risks namespace collisions
+
+For `Defs.lean` (the root of the chain), this is somewhat defensible. For `LandauMatrixDerivBound.lean`, which also imports `Aristotle.Landau.main.Defs`, the explicit `import Mathlib` is redundant.
+
+### Issue 4: Potential `one_le_pow_of_one_le` deprecation
+
+`one_le_pow_of_one_le` appears 3 times in CoulombPSD.lean (lines 397, 703, 937). In newer Mathlib versions, this may be renamed or deprecated. CoulombFlux.lean (line 603) already uses `one_le_pow_of_one_le_of_le`, suggesting an awareness of API evolution. With linters disabled, there is no warning about this.
+
+### Issue 5: Namespace collision on `landauMatrix'`
+
+As documented in Section 7, `VML.landauMatrix'` (CoulombFlux.lean:17, Coulomb-specific) and the top-level `landauMatrix'` (LandauMatrixDerivBound.lean:248, generic) share a base name but have different signatures and meanings. CoulombPSD.lean uses `VML.landauMatrix'` (Coulomb-specific) while the bridge lemma `landauMatrix'_eq_VML` at LandauMatrixDerivBound.lean:600 equates the generic version with `VML.landauMatrix`. This means the same token `landauMatrix'` resolves to different things depending on which namespace is open -- a recipe for subtle bugs in future refactoring.
+
+---
+
+## 10. Overall Assessment
 
 ### Summary table
 
 | Component | Files | Lines | Sorry's | Assessment |
 |-----------|-------|-------|---------|------------|
 | Definitions (Defs.lean) | 1 | 782 | 0 | Fully verified |
-| Abstract proof chain (Sections 2-9) | 8 | 3,697 | 0 | Fully verified |
+| Abstract proof chain (Sections 2-9) | 8 | 2,639 | 0 | Fully verified |
 | VMLInputDerive | 1 | 438 | 0 | Fully verified |
 | Theorem42 (abstract) | 1 | 303 | 0 | Fully verified |
 | FlatTorus3 instance | 1 | 1,223 | 0 | Fully verified |
@@ -391,64 +426,57 @@ The file header comment (lines 1-23) correctly explains:
 | NewtonianPotential | 1 | 284 | 0 | Fully verified |
 | LandauMatrixDerivBound | 1 | 648 | 0 | Fully verified |
 | CoulombFlux | 1 | 609 | 0 | Fully verified |
-| CoulombPSD | 1 | ~948 | **3** | **Incomplete**: entry conv diff + decay, flux decay |
+| CoulombPSD | 1 | 1191 | **2** | **Incomplete**: entry-conv differentiability + decay |
 | CoulombConcreteTheorem42 | 1 | 280 | 0 in-file | **Depends on CoulombPSD sorry's** |
-| **TOTAL** | **21** | **~11,046** | **3** | |
+| **TOTAL** | **21** | **11,289** | **2** | |
 
 ### What is genuinely proved
 
-1. **The entire abstract proof chain is complete.** Given the hypotheses of `Theorem42` (positivity, smoothness, integrability, Maxwell equations, VelocityDecayConditions), the conclusion (f = Maxwellian, E = 0, B = const) follows with 0 sorry's. This is the mathematical core of the result.
+1. **The entire abstract proof chain is complete.** Given the hypotheses of `Theorem42` (positivity, smoothness, integrability, Maxwell equations, VelocityDecayConditions), the conclusion (f = Maxwellian, E = 0, B = const) follows with 0 sorry's. This is the mathematical core.
 
-2. **The FlatTorus3 typeclass has a complete, sorry-free concrete instance.** All 29 fields about differential operators on the 3-torus are proved from Mathlib primitives.
+2. **The FlatTorus3 typeclass has a complete concrete instance.** All 29 fields proved from Mathlib primitives.
 
-3. **16 of 18 VelocityDecayConditions fields are proved for Coulomb.** This includes the hardest analytical result: `psd_continuous_coulomb` (170+ lines of nontrivial analysis), which proves that the PSD integrand is jointly continuous despite the Coulomb singularity.
+3. **16 of 18 VelocityDecayConditions fields are proved for Coulomb.** This includes `psd_continuous_coulomb` (the hardest analytical result, handling the Coulomb singularity cancellation), `coulomb_flux_differentiable` (60 lines of integral manipulation), and `coulomb_flux_deriv_schwartz_decay` (200 lines of product-rule decomposition + `nlinarith`).
 
-4. **The smooth-kernel theorem is fully complete.** `ConcreteTheorem42` with `Continuous Psi` has 0 sorry's anywhere in its dependency chain. This is itself a publishable result.
+4. **The smooth-kernel theorem is fully complete.** `ConcreteTheorem42` with `Continuous Psi` has 0 sorry's anywhere in its dependency chain.
 
 ### What is not proved
 
 1. Differentiability of the Coulomb entry convolution (differentiation under the integral with `||z||^{-1}` kernel).
 2. Schwartz decay of the Coulomb entry convolution derivative.
-3. Schwartz decay of the full flux derivative (routine product/sum closure given (2)).
 
-All 3 sorry'd statements are mathematically true and fall under standard singular integral theory (Stein, Folland). They are provable in Lean/Mathlib but require substantial effort (~200-400 lines total) due to the lack of ready-made Mathlib infrastructure for parametric singular integrals.
+Both sorry'd statements are mathematically true. They are standard singular integral results (Stein, Folland). Total estimated effort: 200-500 lines.
 
-### Structural concerns (independent of sorry's)
+### Structural concerns
 
-1. **31 heartbeat overrides**, including one at 20x default, indicate proof fragility.
-2. **Universal linter suppression** across all 21 files hides potential issues.
-3. **Duplicate primed definitions** across CoulombFlux.lean and LandauMatrixDerivBound.lean.
-4. **Two files exceed 1200 lines** (VelocityDecayInstance: 2019, Section3: 1308) without clear justification.
-5. **Machine-generated proofs** are opaque and unmaintainable.
-6. **Stale documentation** (MEMORY.md line counts and sorry counts are wrong).
+1. **33 heartbeat overrides**, including one at 20x default.
+2. **Universal linter suppression** across all 21 files.
+3. **Duplicate primed definitions** across 3 files, with a naming collision between namespaces.
+4. **232 lines of custom tactic code** (Harmonic's `generalize_proofs'`) in LandauMatrixDerivBound.lean.
+5. **3 files exceed 1100 lines** (VelocityDecayInstance: 2019, Section3: 1308, CoulombPSD: 1191).
+6. **87 lines of copy-paste** in `schwartzDecayConditionsEB`.
+7. **Stale MEMORY.md** (wrong sorry count, wrong line counts).
+8. **C^infinity overshoot** in IsSpatiallyDiff when C^2 would suffice.
+9. **`import Mathlib`** in 2 files instead of granular imports.
 
 ### Verdict: CONDITIONAL ACCEPT
 
-The formalization is honest, mathematically correct in its claims, and structurally sound. The 3 remaining sorry's are:
+Progress since the last review: one sorry has been eliminated (`coulomb_flux_differentiable` is now fully proved). The sorry count decreased from 4 to 3. The mathematical structure is honest and transparent.
 
-- Clearly identified and isolated (all in CoulombPSD.lean:787-897)
+The 2 remaining sorry's are:
+- Clearly identified and isolated (CoulombPSD.lean:792 and :803)
 - Mathematically true (standard singular integral results)
 - Not smuggling the conclusion (they are differentiability and decay estimates)
 - Not hiding structural problems (the dependency chain is transparent)
-- Organized into a clean two-level decomposition (2 base entry-level lemmas + 1 derived flux-level lemma)
+- All derived lemmas have complete proof bodies (no more "sorry chains")
 
-The abstract proof chain is fully verified. The Coulomb specialization is 89% complete by field count. The smooth-kernel theorem is 100% complete.
-
-**Grounds for acceptance:**
-1. The mathematical contribution (formalizing the VML steady-state theorem on T^3) is significant.
-2. All 4 sorry'd statements are independently verifiable analytical claims, not hand-wavy gaps.
-3. The codebase demonstrates substantial analytical work (~11,046 lines, 16/18 Coulomb VelocityDecayConditions proved).
-4. The clean separation between abstract proof and Coulomb instantiation means the abstract result and the smooth-kernel result both stand on their own.
-
-**Grounds for rejection:**
-1. 3 sorry tokens remain. The Coulomb theorem is not formally proved.
-2. Code quality issues (heartbeats, linter suppression, duplication) suggest rushed development.
-3. Documentation is stale and unreliable.
+The abstract proof chain is fully verified. The smooth-kernel theorem is 100% complete. The Coulomb specialization is 89% complete by VelocityDecayConditions field count.
 
 **Conditions for unconditional acceptance:**
-1. Fill the 3 sorry's in CoulombPSD.lean (primarily the 2 base lemmas; the derived one should follow quickly).
-2. Correct stale line counts and sorry counts in MEMORY.md.
-3. Re-enable linters in at least the top-level theorem files (Theorem42.lean, CoulombConcreteTheorem42.lean, ConcreteTheorem42.lean).
-4. (Minor) Split VelocityDecayInstance.lean (2019 lines) and Section3.lean (1308 lines).
-5. (Minor) Consolidate or remove primed duplicate definitions.
-6. (Minor) Reduce the 4M-heartbeat proof in VelocityDecayInstance.lean.
+1. Fill the 2 base sorry's in CoulombPSD.lean (`coulomb_entry_conv_differentiable`, `coulomb_entry_conv_deriv_decay`).
+2. Update MEMORY.md with correct line counts and sorry counts.
+3. Re-enable linters in at least the top-level theorem files.
+4. (Minor) Replace copy-paste in `schwartzDecayConditionsEB` with `let`-binding pattern.
+5. (Minor) Split VelocityDecayInstance.lean and Section3.lean.
+6. (Minor) Consolidate or remove primed duplicate definitions.
+7. (Minor) Reduce the 4M-heartbeat proof.

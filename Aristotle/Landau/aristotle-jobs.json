@@ -23,14 +23,18 @@
       "submission": "aristotle-in/landau_ibp_df_g.lean",
       "output": "aristotle-out/landau_ibp_df_g_aristotle.lean",
       "target": "landau_ibp_df_g",
-      "note": ""
+      "note": "Proved by Aristotle (0 sorry's), but result is redundant — coulomb_ibp_df_g_integrable already proved manually in CoulombPSD.lean",
+      "status": "done",
+      "solution": "/home/vilin/aristotle/Aristotle/Landau/aristotle-out/landau_ibp_df_g_aristotle.lean"
     },
     {
       "id": "b419ae41-85e5-4a04-a68d-0a7a4960d351",
       "submission": "aristotle-in/coulomb_conv_diff.lean",
       "output": "aristotle-out/coulomb_conv_diff_aristotle.lean",
       "target": "coulomb_conv_diff",
-      "note": ""
+      "note": "Aristotle FAILED (returned sorry). Need manual proof via hasFDerivAt_integral_of_dominated_of_fderiv_le with Peetre bound.",
+      "status": "failed",
+      "solution": "/home/vilin/aristotle/Aristotle/Landau/aristotle-out/coulomb_conv_diff_aristotle.lean"
     },
     {
       "id": "28a741f0-54c2-42fb-a919-24289959c2c9",
