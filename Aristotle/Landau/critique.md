@@ -1,8 +1,8 @@
-# Adversarial Critique — 2026-03-10 UTC (Cycle 55)
+# Adversarial Critique — 2026-03-10 UTC (Cycle 56)
 
 ## Verdict: ACCEPT WITH MINOR REVISIONS
 
-Cycle 55 reduced one heartbeat override and fixed MEMORY.md drift. All remaining issues are minor.
+Cycle 56 eliminated all 11 `maxHeartbeats 800000` overrides (all were unnecessary — proofs compile at default 400000). Remaining issues are minor.
 
 ---
 
@@ -81,24 +81,24 @@ I found no divergence from the standard mathematical proof. The proof follows th
 
 | File | Lines | Issue |
 |------|-------|-------|
-| TorusInstance.lean | 1164 | Far too large. Could split into TorusOperators + TorusAnalysis + TorusGeometry |
+| TorusInstance.lean | 1162 | Far too large. Could split into TorusOperators + TorusAnalysis + TorusGeometry |
 | Defs.lean | 761 | Borderline. Contains FlatTorus3 + all definitions + VMLInput/VMLSteadyState |
-| CoulombPSD.lean | 716 | Acceptable (complex proofs) |
+| CoulombPSD.lean | 715 | Acceptable (complex proofs) |
 | CoulombSpatialTransport.lean | 662 | Borderline |
 | Section3Helpers.lean | 637 | Borderline |
 | CoulombFluxDiff.lean | 627 | Borderline |
-| CoulombFlux.lean | 616 | Borderline |
+| CoulombFlux.lean | 615 | Borderline |
 
-### 6b. maxHeartbeats overrides (28 maxHeartbeats + 1 synthInstance = 29 total)
+### 6b. maxHeartbeats overrides (17 maxHeartbeats + 1 synthInstance = 18 total)
 
 | Value | Count | Files |
 |-------|-------|-------|
-| 800000 | 11 | CoulombFlux, CoulombSpatialTransport, LandauMatrixDerivBound, Section3, Section3Helpers, TorusInstance |
+| ~~800000~~ | ~~0~~ | **ALL ELIMINATED** (cycles 55-56) |
 | 1600000 | 11 | CoulombFluxDiff, CoulombPSD, CoulombSpatialTransport, LandauMatrixDerivBound, NewtonianPotential, CoulombFlux |
 | 3200000 | 6 | CoulombFlux (2), CoulombPSD (3), NewtonianPotential (1) |
 | synthInstance 160000 | 1 | CoulombSpatialTransport |
 
-29 heartbeat overrides across 10 files. The 6 values at 3200000 (8× default) indicate proofs that could break with Mathlib updates. These are fragile. `landau_bound` (CoulombPSD) was reduced from 800000 to default in cycle 55.
+18 heartbeat overrides across 7 files (down from 30 at cycle 54). All 800000 overrides were unnecessary. The 6 values at 3200000 (8× default) remain and indicate fragile proofs.
 
 ### 6c. Primed definitions (11 duplicates across 3 files) — PARTIALLY ADDRESSED (cycle 54)
 
@@ -185,8 +185,8 @@ Elementary linear algebra bound. **Not worth upstreaming.**
 | 2 | 11 primed definitions + 9 unused bridging lemmas (20 lines dead code) | Minor | Partially addressed (cycle 54) |
 | 3 | ~~progress.md severely stale~~ | ~~Major~~ | **RESOLVED** (cycle 53) |
 | 4 | ~~MEMORY.md stale~~ | ~~Minor~~ | **RESOLVED** (cycle 53) |
-| 5 | 29 heartbeat overrides (6 at 3200000) | Minor | Open |
-| 6 | 7 files over 600 lines (TorusInstance at 1164) | Minor | Open |
+| 5 | 18 heartbeat overrides (6 at 3200000, 11 at 1600000, 1 synthInstance) | Minor | Partially addressed (cycles 55-56) |
+| 6 | 7 files over 600 lines (TorusInstance at 1162) | Minor | Open |
 | 7 | hGradBound "likely derivable" claim may be incorrect | Epistemic | Open |
 | 8 | No non-equilibrium VDC instance for Coulomb kernel | Epistemic | Open |
 | 9 | C^∞ smoothness overkill (C² likely suffices) | Minor | Open |
@@ -196,7 +196,7 @@ Elementary linear algebra bound. **Not worth upstreaming.**
 ### Remaining work (all recommended, none required)
 
 1. Eliminate primed definitions entirely (replace with VML namespace defs in proofs)
-2. Investigate and correct hGradBound "likely derivable" claim
-3. Split TorusInstance.lean (1164 lines)
-4. Reduce maxHeartbeats in hot proofs (6 proofs at 3200000)
-5. Update MEMORY.md line counts
+2. Reduce maxHeartbeats 1600000 overrides (try at 800000 or default)
+3. Investigate and correct hGradBound "likely derivable" claim
+4. Split TorusInstance.lean (1162 lines)
+5. Reduce maxHeartbeats 3200000 overrides (6 proofs)
