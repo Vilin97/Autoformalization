@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 42: Replace `import Mathlib` with granular imports
+
+### Changes
+- Defs.lean: replaced `import Mathlib` with `import Mathlib.Data.Real.StarOrdered` + `import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts` (found via `lake exe shake`)
+- LandauMatrixDerivBound.lean: removed redundant `import Mathlib` and `import Mathlib.Tactic.GeneralizeProofs` (both already provided transitively via `import Aristotle.Landau.main.Defs`)
+- Full build verified clean
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 41: Split VelocityDecayInstance.lean
 
 ### Changes
