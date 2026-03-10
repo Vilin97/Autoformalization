@@ -1,5 +1,25 @@
 # Log
 
+## 2026-03-11 04:00 UTC — Babysit cycle 19: Fubini+IBP closed, 2 sorry's remaining
+
+### Status
+- Closed `hFubini_double` in CoulombConcreteTheorem42.lean (3→2 sorry's).
+  - Added `fubini_double_integrable_coulomb` (~310 lines) in CoulombPSD.lean.
+  - Uses `integrable_prod_iff` with joint measurability, inner integrability from `landau_flux_integrable_coulomb`, and norm integral bound from Newtonian uniform bounds.
+- Decomposed `hLandauFluxDiff` and `hLandauIBP_df_g` into 2 focused sorry targets:
+  - `coulomb_flux_differentiable` — differentiation under integral sign with singular Coulomb kernel.
+  - `coulomb_flux_deriv_schwartz_decay` — Schwartz decay of the flux derivative.
+- Added `coulomb_ibp_df_g_integrable` proof that depends on the two sorry'd lemmas above.
+- Wired up `hLandauFluxDiff` and `hLandauIBP_df_g` in CoulombConcreteTheorem42.lean.
+- Simplified CoulombConcreteTheorem42: extracted `hSchwartz_x` helper (eliminates 9 repeated expressions), removed 3 redundant `obtain hGradBound` destructurings, converted tactic proofs to term-mode for PSD/Fubini fields.
+- Aristotle: `coulomb_flux_diff` and `fubini_double_integrable` both returned sorry (Aristotle failed). `landau_ibp_df_g` still queued.
+
+### Sorry count: 2 (down from 3)
+| Sorry | File | Status |
+|-------|------|--------|
+| coulomb_flux_differentiable | CoulombPSD | Genuine hard: diff under integral with ‖z‖⁻² singularity |
+| coulomb_flux_deriv_schwartz_decay | CoulombPSD | Schwartz decay of convolution with singular kernel |
+
 ## 2026-03-11 01:00 UTC — Babysit cycle 18: PSD inner+outer closed, 3 sorry's remaining
 
 ### Status
