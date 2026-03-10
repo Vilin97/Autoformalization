@@ -1,5 +1,5 @@
 % Blueprint for: Global Steady State of the Vlasov-Maxwell-Landau System
-% Based on Guo & Strain, "Almost exponential decay near Maxwellian"
+% Dependencies extracted automatically from the Lean environment via scripts/dep_graph.lean
 
 \chapter{Introduction}
 
@@ -23,7 +23,7 @@ This blueprint describes the formalization of the characterization of global ste
 \begin{definition}[Landau matrix]\label{def:landauMatrix}
   \lean{VML.landauMatrix}
   \leanok
-  \uses{def:normSq, def:eucNorm}
+  \uses{def:eucNorm}
   Given a kernel function $\Psi : \R \to \R$, the Landau matrix $A(z)$ is the $3 \times 3$ matrix with entries
   \[
     A_{ij}(z) = \Psi(|z|)\bigl(\delta_{ij} |z|^2 - z_i z_j\bigr).
@@ -33,6 +33,7 @@ This blueprint describes the formalization of the characterization of global ste
 \begin{definition}[Maxwellian]\label{def:isMaxwellian}
   \lean{VML.IsMaxwellian}
   \leanok
+  \uses{def:normSq}
   A function $f : \R^3 \to \R$ is \emph{Maxwellian} if there exist $a_0 \in \R$, $b \in \R^3$, and $c_0 < 0$ such that
   \[
     f(v) = \exp\bigl(a_0 + b \cdot v + c_0 |v|^2\bigr)
@@ -43,6 +44,7 @@ This blueprint describes the formalization of the characterization of global ste
 \begin{definition}[Equilibrium Maxwellian]\label{def:equilibriumMaxwellian}
   \lean{VML.equilibriumMaxwellian}
   \leanok
+  \uses{def:normSq}
   For $\rho_{\mathrm{ion}} > 0$ and $T > 0$, the equilibrium Maxwellian is
   \[
     M_{\rho,T}(v) = \frac{\rho_{\mathrm{ion}}}{(2\pi T)^{3/2}} \exp\!\left(-\frac{|v|^2}{2T}\right).
@@ -69,39 +71,20 @@ This blueprint describes the formalization of the characterization of global ste
   \]
 \end{definition}
 
-\begin{definition}[Flat 3-torus]\label{def:flatTorus3}
+\begin{definition}[Flat 3-torus (abstract)]\label{def:flatTorus3}
   \lean{VML.FlatTorus3}
   \leanok
   A \emph{flat 3-torus} is a compact, nonempty, first-countable measure space $X$ equipped with spatial gradient, divergence, and curl operators, a differentiability predicate \texttt{IsSpatiallyDiff}, and axioms encoding:
-  \begin{itemize}
-    \item operator linearity (gradient of constants, sums, scalar multiples, chain rules),
-    \item closure of \texttt{IsSpatiallyDiff} under const, add, smul, log, grad, and continuity,
-    \item integration by parts ($\int \varphi\, \partial_i \psi = -\int \psi\, \partial_i \varphi$),
-    \item curl-integral vanishing ($\int u \cdot \curl F = 0$),
-    \item harmonic functions are constant,
-    \item maximum principle for the Laplacian,
-    \item Killing fields are harmonic; curl-free divergence-free fields are harmonic,
-    \item Fubini theorem for spatial--velocity double integrals.
-  \end{itemize}
-\end{definition}
-
-\begin{definition}[VML steady-state input]\label{def:vmlInput}
-  \lean{VML.VMLInput}
-  \leanok
-  \uses{def:flatTorus3, def:landauOperator, def:entropyDissipation, def:isMaxwellian}
-  The \texttt{VMLInput} structure bundles the physical data $(f, E, B, \Psi, \nu, \rho_{\mathrm{ion}})$ together with:
-  positivity of $f$, $\nu$, $\rho_{\mathrm{ion}}$, $\Psi$;
-  smoothness in $v$; integrability;
-  the steady-state Maxwell equations (Amp\`ere, Gauss, $\divop B = 0$);
-  the steady-state Vlasov equation;
-  spatial differentiability of $f(\cdot, v)$ and $B$;
-  and all derived analytical results needed to close the argument (entropy dissipation vanishing, Maxwellian form, polynomial identity, Poisson--Boltzmann, etc.).
+  operator linearity, closure of \texttt{IsSpatiallyDiff} under const/add/smul/log/grad,
+  integration by parts, curl-integral vanishing, harmonic $\Rightarrow$ constant,
+  maximum principle, Killing/curl-free/div-free $\Rightarrow$ harmonic, and Fubini for spatial--velocity double integrals.
 \end{definition}
 
 \begin{definition}[Velocity decay conditions]\label{def:velocityDecayConditions}
   \lean{VML.VelocityDecayConditions}
   \leanok
-  The \texttt{VelocityDecayConditions} structure bundles 17 integrability/Fubini/IBP conditions on $f$, $E$, $B$ that are needed to justify the analytical manipulations (integration by parts on $\R^3$, Fubini exchange, Leibniz differentiation under the integral, entropy dissipation continuity, etc.).
+  \uses{def:flatTorus3}
+  The \texttt{VelocityDecayConditions} structure bundles 17 integrability/Fubini/IBP conditions on $f$, $E$, $B$ that justify the analytical manipulations (integration by parts on $\R^3$, Fubini exchange, Leibniz differentiation under the integral, entropy dissipation continuity, etc.).
 \end{definition}
 
 
@@ -112,48 +95,38 @@ This blueprint describes the formalization of the characterization of global ste
   \leanok
   \uses{def:landauMatrix}
   If $\Psi(|z|) \ge 0$, then the Landau matrix $A(z)$ is positive semi-definite:
-  \[
-    Y^T A(z) Y \ge 0 \quad \text{for all } Y \in \R^3.
-  \]
+  $Y^T A(z) Y \ge 0$ for all $Y \in \R^3$.
 \end{lemma}
 
 \begin{lemma}[Nullspace characterization]\label{lem:landauMatrix_quadForm_eq_zero_iff}
   \lean{VML.landauMatrix_quadForm_eq_zero_iff}
   \leanok
   \uses{def:landauMatrix}
-  If $\Psi(|z|) > 0$ and $z \ne 0$, then $Y^T A(z) Y = 0$ if and only if $Y$ is parallel to $z$ (i.e., $\exists \lambda,\, Y = \lambda z$).
+  If $\Psi(|z|) > 0$ and $z \ne 0$, then $Y^T A(z) Y = 0$ iff $Y \parallel z$.
 \end{lemma}
 
 
 \chapter{H-Theorem and Maxwellian Characterization}\label{ch:section3}
 
-\begin{theorem}[H-theorem]\label{thm:H_theorem}
+\begin{theorem}[H-theorem ($D(f) \le 0$)]\label{thm:H_theorem}
   \lean{VML.H_theorem}
   \leanok
-  \uses{def:entropyDissipation, lem:landauMatrix_posSemidef}
-  If $\Psi \ge 0$ and $f > 0$ is smooth and integrable, then the entropy dissipation is non-positive:
-  \[
-    D(f) \le 0.
-  \]
+  \uses{def:entropyDissipation, def:landauMatrix, def:landauOperator}
+  If $\Psi \ge 0$ and $f > 0$ is smooth, then the entropy dissipation is non-positive: $D(f) \le 0$.
 \end{theorem}
 
-\begin{lemma}[Logarithm is quadratic]\label{lem:log_f_quadratic}
-  \lean{VML.log_f_quadratic}
+\begin{lemma}[$D = 0$ implies Maxwellian]\label{lem:D_zero_implies_maxwellian}
+  \lean{VML.D_zero_implies_maxwellian}
   \leanok
-  If $f > 0$, $f$ smooth, and $\grad_v \log f(v) = b + 2c_0 v$ for all $v$, then there exists $a_0$ such that $\log f(v) = a_0 + b \cdot v + c_0 |v|^2$.
+  \uses{lem:landauMatrix_quadForm_eq_zero_iff, def:isMaxwellian, def:entropyDissipation}
+  If $\Psi > 0$, $f > 0$, $f$ smooth and integrable, and $D(f) = 0$, then $f$ is Maxwellian.
+  This is the core analytic step: $D = 0$ forces the PSD integrand to vanish, which by the nullspace characterization of $A(z)$ forces $\grad \log f$ to be affine, hence $f = \exp(\text{quadratic})$.
 \end{lemma}
 
-\begin{theorem}[Nullspace necessity]\label{thm:nullspace_necessity}
-  \lean{VML.nullspace_necessity}
-  \leanok
-  \uses{def:isMaxwellian, def:entropyDissipation, lem:landauMatrix_quadForm_eq_zero_iff, lem:log_f_quadratic}
-  If $\Psi > 0$, $f > 0$, $f$ smooth and integrable, $Q(f,f) = 0$, and the PSD/score-form conditions hold, then $f$ is Maxwellian.
-\end{theorem}
-
-\begin{theorem}[Nullspace sufficiency]\label{thm:nullspace_sufficiency}
+\begin{theorem}[Nullspace sufficiency (Maxwellian $\Rightarrow Q = 0$)]\label{thm:nullspace_sufficiency}
   \lean{VML.nullspace_sufficiency}
   \leanok
-  \uses{def:landauOperator, def:isMaxwellian}
+  \uses{def:landauMatrix, def:landauOperator}
   If $\log f(v) = a_0 + b \cdot v + c_0 |v|^2$ with $c_0 < 0$, then $Q(f,f)(v) = 0$ for all $v$.
 \end{theorem}
 
@@ -163,57 +136,57 @@ This blueprint describes the formalization of the characterization of global ste
 \begin{theorem}[Steady state is local Maxwellian]\label{thm:steady_state_is_local_maxwellian}
   \lean{VML.steady_state_is_local_maxwellian}
   \leanok
-  \uses{thm:nullspace_necessity}
-  If $\Psi > 0$, $f > 0$, $f$ is smooth, and $D(f(x, \cdot)) = 0$ for all $x$, then for every $x$, $f(x, \cdot)$ is Maxwellian.
+  \uses{lem:D_zero_implies_maxwellian, def:isMaxwellian, def:entropyDissipation}
+  If $\Psi > 0$, $f > 0$, $f$ smooth, and $D(f(x, \cdot)) = 0$ for all $x$, then for every $x$, $f(x, \cdot)$ is Maxwellian.
 \end{theorem}
 
 \begin{lemma}[Lorentz force is divergence-free]\label{lem:lorentz_force_div_zero}
   \lean{VML.lorentz_force_div_zero}
   \leanok
-  For any $E_0, B_0 \in \R^3$,
-  \[
-    \divop_v \bigl(E_0 + v \times B_0\bigr) = 0.
-  \]
+  For any $E_0, B_0 \in \R^3$, $\divop_v (E_0 + v \times B_0) = 0$.
 \end{lemma}
 
-\begin{theorem}[Transport entropy identity]\label{thm:transport_entropy_from_vlasov}
+\begin{lemma}[Velocity-space IBP]\label{lem:velocity_ibp}
+  \lean{VML.velocity_ibp}
+  \leanok
+  Integration by parts on $\R^3$ in velocity space: $\int \partial_i g \cdot h = -\int g \cdot \partial_i h$ under suitable decay.
+\end{lemma}
+
+\begin{lemma}[Force transport vanishes]\label{lem:force_transport_zero}
+  \lean{VML.force_transport_zero}
+  \leanok
+  \uses{lem:velocity_ibp, lem:lorentz_force_div_zero}
+  For any Lorentz force $(E_0 + v \times B_0)$, velocity-space IBP combined with $\divop_v(E_0 + v \times B_0) = 0$ gives
+  $\int (E_0 + v \times B_0) \cdot \grad_v f \cdot \log f\, dv = 0$.
+\end{lemma}
+
+\begin{theorem}[Transport entropy identity ($\int_X D = 0$)]\label{thm:transport_entropy_from_vlasov}
   \lean{VML.transport_entropy_from_vlasov}
   \leanok
-  \uses{def:flatTorus3, def:entropyDissipation}
-  Under the Vlasov equation $v \cdot \grad_x f + (E + v \times B) \cdot \grad_v f = \nu\, Q(f,f)$, combined with integration by parts (spatial and velocity) and the divergence-free property of the Lorentz force, one derives
-  \[
-    \int_X D(f(x, \cdot))\, dx = 0.
-  \]
+  \uses{lem:force_transport_zero, def:flatTorus3, def:entropyDissipation, def:landauOperator}
+  Under the Vlasov equation, combined with spatial IBP (on the torus) and the force transport lemma:
+  $\int_X D(f(x, \cdot))\, dx = 0$.
 \end{theorem}
 
 
 \chapter{Polynomial Matching}\label{ch:section5}
 
-\begin{lemma}[Temperature is constant]\label{lem:temperature_constant}
-  \lean{VML.temperature_constant}
-  \leanok
-  \uses{def:flatTorus3}
-  If for all $x$ and $v$,
-  $(v \cdot \grad_x c(x))\, |v|^2 = 0$,
-  then $\grad_x c(x) = 0$ for all $x$.
-\end{lemma}
-
 \begin{theorem}[Polynomial identity from Vlasov]\label{thm:polynomial_identity_from_vlasov}
   \lean{VML.polynomial_identity_from_vlasov}
   \leanok
-  \uses{def:flatTorus3, def:isMaxwellian}
-  If $f$ is a local Maxwellian $f(x, v) = \exp(a(x) + b(x) \cdot v + c(x)|v|^2)$ satisfying the Vlasov equation, then matching coefficients of the polynomial in $v$ yields:
-  $\grad c = 0$ (constant temperature),
-  and transport identities for the lower-order coefficients.
+  \uses{thm:nullspace_sufficiency, def:flatTorus3, def:landauOperator}
+  If $f$ is a local Maxwellian satisfying the Vlasov equation, then substituting
+  $Q(f,f) = 0$ (by nullspace sufficiency) and matching polynomial coefficients in $v$ yields:
+  $\grad c = 0$ (constant temperature) and transport identities for $a$, $b$.
 \end{theorem}
 
 
 \chapter{Bulk Velocity}\label{ch:section6}
 
-\begin{theorem}[Bulk velocity vanishes]\label{thm:bulk_velocity_zero}
+\begin{theorem}[Bulk velocity vanishes ($b_0 = 0$)]\label{thm:bulk_velocity_zero}
   \lean{VML.bulk_velocity_zero}
   \leanok
-  \uses{def:flatTorus3, thm:polynomial_identity_from_vlasov}
+  \uses{def:flatTorus3}
   In steady state with constant temperature and Amp\`ere's law, the bulk velocity is zero: $b_0 = 0$.
 \end{theorem}
 
@@ -223,18 +196,16 @@ This blueprint describes the formalization of the characterization of global ste
 \begin{theorem}[Poisson--Boltzmann from Vlasov]\label{thm:poisson_boltzmann_from_vlasov}
   \lean{VML.poisson_boltzmann_from_vlasov}
   \leanok
-  \uses{def:flatTorus3, thm:bulk_velocity_zero}
-  When $b_0 = 0$ (isotropic Maxwellian), combining the Vlasov equation with Gauss's law yields the Poisson--Boltzmann equation:
-  \[
-    T_\infty \,\Delta(\log \rho) = \rho - \rho_{\mathrm{ion}}.
-  \]
+  \uses{thm:nullspace_sufficiency, def:flatTorus3, def:landauOperator}
+  When $b_0 = 0$ (isotropic Maxwellian), substituting $Q(f,f) = 0$ into the Vlasov equation and combining with Gauss's law yields:
+  $T_\infty \Delta(\log \rho) = \rho - \rho_{\mathrm{ion}}$.
 \end{theorem}
 
-\begin{theorem}[Electric field vanishes]\label{thm:electric_field_zero}
+\begin{theorem}[Electric field vanishes ($E = 0$)]\label{thm:electric_field_zero}
   \lean{VML.electric_field_zero}
   \leanok
-  \uses{thm:poisson_boltzmann_from_vlasov}
-  By the maximum principle on the compact torus (applied to $\log \rho$), the density $\rho$ must be constant, and therefore $E(x) = 0$ for all $x$.
+  \uses{thm:bulk_velocity_zero, def:flatTorus3}
+  By the maximum principle on the compact torus, the density $\rho$ is constant and $E(x) = 0$ for all $x$.
 \end{theorem}
 
 
@@ -243,50 +214,69 @@ This blueprint describes the formalization of the characterization of global ste
 \begin{theorem}[Magnetic field is constant]\label{thm:magnetic_field_constant}
   \lean{VML.magnetic_field_constant}
   \leanok
-  \uses{def:flatTorus3, thm:bulk_velocity_zero}
-  With $J = 0$ (since $b_0 = 0$), Amp\`ere's law gives $\curl B = 0$, and combined with $\divop B = 0$ and the fact that curl-free divergence-free vector fields on the torus are harmonic (hence constant), we conclude: there exists $B_0$ such that $B(x) = B_0$ for all $x$.
+  \uses{thm:bulk_velocity_zero, def:flatTorus3}
+  With $J = 0$ (since $b_0 = 0$), $\curl B = 0$. Combined with $\divop B = 0$ and the torus axiom that curl-free div-free fields are harmonic (hence constant): $\exists B_0,\, \forall x,\, B(x) = B_0$.
 \end{theorem}
+
+
+\chapter{Symmetrized Weak Form}\label{ch:swf}
+
+\begin{lemma}[Landau IBP (symmetrized weak form)]\label{lem:landau_ibp}
+  \lean{VML.landau_ibp}
+  \leanok
+  \uses{lem:velocity_ibp, def:landauMatrix, def:landauOperator}
+  Integration by parts applied to $\int Q(f,f) \log f$, rewriting the collision operator in divergence form and integrating by parts in $v$:
+  \[
+    D(f) = -\int\int \ip{\grad_v \log f}{A(v-w)[f(w)\grad f(v) - f(v)\grad f(w)]}\, dw\, dv.
+  \]
+\end{lemma}
+
+\begin{lemma}[Fubini symmetrization]\label{lem:fubini_symmetrization_logf}
+  \lean{VML.fubini_symmetrization_logf}
+  \leanok
+  \uses{def:landauMatrix}
+  The double integral from Landau IBP can be symmetrized by swapping $v \leftrightarrow w$ and using $A(v-w) = A(w-v)$, yielding the PSD integrand form with $(\grad \log f(v) - \grad \log f(w))$.
+\end{lemma}
 
 
 \chapter{Main Results}\label{ch:main}
 
+\begin{theorem}[Main steady state]\label{thm:main_steady_state}
+  \lean{VML.main_steady_state}
+  \leanok
+  \uses{thm:electric_field_zero, thm:bulk_velocity_zero, thm:magnetic_field_constant, def:flatTorus3, def:equilibriumMaxwellian}
+  Given a \texttt{VMLSteadyState}, there exist $T_{\mathrm{eq}} > 0$ and $B_0$ such that $f = M_{\rho,T_{\mathrm{eq}}}$, $E = 0$, $B = B_0$.
+\end{theorem}
+
 \begin{theorem}[Main from physics]\label{thm:main_from_physics}
   \lean{VML.main_from_physics}
   \leanok
-  \uses{def:vmlInput, thm:steady_state_is_local_maxwellian, thm:polynomial_identity_from_vlasov, thm:bulk_velocity_zero, thm:electric_field_zero, thm:magnetic_field_constant, def:equilibriumMaxwellian}
-  Given a \texttt{VMLInput}, there exist $T_{\mathrm{eq}} > 0$ and $B_0 \in \R^3$ such that:
-  \begin{enumerate}
-    \item $f(x, v) = M_{\rho_{\mathrm{ion}}, T_{\mathrm{eq}}}(v)$ for all $x, v$,
-    \item $E(x) = 0$ for all $x$,
-    \item $B(x) = B_0$ for all $x$.
-  \end{enumerate}
+  \uses{thm:main_steady_state, thm:steady_state_is_local_maxwellian, def:equilibriumMaxwellian}
+  Given a \texttt{VMLInput} (which encodes $D(f(x,\cdot)) = 0$ for all $x$), constructs a \texttt{VMLSteadyState} and delegates to \texttt{main\_steady\_state}.
 \end{theorem}
 
-\begin{theorem}[Theorem 42]\label{thm:theorem42}
+\begin{theorem}[Theorem 42 (abstract)]\label{thm:theorem42}
   \lean{VML.Theorem42}
   \leanok
-  \uses{thm:main_from_physics, def:velocityDecayConditions, def:flatTorus3, def:equilibriumMaxwellian}
-  Let $X$ be a flat 3-torus. Let $f : X \times \R^3 \to \R$ be a smooth, positive, integrable function, let $E, B : X \to \R^3$, and let $\Psi$ be a positive collision kernel. Suppose:
-  \begin{itemize}
-    \item The steady-state Vlasov equation holds: $v \cdot \grad_x f + (E + v \times B) \cdot \grad_v f = \nu\, Q_\Psi(f, f)$.
-    \item The steady-state Maxwell equations hold (Amp\`ere, Gauss, $\divop B = 0$).
-    \item $f(\cdot, v)$ is spatially differentiable for each $v$, and $B$ is spatially differentiable.
-    \item The velocity decay conditions \texttt{VelocityDecayConditions} are satisfied.
-  \end{itemize}
-  Then there exist $T_{\mathrm{eq}} > 0$ and $B_0 \in \R^3$ such that:
-  \[
-    f(x, v) = \frac{\rho_{\mathrm{ion}}}{(2\pi T_{\mathrm{eq}})^{3/2}} \exp\!\left(-\frac{|v|^2}{2T_{\mathrm{eq}}}\right), \quad
-    E(x) = 0, \quad B(x) = B_0
-  \]
-  for all $x \in X$ and $v \in \R^3$.
+  \uses{thm:main_from_physics, thm:H_theorem, thm:transport_entropy_from_vlasov, thm:polynomial_identity_from_vlasov, thm:poisson_boltzmann_from_vlasov, lem:landau_ibp, lem:fubini_symmetrization_logf, def:velocityDecayConditions, def:flatTorus3, def:equilibriumMaxwellian, def:entropyDissipation}
+  Let $X$ be a flat 3-torus, $f > 0$ smooth and integrable, $\Psi > 0$.
+  From the Vlasov equation + Maxwell equations + velocity decay conditions:
+  \begin{enumerate}
+    \item Landau IBP + Fubini symmetrization $\Rightarrow$ score form of $D(f)$
+    \item $H$-theorem: $D(f(x,\cdot)) \le 0$ for each $x$
+    \item Transport entropy identity: $\int_X D = 0$
+    \item Combining: $D(f(x,\cdot)) = 0$ for all $x$
+    \item Polynomial identity + Poisson--Boltzmann from the Vlasov equation
+    \item Main from physics: conclude $f = M_{\rho,T}$, $E = 0$, $B = B_0$
+  \end{enumerate}
 \end{theorem}
 
 \begin{theorem}[Coulomb concrete Theorem 42]\label{thm:coulomb_concrete}
   \lean{VML.CoulombConcreteTheorem42}
   \leanok
-  \uses{thm:theorem42}
+  \uses{thm:theorem42, def:torusInstance, def:schwartzDecayEB, thm:equilibriumMaxwellian_T_unique}
   Specialization of Theorem~42 to the Coulomb kernel $\Psi(r) = r^{-3}$ on the concrete torus $\T^3 = (\R / \mathbb{Z})^3$, with Schwartz-class decay assumptions on $f$.
-  The conclusion is the same: $f$ is an equilibrium Maxwellian, $E = 0$, and $B$ is constant.
+  The conclusion is the same: $f$ is an equilibrium Maxwellian with unique $T_{\mathrm{eq}}$, $E = 0$, and $B$ is constant.
 \end{theorem}
 
 \begin{theorem}[Temperature uniqueness]\label{thm:equilibriumMaxwellian_T_unique}
@@ -295,3 +285,21 @@ This blueprint describes the formalization of the characterization of global ste
   \uses{def:equilibriumMaxwellian}
   If $\rho > 0$, $T_1 > 0$, $T_2 > 0$, and $M_{\rho, T_1} = M_{\rho, T_2}$, then $T_1 = T_2$.
 \end{theorem}
+
+
+\chapter{Concrete Instances}\label{ch:instances}
+
+\begin{definition}[Concrete torus instance]\label{def:torusInstance}
+  \lean{VML.instFlatTorus3}
+  \leanok
+  \uses{def:flatTorus3}
+  A concrete \texttt{FlatTorus3} instance on $\T^3 = (\R/\mathbb{Z})^3$, realized as $\mathrm{Fin}\,3 \to \mathrm{AddCircle}\,1$.
+  All 23 fields proved: IBP via $1$D FTC + Fubini + periodicity, harmonic $\Rightarrow$ constant via the energy method, Laplacian maximum principle via the second derivative test, etc.
+\end{definition}
+
+\begin{definition}[Schwartz decay conditions (Coulomb)]\label{def:schwartzDecayEB}
+  \lean{VML.schwartzDecayConditionsEB}
+  \leanok
+  \uses{def:velocityDecayConditions}
+  A concrete \texttt{VelocityDecayConditions} instance for the Coulomb kernel $\Psi(r) = r^{-3}$ with Schwartz-class $f$ and nonzero $E$, $B$. All 17 integrability/Fubini/IBP conditions verified.
+\end{definition}
