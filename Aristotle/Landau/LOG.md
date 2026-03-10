@@ -1,5 +1,21 @@
 # Log
 
+## 2026-03-11 14:00 UTC — Babysit cycle 24: **0 SORRY'S — FORMALIZATION COMPLETE**
+
+### Status
+- **ALL SORRY'S ELIMINATED.** The Coulomb Concrete Theorem 42 is fully proved.
+- **Proved `coulomb_entry_conv_differentiable`**: Differentiability of Coulomb entry convolution.
+  - Refactored into `coulomb_entry_conv_hasFDerivAt_aux` (core HasFDerivAt via `hasFDerivAt_integral_of_dominated_of_fderiv_le`) + corollary.
+  - Key: change of variables u = v-w, uniform bound ‖fderiv g‖ ≤ Cf, dominator ‖u‖⁻¹ * Cf integrable via `inv_norm_schwartz_integrable`.
+- **Discovered `coulomb_entry_conv_deriv_decay` was FALSE**: The Coulomb kernel is degree -1 homogeneous, so the convolution derivative has O(‖v‖⁻²) decay, NOT Schwartz decay.
+  - Replaced with `coulomb_entry_conv_deriv_bounded`: uniform bound ∃ C, ∀ v, ‖fderiv(conv)(v)‖ ≤ C (TRUE).
+  - Proof: HasFDerivAt gives fderiv = ∫ A(u) • fderiv(g)(v-u), bounded by ∫ ‖u‖⁻¹ * ‖fderiv g(v-u)‖ ≤ M via `newtonian_schwartz_uniform_bound`.
+- **Refactored `coulomb_flux_deriv_schwartz_decay`**: Swapped which factors carry Schwartz decay.
+  - OLD (wrong): (bounded ∂_j f) × (Schwartz DK) — used false Schwartz decay of DK
+  - NEW (correct): (Schwartz ∂_j f) × (bounded DK) — product of Schwartz-decaying coefficient with bounded convolution derivative
+
+### Sorry count: 0 (down from 2)
+
 ## 2026-03-11 12:00 UTC — Babysit cycle 23: Closed flux decay arithmetic sorry, Aristotle results
 
 ### Status
