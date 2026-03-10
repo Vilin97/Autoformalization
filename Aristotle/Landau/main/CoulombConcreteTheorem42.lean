@@ -76,9 +76,9 @@ theorem CoulombConcreteTheorem42
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
       ν * LandauOperator coulombKernel (f x) v)  -- (10)
     -- === Steady-state Maxwell equations ===
-    (hAmpere : ∀ x, torusCurlX B x = fun i => ∫ v, v i * f x v)       -- (10)
-    (hGauss : ∀ x, torusDivX E x = (∫ v, f x v) - ρ_ion)              -- (11)
-    (hDivB : ∀ x, torusDivX B x = 0)             -- (12)
+    (hAmpere : ∀ x, torusCurlX B x = fun i => ∫ v, v i * f x v)       -- (11)
+    (hGauss : ∀ x, torusDivX E x = (∫ v, f x v) - ρ_ion)              -- (12)
+    (hDivB : ∀ x, torusDivX B x = 0)             -- (13)
     :
     -- === Conclusion ===
     ∃ (T_eq : ℝ) (B₀ : Fin 3 → ℝ), 0 < T_eq ∧
