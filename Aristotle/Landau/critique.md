@@ -172,9 +172,9 @@ Both have all 18 fields proved with 0 sorry's. These demonstrate the hypotheses 
 | 1,600,000 (8x default) | 11 | Moderate |
 | 800,000 (4x default) | ~15 | Acceptable individually |
 
-### Universal linter suppression
+### ~~Universal linter suppression~~ FIXED
 
-`set_option linter.all false` in all 21 files. No automated checks for deprecated APIs, dead hypotheses, or unused imports.
+~~`set_option linter.all false` in all 21 files.~~ All linter suppressions removed in cycle 26. The project builds with 0 linter warnings.
 
 ### Duplicate primed definitions
 
@@ -239,7 +239,7 @@ Both have all 18 fields proved with 0 sorry's. These demonstrate the hypotheses 
 ### Structural concerns (non-blocking)
 
 1. **~33 heartbeat overrides**, including one at 20x default
-2. **Universal linter suppression** across all 21 files
+2. ~~Universal linter suppression across all 21 files~~ **FIXED** (cycle 26: all linters re-enabled, 0 warnings)
 3. **Duplicate primed definitions** with namespace collision
 4. **232 lines of custom tactic code** (Aristotle's `generalize_proofs'`)
 5. **3 files exceed 1100 lines** (should be split)
@@ -256,7 +256,7 @@ The structural concerns above are code quality issues, not soundness issues. The
 
 **Remaining work (optional):**
 1. Update MEMORY.md with correct line counts and sorry counts
-2. Re-enable linters in top-level theorem files
+2. ~~Re-enable linters in top-level theorem files~~ **DONE** (all 21 files)
 3. Split VelocityDecayInstance.lean, Section3.lean, CoulombPSD.lean
 4. ~~Replace copy-paste in `schwartzDecayConditionsEB` with `let`-binding~~ **DONE**
 5. Reduce the 4M-heartbeat proof

@@ -4,7 +4,6 @@
 -/
 import Aristotle.Landau.main.ConcreteTheorem42
 
-set_option linter.all false
 open MeasureTheory Matrix Finset BigOperators Real
 
 noncomputable section

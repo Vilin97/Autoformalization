@@ -1,5 +1,4 @@
 import Aristotle.Landau.main.Defs
-set_option linter.all false
 open Matrix Finset BigOperators Real MeasureTheory
 noncomputable section
 namespace VML

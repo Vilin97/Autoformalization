@@ -6,7 +6,6 @@ import Aristotle.Landau.main.Section6
 import Aristotle.Landau.main.Section7
 import Aristotle.Landau.main.Section8
 import Aristotle.Landau.main.Section9
-set_option linter.all false
 open Matrix Finset BigOperators Real MeasureTheory
 noncomputable section
 namespace VML

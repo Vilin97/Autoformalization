@@ -15,7 +15,6 @@
 import Aristotle.Landau.main.Theorem42
 import Aristotle.Landau.main.LandauMatrixDerivBound
 
-set_option linter.all false
 open Matrix Finset BigOperators Real MeasureTheory
 
 noncomputable section

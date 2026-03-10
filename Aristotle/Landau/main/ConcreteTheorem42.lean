@@ -18,7 +18,6 @@ import Aristotle.Landau.main.Theorem42
 import Aristotle.Landau.main.TorusInstance
 import Aristotle.Landau.main.VelocityDecayInstance
 
-set_option linter.all false
 open MeasureTheory Matrix Finset BigOperators Real
 
 noncomputable section
