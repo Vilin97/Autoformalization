@@ -1,5 +1,24 @@
 # Log
 
+## 2026-03-11 12:00 UTC — Babysit cycle 23: Closed flux decay arithmetic sorry, Aristotle results
+
+### Status
+- **Closed inner sorry in `coulomb_flux_deriv_schwartz_decay`**: The per-term arithmetic assembly.
+  - Key technique: product rule gives 4 terms, each (bounded × Schwartz-decaying × polynomial).
+  - Proved `‖fderiv ℝ f v‖ = ‖iteratedFDeriv ℝ 1 f v‖` via `norm_iteratedFDeriv_fderiv` + `norm_iteratedFDeriv_zero`.
+  - Used `mul_le_mul` for each of 4 terms, then `nlinarith` for the distribution over (1+‖v‖)^N.
+- **Aristotle results**:
+  - `landau_ibp_df_g` (97da955d): COMPLETE, 0 sorry's. But REDUNDANT — `coulomb_ibp_df_g_integrable` already proved manually.
+  - `coulomb_conv_diff` (b419ae41): FAILED — Aristotle returned sorry.
+  - `coulomb_conv_deriv_decay` (28a741f0): Still running.
+- **Build system**: Fixed `lake build` crash by running `lake exe cache get` after previous `lake clean`.
+
+### Sorry count: 2 (down from 3)
+| Sorry | File | Status |
+|-------|------|--------|
+| coulomb_entry_conv_differentiable | CoulombPSD:792 | Aristotle failed; needs manual proof via hasFDerivAt + Peetre bound |
+| coulomb_entry_conv_deriv_decay | CoulombPSD:803 | Aristotle job 28a741f0 still running |
+
 ## 2026-03-11 08:00 UTC — Babysit cycle 22: Proved coulomb_entry_schwartz_integrable, closed flux differentiability sorry
 
 ### Status

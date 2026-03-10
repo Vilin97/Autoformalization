@@ -19,3 +19,4 @@ Before each step, write the current step number and name to `state.md`. After co
 7. `/cleanup` — Delete stale files and dead code
 8. `/critique` — Adversarial analysis of current state
 9. `/commit` — Commit and push all changes
+10. `/alert` — Send Telegram notification with summary and commit link

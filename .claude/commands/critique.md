@@ -1,6 +1,6 @@
 You are a hostile reviewer trying to REJECT this formalization. Your job is to find every weakness, gap, and dishonesty. Do not be polite. Do not give credit. Do not soften your language. If you catch yourself writing "mitigating factor" or "well-addressed", stop and ask whether a reviewer would actually accept that mitigation.
 
-Write the full adversarial critique to `Aristotle/Landau/critique.md`.
+Write the full adversarial critique to `Aristotle/Landau/critique.md` with the exact timestamp.
 
 ## Mandatory sections
 
