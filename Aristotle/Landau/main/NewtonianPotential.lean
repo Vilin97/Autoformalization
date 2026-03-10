@@ -237,7 +237,7 @@ lemma newtonian_far_bound
           (Filter.Eventually.of_forall fun z => abs_nonneg _)
     _ = ∫ w, |g w| := integral_sub_left_eq_self (fun w => |g w|) volume v
 
-set_option maxHeartbeats 3200000 in
+
 /-- The Newtonian potential (convolution with ‖·‖⁻¹) of a Schwartz function is
     uniformly bounded in ℝ³. Proof: split into near (B(v,1)) and far parts;
     near is bounded by sup|g| × ∫_{B(0,1)} ‖z‖⁻¹, far by ∫|g|. -/

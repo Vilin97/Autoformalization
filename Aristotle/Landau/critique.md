@@ -1,8 +1,8 @@
-# Adversarial Critique — 2026-03-10 UTC (Cycle 57)
+# Adversarial Critique — 2026-03-10 UTC (Cycle 58)
 
 ## Verdict: ACCEPT WITH MINOR REVISIONS
 
-Cycles 55-57 eliminated 23 of 30 heartbeat overrides (all 800000 and 1600000 were unnecessary). Only 7 remain (6 at 3200000, 1 synthInstance). Remaining issues are minor.
+Cycles 55-58 eliminated ALL 29 `maxHeartbeats` overrides (all were unnecessary — every proof compiles at default 400000). Only 1 `synthInstance.maxHeartbeats 160000` remains. Remaining issues are minor.
 
 ---
 
@@ -89,16 +89,18 @@ I found no divergence from the standard mathematical proof. The proof follows th
 | CoulombFluxDiff.lean | 627 | Borderline |
 | CoulombFlux.lean | 615 | Borderline |
 
-### 6b. maxHeartbeats overrides (6 maxHeartbeats + 1 synthInstance = 7 total)
+### 6b. maxHeartbeats overrides (0 maxHeartbeats + 1 synthInstance = 1 total)
 
-| Value | Count | Files |
-|-------|-------|-------|
-| ~~800000~~ | ~~0~~ | **ALL ELIMINATED** (cycles 55-56) |
-| ~~1600000~~ | ~~0~~ | **ALL ELIMINATED** (cycle 57) |
-| 3200000 | 6 | CoulombFlux (2), CoulombPSD (3), NewtonianPotential (1) |
-| synthInstance 160000 | 1 | CoulombSpatialTransport |
+**ALL `maxHeartbeats` overrides eliminated** (cycles 55-58). Every proof compiles at default (400000).
 
-7 heartbeat overrides across 4 files (down from 30 at cycle 54). The 6 values at 3200000 (8× default) are the only remaining `maxHeartbeats` overrides. These are genuinely heavy proofs (measurability, integrability with Coulomb kernel singularity).
+| Value | Status |
+|-------|--------|
+| ~~800000 (12)~~ | **ALL ELIMINATED** (cycles 55-56) |
+| ~~1600000 (11)~~ | **ALL ELIMINATED** (cycle 57) |
+| ~~3200000 (6)~~ | **ALL ELIMINATED** (cycle 58) |
+| synthInstance 160000 (1) | Remains in CoulombSpatialTransport.lean |
+
+1 override remaining across all files (down from 30 at cycle 54).
 
 ### 6c. Primed definitions (11 duplicates across 3 files) — PARTIALLY ADDRESSED (cycle 54)
 
@@ -185,7 +187,7 @@ Elementary linear algebra bound. **Not worth upstreaming.**
 | 2 | 11 primed definitions + 9 unused bridging lemmas (20 lines dead code) | Minor | Partially addressed (cycle 54) |
 | 3 | ~~progress.md severely stale~~ | ~~Major~~ | **RESOLVED** (cycle 53) |
 | 4 | ~~MEMORY.md stale~~ | ~~Minor~~ | **RESOLVED** (cycle 53) |
-| 5 | 7 heartbeat overrides (6 at 3200000, 1 synthInstance) | Minor | Mostly resolved (cycles 55-57) |
+| 5 | ~~29 maxHeartbeats overrides~~ (1 synthInstance remains) | ~~Minor~~ | **RESOLVED** (cycles 55-58) |
 | 6 | 7 files over 600 lines (TorusInstance at 1162) | Minor | Open |
 | 7 | hGradBound "likely derivable" claim may be incorrect | Epistemic | Open |
 | 8 | No non-equilibrium VDC instance for Coulomb kernel | Epistemic | Open |
@@ -198,4 +200,3 @@ Elementary linear algebra bound. **Not worth upstreaming.**
 1. Eliminate primed definitions entirely (replace with VML namespace defs in proofs)
 2. Investigate and correct hGradBound "likely derivable" claim
 3. Split TorusInstance.lean (1162 lines)
-4. Reduce maxHeartbeats 3200000 overrides (6 proofs — these are genuinely heavy)

@@ -240,7 +240,7 @@ lemma psd_pointwise_bound_coulomb
       _ = 18 * Cg ^ 2 * f v * ((1 + ‖v‖) ^ (2 * Kg) * (‖v - w‖⁻¹ * f w) +
                ‖v - w‖⁻¹ * ((1 + ‖w‖) ^ (2 * Kg) * f w)) := by ring
 
-set_option maxHeartbeats 3200000 in
+
 /-- PSD integrand is integrable for Coulomb kernel (inner integral, fixing v).
     Uses element-wise Coulomb matrix bound |A_{ij}| ≤ ‖z‖⁻¹ combined with
     polynomial score bound and Newtonian potential of Schwartz functions. -/
@@ -293,7 +293,7 @@ lemma psd_inner_integrable_coulomb
   rw [Real.norm_eq_abs]
   exact psd_pointwise_bound_coulomb f hf_pos h_score v w
 
-set_option maxHeartbeats 3200000 in
+
 /-- PSD integrand is integrable for Coulomb kernel (outer integral).
     Uses pointwise bound + Newtonian uniform bounds + Schwartz decay. -/
 lemma psd_outer_integrable_coulomb
@@ -400,7 +400,7 @@ lemma psd_outer_integrable_coulomb
               gcongr; linarith
           _ = 18 * Cg ^ 2 * (M₁ + M₂) * ((1 + ‖v‖) ^ (2 * Kg) * f v) := by ring
 
-set_option maxHeartbeats 3200000 in
+
 /-- The Fubini integrand (score · flux) is jointly integrable on the product space
     for the Coulomb kernel. Uses `integrable_prod_iff` with:
     - Joint measurability from measurability of each factor
