@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 20:00 UTC — Babysit cycle 27: Assessed remaining tech debt
+
+### Assessment
+- Investigated duplicate primed definitions: non-trivial to consolidate (different generic vs Coulomb-specific signatures, separate import branches). Not worth the risk.
+- Investigated 3200000 heartbeat proofs: well-structured 50-line proofs, heartbeat cost is from typeclass resolution, not bad structure.
+- Remaining tech debt items are all high-effort/low-value or risky. Formalization is complete.
+
+### Sorry count: 0
+
 ## 2026-03-11 18:00 UTC — Babysit cycle 26: Re-enable all linters
 
 ### Changes
