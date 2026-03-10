@@ -134,7 +134,7 @@ lemma schwartz_partial_decay
   rw [h2] at h1
   exact le_trans (mul_le_mul_of_nonneg_right h1 (by positivity)) (hC x w)
 
-set_option maxHeartbeats 3200000 in
+
 /-- The Landau flux component is AEStronglyMeasurable as a parametric integral.
     Uses joint measurability on the product space + integral_prod_right'. -/
 lemma flux_component_aestronglyMeasurable
@@ -447,7 +447,7 @@ lemma flux_times_log_integrable_coulomb
 -- Flux component bound with polynomial gradient hypothesis
 -- ============================================================================
 
-set_option maxHeartbeats 3200000 in
+
 /-- Pointwise bound on the Coulomb flux component: |flux_i(v)| ≤ Cf * g(v) * (1+‖v‖)^Kg.
     Combines the Newtonian potential bound (∫ ‖v-w‖⁻¹ |g| ≤ M) with the polynomial
     gradient bound |∂_j g(v)| ≤ Cg * (1+‖v‖)^Kg * g(v). -/
