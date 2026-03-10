@@ -1,5 +1,26 @@
 # Log
 
+## 2026-03-11 08:00 UTC — Babysit cycle 22: Proved coulomb_entry_schwartz_integrable, closed flux differentiability sorry
+
+### Status
+- **Proved `coulomb_entry_schwartz_integrable`**: Coulomb matrix entry × Schwartz function is integrable in ℝ³.
+  - Domination argument: |A_{ij}(v-w) * g(w)| ≤ ‖v-w‖⁻¹ * |g(w)| via `coulomb_landauMatrix_entry_le_pi`.
+  - Full proof including measurability of piecewise Coulomb kernel (Measurable.ite + composition).
+  - Reusable helper for all flux decomposition proofs.
+- **Closed `coulomb_flux_differentiable` combination sorry**: Proved the pointwise flux decomposition.
+  - flux_i(v) = Σ_j [∂_j f(v) * K_{ij}(v) - f(v) * L_{ij}(v)] via:
+    1. `eval_integral` to extract component from vector integral
+    2. `integral_finset_sum` to exchange sum and integral
+    3. `integral_sub` + `integral_const_mul_of_integrable` to distribute and factor
+  - Key insight: avoid typeclass diamond by using `integral_const_mul_of_integrable` (not `integral_const_mul`).
+
+### Sorry count: 3 (down from 4)
+| Sorry | File | Status |
+|-------|------|--------|
+| coulomb_entry_conv_differentiable | CoulombPSD:792 | Submitted to Aristotle (b419ae41) |
+| coulomb_entry_conv_deriv_decay | CoulombPSD:803 | Submitted to Aristotle (28a741f0) |
+| coulomb_flux_deriv_schwartz_decay (combination) | CoulombPSD:897 | Needs product rule + decay tracking |
+
 ## 2026-03-11 06:00 UTC — Babysit cycle 21: Decomposed sorry's, proved schwartz_fderiv_component_schwartz
 
 ### Status
