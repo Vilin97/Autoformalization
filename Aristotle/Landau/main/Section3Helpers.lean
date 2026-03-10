@@ -1,8 +1,6 @@
 import Aristotle.Landau.main.Defs
 import Aristotle.Landau.main.Section2
 
-set_option linter.unusedSimpArgs false
-
 open Matrix Finset BigOperators Real MeasureTheory
 
 noncomputable section

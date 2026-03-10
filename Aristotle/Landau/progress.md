@@ -1,6 +1,6 @@
 # Formalization Progress: Global Steady State of the VML System
 
-**Files**: `Aristotle/Landau/main/*.lean` (22 files, ~8,300 lines)
+**Files**: `Aristotle/Landau/main/*.lean` (21 files, ~7,850 lines)
 **Blueprint**: `Aristotle/Landau/H-theorem-formal.tex` (Sections 1--10)
 **Status**: 0 errors, 0 sorry's. Fully verified by Lean 4 kernel.
 
@@ -51,7 +51,6 @@ VelocityDecayConditions fields inline for the Coulomb kernel Ψ(r) = r⁻³.
 - `CoulombFluxDiff.lean` -- Conv differentiability, flux diff/decay, IBP
 - `CoulombPSD.lean` -- PSD continuity, inner/outer integrability, Fubini
 - `CoulombConcreteTheorem42.lean` -- Main concrete theorem (13 hypotheses, 0 sorry's)
-- `LandauMatrixDerivBound.lean` -- Landau matrix derivative bounds
 
 ---
 
