@@ -716,10 +716,14 @@ lemma fubini_double_integrable_coulomb
 
 /-- The Coulomb flux component v ↦ (∫_w A(v-w)·[f(w)∇f(v)-f(v)∇f(w)])_i is differentiable.
 
-    This is differentiation under the integral sign for a singular (Coulomb) kernel.
-    The integrand A(v-w)·flux(v,w) has entries bounded by ‖v-w‖⁻¹ (locally integrable in ℝ³).
-    The v-derivative involves ‖v-w‖⁻² (also locally integrable in ℝ³).
-    Combined with Schwartz decay of f, the dominated convergence theorem applies. -/
+    Proof strategy: Decompose the flux as
+      flux_i(v) = Σ_j (∂_j f)(v) * K_{ij}(v) - f(v) * Σ_j L_{ij}(v)
+    where K_{ij}(v) = ∫ A_{ij}(v-w) f(w) dw and L_{ij}(v) = ∫ A_{ij}(v-w) (∂_j f)(w) dw.
+    After substituting u = v - w, the kernel A(u) doesn't depend on v, so differentiation
+    under the integral sign applies via hasFDerivAt_integral_of_dominated_of_fderiv_le:
+    the v-derivative passes to the Schwartz factor g(v-u), giving a bound
+    |A(u)_{ij}| * ‖fderiv g(v-u)‖ ≤ ‖u‖⁻¹ * C/(1+‖u‖)^4 which is integrable in ℝ³.
+    Then flux_i is differentiable by product/sum rules. -/
 lemma coulomb_flux_differentiable
     (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
     (hf_schwartz : ∀ N k, ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
