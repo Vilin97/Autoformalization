@@ -699,28 +699,6 @@ lemma maxwellian_landau_flux_zero (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
   · simp +decide [mul_assoc, mul_comm, mul_left_comm, Finset.mul_sum _ _ _, Finset.sum_add_distrib, Matrix.mulVec, dotProduct]; ring!
   · norm_num [Algebra.smul_def]
 
-/-- Gap 9: Transport term integrates to zero on T³ × ℝ³.
-    The spatial transport vanishes by periodicity on T³, the electric force
-    term by integration by parts (E independent of v), and the magnetic
-    force term because ∇ᵥ · (v × B) = 0.
-    Reference: Proof of Lemma 10 (lem:lhs_vanishes). -/
-lemma transport_entropy_vanishes_torus
-    (X : Type*)
-    (spatialIntegral : (X → ℝ) → ℝ)
-    (f : X → (Fin 3 → ℝ) → ℝ)
-    (E B : X → (Fin 3 → ℝ))
-    (_hf_pos : ∀ x v, 0 < f x v)
-    -- Hypothesis: transport integral vanishes (from periodicity + IBP + div(v×B)=0)
-    (htransport : spatialIntegral (fun x => ∫ v,
-      (dotProduct v (vGrad (f x) v) +
-      dotProduct (E x + cross v (B x)) (vGrad (f x) v)) *
-      Real.log (f x v)) = 0) :
-    spatialIntegral (fun x => ∫ v,
-      (dotProduct v (vGrad (f x) v) +
-      dotProduct (E x + cross v (B x)) (vGrad (f x) v)) *
-      Real.log (f x v)) = 0 :=
-  htransport
-
 /-- Gap 10: On a compact domain, ∫ g = 0 with g ≤ 0 implies g ≡ 0.
     For continuous g on T³ (compact, positive measure), non-positive with
     zero integral implies pointwise vanishing.
@@ -856,52 +834,6 @@ lemma poisson_boltzmann_max_principle
   have h_eq : n x_max = ρ_ion ∧ n x_min = ρ_ion := by
     constructor <;> nlinarith [hPB x_max, hPB x_min, hmax x_min, hmin x_max]
   exact fun x => le_antisymm (by linarith [hmax x]) (by linarith [hmin x])
-
-/-- Gap 16: Leibniz integral rule on T³ (axiomatized).
-    For smooth f on [0,∞) × T³, d/dt ∫_{T³} f(t,x) dx = ∫_{T³} ∂_t f(t,x) dx.
-    Justified by smoothness and compactness.
-    Reference: Step in the proof of Lemma 24 (lem:B_mean_conserved). -/
-lemma B_mean_conserved_from_axioms
-    (X : Type*)
-    (spatialIntegral : (X → ℝ) → ℝ)
-    (B : ℝ → X → (Fin 3 → ℝ))
-    -- Leibniz rule: d/dt ∫ g = ∫ ∂_t g
-    (hLeibniz : ∀ (g : ℝ → X → ℝ) (t : ℝ),
-      deriv (fun t' => spatialIntegral (fun x => g t' x)) t =
-      spatialIntegral (fun x => deriv (fun t' => g t' x) t))
-    -- Component-wise: ∫ ∂_t B_i = 0
-    (hComponent : ∀ t i, spatialIntegral (fun x => deriv (fun t' => B t' x i) t) = 0) :
-    ∀ t i, deriv (fun t' => spatialIntegral (fun x => B t' x i)) t = 0 := by
-  -- Proved by Aristotle (Harmonic)
-  aesop
-
-/-- Gap 17 (revised): Faraday + Stokes on T³: ∫_{T³} ∂_t Bᵢ dx = 0.
-    By Faraday, ∂_t B = -∇×E. By Stokes on the periodic domain T³,
-    ∫ (∇×E)ᵢ = 0. Combined: ∫ ∂_t Bᵢ = -∫ (∇×E)ᵢ = 0.
-    Reference: Step in the proof of Lemma 24 (lem:B_mean_conserved). -/
-lemma faraday_stokes_integral_zero_v2
-    (X : Type*)
-    (spatialIntegral : (X → ℝ) → ℝ)
-    (B_dot : X → (Fin 3 → ℝ))
-    (curlE : X → (Fin 3 → ℝ))
-    (hFaraday : ∀ x i, B_dot x i = -(curlE x i))
-    (hStokes_curl : ∀ i : Fin 3,
-      spatialIntegral (fun x => curlE x i) = 0)
-    (hNeg : ∀ g : X → ℝ,
-      spatialIntegral (fun x => -(g x)) = -(spatialIntegral g)) :
-    ∀ i : Fin 3, spatialIntegral (fun x => B_dot x i) = 0 := by
-  -- Proved by Aristotle (Harmonic)
-  aesop
-
-/-- Gap 18: At steady state, all fields are time-independent, so total energy is constant.
-    Reference: Proof of Lemma 25 (lem:energy_conserved). -/
-lemma vml_energy_conservation
-    (a b c : ℝ)
-    (totalEnergy : ℝ → ℝ)
-    (hconst : ∀ t, totalEnergy t = a + b + c) :
-    ∀ t₁ t₂, totalEnergy t₁ = totalEnergy t₂ := by
-  -- Proved by Aristotle (Harmonic)
-  aesop
 
 /-- Gap 19: Force balance from polynomial identity O(|v|¹) coefficient.
     With c and b constant, the polynomial identity at O(|v|¹) gives

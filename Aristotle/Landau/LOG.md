@@ -1,5 +1,18 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 46: Remove dead code in Section3Helpers
+
+### Changes
+- Removed 4 dead-code lemmas from Section3Helpers.lean (no longer called after cycle 45 removed their forwarding callers):
+  - `transport_entropy_vanishes_torus` — tautological (proof was just `htransport`)
+  - `B_mean_conserved_from_axioms` — trivial `aesop`, no callers since `B_mean_conserved` removed
+  - `faraday_stokes_integral_zero_v2` — trivial `aesop`, no callers
+  - `vml_energy_conservation` — trivial `aesop`, no callers since `energy_conserved` removed
+- Section3Helpers.lean: 926 → 858 lines (-68)
+- Total: 24 files, ~11,011 lines (down from ~11,079)
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 45: Remove tautological theorems + document hGradBound
 
 ### Changes
