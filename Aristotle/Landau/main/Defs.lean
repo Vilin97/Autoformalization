@@ -259,12 +259,6 @@ lemma cross_smul_left (c : ℝ) (a b : Fin 3 → ℝ) :
     cross (c • a) b = c • cross a b := by
   ext i; fin_cases i <;> simp +decide [cross, Pi.smul_apply, smul_eq_mul, mul_sub] <;> ring
 
-/-- Helper: dotProduct with scalar multiplication -/
-private lemma dotProduct_smul_self (c : ℝ) (v : Fin 3 → ℝ) :
-    dotProduct v (c • v) = c * normSq v := by
-  unfold normSq dotProduct
-  simp only [Pi.smul_apply, smul_eq_mul, Fin.sum_univ_three]
-  ring
 
 /-- Helper: cross product with zero first argument -/
 lemma cross_zero_left (b : Fin 3 → ℝ) : cross (0 : Fin 3 → ℝ) b = 0 := by
