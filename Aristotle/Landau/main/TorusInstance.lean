@@ -13,7 +13,6 @@
 -/
 import Aristotle.Landau.main.Defs
 
-set_option linter.all false
 open MeasureTheory Matrix Finset BigOperators Real Filter
 
 noncomputable section

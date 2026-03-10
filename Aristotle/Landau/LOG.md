@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 18:00 UTC — Babysit cycle 26: Re-enable all linters
+
+### Changes
+- Removed `set_option linter.all false` from all 21 files in `Aristotle/Landau/main/`
+- Project builds with 0 linter warnings — no code changes needed
+- Updated critique.md to reflect linter fix
+
+### Sorry count: 0
+
 ## 2026-03-11 16:00 UTC — Babysit cycle 25: Code quality cleanup
 
 ### Changes

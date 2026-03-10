@@ -25,7 +25,6 @@ import Aristotle.Landau.main.CoulombSpatialTransport
 import Aristotle.Landau.main.CoulombFlux
 import Aristotle.Landau.main.CoulombPSD
 
-set_option linter.all false
 open MeasureTheory Matrix Finset BigOperators Real
 
 noncomputable section

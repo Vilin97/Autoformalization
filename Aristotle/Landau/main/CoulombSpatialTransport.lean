@@ -1,6 +1,5 @@
 import Aristotle.Landau.main.CoulombKernel
 
-set_option linter.all false
 open MeasureTheory Matrix Finset BigOperators Real
 
 noncomputable section

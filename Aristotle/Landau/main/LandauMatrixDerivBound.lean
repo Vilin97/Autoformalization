@@ -231,7 +231,6 @@ elab (name := generalizeProofsElab'') "generalize_proofs" config?:(Parser.Tactic
 
 end Harmonic
 
-set_option linter.all false
 
 open MeasureTheory Matrix Finset BigOperators Real Filter
 

@@ -8,7 +8,6 @@
 
 import Mathlib
 
-set_option linter.all false
 set_option linter.unusedSimpArgs false
 
 open Matrix Finset BigOperators Real MeasureTheory

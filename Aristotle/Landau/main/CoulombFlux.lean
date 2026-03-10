@@ -1,6 +1,5 @@
 import Aristotle.Landau.main.NewtonianPotential
 
-set_option linter.all false
 open MeasureTheory Matrix Finset BigOperators Real
 
 noncomputable section
