@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 41: Split VelocityDecayInstance.lean
+
+### Changes
+- Split VelocityDecayInstance.lean (1,984 lines) into:
+  - VelocityDecayHelpers.lean (1,002 lines): uniformMaxwellian, Schwartz integrability helpers, Landau matrix bounds, flux pointwise bounds, integrable_prod_schwartz_bound
+  - VelocityDecayInstance.lean (1,001 lines): landau_flux_component_diff_with_bound (4M heartbeats), schwartzDecayConditions (18 fields), EB force transport, schwartzDecayConditionsEB
+- Both files compile cleanly, 0 sorry's
+- Now 24 files total, 0 files over 1,984 lines, largest is TorusInstance.lean at 1,222
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 40: Split Section3.lean
 
 ### Changes
