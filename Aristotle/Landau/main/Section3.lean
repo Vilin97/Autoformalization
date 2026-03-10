@@ -21,7 +21,7 @@ namespace VML
     By Lemma 2 (PSD), the integrand is non-negative, so D(f) ≤ 0. -/
 theorem H_theorem (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
     (hΨ : ∀ r, 0 ≤ Ψ r) (hf_pos : ∀ v, 0 < f v)
-    (hf_smooth : ContDiff ℝ ⊤ f)
+    (hf_smooth : ContDiff ℝ 3 f)
     (hSWF : ∫ v, LandauOperator Ψ f v * (Real.log ∘ f) v =
       -(1 / 2) * ∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f) v - vGrad (Real.log ∘ f) w)
         (mulVec (landauMatrix Ψ (v - w))
@@ -38,7 +38,7 @@ theorem H_theorem (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
 
     Proof: Direct integration of each component ∂ᵢ log f = bᵢ + 2c₀ vᵢ. -/
 theorem log_f_quadratic (f : (Fin 3 → ℝ) → ℝ) (b : Fin 3 → ℝ) (c₀ : ℝ)
-    (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
+    (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ 3 f)
     (hgrad : ∀ v, vGrad (Real.log ∘ f) v = b + (2 * c₀) • v) :
     ∃ a₀ : ℝ, ∀ v, Real.log (f v) = a₀ + dotProduct b v + c₀ * normSq v :=
   ⟨(Real.log ∘ f) 0, affine_gradient_antiderivative (Real.log ∘ f) b c₀
@@ -54,7 +54,7 @@ theorem log_f_quadratic (f : (Fin 3 → ℝ) → ℝ) (b : Fin 3 → ℝ) (c₀ 
     ∇log f affine (Lemma 7) → log f quadratic (Lemma 8) → f Maxwellian. -/
 theorem nullspace_necessity (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
     (hΨ : ∀ r, 0 < Ψ r) (hf_pos : ∀ v, 0 < f v)
-    (_hf_smooth : ContDiff ℝ ⊤ f) (hf_int : Integrable f)
+    (_hf_smooth : ContDiff ℝ 3 f) (hf_int : Integrable f)
     (hQ : ∀ v, LandauOperator Ψ f v = 0)
     (hScoreForm : entropyDissipation Ψ f =
       -(1 / 2) * ∫ v, ∫ w, PSDIntegrand Ψ f v w)
@@ -128,7 +128,7 @@ lemma landauMatrix_sub_comm (Ψ : ℝ → ℝ) (v w : Fin 3 → ℝ) :
     ∫∫ ⟨∇log f(v) - ∇log f(w), A(v-w) · flux⟩ = 2 · ∫∫ ⟨∇log f(v), A(v-w) · flux⟩
     Proved by Aristotle (project 85302568). -/
 theorem fubini_symmetrization_logf (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
-    (_hf_smooth : ContDiff ℝ ⊤ f)
+    (_hf_smooth : ContDiff ℝ 3 f)
     (h_int_double : Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
       dotProduct (vGrad (Real.log ∘ f) p.1)
         (mulVec (landauMatrix Ψ (p.1 - p.2))

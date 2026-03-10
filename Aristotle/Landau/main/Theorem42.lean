@@ -121,7 +121,7 @@ theorem Theorem42
     (hρ_ion : 0 < ρ_ion)
     (hΨ : ∀ r, 0 < Ψ r)
     (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth : ∀ x, ContDiff ℝ 3 (f x))
     (hf_int : ∀ x, Integrable (f x))
     -- === Steady-state Maxwell equations ===
     -- Ampère's law (∂ₜE = 0): ∇×B = J

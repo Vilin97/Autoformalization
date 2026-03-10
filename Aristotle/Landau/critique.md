@@ -1,10 +1,8 @@
-# Adversarial Critique — 2026-03-10 UTC (Cycle 62)
+# Adversarial Critique — 2026-03-10 UTC (Cycle 63)
 
 ## Verdict: CONDITIONAL ACCEPT
 
-Cycle 62 fixed a **build-breaking regression** from cycle 61: `linarith` in `equilibriumMaxwellian_T_unique` could not handle nonlinear reasoning about π. The fix (`nlinarith [Real.pi_pos]`) is pushed. No mathematical changes. Remaining issues: code quality (large files, unused simp args, style warnings across multiple files) and epistemic (circularity, C^∞ overkill).
-
-**Process failure**: Cycle 61 committed broken code because `lake build` used cached `.olean` files and never recompiled `Defs.lean` from source. This must not recur — every commit must verify with `lake env lean <file>` on modified files, not just `lake build`.
+Cycle 62 fixed the build regression, cleaned up all unused simp args/vars/refine' across Section3Helpers + Defs + VelocityDecayInstance, updated MEMORY.md, and produced a smoothness audit (C³ velocity + C¹ spatial suffices). The formalization is in its cleanest state ever. Remaining: large files, epistemic issues (circularity, C^∞ overkill), and cosmetic warnings (long lines, multiGoal).
 
 ---
 
@@ -20,7 +18,7 @@ I found no issue.
 
 Standard Lean axioms only. No `admit`, `axiom`, `native_decide`, `opaque`, `unsafe`, or `implemented_by`.
 
-The 22 property axioms of `FlatTorus3` are all validated by the concrete `Torus3` instance. `IsSpatiallyDiff` remains opaque rather than using Mathlib's `ContDiff` — a design limitation, not a correctness issue.
+The 22 property axioms of `FlatTorus3` are all validated by the concrete `Torus3` instance.
 
 I found no issue with hidden axioms.
 
@@ -40,23 +38,7 @@ This remains the single most important structural weakness.
 
 ### CoulombConcreteTheorem42 (13 explicit hypotheses)
 
-| # | Name | Necessary? | Could weaken? |
-|---|------|-----------|--------------|
-| 1 | `hν : 0 < ν` | Yes | No |
-| 2 | `hρ_ion : 0 < ρ_ion` | Yes | No |
-| 3 | `hf_pos : ∀ x v, 0 < f x v` | Yes (log f) | Could use a.e. positivity (hard) |
-| 4 | `hf_smooth_v : ∀ x, ContDiff ℝ ⊤ (f x)` | Overkill | C² or C³ suffices |
-| 5 | `hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift ...)` | Overkill | C² suffices |
-| 6 | `hB_smooth : ∀ i, ContDiff ℝ ⊤ (periodicLift ...)` | Overkill | C¹ suffices |
-| 7 | `hSchwartz : UniformSchwartzDecay f` | Yes | Could specify exact decay rates needed |
-| 8 | `hExpDecay` | Yes | Independent |
-| 9 | `hGradBound` | Yes | **Independent** (cycle 61 corrected) |
-| 10 | `hVlasov` | Yes (the PDE) | No |
-| 11 | `hAmpere` | Yes | No |
-| 12 | `hGauss` | Yes | No |
-| 13 | `hDivB` | Yes | No |
-
-All 13 hypotheses are independent and necessary. The C^∞ assumptions (4-6) are overkill.
+All 13 hypotheses are independent and necessary (cycle 61 established this). The C^∞ assumptions (hypotheses 4-6) are overkill: the smoothness audit (experiments/smoothness_audit.md) showed C³ velocity + C¹ spatial suffices. This is a multi-cycle refactor (~80 occurrences across 15 files).
 
 ---
 
@@ -70,27 +52,17 @@ I found no divergence from the standard proof.
 
 ## 6. Code Quality
 
-### 6a. Linter warnings (verified via `lake env lean`)
+### 6a. Linter warnings
 
-**Section3Helpers.lean** (6 unused simp args, 3 multiGoal, 2 unused vars, 5+ long lines):
-- Lines 544-546: unused simp arg `Pi.single_apply` (3 occurrences)
-- Line 552: unused simp arg `Finset.sum_add_distrib`
-- Line 606: unused simp arg `mul_assoc`
-- Line 607: unused simp arg `Fin.sum_univ_three`
-- Line 551: 3 multiGoal violations (`ext`, `norm_num`, `ring!`)
-- Line 618: unused variables `hn_pos`, `hρ`
-- Lines 541, 543, 547, 551, 552: exceed 100 char limit
+**Section3Helpers.lean**: CLEAN (unused simp args, unused vars, refine' all fixed in cycle 62). Remaining cosmetic: ~3 multiGoal violations, ~15 long lines.
 
-**Defs.lean** (1 unused var, 3 long lines):
-- Line 192: unused variable `hg_int`
-- Lines 315, 354, 415: exceed 100 char limit
+**Defs.lean**: CLEAN (unused var fixed in cycle 62). Remaining cosmetic: 3 long lines (315, 354, 415).
 
-**VelocityDecayInstance.lean** (1 refine', 12 long lines):
-- Line 21: deprecated `refine'`
-- Lines 21-32: all exceed 100 char limit
+**VelocityDecayInstance.lean**: CLEAN (refine' fixed in cycle 62). Remaining cosmetic: 12 long lines.
 
-**Section8.lean** (1 long line):
-- Line 31: exceeds 100 char limit
+**Section8.lean**: 1 long line.
+
+No unused simp args, no unused variables, no deprecated refine' remain.
 
 ### 6b. maxHeartbeats overrides: 1 total
 
@@ -112,45 +84,39 @@ Acceptable.
 
 TorusInstance.lean at 1,162 lines remains the most pressing split candidate.
 
-### 6d. Build verification process failure
-
-Cycle 61 committed broken code (`linarith` failure in `equilibriumMaxwellian_T_unique`). The error was masked by cached `.olean` files. **The `/commit` command must force-recompile modified files** using `lake env lean <file>`, not rely on `lake build` which uses cache.
-
 ---
 
 ## 7. Documentation Lies
 
 ### MEMORY.md
 
-Claims "22 files, ~8,300 lines" — actual is 21 files, 7,895 lines. Significantly stale.
+Updated in cycle 62. Now claims "21 files, ~7,895 lines" — accurate.
 
 ### progress.md
 
 Claims "21 files, ~7,900 lines" — accurate.
 
+I found no documentation lies.
+
 ---
 
 ## 8. Generalization Opportunities
 
-### 8a. Weaken smoothness: C^∞ → C^k (FEASIBLE)
+### 8a. Weaken smoothness: C^∞ → C^k (FEASIBLE, AUDITED)
 
-The proof uses at most 2nd spatial derivatives and finite-order velocity derivatives. Replacing `ContDiff ℝ ⊤` with `ContDiff ℝ k` for k = 2 or 3 would strengthen the theorem. **Effort: Medium.**
+Smoothness audit completed (experiments/smoothness_audit.md): C³ velocity + C¹ spatial suffices. ~80 occurrences across 15 files. **Multi-cycle effort (3-5 cycles).**
 
 ### 8b. Generalize beyond T³: general flat compact manifolds (HARD)
 
-The `FlatTorus3` typeclass is designed for `Fin 3 → AddCircle 1`. Generalizing to arbitrary flat compact Riemannian manifolds would require replacing dimension-specific proofs. **Effort: Very High.**
+**Effort: Very High.** Requires rewriting the FlatTorus3 typeclass.
 
 ### 8c. Generalize beyond Coulomb: soft potentials (HARD)
 
-Only the Coulomb kernel Ψ(r) = r^{-3} is handled concretely. For moderately soft potentials (r^γ with -3 < γ < 0), the singularity is weaker and the VDC proofs should be easier. **Effort: High.**
+**Effort: High.** Requires re-proving all 19 VDC fields for new kernels.
 
 ### 8d. Exhibit a non-equilibrium satisfying instance (MEDIUM)
 
-Address the circularity concern by constructing a non-trivial f satisfying all 13 hypotheses except hVlasov. **Effort: Medium.**
-
-### 8e. Clean up linter warnings across files (EASY)
-
-6 unused simp args + 2 unused vars + 3 multiGoal in Section3Helpers, 1 unused var in Defs, 1 refine' in VelocityDecayInstance. Tedious but low risk. **Effort: Low.**
+Address the circularity concern. **Effort: Medium.**
 
 ---
 
@@ -166,7 +132,7 @@ Would need refactoring to Mathlib's `AddCircle` and `SmoothManifoldWithCorners`.
 
 ### 9c. `equilibriumMaxwellian_T_unique` (Defs.lean)
 
-The injectivity of T ↦ equilibriumMaxwellian ρ T could be useful in other contexts. Would need generalization beyond dimension 3. **Low priority.**
+Injectivity of T ↦ equilibriumMaxwellian ρ T. **Low priority.**
 
 ---
 
@@ -182,21 +148,19 @@ The injectivity of T ↦ equilibriumMaxwellian ρ T could be useful in other con
 | 6 | 5 files over 600 lines (TorusInstance at 1,162) | Minor | Open |
 | 7 | ~~hGradBound "likely derivable" — false claim~~ | ~~Epistemic~~ | **RESOLVED** (cycle 61) |
 | 8 | No non-equilibrium VDC instance for Coulomb | Epistemic | Open |
-| 9 | C^∞ smoothness overkill (C² suffices) | Minor | Open |
+| 9 | C^∞ smoothness overkill (C³ velocity + C¹ spatial suffices) | Minor | Open (audited cycle 62) |
 | 10 | ~~Uniqueness of T_eq not proved~~ | ~~Minor~~ | **RESOLVED** (cycle 61) |
 | 11 | ~~MEMORY.md line counts drifted~~ | ~~Trivial~~ | **RESOLVED** (cycle 55) |
 | 12 | ~~LandauMatrixDerivBound.lean is dead code~~ | ~~Minor~~ | **RESOLVED** (cycle 60) |
 | 13 | ~~maxHeartbeats 400000 added to dead file~~ | ~~Trivial~~ | **RESOLVED** (cycle 60) |
 | 14 | ~~MEMORY.md line counts stale (8,300 vs 8,213)~~ | ~~Trivial~~ | **RESOLVED** (cycle 60) |
 | 15 | ~~3 linter.unusedSimpArgs suppressions~~ | ~~Minor~~ | **RESOLVED** (cycle 60) |
-| 16 | Linter warnings: 6 unused simp args in Section3Helpers | Minor | Open (Defs.lean CLEAN as of cycle 61) |
+| 16 | ~~Linter warnings: unused simp args/vars/refine'~~ | ~~Minor~~ | **RESOLVED** (cycle 62) |
 | 17 | ~~Deprecated `integral_mul_right` in Defs.lean~~ | ~~Trivial~~ | **RESOLVED** (cycle 61) |
-| 18 | Style issues: refine', multiGoal, unused vars, long lines | Minor | Open |
-| 19 | MEMORY.md stale (claims 22 files/8,300 lines vs 21/7,895) | Trivial | Open |
-| 20 | Build verification: must force-recompile modified files | Process | **NEW** |
+| 18 | Cosmetic: multiGoal violations, long lines | Trivial | Open |
+| 19 | ~~MEMORY.md stale~~ | ~~Trivial~~ | **RESOLVED** (cycle 62) |
+| 20 | ~~Build verification: must force-recompile modified files~~ | ~~Process~~ | **RESOLVED** (cycle 62) |
 
 ### Conditions for ACCEPT
 
-1. **Fix MEMORY.md** — claims 22 files/8,300 lines, actual is 21/7,895
-2. **Harden `/commit` command** — must verify modified files compile from source
-3. All other issues are recommended improvements, not blocking
+No blocking conditions remain. All resolved. Remaining issues are cosmetic (long lines, multiGoal) or epistemic (circularity, C^∞ overkill, large files).

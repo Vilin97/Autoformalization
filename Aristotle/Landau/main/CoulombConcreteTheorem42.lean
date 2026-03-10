@@ -282,7 +282,7 @@ theorem CoulombConcreteTheorem42
         (spatial_transport_continuous hf_pos hf_smooth_v hf_smooth_x hSchwartz hLB')
   }
   exact Theorem42 f E B coulombKernel ν ρ_ion
-    hν hρ_ion coulombKernel_pos hf_pos hf_smooth_v
+    hν hρ_ion coulombKernel_pos hf_pos (fun x => (hf_smooth_v x).of_le le_top)
     (hSchwartz.integrable hf_smooth_v)
     hAmpere hGauss hDivB hB_smooth hVlasov hf_smooth_x hDecay
 

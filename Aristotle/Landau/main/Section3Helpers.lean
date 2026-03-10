@@ -236,8 +236,8 @@ lemma analysis_gaussian_integrability
 
 /-- Smoothness of velocity gradient: if g is smooth, so is vGrad g. -/
 lemma analysis_vGrad_smooth
-    (g : (Fin 3 → ℝ) → ℝ) (hg : ContDiff ℝ ⊤ g) :
-    ContDiff ℝ ⊤ (fun v => vGrad g v) := by
+    (g : (Fin 3 → ℝ) → ℝ) (hg : ContDiff ℝ 3 g) :
+    ContDiff ℝ 2 (fun v => vGrad g v) := by
   -- Proved by Aristotle (Harmonic)
   refine' contDiff_pi.2 fun i => _
   apply_rules [ ContDiff.fderiv_apply, contDiff_id, contDiff_const ]
@@ -325,7 +325,7 @@ lemma poly_linear_extraction
     Derived from: IBP (Gap 1) + Fubini+symmetrization (Gap 2) + score substitution (Gap 3).
     Reference: Proof of Lemma 5 (lem:entropy_dissipation). -/
 lemma entropy_score_form (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
-    (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
+    (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ 3 f)
     (hSWF : ∫ v, LandauOperator Ψ f v * (Real.log ∘ f) v =
       -(1 / 2) * ∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f) v - vGrad (Real.log ∘ f) w)
         (mulVec (landauMatrix Ψ (v - w))
@@ -359,7 +359,7 @@ lemma psd_weighted_integral_nonneg (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
     Reference: Step in the proof of Lemma 6 (lem:D_zero_functional_eq). -/
 lemma entropy_zero_quadform_zero (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
     (hΨ : ∀ r, 0 < Ψ r) (hf_pos : ∀ v, 0 < f v)
-    (hf_smooth : ContDiff ℝ ⊤ f)
+    (hf_smooth : ContDiff ℝ 3 f)
     (hD : entropyDissipation Ψ f = 0)
     -- Analytical interface hypotheses:
     -- Score form identity (from IBP + Fubini + score substitution)
@@ -394,7 +394,7 @@ lemma entropy_zero_quadform_zero (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ
     then g(v) = b + 2c₀ v for constants b, c₀.
     Reference: Proof of Lemma 7 (lem:functional_eq_solution). -/
 lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
-    (hg_smooth : ContDiff ℝ ⊤ g)
+    (hg_smooth : ContDiff ℝ 2 g)
     (hparallel : ∀ v w, v ≠ w → ∃ l : ℝ, g v - g w = l • (v - w)) :
     ∃ (b : Fin 3 → ℝ) (c₀ : ℝ), ∀ v, g v = b + (2 * c₀) • v := by
   -- Proved by Aristotle (Harmonic). Full proof in gap06_aristotle.lean.
@@ -410,7 +410,7 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
         · obtain ⟨l, hl⟩ := hparallel (v + t • w) v (by aesop); use l * t; simp_all +decide [mul_comm, smul_smul]
       have h_lim : Filter.Tendsto (fun t : ℝ => (1 / t) • (g (v + t • w) - g v)) (nhdsWithin 0 (Set.Ioi 0)) (nhds ((fderiv ℝ g v) w)) := by
         have h_lim : HasDerivAt (fun t : ℝ => g (v + t • w)) ((fderiv ℝ g v) w) 0 := by
-          convert HasFDerivAt.hasDerivAt (HasFDerivAt.comp 0 (hg_smooth.differentiable le_top |> Differentiable.differentiableAt |> DifferentiableAt.hasFDerivAt) (HasFDerivAt.add (hasFDerivAt_const _ _) (HasFDerivAt.smul (hasFDerivAt_id 0) (hasFDerivAt_const _ _)))) using 1; norm_num
+          convert HasFDerivAt.hasDerivAt (HasFDerivAt.comp 0 (hg_smooth.differentiable (by norm_num) |> Differentiable.differentiableAt |> DifferentiableAt.hasFDerivAt) (HasFDerivAt.add (hasFDerivAt_const _ _) (HasFDerivAt.smul (hasFDerivAt_id 0) (hasFDerivAt_const _ _)))) using 1; norm_num
         simpa [div_eq_inv_mul] using h_lim.tendsto_slope_zero_right
       exact Submodule.closed_of_finiteDimensional _ |> fun h => h.mem_of_tendsto h_lim <| Filter.eventually_of_mem self_mem_nhdsWithin fun t ht => Submodule.smul_mem _ _ <| h_deriv_eq t
     have h_deriv_scalar : ∀ w : Fin 3 → ℝ, ∃ c : ℝ, (fderiv ℝ g v) w = c • w := by
@@ -440,29 +440,19 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
         intro v i j k; rw [fderiv_clm_apply, fderiv_clm_apply]; simp +decide [hg_smooth.contDiffAt.differentiableAt]; ring
         · apply_rules [ContDiffAt.isSymmSndFDerivAt]
           exacts [hg_smooth.contDiffAt, by norm_num [minSmoothness]]
-        · have h_diff : ContDiff ℝ ⊤ (fderiv ℝ g) := by
-            apply_rules [ContDiff.fderiv, hg_smooth]
-            any_goals exact le_top
-            · fun_prop (disch := norm_num)
-            · exact contDiff_id
-          exact h_diff.differentiable le_top v
+        · have h_diff : ContDiff ℝ 1 (fderiv ℝ g) := by
+            exact hg_smooth.fderiv_right le_rfl
+          exact h_diff.differentiable le_rfl v
         · exact differentiableAt_const _
-        · have h_diff : ContDiff ℝ ⊤ (fderiv ℝ g) := by
-            apply_rules [ContDiff.fderiv, hg_smooth]
-            any_goals exact le_top
-            · fun_prop (disch := norm_num)
-            · exact contDiff_id
-          exact h_diff.differentiable le_top v
+        · have h_diff : ContDiff ℝ 1 (fderiv ℝ g) := by
+            exact hg_smooth.fderiv_right le_rfl
+          exact h_diff.differentiable le_rfl v
         · exact differentiableAt_const _
       have h_second_deriv : ∀ v : Fin 3 → ℝ, ∀ i j k : Fin 3, (fderiv ℝ (fun v => (fderiv ℝ g v) (Pi.single j 1)) v) (Pi.single k 1) i = (fderiv ℝ c v) (Pi.single k 1) * (if i = j then 1 else 0) := by
         intro v i j k; rw [fderiv_pi]; aesop
-        have h_diff : ContDiff ℝ ⊤ (fun v => (fderiv ℝ g v) (Pi.single j 1)) := by
-          apply_rules [ContDiff.fderiv_apply, hg_smooth]
-          any_goals exact le_top
-          · fun_prop (disch := norm_num)
-          · exact contDiff_id
-          · exact contDiff_const
-        exact fun i => DifferentiableAt.comp v (differentiableAt_pi.1 (h_diff.contDiffAt.differentiableAt le_top) i) (differentiableAt_id)
+        have h_diff : ContDiff ℝ 1 (fun v => (fderiv ℝ g v) (Pi.single j 1)) := by
+          exact (hg_smooth.fderiv_right le_rfl).clm_apply contDiff_const
+        exact fun i => DifferentiableAt.comp v (differentiableAt_pi.1 (h_diff.contDiffAt.differentiableAt le_rfl) i) (differentiableAt_id)
       have h_zero_deriv : ∀ v : Fin 3 → ℝ, ∀ k : Fin 3, (fderiv ℝ c v) (Pi.single k 1) = 0 := by
         intros v k
         by_contra h_nonzero_deriv
@@ -480,9 +470,9 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
         · rw [show w = ∑ k, Pi.single k (w k) by ext i; simp +decide [Pi.single_apply]]; simp +decide [Finset.sum_apply, Pi.single_apply]; ring
           exact Finset.sum_congr rfl fun i _ => by rw [← smul_eq_mul, ← ContinuousLinearMap.map_smul]; congr; ext j; by_cases hi : i = j <;> aesop
       intro v w; exact is_const_of_fderiv_eq_zero (show Differentiable ℝ c from by
-        have h_diff_c : ContDiff ℝ ⊤ (fun v => (fderiv ℝ g v) (Pi.single 0 1) 0) := by
-          fun_prop (disch := norm_num)
-        convert h_diff_c.differentiable le_top using 1; aesop (simp_config := { singlePass := true })) h_const_c v w
+        have h_diff_c : ContDiff ℝ 1 (fun v => (fderiv ℝ g v) (Pi.single 0 1) 0) := by
+          exact ((hg_smooth.fderiv_right le_rfl).clm_apply contDiff_const).apply 0
+        convert h_diff_c.differentiable le_rfl using 1; aesop (simp_config := { singlePass := true })) h_const_c v w
     use c 0
     intro v w
     rw [hc, h_const_c v 0]
@@ -493,7 +483,7 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
     have h_integral_eq : ∀ a b : ℝ, ∫ t in a..b, (fderiv ℝ g (t • v)) v = g (b • v) - g (a • v) := by
       intro a b
       rw [intervalIntegral.integral_deriv_eq_sub']
-      · ext t; erw [deriv]; erw [fderiv_comp] <;> norm_num [hg_smooth.contDiffAt.differentiableAt, hc₀]
+      · ext t; erw [deriv]; erw [fderiv_comp] <;> norm_num [hg_smooth.contDiffAt.differentiableAt (by norm_num), hc₀]
         rw [deriv_pi] <;> norm_num [Fin.forall_fin_succ]
       · exact fun x hx => DifferentiableAt.comp x (hg_smooth.contDiffAt.differentiableAt (by norm_num)) (differentiableAt_id.smul_const _)
       · exact Continuous.continuousOn (by continuity)
@@ -504,7 +494,7 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
     If ∇h(v) = b + 2c₀ v, then h(v) = h(0) + b · v + c₀|v|².
     Reference: Proof of Lemma 8 (lem:log_f_quadratic). -/
 lemma affine_gradient_antiderivative (h : (Fin 3 → ℝ) → ℝ) (b : Fin 3 → ℝ) (c₀ : ℝ)
-    (hh_smooth : ContDiff ℝ ⊤ h)
+    (hh_smooth : ContDiff ℝ 3 h)
     (hgrad : ∀ v, vGrad h v = b + (2 * c₀) • v) :
     ∀ v, h v = h 0 + dotProduct b v + c₀ * normSq v := by
   -- Proved by Aristotle (Harmonic). Full proof in gap07_aristotle.lean.
@@ -512,7 +502,7 @@ lemma affine_gradient_antiderivative (h : (Fin 3 → ℝ) → ℝ) (b : Fin 3 �
     intro v t
     have h_deriv_def : deriv (fun t => h (t • v)) t = (VML.vGrad h (t • v)) ⬝ᵥ v := by
       unfold VML.vGrad
-      convert HasDerivAt.deriv (HasFDerivAt.hasDerivAt (hh_smooth.differentiable le_top |> Differentiable.differentiableAt |> DifferentiableAt.hasFDerivAt |> HasFDerivAt.comp _ <| HasFDerivAt.smul (hasFDerivAt_id t) <| hasFDerivAt_const _ _)) using 1; norm_num [fderiv_deriv, dotProduct]
+      convert HasDerivAt.deriv (HasFDerivAt.hasDerivAt (hh_smooth.differentiable (by norm_num) |> Differentiable.differentiableAt |> DifferentiableAt.hasFDerivAt |> HasFDerivAt.comp _ <| HasFDerivAt.smul (hasFDerivAt_id t) <| hasFDerivAt_const _ _)) using 1; norm_num [fderiv_deriv, dotProduct]
       rw [show v = ∑ i, Pi.single i (v i) by ext i; simp +decide]; simp +decide [mul_comm, Finset.mul_sum _ _ _, Finset.sum_mul]; ring
       exact Finset.sum_congr rfl fun i _ => by rw [← smul_eq_mul, ← ContinuousLinearMap.map_smul]; congr; ext j; by_cases hi : i = j <;> aesop
     simp_all +decide [two_mul]
@@ -520,7 +510,7 @@ lemma affine_gradient_antiderivative (h : (Fin 3 → ℝ) → ℝ) (b : Fin 3 �
   intros v
   have : ∫ t in (0 : ℝ)..1, deriv (fun t => h (t • v)) t = h v - h 0 := by
     rw [intervalIntegral.integral_deriv_eq_sub]; aesop
-    · exact fun t ht => DifferentiableAt.comp t (hh_smooth.contDiffAt.differentiableAt le_top) (differentiableAt_id.smul_const _)
+    · exact fun t ht => DifferentiableAt.comp t (hh_smooth.contDiffAt.differentiableAt (by norm_num)) (differentiableAt_id.smul_const _)
     · exact Continuous.intervalIntegrable (by rw [show deriv _ = _ from funext fun t => h_deriv v t]; continuity) _ _
   simp_all +decide [VML.normSq]
   norm_num [mul_assoc, mul_comm, mul_left_comm, Fin.sum_univ_three, dotProduct] at *; linarith!
@@ -558,7 +548,7 @@ lemma maxwellian_landau_flux_zero (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
     Reference: Proof of Theorem 4 (thm:nullspace_necessity) + Corollary 2. -/
 lemma D_zero_implies_maxwellian (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
     (hΨ : ∀ r, 0 < Ψ r) (hf_pos : ∀ v, 0 < f v)
-    (hf_smooth : ContDiff ℝ ⊤ f) (hf_int : Integrable f)
+    (hf_smooth : ContDiff ℝ 3 f) (hf_int : Integrable f)
     (hD : entropyDissipation Ψ f = 0)
     -- Analytical interface (from IBP + Fubini + score + integrability)
     (hScoreForm : entropyDissipation Ψ f =
@@ -579,7 +569,7 @@ lemma D_zero_implies_maxwellian (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
         hScoreForm hPSD_cont hPSD_inner hPSD_outer v w)
   -- Step 2: parallel → affine (gap 6)
   -- vGrad (log ∘ f) is smooth (each component is fderiv applied to a smooth function)
-  have hvGrad_smooth : ContDiff ℝ ⊤ (fun v => vGrad (Real.log ∘ f) v) :=
+  have hvGrad_smooth : ContDiff ℝ 2 (fun v => vGrad (Real.log ∘ f) v) :=
     analysis_vGrad_smooth _ hlog_smooth
   obtain ⟨b, c₀, haffine⟩ := parallel_curl_free_affine _ hvGrad_smooth hpar
   -- Step 3: affine gradient → quadratic (gap 7)
