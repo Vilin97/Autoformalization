@@ -151,8 +151,18 @@ theorem CoulombConcreteTheorem42
     landau_flux_integrable_coulomb (f x) (hf_pos x) (hf_smooth_v x)
       (fun N k => hSchwartz.hDecay N k |>.imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩) v
   have hDecay : VelocityDecayConditions coulombKernel f E B := {
-    hPSD_inner_int := by sorry
-    hPSD_outer_int := by sorry
+    hPSD_inner_int := by
+      obtain ⟨Cg, Kg, hCg⟩ := hGradBound
+      intro x v
+      exact psd_inner_integrable_coulomb (f x) (hf_pos x) (hf_smooth_v x)
+        (fun N k => hSchwartz.hDecay N k |>.imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩)
+        (fun v j => hCg x v j) v
+    hPSD_outer_int := by
+      obtain ⟨Cg, Kg, hCg⟩ := hGradBound
+      intro x
+      exact psd_outer_integrable_coulomb (f x) (hf_pos x) (hf_smooth_v x)
+        (fun N k => hSchwartz.hDecay N k |>.imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩)
+        (fun v j => hCg x v j)
     hFubini_double := by sorry
     hFubini_inner := by
       intro x v

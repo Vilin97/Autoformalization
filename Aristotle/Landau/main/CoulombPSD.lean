@@ -167,4 +167,239 @@ lemma psd_continuous_coulomb
   convert continuous_landau_quadratic ( fun v => ( fun i => G v ( Pi.single i 1 ) ) ) _ using 1;
   exact contDiff_pi.mpr fun i => h_G_smooth.clm_apply ( contDiff_const )
 
+set_option maxHeartbeats 1600000 in
+/-- Pointwise bound on PSD integrand for Coulomb kernel:
+    |PSD(v,w)| ≤ 18Cg²f(v) * ((1+‖v‖)^{2Kg}·‖v-w‖⁻¹f(w) + ‖v-w‖⁻¹·(1+‖w‖)^{2Kg}f(w)) -/
+lemma psd_pointwise_bound_coulomb
+    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v)
+    {Cg : ℝ} {Kg : ℕ}
+    (h_score : ∀ u i, |vGrad (Real.log ∘ f) u i| ≤ Cg * (1 + ‖u‖) ^ Kg)
+    (v w : Fin 3 → ℝ) :
+    |PSDIntegrand coulombKernel f v w| ≤
+    18 * Cg ^ 2 * f v * ((1 + ‖v‖) ^ (2 * Kg) * (‖v - w‖⁻¹ * f w) +
+                          ‖v - w‖⁻¹ * ((1 + ‖w‖) ^ (2 * Kg) * f w)) := by
+  unfold PSDIntegrand
+  set Δ := vGrad (Real.log ∘ f) v - vGrad (Real.log ∘ f) w
+  rw [abs_mul, abs_mul, abs_of_pos (hf_pos v), abs_of_pos (hf_pos w)]
+  by_cases hvw : v - w = 0
+  · have hveqw : v = w := sub_eq_zero.mp hvw; subst hveqw
+    simp only [Δ, sub_self, Pi.zero_apply, dotProduct, mulVec, Finset.sum_const_zero,
+      mul_zero, abs_zero]; positivity
+  · have h_entry : ∀ i j, |landauMatrix coulombKernel (v - w) i j| ≤ ‖v - w‖⁻¹ :=
+      fun i j => coulomb_landauMatrix_entry_le_pi _ i j hvw
+    have h_mulvec : ∀ i, |(mulVec (landauMatrix coulombKernel (v - w)) Δ) i| ≤
+        ‖v - w‖⁻¹ * ∑ j : Fin 3, |Δ j| := by
+      intro i; simp only [mulVec, dotProduct]
+      calc |∑ j, landauMatrix coulombKernel (v - w) i j * Δ j|
+          ≤ ∑ j, |landauMatrix coulombKernel (v - w) i j| * |Δ j| := by
+            exact le_trans (Finset.abs_sum_le_sum_abs _ _)
+              (Finset.sum_le_sum fun j _ => (abs_mul _ _).le)
+        _ ≤ ∑ j, ‖v - w‖⁻¹ * |Δ j| :=
+            Finset.sum_le_sum fun j _ =>
+              mul_le_mul_of_nonneg_right (h_entry i j) (abs_nonneg _)
+        _ = ‖v - w‖⁻¹ * ∑ j, |Δ j| := (Finset.mul_sum _ _ _).symm
+    have h_quad : |dotProduct Δ (mulVec (landauMatrix coulombKernel (v - w)) Δ)| ≤
+        ‖v - w‖⁻¹ * (∑ i : Fin 3, |Δ i|) ^ 2 := by
+      simp only [dotProduct]
+      calc |∑ i, Δ i * (mulVec (landauMatrix coulombKernel (v - w)) Δ) i|
+          ≤ ∑ i, |Δ i| * |(mulVec (landauMatrix coulombKernel (v - w)) Δ) i| := by
+            exact le_trans (Finset.abs_sum_le_sum_abs _ _)
+              (Finset.sum_le_sum fun i _ => (abs_mul _ _).le)
+        _ ≤ ∑ i, |Δ i| * (‖v - w‖⁻¹ * ∑ j, |Δ j|) :=
+            Finset.sum_le_sum fun i _ =>
+              mul_le_mul_of_nonneg_left (h_mulvec i) (abs_nonneg _)
+        _ = ‖v - w‖⁻¹ * (∑ i : Fin 3, |Δ i|) ^ 2 := by
+            rw [sq, ← Finset.sum_mul]; ring
+    have h_delta_sum : ∑ i : Fin 3, |Δ i| ≤
+        3 * Cg * ((1 + ‖v‖) ^ Kg + (1 + ‖w‖) ^ Kg) := by
+      simp only [Δ, Pi.sub_apply]
+      calc ∑ i : Fin 3, |vGrad (Real.log ∘ f) v i - vGrad (Real.log ∘ f) w i|
+          ≤ ∑ i : Fin 3, (Cg * (1 + ‖v‖) ^ Kg + Cg * (1 + ‖w‖) ^ Kg) :=
+            Finset.sum_le_sum fun i _ => by
+              have := norm_sub_le (vGrad (Real.log ∘ f) v i) (vGrad (Real.log ∘ f) w i)
+              rw [Real.norm_eq_abs, Real.norm_eq_abs, Real.norm_eq_abs] at this
+              linarith [h_score v i, h_score w i]
+        _ = 3 * Cg * ((1 + ‖v‖) ^ Kg + (1 + ‖w‖) ^ Kg) := by
+            simp [Fin.sum_univ_three]; ring
+    have h_sq_bound : (∑ i : Fin 3, |Δ i|) ^ 2 ≤
+        18 * Cg ^ 2 * ((1 + ‖v‖) ^ (2 * Kg) + (1 + ‖w‖) ^ (2 * Kg)) := by
+      have h1 : (∑ i : Fin 3, |Δ i|) ^ 2 ≤
+          9 * Cg ^ 2 * ((1 + ‖v‖) ^ Kg + (1 + ‖w‖) ^ Kg) ^ 2 := by
+        calc _ ≤ (3 * Cg * ((1 + ‖v‖) ^ Kg + (1 + ‖w‖) ^ Kg)) ^ 2 :=
+              sq_le_sq' (by linarith [Finset.sum_nonneg
+                (s := Finset.univ) (fun (i : Fin 3) _ => abs_nonneg (Δ i))]) h_delta_sum
+          _ = _ := by ring
+      have h2 : ((1 + ‖v‖) ^ Kg + (1 + ‖w‖) ^ Kg) ^ 2 ≤
+          2 * ((1 + ‖v‖) ^ (2 * Kg) + (1 + ‖w‖) ^ (2 * Kg)) := by
+        rw [show 2 * Kg = Kg + Kg from by omega, pow_add, pow_add]
+        nlinarith [sq_nonneg ((1 + ‖v‖) ^ Kg - (1 + ‖w‖) ^ Kg)]
+      nlinarith
+    calc f v * f w * |dotProduct Δ (mulVec (landauMatrix coulombKernel (v - w)) Δ)|
+        ≤ f v * f w * (‖v - w‖⁻¹ *
+            (18 * Cg ^ 2 * ((1 + ‖v‖) ^ (2 * Kg) + (1 + ‖w‖) ^ (2 * Kg)))) := by
+          gcongr; exact le_trans h_quad (mul_le_mul_of_nonneg_left h_sq_bound
+            (inv_nonneg.mpr (norm_nonneg _)))
+      _ = 18 * Cg ^ 2 * f v * ((1 + ‖v‖) ^ (2 * Kg) * (‖v - w‖⁻¹ * f w) +
+               ‖v - w‖⁻¹ * ((1 + ‖w‖) ^ (2 * Kg) * f w)) := by ring
+
+set_option maxHeartbeats 3200000 in
+/-- PSD integrand is integrable for Coulomb kernel (inner integral, fixing v).
+    Uses element-wise Coulomb matrix bound |A_{ij}| ≤ ‖z‖⁻¹ combined with
+    polynomial score bound and Newtonian potential of Schwartz functions. -/
+lemma psd_inner_integrable_coulomb
+    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
+    (hf_schwartz : ∀ N k, ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
+    {Cg : ℝ} {Kg : ℕ}
+    (hGrad : ∀ v i, |fderiv ℝ f v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f v)
+    (v : Fin 3 → ℝ) :
+    Integrable (PSDIntegrand coulombKernel f v) := by
+  -- Score bound: |∂_i log f(u)| ≤ Cg * (1+‖u‖)^Kg
+  have h_score : ∀ u i, |vGrad (Real.log ∘ f) u i| ≤ Cg * (1 + ‖u‖) ^ Kg := by
+    intro u i; simp only [vGrad]
+    have hfu := hf_pos u
+    rw [show Real.log ∘ f = fun u => Real.log (f u) from rfl,
+        fderiv.log (hf_smooth.differentiable le_top).differentiableAt (ne_of_gt hfu)]
+    simp only [ContinuousLinearMap.smul_apply, smul_eq_mul, abs_mul,
+      abs_of_pos (inv_pos.mpr hfu)]
+    rw [inv_mul_le_iff₀ hfu]; linarith [hGrad u i]
+  -- Schwartz decay of f
+  have hf_decay : ∀ N, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ N ≤ C := by
+    intro N; obtain ⟨C, hC, hb⟩ := hf_schwartz N 0
+    exact ⟨C, hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
+  -- Schwartz decay of (1+‖w‖)^{2Kg} * f(w)
+  have hpf_decay : ∀ N, ∃ C > 0, ∀ w,
+      |(1 + ‖w‖) ^ (2 * Kg) * f w| * (1 + ‖w‖) ^ N ≤ C := by
+    intro N; obtain ⟨C, hC, hb⟩ := hf_decay (2 * Kg + N)
+    refine ⟨C, hC, fun w => ?_⟩
+    rw [abs_mul, abs_of_nonneg (pow_nonneg (by linarith [norm_nonneg w]) _)]
+    calc (1 + ‖w‖) ^ (2 * Kg) * |f w| * (1 + ‖w‖) ^ N
+        = |f w| * (1 + ‖w‖) ^ (2 * Kg + N) := by rw [pow_add]; ring
+      _ ≤ C := hb w
+  -- Newtonian potential integrability
+  have h_int_f : Integrable (fun w => ‖v - w‖⁻¹ * f w) :=
+    inv_norm_schwartz_integrable f hf_decay hf_smooth.continuous.aestronglyMeasurable v
+  have h_int_pf : Integrable (fun w => ‖v - w‖⁻¹ * ((1 + ‖w‖) ^ (2 * Kg) * f w)) :=
+    inv_norm_schwartz_integrable _ hpf_decay
+      ((continuous_const.add continuous_norm).pow _ |>.mul
+        hf_smooth.continuous).aestronglyMeasurable v
+  -- AEStronglyMeasurable of PSD integrand
+  have h_meas : AEStronglyMeasurable (PSDIntegrand coulombKernel f v) volume :=
+    ((psd_continuous_coulomb f hf_pos hf_smooth).comp
+      (continuous_const.prod_mk continuous_id')).aestronglyMeasurable
+  -- Dominating constant
+  set C_dom := 18 * Cg ^ 2 * f v
+  -- Apply Integrable.mono' with dominating function
+  refine ((h_int_f.const_mul ((1 + ‖v‖) ^ (2 * Kg))).add h_int_pf
+    |>.const_mul C_dom).mono' h_meas (Filter.Eventually.of_forall fun w => ?_)
+  -- Pointwise bound via extracted lemma
+  rw [Real.norm_eq_abs]
+  exact psd_pointwise_bound_coulomb f hf_pos h_score v w
+
+set_option maxHeartbeats 3200000 in
+/-- PSD integrand is integrable for Coulomb kernel (outer integral).
+    Uses pointwise bound + Newtonian uniform bounds + Schwartz decay. -/
+lemma psd_outer_integrable_coulomb
+    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
+    (hf_schwartz : ∀ N k, ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
+    {Cg : ℝ} {Kg : ℕ}
+    (hGrad : ∀ v i, |fderiv ℝ f v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f v) :
+    Integrable (fun v => ∫ w, PSDIntegrand coulombKernel f v w) := by
+  -- Score bound
+  have h_score : ∀ u i, |vGrad (Real.log ∘ f) u i| ≤ Cg * (1 + ‖u‖) ^ Kg := by
+    intro u i; simp only [vGrad]
+    have hfu := hf_pos u
+    rw [show Real.log ∘ f = fun u => Real.log (f u) from rfl,
+        fderiv.log (hf_smooth.differentiable le_top).differentiableAt (ne_of_gt hfu)]
+    simp only [ContinuousLinearMap.smul_apply, smul_eq_mul, abs_mul,
+      abs_of_pos (inv_pos.mpr hfu)]
+    rw [inv_mul_le_iff₀ hfu]; linarith [hGrad u i]
+  -- Schwartz decay
+  have hf_decay : ∀ N, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ N ≤ C :=
+    fun N => (hf_schwartz N 0).imp fun C ⟨hC, hb⟩ =>
+      ⟨hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
+  have hpf_decay : ∀ N, ∃ C > 0, ∀ w,
+      |(1 + ‖w‖) ^ (2 * Kg) * f w| * (1 + ‖w‖) ^ N ≤ C := by
+    intro N; obtain ⟨C, hC, hb⟩ := hf_decay (2 * Kg + N)
+    exact ⟨C, hC, fun w => by
+      rw [abs_mul, abs_of_nonneg (pow_nonneg (by linarith [norm_nonneg w]) _)]
+      calc _ = |f w| * (1 + ‖w‖) ^ (2 * Kg + N) := by rw [pow_add]; ring
+        _ ≤ C := hb w⟩
+  -- Newtonian uniform bounds
+  obtain ⟨M₁, hM₁, hM₁b⟩ := newtonian_schwartz_uniform_bound f hf_decay
+    hf_smooth.continuous.aestronglyMeasurable
+  obtain ⟨M₂, hM₂, hM₂b⟩ := newtonian_schwartz_uniform_bound
+    (fun w => (1 + ‖w‖) ^ (2 * Kg) * f w) hpf_decay
+    ((continuous_const.add continuous_norm).pow _ |>.mul hf_smooth.continuous).aestronglyMeasurable
+  -- Integrability of Newtonian terms
+  have h_int_f := fun v => inv_norm_schwartz_integrable f hf_decay
+    hf_smooth.continuous.aestronglyMeasurable v
+  have h_int_pf := fun v => inv_norm_schwartz_integrable
+    (fun w => (1 + ‖w‖) ^ (2 * Kg) * f w) hpf_decay
+    ((continuous_const.add continuous_norm).pow _ |>.mul hf_smooth.continuous).aestronglyMeasurable v
+  -- Dominating function: C_out * (1+‖v‖)^{2Kg} * f(v), integrable by Schwartz decay
+  set C_out := 18 * Cg ^ 2 * (M₁ + M₂) with hC_out_def
+  have h_poly_int : Integrable (fun v => (1 + ‖v‖) ^ (2 * Kg) * f v) := by
+    obtain ⟨C, hC_pos, hbound⟩ := hf_decay (2 * Kg + 4)
+    apply (inverse_poly_integrable C).mono'
+    · exact ((continuous_const.add continuous_norm).pow _ |>.mul
+        hf_smooth.continuous).aestronglyMeasurable
+    · filter_upwards with v
+      simp only [Real.norm_eq_abs, abs_mul,
+        abs_of_nonneg (pow_nonneg (by linarith [norm_nonneg v]) _),
+        abs_of_pos (hf_pos v)]
+      rw [le_div_iff₀ (by positivity : (0 : ℝ) < (1 + ‖v‖) ^ 4)]
+      have : (1 + ‖v‖) ^ (2 * Kg) * f v * (1 + ‖v‖) ^ 4 =
+          |f v| * (1 + ‖v‖) ^ (2 * Kg + 4) := by
+        rw [abs_of_pos (hf_pos v), pow_add]; ring
+      linarith [hbound v]
+  -- AEStronglyMeasurable of parametric integral
+  have h_meas : AEStronglyMeasurable
+      (fun v => ∫ w, PSDIntegrand coulombKernel f v w) volume :=
+    (psd_continuous_coulomb f hf_pos hf_smooth).aestronglyMeasurable.integral_prod_right'
+  -- Apply Integrable.mono'
+  apply (h_poly_int.const_mul C_out).mono' h_meas
+  filter_upwards with v
+  rw [Real.norm_eq_abs]
+  -- Dominating function for inner integral
+  have hdom_w : Integrable (fun w =>
+      18 * Cg ^ 2 * f v * ((1 + ‖v‖) ^ (2 * Kg) * (‖v - w‖⁻¹ * f w) +
+                            ‖v - w‖⁻¹ * ((1 + ‖w‖) ^ (2 * Kg) * f w))) :=
+    ((h_int_f v).const_mul ((1 + ‖v‖) ^ (2 * Kg))).add (h_int_pf v)
+      |>.const_mul (18 * Cg ^ 2 * f v)
+  calc |∫ w, PSDIntegrand coulombKernel f v w|
+      ≤ ∫ w, |PSDIntegrand coulombKernel f v w| :=
+        abs_integral_le_integral_abs _
+    _ ≤ ∫ w, (18 * Cg ^ 2 * f v * ((1 + ‖v‖) ^ (2 * Kg) * (‖v - w‖⁻¹ * f w) +
+                                     ‖v - w‖⁻¹ * ((1 + ‖w‖) ^ (2 * Kg) * f w))) :=
+        integral_mono_of_nonneg (ae_of_all _ fun _ => abs_nonneg _) hdom_w
+          (ae_of_all _ fun w => psd_pointwise_bound_coulomb f hf_pos h_score v w)
+    _ = 18 * Cg ^ 2 * f v * ∫ w, ((1 + ‖v‖) ^ (2 * Kg) * (‖v - w‖⁻¹ * f w) +
+                                    ‖v - w‖⁻¹ * ((1 + ‖w‖) ^ (2 * Kg) * f w)) :=
+        integral_mul_left _ _
+    _ = 18 * Cg ^ 2 * f v * ((1 + ‖v‖) ^ (2 * Kg) * ∫ w, ‖v - w‖⁻¹ * f w +
+                              ∫ w, ‖v - w‖⁻¹ * ((1 + ‖w‖) ^ (2 * Kg) * f w)) := by
+        congr 1
+        rw [integral_add ((h_int_f v).const_mul _) (h_int_pf v), integral_mul_left]
+    _ ≤ 18 * Cg ^ 2 * f v * ((1 + ‖v‖) ^ (2 * Kg) * M₁ + M₂) := by
+        gcongr
+        · calc ∫ w, ‖v - w‖⁻¹ * f w
+              = ∫ w, ‖v - w‖⁻¹ * |f w| :=
+                integral_congr_ae (ae_of_all _ fun w => by rw [abs_of_pos (hf_pos w)])
+            _ ≤ M₁ := hM₁b v
+        · calc ∫ w, ‖v - w‖⁻¹ * ((1 + ‖w‖) ^ (2 * Kg) * f w)
+              = ∫ w, ‖v - w‖⁻¹ * |(1 + ‖w‖) ^ (2 * Kg) * f w| :=
+                integral_congr_ae (ae_of_all _ fun w => by
+                  rw [abs_of_nonneg (mul_nonneg (pow_nonneg (by linarith [norm_nonneg w]) _)
+                    (le_of_lt (hf_pos w)))])
+            _ ≤ M₂ := hM₂b v
+    _ ≤ C_out * ((1 + ‖v‖) ^ (2 * Kg) * f v) := by
+        have h1 : (1 : ℝ) ≤ (1 + ‖v‖) ^ (2 * Kg) :=
+          one_le_pow_of_one_le (by linarith [norm_nonneg v]) _
+        have h2 : M₂ ≤ (1 + ‖v‖) ^ (2 * Kg) * M₂ := le_mul_of_one_le_left (le_of_lt hM₂) h1
+        simp only [C_out]
+        calc 18 * Cg ^ 2 * f v * ((1 + ‖v‖) ^ (2 * Kg) * M₁ + M₂)
+            ≤ 18 * Cg ^ 2 * f v * ((M₁ + M₂) * (1 + ‖v‖) ^ (2 * Kg)) := by
+              gcongr; linarith
+          _ = 18 * Cg ^ 2 * (M₁ + M₂) * ((1 + ‖v‖) ^ (2 * Kg) * f v) := by ring
+
 end VML
