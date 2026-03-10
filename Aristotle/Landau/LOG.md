@@ -1,5 +1,17 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 44: Remove custom generalize_proofs fork + dead code
+
+### Changes
+- Removed ~200 lines of custom `generalize_proofs` tactic fork from LandauMatrixDerivBound.lean (Harmonic.GeneralizeProofs namespace). Standard Mathlib `generalize_proofs` works identically.
+- Removed dead code `dLandauEntry_bound_of_ne_zero` (trivially true, never called)
+- Replaced 3 `exact?` calls with their resolved lemma names (`rfl`, `abs_dotProduct_le_eucNorm'_mul_eucNorm'`, `eucNorm'_le_sqrt_three_norm`)
+- LandauMatrixDerivBound.lean: 644 → 428 lines (-216 lines)
+- Total codebase: 24 files, 11,193 lines (down from 11,409)
+- Full build verified clean
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 43: Dead code removal + MEMORY.md update
 
 ### Changes
