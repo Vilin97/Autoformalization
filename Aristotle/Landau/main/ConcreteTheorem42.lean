@@ -1,18 +1,16 @@
 /-
-  Concrete Theorem 42: VML steady state on T³ = (ℝ/ℤ)³.
+  Helper definitions for concrete Theorem 42 on T³ = (ℝ/ℤ)³.
 
-  This states the main result with paper-style hypotheses on the concrete
-  3-torus, replacing the abstract FlatTorus3 typeclass (23 proved fields)
-  and the VelocityDecayConditions bundle (18 fields) with standard
-  analytical hypotheses: uniform Schwartz decay, kernel regularity, and
-  a stretched-exponential lower bound on f.
+  This file defines `UniformSchwartzDecay` (the standard Schwartz-class
+  assumption for kinetic theory) and proves basic integrability lemmas.
+  These are used by both the Coulomb concrete theorem
+  (CoulombConcreteTheorem42.lean) and the smooth-kernel infrastructure
+  (VelocityDecayInstance.lean).
 
-  Hypotheses (15 total):
-  - 5 physical/kernel parameters (ν, ρ_ion, Ψ positive/C¹/poly growth)
-  - 1 strict positivity (f > 0)
-  - 3 smoothness (f smooth in v and x, B smooth)
-  - 2 decay conditions (Schwartz in v, at most stretched-exponential decay)
-  - 4 equations (Vlasov, Ampère, Gauss, div B = 0)
+  NOTE: No theorem is stated here. The concrete theorems are:
+  - CoulombConcreteTheorem42 (Coulomb kernel, 13 hypotheses)
+  - For smooth bounded kernels, use `schwartzDecayConditions` +
+    `Theorem42` (assembly required; no user-facing theorem yet).
 -/
 import Aristotle.Landau.main.Theorem42
 import Aristotle.Landau.main.TorusInstance

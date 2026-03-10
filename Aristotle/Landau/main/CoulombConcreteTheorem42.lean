@@ -51,7 +51,10 @@ namespace VML
     lower bound): Schwartz |∂f| decays faster than any polynomial, while the lower
     bound f ≥ exp(-C(1+‖v‖)^K) only decays sub-exponentially, so |∂f|/f grows at
     most polynomially. Formalizing this derivation in Lean is nontrivial, so the
-    hypothesis is stated separately. The hypothesis list is not minimal. -/
+    hypothesis is stated separately. The hypothesis list is not minimal.
+
+    **Scope:** Single species, non-relativistic, 3D flat torus, Coulomb kernel
+    (Ψ(r) = r⁻³). Assumes existence of a smooth positive steady-state solution. -/
 theorem CoulombConcreteTheorem42
     -- === Physical state at steady state ===
     (f : Torus3 → (Fin 3 → ℝ) → ℝ)

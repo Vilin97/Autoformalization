@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 51: Remove dead smooth-kernel helpers, fix docs
+
+### Changes
+- **VelocityDecayInstance.lean (939 → 809, -130 lines):** Removed 4 dead helper lemmas (`fderiv_entropy_density_eq`, `force_transport_integrable`, `force_ibp_f_dg_integrable`, `force_ibp_fg_integrable`) that were only used by the deleted `schwartzDecayConditionsEB`.
+- **ConcreteTheorem42.lean:** Fixed misleading header that claimed "15 hypotheses" for a non-existent theorem. Now accurately describes file as helper definitions for concrete theorems.
+- **CoulombConcreteTheorem42.lean:** Added physical scope note (single species, non-relativistic, 3D flat torus, Coulomb kernel).
+- All builds pass. 0 sorry's. 23 files.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 50: Delete Section9.lean, remove schwartzDecayConditionsEB, doc fixes
 
 ### Changes
