@@ -1,216 +1,66 @@
 # Formalization Progress: Global Steady State of the VML System
 
-**Files**: `Aristotle/Landau/main/*.lean` (split across 14 files)
+**Files**: `Aristotle/Landau/main/*.lean` (22 files, ~8,300 lines)
 **Blueprint**: `Aristotle/Landau/H-theorem-formal.tex` (Sections 1--10)
-**Status**: 0 errors, 0 sorry's in abstract proof chain; 8 sorry's in CoulombConcreteTheorem42
+**Status**: 0 errors, 0 sorry's. Fully verified by Lean 4 kernel.
 
-Last updated: 2026-03-09
+Last updated: 2026-03-10
 
 ## Summary
 
 The formalization proves Theorem 42 (= Theorem 12 in the blueprint):
 any smooth steady state (f, E, B) of the Vlasov--Maxwell--Landau system
-on T^3 x R^3 with collision frequency nu > 0 must satisfy:
+on T^3 x R^3 with Coulomb kernel and collision frequency nu > 0 must satisfy:
 
   (i)   f is a spatially uniform, zero-drift Maxwellian
   (ii)  E = 0
   (iii) B = const
-  (iv)  T > 0 uniquely determined by conservation laws
+  (iv)  T > 0
 
-The main proof chain (Defs, Section2-9, VMLInputDerive, Theorem42) is
+The main proof chain (Defs, Section2-8, VMLInputDerive, Theorem42) is
 **complete with 0 sorry's and 0 axioms**.
 
 A concrete FlatTorus3 instance on `Fin 3 -> AddCircle 1` (TorusInstance.lean)
-validates the typeclass with **0 sorry's** (all 23 instance fields proved).
+validates the typeclass with **0 sorry's**.
 
-Three concrete VelocityDecayConditions instances (VelocityDecayInstance.lean):
-1. **uniformMaxwellianDecay** (E=B=0, f=Maxwellian): **0 sorry's** (circular but consistent)
-2. **schwartzDecayConditions** (E=B=0, f=Schwartz): **0 sorry's** (non-circular)
-3. **schwartzDecayConditionsEB** (E=E₀, B=B₀, f=Schwartz): **0 sorry's** (all 19 fields proved; force fields by Aristotle)
+The concrete theorem `CoulombConcreteTheorem42` (13 hypotheses) proves all 19
+VelocityDecayConditions fields inline for the Coulomb kernel Ψ(r) = r⁻³.
 
 ---
 
 ## File Structure
 
-- `Defs.lean` -- FlatTorus3 typeclass (extends MeasureSpace X, TopologicalSpace X, CompactSpace, Nonempty), structures, base definitions
-- `Section2.lean` -- Algebraic lemmas (Landau matrix properties, Lemmas 1-3)
-- `Section3.lean` -- H-theorem chain + analysis lemmas (~1300 lines, Lemmas 4-9)
-- `Section4.lean` -- Transport constraints (Lemmas 10-12, Corollary 2)
+- `Defs.lean` -- FlatTorus3 typeclass, structures, base definitions
+- `Section2.lean` -- Algebraic lemmas (Landau matrix properties)
+- `Section3.lean` -- H-theorem (Lemmas 4-9, Theorems 3-5)
+- `Section3Helpers.lean` -- Helper lemmas for Section 3
+- `Section4.lean` -- Transport constraints (Lemmas 10-12)
 - `Section5.lean` -- Polynomial matching (Lemmas 13-17)
-- `Section6.lean` -- Bulk velocity (Lemmas 18-19)
+- `Section6.lean` -- Bulk velocity (Lemma 19)
 - `Section7.lean` -- Maximum principle (Lemmas 20-21, Corollary 3)
-- `Section8.lean` -- Magnetic field (Lemmas 22-23)
-- `Section9.lean` -- Conservation laws (Lemmas 24-28)
+- `Section8.lean` -- Magnetic field (Lemma 22)
 - `VMLInputDerive.lean` -- VMLInput.toSteadyState, main_steady_state, main_from_physics
-- `Theorem42.lean` -- Main theorem statement + proof (VelocityDecayConditions bundle)
-- `TorusInstance.lean` -- Concrete FlatTorus3 instance on T^3
-- `VelocityDecayInstance.lean` -- Concrete VelocityDecayConditions for uniform Maxwellian
-
----
-
-## Proved Lemmas (by blueprint section)
-
-### Section 2: Algebraic Lemmas about the Landau Matrix
-
-- **Lemma 1(a)** (A is symmetric): `landauMatrix_symmetric`
-- **Lemma 1(b)** (A is even): `landauMatrix_even`
-- **Lemma 2** (A is PSD): `landauMatrix_posSemidef`, `landauMatrix_quadForm_eq_zero_iff`
-- **Lemma 3** (Projection annihilation): `landauMatrix_mulVec_self`, `vecMul_landauMatrix_self`
-
-### Section 3: The H-Theorem and Nullspace
-
-- **Lemma 4** (Symmetrized weak form): `entropy_score_form`
-- **Lemma 5** (Entropy dissipation formula): `entropy_dissipation_formula`
-- **Theorem 3** (H-theorem: D(f) <= 0): `H_theorem`
-- **Lemma 6** (D=0 implies parallelism): `D_zero_implies_parallel`
-- **Lemma 7** (Parallel implies affine): `functional_eq_affine`, `parallel_curl_free_affine`
-- **Lemma 8** (Affine gradient implies quadratic): `log_f_quadratic`, `affine_gradient_antiderivative`
-- **Theorem 4** (Nullspace necessity): `nullspace_necessity`
-- **Theorem 5** (Nullspace sufficiency): `nullspace_sufficiency`
-- **Corollary 1** (Complete characterization): `nullspace_iff`
-- **velocity_ibp**: General IBP on R^3. **Fully proved.**
-- **landau_ibp**: IBP for Landau operator. **Fully proved.**
-- **fubini_symmetrization_logf**: Fubini swap for D(f) formula. Proved by Aristotle.
-
-### Section 4: Vlasov--Maxwell Transport Constraints
-
-- **Lemma 10** (Lorentz force div = 0): `lorentz_force_div_zero`
-- **Lemma 11** (Global entropy production vanishes): `transport_entropy_from_vlasov`
-- **Lemma 12** (Pointwise D = 0): derived in Theorem42
-
-### Section 5: Polynomial Matching
-
-- **Lemma 13** (Polynomial identity): `polynomial_identity_velocity`
-- **Lemma 14** (Temperature constant): `temperature_constant`, `cubic_coeff_zero`
-- **Lemma 15** (Bulk velocity constant): `bulk_velocity_constant`, `killing_constant_torus`
-- **Lemma 16** (Force balance): `force_balance`, `force_balance_from_polynomial`
-- **Lemma 17** (Zeroth-order term): `E_dot_u_zero`
-
-### Section 6: Nullification of Bulk Velocity
-
-- **Lemma 18** (Ampere at steady state): `ampere_steady_state`
-- **Lemma 19** (u = 0): `bulk_velocity_zero`
-
-### Section 7: Spatial Uniformity via Maximum Principle
-
-- **Lemma 20** (Poisson--Boltzmann): `poisson_boltzmann_density`, `poisson_boltzmann_from_vlasov`
-- **Lemma 21** (Density constant): `density_constant_max_principle`, `poisson_boltzmann_max_principle`
-- **Corollary 3** (E = 0): `electric_field_zero`
-
-### Section 8: Uniformity of the Magnetic Field
-
-- **Lemma 22** (B constant): `magnetic_field_constant`
-- **Lemma 23** (Compatibility): `B_compatible_maxwellian`
-
-### Section 9: Conservation Laws
-
-- **Lemma 24** (B mean conserved): `B_mean_conserved`
-- **Lemma 25** (Energy conserved): `energy_conserved`
-- **Lemma 26** (B_infty determined): `B_infty_determination`
-- **Lemma 27** (T_infty determined): `T_infty_determination`
-- **Lemma 28** (T > 0): `T_positive`
-
-### Main Theorem Assembly
-
-- `main_steady_state`: VMLSteadyState -> conclusion. **Fully proved.**
-- `main_from_physics`: VMLInput -> conclusion. **Fully proved.**
-- `Theorem42`: Clean statement with VelocityDecayConditions bundle. **Fully proved.**
-
----
-
-## TorusInstance (0 sorry's)
-
-### All instance fields proved:
-
-`hDiff_velocityIntegral` was removed from `FlatTorus3` (2026-03-10): it was mathematically false
-as stated (first-order bounds don't give C^∞). The need for `IsSpatiallyDiff ρ` was eliminated by
-deriving `IsSpatiallyDiff (log ∘ ρ)` directly from the Maxwellian form: since f(x,v) = exp(a(x) + c₀|v|²),
-we have log ρ(x) = a(x) + const, so `IsSpatiallyDiff (log ∘ ρ)` follows from `IsSpatiallyDiff a`.
-
-Instance fields (21/21 proved): `hDivLinear`, `hGradScalarMul`, `hGradChainExp`, `hGradAdd`, `hGradConst`,
-`hSpatialPos`, `hSpatialNonnegZero`, `hSpatialVelocityFubini`, `hSpatialAdd` (via integral_add),
-`hGradIntegrable` (via IsOpenQuotientMap.piMap), `IsSpatiallyDiff` (= ContDiff ℝ ⊤ ∘ periodicLift),
-`hDiff_const`, `hDiff_add`, `hDiff_smul`, `hDiff_log` (= ContDiff.log),
-`hDiff_grad` (= ContDiff.fderiv_right + clm_apply),
-`hCurlIntZero`, `hHarmonic_const`, `hIBP_spatial`, `hLaplacianMaxNonpos`,
-`hKillingToHarmonic`, `hCurlZeroDivZeroHarmonic`
-
-Helper theorems (all proved): `torus_hIBP_spatial` (1D FTC + Fubini + periodicity),
-`torus_hCurlIntZero` (from IBP), `torus_hHarmonic_const` (energy method via IBP),
-`torus_hGradAdd'`, `torus_hLaplacianMaxNonpos`, `torus_hKillingToHarmonic`,
-`torus_hCurlZeroDivZeroHarmonic`, `clairaut_fderiv`, `periodicLift_torusGradX`,
-`laplacian_nonpos_at_max_rn`, `killing_harmonic_rn'`, `curl_div_harmonic_rn'`,
-`contDiff2_from_partials`
-
----
-
-## VelocityDecayInstance
-
-### uniformMaxwellianDecay (0 sorry's)
-
-Constructs a concrete `VelocityDecayConditions` for the spatially
-uniform isotropic Maxwellian `f(x,v) = exp(a + c|v|²)` with `c < 0`, `E = 0`, `B = 0`.
-All 15 fields proved by showing each integrand is identically 0, then applying `integrable_zero`.
-**Note:** This instance is circular (the Maxwellian is the theorem's conclusion).
-
-### schwartzDecayConditions (0 sorry's, all 15 proved)
-
-**Non-circular** construction: proves VelocityDecayConditions for Schwartz-class distributions
-`φ(v) > 0` with `‖v‖^k * |φ(v)|` integrable for all k, C¹ bounded Ψ, gradient/log bounds.
-For `E = B = 0`, this shows the hypothesis set is satisfiable by genuine non-Maxwellians
-(e.g., `φ(v) = exp(-|v|⁴)`).
-
-**Hypotheses** (added to unblock flux differentiability):
-- `hΨ_diff : ContDiff ℝ 1 Ψ` — Ψ is C¹
-- `hΨ'_bound : ∃ CΨ', ∀ r, |deriv Ψ r| ≤ CΨ'` — Ψ' bounded
-- `hφ_deriv2_bound` — pointwise second derivative bound: `‖∂²φ/∂vⱼ∂vₖ‖ ≤ C₂(1+‖v‖)^K₂ φ(v)`
-
-**Status:** All 15/15 conditions proved:
-- 5 transport/force conditions (trivially 0 since E=B=0, gradX=0)
-- `hLandauFluxInt` — flux integrability (pointwise bound + Schwartz domination)
-- `hLandauIBP_fg` — flux × log integrability (flux integral bound + log bound)
-- `hLandauIBP_f_dg` — flux × d(log) integrability (flux bound + gradient/value bound)
-- `hPSD_inner_int` — PSD inner integrability (psd_integrand_bound + integrable_of_schwartz_bound)
-- `hPSD_outer_int` — PSD outer integrability (integrable_integral_schwartz + psd_integrand_bound)
-- `hFubini_double` — Fubini double integrability (integrable_prod_schwartz_bound)
-- `hFubini_inner` — Fubini inner integrability (flux projection + dotProduct decomposition)
-- `hFubini_outer` — Fubini outer integrability (integrable_integral_schwartz)
-- `hLandauFluxDiff` — flux differentiability (via `landau_flux_component_diff_with_bound`)
-- `hLandauIBP_df_g` — derivative-of-flux × log (via `landau_flux_component_diff_with_bound`)
-
-### schwartzDecayConditionsEB (0 sorry's)
-
-**Non-circular, nonzero fields** construction: proves VelocityDecayConditions for Schwartz-class
-φ(v) > 0 with arbitrary constant E₀, B₀. Addresses Issue #2 from the critique.
-
-- 14 collision/spatial conditions **reused** from `schwartzDecayConditions` (types don't mention E, B)
-- 3 force conditions: **proved by Aristotle** (force_transport_integrable, force_ibp_f_dg_integrable,
-  force_ibp_fg_integrable). Each uses the Lorentz bound |(E₀ + v×B₀)ᵢ| ≤ CL·(1+‖v‖) combined
-  with Schwartz decay.
-- `hf_velocity_dominated`: trivially uniform in x for spatially-constant f
-
-Key infrastructure lemmas (all proved):
-- `landau_flux_component_diff_with_bound` — 4-part conjunction: differentiability, derivative bound,
-  integrability, Schwartz bound. All parts proved:
-  - Part 1: `landauMatrix_entry_differentiable` (Aristotle) + `Fin.sum_univ_three`
-  - Part 2: `single_summand_deriv_bound` (Aristotle) + sum over Fin 3
-  - Part 3: `Integrable.mono'` + Part 2 bound
-  - Part 4: `hasFDerivAt_integral_of_dominated_of_fderiv_le` (Leibniz integral rule) +
-    extreme value theorem on compact ball + monotonicity of Schwartz bounds
-- `psd_integrand_bound`, `psd_integrand_continuous_joint`, `fubini_integrand_bound`,
-  `fubini_integrand_continuous`, `landau_flux_pointwise_bound`, `landau_flux_continuous_joint`,
-  `landau_flux_integral_aestronglyMeasurable`
-- Helper lemmas: `integrable_one_add_norm_pow_mul`, `integrable_of_schwartz_bound[_vec]`,
-  `integrable_prod_schwartz_bound`, `integrable_integral_schwartz`, `norm_mulVec_le_of_entry_bound`,
-  `landauMatrix_entry_le`, `vGrad_log_eq_div`, `vGrad_log_norm_le`, `normSq_le_three_mul_sq_norm`
+- `Theorem42.lean` -- Main abstract theorem + VelocityDecayConditions bundle (19 fields)
+- `TorusInstance.lean` -- Concrete FlatTorus3 instance on T³
+- `SchwartzDecayDefs.lean` -- UniformSchwartzDecay, integrability helpers
+- `VelocityDecayInstance.lean` -- lorentz_component_bound
+- `CoulombKernel.lean` -- Coulomb kernel def, Schwartz helpers
+- `CoulombSpatialTransport.lean` -- Spatial/force transport for Coulomb
+- `NewtonianPotential.lean` -- Matrix bounds, inv-norm integrability
+- `CoulombFlux.lean` -- Flux integrability, flux×log, flux component bound
+- `CoulombFluxDiff.lean` -- Conv differentiability, flux diff/decay, IBP
+- `CoulombPSD.lean` -- PSD continuity, inner/outer integrability, Fubini
+- `CoulombConcreteTheorem42.lean` -- Main concrete theorem (13 hypotheses, 0 sorry's)
+- `LandauMatrixDerivBound.lean` -- Landau matrix derivative bounds
 
 ---
 
 ## Architecture
 
 The `FlatTorus3` typeclass extends `MeasureSpace X, TopologicalSpace X` and includes
-`CompactSpace X` and `Nonempty X`. It bundles spatial operators + 15 axioms.
-Spatial integration uses Mathlib's `integral` via the inherited measure.
+`CompactSpace X` and `Nonempty X`. It bundles 3 spatial operators (gradX, divX, curlX),
+an abstract differentiability predicate `IsSpatiallyDiff`, and 22 axiom fields.
+All validated by the concrete Torus3 instance.
 
 The proof flows through three layers:
 
@@ -225,7 +75,7 @@ The proof flows through three layers:
 
 ---
 
-## FlatTorus3 Axioms (21)
+## FlatTorus3 Axioms (22)
 
 **Operator properties (5):** hDivLinear, hGradConst, hGradAdd, hGradScalarMul, hGradChainExp
 
@@ -235,38 +85,21 @@ The proof flows through three layers:
 
 **Flat geometry (2):** hKillingToHarmonic, hCurlZeroDivZeroHarmonic
 
-**Abstract measure (3):** hSpatialVelocityFubini, hSpatialAdd (requires Integrable), hGradIntegrable
+**Abstract measure (3):** hSpatialVelocityFubini, hSpatialAdd, hGradIntegrable
 
-**IsSpatiallyDiff closure (5):** hDiff_const, hDiff_add, hDiff_smul, hDiff_log, hDiff_grad
-
-**Derived lemmas (proved from axioms):**
-- hGradChainLog (from hGradChainExp via exp(log g) = g)
-- hGradIntZero (from hIBP_spatial + hGradConst + hSpatialAdd)
-- hLaplacianMinNonneg (from hLaplacianMaxNonpos + hGradScalarMul + hDivLinear)
-- hSpatialMul (from Mathlib's integral_mul_right)
-- hDiff_sub (from hDiff_add + hDiff_smul with c=-1)
-- maxwellian_params_isSpatiallyDiff (from hDiff_log + closure)
+**IsSpatiallyDiff closure (6):** hDiff_const, hDiff_add, hDiff_smul, hDiff_log, hDiff_continuous, hDiff_grad
 
 ---
 
 ## Theorem42 Hypotheses
 
 **Physical** (10): f > 0, f smooth, f integrable, nu > 0, rho_ion > 0, Psi > 0,
-Psi continuous, rho continuous, D continuous, Vlasov equation, Maxwell equations (3).
+Vlasov equation, Maxwell equations (3).
 
-**Spatial regularity** (2): hDiff_fv (f(·,v) ∈ C^∞ for each v), hDiff_B (B ∈ C^∞).
+**Spatial regularity** (2): hDiff_fv (f(·,v) spatially differentiable), hDiff_B (B spatially differentiable).
 
-**DERIVED regularity** (no longer explicit hypotheses, 2026-03-09):
-- hDiff_B_C2 = hDiff_grad (FlatTorus3 closure) applied to B components
-- hDiff_maxwellian_C2 = hDiff_grad applied to b_loc components
+**Velocity-space decay** (1 structure): `VelocityDecayConditions` bundles 19
+integrability/Fubini/IBP/differentiability/continuity conditions.
 
-**DERIVED** (no longer explicit hypotheses):
-- hDiff_logfv = hDiff_log + hDiff_fv + hf_pos
-- hDiff_maxwellian = maxwellian_params_isSpatiallyDiff (evaluate log f at v=0, eⱼ, 2e₀)
-- hDiff_logRho = derived from Maxwellian form: log ρ = a + const (2026-03-10, replaces hDiff_velocityIntegral)
-
-**Domain** (via `[FlatTorus3 X]`): 21 fields for spatial operators, torus topology, differentiability.
-CompactSpace and Nonempty bundled into FlatTorus3.
-
-**Velocity-space decay** (1 structure): `VelocityDecayConditions` bundles 15
-integrability/Fubini/IBP/decay conditions (hGradFv_dominated removed 2026-03-10).
+**CoulombConcreteTheorem42** collapses all of the above to 13 explicit hypotheses
+(FlatTorus3 fields from the Torus3 instance, all 19 VelocityDecayConditions proved inline).

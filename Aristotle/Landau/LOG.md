@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 53: Delete VelocityDecayHelpers.lean, fix stale docs
+
+### Changes
+- **VelocityDecayHelpers.lean: DELETED (-749 lines).** ~95% dead code. Moved 2 live lemmas (`integrable_one_add_norm_pow_mul`, `integrable_of_schwartz_bound`) to SchwartzDecayDefs.lean. Removed VelocityDecayHelpers import from CoulombSpatialTransport.lean.
+- **progress.md: REWRITTEN.** Was severely stale (claimed 14 files/8 sorry's, listed deleted files). Now accurately reflects 22 files, 0 sorry's, correct file structure and axiom counts.
+- **MEMORY.md: UPDATED.** Corrected file count (22), line count (~8,300), VelocityDecayConditions field count (19).
+- All builds pass. 0 sorry's. 22 files, ~8,300 lines.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 52: Remove dead schwartzDecayConditions, rename ConcreteTheorem42
 
 ### Changes
