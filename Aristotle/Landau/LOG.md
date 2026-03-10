@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 40: Split Section3.lean
+
+### Changes
+- Split Section3.lean (1307 lines) into:
+  - Section3Helpers.lean (926 lines): building blocks — vGrad_exp_quadratic, Gaussian integrals, PSD analysis, polynomial algebra, parallel_curl_free_affine, affine_gradient_antiderivative, Maxwellian flux zero, Poisson-Boltzmann, Faraday-Stokes, force balance
+  - Section3.lean (391 lines): H-theorem chain — symmetrized_weak_form, entropy_dissipation_formula, H_theorem, D_zero_implies_parallel, nullspace_necessity/sufficiency/iff, Fubini symmetrization, IBP, integral linearity
+- Both files compile cleanly, 0 sorry's
+- Now 23 files total, ~11,400 lines
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 39: Split CoulombPSD.lean
 
 ### Changes
