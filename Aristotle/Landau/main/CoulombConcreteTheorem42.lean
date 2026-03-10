@@ -87,12 +87,17 @@ theorem CoulombConcreteTheorem42
     (∀ x, B x = B₀) := by
   -- Derive log bound from Schwartz + ExpDecay (used by many fields)
   have hLogBound := schwartz_log_bound hf_pos hSchwartz hExpDecay
+  -- Schwartz decay specialized to each x (used in many fields below)
+  have hSchwartz_x : ∀ x, ∀ N k, ∃ C > 0, ∀ v,
+      ‖iteratedFDeriv ℝ k (f x) v‖ * (1 + ‖v‖) ^ N ≤ C := fun x N k =>
+    hSchwartz.hDecay N k |>.imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩
+  -- Extract gradient bound components (used in multiple fields)
+  obtain ⟨Cg, Kg, hCg⟩ := hGradBound
   -- Extract hIBP_f_dg: used for both hLandauIBP_f_dg and hFubini_outer
   have hIBP_f_dg : ∀ x i, Integrable (fun v =>
       (∫ w, mulVec (landauMatrix coulombKernel (v - w))
         (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i *
       fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)) := by
-    obtain ⟨Cg, Kg, hCg⟩ := hGradBound
     intro x i
     -- Step 1: Score bound |d(log f)/dv_i| ≤ Cg(1+‖v‖)^Kg
     -- (from chain rule: d(log∘f)/dv_i = (df/dv_i)/f, and hGradBound gives |df/dv_i| ≤ Cg(1+‖v‖)^Kg * f)
@@ -117,7 +122,7 @@ theorem CoulombConcreteTheorem42
           (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i| ≤
         Cf * f x v * (1 + ‖v‖) ^ Kg :=
       coulomb_flux_component_bound (f x) (hf_pos x) (hf_smooth_v x)
-        (fun N k => hSchwartz.hDecay N k |>.imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩)
+        (hSchwartz_x x)
         (fun v j => hCg x v j) i
     -- Step 3: Combine → product ≤ Cf*Cg * f(v) * (1+‖v‖)^{2Kg} → integrable
     obtain ⟨Cf, hCf_pos, hCf⟩ := h_flux
@@ -130,7 +135,7 @@ theorem CoulombConcreteTheorem42
       exact AEStronglyMeasurable.mul
         (flux_component_aestronglyMeasurable (f x) (hf_smooth_v x)
           (fun v => landau_flux_integrable_coulomb (f x) (hf_pos x) (hf_smooth_v x)
-            (fun N k => hSchwartz.hDecay N k |>.imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩) v) i)
+            (hSchwartz_x x) v) i)
         h_score_meas
     · filter_upwards with v
       rw [Real.norm_eq_abs, abs_mul]
@@ -149,21 +154,17 @@ theorem CoulombConcreteTheorem42
       mulVec (landauMatrix coulombKernel (v - w))
         (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) := fun x v =>
     landau_flux_integrable_coulomb (f x) (hf_pos x) (hf_smooth_v x)
-      (fun N k => hSchwartz.hDecay N k |>.imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩) v
+      (hSchwartz_x x) v
   have hDecay : VelocityDecayConditions coulombKernel f E B := {
-    hPSD_inner_int := by
-      obtain ⟨Cg, Kg, hCg⟩ := hGradBound
-      intro x v
-      exact psd_inner_integrable_coulomb (f x) (hf_pos x) (hf_smooth_v x)
-        (fun N k => hSchwartz.hDecay N k |>.imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩)
-        (fun v j => hCg x v j) v
-    hPSD_outer_int := by
-      obtain ⟨Cg, Kg, hCg⟩ := hGradBound
-      intro x
-      exact psd_outer_integrable_coulomb (f x) (hf_pos x) (hf_smooth_v x)
-        (fun N k => hSchwartz.hDecay N k |>.imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩)
-        (fun v j => hCg x v j)
-    hFubini_double := by sorry
+    hPSD_inner_int := fun x v =>
+      psd_inner_integrable_coulomb (f x) (hf_pos x) (hf_smooth_v x)
+        (hSchwartz_x x) (fun v j => hCg x v j) v
+    hPSD_outer_int := fun x =>
+      psd_outer_integrable_coulomb (f x) (hf_pos x) (hf_smooth_v x)
+        (hSchwartz_x x) (fun v j => hCg x v j)
+    hFubini_double := fun x =>
+      fubini_double_integrable_coulomb (f x) (hf_pos x) (hf_smooth_v x)
+        (hSchwartz_x x) (fun v j => hCg x v j)
     hFubini_inner := by
       intro x v
       simp only [dotProduct]
@@ -193,8 +194,16 @@ theorem CoulombConcreteTheorem42
       spatial_transport_integrable hf_pos hf_smooth_v hf_smooth_x hSchwartz hLogBound x
     hForceTransport_int := fun x =>
       force_transport_integrable_coulomb E B hf_pos hf_smooth_v hSchwartz hLogBound x
-    hLandauFluxDiff := by sorry
-    hLandauIBP_df_g := by sorry
+    hLandauFluxDiff := by
+      intro x i
+      exact coulomb_flux_differentiable (f x) (hf_pos x) (hf_smooth_v x)
+        (hSchwartz_x x) i
+    hLandauIBP_df_g := by
+      obtain ⟨C_log, K_log, hLB⟩ := hLogBound
+      intro x i
+      exact coulomb_ibp_df_g_integrable (f x) (hf_pos x) (hf_smooth_v x)
+        (hSchwartz_x x)
+        ⟨C_log, K_log, fun v => hLB x v⟩ i
     hLandauIBP_f_dg := hIBP_f_dg
     hLandauIBP_fg := fun x i =>
       flux_times_log_integrable_coulomb hf_pos hf_smooth_v hSchwartz hLogBound x i

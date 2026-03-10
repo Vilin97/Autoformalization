@@ -5,14 +5,18 @@
       "submission": "aristotle-in/coulomb_flux_diff.lean",
       "output": "aristotle-out/coulomb_flux_diff_aristotle.lean",
       "target": "coulomb_flux_diff",
-      "note": ""
+      "note": "",
+      "status": "done",
+      "solution": "/home/vilin/aristotle/Aristotle/Landau/aristotle-out/coulomb_flux_diff_aristotle.lean"
     },
     {
       "id": "50fc290c-3a9f-4f37-81df-c4aa17748d0b",
       "submission": "aristotle-in/fubini_double_integrable.lean",
       "output": "aristotle-out/fubini_double_integrable_aristotle.lean",
       "target": "fubini_double_integrable",
-      "note": ""
+      "note": "",
+      "status": "done",
+      "solution": "/home/vilin/aristotle/Aristotle/Landau/aristotle-out/fubini_double_integrable_aristotle.lean"
     },
     {
       "id": "97da955d-87fc-4609-abbc-45fbd4eb9b8b",
