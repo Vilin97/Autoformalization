@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 43: Dead code removal + MEMORY.md update
+
+### Changes
+- Removed unused private `dotProduct_smul_self` from Defs.lean (dead code; public version in Section6.lean is the one actually used)
+- Updated MEMORY.md with VelocityDecay split info, LandauMatrixDerivBound entry, correct file/line counts
+- Testing custom `generalize_proofs` tactic fork removal (in progress)
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 42: Replace `import Mathlib` with granular imports
 
 ### Changes
