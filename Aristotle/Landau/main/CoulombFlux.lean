@@ -18,6 +18,14 @@ def landauMatrix' (z : Fin 3 → ℝ) : Matrix (Fin 3) (Fin 3) ℝ :=
 def vGrad' (f : (Fin 3 → ℝ) → ℝ) (v : Fin 3 → ℝ) : Fin 3 → ℝ :=
   fun i => fderiv ℝ f v (Pi.single i 1)
 
+-- Bridging lemmas: primed defs equal VML namespace defs (by definitional equality)
+lemma normSq'_eq : normSq' = normSq := rfl
+lemma eucNorm'_eq : eucNorm' = eucNorm := rfl
+lemma innerLandauMatrix'_eq : innerLandauMatrix' = innerLandauMatrix := rfl
+lemma coulombKernel'_eq : coulombKernel' = coulombKernel := rfl
+lemma landauMatrix'_eq : landauMatrix' = landauMatrix coulombKernel := rfl
+lemma vGrad'_eq : vGrad' = vGrad := rfl
+
 -- ============================================================================
 -- Landau flux integrability for Coulomb kernel (proved by Aristotle, job aabe3f3d)
 -- Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun>
