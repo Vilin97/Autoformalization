@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 61: T_eq uniqueness, hGradBound independence, simp cleanup
+
+### Changes
+- **Proved T_eq uniqueness** (critique #10): Added `equilibriumMaxwellian_T_unique` (Defs.lean) and `CoulombConcreteTheorem42_unique_T` (CoulombConcreteTheorem42.lean). The equilibrium temperature is uniquely determined by the distribution function.
+- **Established hGradBound independence** (critique #7): The claim "likely derivable from hSchwartz + hExpDecay" was **mathematically incorrect**. Counterexample: f(v) = exp(-|v|²)(2+sin(exp(⟨v⟩))) is Schwartz with exponential lower bound, but |∂f|/f grows like exp(⟨v⟩). Fixed all docstrings from "12 independent + 1 likely derivable" to "13 total, all independent".
+- **Fixed 8 unused simp args in Defs.lean** (critique #16): Removed unused `Fin.sum_univ_three`, `smul_eq_mul` from simp calls. Zero `unusedSimpArgs` warnings remain in Defs.lean.
+- **Replaced deprecated API** (critique #17): `integral_mul_right` → `integral_mul_const` in Defs.lean:419.
+- Added `/strengthen` command and updated `/plan` to write to `plan.md`.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 60: Delete dead code, remove linter suppressions
 
 ### Changes

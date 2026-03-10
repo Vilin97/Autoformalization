@@ -14,7 +14,7 @@
   ∀ r, 0 < coulombKernel r. The value at 0 is irrelevant since
   landauMatrix Ψ 0 = 0 always (the projection |z|²I - zz^T vanishes at z = 0).
 
-  Hypotheses (13 total, 12 independent + 1 likely derivable):
+  Hypotheses (13 total, all independent):
   - 2 physical parameters (ν > 0, ρ_ion > 0)
   - 1 strict positivity (f > 0)
   - 3 smoothness (f smooth in v and x, B smooth)
@@ -39,19 +39,20 @@ namespace VML
     at r = 0 but the formalization handles this via the PSD continuity condition
     in VelocityDecayConditions (the singularity cancels in the quadratic form).
 
-    **Hypotheses** (13 total, 12 independent + 1 likely derivable):
+    **Hypotheses** (13 total):
     - 2 physical parameters (ν > 0, ρ_ion > 0)
     - 1 strict positivity (f > 0)
     - 3 smoothness (f smooth in v and x, B smooth)
     - 3 decay (Schwartz in v; stretched-exponential lower bound; polynomial score)
     - 4 equations (Vlasov, Ampère, Gauss, div B = 0)
 
-    **Non-minimality note:** Hypothesis 9 (hGradBound, polynomial score bound) is
-    likely derivable from hypotheses 7-8 (Schwartz decay + stretched-exponential
-    lower bound): Schwartz |∂f| decays faster than any polynomial, while the lower
-    bound f ≥ exp(-C(1+‖v‖)^K) only decays sub-exponentially, so |∂f|/f grows at
-    most polynomially. Formalizing this derivation in Lean is nontrivial, so the
-    hypothesis is stated separately. The hypothesis list is not minimal.
+    **Independence note:** Hypothesis 9 (hGradBound, polynomial score bound) is
+    NOT derivable from hypotheses 7-8 alone. The ratio |∂f|/f equals
+    |∂f| * exp(C(1+‖v‖)^K) in the worst case, which grows super-polynomially
+    for K ≥ 1. Counterexample: f(v) = exp(-|v|²)(2 + sin(exp(⟨v⟩))) is Schwartz
+    with stretched-exponential lower bound, but |∂f|/f grows like exp(⟨v⟩).
+    The polynomial score bound is a genuine additional assumption, satisfied by
+    physically relevant distributions (Maxwellians, perturbations thereof).
 
     **Scope:** Single species, non-relativistic, 3D flat torus, Coulomb kernel
     (Ψ(r) = r⁻³). Assumes existence of a smooth positive steady-state solution. -/
@@ -72,10 +73,10 @@ theorem CoulombConcreteTheorem42
     (hSchwartz : UniformSchwartzDecay f)         -- (7)
     (hExpDecay : ∃ (C : ℝ) (K : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
       Real.exp (-C * (1 + ‖v‖) ^ K) ≤ f x v)   -- (8)
-    -- === Polynomial score bound (same as smooth kernel's hGradBound) ===
-    -- NOTE: Likely derivable from hSchwartz + hExpDecay (Schwartz numerator /
-    -- stretched-exponential denominator → polynomial growth), but proving this
-    -- in Lean is nontrivial. Stated separately; the hypothesis list is not minimal.
+    -- === Polynomial score bound (independent of hSchwartz + hExpDecay) ===
+    -- This is NOT derivable from hSchwartz + hExpDecay: the ratio |∂f|/f can grow
+    -- super-polynomially even for Schwartz f with exponential lower bound.
+    -- Satisfied by Maxwellians and physically reasonable perturbations.
     (hGradBound : ∃ (Cg : ℝ) (Kg : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ) (i : Fin 3),
       |fderiv ℝ (f x) v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f x v) -- (9)
     -- === Steady-state Vlasov equation with Coulomb kernel ===
@@ -284,5 +285,37 @@ theorem CoulombConcreteTheorem42
     hν hρ_ion coulombKernel_pos hf_pos hf_smooth_v
     (hSchwartz.integrable hf_smooth_v)
     hAmpere hGauss hDivB hB_smooth hVlasov hf_smooth_x hDecay
+
+/-- The equilibrium temperature T_eq is unique: any two temperatures giving the
+    same Maxwellian with the same density must be equal. This follows from
+    `CoulombConcreteTheorem42` and the injectivity of T ↦ equilibriumMaxwellian ρ T`. -/
+theorem CoulombConcreteTheorem42_unique_T
+    (f : Torus3 → (Fin 3 → ℝ) → ℝ) (E B : Torus3 → Fin 3 → ℝ) (ν ρ_ion : ℝ)
+    (hν : 0 < ν) (hρ_ion : 0 < ρ_ion) (hf_pos : ∀ x v, 0 < f x v)
+    (hf_smooth_v : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
+    (hB_smooth : ∀ i, ContDiff ℝ ⊤ (periodicLift (fun x => B x i)))
+    (hSchwartz : UniformSchwartzDecay f)
+    (hExpDecay : ∃ (C : ℝ) (K : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
+      Real.exp (-C * (1 + ‖v‖) ^ K) ≤ f x v)
+    (hGradBound : ∃ (Cg : ℝ) (Kg : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ) (i : Fin 3),
+      |fderiv ℝ (f x) v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f x v)
+    (hVlasov : ∀ x v,
+      dotProduct v (torusGradX (fun y => f y v) x) +
+      dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
+      ν * LandauOperator coulombKernel (f x) v)
+    (hAmpere : ∀ x, torusCurlX B x = fun i => ∫ v, v i * f x v)
+    (hGauss : ∀ x, torusDivX E x = (∫ v, f x v) - ρ_ion)
+    (hDivB : ∀ x, torusDivX B x = 0) :
+    ∃ (T_eq : ℝ) (B₀ : Fin 3 → ℝ), 0 < T_eq ∧
+    (∀ x v, f x v = equilibriumMaxwellian ρ_ion T_eq v) ∧
+    (∀ x, E x = 0) ∧ (∀ x, B x = B₀) ∧
+    (∀ T', 0 < T' → (∀ v, equilibriumMaxwellian ρ_ion T' v = equilibriumMaxwellian ρ_ion T_eq v) →
+      T' = T_eq) := by
+  obtain ⟨T_eq, B₀, hT_pos, hf_eq, hE_zero, hB_const⟩ :=
+    CoulombConcreteTheorem42 f E B ν ρ_ion hν hρ_ion hf_pos hf_smooth_v hf_smooth_x hB_smooth
+      hSchwartz hExpDecay hGradBound hVlasov hAmpere hGauss hDivB
+  exact ⟨T_eq, B₀, hT_pos, hf_eq, hE_zero, hB_const,
+    fun T' hT' h_eq => equilibriumMaxwellian_T_unique ρ_ion T' T_eq hρ_ion hT' hT_pos h_eq⟩
 
 end VML

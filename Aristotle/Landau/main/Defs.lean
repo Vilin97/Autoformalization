@@ -92,6 +92,23 @@ def equilibriumMaxwellian (ρ_ion T : ℝ) (v : Fin 3 → ℝ) : ℝ :=
   ρ_ion / (2 * π * T) ^ ((3 : ℝ) / 2) *
     Real.exp (-(normSq v) / (2 * T))
 
+/-- The equilibrium temperature T is uniquely determined: if two Maxwellians with
+    the same density agree as functions, their temperatures must be equal. -/
+lemma equilibriumMaxwellian_T_unique (ρ T₁ T₂ : ℝ) (hρ : 0 < ρ) (hT₁ : 0 < T₁) (hT₂ : 0 < T₂)
+    (h : ∀ v, equilibriumMaxwellian ρ T₁ v = equilibriumMaxwellian ρ T₂ v) : T₁ = T₂ := by
+  -- Evaluate at v = 0: ρ/(2πT₁)^{3/2} * 1 = ρ/(2πT₂)^{3/2} * 1
+  have h0 := h 0
+  simp only [equilibriumMaxwellian, normSq_zero, neg_zero, zero_div, Real.exp_zero, mul_one] at h0
+  -- Cancel ρ: (2πT₁)^{3/2} = (2πT₂)^{3/2}
+  have hπT₁ : (0 : ℝ) < 2 * π * T₁ := by positivity
+  have hπT₂ : (0 : ℝ) < 2 * π * T₂ := by positivity
+  have h_eq : (2 * π * T₁) ^ ((3 : ℝ) / 2) = (2 * π * T₂) ^ ((3 : ℝ) / 2) := by
+    field_simp at h0; linarith
+  -- rpow injectivity: 2πT₁ = 2πT₂, hence T₁ = T₂
+  have h_base := Real.rpow_left_injOn (by norm_num : (3 : ℝ) / 2 ≠ 0)
+    (Set.mem_Ici.mpr (le_of_lt hπT₁)) (Set.mem_Ici.mpr (le_of_lt hπT₂)) h_eq
+  linarith
+
 -- ============================================================================
 -- Section 3b: Velocity Calculus
 -- ============================================================================
@@ -413,10 +430,10 @@ instance (priority := 100) instFirstCountableTopology : FirstCountableTopology X
 noncomputable abbrev spatialIntegral (g : X → ℝ) : ℝ := ∫ x, g x
 
 /-- Scalar multiplication: ∫ g(x) * c = (∫ g) * c.
-    Proved from Mathlib's `integral_mul_right`. -/
+    Proved from Mathlib's `integral_mul_const`. -/
 lemma hSpatialMul (g : X → ℝ) (c : ℝ) :
     spatialIntegral (fun x => g x * c) = spatialIntegral g * c := by
-  simp [spatialIntegral, integral_mul_right]
+  simp [spatialIntegral, integral_mul_const]
 
 /-- Zero gradient implies spatially constant (derived from hHarmonic_const + hDivLinear). -/
 lemma hGradZeroConst (φ : X → ℝ) (hd : IsSpatiallyDiff φ) (h : ∀ x, gradX φ x = 0) :
@@ -534,24 +551,24 @@ lemma maxwellian_params_isSpatiallyDiff
     intros x v; rw [hform x v, Real.log_exp]
   -- At v = 0: log f(x, 0) = a x
   have ha_val : ∀ x, a x = Real.log (f x 0) := by
-    intro x; have := hlogform x 0; simp [normSq_zero, dotProduct, Fin.sum_univ_three] at this
+    intro x; have := hlogform x 0; simp [normSq_zero, dotProduct] at this
     linarith
   -- At v = eⱼ: log f(x, eⱼ) = a x + b x j + c x
   have hform_single : ∀ x (j : Fin 3), Real.log (f x (Pi.single j 1)) = a x + b x j + c x := by
     intros x j; have h := hlogform x (Pi.single j 1)
     have h_dot : dotProduct (b x) (Pi.single j (1:ℝ)) = b x j := by
-      simp [dotProduct, Pi.single_apply, Fin.sum_univ_three]
+      simp [dotProduct, Pi.single_apply]
     have h_ns : normSq (Pi.single j (1:ℝ)) = 1 := by
-      simp [normSq, dotProduct, Pi.single_apply, Fin.sum_univ_three]
+      simp [normSq, dotProduct, Pi.single_apply]
     rw [h_dot, h_ns, mul_one] at h; linarith
   -- At v = 2e₀: log f(x, 2e₀) = a x + 2*(b x 0) + 4*(c x)
   have hform_2e₀ : ∀ x, Real.log (f x (2 • Pi.single 0 1)) = a x + 2 * b x 0 + 4 * c x := by
     intro x; have h := hlogform x (2 • Pi.single 0 (1:ℝ))
     have h_dot : dotProduct (b x) (2 • Pi.single 0 (1:ℝ)) = 2 * b x 0 := by
-      simp [dotProduct, Pi.smul_apply, smul_eq_mul, Pi.single_apply, Fin.sum_univ_three]
+      simp [dotProduct, Pi.smul_apply, Pi.single_apply]
       ring
     have h_ns : normSq (2 • Pi.single 0 (1:ℝ)) = 4 := by
-      simp [normSq, dotProduct, Pi.smul_apply, smul_eq_mul, Pi.single_apply, Fin.sum_univ_three]
+      simp [normSq, dotProduct, Pi.smul_apply, Pi.single_apply]
       ring
     rw [h_dot, h_ns] at h; linarith
   -- c formula: 2 * c x = log f(2e₀) - 2*log f(e₀) + log f(0)
