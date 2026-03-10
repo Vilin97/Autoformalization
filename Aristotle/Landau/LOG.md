@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 60: Delete dead code, remove linter suppressions
+
+### Changes
+- **Deleted `LandauMatrixDerivBound.lean`** (363 lines) — dead code never imported by any file. Removes the only `maxHeartbeats` override added in cycle 59.
+- **Removed all 3 `linter.unusedSimpArgs` suppressions** from Defs.lean, Section3Helpers.lean, Section7.lean. Build passes; exposed warnings are cosmetic (unused simp args).
+- **Updated documentation**: MEMORY.md and progress.md now reflect 21 files, ~7,850 lines.
+- Net change: -363 lines. Heartbeat overrides: 1 (only `synthInstance.maxHeartbeats 160000` in CoulombSpatialTransport.lean).
+- Both critique.md conditions for ACCEPT addressed: dead code deleted, line counts updated.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 59: Eliminate all primed definitions, fix LandauMatrixDerivBound compilation
 
 ### Changes

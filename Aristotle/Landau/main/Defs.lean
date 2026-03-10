@@ -9,8 +9,6 @@
 import Mathlib.Data.Real.StarOrdered
 import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
 
-set_option linter.unusedSimpArgs false
-
 open Matrix Finset BigOperators Real MeasureTheory
 
 noncomputable section
