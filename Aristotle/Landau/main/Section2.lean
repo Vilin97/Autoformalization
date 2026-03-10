@@ -158,18 +158,4 @@ theorem landauMatrix_mulVec_self (Ψ : ℝ → ℝ) (z : Fin 3 → ℝ) :
   unfold landauMatrix
   rw [smul_mulVec, innerLandauMatrix_mulVec_self, smul_zero]
 
-/-- Lemma 3 (left version): zᵀ A(z) = 0. Reference: lem:zA_zero -/
-theorem vecMul_landauMatrix_self (Ψ : ℝ → ℝ) (z : Fin 3 → ℝ) :
-    vecMul z (landauMatrix Ψ z) = 0 := by
-  have h : (landauMatrix Ψ z)ᵀ *ᵥ z = 0 := by
-    rw [landauMatrix_symmetric]; exact landauMatrix_mulVec_self Ψ z
-  ext i
-  simp only [vecMul, Pi.zero_apply]
-  have := congr_fun h i
-  simp only [mulVec, transpose_apply] at this
-  convert this using 1
-  apply Finset.sum_congr rfl
-  intros j _
-  ring
-
 end VML

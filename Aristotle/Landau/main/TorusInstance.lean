@@ -70,11 +70,6 @@ lemma periodicLift_periodic (f : Torus3 → ℝ) (x : Fin 3 → ℝ) (i : Fin 3)
     exact ⟨-1, by simp⟩
   · simp [Pi.single_eq_of_ne h]
 
--- If f : T³ → ℝ is continuous, the lift is continuous:
-lemma periodicLift_continuous (f : Torus3 → ℝ) (hf : Continuous f) :
-    Continuous (periodicLift f) :=
-  hf.comp torusMk_continuous
-
 -- ============================================================================
 -- The key lemma: fderiv of the periodic lift is well-defined
 -- (independent of the choice of lift point)
@@ -264,12 +259,6 @@ theorem torus_hGradAdd' (f g : Torus3 → ℝ)
 -- ============================================================================
 -- Integration axioms (from Haar measure properties)
 -- ============================================================================
-
-/-- hSpatialAdd (with integrability, which the abstract axiom omits). -/
-theorem torus_hSpatialAdd (g₁ g₂ : Torus3 → ℝ)
-    (h1 : Integrable g₁) (h2 : Integrable g₂) :
-    (∫ x, (g₁ x + g₂ x)) = (∫ x, g₁ x) + ∫ x, g₂ x :=
-  integral_add h1 h2
 
 /-- hSpatialVelocityFubini: swap spatial and velocity integrals.
     Uses SigmaFinite (from CompactSpace + IsFiniteMeasure). -/

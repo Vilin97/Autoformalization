@@ -374,9 +374,6 @@ lemma landauMatrix_entry_fderiv_norm_bound
     exact False.elim <| h_zero ⟨ C, hC ⟩
 
 -- Bridge: show standalone defs equal VML defs
-lemma normSq'_eq_VML : normSq' = VML.normSq := rfl
-lemma eucNorm'_eq_VML : eucNorm' = VML.eucNorm := rfl
-lemma innerLandauMatrix'_eq_VML : innerLandauMatrix' = VML.innerLandauMatrix := rfl
 lemma landauMatrix'_eq_VML : landauMatrix' = VML.landauMatrix := rfl
 
 -- Aristotle-proved: |A_{ij}(z)| ≤ C * ‖z‖²
