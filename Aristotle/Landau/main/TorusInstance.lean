@@ -1,326 +1,17 @@
 /-
-  Concrete FlatTorus3 instance on Fin 3 → AddCircle 1.
+  FlatTorus3 instance on Fin 3 → AddCircle 1.
 
-  The spatial domain is the 3-torus T³ = (ℝ/ℤ)³, represented as
-  `Fin 3 → AddCircle 1`. Every function T³ → ℝ is automatically
-  periodic — no extra hypotheses needed.
+  Proves the remaining FlatTorus3 axioms (IBP, harmonic → constant,
+  Laplacian max principle, Killing → harmonic, curl-div → harmonic)
+  and assembles the full FlatTorus3 instance.
 
-  Differential operators are defined via the periodic lift:
-  for f : T³ → ℝ, the lift f̃ := f ∘ proj : ℝ³ → ℝ is periodic,
-  and we define gradX f x := fderiv of f̃ at any preimage of x.
-
-  This provides a concrete justification for all FlatTorus3 axioms.
+  Type definitions and basic operators are in TorusDefs.lean.
 -/
-import Aristotle.Landau.main.Defs
+import Aristotle.Landau.main.TorusDefs
 
 open MeasureTheory Matrix Finset BigOperators Real Filter
 
 noncomputable section
-
--- ============================================================================
--- The concrete 3-torus
--- ============================================================================
-
-/-- The 3-torus: product of three circles with period 1. -/
-abbrev Torus3 := Fin 3 → AddCircle (1 : ℝ)
-
--- All measure/topology instances come for free:
-instance : CompactSpace Torus3 := inferInstance
-instance : T2Space Torus3 := inferInstance
-instance : IsFiniteMeasure (volume : Measure Torus3) := inferInstance
-instance : SigmaFinite (volume : Measure Torus3) := inferInstance
-
--- ============================================================================
--- The projection (covering map) ℝ³ → T³
--- ============================================================================
-
-/-- The quotient map ℝ³ → T³, sending each coordinate to its equivalence class. -/
-def torusMk (x : Fin 3 → ℝ) : Torus3 := fun i => QuotientAddGroup.mk (x i)
-
--- torusMk is surjective (every point in T³ has a preimage)
-lemma torusMk_surjective : Function.Surjective torusMk := by
-  intro x
-  -- For each coordinate, QuotientAddGroup.mk is surjective
-  choose f hf using fun i => Quotient.exists_rep (x i)
-  exact ⟨f, funext hf⟩
-
--- ============================================================================
--- Periodic lift: for f : T³ → ℝ, the composition f ∘ torusMk : ℝ³ → ℝ
--- ============================================================================
-
-/-- The periodic lift of a function on the torus to ℝ³. -/
-def periodicLift (f : Torus3 → ℝ) : (Fin 3 → ℝ) → ℝ := f ∘ torusMk
-
--- The lift IS periodic (by construction):
-lemma periodicLift_periodic (f : Torus3 → ℝ) (x : Fin 3 → ℝ) (i : Fin 3) :
-    periodicLift f (x + Pi.single i 1) = periodicLift f x := by
-  simp only [periodicLift, Function.comp_apply]
-  congr 1; ext j
-  simp only [torusMk, Pi.add_apply]
-  by_cases h : j = i
-  · subst h; simp only [Pi.single_eq_same]
-    -- (x j + 1 : ℝ) maps to same class as (x j : ℝ) in AddCircle 1
-    -- because 1 generates the subgroup we quotient by
-    change QuotientAddGroup.mk (x j + 1) = QuotientAddGroup.mk (x j)
-    rw [QuotientAddGroup.eq]
-    exact ⟨-1, by simp⟩
-  · simp [Pi.single_eq_of_ne h]
-
--- ============================================================================
--- The key lemma: fderiv of the periodic lift is well-defined
--- (independent of the choice of lift point)
--- ============================================================================
-
-/-- The periodic lift at shifted argument equals the original when the shift
-    maps to the same torus point. -/
-lemma periodicLift_shift (f : Torus3 → ℝ) (x y : Fin 3 → ℝ)
-    (h : torusMk x = torusMk y) (z : Fin 3 → ℝ) :
-    periodicLift f (z + (x - y)) = periodicLift f z := by
-  simp only [periodicLift, Function.comp_apply]
-  congr 1; ext i
-  simp only [torusMk, Pi.add_apply, Pi.sub_apply]
-  -- x i - y i is an integer, so adding it doesn't change the equivalence class
-  have hi : (fun i => QuotientAddGroup.mk (x i) : Torus3) i =
-            (fun i => QuotientAddGroup.mk (y i) : Torus3) i := by
-    exact congr_fun h i
-  simp only at hi
-  rw [QuotientAddGroup.eq] at hi ⊢
-  obtain ⟨n, hn⟩ := hi
-  refine ⟨n, ?_⟩
-  simp at hn ⊢
-  linarith
-
-/-- fderiv of the lift at two points that map to the same torus point are equal.
-    This follows because f̃(x) = f̃(x + n) for integer n, so the 1-jets agree. -/
-lemma periodicLift_fderiv_eq (f : Torus3 → ℝ) (x y : Fin 3 → ℝ)
-    (h : torusMk x = torusMk y) :
-    fderiv ℝ (periodicLift f) x = fderiv ℝ (periodicLift f) y := by
-  -- periodicLift f ∘ (· + (x - y)) = periodicLift f
-  have hshift : (fun z => periodicLift f (z + (x - y))) = periodicLift f := by
-    ext z; exact periodicLift_shift f x y h z
-  -- By fderiv_comp_add_right:
-  -- fderiv (fun z => f̃(z + (x-y))) y = fderiv f̃ (y + (x-y)) = fderiv f̃ x
-  have h1 : fderiv ℝ (fun z => periodicLift f (z + (x - y))) y =
-             fderiv ℝ (periodicLift f) (y + (x - y)) := fderiv_comp_add_right (x - y)
-  -- y + (x - y) = x
-  have h2 : y + (x - y) = x := by ext i; simp [Pi.add_apply, Pi.sub_apply]
-  rw [h2] at h1
-  -- But also fderiv (fun z => f̃(z + (x-y))) = fderiv f̃ (by hshift)
-  rw [hshift] at h1
-  exact h1.symm
-
--- ============================================================================
--- Differential operators on T³ via the periodic lift
--- ============================================================================
-
-/-- Spatial gradient on T³.
-    For f : T³ → ℝ, we lift to ℝ³, compute fderiv, and read off components.
-    This is well-defined by periodicLift_fderiv_eq. -/
-def torusGradX (f : Torus3 → ℝ) (x : Torus3) : Fin 3 → ℝ :=
-  -- Choose any preimage of x
-  let x₀ := (torusMk_surjective x).choose
-  fun i => fderiv ℝ (periodicLift f) x₀ (Pi.single i 1)
-
-/-- Spatial divergence on T³. -/
-def torusDivX (F : Torus3 → (Fin 3 → ℝ)) (x : Torus3) : ℝ :=
-  let x₀ := (torusMk_surjective x).choose
-  ∑ i : Fin 3, fderiv ℝ (fun y => periodicLift (fun z => F z i) y) x₀ (Pi.single i 1)
-
-/-- Spatial curl on T³. -/
-def torusCurlX (F : Torus3 → (Fin 3 → ℝ)) (x : Torus3) : Fin 3 → ℝ :=
-  let x₀ := (torusMk_surjective x).choose
-  let d := fun i j => fderiv ℝ (fun y => periodicLift (fun z => F z j) y) x₀ (Pi.single i 1)
-  ![d 1 2 - d 2 1, d 2 0 - d 0 2, d 0 1 - d 1 0]
-
--- ============================================================================
--- Key intermediate: periodicLift of torusGradX equals fderiv of periodicLift
--- ============================================================================
-
-/-- The periodic lift of the gradient component equals the fderiv of the lift.
-    This resolves the `choose` ambiguity: at each point, the gradient uses a
-    chosen preimage, but by periodicLift_fderiv_eq, the fderiv is the same
-    for any preimage of the same torus point. -/
-lemma periodicLift_torusGradX (φ : Torus3 → ℝ) (i : Fin 3)
-    (y : Fin 3 → ℝ) :
-    periodicLift (fun z => torusGradX φ z i) y =
-    fderiv ℝ (periodicLift φ) y (Pi.single i 1) := by
-  simp only [periodicLift, Function.comp_apply, torusGradX]
-  have h := periodicLift_fderiv_eq φ ((torusMk_surjective (torusMk y)).choose) y
-    (torusMk_surjective (torusMk y)).choose_spec
-  exact congr_fun (congr_arg DFunLike.coe h) (Pi.single i 1)
-
--- ============================================================================
--- Helper lemmas: fderiv for const_mul and exp without differentiability
--- ============================================================================
-
-/-- fderiv(c * g) = c • fderiv(g) unconditionally.
-    When g is differentiable: by fderiv_const_smul.
-    When g is not differentiable and c ≠ 0: c * g is also not differentiable,
-    so both sides are the zero map.
-    When c = 0: both sides are 0. -/
-lemma fderiv_const_mul_always {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (c : ℝ) (g : E → ℝ) (x : E) :
-    fderiv ℝ (fun y => c * g y) x = c • fderiv ℝ g x := by
-  by_cases hc : c = 0
-  · have : (fun y => c * g y) = fun _ => (0 : ℝ) := by ext y; simp [hc]
-    rw [this]; simp [hc]
-  · by_cases hg : DifferentiableAt ℝ g x
-    · exact fderiv_const_smul hg c
-    · have hcg : ¬ DifferentiableAt ℝ (fun y => c * g y) x := by
-        intro h; apply hg
-        have : (fun y => c⁻¹ * (c * g y)) = g := by ext y; field_simp
-        exact this ▸ h.const_mul c⁻¹
-      rw [fderiv_zero_of_not_differentiableAt hg, fderiv_zero_of_not_differentiableAt hcg]
-      simp
-
-/-- fderiv(exp ∘ g) x = exp(g x) • fderiv g x unconditionally.
-    When g is differentiable: by fderiv_exp.
-    When g is not differentiable: exp ∘ g is also not differentiable
-    (since g = log ∘ exp ∘ g and log is smooth on (0,∞)), so both sides are 0. -/
-lemma fderiv_exp_comp_always {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (g : E → ℝ) (x : E) :
-    fderiv ℝ (fun y => Real.exp (g y)) x = Real.exp (g x) • fderiv ℝ g x := by
-  by_cases hg : DifferentiableAt ℝ g x
-  · exact fderiv_exp hg
-  · have heg : ¬ DifferentiableAt ℝ (fun y => Real.exp (g y)) x := by
-      intro h; apply hg
-      have hlog : DifferentiableAt ℝ Real.log (Real.exp (g x)) :=
-        Real.differentiableAt_log (ne_of_gt (Real.exp_pos (g x)))
-      have h2 := hlog.comp x h
-      have : (Real.log ∘ fun y => Real.exp (g y)) = g := by ext y; simp [Real.log_exp]
-      rwa [this] at h2
-    rw [fderiv_zero_of_not_differentiableAt hg, fderiv_zero_of_not_differentiableAt heg]
-    simp
-
--- ============================================================================
--- Clairaut's theorem (symmetry of mixed partial derivatives)
--- ============================================================================
-
-/-- Clairaut's theorem via fderiv: ∂²f/∂xᵢ∂xⱼ = ∂²f/∂xⱼ∂xᵢ for C² functions. -/
-theorem clairaut_fderiv {n : ℕ} (g : (Fin n → ℝ) → ℝ) (x : Fin n → ℝ)
-    (i j : Fin n) (hg : ContDiff ℝ 2 g) :
-    fderiv ℝ (fun y => fderiv ℝ g y (Pi.single j 1)) x (Pi.single i 1) =
-    fderiv ℝ (fun y => fderiv ℝ g y (Pi.single i 1)) x (Pi.single j 1) := by
-  have hsymm := (hg.contDiffAt (x := x)).isSymmSndFDerivAt (by simp)
-  have hd : DifferentiableAt ℝ (fderiv ℝ g) x :=
-    ((hg.contDiffAt (x := x)).fderiv_right (le_refl _)).differentiableAt le_rfl
-  have key : ∀ v w, fderiv ℝ (fun y => fderiv ℝ g y v) x w = fderiv ℝ (fderiv ℝ g) x w v := by
-    intro v w
-    have h1 := fderiv_clm_apply hd (differentiableAt_const v)
-    have hconst : fderiv ℝ (fun _ : Fin n → ℝ => v) x = 0 := by
-      have : (fun _ : Fin n → ℝ => v) = Function.const _ v := rfl
-      rw [this]; exact congr_fun (fderiv_const (𝕜 := ℝ) (E := Fin n → ℝ) v) x
-    simp only [hconst, ContinuousLinearMap.comp_zero, zero_add] at h1
-    exact congr_fun (congr_arg DFunLike.coe h1) w
-  rw [key, key]; exact hsymm.eq (Pi.single i 1) (Pi.single j 1)
-
--- ============================================================================
--- Proving the 15 FlatTorus3 axioms
--- ============================================================================
-
--- NON-DIFFERENTIABILITY NOTE:
--- hGradAdd is the only gradient axiom that CANNOT be proved without
--- differentiability hypotheses. The counterexample: if f is differentiable
--- and g is not, fderiv(f+g) = 0 but fderiv(f) + fderiv(g) = fderiv(f) ≠ 0.
--- All other gradient axioms (scalar mul, chain exp, div linear) hold
--- universally via case analysis on differentiability.
--- hGradAdd and hGradChainExp require IsSpatiallyDiff guards in the abstract axiom.
-
--- ============================================================================
--- AXIOM PROOFS (attempted)
--- ============================================================================
-
-/-- hGradConst: gradient of constant function vanishes. -/
-theorem torus_hGradConst (φ : Torus3 → ℝ) (hconst : ∀ x y, φ x = φ y) :
-    ∀ x, torusGradX φ x = 0 := by
-  intro x; ext i; simp only [torusGradX, Pi.zero_apply]
-  have : periodicLift φ = fun _ => φ x := by
-    ext y; simp only [periodicLift, Function.comp_apply]; exact hconst _ _
-  rw [this]; rw [hasFDerivAt_const (φ x) _ |>.fderiv]; rfl
-
-/-- hGradAdd: gradient additivity for C¹ functions. -/
-theorem torus_hGradAdd' (f g : Torus3 → ℝ)
-    (hf : ContDiff ℝ 1 (periodicLift f)) (hg : ContDiff ℝ 1 (periodicLift g)) :
-    ∀ x, torusGradX (fun y => f y + g y) x =
-      torusGradX f x + torusGradX g x := by
-  intro x; ext i; simp only [torusGradX, Pi.add_apply]
-  have hlift : periodicLift (fun y => f y + g y) = fun y => periodicLift f y + periodicLift g y := by
-    ext y; simp [periodicLift]
-  rw [hlift]
-  rw [show (fun y => periodicLift f y + periodicLift g y) = (periodicLift f + periodicLift g)
-    from rfl, fderiv_add (hf.differentiable le_rfl).differentiableAt
-      (hg.differentiable le_rfl).differentiableAt]
-  rfl
-
--- ============================================================================
--- Integration axioms (from Haar measure properties)
--- ============================================================================
-
-/-- hSpatialVelocityFubini: swap spatial and velocity integrals.
-    Uses SigmaFinite (from CompactSpace + IsFiniteMeasure). -/
-theorem torus_hSpatialVelocityFubini (F : Torus3 → (Fin 3 → ℝ) → ℝ)
-    (hF : ∀ x, Integrable (F x))
-    (hF_joint : Integrable (Function.uncurry F) (volume.prod volume)) :
-    (∫ x, ∫ v, F x v) = ∫ v, ∫ x, F x v := by
-  exact integral_integral_swap hF_joint
-
--- NOTE: Our abstract axiom only requires pointwise integrability (∀ x, Integrable (F x)).
--- Mathlib's Fubini needs joint integrability. So the concrete version is slightly stronger.
--- The abstract axiom now requires joint integrability (hSpatialVelocityFubini).
-
--- ============================================================================
--- Compact manifold axioms
--- ============================================================================
-
-/-- hSpatialPos: positive function has positive integral.
-    On a compact space with Haar measure, this follows from the measure
-    being non-degenerate (positive on open sets). -/
-theorem torus_hSpatialPos (g : Torus3 → ℝ) (hg_pos : ∀ x, 0 < g x)
-    (hg_cont : Continuous g) :
-    0 < ∫ x, g x := by
-  have h1 : Integrable g :=
-    hg_cont.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace g)
-  exact integral_pos_of_integrable_nonneg_nonzero hg_cont h1
-    (fun x => le_of_lt (hg_pos x)) (ne_of_gt (hg_pos default))
-
-/-- hSpatialNonnegZero: nonneg function with zero integral is zero.
-    On compact space with Haar measure (positive on opens), this follows
-    from: if continuous g ≥ 0 and ∫g = 0, then g = 0 a.e.,
-    and by continuity g = 0 everywhere. -/
-theorem torus_hSpatialNonnegZero (g : Torus3 → ℝ)
-    (hg_nn : ∀ x, 0 ≤ g x) (hg_int : (∫ x, g x) = 0)
-    (hg_cont : Continuous g) :
-    ∀ x, g x = 0 := by
-  have h1 : Integrable g :=
-    hg_cont.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace g)
-  have h2 : g =ᵐ[volume] 0 := (integral_eq_zero_iff_of_nonneg hg_nn h1).mp hg_int
-  have h3 : g = 0 :=
-    (Continuous.ae_eq_iff_eq (volume : Measure Torus3) hg_cont continuous_const).mp h2
-  exact fun x => congr_fun h3 x
-
--- ============================================================================
--- ============================================================================
--- Helper lemmas for torus IBP
--- ============================================================================
-
-/-- torusMk is an open quotient map (product of open quotient maps). -/
-private lemma isOpenQuotientMap_torusMk : IsOpenQuotientMap torusMk := by
-  have : torusMk = Pi.map (fun (_ : Fin 3) =>
-    (QuotientAddGroup.mk : ℝ → AddCircle (1 : ℝ))) := by ext x j; rfl
-  exact this ▸ IsOpenQuotientMap.piMap (fun _ =>
-    IsOpenQuotientMap.of_isOpenMap_isQuotientMap
-      QuotientAddGroup.isOpenMap_coe
-      (QuotientAddGroup.isQuotientMap_mk (AddSubgroup.zmultiples (1 : ℝ))))
-
-/-- torusGradX is continuous (uses quotient map property). -/
-private lemma continuous_torusGradX (f : Torus3 → ℝ) (i : Fin 3)
-    (hf : ContDiff ℝ 1 (periodicLift f)) :
-    Continuous (fun x => torusGradX f x i) := by
-  rw [isOpenQuotientMap_torusMk.isQuotientMap.continuous_iff,
-      show (fun x => torusGradX f x i) ∘ torusMk =
-        fun y => fderiv ℝ (periodicLift f) y (Pi.single i 1)
-        from funext (periodicLift_torusGradX f i)]
-  exact (hf.continuous_fderiv le_rfl).clm_apply continuous_const
 
 -- ============================================================================
 -- Box integral machinery (proved by Aristotle)
@@ -853,13 +544,7 @@ theorem torus_hLaplacianMaxNonpos (φ : Torus3 → ℝ) (x₀ : Torus3)
 -- Flatness axioms
 -- ============================================================================
 
-/-- hKillingToHarmonic: Killing vector field components are harmonic on flat T³.
-    Uses: Clairaut's theorem + trace of Killing equation.
-    Key proof steps:
-    1. Convert C² hypothesis via periodicLift_torusGradX
-    2. Derive ContDiff ℝ 2 from differentiable first-order partials (finite-dim analysis)
-    3. Apply killing_harmonic_rn' to the periodic lift
-    The ContDiff ℝ 2 derivation uses contDiff2_from_partials. -/
+/-- hKillingToHarmonic: Killing vector field components are harmonic on flat T³. -/
 -- Helper used by both Killing and curl/div proofs:
 -- derive ContDiff ℝ 2 from C¹ + C¹ of each partial
 private lemma contDiff2_from_partials {g : (Fin 3 → ℝ) → ℝ}
@@ -920,14 +605,7 @@ theorem torus_hKillingToHarmonic (b : Torus3 → Fin 3 → ℝ)
     (fun y k => periodicLift (fun z => b z k) y)
     hC2_all hKilling_rn jj (torusMk_surjective x).choose
 
-/-- hCurlZeroDivZeroHarmonic: irrotational + solenoidal → harmonic on flat T³.
-    Uses: curl=0 → symmetric Jacobian, then Clairaut + div=0.
-    Key proof steps:
-    1. Convert C² hypothesis via periodicLift_torusGradX
-    2. Derive ContDiff ℝ 2 (finite-dim analysis)
-    3. Convert curl=0 and div=0 to ℝⁿ form
-    4. Apply curl_div_harmonic_rn' to the periodic lift
-    The ContDiff ℝ 2 derivation uses contDiff2_from_partials. -/
+/-- hCurlZeroDivZeroHarmonic: irrotational + solenoidal → harmonic on flat T³. -/
 theorem torus_hCurlZeroDivZeroHarmonic (F : Torus3 → Fin 3 → ℝ)
     (hF_C1 : ∀ i, ContDiff ℝ 1 (periodicLift (fun z => F z i)))
     (hF_C2 : ∀ i j, ContDiff ℝ 1 (periodicLift (fun x => torusGradX (fun y => F y i) x j)))
@@ -1046,15 +724,7 @@ instance : VML.FlatTorus3 Torus3 where
     -- hf : ContDiff ℝ ⊤ (periodicLift f), so periodicLift f is continuous
     -- periodicLift f = f ∘ torusMk, and torusMk is a quotient map
     -- Therefore f is continuous by the quotient map property
-    have hOQ_coord : IsOpenQuotientMap (QuotientAddGroup.mk : ℝ → AddCircle (1 : ℝ)) :=
-      IsOpenQuotientMap.of_isOpenMap_isQuotientMap
-        QuotientAddGroup.isOpenMap_coe
-        (QuotientAddGroup.isQuotientMap_mk (AddSubgroup.zmultiples (1 : ℝ)))
-    have htorusMk_eq : torusMk = Pi.map (fun (_ : Fin 3) => (QuotientAddGroup.mk : ℝ → AddCircle (1 : ℝ))) := by
-      ext x j; rfl
-    have hOQmap : IsOpenQuotientMap torusMk := htorusMk_eq ▸
-      IsOpenQuotientMap.piMap (fun _ => hOQ_coord)
-    rw [hOQmap.isQuotientMap.continuous_iff]
+    rw [isOpenQuotientMap_torusMk.isQuotientMap.continuous_iff]
     show Continuous (periodicLift f)
     exact hf.continuous
   hDiff_grad := fun f i hf => by
@@ -1098,29 +768,13 @@ instance : VML.FlatTorus3 Torus3 where
   hSpatialAdd := fun g₁ g₂ h1 h2 => integral_add h1 h2
   hGradIntegrable := by
     intro g hg i
-    -- hg : Differentiable ℝ (periodicLift g)   (IsSpatiallyDiff on torus)
-    -- torusGradX g x i is continuous on the compact torus T³
-    -- compact + continuous ↦ integrableOn univ ↦ integrable
     have h_cont : Continuous (fun x : Torus3 => torusGradX g x i) := by
-      -- H : ℝ³ → ℝ is continuous (from C¹ assumption)
       have hH_cont : Continuous (fun y : Fin 3 → ℝ => fderiv ℝ (periodicLift g) y (Pi.single i 1)) :=
         (hg.continuous_fderiv le_top).clm_apply continuous_const
-      -- h ∘ torusMk = H (by periodicLift_torusGradX)
       have heq : (fun x : Torus3 => torusGradX g x i) ∘ torusMk =
           fun y => fderiv ℝ (periodicLift g) y (Pi.single i 1) :=
         funext (fun y => periodicLift_torusGradX g i y)
-      -- Each coordinate mk : ℝ → AddCircle 1 is an open quotient map
-      have hOQ_coord : IsOpenQuotientMap (QuotientAddGroup.mk : ℝ → AddCircle (1 : ℝ)) :=
-        IsOpenQuotientMap.of_isOpenMap_isQuotientMap
-          QuotientAddGroup.isOpenMap_coe
-          (QuotientAddGroup.isQuotientMap_mk (AddSubgroup.zmultiples (1 : ℝ)))
-      -- torusMk = Pi.map (fun _ => mk), hence is also an open quotient map
-      have htorusMk_eq : torusMk = Pi.map (fun (_ : Fin 3) => (QuotientAddGroup.mk : ℝ → AddCircle (1 : ℝ))) := by
-        ext x j; rfl
-      have hOQmap : IsOpenQuotientMap torusMk := htorusMk_eq ▸
-        IsOpenQuotientMap.piMap (fun _ => hOQ_coord)
-      -- h is continuous iff h ∘ torusMk is continuous (quotient map property)
-      rw [hOQmap.isQuotientMap.continuous_iff, heq]
+      rw [isOpenQuotientMap_torusMk.isQuotientMap.continuous_iff, heq]
       exact hH_cont
     rw [← integrableOn_univ]
     exact h_cont.continuousOn.integrableOn_compact isCompact_univ

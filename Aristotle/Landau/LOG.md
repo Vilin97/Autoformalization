@@ -1,5 +1,25 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 63: Split TorusInstance, weaken C^∞ → C³ velocity smoothness
+
+### Changes
+- **Split TorusInstance.lean** (1,162 → 299 + 816 lines): Extracted `TorusDefs.lean` with Torus3 type, periodicLift, gradient/div/curl operators, and basic spatial lemmas. Made `isOpenQuotientMap_torusMk` and `continuous_torusGradX` non-private to enable cross-file usage. All downstream files build clean.
+- **Weakened velocity smoothness C^∞ → C³** across the entire abstract proof chain (8 files):
+  - `Defs.lean`: `VMLInput.hf_smooth` and `landau_ibp` changed from `ContDiff ℝ ⊤` to `ContDiff ℝ 3`
+  - `Section3Helpers.lean`: `analysis_vGrad_smooth` (⊤→2), `entropy_score_form`, `entropy_zero_quadform_zero`, `parallel_curl_free_affine` (⊤→2), `affine_gradient_antiderivative`, `D_zero_implies_maxwellian` all weakened. Fixed all `le_top` → `by norm_num` for `ContDiff.differentiable`.
+  - `Section3.lean`: `H_theorem`, `log_f_quadratic`, `nullspace_necessity`, `fubini_symmetrization_logf` all C³
+  - `Section4.lean`: `fderiv_entropy_potential`, `force_transport_zero`, `transport_entropy_from_vlasov` all C³
+  - `Section5.lean`: `polynomial_identity_from_vlasov` C³
+  - `Section7.lean`: `poisson_boltzmann_from_vlasov` C³
+  - `Theorem42.lean`: Main theorem signature now takes `ContDiff ℝ 3` instead of `ContDiff ℝ ⊤`
+  - `CoulombConcreteTheorem42.lean`: Concrete theorem keeps `ContDiff ℝ ⊤` (needed for Schwartz), converts via `.of_le le_top` at the Theorem42 call site
+- **Full clean build** verified: 22 files, ~7,838 lines, 0 sorry's
+
+### Mathematical significance
+The abstract proof chain (H-theorem → nullspace → Maxwellian form → polynomial matching → Poisson-Boltzmann → spatial uniformity) only requires C³ velocity regularity. C^∞ is only genuinely needed in the concrete Coulomb path for `schwartz_fderiv_component_schwartz`. This makes the theorem applicable to a strictly larger class of distribution functions.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 62: Fix build regression, linter cleanup, smoothness audit
 
 ### Changes
