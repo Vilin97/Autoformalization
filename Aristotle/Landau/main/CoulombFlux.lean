@@ -198,7 +198,6 @@ lemma flux_component_aestronglyMeasurable
     · exact (hf_cont.comp continuous_fst).mul
         ((hdf_cont.comp continuous_snd).clm_apply continuous_const)
 
-set_option maxHeartbeats 1600000 in
 /-- The Landau flux × log(f) is integrable for the Coulomb kernel.
     Uses the uniform Newtonian bound to control the flux pointwise. -/
 lemma flux_times_log_integrable_coulomb

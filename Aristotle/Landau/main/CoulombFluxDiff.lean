@@ -48,7 +48,6 @@ lemma schwartz_fderiv_component_schwartz
 
 /-- Coulomb matrix entry times Schwartz function is integrable in ℝ³.
     Domination: |A_{ij}(v-w) * g(w)| ≤ ‖v-w‖⁻¹ * |g(w)| by entry bound. -/
-set_option maxHeartbeats 1600000 in
 lemma coulomb_entry_schwartz_integrable
     (g : (Fin 3 → ℝ) → ℝ) (hg_smooth : ContDiff ℝ ⊤ g)
     (hg_schwartz : ∀ N k, ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k g v‖ * (1 + ‖v‖) ^ N ≤ C)

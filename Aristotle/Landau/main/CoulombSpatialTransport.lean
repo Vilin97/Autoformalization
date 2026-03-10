@@ -7,7 +7,7 @@ noncomputable section
 namespace VML
 
 set_option synthInstance.maxHeartbeats 160000 in
-set_option maxHeartbeats 1600000 in
+
 /-- Spatial gradient of f w.r.t. x is AEStronglyMeasurable in v, via difference quotient limits. -/
 lemma torusGradX_aestronglyMeasurable
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
@@ -317,7 +317,7 @@ lemma force_ibp_fg_integrable_coulomb
               = CL * (|C_log| + 1) * ((1 + ‖v‖) * (1 + ‖v‖) ^ K_log) * f x v := by ring
             _ = CL * (|C_log| + 1) * (1 + ‖v‖) ^ (K_log + 1) * f x v := by rw [h_pow]
 
-set_option maxHeartbeats 1600000 in
+
 /-- The spatial gradient component `v ↦ gradX(fun y => f y v)(x)(i)` is strongly measurable
     in `v`. Proved via difference quotient approximation: each quotient is continuous in `v`
     (since `f(x,·)` is smooth for each torus point), and the fderiv is their pointwise limit. -/
