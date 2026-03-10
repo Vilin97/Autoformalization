@@ -6,7 +6,8 @@
   and small auxiliary lemmas about definitions.
 -/
 
-import Mathlib
+import Mathlib.Data.Real.StarOrdered
+import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
 
 set_option linter.unusedSimpArgs false
 

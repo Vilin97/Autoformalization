@@ -2,7 +2,7 @@
 
 **Reviewer posture:** Hostile. Default verdict is REJECT. The formalization must earn approval through evidence.
 
-**Reviewed:** Full codebase at `Aristotle/Landau/main/` (24 .lean files, 11,417 total lines)
+**Reviewed:** Full codebase at `Aristotle/Landau/main/` (24 .lean files, 11,415 total lines)
 **Main theorem:** `CoulombConcreteTheorem42` in `CoulombConcreteTheorem42.lean` (280 lines)
 **Date:** 2026-03-10 (fresh analysis, supersedes all prior reviews)
 
@@ -15,14 +15,12 @@
 **There are 0 `sorry` tokens in the codebase.** Grep finds exactly 3 matches for "sorry" in comments only:
 
 - `TorusInstance.lean:1066` -- comment: "0 sorry's"
-- `TorusInstance.lean:1195` -- comment: "0 errors, 0 sorry's"
+- `TorusInstance.lean:1195` -- comment: "0 sorry's"
 - `VelocityDecayInstance.lean:948` -- comment: "0 sorry's"
 
 None of these are in proof terms. Every lemma has a complete proof body.
 
-### ~~Previous sorry's~~ FIXED
-
-~~`coulomb_entry_conv_differentiable`~~ and ~~`coulomb_entry_conv_deriv_decay`~~ were the last two sorry's. Both resolved in cycle 24. The latter was discovered to be mathematically false and replaced with `coulomb_entry_conv_deriv_bounded`.
+**Verdict: CLEAN.** No sorry's.
 
 ---
 
@@ -32,7 +30,7 @@ None of these are in proof terms. Every lemma has a complete proof body.
 Zero occurrences.
 
 ### `axiom`
-Zero `axiom` declarations. The word "axiom" appears only in comments across Defs.lean, Section3Helpers.lean, Section7.lean, Section9.lean, and TorusInstance.lean, referring to the FlatTorus3 typeclass fields. No Lean `axiom` keyword is used.
+Zero `axiom` declarations. The word "axiom" appears only in comments (Defs.lean, Section3Helpers.lean, Section7.lean, Section9.lean, TorusInstance.lean) referring to FlatTorus3 typeclass fields. No Lean `axiom` keyword is used.
 
 ### `native_decide`
 Zero occurrences.
@@ -41,10 +39,9 @@ Zero occurrences.
 Zero occurrences.
 
 ### `Classical.arbitrary` / `Classical.choice`
-Used in 3 places:
+Used in 2 proof locations:
 - `Theorem42.lean:232` -- `Classical.arbitrary X` for picking a reference point in `VMLInput.x0`
 - `Section3Helpers.lean:819-820` -- `Classical.arbitrary X` for extracting a constant from Killing equation
-- `VMLInputDerive.lean:64` -- comment only
 
 These are standard uses of classical logic for existential witnesses. No soundness concern.
 
@@ -63,29 +60,31 @@ These are standard uses of classical logic for existential witnesses. No soundne
 ```
 Mathlib
   <- Defs.lean (definitions, FlatTorus3 class, VMLInput)
-  <- LandauMatrixDerivBound.lean (also imports Mathlib directly)
+     [imports Mathlib.Data.Real.StarOrdered + Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts]
+  <- LandauMatrixDerivBound.lean (imports Defs only)
   <- Section2.lean
   <- Section3Helpers.lean (imports Defs + Section2)
      <- Section3.lean
-  <- Section4.lean
-  <- Section5.lean
-  <- Section6.lean
-  <- Section7.lean
-  <- Section8.lean
-  <- Section9.lean
-  <- VMLInputDerive.lean (imports Sections 3-9)
+  <- Section4.lean (imports Defs + Section3)
+  <- Section5.lean (imports Defs + Section3)
+  <- Section6.lean (imports Defs)
+  <- Section7.lean (imports Defs + Section3 + Section6)
+  <- Section8.lean (imports Defs + Section6)
+  <- Section9.lean (imports Defs + Section3)
+  <- VMLInputDerive.lean (imports Defs + Sections 3-9)
      <- Theorem42.lean (abstract theorem with VelocityDecayConditions)
-        <- TorusInstance.lean (FlatTorus3 instance for T^3)
-        <- VelocityDecayHelpers.lean (helper lemmas for decay conditions)
-           <- VelocityDecayInstance.lean (satisfiability witnesses; imports LandauMatrixDerivBound)
-              <- ConcreteTheorem42.lean (smooth kernel version, UniformSchwartzDecay)
-                 <- CoulombKernel.lean (Coulomb kernel definition)
-                    <- NewtonianPotential.lean
-                    <- CoulombSpatialTransport.lean
-                       <- CoulombFlux.lean
-                          <- CoulombFluxDiff.lean
-                          <- CoulombPSD.lean
-                             <- CoulombConcreteTheorem42.lean (MAIN THEOREM)
+        <- TorusInstance.lean (FlatTorus3 instance for T^3, imports Defs)
+        <- VelocityDecayHelpers.lean (imports Theorem42 + LandauMatrixDerivBound)
+           <- VelocityDecayInstance.lean (imports VelocityDecayHelpers)
+              <- ConcreteTheorem42.lean (imports Theorem42 + TorusInstance + VelocityDecayInstance)
+                 <- CoulombKernel.lean (imports ConcreteTheorem42)
+                    <- NewtonianPotential.lean (imports CoulombKernel)
+                    <- CoulombSpatialTransport.lean (imports CoulombKernel)
+                       <- CoulombFlux.lean (imports NewtonianPotential)
+                          <- CoulombFluxDiff.lean (imports CoulombFlux)
+                          <- CoulombPSD.lean (imports CoulombFlux)
+                             <- CoulombConcreteTheorem42.lean
+                                (imports CoulombSpatialTransport, CoulombFlux, CoulombPSD, CoulombFluxDiff)
 ```
 
 **No cycles.** The DAG is strictly acyclic. The abstract theorem (Theorem42.lean) does not import the Coulomb specialization. The Coulomb files only depend downward through CoulombKernel -> ConcreteTheorem42 -> Theorem42.
@@ -135,6 +134,14 @@ The abstract `Theorem42` goes through an intermediate `VMLInput` structure with 
 
 All of these are filled in by `Theorem42.lean:231-298` from the Vlasov equation and Mathlib Gaussian integrals. None are left as hypotheses in the final theorem. **No hidden assumptions.**
 
+### Passthrough theorems
+
+Two theorems return their hypothesis unchanged:
+- `symmetrized_weak_form` (Section3.lean:22-34): takes `hSWF` and returns `hSWF`.
+- `lhs_entropy_vanishes` (Section4.lean:20-38): takes `htransport` and returns `htransport`.
+
+These are documentation wrappers: named theorem statements corresponding to results in the reference text whose proofs are absorbed into other lemmas. They do not introduce unsoundness (trivially true), but they are dead code in the proof chain since any caller could use the hypothesis directly.
+
 ---
 
 ## 5. Mathematical Correctness
@@ -179,10 +186,10 @@ This is faithful to the Desvillettes-Villani / Guo approach. The Coulomb kernel 
 | VelocityDecayHelpers.lean | 1,002 | **Borderline.** Newly split from VelocityDecayInstance.lean. |
 | VelocityDecayInstance.lean | 1,001 | **Borderline.** Newly split from original 1,984-line file. |
 | Section3Helpers.lean | 926 | Acceptable post-split. Contains gap lemmas, Gaussian integrals, analytical utilities. |
-| Defs.lean | 781 | Acceptable for definitions + FlatTorus3 class + VMLInput. |
+| Defs.lean | 782 | Acceptable for definitions + FlatTorus3 class + VMLInput. |
 | CoulombPSD.lean | 716 | Acceptable post-split. |
 | CoulombSpatialTransport.lean | 661 | Borderline. |
-| LandauMatrixDerivBound.lean | 647 | Contains 202 lines of custom `generalize_proofs` tactic fork. |
+| LandauMatrixDerivBound.lean | 644 | Contains ~183 lines of custom `generalize_proofs` tactic fork. |
 | CoulombFluxDiff.lean | 627 | Borderline. |
 | CoulombFlux.lean | 608 | Borderline. |
 
@@ -190,25 +197,27 @@ This is faithful to the Desvillettes-Villani / Guo approach. The Coulomb kernel 
 
 ### Heartbeat overrides
 
-32 `maxHeartbeats` overrides + 1 `synthInstance.maxHeartbeats` override across 11 files:
+32 heartbeat overrides across 12 files (31 `maxHeartbeats` + 1 `synthInstance.maxHeartbeats`):
 
-| Value | Count | Severity | Action needed |
-|-------|-------|----------|---------------|
-| 4,000,000 (20x default) | 1 | **Critical** | VelocityDecayInstance.lean:18. Refactor or split. |
-| 3,200,000 (16x default) | 6 | **High** | CoulombPSD (3), CoulombFlux (2), NewtonianPotential (1). |
-| 1,600,000 (8x default) | 11 | Moderate | Across 6 files. |
-| 800,000 (4x default) | 13 | Acceptable | Across 8 files. |
-| synthInstance 160,000 | 1 | Low | CoulombSpatialTransport typeclass diamond. |
+| Value | Count | Severity | Files |
+|-------|-------|----------|-------|
+| 4,000,000 (20x default) | 1 | **Critical** | VelocityDecayInstance.lean:18 |
+| 3,200,000 (16x default) | 6 | **High** | CoulombPSD (3), CoulombFlux (2), NewtonianPotential (1) |
+| 1,600,000 (8x default) | 11 | Moderate | CoulombSpatialTransport (2), NewtonianPotential (3), CoulombPSD (3), CoulombFluxDiff (1), CoulombFlux (1), LandauMatrixDerivBound (1) |
+| 800,000 (4x default) | 13 | Acceptable | CoulombSpatialTransport (5), Section3Helpers (2), Section3 (1), CoulombPSD (1), CoulombFlux (1), LandauMatrixDerivBound (1), TorusInstance (1), VelocityDecayHelpers (1) |
+| synthInstance 160,000 | 1 | Low | CoulombSpatialTransport:8 (typeclass diamond) |
 
 The 4M-heartbeat proof (`landau_flux_component_diff_with_bound` at VelocityDecayInstance.lean:18) is a maintenance hazard. A Mathlib version bump could easily break it.
 
 ### `import Mathlib` (full import)
 
-Two files use `import Mathlib` instead of granular imports:
-- `Defs.lean:9`
-- `LandauMatrixDerivBound.lean:25`
+~~Two files use `import Mathlib` instead of granular imports.~~
 
-This pulls in the entire Mathlib library. Slows compilation and hides actual dependencies. Not a soundness issue but terrible for maintainability.
+**FIXED.** Both files now use granular imports:
+- `Defs.lean:9-10` imports `Mathlib.Data.Real.StarOrdered` + `Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts`
+- `LandauMatrixDerivBound.lean:25` imports only `Aristotle.Landau.main.Defs`
+
+All other files import only project-internal modules. No bare `import Mathlib` anywhere.
 
 ### Duplicate primed definitions
 
@@ -220,17 +229,25 @@ Additionally, `CoulombFlux.lean` defines `VML.coulombKernel'` and `VML.vGrad'` w
 
 Also, `CoulombPSD.lean:8` defines `PSDIntegrand'` with a bridge to `PSDIntegrand` at line 14.
 
+### Duplicate `dotProduct_smul_self` lemma
+
+Proved identically in two places:
+- `Defs.lean:263` (private)
+- `Section6.lean:12` (public)
+
+Both are used: the Defs.lean version is used locally within Defs.lean, the Section6.lean version is used by VMLInputDerive.lean:242 and Section6.lean itself. This is a minor duplication (the private scope in Defs.lean is the root cause).
+
 ### Custom tactic code
 
-`LandauMatrixDerivBound.lean:30-232` contains a 202-line reimplementation of `generalize_proofs` by Aristotle (Harmonic), inside `namespace Harmonic.GeneralizeProofs`. This shadows Mathlib's `generalize_proofs` via `elab (name := generalizeProofsElab'')` at line 212. The custom tactic is used in 2 places within that same file (lines 582, 589). Standard Mathlib `generalize_proofs` is used in `Section3Helpers.lean:73,75` and `CoulombFlux.lean:64` (which do not import LandauMatrixDerivBound, so they use the unmodified version). **Risk**: if LandauMatrixDerivBound is ever imported alongside files using standard `generalize_proofs`, the shadowing could cause subtle behavior differences.
+`LandauMatrixDerivBound.lean:27-232` contains a ~183-line reimplementation of `generalize_proofs` by Aristotle (Harmonic), inside `namespace Harmonic.GeneralizeProofs`. This shadows Mathlib's `generalize_proofs` via `elab (name := generalizeProofsElab'')` at line 212. The custom tactic is used in 2 places within that same file (lines 582, 589). Standard Mathlib `generalize_proofs` is used in `Section3Helpers.lean:73,75` and `CoulombFlux.lean:64` (which do not import LandauMatrixDerivBound, so they use the unmodified version). **Risk**: if LandauMatrixDerivBound is ever imported alongside files using standard `generalize_proofs`, the shadowing could cause subtle behavior differences.
 
 ### Linter suppressions
 
-`set_option linter.unusedSimpArgs false` in 3 files. Minor; the `unusedSimpArgs` linter is noisy. ~~`linter.all false`~~ previously in all files, now removed.
+`set_option linter.unusedSimpArgs false` in 3 files. Minor; the `unusedSimpArgs` linter is noisy.
 
 ---
 
-## 7. Documentation Lies
+## 7. Documentation Accuracy
 
 ### MEMORY.md claims vs reality
 
@@ -239,18 +256,17 @@ Also, `CoulombPSD.lean:8` defines `PSDIntegrand'` with a bridge to `PSDIntegrand
 | "CoulombConcreteTheorem42.lean (~280 lines)" | 280 lines | Correct |
 | "CoulombFlux.lean (~609 lines)" | 608 lines | Correct |
 | "CoulombPSD.lean (~1325 lines)" | 716 lines (split; CoulombFluxDiff.lean has 627) | **STALE** |
-| "21 files, ~11,400 lines" | 24 files, 11,417 lines | **STALE** (missing Section3Helpers.lean, CoulombFluxDiff.lean, VelocityDecayHelpers.lean) |
+| "21 files, ~11,400 lines" | 24 files, 11,415 lines | **STALE** (missing Section3Helpers.lean, CoulombFluxDiff.lean, VelocityDecayHelpers.lean) |
 | "0 SORRY'S (as of cycle 24)" | 0 sorry's | Correct |
 | "Coulomb files (split from single 1827-line file)" | CoulombPSD + CoulombFluxDiff = 1,343 lines | Line counts stale |
 
 MEMORY.md is missing Section3Helpers.lean (926 lines), CoulombFluxDiff.lean (627 lines), and VelocityDecayHelpers.lean (1,002 lines) from its file inventory. It lists 21 files instead of 24.
 
-### Previous critique claims vs reality
+### Previous critique claims now outdated
 
-The previous critique (cycle 41) claimed:
-- "23 .lean files, 11,398 total lines" -- now 24 files, 11,417 lines (VelocityDecayInstance.lean was split into VelocityDecayHelpers.lean + VelocityDecayInstance.lean)
-- "VelocityDecayInstance.lean | 1,984" -- now VelocityDecayHelpers.lean (1,002) + VelocityDecayInstance.lean (1,001)
-- "2 files over 1000 lines" -- now 3 files over 1000 lines (TorusInstance 1,222, VelocityDecayHelpers 1,002, VelocityDecayInstance 1,001), but all borderline
+The previous critique claimed:
+- "`import Mathlib`" in Defs.lean and LandauMatrixDerivBound.lean -- **NOW FIXED.** Both use granular imports.
+- "35 maxHeartbeats overrides" -- Actual count is 32 (31 maxHeartbeats + 1 synthInstance.maxHeartbeats). The previous count was wrong.
 
 ---
 
@@ -309,21 +325,21 @@ The six primed helper definitions (`normSq'`, `eucNorm'`, `innerLandauMatrix'`, 
 
 ---
 
-## Overall Assessment
+## 10. Overall Assessment
 
 ### Summary table
 
 | Component | Files | Lines | Sorry's | Assessment |
 |-----------|-------|-------|---------|------------|
-| Definitions (Defs.lean) | 1 | 781 | 0 | Fully verified |
-| Abstract proof chain (Sections 2-9 + helpers) | 9 | 3,210 | 0 | Fully verified |
+| Definitions (Defs.lean) | 1 | 782 | 0 | Fully verified |
+| Abstract proof chain (Sections 2-9 + helpers) | 9 | 3,207 | 0 | Fully verified |
 | VMLInputDerive | 1 | 437 | 0 | Fully verified |
 | Theorem42 (abstract) | 1 | 302 | 0 | Fully verified |
 | FlatTorus3 instance | 1 | 1,222 | 0 | Fully verified |
 | VelocityDecayHelpers | 1 | 1,002 | 0 | Fully verified |
 | VelocityDecayInstance | 1 | 1,001 | 0 | Fully verified |
 | ConcreteTheorem42 (smooth kernel) | 1 | 96 | 0 | Fully verified |
-| LandauMatrixDerivBound | 1 | 647 | 0 | Fully verified |
+| LandauMatrixDerivBound | 1 | 644 | 0 | Fully verified |
 | CoulombKernel | 1 | 113 | 0 | Fully verified |
 | CoulombSpatialTransport | 1 | 661 | 0 | Fully verified |
 | NewtonianPotential | 1 | 283 | 0 | Fully verified |
@@ -331,7 +347,7 @@ The six primed helper definitions (`normSq'`, `eucNorm'`, `innerLandauMatrix'`, 
 | CoulombFluxDiff | 1 | 627 | 0 | Fully verified |
 | CoulombPSD | 1 | 716 | 0 | Fully verified |
 | CoulombConcreteTheorem42 | 1 | 280 | 0 | Fully verified |
-| **TOTAL** | **24** | **11,417** | **0** | **Fully verified** |
+| **TOTAL** | **24** | **11,415** | **0** | **Fully verified** |
 
 ### What is proved
 
@@ -339,7 +355,7 @@ The six primed helper definitions (`normSq'`, `eucNorm'`, `innerLandauMatrix'`, 
 2. **The FlatTorus3 typeclass has a complete concrete instance** (all 23 property fields proved from Mathlib).
 3. **All 18 VelocityDecayConditions fields + hD_cont are proved for the Coulomb kernel.**
 4. **The smooth-kernel concrete theorem is fully proved.**
-5. **The Coulomb Concrete Theorem 42 is fully proved** -- 0 sorry's in the entire 24-file, 11,417-line dependency chain.
+5. **The Coulomb Concrete Theorem 42 is fully proved** -- 0 sorry's in the entire 24-file, 11,415-line dependency chain.
 6. **Two non-trivial satisfiability witnesses** confirm the hypotheses are satisfiable.
 
 ### Open issues (by severity)
@@ -349,14 +365,15 @@ The six primed helper definitions (`normSq'`, `eucNorm'`, `innerLandauMatrix'`, 
 2. **6 proofs at 3.2M heartbeats.** Same fragility concern.
 
 **Medium priority:**
-3. **`import Mathlib`** in Defs.lean and LandauMatrixDerivBound.lean. Replace with granular imports to speed compilation and clarify dependencies.
-4. **Duplicate primed definitions** across CoulombFlux.lean (VML namespace) and LandauMatrixDerivBound.lean (top-level namespace), plus `PSDIntegrand'` in CoulombPSD.lean. Consolidate into a shared file.
-5. **202 lines of custom tactic code** (`generalize_proofs` fork in `Harmonic.GeneralizeProofs` namespace). Shadows Mathlib's `generalize_proofs` via `elab (name := generalizeProofsElab'')`. Remove if Mathlib's version works; otherwise upstream the improvements.
-6. **Stale MEMORY.md** (says 21 files, should be 24; missing Section3Helpers.lean, CoulombFluxDiff.lean, and VelocityDecayHelpers.lean; wrong CoulombPSD line count).
+3. **Duplicate primed definitions** across CoulombFlux.lean (VML namespace) and LandauMatrixDerivBound.lean (top-level namespace), plus `PSDIntegrand'` in CoulombPSD.lean. Consolidate into a shared file.
+4. **~183 lines of custom tactic code** (`generalize_proofs` fork in `Harmonic.GeneralizeProofs` namespace). Shadows Mathlib's `generalize_proofs` via `elab (name := generalizeProofsElab'')`. Remove if Mathlib's version works; otherwise upstream the improvements.
+5. **Stale MEMORY.md** (says 21 files, should be 24; missing Section3Helpers.lean, CoulombFluxDiff.lean, and VelocityDecayHelpers.lean; wrong CoulombPSD line count).
 
 **Low priority:**
-7. **C-infinity overshoot** when C^2 would suffice. Does not affect correctness.
-8. **`linter.unusedSimpArgs false`** in 3 files. Cosmetic.
+6. **C-infinity overshoot** when C^2 would suffice. Does not affect correctness.
+7. **Duplicate `dotProduct_smul_self`** in Defs.lean (private) and Section6.lean (public). Minor.
+8. **2 passthrough theorems** (`symmetrized_weak_form`, `lhs_entropy_vanishes`). Dead code as proof steps; serve only as named references.
+9. **`linter.unusedSimpArgs false`** in 3 files. Cosmetic.
 
 ### Structural concerns (non-blocking)
 
@@ -366,16 +383,16 @@ The six primed helper definitions (`normSq'`, `eucNorm'`, `innerLandauMatrix'`, 
 4. ~~Section3.lean too large (1,307 lines)~~ **FIXED: split into Section3.lean (391) + Section3Helpers.lean (926)**
 5. ~~CoulombPSD.lean too large (1,325 lines)~~ **FIXED: split into CoulombPSD.lean (716) + CoulombFluxDiff.lean (627)**
 6. ~~VelocityDecayInstance.lean too large (1,984 lines)~~ **FIXED: split into VelocityDecayHelpers.lean (1,002) + VelocityDecayInstance.lean (1,001)**
+7. ~~`import Mathlib` in Defs.lean and LandauMatrixDerivBound.lean~~ **FIXED: granular imports**
 
 ### Verdict: ACCEPT
 
-The formalization is **mathematically complete and honest**. Every lemma in the 11,417-line codebase across 24 files has a machine-checked proof verified by the Lean 4 kernel. The 13 hypotheses of the main theorem are genuine analytical conditions (positivity, smoothness, Schwartz decay, polynomial score bound, and four Maxwell-Vlasov equations) that do not encode the conclusion. Two satisfiability witnesses confirm non-vacuity of the hypotheses. The import DAG is acyclic. No hidden axioms, no sorry's, no native_decide, no admit.
+The formalization is **mathematically complete and honest**. Every lemma in the 11,415-line codebase across 24 files has a machine-checked proof verified by the Lean 4 kernel. The 13 hypotheses of the main theorem are genuine analytical conditions (positivity, smoothness, Schwartz decay, polynomial score bound, and four Maxwell-Vlasov equations) that do not encode the conclusion. Two satisfiability witnesses confirm non-vacuity of the hypotheses. The import DAG is acyclic. No hidden axioms, no sorry's, no native_decide, no admit.
 
 The open issues above are **code quality concerns**, not soundness concerns. None affect the mathematical validity of the proof.
 
 **Remaining work (prioritized):**
 1. Reduce the 4M-heartbeat proof in VelocityDecayInstance.lean
-2. Replace `import Mathlib` with granular imports in Defs.lean and LandauMatrixDerivBound.lean
-3. Consolidate primed definitions into a shared file
-4. Remove or upstream Harmonic's custom generalize_proofs tactic fork
-5. Update MEMORY.md with correct file count (24) and line counts
+2. Consolidate primed definitions into a shared file
+3. Remove or upstream Harmonic's custom generalize_proofs tactic fork
+4. Update MEMORY.md with correct file count (24) and line counts
