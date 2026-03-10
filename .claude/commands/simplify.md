@@ -1,83 +1,89 @@
-Review changed code for reuse, quality, and efficiency, then fix any issues found.
+Systematically fix code quality issues identified in `critique.md` and in the codebase.
 
-Systematically simplify and decompose Lean files to improve compilation performance, readability, and maintainability.
+**Rule: If any non-FIXED issue exists in `critique.md`, you MUST work on at least one per cycle.** "All issues are too hard" is not acceptable — pick the easiest one and fix it.
 
-## Targets
+## Phase 1: Read critique.md and identify open issues
 
-1. **No file over ~600 lines.** Split along logical/mathematical boundaries.
-2. **No proof over ~50 lines.** Extract helper lemmas with clear names.
-3. **No `set_option maxHeartbeats` above 800000.** If needed, the proof is doing too much work — decompose it.
+Read `Aristotle/Landau/critique.md`. Extract every issue that is NOT marked as ~~strikethrough~~ or **FIXED**. These are your work items.
 
-## Procedure
-
-### Phase 1: Identify problems
-
-Scan `Aristotle/Landau/main/*.lean` for:
+Also scan `Aristotle/Landau/main/*.lean` for:
 - Files over 600 lines (`wc -l`)
-- Proofs over 50 lines (count lines between `:= by` and the next top-level declaration)
 - `set_option maxHeartbeats` above 800000
-- Code smells (see checklist below)
+- Proofs over 50 lines
+- Duplicate definitions across files
+- `import Mathlib` (should be granular imports)
 
-### Phase 2: Plan splits
+Merge the scan results with critique issues (deduplicate).
 
-For each oversized file, identify logical boundaries for splitting:
-- Group definitions and their API lemmas together
-- Group related lemmas by mathematical topic (e.g., "Coulomb kernel bounds", "Schwartz decay estimates", "flux integrability")
-- Keep the main theorem file thin — it should mostly assemble pre-proved lemmas
-- New files import predecessors; avoid circular dependencies
+## Phase 2: Prioritize and pick a target
 
-For each oversized proof, identify extractable sub-goals:
-- `have` blocks with 10+ lines of proof → extract as standalone lemma
-- Repeated patterns → extract as reusable lemma
-- `calc` steps with heavy justifications → extract the justification
+Rank issues by impact × feasibility:
 
-### Phase 3: Execute refactors
+| Priority | Type | Examples |
+|----------|------|----------|
+| 1 | Quick wins | Stale docs, unused imports, dead code |
+| 2 | Bounded refactors | Consolidate duplicates, extract lemmas |
+| 3 | File splits | Files >600 lines → split along logical boundaries |
+| 4 | Heartbeat reduction | Decompose proofs, add type annotations |
+| 5 | Architectural | Change definitions, redesign typeclasses |
 
-For file splits:
-1. Create the new file with appropriate imports
-2. Move declarations, preserving order
-3. Add `import` in the original file
-4. Verify both files compile
+Pick the highest-priority item you can make progress on. If the top item is blocked, skip to the next.
 
-For proof decomposition:
-1. Use `lean_goal` to identify the exact type of the sub-goal
-2. Extract as a `private lemma` (or public if reusable) with explicit hypotheses
-3. Replace the inline proof with `exact new_lemma ...` or `apply new_lemma`
-4. Verify heartbeats decrease
+## Phase 3: Execute the fix
 
-### Phase 4: Verify
+### For file splits (>600 lines):
+1. Identify logical boundaries (group by mathematical topic)
+2. Create new file with appropriate imports
+3. Move declarations, preserving order
+4. Add `import` in the original file
+5. Build to verify both files compile
 
-- Run `lean_diagnostic_messages` on all modified files
-- Confirm no new errors (sorry warnings are fine)
-- Confirm heartbeat requirements decreased
+### For heartbeat reduction (>800000):
+1. Use `lean_goal` to understand the proof structure
+2. Extract `have` blocks >10 lines as standalone lemmas
+3. Add explicit type annotations to reduce typeclass search
+4. Replace `simp` with `simp only [...]`
+5. Build to verify heartbeats decreased
 
-## Code Smells Checklist
+### For duplicate definitions:
+1. Identify which file should own the definition
+2. Move definition to the owner file
+3. Replace uses in other files with imports
+4. Build to verify
 
-Fix these when encountered:
+### For stale documentation:
+1. Check actual line counts, sorry counts, file lists
+2. Update to match reality
+3. Mark the critique issue as FIXED
+
+### For `import Mathlib`:
+1. Comment out `import Mathlib`
+2. Build and collect errors
+3. Add specific imports for what's actually needed
+4. Build to verify
+
+## Phase 4: Verify and update critique
+
+- Build all modified files with `lake build`
+- If the fix works, update `critique.md`: mark the issue as ~~strikethrough~~ **FIXED** with the cycle number
+- If the fix partially works, update critique.md with the new status
+
+## Code Smells Checklist (secondary — fix when encountered)
 
 **Proof smells:**
-- [ ] Non-terminal `simp` (use `simp only [...]` or `simp?` to pin lemmas)
-- [ ] Monolithic tactic scripts >50 lines (split with `have`/`obtain`/`show`)
-- [ ] `erw` or extra `rfl` after `simp`/`rw` (missing API lemma — add one)
-- [ ] `unfold`/`dsimp` exposing definition internals (use characteristic theorems instead)
-- [ ] Duplicated proof patterns (extract shared logic into a lemma)
+- Non-terminal `simp` (use `simp only [...]`)
+- Monolithic tactic scripts >50 lines (split with `have`/`obtain`)
+- Duplicated proof patterns (extract shared lemma)
 
 **Performance smells:**
-- [ ] `set_option maxHeartbeats` above 800000 (decompose the proof)
-- [ ] Heavy `simp` calls without `only` (pin the lemma set)
-- [ ] Deep typeclass synthesis chains (add type annotations or `show` goals)
-- [ ] `synthInstance.maxHeartbeats` overrides (simplify the typeclass problem)
+- `set_option maxHeartbeats` above 800000
+- Heavy `simp` calls without `only`
+- Deep typeclass synthesis chains (add type annotations)
 
 **Architecture smells:**
-- [ ] Files over 600 lines (split by mathematical topic)
-- [ ] Re-proving Mathlib lemmas (use `exact?`, `apply?`, `lean_leansearch`)
-- [ ] Missing API lemmas for custom definitions (add `@[simp]` lemmas)
-- [ ] Definitions used only once with heavy unfolding (inline or add simp lemmas)
-
-**Style smells:**
-- [ ] Naming convention violations (types: `UpperCamelCase`, theorems: `snake_case`)
-- [ ] Missing `variable` declarations (repeated explicit parameters)
-- [ ] Unused imports or opens
+- Files over 600 lines (split by topic)
+- Duplicate definitions across files
+- Missing API lemmas for custom definitions
 
 ## Reference
 
