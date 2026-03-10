@@ -8,20 +8,6 @@
       "note": ""
     },
     {
-      "id": "06e28c3f-f043-4127-862e-4310a6c614ad",
-      "submission": "aristotle-in/psd_inner_integrable.lean",
-      "output": "aristotle-out/psd_inner_integrable_aristotle.lean",
-      "target": "psd_inner_integrable",
-      "note": ""
-    },
-    {
-      "id": "1062b892-d888-4dc9-991a-10daa20e3d05",
-      "submission": "aristotle-in/psd_outer_integrable.lean",
-      "output": "aristotle-out/psd_outer_integrable_aristotle.lean",
-      "target": "psd_outer_integrable",
-      "note": ""
-    },
-    {
       "id": "50fc290c-3a9f-4f37-81df-c4aa17748d0b",
       "submission": "aristotle-in/fubini_double_integrable.lean",
       "output": "aristotle-out/fubini_double_integrable_aristotle.lean",
@@ -37,6 +23,18 @@
     }
   ],
   "completed": [
+    {
+      "id": "06e28c3f-f043-4127-862e-4310a6c614ad",
+      "target": "psd_inner_integrable",
+      "status": "proved_manually",
+      "note": "Proved manually via psd_pointwise_bound_coulomb + inv_norm_schwartz_integrable"
+    },
+    {
+      "id": "1062b892-d888-4dc9-991a-10daa20e3d05",
+      "target": "psd_outer_integrable",
+      "status": "proved_manually",
+      "note": "Proved manually via psd_outer_integrable_coulomb + newtonian_schwartz_uniform_bound + inverse_poly_integrable"
+    },
     {
       "id": "23198617-028c-48ea-aee3-41985df8903a",
       "target": "landau_ibp_f_dg",

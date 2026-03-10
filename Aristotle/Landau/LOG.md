@@ -1,5 +1,23 @@
 # Log
 
+## 2026-03-11 01:00 UTC — Babysit cycle 18: PSD inner+outer closed, 3 sorry's remaining
+
+### Status
+- Closed `hPSD_inner_int` and `hPSD_outer_int` in CoulombConcreteTheorem42.lean (5→3 sorry's).
+- Extracted `psd_pointwise_bound_coulomb` (~70 lines) in CoulombPSD.lean:
+  - Standalone pointwise bound: `|PSDIntegrand(v,w)| ≤ 18*Cg²*f(v)*(poly(v)*‖v-w‖⁻¹*f(w) + ‖v-w‖⁻¹*poly(w)*f(w))`.
+- Refactored `psd_inner_integrable_coulomb` to use the extracted bound (removed ~75 inline lines).
+- Added `psd_outer_integrable_coulomb` (~90 lines): outer integrability via Newtonian uniform bounds + `inverse_poly_integrable`.
+- Removed dead code (`hCg_nn`) from `psd_inner_integrable_coulomb`.
+- Aristotle jobs all failed (API ReadTimeout) — no new submissions this cycle.
+
+### Sorry count: 3 (down from 5)
+| Sorry | File | Status |
+|-------|------|--------|
+| hFubini_double | CoulombConcreteTheorem42 | Needs joint measurability on product space |
+| hLandauFluxDiff | CoulombConcreteTheorem42 | Needs differentiation under integral sign |
+| hLandauIBP_df_g | CoulombConcreteTheorem42 | Blocked on hLandauFluxDiff |
+
 ## 2026-03-10 23:30 UTC — Babysit cycle 17: h_flux closed, 5 sorry's remaining
 
 ### Status
