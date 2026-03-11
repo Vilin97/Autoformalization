@@ -133,6 +133,18 @@ def equilibriumMaxwellian (ρ_ion T : ℝ) (v : Fin 3 → ℝ) : ℝ :=
   ρ_ion / (2 * π * T) ^ ((3 : ℝ) / 2) *
     Real.exp (-(normSq v) / (2 * T))
 
+/-- The equilibrium Maxwellian is a Maxwellian (i.e., satisfies `IsMaxwellian`).
+    Rewrites ρ/(2πT)^{3/2} · exp(-|v|²/(2T)) = exp(log(ρ/(2πT)^{3/2}) + 0·v + (-1/(2T))|v|²). -/
+lemma equilibriumMaxwellian_isMaxwellian (ρ T : ℝ) (hρ : 0 < ρ) (hT : 0 < T) :
+    IsMaxwellian (equilibriumMaxwellian ρ T) := by
+  refine ⟨Real.log (ρ / (2 * π * T) ^ ((3 : ℝ) / 2)), 0, -1 / (2 * T),
+    by linarith, fun v => ?_⟩
+  unfold equilibriumMaxwellian
+  rw [dotProduct_zero_left, normSq, add_zero]
+  rw [← Real.exp_log (div_pos hρ (Real.rpow_pos_of_pos (by positivity) _)).le.lt.ne',
+    ← Real.exp_add]
+  congr 1; ring
+
 /-- The equilibrium temperature T is uniquely determined: if two Maxwellians with
     the same density agree as functions, their temperatures must be equal. -/
 lemma equilibriumMaxwellian_T_unique (ρ T₁ T₂ : ℝ) (hρ : 0 < ρ) (hT₁ : 0 < T₁) (hT₂ : 0 < T₂)

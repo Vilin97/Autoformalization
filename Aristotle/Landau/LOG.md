@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 109: Eliminate aesop in GaussianHelpers/TorusIntegration, add equilibriumMaxwellian_isMaxwellian
+
+### Changes
+- **Eliminated 10 `aesop` calls** across 2 files:
+  - GaussianHelpers.lean: 5 → 0 (replaced with `exact rfl`, `congr 1; ext x; exact hf_odd x`, `simp_all`, `simp [...]; tauto`, `rfl`)
+  - TorusIntegration.lean: 5 → 0 (replaced with `rfl`, `simp [Set.pi_inter_compl]`, `unfold box3; rfl`, `simp_all`)
+- **Codebase `aesop` count**: 19 → 9 (remaining in NewtonianPotential, CoulombPSDHelpers, CoulombFlux, SchwartzDecayDefs)
+- **Added `equilibriumMaxwellian_isMaxwellian`** in Defs.lean: proves the equilibrium Maxwellian satisfies `IsMaxwellian`, closing the consistency loop between the definition and the main theorem's conclusion.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 108: Eliminate remaining aesop, tighten simp +decide, add Maxwellian API
 
 ### Changes

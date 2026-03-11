@@ -91,7 +91,7 @@ lemma gaussian_normalization_maxwellian
         ring
       generalize_proofs at *; (
       erw [ h_fubini, ← MeasureTheory.integral_fintype_prod_eq_prod ]
-      aesop)
+      exact rfl)
     generalize_proofs at *; (
     have := integral_gaussian ( -c₀)
     simp_all +decide [ div_eq_mul_inv, mul_comm, mul_assoc, mul_left_comm ]
@@ -140,7 +140,7 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
             have h_symm : ∫ x : ℝ, f x = ∫ x : ℝ, f (-x) := by
               rw [ MeasureTheory.integral_neg_eq_self ]
             have h_zero : ∫ x : ℝ, f x = -∫ x : ℝ, f x := by
-              rw [ ← MeasureTheory.integral_neg ] ; aesop
+              rw [← MeasureTheory.integral_neg]; congr 1; ext x; exact hf_odd x
             linarith [h_zero]
           exact h_subst.trans (h_odd _ fun x => by ring)
         rw [ ← MeasureTheory.integral_add_right_eq_self _ ( -b / (2 * c) ) ]
@@ -246,7 +246,7 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
         erw [← MeasureTheory.integral_fintype_prod_eq_prod]; rfl
       simp_all +decide [ Finset.prod_eq_mul_prod_diff_singleton (Finset.mem_univ i) ]
       exact Or.inl (by rw [ Finset.sdiff_singleton_eq_erase ]
-                       exact Finset.prod_congr rfl fun x hx => by aesop)
+                       exact Finset.prod_congr rfl fun x hx => by simp_all)
     have h_gauss_integral_component2 :
         ∫ v : Fin 3 → ℝ,
           Real.exp (a + b ⬝ᵥ v + c * normSq v) =
@@ -333,7 +333,7 @@ lemma analysis_gaussian_integrability
               { x : ℝ × (Fin 2 → ℝ) |
                 x.1 ∈ s 0 ∧ x.2 0 ∈ s 1 ∧ x.2 1 ∈ s 2 } =
               (s 0 ×ˢ { x : Fin 2 → ℝ | x 0 ∈ s 1 ∧ x 1 ∈ s 2 })
-              by ext ; aesop,
+              by ext; simp [Set.mem_prod]; tauto,
               MeasureTheory.Measure.prod_prod ]
             simp +decide [ Fin.prod_univ_three ]
             erw [ show
@@ -375,7 +375,7 @@ lemma analysis_gaussian_integrability
             (∫ (a : Fin 2 → ℝ),
               Real.exp (b 1 * a 0) *
               Real.exp (b 2 * a 1) ) using 1
-          aesop
+          rfl
       · exact h_integrable.1
     exact h_integrable ‹_›
   by_cases hb0 : b 0 = 0

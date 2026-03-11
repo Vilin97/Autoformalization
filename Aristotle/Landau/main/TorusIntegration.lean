@@ -52,7 +52,7 @@ lemma measure_torus_eq_map :
         all_goals try infer_instance
         · exact Eq.symm Measure.map_id'
         · convert MeasureTheory.Measure.pi_map_pi (fun i => _) using 1
-          · aesop
+          · rfl
           · exact fun i ↦ sigmaFinite_of_locallyFinite
           · exact Continuous.aemeasurable (by continuity)
         · exact fun i => measurable_id.aemeasurable
@@ -62,8 +62,8 @@ lemma measure_torus_eq_map :
       · erw [ show (Set.univ.pi s ∩ box3 : Set (Fin 3 → ℝ) ) =
             Set.pi Set.univ fun i => s i ∩ Set.Ioc 0 1 from ?_,
           MeasureTheory.Measure.pi_pi ]
-        aesop
-        unfold box3; aesop
+        simp [Set.pi_inter_compl]
+        unfold box3; rfl
       · exact MeasurableSet.univ_pi hs
 
 /-- ∫ over T³ = ∫ over [0,1]³ of the periodic lift. -/
@@ -209,7 +209,7 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
             · simp +decide [ Pi.single_apply ]
               congr
               ext j
-              aesop
+              simp_all
           · apply_rules [ Continuous.intervalIntegrable ]
             have h_cont : Continuous (fun y => fderiv ℝ F (Fin.insertNth i y z)) := by
               exact hF.continuous_fderiv le_rfl |> Continuous.comp <|
@@ -227,7 +227,7 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
         · rfl
       convert h_fubini _ _ using 1
       · rw [ MeasureTheory.integral_integral_swap ]
-        · aesop
+        · rfl
         · have h_cont : Continuous
               (fun p : ℝ × (Fin 2 → ℝ) => (fderiv ℝ F (i.insertNth p.1 p.2)) (Pi.single i 1)) := by
             have h_cont : Continuous

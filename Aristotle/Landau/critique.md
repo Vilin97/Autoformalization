@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 108)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 109)
 
 ## Verdict: ACCEPT
 
@@ -46,7 +46,7 @@ I found no issue.
 
 ### ~~6b. Files over 600 lines~~ — RESOLVED (cycle 100)
 
-Largest: Section3Helpers.lean (580).
+Largest: Section3Helpers.lean (576).
 
 ### ~~6c. Long proofs~~ — RESOLVED (cycle 98)
 
@@ -60,19 +60,33 @@ All proofs under 200 lines.
 | Theorem42.lean | `Theorem42` | 178 |
 | Section3Helpers.lean | `parallel_curl_free_affine` | 157 |
 
-All under 200. Diminishing returns on further extraction — remaining bulk is intrinsic complexity.
+All under 200. Diminishing returns on further extraction.
 
 ### ~~6e. Stale comments~~ — RESOLVED (cycle 103)
 
 ### ~~6f. Dead code audit~~ — RESOLVED (cycle 105)
 
-### ~~6g. Verbose Aristotle `aesop` in parallel_curl_free_affine~~ — RESOLVED (cycle 107)
+### ~~6g. Verbose Aristotle `aesop` in Section3Helpers~~ — RESOLVED (cycle 108)
 
-7 `aesop` calls replaced with targeted `simp`/`exact` tactics. 2 `aesop` calls remain in other proofs (`affine_gradient_antiderivative` line 455, unnamed case at line 450), acceptable.
+0 `aesop` remaining in Section3Helpers.lean.
 
-### 6h. Broad `simp +decide` usage (35 occurrences)
+### 6h. Broad `simp +decide` usage
 
-Section3Helpers.lean has 35 `simp +decide` / `simp_all +decide` calls across Aristotle-generated proofs. While more predictable than `aesop`, broad `simp` calls are fragile if Mathlib changes simp lemmas. Low priority — most are in `Fin 3` case analysis where `decide` handles index equality.
+- Section3Helpers.lean: 29 occurrences
+- Codebase total: 103 `simp +decide` / `simp_all +decide` across 13 files
+- Most are in `Fin 3` case analysis where `decide` is the right discharger
+- Low priority — `simp` with explicit lemma lists is more robust but `decide` discharging is deterministic
+
+### 6i. `aesop` in non-Section3Helpers files (19 occurrences)
+
+| File | Count |
+|------|-------|
+| TorusIntegration.lean | 5 |
+| GaussianHelpers.lean | 5 |
+| NewtonianPotential.lean | 4 |
+| CoulombPSDHelpers.lean | 2 |
+| CoulombFlux.lean | 2 |
+| SchwartzDecayDefs.lean | 1 |
 
 ---
 
@@ -107,7 +121,8 @@ I found no issue.
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 6d | 3 proofs over 150 lines | Low | Open (diminishing returns) |
-| 6h | 35 broad `simp +decide` calls | Low | New |
+| 6h | 103 broad `simp +decide` calls | Low | Open (29 in Section3Helpers) |
+| 6i | 19 `aesop` in non-Section3Helpers files | Low | New |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |
 | 8j | lean-lsp build desync | Low | Open (tooling) |
