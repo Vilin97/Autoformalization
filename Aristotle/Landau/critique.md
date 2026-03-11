@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 80)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 81)
 
 ## Verdict: ACCEPT
 
@@ -46,19 +46,18 @@ I found no issue.
 
 `synthInstance.maxHeartbeats 160000` in CoulombSpatialTransport.lean. Acceptable.
 
-### 6b. Files over 600 lines (7 files)
+### 6b. Files over 600 lines (8 files)
 
 | File | Lines |
 |------|-------|
 | Section3Helpers.lean | 1027 |
 | TorusInstance.lean | 872 |
-| Defs.lean | 788 |
+| Defs.lean | 805 |
 | CoulombPSD.lean | 759 |
-| CoulombSpatialTransport.lean | 670 |
-| CoulombConcreteTheorem42.lean | 623 |
-| CoulombFluxDiff.lean | 617 |
-
-Section3Helpers.lean has **exceeded 1000 lines** — splitting is now critical.
+| CoulombSpatialTransport.lean | 676 |
+| CoulombConcreteTheorem42.lean | 630 |
+| CoulombFluxDiff.lean | 629 |
+| CoulombFlux.lean | 605 |
 
 ### 6c. AI code style artifacts
 
@@ -66,9 +65,11 @@ Section3Helpers.lean has **exceeded 1000 lines** — splitting is now critical.
 |---|---|---|
 | ~~Lines > 200 chars~~ | ~~0~~ | ~~0~~ DONE |
 | ~~Trailing semicolons~~ | ~~0~~ | ~~0~~ DONE |
-| Lines > 100 chars | **183** | 0 |
-| Plain semicolons | **487** (+ 126 `<;>`) | < 50 |
-| Lines with 2+ plain semis | **64** | 0 |
+| ~~Multi-semi lines~~ | ~~4~~ (in `by` blocks) | ~~0~~ DONE |
+| Lines > 100 chars | **183** (17 files) | 0 |
+| Plain semicolons | **358** (+ 126 `<;>`) | < 50 |
+
+Worst offenders for >100 char lines: Section3Helpers (49), CoulombPSD (42), TorusInstance (32), NewtonianPotential (15), CoulombFluxDiff (12), VelocityDecayInstance (10).
 
 ---
 
@@ -104,10 +105,9 @@ I found no issue.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6b | 7 files over 600 lines (Section3Helpers **1027**) | High | Open |
-| 6c | 183 lines >100 chars, 487 plain semicolons | Moderate | Open |
-| 8e | Defs.lean too large (788 lines) | Minor | Open |
-| 8f | Section3Helpers.lean >1000 lines — needs splitting | High | **New priority** |
+| 6b | 8 files over 600 lines (Section3Helpers 1027) | High | Open |
+| 6c | 183 lines >100 chars, 358 plain semicolons | Moderate | Open |
+| 8f | Section3Helpers.lean >1000 lines — needs splitting | High | Open |
 
 ### Conditions for ACCEPT
 
