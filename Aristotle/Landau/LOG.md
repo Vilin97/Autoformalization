@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 77: Remove trailing semicolons
+
+### Changes
+- **Removed 341 trailing semicolons** from 5 files: TorusInstance (146), CoulombPSD (84), NewtonianPotential (68), Section3Helpers (42), Defs (1).
+- Semicolon count: 1092 → **751** (31% reduction).
+- All 5 files verified to compile clean from source.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 76: Eliminate all mega-lines
 
 ### Changes

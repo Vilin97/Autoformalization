@@ -29,7 +29,7 @@ lemma vGrad_exp_quadratic (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) :
     ∀ v : Fin 3 → ℝ,
     vGrad (fun w => Real.exp (a + dotProduct b w + c * normSq w)) v =
     Real.exp (a + dotProduct b v + c * normSq v) • (b + (2 * c) • v) := by
-  unfold vGrad normSq;
+  unfold vGrad normSq
   intro v
   ext i
   erw [ fderiv_exp ]
@@ -64,7 +64,7 @@ lemma vGrad_exp_quadratic (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) :
           (hasFDerivAt_apply _ _ |> HasFDerivAt.pow <| 2))) ]
     ring
     fin_cases i <;> simp +decide [ Pi.single_apply ] <;> ring!
-  · norm_num [ dotProduct ];
+  · norm_num [ dotProduct ]
     fun_prop (disch := norm_num)
 
 /-- Gaussian normalization: if f(v) = exp(a₀ + c₀|v|²) with c₀ < 0 and ∫f = ρ_ion,
@@ -80,15 +80,15 @@ lemma gaussian_normalization_maxwellian
   have h_m_int : ∫ v : Fin 3 → ℝ, Real.exp (c₀ * (normSq v)) = (Real.pi / (-c₀)) ^ ((3 : ℝ) / 2) := by
     have h_gauss : ∫ v : Fin 3 → ℝ, Real.exp (c₀ * normSq v) = (∏ i : Fin 3, ∫ v : ℝ, Real.exp (c₀ * v^2)) := by
       have h_fubini : ∫ v : Fin 3 → ℝ, Real.exp (c₀ * normSq v) = ∫ v : Fin 3 → ℝ, (∏ i : Fin 3, Real.exp (c₀ * (v i) ^ 2)) := by
-        norm_num [ ← Real.exp_sum, normSq ];
-        norm_num [ dotProduct, Fin.sum_univ_three ] ; congr ; ext ; ring;
+        norm_num [ ← Real.exp_sum, normSq ]
+        norm_num [ dotProduct, Fin.sum_univ_three ] ; congr ; ext ; ring
       generalize_proofs at *; (
       erw [ h_fubini, ← MeasureTheory.integral_fintype_prod_eq_prod ] ; aesop;)
     generalize_proofs at *; (
     have := integral_gaussian ( -c₀) ; simp_all +decide [ div_eq_mul_inv, mul_comm, mul_assoc, mul_left_comm ] ; ring; (
-    rw [ Real.sqrt_eq_rpow, ← Real.rpow_natCast, ← Real.rpow_mul (by nlinarith [ Real.pi_pos, mul_inv_cancel₀ hc₀.ne ]) ] ; norm_num;) ;);
-  simp_all +decide [ Real.exp_add, MeasureTheory.integral_const_mul ];
-  intro v; rw [ ← hf_int ] ; unfold equilibriumMaxwellian; ring;
+    rw [ Real.sqrt_eq_rpow, ← Real.rpow_natCast, ← Real.rpow_mul (by nlinarith [ Real.pi_pos, mul_inv_cancel₀ hc₀.ne ]) ] ; norm_num;) ;)
+  simp_all +decide [ Real.exp_add, MeasureTheory.integral_const_mul ]
+  intro v; rw [ ← hf_int ] ; unfold equilibriumMaxwellian; ring
   norm_num [ mul_assoc, mul_comm, mul_left_comm, ne_of_gt (Real.rpow_pos_of_pos (show 0 < - (Real.pi * c₀⁻¹) by nlinarith [ Real.pi_pos, mul_inv_cancel₀ (ne_of_lt hc₀) ]) _) ]
 
 
@@ -110,46 +110,46 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
             have h_symm : ∫ x : ℝ, f x = ∫ x : ℝ, f (-x) := by
               rw [ MeasureTheory.integral_neg_eq_self ]
             have h_zero : ∫ x : ℝ, f x = -∫ x : ℝ, f x := by
-              rw [ ← MeasureTheory.integral_neg ] ; aesop;
-            linarith [h_zero];
-          exact h_subst.trans (h_odd _ fun x => by ring);
+              rw [ ← MeasureTheory.integral_neg ] ; aesop
+            linarith [h_zero]
+          exact h_subst.trans (h_odd _ fun x => by ring)
         rw [ ← MeasureTheory.integral_add_right_eq_self _ ( -b / (2 * c) ) ]
         congr
         ext
         ring
         norm_num [ hc_neg.ne ]
         ring
-        grind;
-      simp_all +decide [ add_mul, div_eq_mul_inv, MeasureTheory.integral_const_mul ];
-      rw [ MeasureTheory.integral_add ] at h_gauss_integral <;> norm_num at *;
-      · rw [ MeasureTheory.integral_const_mul ] at h_gauss_integral ; linarith;
+        grind
+      simp_all +decide [ add_mul, div_eq_mul_inv, MeasureTheory.integral_const_mul ]
+      rw [ MeasureTheory.integral_add ] at h_gauss_integral <;> norm_num at *
+      · rw [ MeasureTheory.integral_const_mul ] at h_gauss_integral ; linarith
       · have h_integrable : MeasureTheory.Integrable (fun v : ℝ => v * Real.exp (c * v^2 + b * v)) MeasureTheory.MeasureSpace.volume := by
           have h_gauss : ∀ v : ℝ, |v * Real.exp (c * v^2 + b * v)| ≤ |v| * Real.exp (c * v^2 / 2) * Real.exp (b^2 / (2 * |c|)) := by
             intro v
-            simp [abs_mul];
+            simp [abs_mul]
             rw [ mul_assoc, ← Real.exp_add ] ; ring_nf ; norm_num [ abs_of_neg hc_neg ] ; ring_nf ; norm_num [ hc_neg ] ; (
-            exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr <| by nlinarith [ sq_nonneg (v * c + b), mul_inv_cancel₀ (ne_of_lt hc_neg) ]) (abs_nonneg v));
+            exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr <| by nlinarith [ sq_nonneg (v * c + b), mul_inv_cancel₀ (ne_of_lt hc_neg) ]) (abs_nonneg v))
           have h_integrable : MeasureTheory.Integrable (fun v : ℝ => |v| * Real.exp (c * v^2 / 2)) MeasureTheory.MeasureSpace.volume := by
             have h_integrable : MeasureTheory.Integrable (fun v : ℝ => v * Real.exp (c * v^2 / 2)) MeasureTheory.MeasureSpace.volume := by
-              have := @integrable_rpow_mul_exp_neg_mul_sq;
-              convert @this ( -c / 2) (by linarith) 1 (by norm_num) using 3 ; ring;
-              · norm_num;
-              · ring;
-            convert h_integrable.norm using 2 ; norm_num [ abs_mul, abs_of_nonneg, Real.exp_nonneg ];
-          refine MeasureTheory.Integrable.mono' ?_ ?_ ?_;
+              have := @integrable_rpow_mul_exp_neg_mul_sq
+              convert @this ( -c / 2) (by linarith) 1 (by norm_num) using 3 ; ring
+              · norm_num
+              · ring
+            convert h_integrable.norm using 2 ; norm_num [ abs_mul, abs_of_nonneg, Real.exp_nonneg ]
+          refine MeasureTheory.Integrable.mono' ?_ ?_ ?_
           exacts [
             fun v => |v| * Real.exp (c * v ^ 2 / 2) * Real.exp (b ^ 2 / (2 * |c|)),
             h_integrable.mul_const _,
             Continuous.aestronglyMeasurable (by continuity),
             Filter.Eventually.of_forall h_gauss ]
-        convert h_integrable.mul_const (Real.exp a) using 2 ; ring;
-        rw [ mul_assoc, ← Real.exp_add ];
+        convert h_integrable.mul_const (Real.exp a) using 2 ; ring
+        rw [ mul_assoc, ← Real.exp_add ]
       · have h_gauss_integral : ∫ v : ℝ, Real.exp (a + b * v + c * v^2) = Real.sqrt (Real.pi / (-c)) * Real.exp (a - b^2 / (4 * c)) := by
           have h_gauss_integral : ∫ v : ℝ, Real.exp (c * (v - (-b / (2 * c)))^2) = Real.sqrt (Real.pi / (-c)) := by
-            convert integral_gaussian ( -c) using 1 <;> norm_num [ hc_neg.le ];
-            rw [ eq_comm, ← MeasureTheory.integral_sub_right_eq_self ];
-          rw [ ← h_gauss_integral, ← MeasureTheory.integral_mul_const ] ; congr ; ext v ; ring;
-          rw [ ← Real.exp_add ] ; norm_num [ sq, mul_assoc, hc_neg.ne ] ; ring;
+            convert integral_gaussian ( -c) using 1 <;> norm_num [ hc_neg.le ]
+            rw [ eq_comm, ← MeasureTheory.integral_sub_right_eq_self ]
+          rw [ ← h_gauss_integral, ← MeasureTheory.integral_mul_const ] ; congr ; ext v ; ring
+          rw [ ← Real.exp_add ] ; norm_num [ sq, mul_assoc, hc_neg.ne ] ; ring
         exact MeasureTheory.Integrable.const_mul (by
           exact (by
             contrapose! h_gauss_integral
@@ -172,9 +172,9 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
             (∏ j, (if j = i
               then v j * Real.exp (a + b j * v j + c * v j^2)
               else Real.exp (b j * v j + c * v j^2))) := by
-        simp +decide [ Finset.prod_ite, Finset.filter_eq', Finset.filter_ne' ];
-        simp +decide [ mul_assoc, ← Real.exp_sum, Finset.sum_add_distrib, Finset.mul_sum _ _ _, Finset.sum_mul, normSq ];
-        simp +decide [ ← Real.exp_add, Fin.sum_univ_three, dotProduct ] ; congr ; ext ; ring!;
+        simp +decide [ Finset.prod_ite, Finset.filter_eq', Finset.filter_ne' ]
+        simp +decide [ mul_assoc, ← Real.exp_sum, Finset.sum_add_distrib, Finset.mul_sum _ _ _, Finset.sum_mul, normSq ]
+        simp +decide [ ← Real.exp_add, Fin.sum_univ_three, dotProduct ] ; congr ; ext ; ring!
       have h_fubini2 :
           ∫ v : Fin 3 → ℝ, (∏ j, (if j = i
             then v j * Real.exp (a + b j * v j + c * v j^2)
@@ -183,17 +183,17 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
             then v * Real.exp (a + b j * v + c * v^2)
             else Real.exp (b j * v + c * v^2))) := by
         erw [← MeasureTheory.integral_fintype_prod_eq_prod]; rfl
-      simp_all +decide [ Finset.prod_eq_mul_prod_diff_singleton (Finset.mem_univ i) ];
-      exact Or.inl (by rw [ Finset.sdiff_singleton_eq_erase ] ; exact Finset.prod_congr rfl fun x hx => by aesop);
+      simp_all +decide [ Finset.prod_eq_mul_prod_diff_singleton (Finset.mem_univ i) ]
+      exact Or.inl (by rw [ Finset.sdiff_singleton_eq_erase ] ; exact Finset.prod_congr rfl fun x hx => by aesop)
     have h_gauss_integral_component2 : ∫ v : Fin 3 → ℝ, Real.exp (a + b ⬝ᵥ v + c * normSq v) = (∏ j : Fin 3, ∫ v : ℝ, Real.exp (b j * v + c * v^2)) * Real.exp a := by
       have h_gauss_integral_component3 : ∫ v : Fin 3 → ℝ, Real.exp (a + b ⬝ᵥ v + c * normSq v) = (∫ v : Fin 3 → ℝ, Real.exp (a) * (∏ j : Fin 3, Real.exp (b j * v j + c * v j^2))) := by
-        simp +decide [ normSq, dotProduct, Fin.sum_univ_three, ← Real.exp_sum, ← Real.exp_add ] ; congr ; ext ; ring;
-      rw [ h_gauss_integral_component3, mul_comm ];
+        simp +decide [ normSq, dotProduct, Fin.sum_univ_three, ← Real.exp_sum, ← Real.exp_add ] ; congr ; ext ; ring
+      rw [ h_gauss_integral_component3, mul_comm ]
       rw [ MeasureTheory.integral_const_mul ]
       congr 1
       erw [← MeasureTheory.integral_fintype_prod_eq_prod]; rfl
-    simp_all +decide [ Finset.prod_erase_mul _ _ (Finset.mem_univ i) ];
-    rw [ ← Finset.mul_prod_erase _ _ (Finset.mem_univ i) ] ; ring;
+    simp_all +decide [ Finset.prod_erase_mul _ _ (Finset.mem_univ i) ]
+    rw [ ← Finset.mul_prod_erase _ _ (Finset.mem_univ i) ] ; ring
     simp +decide [ Real.exp_add, mul_add, add_comm, add_left_comm, mul_assoc, mul_comm, mul_left_comm, MeasureTheory.integral_const_mul, MeasureTheory.integral_mul_const ]
   exact h_gauss
 
@@ -331,8 +331,8 @@ lemma analysis_gaussian_integrability
             simp +decide [ mul_assoc ]
           · exact measurable_pi_iff.mpr fun i => by
               fin_cases i <;> [
-                exact measurable_fst;
-                exact measurable_pi_iff.mp measurable_snd 0;
+                exact measurable_fst
+                exact measurable_pi_iff.mp measurable_snd 0
                 exact measurable_pi_iff.mp measurable_snd 1 ]
           · exact MeasurableSet.univ_pi hs
         rw [ h_iso, MeasureTheory.integrable_map_measure ]
@@ -341,8 +341,8 @@ lemma analysis_gaussian_integrability
         · refine Continuous.aemeasurable ?_
           exact continuous_pi_iff.mpr fun i => by
             fin_cases i <;> [
-              exact continuous_fst;
-              exact continuous_apply 0 |> Continuous.comp <| continuous_snd;
+              exact continuous_fst
+              exact continuous_apply 0 |> Continuous.comp <| continuous_snd
               exact continuous_apply 1 |> Continuous.comp <| continuous_snd ]
       rw [ MeasureTheory.integrable_prod_iff ] at h_integrable
       · simp_all +decide [ Real.exp_add, MeasureTheory.integral_const_mul, MeasureTheory.integral_mul_const ]
@@ -398,7 +398,7 @@ lemma poly_cubic_extraction
   have h_cubic_zero : ∀ t : ℝ, t^3 * (v ⬝ᵥ d_c * (v ⬝ᵥ v)) +
       t^2 * (∑ i, ∑ j, (v i) * (v j) * (K i j)) +
       t * (v ⬝ᵥ d_lin) + C = 0 := by
-    convert h_poly_zero using 2 ; ring; simp +decide [ Fin.sum_univ_three ] ; ring;
+    convert h_poly_zero using 2 ; ring; simp +decide [ Fin.sum_univ_three ] ; ring
   have h_coeff_zero : v ⬝ᵥ d_c * (v ⬝ᵥ v) = 0 := by
     linarith [ h_cubic_zero ( -2), h_cubic_zero ( -1), h_cubic_zero 0,
                h_cubic_zero 1, h_cubic_zero 2 ]

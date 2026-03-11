@@ -30,48 +30,48 @@ lemma measure_torus_eq_map :
             (MeasureTheory.MeasureSpace.volume.restrict (Set.Ioc 0 1)).map
               (fun x => QuotientAddGroup.mk x : ℝ → AddCircle (1 : ℝ)) =
             MeasureTheory.MeasureSpace.volume := by
-          intro i;
-          symm;
-          convert (AddCircle.measurePreserving_mk 1 (0 : ℝ) |> MeasureTheory.MeasurePreserving.map_eq) using 1;
-          · ext s hs;
-            rw [ MeasureTheory.Measure.map_apply ];
-            · rw [ MeasureTheory.Measure.restrict_apply' ];
-              · exact AddCircle.add_projection_respects_measure 1 0 hs;
-              · norm_num;
-            · exact fun ⦃t⦄ a ↦ a;
-            · exact hs;
-          · convert (AddCircle.measurePreserving_mk 1 (0 : ℝ) |> MeasureTheory.MeasurePreserving.map_eq) using 1;
-            norm_num +zetaDelta at *;
-        convert MeasureTheory.Measure.pi_map_pi _ using 1;
-        any_goals tauto;
-        any_goals exact fun i => MeasureTheory.MeasureSpace.volume;
-        all_goals try infer_instance;
-        · exact Eq.symm Measure.map_id';
-        · convert MeasureTheory.Measure.pi_map_pi (fun i => _) using 1;
-          · aesop;
-          · exact fun i ↦ sigmaFinite_of_locallyFinite;
-          · exact Continuous.aemeasurable (by continuity);
-        · exact fun i => measurable_id.aemeasurable;
-      erw [ MeasureTheory.Measure.pi_eq ] at h_volume_eq;
-      convert h_volume_eq;
-      intro s hs; erw [ MeasureTheory.Measure.restrict_apply ];
-      · erw [ show (Set.univ.pi s ∩ box3 : Set (Fin 3 → ℝ) ) = Set.pi Set.univ fun i => s i ∩ Set.Ioc 0 1 from ?_, MeasureTheory.Measure.pi_pi ] ; aesop;
-        unfold box3; aesop;
+          intro i
+          symm
+          convert (AddCircle.measurePreserving_mk 1 (0 : ℝ) |> MeasureTheory.MeasurePreserving.map_eq) using 1
+          · ext s hs
+            rw [ MeasureTheory.Measure.map_apply ]
+            · rw [ MeasureTheory.Measure.restrict_apply' ]
+              · exact AddCircle.add_projection_respects_measure 1 0 hs
+              · norm_num
+            · exact fun ⦃t⦄ a ↦ a
+            · exact hs
+          · convert (AddCircle.measurePreserving_mk 1 (0 : ℝ) |> MeasureTheory.MeasurePreserving.map_eq) using 1
+            norm_num +zetaDelta at *
+        convert MeasureTheory.Measure.pi_map_pi _ using 1
+        any_goals tauto
+        any_goals exact fun i => MeasureTheory.MeasureSpace.volume
+        all_goals try infer_instance
+        · exact Eq.symm Measure.map_id'
+        · convert MeasureTheory.Measure.pi_map_pi (fun i => _) using 1
+          · aesop
+          · exact fun i ↦ sigmaFinite_of_locallyFinite
+          · exact Continuous.aemeasurable (by continuity)
+        · exact fun i => measurable_id.aemeasurable
+      erw [ MeasureTheory.Measure.pi_eq ] at h_volume_eq
+      convert h_volume_eq
+      intro s hs; erw [ MeasureTheory.Measure.restrict_apply ]
+      · erw [ show (Set.univ.pi s ∩ box3 : Set (Fin 3 → ℝ) ) = Set.pi Set.univ fun i => s i ∩ Set.Ioc 0 1 from ?_, MeasureTheory.Measure.pi_pi ] ; aesop
+        unfold box3; aesop
       · exact MeasurableSet.univ_pi hs
 
 /-- ∫ over T³ = ∫ over [0,1]³ of the periodic lift. -/
 lemma integral_torus_eq_integral_box (g : Torus3 → ℝ) (hg : Continuous g) :
     ∫ x : Torus3, g x = ∫ y in box3, g (torusMk y) := by
-      rw [ ← MeasureTheory.integral_map ];
-      · convert MeasureTheory.integral_map _ _ using 3;
-        · rw [ ← MeasureTheory.integral_map ];
-          · rw [ ← measure_torus_eq_map ];
-          · refine Continuous.aemeasurable ?_;
-            exact continuous_pi_iff.mpr fun i => QuotientAddGroup.continuous_mk.comp (continuous_apply i);
-          · exact hg.aestronglyMeasurable;
-        · exact measurable_id.aemeasurable;
-        · exact hg.aestronglyMeasurable;
-      · exact measurable_id.aemeasurable;
+      rw [ ← MeasureTheory.integral_map ]
+      · convert MeasureTheory.integral_map _ _ using 3
+        · rw [ ← MeasureTheory.integral_map ]
+          · rw [ ← measure_torus_eq_map ]
+          · refine Continuous.aemeasurable ?_
+            exact continuous_pi_iff.mpr fun i => QuotientAddGroup.continuous_mk.comp (continuous_apply i)
+          · exact hg.aestronglyMeasurable
+        · exact measurable_id.aemeasurable
+        · exact hg.aestronglyMeasurable
+      · exact measurable_id.aemeasurable
       · exact hg.aestronglyMeasurable
 
 /-- ∫ ∂F/∂xᵢ over [0,1]³ = 0 for periodic F (FTC + periodicity). -/
@@ -79,7 +79,7 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
     (hF : ContDiff ℝ 1 F) (hper : ∀ x, F (x + Pi.single i 1) = F x) :
     ∫ y in box3, fderiv ℝ F y (Pi.single i 1) = 0 := by
       have h_periodic : ∀ x : Fin 3 → ℝ, (F (x + Pi.single i 1)) = (F x) := by
-        assumption;
+        assumption
       have h_fubini : ∀ (g : (Fin 3 → ℝ) → ℝ), Continuous g →
           (∫ y in (Set.pi Set.univ (fun _ => Set.Ioc 0 1)), g y) =
           (∫ y : ℝ in Set.Ioc 0 1,
@@ -91,145 +91,145 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
             ∫ y : ℝ × (Fin 2 → ℝ) in
               (Set.Ioc 0 1) ×ˢ (Set.pi Set.univ (fun _ => Set.Ioc 0 1)),
               g (Fin.insertNth i y.1 y.2) := by
-          rw [ ← MeasureTheory.integral_indicator, ← MeasureTheory.integral_indicator ];
+          rw [ ← MeasureTheory.integral_indicator, ← MeasureTheory.integral_indicator ]
           · have h_iso :
                 (MeasureTheory.volume : MeasureTheory.Measure (Fin 3 → ℝ)) =
                 MeasureTheory.Measure.map
                   (fun x : ℝ × (Fin 2 → ℝ) => Fin.insertNth i x.1 x.2)
                   (MeasureTheory.volume.prod
                     (MeasureTheory.volume : MeasureTheory.Measure (Fin 2 → ℝ))) := by
-              simp +decide [ MeasureTheory.MeasureSpace.volume ];
-              erw [ MeasureTheory.Measure.pi_eq ];
-              intro s hs; erw [ MeasureTheory.Measure.map_apply ];
-              · rw [ show (fun x : ℝ × (Fin 2 → ℝ) => i.insertNth x.1 x.2) ⁻¹' Set.univ.pi s = (s i) ×ˢ (Set.pi Set.univ fun j => s (Fin.succAbove i j) ) from ?_ ];
-                · simp +decide [ Fin.prod_univ_three, MeasureTheory.Measure.prod_prod ];
-                  fin_cases i <;> ring!;
-                · ext ⟨x, y⟩; simp [Fin.insertNth];
-                  fin_cases i <;> simp +decide [ Fin.forall_fin_succ ];
-                  · tauto;
-                  · tauto;
-              · refine measurable_pi_iff.mpr ?_;
-                intro a; fin_cases a <;> simp +decide [ Fin.insertNth ] ;
-                · fin_cases i <;> simp +decide [ Fin.succAboveCases ];
-                  · exact measurable_fst;
-                  · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd;
-                  · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd;
-                · fin_cases i <;> simp +decide [ Fin.succAboveCases ] <;> measurability;
-                · fin_cases i <;> simp +decide [ Fin.succAboveCases ];
-                  · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd;
-                  · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd;
-                  · exact measurable_fst;
-              · exact MeasurableSet.univ_pi hs;
-            rw [ h_iso, MeasureTheory.integral_map ];
-            · simp +decide [ Set.indicator ];
-              fin_cases i <;> simp +decide [ Fin.forall_fin_succ ];
-              · rfl;
-              · simp +decide only [and_left_comm];
-                rfl;
-              · simp +decide [ Fin.insertNth ];
-                simp +decide [ Fin.succAboveCases ] ; congr ; ext ; split_ifs <;> tauto;
-            · refine Measurable.aemeasurable ?_;
-              refine measurable_pi_iff.mpr ?_;
-              intro a; fin_cases a <;> simp +decide [ Fin.insertNth ] ;
-              · fin_cases i <;> simp +decide [ Fin.succAboveCases ];
-                · exact measurable_fst;
-                · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd;
-                · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd;
-              · fin_cases i <;> simp +decide [ Fin.succAboveCases ];
-                · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd;
-                · exact measurable_fst;
-                · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd;
-              · fin_cases i <;> simp +decide [ Fin.succAboveCases ];
-                · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd;
-                · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd;
-                · exact measurable_fst;
-            · refine Measurable.aestronglyMeasurable ?_;
-              exact Measurable.indicator (hg.measurable) (MeasurableSet.univ_pi fun _ => measurableSet_Ioc);
-          · exact measurableSet_Ioc.prod (MeasurableSet.univ_pi fun _ => measurableSet_Ioc);
-          · exact MeasurableSet.univ_pi fun _ => measurableSet_Ioc;
-        erw [ h_fubini, MeasureTheory.setIntegral_prod ];
+              simp +decide [ MeasureTheory.MeasureSpace.volume ]
+              erw [ MeasureTheory.Measure.pi_eq ]
+              intro s hs; erw [ MeasureTheory.Measure.map_apply ]
+              · rw [ show (fun x : ℝ × (Fin 2 → ℝ) => i.insertNth x.1 x.2) ⁻¹' Set.univ.pi s = (s i) ×ˢ (Set.pi Set.univ fun j => s (Fin.succAbove i j) ) from ?_ ]
+                · simp +decide [ Fin.prod_univ_three, MeasureTheory.Measure.prod_prod ]
+                  fin_cases i <;> ring!
+                · ext ⟨x, y⟩; simp [Fin.insertNth]
+                  fin_cases i <;> simp +decide [ Fin.forall_fin_succ ]
+                  · tauto
+                  · tauto
+              · refine measurable_pi_iff.mpr ?_
+                intro a; fin_cases a <;> simp +decide [ Fin.insertNth ]
+                · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+                  · exact measurable_fst
+                  · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd
+                  · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd
+                · fin_cases i <;> simp +decide [ Fin.succAboveCases ] <;> measurability
+                · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+                  · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd
+                  · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd
+                  · exact measurable_fst
+              · exact MeasurableSet.univ_pi hs
+            rw [ h_iso, MeasureTheory.integral_map ]
+            · simp +decide [ Set.indicator ]
+              fin_cases i <;> simp +decide [ Fin.forall_fin_succ ]
+              · rfl
+              · simp +decide only [and_left_comm]
+                rfl
+              · simp +decide [ Fin.insertNth ]
+                simp +decide [ Fin.succAboveCases ] ; congr ; ext ; split_ifs <;> tauto
+            · refine Measurable.aemeasurable ?_
+              refine measurable_pi_iff.mpr ?_
+              intro a; fin_cases a <;> simp +decide [ Fin.insertNth ]
+              · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+                · exact measurable_fst
+                · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd
+                · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd
+              · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+                · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd
+                · exact measurable_fst
+                · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd
+              · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+                · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd
+                · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd
+                · exact measurable_fst
+            · refine Measurable.aestronglyMeasurable ?_
+              exact Measurable.indicator (hg.measurable) (MeasurableSet.univ_pi fun _ => measurableSet_Ioc)
+          · exact measurableSet_Ioc.prod (MeasurableSet.univ_pi fun _ => measurableSet_Ioc)
+          · exact MeasurableSet.univ_pi fun _ => measurableSet_Ioc
+        erw [ h_fubini, MeasureTheory.setIntegral_prod ]
         have h_integrable : ContinuousOn (fun y : ℝ × (Fin 2 → ℝ) => g (Fin.insertNth i y.1 y.2)) (Set.Icc 0 1 ×ˢ Set.pi Set.univ (fun _ => Set.Icc 0 1)) := by
-          refine hg.comp_continuousOn ?_;
-          refine Continuous.continuousOn ?_;
-          fin_cases i <;> simp +decide [ Fin.insertNth ];
+          refine hg.comp_continuousOn ?_
+          refine Continuous.continuousOn ?_
+          fin_cases i <;> simp +decide [ Fin.insertNth ]
           · exact continuous_pi_iff.mpr fun i => by
               fin_cases i <;>
               [ exact continuous_fst
               ; exact continuous_apply 0 |> Continuous.comp <| continuous_snd
-              ; exact continuous_apply 1 |> Continuous.comp <| continuous_snd ] ;
-          · refine continuous_pi_iff.mpr ?_;
-            intro i; fin_cases i <;> simp +decide [ Fin.insertNth ] ;
-            · exact continuous_apply 0 |> Continuous.comp <| continuous_snd;
-            · exact continuous_fst;
-            · exact continuous_apply 1 |> Continuous.comp <| continuous_snd;
+              ; exact continuous_apply 1 |> Continuous.comp <| continuous_snd ]
+          · refine continuous_pi_iff.mpr ?_
+            intro i; fin_cases i <;> simp +decide [ Fin.insertNth ]
+            · exact continuous_apply 0 |> Continuous.comp <| continuous_snd
+            · exact continuous_fst
+            · exact continuous_apply 1 |> Continuous.comp <| continuous_snd
           · exact continuous_pi_iff.mpr fun i => by
               fin_cases i <;>
               [ exact continuous_pi_iff.mp continuous_snd 0
               ; exact continuous_pi_iff.mp continuous_snd 1
-              ; exact continuous_fst ] ;
+              ; exact continuous_fst ]
         exact (h_integrable.integrableOn_compact
             (isCompact_Icc.prod (isCompact_univ_pi fun _ => CompactIccSpace.isCompact_Icc)))
           |> fun h => h.mono_set
             (Set.prod_mono (Set.Ioc_subset_Icc_self)
-              (Set.pi_mono fun _ _ => Set.Ioc_subset_Icc_self));
+              (Set.pi_mono fun _ _ => Set.Ioc_subset_Icc_self))
       have h_ftc : ∀ (z : Fin 2 → ℝ), ∫ y in Set.Ioc 0 1, (fderiv ℝ F (Fin.insertNth i y z)) (Pi.single i 1) = 0 := by
         intro z
         have h_ftc : ∫ y in (0 : ℝ)..1, (fderiv ℝ F (Fin.insertNth i y z)) (Pi.single i 1) = F (Fin.insertNth i 1 z) - F (Fin.insertNth i 0 z) := by
-          rw [ intervalIntegral.integral_eq_sub_of_hasDerivAt ];
-          rotate_right;
-          use fun x => F (Fin.insertNth i x z);
-          · rfl;
-          · intro x hx;
-            convert HasFDerivAt.hasDerivAt (HasFDerivAt.comp x (hF.contDiffAt.differentiableAt le_rfl |> DifferentiableAt.hasFDerivAt) (hasFDerivAt_pi.mpr _) ) using 1;
-            rotate_left;
-            use fun j => if j = i then 1 else 0;
-            · intro j; split_ifs <;> simp_all +decide [ hasFDerivAt_iff_isLittleO_nhds_zero ] ;
-              simp_all +decide [ Fin.insertNth ];
-              fin_cases i <;> fin_cases j <;> simp_all +decide [ Fin.succAboveCases ];
-            · simp +decide [ Pi.single_apply ];
-              congr ; ext j ; aesop;
-          · apply_rules [ Continuous.intervalIntegrable ];
+          rw [ intervalIntegral.integral_eq_sub_of_hasDerivAt ]
+          rotate_right
+          use fun x => F (Fin.insertNth i x z)
+          · rfl
+          · intro x hx
+            convert HasFDerivAt.hasDerivAt (HasFDerivAt.comp x (hF.contDiffAt.differentiableAt le_rfl |> DifferentiableAt.hasFDerivAt) (hasFDerivAt_pi.mpr _) ) using 1
+            rotate_left
+            use fun j => if j = i then 1 else 0
+            · intro j; split_ifs <;> simp_all +decide [ hasFDerivAt_iff_isLittleO_nhds_zero ]
+              simp_all +decide [ Fin.insertNth ]
+              fin_cases i <;> fin_cases j <;> simp_all +decide [ Fin.succAboveCases ]
+            · simp +decide [ Pi.single_apply ]
+              congr ; ext j ; aesop
+          · apply_rules [ Continuous.intervalIntegrable ]
             have h_cont : Continuous (fun y => fderiv ℝ F (Fin.insertNth i y z)) := by
-              exact hF.continuous_fderiv le_rfl |> Continuous.comp <| continuous_pi_iff.mpr fun j => by fin_cases i <;> fin_cases j <;> continuity;
-            exact h_cont.clm_apply continuous_const;
-        convert h_ftc using 1 <;> norm_num [ intervalIntegral.integral_of_le zero_le_one ];
-        rw [ eq_comm, sub_eq_zero ];
-        convert h_periodic (Fin.insertNth i 0 z) using 2 ; ext j ; fin_cases i <;> fin_cases j <;> simp +decide [ Fin.insertNth ];
-        · rfl;
-        · rfl;
-        · rfl;
-        · rfl;
-        · rfl;
-      convert h_fubini _ _ using 1;
-      · rw [ MeasureTheory.integral_integral_swap ];
-        · aesop;
+              exact hF.continuous_fderiv le_rfl |> Continuous.comp <| continuous_pi_iff.mpr fun j => by fin_cases i <;> fin_cases j <;> continuity
+            exact h_cont.clm_apply continuous_const
+        convert h_ftc using 1 <;> norm_num [ intervalIntegral.integral_of_le zero_le_one ]
+        rw [ eq_comm, sub_eq_zero ]
+        convert h_periodic (Fin.insertNth i 0 z) using 2 ; ext j ; fin_cases i <;> fin_cases j <;> simp +decide [ Fin.insertNth ]
+        · rfl
+        · rfl
+        · rfl
+        · rfl
+        · rfl
+      convert h_fubini _ _ using 1
+      · rw [ MeasureTheory.integral_integral_swap ]
+        · aesop
         · have h_cont : Continuous (fun p : ℝ × (Fin 2 → ℝ) => (fderiv ℝ F (i.insertNth p.1 p.2)) (Pi.single i 1)) := by
             have h_cont : Continuous (fun p : ℝ × (Fin 2 → ℝ) => fderiv ℝ F (i.insertNth p.1 p.2)) := by
               have h_cont : Continuous (fun p : Fin 3 → ℝ => fderiv ℝ F p) := by
-                exact hF.continuous_fderiv le_rfl;
-              refine h_cont.comp ?_;
-              refine continuous_pi_iff.mpr ?_;
-              intro j; fin_cases j <;> simp +decide [ Fin.insertNth ] ;
-              · fin_cases i <;> simp +decide [ Fin.succAboveCases ];
-                · exact continuous_fst;
-                · exact continuous_apply 0 |> Continuous.comp <| continuous_snd;
-                · exact continuous_apply 0 |> Continuous.comp <| continuous_snd;
-              · fin_cases i <;> simp +decide [ Fin.succAboveCases ];
-                · exact continuous_apply 0 |> Continuous.comp <| continuous_snd;
-                · exact continuous_fst;
-                · exact continuous_apply _ |> Continuous.comp <| continuous_snd;
-              · fin_cases i <;> simp +decide [ Fin.succAboveCases ];
-                · exact continuous_apply _ |> Continuous.comp <| continuous_snd;
-                · exact continuous_apply _ |> Continuous.comp <| continuous_snd;
-                · exact continuous_fst;
-            exact Continuous.eval_const h_cont (Pi.single i 1);
-          rw [ MeasureTheory.Measure.prod_restrict ];
+                exact hF.continuous_fderiv le_rfl
+              refine h_cont.comp ?_
+              refine continuous_pi_iff.mpr ?_
+              intro j; fin_cases j <;> simp +decide [ Fin.insertNth ]
+              · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+                · exact continuous_fst
+                · exact continuous_apply 0 |> Continuous.comp <| continuous_snd
+                · exact continuous_apply 0 |> Continuous.comp <| continuous_snd
+              · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+                · exact continuous_apply 0 |> Continuous.comp <| continuous_snd
+                · exact continuous_fst
+                · exact continuous_apply _ |> Continuous.comp <| continuous_snd
+              · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+                · exact continuous_apply _ |> Continuous.comp <| continuous_snd
+                · exact continuous_apply _ |> Continuous.comp <| continuous_snd
+                · exact continuous_fst
+            exact Continuous.eval_const h_cont (Pi.single i 1)
+          rw [ MeasureTheory.Measure.prod_restrict ]
           exact ContinuousOn.integrableOn_compact
               (isCompact_Icc.prod (isCompact_univ_pi fun _ => CompactIccSpace.isCompact_Icc))
               (h_cont.continuousOn)
             |> fun h => h.mono_set
               (Set.prod_mono (Set.Ioc_subset_Icc_self)
-                (Set.pi_mono fun _ _ => Set.Ioc_subset_Icc_self));
+                (Set.pi_mono fun _ _ => Set.Ioc_subset_Icc_self))
       · fun_prop (disch := norm_num)
 
 end AristotleLemmas
