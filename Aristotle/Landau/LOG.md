@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 89: Split CoulombSpatialTransport, weaken UniformSchwartzDecay
+
+### Changes
+- **Split CoulombSpatialTransport.lean** (676 → 358 lines): extracted force/transport/IBP integrability lemmas into new `CoulombForceTransport.lean` (335 lines). CoulombSpatialTransport retains measurability, joint integrability, and continuity.
+- **Weakened UniformSchwartzDecay** (issue 8g, RESOLVED): changed `hDecay` from `∀ (N k : ℕ)` (all derivatives) to `∀ (N : ℕ) {k : ℕ}, k ≤ 2 →` (only up to 2nd order). This is a strictly weaker hypothesis — the theorem now applies to C² functions with rapid decay, not just Schwartz class. Updated ~30 call sites across 8 files. Also weakened `coulomb_entry_schwartz_integrable` to only require k=0 (pointwise) decay.
+- Files: 27 → **28**. Lines: ~9,850.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 88: Split CoulombPSD, analyze Schwartz decay
 
 ### Changes

@@ -14,15 +14,15 @@ open MeasureTheory Matrix Finset BigOperators Real
 noncomputable section
 namespace VML
 
-/-- Uniform Schwartz decay in velocity: f(x,·) and all its velocity derivatives
+/-- Uniform C² velocity decay: f(x,·) and its first two velocity derivatives
     decay faster than any polynomial in |v|, uniformly in x ∈ T³.
 
-    This is the standard "sufficient regularity and decay" assumption
-    in kinetic theory (Desvillettes, Villani, Guo). -/
+    This is weaker than Schwartz class (which requires ALL derivatives to decay).
+    The proof of the H-theorem only uses derivatives up to order 2. -/
 structure UniformSchwartzDecay
     (f : Torus3 → (Fin 3 → ℝ) → ℝ) : Prop where
-  /-- All velocity derivatives of f decay faster than any polynomial, uniformly in x -/
-  hDecay : ∀ (N k : ℕ), ∃ C > 0, ∀ (x : Torus3) (v : Fin 3 → ℝ),
+  /-- Velocity derivatives up to order 2 of f decay faster than any polynomial, uniformly in x -/
+  hDecay : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ (x : Torus3) (v : Fin 3 → ℝ),
     ‖iteratedFDeriv ℝ k (f x) v‖ * (1 + ‖v‖) ^ N ≤ C
   /-- Spatial gradients of f also have Schwartz decay in v -/
   hGradDecay : ∀ (N : ℕ) (i : Fin 3), ∃ C > 0, ∀ (x : Torus3) (v : Fin 3 → ℝ),
@@ -56,7 +56,7 @@ lemma inverse_poly_integrable (C : ℝ) :
 lemma UniformSchwartzDecay.integrable {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (hS : UniformSchwartzDecay f) (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
     (x : Torus3) : Integrable (f x) := by
-  obtain ⟨C, hC_pos, hbound⟩ := hS.hDecay 4 0
+  obtain ⟨C, hC_pos, hbound⟩ := hS.hDecay 4 (by omega)
   have hint := inverse_poly_integrable C
   apply hint.mono' (hf_smooth x).continuous.aestronglyMeasurable
   filter_upwards [] with v
@@ -75,7 +75,7 @@ lemma UniformSchwartzDecay.integrable_poly_mul {f : Torus3 → (Fin 3 → ℝ) �
     (hS : UniformSchwartzDecay f) (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
     (x : Torus3) (M : ℕ) :
     Integrable (fun v => (1 + ‖v‖) ^ M * f x v) := by
-  obtain ⟨C, hC_pos, hbound⟩ := hS.hDecay (M + 4) 0
+  obtain ⟨C, hC_pos, hbound⟩ := hS.hDecay (M + 4) (by omega)
   have hint := inverse_poly_integrable C
   apply hint.mono' ((continuous_const.add continuous_norm).pow M |>.mul
     (hf_smooth x).continuous).aestronglyMeasurable

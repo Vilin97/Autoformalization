@@ -18,7 +18,7 @@ namespace VML
     polynomial score bound and Newtonian potential of Schwartz functions. -/
 lemma psd_inner_integrable_coulomb
     (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
-    (hf_schwartz : ∀ N k, ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
+    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
     {Cg : ℝ} {Kg : ℕ}
     (hGrad : ∀ v i, |fderiv ℝ f v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f v)
     (v : Fin 3 → ℝ) :
@@ -34,7 +34,7 @@ lemma psd_inner_integrable_coulomb
     rw [inv_mul_le_iff₀ hfu]; linarith [hGrad u i]
   -- Schwartz decay of f
   have hf_decay : ∀ N, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ N ≤ C := by
-    intro N; obtain ⟨C, hC, hb⟩ := hf_schwartz N 0
+    intro N; obtain ⟨C, hC, hb⟩ := hf_schwartz N (by omega)
     exact ⟨C, hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
   -- Schwartz decay of (1+‖w‖)^{2Kg} * f(w)
   have hpf_decay : ∀ N, ∃ C > 0, ∀ w,
@@ -70,7 +70,7 @@ lemma psd_inner_integrable_coulomb
     Uses pointwise bound + Newtonian uniform bounds + Schwartz decay. -/
 lemma psd_outer_integrable_coulomb
     (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
-    (hf_schwartz : ∀ N k, ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
+    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
     {Cg : ℝ} {Kg : ℕ}
     (hGrad : ∀ v i, |fderiv ℝ f v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f v) :
     Integrable (fun v => ∫ w, PSDIntegrand coulombKernel f v w) := by
@@ -85,7 +85,7 @@ lemma psd_outer_integrable_coulomb
     rw [inv_mul_le_iff₀ hfu]; linarith [hGrad u i]
   -- Schwartz decay
   have hf_decay : ∀ N, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ N ≤ C :=
-    fun N => (hf_schwartz N 0).imp fun C ⟨hC, hb⟩ =>
+    fun N => (hf_schwartz N (by omega)).imp fun C ⟨hC, hb⟩ =>
       ⟨hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
   have hpf_decay : ∀ N, ∃ C > 0, ∀ w,
       |(1 + ‖w‖) ^ (2 * Kg) * f w| * (1 + ‖w‖) ^ N ≤ C := by
@@ -181,7 +181,7 @@ lemma psd_outer_integrable_coulomb
     - Norm integral bound from PSD pointwise bound + Newtonian uniform bounds -/
 lemma fubini_double_integrable_coulomb
     (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
-    (hf_schwartz : ∀ N k, ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
+    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
     {Cg : ℝ} {Kg : ℕ}
     (hGrad : ∀ v i, |fderiv ℝ f v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f v) :
     Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
@@ -199,7 +199,7 @@ lemma fubini_double_integrable_coulomb
     rw [inv_mul_le_iff₀ hfu]; linarith [hGrad u i]
   -- Schwartz decay
   have hf_decay : ∀ N, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ N ≤ C :=
-    fun N => (hf_schwartz N 0).imp fun C ⟨hC, hb⟩ =>
+    fun N => (hf_schwartz N (by omega)).imp fun C ⟨hC, hb⟩ =>
       ⟨hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
   have hpf_decay : ∀ N, ∃ C > 0, ∀ w,
       |(1 + ‖w‖) ^ (2 * Kg) * f w| * (1 + ‖w‖) ^ N ≤ C := by
@@ -323,7 +323,7 @@ lemma fubini_double_integrable_coulomb
     -- Partial derivative Schwartz decay
     have hdg_decay : ∀ j : Fin 3, ∀ N, ∃ C > 0, ∀ w,
         |fderiv ℝ f w (Pi.single j 1)| * (1 + ‖w‖) ^ N ≤ C := by
-      intro j N; obtain ⟨C, hC, hb⟩ := hf_schwartz N 1
+      intro j N; obtain ⟨C, hC, hb⟩ := hf_schwartz N (by omega)
       refine ⟨C, hC, fun w => le_trans (mul_le_mul_of_nonneg_right ?_ (by positivity)) (hb w)⟩
       rw [← Real.norm_eq_abs]
       exact le_trans (le_trans (ContinuousLinearMap.le_opNorm _ _)

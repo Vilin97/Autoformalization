@@ -1,6 +1,6 @@
 # Experiment: Weaken UniformSchwartzDecay (Issue 8g)
 
-## Status: ANALYSIS COMPLETE — k ≤ 2 suffices
+## Status: IMPLEMENTED (cycle 89) — hDecay now requires k ≤ 2 only
 
 ## Current condition
 

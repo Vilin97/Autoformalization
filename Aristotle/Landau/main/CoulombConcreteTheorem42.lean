@@ -92,9 +92,9 @@ theorem CoulombConcreteTheorem42
   -- Log growth bound (used by many fields)
   have hLogBound := hLogGrowth
   -- Schwartz decay specialized to each x (used in many fields below)
-  have hSchwartz_x : ∀ x, ∀ N k, ∃ C > 0, ∀ v,
-      ‖iteratedFDeriv ℝ k (f x) v‖ * (1 + ‖v‖) ^ N ≤ C := fun x N k =>
-    hSchwartz.hDecay N k |>.imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩
+  have hSchwartz_x : ∀ x, ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
+      ‖iteratedFDeriv ℝ k (f x) v‖ * (1 + ‖v‖) ^ N ≤ C := fun x N hk =>
+    (hSchwartz.hDecay N hk).imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩
   -- Extract gradient bound components (used in multiple fields)
   obtain ⟨Cg, Kg, hCg⟩ := hGradBound
   -- Extract hIBP_f_dg: used for both hLandauIBP_f_dg and hFubini_outer
@@ -228,7 +228,7 @@ theorem CoulombConcreteTheorem42
       exact (hcont_grad.mul hcont_log).integrable_of_hasCompactSupport
         (HasCompactSupport.of_compactSpace _)
     hf_velocity_dominated := by
-      obtain ⟨C, hC_pos, hbound⟩ := hSchwartz.hDecay 4 0
+      obtain ⟨C, hC_pos, hbound⟩ := hSchwartz.hDecay 4 (by omega)
       refine ⟨fun v => C / (1 + ‖v‖) ^ 4, inverse_poly_integrable C, fun x v => ?_⟩
       have hb := hbound x v
       simp at hb
@@ -370,7 +370,7 @@ private lemma equilibriumMaxwellian_log_bound (ρ T : ℝ) (hρ : 0 < ρ) (hT : 
     ∃ (C_log : ℝ) (K_log : ℕ), ∀ v : Fin 3 → ℝ,
     |Real.log (equilibriumMaxwellian ρ T v)| ≤ C_log * (1 + ‖v‖) ^ K_log := by
   exact schwartz_log_bound (fun _ v => equilibriumMaxwellian_pos ρ T hρ hT v)
-    ⟨⟨fun N k => (equilibriumMaxwellian_schwartz_decay ρ T hρ hT N k).imp
+    ⟨⟨fun N hk => (equilibriumMaxwellian_schwartz_decay ρ T hρ hT N _).imp
       fun C hC => ⟨hC.1, fun _ v => hC.2 v⟩,
      fun N i => ⟨1, one_pos, fun x v => by
       simp only [torusGradX, periodicLift, Function.comp]
@@ -567,9 +567,9 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
   -- (7) hSchwartz: Gaussian is UniformSchwartzDecay
   · constructor
     · -- hDecay: ‖iteratedFDeriv ℝ k eM v‖ * (1+‖v‖)^N ≤ C
-      intro N k
+      intro N hk
       obtain ⟨C, hC, hbound⟩ :=
-        equilibriumMaxwellian_schwartz_decay ρ_ion T hρ_ion hT N k
+        equilibriumMaxwellian_schwartz_decay ρ_ion T hρ_ion hT N _
       exact ⟨C, hC, fun _ v => hbound v⟩
     · -- hGradDecay: spatial gradient of constant function is 0
       intro N i

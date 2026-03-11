@@ -23,7 +23,7 @@ lemma landau_flux_integrable_coulomb
     (f : (Fin 3 → ℝ) → ℝ)
     (hf_pos : ∀ v, 0 < f v)
     (hf_smooth : ContDiff ℝ ⊤ f)
-    (hf_schwartz : ∀ (N k : ℕ), ∃ C > 0, ∀ (v : Fin 3 → ℝ),
+    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ (v : Fin 3 → ℝ),
       ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
     (v : Fin 3 → ℝ) :
     Integrable (fun w =>
@@ -41,12 +41,12 @@ lemma landau_flux_integrable_coulomb
         constructor
         · apply inv_norm_schwartz_integrable
           · intro N
-            specialize hf_schwartz N 0
+            specialize hf_schwartz N (by omega)
             aesop
           · exact hf_smooth.continuous.aestronglyMeasurable
         · apply inv_norm_schwartz_integrable
           · intro N
-            obtain ⟨C, hC_pos, hC⟩ := hf_schwartz N 1
+            obtain ⟨C, hC_pos, hC⟩ := hf_schwartz N (by omega)
             use C, hC_pos; intro w
             have h_deriv_bound : |vGrad f w j| ≤ ‖iteratedFDeriv ℝ 1 f w‖ := by
               have : |fderiv ℝ f w (Pi.single j 1)| ≤ ‖fderiv ℝ f w‖ := by
@@ -109,7 +109,7 @@ lemma schwartz_partial_decay
     ∀ N : ℕ, ∃ C > 0, ∀ w : Fin 3 → ℝ,
       |fderiv ℝ (f x) w (Pi.single j 1)| * (1 + ‖w‖) ^ N ≤ C := by
   intro N
-  obtain ⟨C, hC_pos, hC⟩ := hSchwartz.hDecay N 1
+  obtain ⟨C, hC_pos, hC⟩ := hSchwartz.hDecay N (by omega)
   refine ⟨C, hC_pos, fun w => ?_⟩
   have h1 : |fderiv ℝ (f x) w (Pi.single j 1)| ≤ ‖fderiv ℝ (f x) w‖ := by
     rw [← Real.norm_eq_abs]
@@ -202,7 +202,7 @@ lemma flux_times_log_integrable_coulomb
   obtain ⟨C_log, K_log, hLB⟩ := hLogBound
   -- Schwartz decay for f(x) and ∂_j(f(x))
   have hf_decay : ∀ N : ℕ, ∃ C > 0, ∀ w, |f x w| * (1 + ‖w‖) ^ N ≤ C := by
-    intro N; obtain ⟨C, hC, hb⟩ := hSchwartz.hDecay N 0
+    intro N; obtain ⟨C, hC, hb⟩ := hSchwartz.hDecay N (by omega)
     exact ⟨C, hC, fun w => by simpa using hb x w⟩
   have hdf_decay : ∀ j : Fin 3, ∀ N : ℕ, ∃ C > 0, ∀ w,
       |fderiv ℝ (f x) w (Pi.single j 1)| * (1 + ‖w‖) ^ N ≤ C :=
@@ -225,13 +225,13 @@ lemma flux_times_log_integrable_coulomb
   -- |flux_i(v)| ≤ M₀ * ∑|∂_jf(v)| + M_df * f(v)
   -- |flux_i(v) * log(f(v))| ≤ (M₀ * ∑|∂_jf(v)| + M_df * f(v)) * C_log * (1+‖v‖)^K
   -- Each term like |∂_jf(v)| * (1+‖v‖)^K ≤ C_{j,K+4}/(1+‖v‖)^4
-  obtain ⟨C_f, hC_f, hC_f_bound⟩ := hSchwartz.hDecay (K_log + 4) 0
-  obtain ⟨C_df, hC_df, hC_df_bound⟩ := hSchwartz.hDecay (K_log + 4) 1
+  obtain ⟨C_f, hC_f, hC_f_bound⟩ := hSchwartz.hDecay (K_log + 4) (by omega)
+  obtain ⟨C_df, hC_df, hC_df_bound⟩ := hSchwartz.hDecay (K_log + 4) (by omega)
   set C_bound := (M₀ * 3 * C_df + M_df * C_f) * C_log + 1
   -- Flux integrability for eval_integral
-  have hf_schwartz_x : ∀ N k, ∃ C > 0, ∀ v,
+  have hf_schwartz_x : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
       ‖iteratedFDeriv ℝ k (f x) v‖ * (1 + ‖v‖) ^ N ≤ C :=
-    fun N k => hSchwartz.hDecay N k |>.imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩
+    fun N hk => (hSchwartz.hDecay N hk).imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩
   have hFlux : ∀ v, Integrable (fun w => mulVec (landauMatrix coulombKernel (v - w))
       (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) :=
     fun v => landau_flux_integrable_coulomb (f x) (fun v => hf_pos x v)
