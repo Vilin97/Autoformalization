@@ -76,11 +76,6 @@ lemma coulomb_entry_schwartz_integrable
         (le_trans (le_of_eq (Real.norm_eq_abs _)) (coulomb_landauMatrix_entry_le_pi _ _ _ hvw))
         (norm_nonneg _)
 
-/-- Convolution of a Coulomb kernel matrix entry with a Schwartz function is differentiable.
-    After substituting u = v - w, the kernel A(u) doesn't depend on v, so differentiation
-    under the integral sign applies via hasFDerivAt_integral_of_dominated_of_fderiv_le:
-    the v-derivative acts only on g(v-u), giving a bound
-    |A(u)_{ij}| * ‖fderiv g(v-u)‖ ≤ ‖u‖⁻¹ * C/(1+‖u‖)^4 which is integrable in ℝ³. -/
 /-- Core helper: the derivative of the Coulomb entry convolution at v₀ equals
     ∫ A(u) • fderiv(g)(v₀-u) du, with HasFDerivAt witness. -/
 private lemma coulomb_entry_conv_hasFDerivAt_aux
