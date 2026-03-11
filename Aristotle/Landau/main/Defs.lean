@@ -141,8 +141,11 @@ lemma equilibriumMaxwellian_isMaxwellian (ρ T : ℝ) (hρ : 0 < ρ) (hT : 0 < T
     by exact div_neg_of_neg_of_pos (by norm_num) (by positivity), fun v => ?_⟩
   unfold equilibriumMaxwellian
   rw [zero_dotProduct, normSq, add_zero]
-  rw [← Real.exp_log (div_pos hρ (Real.rpow_pos_of_pos (by positivity) _)).ne',
-    ← Real.exp_add]
+  have hpos : 0 < ρ / (2 * π * T) ^ ((3 : ℝ) / 2) :=
+    div_pos hρ (Real.rpow_pos_of_pos (by positivity) _)
+  conv_lhs => rw [show ρ / (2 * π * T) ^ ((3 : ℝ) / 2) =
+    Real.exp (Real.log (ρ / (2 * π * T) ^ ((3 : ℝ) / 2))) from (Real.exp_log hpos).symm]
+  rw [← Real.exp_add]
   congr 1; ring
 
 /-- The equilibrium temperature T is uniquely determined: if two Maxwellians with

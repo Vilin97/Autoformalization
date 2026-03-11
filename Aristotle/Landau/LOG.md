@@ -1,5 +1,17 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 113: Eliminate all maxHeartbeats, document hLogGrowth independence
+
+### Changes
+- **Eliminated ALL `maxHeartbeats` overrides** (2 → 0): removed `set_option maxHeartbeats 800000` from NewtonianPotential.lean and `set_option maxHeartbeats 400000` from TorusIntegration.lean. Both lemmas compile at default heartbeats (200000).
+- **Documented hLogGrowth independence from hSchwartz** in CoulombConcreteTheorem42.lean docstring. Schwartz decay bounds f from above but not below; log growth additionally requires a lower bound (f can't decay faster than exp(-poly)). Added counterexample: f(v) = exp(-exp(‖v‖)) is Schwartz but has exponential log growth.
+- **Resolved 7 merge conflicts** from rebasing +decide elimination onto API-fix branch (d52bd77). Took remote's structural/API changes, stripped +decide.
+- **Fixed last stray `+decide`** in NewtonianPotential.lean:281.
+- **Updated MEMORY.md** with correct file counts (32 files, 9,587 lines).
+- **Codebase health: 0 sorry's, 0 maxHeartbeats overrides, 0 simp +decide, 0 aesop.**
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 112: Fix CI build, eliminate ALL simp +decide
 
 ### Changes

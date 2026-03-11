@@ -82,7 +82,6 @@ lemma integral_torus_eq_integral_box (g : Torus3 → ℝ) (hg : Continuous g) :
       · exact measurable_id.aemeasurable
       · exact hg.aestronglyMeasurable
 
-set_option maxHeartbeats 400000 in
 /-- ∫ ∂F/∂xᵢ over [0,1]³ = 0 for periodic F (FTC + periodicity). -/
 lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3)
     (hF : ContDiff ℝ 1 F) (hper : ∀ x, F (x + Pi.single i 1) = F x) :
