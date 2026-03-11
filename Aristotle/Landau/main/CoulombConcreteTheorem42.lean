@@ -2,6 +2,7 @@ import Aristotle.Landau.main.CoulombSpatialTransport
 import Aristotle.Landau.main.CoulombFlux
 import Aristotle.Landau.main.CoulombPSD
 import Aristotle.Landau.main.CoulombFluxDiff
+import Aristotle.Landau.main.IteratedDerivHelpers
 
 /-!
 # Concrete Theorem 4.2 for Coulomb Collisions on T^3
