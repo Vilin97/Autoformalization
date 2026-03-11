@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 92: Split CoulombConcreteTheorem42, weaken hg_schwartz
+
+### Changes
+- **Split CoulombConcreteTheorem42.lean** (653 → 322 lines): extracted nonvacuous proof block (equilibrium Maxwellian helpers + `CoulombConcreteTheorem42_nonvacuous`) into new `CoulombNonvacuous.lean` (~340 lines). Main file retains `CoulombConcreteTheorem42` and `CoulombConcreteTheorem42_unique_T`.
+- **Weakened `hg_schwartz` in `coulomb_flux_component_bound`** (CoulombFluxBound.lean): changed from `∀ N k, ...` (all derivatives) to `∀ N {k}, k ≤ 2 → ...`, matching the `UniformSchwartzDecay` pattern used elsewhere. Only k=0 and k=1 were actually used.
+- **lean-lsp build desync** (issue 8j): attempted fix via `lake clean` + rebuild — did not resolve. Documented as tooling issue; `lake build` remains authoritative.
+- Files over 600 lines: 2 → **1** (only Defs.lean 634, which can't be split per user preference).
+- Files: 30 → **31**. Lines: ~9,520.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 91: Split CoulombFlux, deduplicate Lorentz HasFDerivAt
 
 ### Changes
