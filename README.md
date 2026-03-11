@@ -1,8 +1,10 @@
 # Formal Verification of the Vlasov-Maxwell-Landau Steady-State Theorem
 
-A complete formalization in [Lean 4](https://lean-lang.org/) + [Mathlib](https://leanprover-community.github.io/mathlib4_docs/) of the characterization of smooth steady-state solutions to the **Vlasov-Maxwell-Landau (VML) system** with Coulomb collisions on the 3-torus.
+[![Documentation](https://img.shields.io/badge/docs-blueprint-blue)](https://vilin97.github.io/aristotle/blueprint/) [![Dependency Graph](https://img.shields.io/badge/docs-dep_graph-blue)](https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html)
 
-**Status: fully verified by the Lean 4 kernel. 0 sorry's across 22 files (~8,300 lines).**
+A complete formalization of the characterization of smooth steady-state solutions to the **Vlasov-Maxwell-Landau (VML) system** with Coulomb collisions on the 3-torus.
+
+**Status: fully verified by the Lean 4 kernel. 0 sorry's across 22 files (~8,300 lines).** [[Zulip discussion]](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20Semi-autonomous.20formalization.20of.20VML.20equilibrium)
 
 ## Contents
 
