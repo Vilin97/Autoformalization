@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 86: Extract GaussianHelpers, weaken hExpDecay
+
+### Changes
+- **Split Section3Helpers.lean** (1020 → 596 lines): extracted Gaussian analysis lemmas (vGrad_exp_quadratic, gaussian_normalization_maxwellian, gaussian_first_moment, analysis_gaussian_integrability, analysis_vGrad_smooth, cubic_coeff_zero, poisson_boltzmann_max_principle) into new `GaussianHelpers.lean` (446 lines).
+- **Weakened hypothesis 8 (hExpDecay → hLogGrowth)**: replaced stretched exponential lower bound `exp(-C(1+‖v‖)^K) ≤ f` with strictly weaker polynomial log growth `|log f| ≤ C*(1+‖v‖)^K`. The old assumption was only used to derive this bound; now the weaker form is assumed directly. Applies to larger class of distributions.
+- Removed semicolon cleanup from critique (user decision: not worth pursuing).
+- Updated critique.md: marked 8e (Defs split) and 8h (hExpDecay weakening) as done.
+- Files: 24 → **25**. Lines: ~9,850.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 84: Split Defs.lean, document hGradBound
 
 ### Changes

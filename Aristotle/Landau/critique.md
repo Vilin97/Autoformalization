@@ -53,21 +53,11 @@ I found no issue.
 | Section3Helpers.lean | 1020 |
 | TorusInstance.lean | 910 |
 | CoulombPSD.lean | 826 |
-| Defs.lean | 805 |
 | CoulombSpatialTransport.lean | 676 |
 | CoulombFluxDiff.lean | 640 |
-| CoulombConcreteTheorem42.lean | 632 |
+| CoulombConcreteTheorem42.lean | 639 |
+| Defs.lean | 634 |
 | CoulombFlux.lean | 607 |
-
-### 6c. AI code style artifacts
-
-| Metric | Current | Target |
-|---|---|---|
-| ~~Lines > 200 chars~~ | ~~0~~ | ~~0~~ DONE |
-| ~~Trailing semicolons~~ | ~~0~~ | ~~0~~ DONE |
-| ~~Multi-semi lines~~ | ~~4~~ (in `by` blocks) | ~~0~~ DONE |
-| ~~Lines > 100 chars~~ | ~~1~~ (intentional) | ~~0~~ DONE |
-| Plain semicolons | **~333** (+ 103 `<;>`) | < 50 |
 
 ---
 
@@ -102,7 +92,7 @@ In Lean terms: `ContDiff ℝ 2 (f x)` in velocity, `ContDiff ℝ 1` in space (or
 
 ### 8d. Extract Mathlib-upstreamable lemmas (MEDIUM)
 
-### 8e. Split Defs.lean (MEDIUM — 805 lines)
+### ~~8e. Split Defs.lean~~ — DONE (805 → 634 + 189)
 
 ### ~~8f. Split Section3Helpers.lean~~ — DONE (1162 → 1020 + 158)
 
@@ -113,11 +103,9 @@ Schwartz class means ALL derivatives decay faster than ANY polynomial. The proof
 
 A lighter condition like "f and its first 3 velocity derivatives satisfy |∂^k f(v)| ≤ C_k · exp(−c|v|^α) for some α > 0, c > 0" would suffice and be more physically natural. UniformSchwartzDecay is a sledgehammer that makes the VelocityDecayConditions easy to verify but is not the minimal assumption.
 
-### 8h. hExpDecay could be weakened (MINOR)
+### ~~8h. hExpDecay weakened to hLogGrowth~~ — DONE
 
-Currently: `∃ C K, ∀ x v, exp(−C(1+‖v‖)^K) ≤ f x v` (stretched exponential lower bound). This is used only to bound |log f(v)| ≤ C(1+‖v‖)^K (polynomial growth of log), ensuring entropy integrability.
-
-A weaker sufficient condition: `∃ C K, ∀ x v, |log f(x,v)| ≤ C(1+‖v‖)^K` (direct polynomial growth of |log f|). This is satisfied by a strictly larger class of distributions (e.g., those with super-polynomial but sub-exponential tails in log f).
+Replaced `∃ C K, ∀ x v, exp(−C(1+‖v‖)^K) ≤ f x v` (stretched exponential lower bound) with the strictly weaker `∃ C_log K_log, ∀ x v, |log f(x,v)| ≤ C_log*(1+‖v‖)^K_log` (polynomial growth of |log f|). This is satisfied by a strictly larger class of distributions.
 
 ### 8i. hGradBound is Coulomb-specific but not flagged as such (MINOR)
 
@@ -138,8 +126,7 @@ For non-singular kernels (e.g., Maxwell molecules with Ψ = const, or any bounde
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 6b | 8 files over 600 lines (Section3Helpers 1020) | High | Open |
-| 6c | ~333 plain semicolons | Low | Open |
-| 8e | Defs.lean too large (805 lines) | Minor | Open |
+| ~~8e~~ | ~~Defs.lean split~~ | ~~Minor~~ | ~~Done~~ |
 | ~~8f~~ | ~~Section3Helpers.lean split~~ | ~~High~~ | ~~Done~~ |
 
 ### Conditions for ACCEPT

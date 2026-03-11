@@ -66,11 +66,11 @@ theorem CoulombConcreteTheorem42
     (hB_smooth : ∀ i, ContDiff ℝ ⊤ (periodicLift (fun x => B x i)))     -- (6)
     -- === Schwartz-class velocity decay, uniform in x ===
     (hSchwartz : UniformSchwartzDecay f)         -- (7)
-    (hExpDecay : ∃ (C : ℝ) (K : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
-      Real.exp (-C * (1 + ‖v‖) ^ K) ≤ f x v)   -- (8)
-    -- === Polynomial score bound (independent of hSchwartz + hExpDecay) ===
-    -- This is NOT derivable from hSchwartz + hExpDecay: the ratio |∂f|/f can grow
-    -- super-polynomially even for Schwartz f with exponential lower bound.
+    (hLogGrowth : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
+      |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log) -- (8)
+    -- === Polynomial score bound (independent of hSchwartz + hLogGrowth) ===
+    -- This is NOT derivable from hSchwartz + hLogGrowth: the ratio |∂f|/f can grow
+    -- super-polynomially even for Schwartz f with polynomial log growth.
     -- Satisfied by Maxwellians and physically reasonable perturbations.
     (hGradBound : ∃ (Cg : ℝ) (Kg : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ) (i : Fin 3),
       |fderiv ℝ (f x) v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f x v) -- (9)
@@ -89,8 +89,8 @@ theorem CoulombConcreteTheorem42
     (∀ x v, f x v = equilibriumMaxwellian ρ_ion T_eq v) ∧
     (∀ x, E x = 0) ∧
     (∀ x, B x = B₀) := by
-  -- Derive log bound from Schwartz + ExpDecay (used by many fields)
-  have hLogBound := schwartz_log_bound hf_pos hSchwartz hExpDecay
+  -- Log growth bound (used by many fields)
+  have hLogBound := hLogGrowth
   -- Schwartz decay specialized to each x (used in many fields below)
   have hSchwartz_x : ∀ x, ∀ N k, ∃ C > 0, ∀ v,
       ‖iteratedFDeriv ℝ k (f x) v‖ * (1 + ‖v‖) ^ N ≤ C := fun x N k =>
@@ -297,8 +297,8 @@ theorem CoulombConcreteTheorem42_unique_T
     (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
     (hB_smooth : ∀ i, ContDiff ℝ ⊤ (periodicLift (fun x => B x i)))
     (hSchwartz : UniformSchwartzDecay f)
-    (hExpDecay : ∃ (C : ℝ) (K : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
-      Real.exp (-C * (1 + ‖v‖) ^ K) ≤ f x v)
+    (hLogGrowth : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
+      |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log)
     (hGradBound : ∃ (Cg : ℝ) (Kg : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ) (i : Fin 3),
       |fderiv ℝ (f x) v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f x v)
     (hVlasov : ∀ x v,
@@ -315,7 +315,7 @@ theorem CoulombConcreteTheorem42_unique_T
       T' = T_eq) := by
   obtain ⟨T_eq, B₀, hT_pos, hf_eq, hE_zero, hB_const⟩ :=
     CoulombConcreteTheorem42 f E B ν ρ_ion hν hρ_ion hf_pos hf_smooth_v hf_smooth_x hB_smooth
-      hSchwartz hExpDecay hGradBound hVlasov hAmpere hGauss hDivB
+      hSchwartz hLogGrowth hGradBound hVlasov hAmpere hGauss hDivB
   exact ⟨T_eq, B₀, hT_pos, hf_eq, hE_zero, hB_const,
     fun T' hT' h_eq => equilibriumMaxwellian_T_unique ρ_ion T' T_eq hρ_ion hT' hT_pos h_eq⟩
 
@@ -363,6 +363,20 @@ private lemma equilibriumMaxwellian_exp_lower_bound (ρ T : ℝ) (hρ : 0 < ρ) 
     linarith [div_le_div_of_nonneg_right h_normSq (show (0:ℝ) ≤ 2 * T by linarith)]
   · exact Real.exp_nonneg _
   · exact Real.exp_nonneg _
+
+/-- Polynomial log growth bound for equilibrium Maxwellian:
+    |log(eM(v))| ≤ C*(1+‖v‖)² for suitable C. -/
+private lemma equilibriumMaxwellian_log_bound (ρ T : ℝ) (hρ : 0 < ρ) (hT : 0 < T) :
+    ∃ (C_log : ℝ) (K_log : ℕ), ∀ v : Fin 3 → ℝ,
+    |Real.log (equilibriumMaxwellian ρ T v)| ≤ C_log * (1 + ‖v‖) ^ K_log := by
+  exact schwartz_log_bound (fun _ v => equilibriumMaxwellian_pos ρ T hρ hT v)
+    ⟨⟨fun N k => (equilibriumMaxwellian_schwartz_decay ρ T hρ hT N k).imp
+      fun C hC => ⟨hC.1, fun _ v => hC.2 v⟩,
+     fun N i => ⟨1, one_pos, fun x v => by
+      simp only [torusGradX, periodicLift, Function.comp]
+      simp [fderiv_const, ContinuousLinearMap.zero_apply, mul_comm]⟩⟩⟩
+    ((equilibriumMaxwellian_exp_lower_bound ρ T hρ hT).imp
+      fun C hC => hC.imp fun K hCK => fun _ => hCK)
 
 /-- Bound x^M * exp(-ax) ≤ M!/a^M via the Taylor expansion of exp. -/
 private lemma pow_mul_exp_neg_le (M : ℕ) (a : ℝ) (ha : 0 < a) (x : ℝ) (hx : 0 ≤ x) :
@@ -505,7 +519,7 @@ private lemma equilibriumMaxwellian_schwartz_decay (ρ T : ℝ) (hρ : 0 < ρ) (
     - (5) hf_smooth_x: f is spatially constant ⇒ periodicLift is constant ⇒ C^∞  ✓
     - (6) hB_smooth: B = 0, same argument as (5)  ✓
     - (7) hSchwartz: Gaussian is Schwartz class via Faà di Bruno + poly×Gaussian bound  ✓
-    - (8) hExpDecay: normSq v ≤ 3(1+‖v‖)², choose C = 3/(2T)+max(0,-log prefix)  ✓
+    - (8) hLogGrowth: |log(eM(v))| = |log(pf) - normSq(v)/(2T)| ≤ C*(1+‖v‖)²  ✓
     - (9) hGradBound: ∂eM/∂vᵢ = -(vᵢ/T)·eM, bound |vᵢ| ≤ 1+‖v‖  ✓
     - (10) hVlasov: A(z)·z = 0 (projection annihilation) ⇒ integrand vanishes  ✓
     - (11) hAmpere: ∇×0 = 0, ∫ vᵢ eM dv = 0 by odd symmetry  ✓
@@ -519,7 +533,7 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
     (∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v))) ∧                 -- (5)
     (∀ i, ContDiff ℝ ⊤ (periodicLift (fun x => B x i))) ∧                 -- (6)
     UniformSchwartzDecay f ∧                                                -- (7)
-    (∃ C K, ∀ x v, Real.exp (-C * (1 + ‖v‖) ^ K) ≤ f x v) ∧             -- (8)
+    (∃ C_log K_log, ∀ x v, |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log) ∧ -- (8)
     (∃ Cg Kg, ∀ x v i,
       |fderiv ℝ (f x) v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f x v) ∧ -- (9)
     (∀ x v, dotProduct v (torusGradX (fun y => f y v) x) +
@@ -562,9 +576,9 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
       refine ⟨1, one_pos, fun x v => ?_⟩
       simp only [torusGradX, periodicLift, Function.comp]
       simp [fderiv_const, ContinuousLinearMap.zero_apply, mul_comm]
-  -- (8) hExpDecay: exponential decay bound
-  · obtain ⟨C, K, hCK⟩ := equilibriumMaxwellian_exp_lower_bound ρ_ion T hρ_ion hT
-    exact ⟨C, K, fun _ => hCK⟩
+  -- (8) hLogGrowth: polynomial log growth
+  · obtain ⟨C_log, K_log, hLB⟩ := equilibriumMaxwellian_log_bound ρ_ion T hρ_ion hT
+    exact ⟨C_log, K_log, fun _ => hLB⟩
   -- (9) hGradBound: |∂eM/∂vᵢ| = |vᵢ/T| · eM ≤ (1+‖v‖)/T · eM
   · refine ⟨1 / T, 1, fun _ v i => ?_⟩
     rw [fderiv_equilibriumMaxwellian ρ_ion T hT v i]
