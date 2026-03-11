@@ -187,4 +187,25 @@ lemma schwartz_poly_weighted_decay
         = |f w| * (1 + ‖w‖) ^ (M + N) := by rw [pow_add]; ring
       _ ≤ C := hb w⟩
 
+/-- Polynomial-weighted Schwartz functions are integrable (on ℝ³).
+    If f has Schwartz decay and f > 0, then `(1+‖v‖)^K * f(v)` is integrable. -/
+lemma schwartz_poly_mul_integrable
+    {f : (Fin 3 → ℝ) → ℝ} (hf_pos : ∀ v, 0 < f v)
+    (hf_cont : Continuous f)
+    (hf_decay : ∀ N : ℕ, ∃ C > 0, ∀ v, |f v| * (1 + ‖v‖) ^ N ≤ C)
+    (K : ℕ) :
+    Integrable (fun v => (1 + ‖v‖) ^ K * f v) := by
+  obtain ⟨C, _, hbound⟩ := hf_decay (K + 4)
+  apply (inverse_poly_integrable C).mono'
+  · exact ((continuous_const.add continuous_norm).pow _ |>.mul hf_cont).aestronglyMeasurable
+  · filter_upwards with v
+    simp only [Real.norm_eq_abs, abs_mul,
+      abs_of_nonneg (pow_nonneg (by linarith [norm_nonneg v]) _),
+      abs_of_pos (hf_pos v)]
+    rw [le_div_iff₀ (by positivity : (0 : ℝ) < (1 + ‖v‖) ^ 4)]
+    have : (1 + ‖v‖) ^ K * f v * (1 + ‖v‖) ^ 4 =
+        |f v| * (1 + ‖v‖) ^ (K + 4) := by
+      rw [abs_of_pos (hf_pos v), pow_add]; ring
+    linarith [hbound v]
+
 end VML

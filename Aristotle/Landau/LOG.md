@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 101: Extract schwartz_poly_mul_integrable
+
+### Changes
+- **Added `schwartz_poly_mul_integrable`** to SchwartzDecayDefs.lean: proves `(1+‖v‖)^K * f(v)` is integrable from Schwartz decay. Replaces 3 duplicate blocks (2 in CoulombPSD.lean, 1 in CoulombFluxBound.lean).
+- CoulombPSD.lean: 346 → 322 lines (-24). CoulombFluxBound.lean: 480 → 470 lines (-10).
+- `fubini_double_integrable_coulomb` now ~173 lines (was ~197).
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 100: Extract FlatTorus3 lemmas from Defs.lean
 
 ### Changes

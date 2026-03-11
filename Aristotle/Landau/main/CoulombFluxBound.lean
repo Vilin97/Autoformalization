@@ -444,19 +444,9 @@ lemma coulomb_ibp_f_dg_integrable
   obtain ⟨Cf, hCf_pos, hCf⟩ :=
     coulomb_flux_component_bound f hf_pos hf_smooth hf_schwartz hGrad i
   -- Polynomial-weighted integrability of f from Schwartz decay
-  have h_poly_int : Integrable (fun v => (1 + ‖v‖) ^ (2 * Kg) * f v) := by
-    obtain ⟨C, hC_pos, hbound⟩ := hf_schwartz (2 * Kg + 4) (by omega)
-    apply (inverse_poly_integrable C).mono'
-      ((continuous_const.add continuous_norm).pow _ |>.mul
-        hf_smooth.continuous).aestronglyMeasurable
-    filter_upwards with v
-    have hb := hbound v; simp [norm_iteratedFDeriv_zero] at hb
-    have hv_pos : (0 : ℝ) < (1 + ‖v‖) ^ 4 := by positivity
-    rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (by positivity), le_div_iff₀ hv_pos]
-    calc (1 + ‖v‖) ^ (2 * Kg) * |f v| * (1 + ‖v‖) ^ 4
-        = |f v| * ((1 + ‖v‖) ^ (2 * Kg) * (1 + ‖v‖) ^ 4) := by ring
-      _ = |f v| * (1 + ‖v‖) ^ (2 * Kg + 4) := by rw [pow_add]
-      _ ≤ C := hb
+  have h_poly_int : Integrable (fun v => (1 + ‖v‖) ^ (2 * Kg) * f v) :=
+    schwartz_poly_mul_integrable hf_pos hf_smooth.continuous
+      (schwartz_pointwise_decay hf_schwartz) (2 * Kg)
   -- Combine: |flux_i * score_i| ≤ Cf*Cg * (1+‖v‖)^{2Kg} * f(v)
   apply (h_poly_int.const_mul (Cf * Cg)).mono'
   · exact AEStronglyMeasurable.mul

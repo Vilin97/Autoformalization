@@ -75,20 +75,8 @@ lemma psd_outer_integrable_coulomb
       hf_smooth.continuous).aestronglyMeasurable v
   -- Dominating function: C_out * (1+‖v‖)^{2Kg} * f(v), integrable by Schwartz decay
   set C_out := 18 * Cg ^ 2 * (M₁ + M₂) with hC_out_def
-  have h_poly_int : Integrable (fun v => (1 + ‖v‖) ^ (2 * Kg) * f v) := by
-    obtain ⟨C, hC_pos, hbound⟩ := hf_decay (2 * Kg + 4)
-    apply (inverse_poly_integrable C).mono'
-    · exact ((continuous_const.add continuous_norm).pow _ |>.mul
-        hf_smooth.continuous).aestronglyMeasurable
-    · filter_upwards with v
-      simp only [Real.norm_eq_abs, abs_mul,
-        abs_of_nonneg (pow_nonneg (by linarith [norm_nonneg v]) _),
-        abs_of_pos (hf_pos v)]
-      rw [le_div_iff₀ (by positivity : (0 : ℝ) < (1 + ‖v‖) ^ 4)]
-      have : (1 + ‖v‖) ^ (2 * Kg) * f v * (1 + ‖v‖) ^ 4 =
-          |f v| * (1 + ‖v‖) ^ (2 * Kg + 4) := by
-        rw [abs_of_pos (hf_pos v), pow_add]; ring
-      linarith [hbound v]
+  have h_poly_int : Integrable (fun v => (1 + ‖v‖) ^ (2 * Kg) * f v) :=
+    schwartz_poly_mul_integrable hf_pos hf_smooth.continuous hf_decay (2 * Kg)
   -- AEStronglyMeasurable of parametric integral
   have h_meas : AEStronglyMeasurable
       (fun v => ∫ w, PSDIntegrand coulombKernel f v w) volume :=
@@ -248,20 +236,8 @@ lemma fubini_double_integrable_coulomb
           Real.norm_eq_abs]; rfl)
     -- Dominating function
     set C_out := 9 * Cg ^ 2 * M₁ + 3 * Cg * M_df
-    have h_poly_int : Integrable (fun v => (1 + ‖v‖) ^ (2 * Kg) * f v) := by
-      obtain ⟨C, hC_pos, hbound⟩ := hf_decay (2 * Kg + 4)
-      apply (inverse_poly_integrable C).mono'
-      · exact ((continuous_const.add continuous_norm).pow _ |>.mul
-          hf_smooth.continuous).aestronglyMeasurable
-      · filter_upwards with v
-        simp only [Real.norm_eq_abs, abs_mul,
-          abs_of_nonneg (pow_nonneg (by linarith [norm_nonneg v]) _),
-          abs_of_pos (hf_pos v)]
-        rw [le_div_iff₀ (by positivity : (0 : ℝ) < (1 + ‖v‖) ^ 4)]
-        have : (1 + ‖v‖) ^ (2 * Kg) * f v * (1 + ‖v‖) ^ 4 =
-            |f v| * (1 + ‖v‖) ^ (2 * Kg + 4) := by
-          rw [abs_of_pos (hf_pos v), pow_add]; ring
-        linarith [hbound v]
+    have h_poly_int : Integrable (fun v => (1 + ‖v‖) ^ (2 * Kg) * f v) :=
+      schwartz_poly_mul_integrable hf_pos hf_smooth.continuous hf_decay (2 * Kg)
     -- Measurability of norm integral
     have h_norm_meas : AEStronglyMeasurable (fun v => ∫ w, ‖F (v, w)‖) volume := by
       apply h_meas.norm.integral_prod_right'
