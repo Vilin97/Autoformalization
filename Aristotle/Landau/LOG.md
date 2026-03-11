@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 95: Extract fubini_double_pointwise_bound, generalize schwartz_pointwise_decay
+
+### Changes
+- **Extracted `fubini_double_pointwise_bound`** (~49 lines) from CoulombPSD.lean into CoulombPSDHelpers.lean. CoulombPSD: 435 → 390 lines (-45). `fubini_double_integrable_coulomb` proof: ~286 → ~242 lines.
+- **Generalized `schwartz_pointwise_decay`** from `Fin 3 → ℝ` to `{α : Type*} [NormedAddCommGroup α] [NormedSpace ℝ α]`. Now 4/5 SchwartzDecayDefs helpers are dimension-independent.
+- **Updated MEMORY.md** line counts (CoulombPSD, CoulombPSDHelpers, SchwartzDecayDefs).
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 94: Deduplicate hpf_decay, generalize helpers
 
 ### Changes
