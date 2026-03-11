@@ -443,7 +443,8 @@ private lemma contDiff_negNormSq_div (T : ℝ) :
   exact ContDiff.sum fun i _ => (contDiff_apply ℝ ℝ i).mul (contDiff_apply ℝ ℝ i)
 
 -- iteratedFDeriv of a CLM vanishes at order ≥ 2
-private lemma iteratedFDeriv_clm_zero {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+/-- The iterated derivative of a continuous linear map vanishes at order ≥ 2. -/
+lemma iteratedFDeriv_clm_zero {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [NormedAddCommGroup F] [NormedSpace ℝ F]
     (f : E →L[ℝ] F) (n : ℕ) (hn : 2 ≤ n) (x : E) :
     iteratedFDeriv ℝ n f x = 0 := by
@@ -452,8 +453,8 @@ private lemma iteratedFDeriv_clm_zero {E F : Type*} [NormedAddCommGroup E] [Norm
     funext fun y => f.hasFDerivAt.fderiv]
   rw [iteratedFDeriv_const_of_ne (by omega : n - 1 ≠ 0)]; simp
 
--- ‖iteratedFDeriv 1 f x‖ = ‖f‖ for a CLM f
-private lemma norm_iteratedFDeriv_one_clm {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+/-- The norm of the first iterated derivative of a CLM equals the operator norm. -/
+lemma norm_iteratedFDeriv_one_clm {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [NormedAddCommGroup F] [NormedSpace ℝ F] (f : E →L[ℝ] F) (x : E) :
     ‖iteratedFDeriv ℝ 1 f x‖ = ‖f‖ := by
   rw [show (1:ℕ) = 0 + 1 from rfl, iteratedFDeriv_succ_eq_comp_right]
@@ -619,7 +620,7 @@ private lemma equilibriumMaxwellian_schwartz_decay (ρ T : ℝ) (hρ : 0 < ρ) (
     E = 0, B = 0 satisfies all 13 hypotheses of the main theorem. This
     proves the theorem is non-vacuous: at least one instance exists.
 
-    **Proof status: 10 of 10 non-trivial goals addressed, 1 sorry'd.**
+    **Proof status: all 10 non-trivial goals fully proved. 0 sorry's.**
 
     Why each hypothesis holds for the equilibrium:
     - (3) hf_pos: ρ/(2πT)^{3/2} > 0 and exp > 0 ⇒ f > 0  ✓
@@ -629,7 +630,7 @@ private lemma equilibriumMaxwellian_schwartz_decay (ρ T : ℝ) (hρ : 0 < ρ) (
     - (7) hSchwartz: Gaussian is Schwartz class via Faà di Bruno + poly×Gaussian bound  ✓
     - (8) hExpDecay: normSq v ≤ 3(1+‖v‖)², choose C = 3/(2T)+max(0,-log prefix)  ✓
     - (9) hGradBound: ∂eM/∂vᵢ = -(vᵢ/T)·eM, bound |vᵢ| ≤ 1+‖v‖  ✓
-    - (10) hVlasov: Maxwellian in kernel of Landau operator  ← sorry (hardest)
+    - (10) hVlasov: A(z)·z = 0 (projection annihilation) ⇒ integrand vanishes  ✓
     - (11) hAmpere: ∇×0 = 0, ∫ vᵢ eM dv = 0 by odd symmetry  ✓
     - (12) hGauss: ∇·0 = 0 = ∫eM - ρ_ion (simp closes)  ✓
     - (13) hDivB: ∇·0 = 0  ✓ -/
@@ -700,8 +701,49 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
           · exact div_le_div_of_nonneg_right hvi hT
           · exact hpos.le
       _ = 1 / T * (1 + ‖v‖) * equilibriumMaxwellian ρ_ion T v := by ring
-  -- (10) hVlasov: Vlasov equation
-  · sorry
+  -- (10) hVlasov: Vlasov equation (Maxwellian in kernel of Landau operator)
+  · intro x v
+    -- LHS: spatial gradient of constant is 0, E=B=0 so force term is 0
+    simp only [torusGradX, periodicLift, Function.comp, Pi.zero_apply]
+    simp only [fderiv_const, ContinuousLinearMap.zero_apply, dotProduct_zero, cross,
+      mul_zero, sub_zero, zero_mul, sub_self, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons, zero_add]
+    -- RHS: LandauOperator eM v = 0 because integrand vanishes
+    suffices h : LandauOperator coulombKernel (equilibriumMaxwellian ρ_ion T) v = 0 by
+      simp [h]
+    -- The integrand is 0 for all w: A(v-w) · (eM(w)·∇eM(v) - eM(v)·∇eM(w)) = 0
+    -- because the vector argument is proportional to (v-w) and A(z)·z = 0
+    unfold LandauOperator vDiv
+    simp only [Pi.single_eq_same]
+    -- Show the flux function is identically 0
+    have hflux_zero : ∀ v', (∫ w, mulVec (landauMatrix coulombKernel (v' - w))
+        (equilibriumMaxwellian ρ_ion T w • vGrad (equilibriumMaxwellian ρ_ion T) v' -
+         equilibriumMaxwellian ρ_ion T v' • vGrad (equilibriumMaxwellian ρ_ion T) w)) = 0 := by
+      intro v'
+      -- Show integrand is 0 pointwise
+      have h_integrand : ∀ w, mulVec (landauMatrix coulombKernel (v' - w))
+          (equilibriumMaxwellian ρ_ion T w • vGrad (equilibriumMaxwellian ρ_ion T) v' -
+           equilibriumMaxwellian ρ_ion T v' • vGrad (equilibriumMaxwellian ρ_ion T) w) = 0 := by
+        intro w
+        -- The bracket vector = (-eM(v')*eM(w)/T) • (v' - w)
+        have hbracket : equilibriumMaxwellian ρ_ion T w • vGrad (equilibriumMaxwellian ρ_ion T) v' -
+            equilibriumMaxwellian ρ_ion T v' • vGrad (equilibriumMaxwellian ρ_ion T) w =
+            (-(equilibriumMaxwellian ρ_ion T v' * equilibriumMaxwellian ρ_ion T w / T)) •
+              (v' - w) := by
+          ext i
+          simp only [Pi.smul_apply, Pi.sub_apply, smul_eq_mul, vGrad,
+            fderiv_equilibriumMaxwellian ρ_ion T hT v' i,
+            fderiv_equilibriumMaxwellian ρ_ion T hT w i]
+          ring
+        rw [hbracket, Matrix.mulVec_smul_assoc, landauMatrix_mulVec_self, smul_zero]
+      simp [h_integrand]
+    -- vDiv of zero function = 0
+    have : ∀ i, fderiv ℝ (fun w => (0 : Fin 3 → ℝ) i) v (Pi.single i 1) = 0 := by
+      intro i; simp [fderiv_const]
+    conv => arg 2; rw [show (0:ℝ) = ν * 0 from by ring]
+    congr 1
+    simp only [hflux_zero]
+    simp [fderiv_const, ContinuousLinearMap.zero_apply]
   -- (11) hAmpere: Ampere's law (curl 0 = ∫ vᵢ eM dv)
   · intro x
     ext i
