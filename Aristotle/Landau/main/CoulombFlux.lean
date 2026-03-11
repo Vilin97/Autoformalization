@@ -62,7 +62,8 @@ lemma landau_flux_integrable_coulomb
                 ring; aesop
               · exact (LinearIsometryEquiv.differentiable _) _
             exact le_trans (mul_le_mul_of_nonneg_right h_deriv_bound (by positivity)) (hC w)
-          · exact ((hf_smooth.continuous_fderiv le_top).eval_const (Pi.single j 1)).aestronglyMeasurable
+          · exact ((hf_smooth.continuous_fderiv le_top).eval_const
+              (Pi.single j 1)).aestronglyMeasurable
       convert h_int.1.mul_const ((vGrad f v) j) |>.sub (h_int.2.const_mul (f v)) using 2
       simp [Pi.smul_apply, Pi.sub_apply, smul_eq_mul]; ring
     intro i j
@@ -100,7 +101,8 @@ lemma landau_flux_integrable_coulomb
 -- ============================================================================
 
 /-- Schwartz decay of partial derivatives: |∂_j f(x,w)| * (1+‖w‖)^N ≤ C.
-    Follows from ‖iteratedFDeriv 1 f w‖ bounds and |∂_jf| ≤ ‖fderiv f w‖ ≤ ‖iteratedFDeriv 1 f w‖. -/
+    Follows from ‖iteratedFDeriv 1 f w‖ bounds and
+    |∂_jf| ≤ ‖fderiv f w‖ ≤ ‖iteratedFDeriv 1 f w‖. -/
 lemma schwartz_partial_decay
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (hSchwartz : UniformSchwartzDecay f) (x : Torus3) (j : Fin 3) :

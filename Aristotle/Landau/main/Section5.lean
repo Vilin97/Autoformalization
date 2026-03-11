@@ -109,13 +109,15 @@ lemma polynomial_identity_from_vlasov
         (fun y => Real.exp (a y + dotProduct (b y) v + c y * normSq v)) :=
       funext (fun y => hform y v)
     have hbv : FlatTorus3.IsSpatiallyDiff (fun y => dotProduct (b y) v) := by
-      have : (fun y => dotProduct (b y) v) = (fun y => v 0 * b y 0 + (v 1 * b y 1 + v 2 * b y 2)) := by
+      have : (fun y => dotProduct (b y) v) =
+          (fun y => v 0 * b y 0 + (v 1 * b y 1 + v 2 * b y 2)) := by
         ext y
         simp [dotProduct, Fin.sum_univ_three]
         ring
       rw [this]
       exact FlatTorus3.hDiff_add _ _ (FlatTorus3.hDiff_smul _ _ (hb 0))
-        (FlatTorus3.hDiff_add _ _ (FlatTorus3.hDiff_smul _ _ (hb 1)) (FlatTorus3.hDiff_smul _ _ (hb 2)))
+        (FlatTorus3.hDiff_add _ _
+          (FlatTorus3.hDiff_smul _ _ (hb 1)) (FlatTorus3.hDiff_smul _ _ (hb 2)))
     have hcv : FlatTorus3.IsSpatiallyDiff (fun y => c y * normSq v) := by
       have : (fun y => c y * normSq v) = (fun y => normSq v * c y) := funext (fun y => mul_comm _ _)
       rw [this]; exact FlatTorus3.hDiff_smul _ _ hc
@@ -141,8 +143,10 @@ lemma polynomial_identity_from_vlasov
         (fun y => v 0 * b y 0 + (v 1 * b y 1 + v 2 * b y 2))
         from funext (fun y => by simp [dotProduct, Fin.sum_univ_three]; ring)]
     rw [FlatTorus3.hGradAdd _ _ (FlatTorus3.hDiff_smul _ _ (hb 0))
-      (FlatTorus3.hDiff_add _ _ (FlatTorus3.hDiff_smul _ _ (hb 1)) (FlatTorus3.hDiff_smul _ _ (hb 2)))]
-    rw [FlatTorus3.hGradAdd _ _ (FlatTorus3.hDiff_smul _ _ (hb 1)) (FlatTorus3.hDiff_smul _ _ (hb 2))]
+      (FlatTorus3.hDiff_add _ _
+        (FlatTorus3.hDiff_smul _ _ (hb 1)) (FlatTorus3.hDiff_smul _ _ (hb 2)))]
+    rw [FlatTorus3.hGradAdd _ _
+      (FlatTorus3.hDiff_smul _ _ (hb 1)) (FlatTorus3.hDiff_smul _ _ (hb 2))]
     rw [FlatTorus3.hGradScalarMul (v 0) (fun y => b y 0)]
     rw [FlatTorus3.hGradScalarMul (v 1) (fun y => b y 1)]
     rw [FlatTorus3.hGradScalarMul (v 2) (fun y => b y 2)]

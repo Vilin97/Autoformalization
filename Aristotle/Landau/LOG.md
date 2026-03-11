@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 82: Break remaining long lines
+
+### Changes
+- **Broke 59 of 60 remaining lines >100ch** across 14 files.
+- Lines >100ch: 60 → **1** (remaining is a `<;>` tactic chain in NewtonianPotential, intentionally preserved).
+- All 14 modified files verified to compile clean from source.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 81: Break long lines in 3 worst files
 
 ### Changes

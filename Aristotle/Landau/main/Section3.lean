@@ -168,8 +168,11 @@ theorem fubini_symmetrization_logf (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
           f p.1 • (vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ
             vGrad f p.2)) MeasureSpace.volume := by
       convert h_int_double using 1
-      simp +decide [mul_sub, sub_mul, mul_assoc, mul_comm, Finset.mul_sum _ _ _, Matrix.mulVec, dotProduct]
-    have h_mp : MeasurePreserving (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => (p.2, p.1)) MeasureSpace.volume MeasureSpace.volume :=
+      simp +decide [mul_sub, sub_mul, mul_assoc, mul_comm,
+        Finset.mul_sum _ _ _, Matrix.mulVec, dotProduct]
+    have h_mp : MeasurePreserving
+        (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => (p.2, p.1))
+        MeasureSpace.volume MeasureSpace.volume :=
       ⟨measurable_swap, Measure.prod_swap ..⟩
     have h_swap_int :
         Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
@@ -186,7 +189,8 @@ theorem fubini_symmetrization_logf (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
     ext p
     simp only [Pi.neg_apply, neg_neg]
     rw [landauMatrix_sub_comm]
-    simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_three, Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
+    simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_three,
+      Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
     ring
   have h_split :
       ∫ v, ∫ w,
@@ -214,13 +218,15 @@ theorem fubini_symmetrization_logf (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
       (f w • vGrad f v - f v • vGrad f w)) by linarith
   -- Step 1: Swap integration order via Fubini
   rw [MeasureTheory.integral_integral_swap h_integrable_swap]
-  -- Step 2: The integrand with swapped v↔w = negative of original (by A(-z)=A(z) + flux antisymmetry)
+  -- Step 2: The integrand with swapped v↔w = negative of original
+  -- (by A(-z)=A(z) + flux antisymmetry)
   have h_symm : ∀ w v : Fin 3 → ℝ, vGrad (Real.log ∘ f) w ⬝ᵥ landauMatrix Ψ (v - w) *ᵥ
       (f w • vGrad f v - f v • vGrad f w) = -(vGrad (Real.log ∘ f) w ⬝ᵥ landauMatrix Ψ (w - v) *ᵥ
       (f v • vGrad f w - f w • vGrad f v)) := by
     intro w v
     rw [landauMatrix_sub_comm]
-    simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_three, Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
+    simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_three,
+      Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
     ring
   simp_rw [h_symm, MeasureTheory.integral_neg]
 

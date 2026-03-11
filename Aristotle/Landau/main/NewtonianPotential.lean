@@ -104,7 +104,8 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
         · refine MeasureTheory.lintegral_mono_set ?_
           intro x hx
           obtain ⟨k, hk⟩ : ∃ k : ℕ, 2^(-k-1 : ℝ) * R < ‖x‖ ∧ ‖x‖ ≤ 2^(-k : ℝ) * R := by
-            obtain ⟨k, hk⟩ : ∃ k : ℕ, -k - 1 < Real.logb 2 (‖x‖ / R) ∧ Real.logb 2 (‖x‖ / R) ≤ -k := by
+            obtain ⟨k, hk⟩ : ∃ k : ℕ,
+                -k - 1 < Real.logb 2 (‖x‖ / R) ∧ Real.logb 2 (‖x‖ / R) ≤ -k := by
               use Nat.floor (-Real.logb 2 (‖x‖ / R))
               constructor <;> linarith [
                 Nat.floor_le (show 0 ≤ -Real.logb 2 (‖x‖ / R) by
@@ -157,7 +158,10 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
               (Metric.closedBall (0 : Fin 3 → ℝ)
                 (2^(-k : ℝ) * R))).toReal) := by
         intro k
-        have h_bounded : ∀ z : Fin 3 → ℝ, z ∈ Metric.closedBall 0 (2^(-k : ℝ) * R) \ Metric.closedBall 0 (2^(-k-1 : ℝ) * R) → ‖z‖⁻¹ ≤ (2^(-k-1 : ℝ) * R)⁻¹ := by
+        have h_bounded : ∀ z : Fin 3 → ℝ,
+            z ∈ Metric.closedBall 0 (2^(-k : ℝ) * R) \
+              Metric.closedBall 0 (2^(-k-1 : ℝ) * R) →
+            ‖z‖⁻¹ ≤ (2^(-k-1 : ℝ) * R)⁻¹ := by
           simp +zetaDelta at *
           intro z hz₁ hz₂
           rw [ ← mul_inv ]
@@ -203,11 +207,15 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
         norm_num only [ ← mul_assoc, ← mul_pow ]
         ring_nf
         norm_num [ hR.ne' ]
-        exact Summable.mul_right _ (Summable.mul_left _ (summable_geometric_of_lt_one (by norm_num) (by norm_num)))
+        exact Summable.mul_right _
+          (Summable.mul_left _
+            (summable_geometric_of_lt_one (by norm_num) (by norm_num)))
       refine lt_of_le_of_lt h_integrable <| lt_of_le_of_lt (ENNReal.tsum_le_tsum h_bounded) ?_
       rw [ ← ENNReal.ofReal_tsum_of_nonneg ] <;> norm_num [ h_volume ]
       · exact fun k => by positivity
-      · convert h_series.mul_right ((MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) 1) |> ENNReal.toReal)) using 2
+      · convert h_series.mul_right
+            ((MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) 1)
+              |> ENNReal.toReal)) using 2
         norm_num [ Real.rpow_add, Real.rpow_sub ]
         ring
         convert congr_arg (· * R⁻¹ * 2 ^ ‹_› * 2) (h_volume ‹_›) using 1 <;> norm_num [ Real.rpow_neg, Real.rpow_mul ] ; ring
@@ -245,8 +253,10 @@ lemma convolution_local_int_schwartz
     constructor
     · obtain ⟨M, hM⟩ : ∃ M > 0, ∀ w ∈ Metric.closedBall v 1, |g w| ≤ M := by
         obtain ⟨ C, hC₀, hC ⟩ := hg_decay 0 ; exact ⟨ C, hC₀, fun w hw => by simpa using hC w ⟩
-      have h_prod_integrable : MeasureTheory.IntegrableOn (fun w => M / ‖v - w‖) (Metric.closedBall v 1) := by
-        have h_integrable : MeasureTheory.IntegrableOn (fun w => ‖v - w‖⁻¹) (Metric.closedBall v 1) := by
+      have h_prod_integrable :
+          MeasureTheory.IntegrableOn (fun w => M / ‖v - w‖) (Metric.closedBall v 1) := by
+        have h_integrable :
+            MeasureTheory.IntegrableOn (fun w => ‖v - w‖⁻¹) (Metric.closedBall v 1) := by
           rw [ ← MeasureTheory.integrable_indicator_iff (measurableSet_closedBall) ] at *
           convert hK_local.comp_sub_left v using 1
           ext; simp [Set.indicator]
@@ -267,13 +277,25 @@ lemma convolution_local_int_schwartz
           simpa [abs_div] using
             div_le_div_of_nonneg_right
               (hM.2 w hw) (norm_nonneg _)
-    · have h_far_integrable : MeasureTheory.IntegrableOn (fun w => g w) (Set.univ \ Metric.closedBall v 1) := by
+    · have h_far_integrable :
+          MeasureTheory.IntegrableOn (fun w => g w) (Set.univ \ Metric.closedBall v 1) := by
         have h_integrable_g : MeasureTheory.Integrable g := by
           obtain ⟨ C, hC₀, hC ⟩ := hg_decay 4
-          have h_integrable : MeasureTheory.Integrable (fun w : Fin 3 → ℝ => C / (1 + ‖w‖) ^ 4) MeasureTheory.MeasureSpace.volume := by
-            have h_integrable : MeasureTheory.Integrable (fun w : Fin 3 → ℝ => (1 + ‖w‖) ^ (-4 : ℝ)) MeasureTheory.MeasureSpace.volume := by
-              have h_integrable : MeasureTheory.Integrable (fun w : Fin 3 → ℝ => (1 + ‖w‖) ^ (-4 : ℝ)) MeasureTheory.MeasureSpace.volume := by
-                have h_integrable : ∀ w : Fin 3 → ℝ, (1 + ‖w‖) ^ (-4 : ℝ) ≤ (1 + ‖w‖ ^ 2) ^ (-2 : ℝ) := by
+          have h_integrable :
+              MeasureTheory.Integrable
+                (fun w : Fin 3 → ℝ => C / (1 + ‖w‖) ^ 4)
+                MeasureTheory.MeasureSpace.volume := by
+            have h_integrable :
+                MeasureTheory.Integrable
+                  (fun w : Fin 3 → ℝ => (1 + ‖w‖) ^ (-4 : ℝ))
+                  MeasureTheory.MeasureSpace.volume := by
+              have h_integrable :
+                  MeasureTheory.Integrable
+                    (fun w : Fin 3 → ℝ => (1 + ‖w‖) ^ (-4 : ℝ))
+                    MeasureTheory.MeasureSpace.volume := by
+                have h_integrable :
+                    ∀ w : Fin 3 → ℝ,
+                    (1 + ‖w‖) ^ (-4 : ℝ) ≤ (1 + ‖w‖ ^ 2) ^ (-2 : ℝ) := by
                   intro w
                   rw [ Real.rpow_neg (by positivity), Real.rpow_neg (by positivity) ]
                   norm_cast
@@ -281,12 +303,18 @@ lemma convolution_local_int_schwartz
                   ring_nf
                   (
                   exact inv_anti₀ (by positivity) (by nlinarith [ norm_nonneg w ]))
-                have h_integrable : MeasureTheory.Integrable (fun w : Fin 3 → ℝ => (1 + ‖w‖ ^ 2) ^ (-2 : ℝ)) MeasureTheory.MeasureSpace.volume := by
+                have h_integrable :
+                    MeasureTheory.Integrable
+                      (fun w : Fin 3 → ℝ => (1 + ‖w‖ ^ 2) ^ (-2 : ℝ))
+                      MeasureTheory.MeasureSpace.volume := by
                   have := @integrable_rpow_neg_one_add_norm_sq
-                  convert @this (Fin 3 → ℝ) _ _ _ _ _ (MeasureTheory.MeasureSpace.volume) _ 4 (by norm_num) using 1
+                  convert @this (Fin 3 → ℝ) _ _ _ _ _
+                    (MeasureTheory.MeasureSpace.volume) _ 4 (by norm_num) using 1
                   norm_num [ div_eq_mul_inv ]
                 refine h_integrable.mono' ?_ ?_
-                · exact Measurable.aestronglyMeasurable (by exact Measurable.pow_const (by exact measurable_const.add (measurable_norm)) _)
+                · exact Measurable.aestronglyMeasurable
+                    (by exact Measurable.pow_const
+                      (by exact measurable_const.add (measurable_norm)) _)
                 · filter_upwards [ ] using fun w => by
                     rw [ Real.norm_of_nonneg (by positivity) ]
                     exact ‹∀ w : Fin 3 → ℝ, (1 + ‖w‖) ^ ( -4 : ℝ) ≤ (1 + ‖w‖ ^ 2) ^ ( -2 : ℝ) › w

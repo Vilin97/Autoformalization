@@ -153,7 +153,8 @@ theorem Theorem42
     -- log f(·,v) is derived from hDiff_fv + hf_pos + FlatTorus3.hDiff_log.
     (hDiff_fv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => f x v))
     -- If f = exp(a + b·v + c|v|²), then a, b, c are spatially differentiable.
-    -- Derived from hDiff_fv + hf_pos + FlatTorus3.hDiff_log (via maxwellian_params_isSpatiallyDiff).
+    -- Derived from hDiff_fv + hf_pos + FlatTorus3.hDiff_log
+    -- (via maxwellian_params_isSpatiallyDiff).
     -- C² regularity (hDiff_B_C2, hDiff_maxwellian_C2) derived via FlatTorus3.hDiff_grad.
     -- === Velocity-space decay conditions ===
     (hDecay : VelocityDecayConditions Ψ f E B) :

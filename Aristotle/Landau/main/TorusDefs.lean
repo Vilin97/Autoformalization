@@ -235,7 +235,8 @@ theorem torus_hGradAdd' (f g : Torus3 → ℝ)
   intro x
   ext i
   simp only [torusGradX, Pi.add_apply]
-  have hlift : periodicLift (fun y => f y + g y) = fun y => periodicLift f y + periodicLift g y := by
+  have hlift : periodicLift (fun y => f y + g y) =
+      fun y => periodicLift f y + periodicLift g y := by
     ext y; simp [periodicLift]
   rw [hlift]
   rw [show (fun y => periodicLift f y + periodicLift g y) = (periodicLift f + periodicLift g)

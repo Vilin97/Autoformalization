@@ -66,7 +66,8 @@ lemma schwartz_log_bound
     calc -((|Real.log C_up| + |C_exp| + 1) * (1 + ‖v‖) ^ K_exp)
         ≤ -(C_exp * (1 + ‖v‖) ^ K_exp) := by
           apply neg_le_neg
-          exact mul_le_mul_of_nonneg_right (by linarith [le_abs_self C_exp, abs_nonneg (Real.log C_up)]) h1v_nn
+          exact mul_le_mul_of_nonneg_right
+            (by linarith [le_abs_self C_exp, abs_nonneg (Real.log C_up)]) h1v_nn
       _ = -C_exp * (1 + ‖v‖) ^ K_exp := by ring
       _ ≤ Real.log (f x v) := hlog_lower x v
   · -- log(f x v) ≤ (|log C_up| + |C_exp| + 1) * (1+‖v‖)^K_exp

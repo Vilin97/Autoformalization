@@ -112,8 +112,8 @@ private lemma coulomb_entry_conv_hasFDerivAt_aux
   · -- F integrable at v₀
     exact coulomb_entry_schwartz_integrable g hg_smooth hg_schwartz v₀ i j
   · -- F' measurable at v₀
-    exact ((coulomb_entry_schwartz_integrable g hg_smooth hg_schwartz v₀ i j).aestronglyMeasurable.mono
-      (fun u => by simp)).smul
+    exact ((coulomb_entry_schwartz_integrable g hg_smooth hg_schwartz v₀ i j)
+        .aestronglyMeasurable.mono (fun u => by simp)).smul
       ((hg_smooth.fderiv_right le_top).continuous.comp
         (continuous_const.sub continuous_id')).aestronglyMeasurable
   · -- Bound: ‖F'(v, u)‖ ≤ bound(u)
@@ -132,7 +132,8 @@ private lemma coulomb_entry_conv_hasFDerivAt_aux
     have : Integrable (fun u : Fin 3 → ℝ => ‖u‖⁻¹ * (1 : ℝ)) := by
       have h1_decay : ∀ N : ℕ, ∃ C > 0, ∀ w : Fin 3 → ℝ, |(1 : ℝ)| * (1 + ‖w‖) ^ N ≤ C := by
         intro N
-        exact ⟨1, one_pos, fun _ => by simp [one_le_pow_of_one_le (by linarith [norm_nonneg (α := Fin 3 → ℝ)])]⟩
+        exact ⟨1, one_pos, fun _ => by
+          simp [one_le_pow_of_one_le (by linarith [norm_nonneg (α := Fin 3 → ℝ)])]⟩
       exact inv_norm_schwartz_integrable _ h1_decay aestronglyMeasurable_const 0
     exact this.const_mul Cf |>.congr (ae_of_all _ fun u => by ring)
   · -- HasFDerivAt pointwise
@@ -150,10 +151,13 @@ lemma coulomb_entry_conv_differentiable
   -- Rewrite in u-coordinates and use HasFDerivAt
   suffices h : Differentiable ℝ (fun v => ∫ u, landauMatrix coulombKernel u i j * g (v - u)) by
     refine h.congr (fun v => ?_)
-    show (∫ u, landauMatrix coulombKernel u i j * g (v - u)) = ∫ w, landauMatrix coulombKernel (v - w) i j * g w
-    rw [← integral_sub_left_eq_self (fun w => landauMatrix coulombKernel w i j * g (v - w)) volume v]
+    show (∫ u, landauMatrix coulombKernel u i j * g (v - u)) =
+        ∫ w, landauMatrix coulombKernel (v - w) i j * g w
+    rw [← integral_sub_left_eq_self
+      (fun w => landauMatrix coulombKernel w i j * g (v - w)) volume v]
     simp [sub_sub_cancel]
-  exact fun v₀ => (coulomb_entry_conv_hasFDerivAt_aux g hg_smooth hg_schwartz i j v₀).differentiableAt
+  exact fun v₀ =>
+    (coulomb_entry_conv_hasFDerivAt_aux g hg_smooth hg_schwartz i j v₀).differentiableAt
 
 /-- The derivative of a Coulomb entry convolution with a Schwartz function is uniformly bounded.
     After substituting u = v - w, the fderiv acts only on g(v-u), giving
@@ -169,7 +173,8 @@ lemma coulomb_entry_conv_deriv_bounded
     (g : (Fin 3 → ℝ) → ℝ) (hg_smooth : ContDiff ℝ ⊤ g)
     (hg_schwartz : ∀ N k, ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k g v‖ * (1 + ‖v‖) ^ N ≤ C)
     (i j : Fin 3) :
-    ∃ C > 0, ∀ v, ‖fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * g w) v‖ ≤ C := by
+    ∃ C > 0, ∀ v,
+        ‖fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * g w) v‖ ≤ C := by
   -- Schwartz decay of fderiv g (absolute value form)
   have hfderiv_abs_decay : ∀ N : ℕ, ∃ C > 0, ∀ w,
       |‖fderiv ℝ g w‖| * (1 + ‖w‖) ^ N ≤ C := by
@@ -191,15 +196,18 @@ lemma coulomb_entry_conv_deriv_bounded
   have h_conv_eq : (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * g w) =
       (fun v => ∫ u, landauMatrix coulombKernel u i j * g (v - u)) := by
     ext v
-    show ∫ w, landauMatrix coulombKernel (v - w) i j * g w = ∫ u, landauMatrix coulombKernel u i j * g (v - u)
-    rw [← integral_sub_left_eq_self (fun w => landauMatrix coulombKernel w i j * g (v - w)) volume v]
+    show ∫ w, landauMatrix coulombKernel (v - w) i j * g w =
+        ∫ u, landauMatrix coulombKernel u i j * g (v - u)
+    rw [← integral_sub_left_eq_self
+      (fun w => landauMatrix coulombKernel w i j * g (v - w)) volume v]
     simp [sub_sub_cancel]
   rw [h_conv_eq]
   have h_hfd := coulomb_entry_conv_hasFDerivAt_aux g hg_smooth hg_schwartz i j v
   rw [h_hfd.fderiv]
   -- Bound ‖∫ A(u) • fderiv(g)(v-u) du‖ ≤ ∫ ‖u‖⁻¹ * ‖fderiv(g)(v-u)‖ du ≤ M
   calc ‖∫ u, landauMatrix coulombKernel u i j • fderiv ℝ g (v - u)‖
-      ≤ ∫ u, ‖landauMatrix coulombKernel u i j • fderiv ℝ g (v - u)‖ := norm_integral_le_integral_norm _
+      ≤ ∫ u, ‖landauMatrix coulombKernel u i j • fderiv ℝ g (v - u)‖ :=
+          norm_integral_le_integral_norm _
     _ = ∫ u, ‖landauMatrix coulombKernel u i j‖ * ‖fderiv ℝ g (v - u)‖ := by
         congr 1
         ext u
@@ -431,7 +439,8 @@ lemma coulomb_flux_deriv_schwartz_decay
       _ ≤ ∫ w, ‖v - w‖⁻¹ * |fderiv ℝ f w (Pi.single j 1)| := by
           apply integral_mono_of_nonneg (ae_of_all _ fun w => abs_nonneg _)
             (inv_norm_schwartz_integrable _ (hdf_decay_abs j)
-              (hf_smooth.fderiv_right le_top |>.clm_apply contDiff_const).continuous.aestronglyMeasurable v)
+              (hf_smooth.fderiv_right le_top |>.clm_apply contDiff_const)
+                .continuous.aestronglyMeasurable v)
             (ae_of_all _ fun w => by
               rw [abs_mul]
               by_cases hvw : v - w = 0
@@ -473,7 +482,8 @@ lemma coulomb_flux_deriv_schwartz_decay
     -- Schwartz decay of f with polynomial weight N
     obtain ⟨Mf_N, hMf_N_pos, hMf_N⟩ := hf_decay N
     refine ⟨Mdj_N * CKj + MK * Cdj + Mf_N * CLj + (ML + 1) * Cf + 1, by positivity, fun v => ?_⟩
-    -- Product rule: fderiv (a * b - c * d) = a • fderiv b + b • fderiv a - (c • fderiv d + d • fderiv c)
+    -- Product rule: fderiv (a * b - c * d) =
+    --   a • fderiv b + b • fderiv a - (c • fderiv d + d • fderiv c)
     have h_ab := (ha_diff j v).hasFDerivAt.mul (hK_diff j v).hasFDerivAt
     have h_cd := (hf_diff v).hasFDerivAt.mul (hL_diff j v).hasFDerivAt
     have h_fderiv := (h_ab.sub h_cd).fderiv
@@ -615,7 +625,8 @@ lemma coulomb_ibp_df_g_integrable
             gcongr; simp [Pi.norm_single]
         _ = ‖fderiv ℝ _ v‖ := mul_one _
         _ ≤ ‖fderiv ℝ _ v‖ * (1 + ‖v‖) ^ (K_log + 4) :=
-            le_mul_of_one_le_right (norm_nonneg _) (one_le_pow_of_one_le (by linarith [norm_nonneg v]) _)
+            le_mul_of_one_le_right (norm_nonneg _)
+              (one_le_pow_of_one_le (by linarith [norm_nonneg v]) _)
         _ ≤ C_fd := hfd_bound v
     -- Combine: |deriv| * |log f| ≤ (C_fd/(1+‖v‖)^(K+4)) * (C_log*(1+‖v‖)^K) = C_fd*C_log/(1+‖v‖)^4
     calc |fderiv ℝ _ v (Pi.single i 1)| * |Real.log (f v)|
