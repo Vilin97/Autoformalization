@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 90: Split CoulombFluxDiff, analyze ContDiff regularity
+
+### Changes
+- **Split CoulombFluxDiff.lean** (637 → 301 lines): extracted `schwartz_fderiv_component_schwartz`, `coulomb_entry_schwartz_integrable`, `coulomb_entry_conv_hasFDerivAt_aux`, `coulomb_entry_conv_differentiable`, `coulomb_entry_conv_deriv_bounded`, `coulomb_flux_differentiable`, `coulomb_flux_eq_decomposed` into new `CoulombFluxConv.lean` (353 lines). CoulombFluxDiff retains flux derivative decay and IBP integrability.
+- **Analyzed ContDiff regularity** (issue 8b, CLOSED): traced all `ContDiff` usage across the project. Concluded that ContDiff ℝ ⊤ is necessary for Coulomb — Schwartz decay of flux derivatives requires all seminorms, which needs C^∞. Cannot weaken without restructuring the abstract framework. Documented in `experiments/contdiff_regularity_analysis.md`.
+- Files over 600 lines: 4 → **3** (CoulombConcreteTheorem42 653, Defs 634, CoulombFlux 607).
+- Files: 28 → **29**. Lines: ~9,850.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 89: Split CoulombSpatialTransport, weaken UniformSchwartzDecay
 
 ### Changes
