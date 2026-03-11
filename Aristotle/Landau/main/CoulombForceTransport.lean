@@ -160,9 +160,8 @@ lemma force_fderiv_log_component_integrable
         have : ‖(Pi.single i (1 : ℝ) : Fin 3 → ℝ)‖ = ‖(1 : ℝ)‖ :=
           @Pi.norm_single (Fin 3) (fun _ => ℝ) _ _ (fun _ => inferInstance) (i := i) 1
         rw [this]; simp
-      have h_fder_eq : ‖fderiv ℝ (f x) v‖ = ‖iteratedFDeriv ℝ 1 (f x) v‖ := by
-        rw [show (1 : ℕ) = 0 + 1 from rfl, ← norm_iteratedFDeriv_fderiv,
-          norm_iteratedFDeriv_zero]
+      have h_fder_eq : ‖fderiv ℝ (f x) v‖ = ‖iteratedFDeriv ℝ 1 (f x) v‖ :=
+        norm_fderiv_eq_iteratedFDeriv_one _ _
       calc |fderiv ℝ (f x) v (Pi.single i 1)|
           = ‖fderiv ℝ (f x) v (Pi.single i 1)‖ := (Real.norm_eq_abs _).symm
         _ ≤ ‖fderiv ℝ (f x) v‖ * ‖(Pi.single i (1 : ℝ) : Fin 3 → ℝ)‖ :=

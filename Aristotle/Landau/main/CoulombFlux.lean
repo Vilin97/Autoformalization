@@ -114,10 +114,7 @@ lemma schwartz_partial_decay
     rw [← Real.norm_eq_abs]
     exact le_trans (ContinuousLinearMap.le_opNorm _ _)
       (mul_le_of_le_one_right (norm_nonneg _) (by simp +decide [Pi.norm_single]))
-  have h2 : ‖fderiv ℝ (f x) w‖ = ‖iteratedFDeriv ℝ 1 (f x) w‖ := by
-    rw [show (1 : ℕ) = 0 + 1 from rfl, ← norm_iteratedFDeriv_fderiv,
-      norm_iteratedFDeriv_zero]
-  rw [h2] at h1
+  rw [norm_fderiv_eq_iteratedFDeriv_one] at h1
   exact le_trans (mul_le_mul_of_nonneg_right h1 (by positivity)) (hC x w)
 
 

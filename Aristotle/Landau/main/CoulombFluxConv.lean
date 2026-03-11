@@ -178,9 +178,7 @@ lemma coulomb_entry_conv_deriv_bounded
     refine ⟨C, hC, fun w => ?_⟩
     rw [abs_of_nonneg (norm_nonneg _)]
     calc ‖fderiv ℝ g w‖ * (1 + ‖w‖) ^ N
-        = ‖iteratedFDeriv ℝ 1 g w‖ * (1 + ‖w‖) ^ N := by
-          rw [← norm_iteratedFDeriv_zero (𝕜 := ℝ) (f := fderiv ℝ g),
-              norm_iteratedFDeriv_fderiv]
+        = ‖iteratedFDeriv ℝ 1 g w‖ * (1 + ‖w‖) ^ N := by rw [norm_fderiv_eq_iteratedFDeriv_one]
       _ ≤ C := hb w
   -- Uniform bound on convolution via newtonian_schwartz_uniform_bound
   obtain ⟨M, hM_pos, hM⟩ := newtonian_schwartz_uniform_bound

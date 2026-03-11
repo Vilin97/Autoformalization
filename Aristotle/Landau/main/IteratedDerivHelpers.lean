@@ -39,6 +39,14 @@ lemma norm_iteratedFDeriv_one_clm {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     funext fun y => f.hasFDerivAt.fderiv, iteratedFDeriv_zero_eq_comp,
     LinearIsometryEquiv.norm_map]
 
+/-- `‖fderiv f v‖ = ‖iteratedFDeriv 1 f v‖`. Converts between the ContinuousLinearMap
+    norm and the ContinuousMultilinearMap norm at order 1. -/
+lemma norm_fderiv_eq_iteratedFDeriv_one {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E F : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [NormedAddCommGroup F] [NormedSpace 𝕜 F] (f : E → F) (v : E) :
+    ‖fderiv 𝕜 f v‖ = ‖iteratedFDeriv 𝕜 1 f v‖ := by
+  rw [← norm_iteratedFDeriv_zero (𝕜 := 𝕜) (f := fderiv 𝕜 f), norm_iteratedFDeriv_fderiv]
+
 -- ============================================================================
 -- Polynomial/quadratic iterated derivative bounds
 -- ============================================================================
