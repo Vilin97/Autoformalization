@@ -84,6 +84,40 @@ I found no issue.
 
 ---
 
+## 8f. Code Style (AI Fingerprints)
+
+Compared against two human-written Lean 4 formalizations of comparable scope:
+- [Sphere Packing](https://github.com/thefundamentaltheor3m/Sphere-Packing-Lean) (22k LOC, 1615 decls, 89 files)
+- [Brownian Motion](https://github.com/RemyDegenne/brownian-motion) (15k LOC, 956 decls, 50+ files)
+
+| Metric | Aristotle | Sphere Packing | Brownian Motion |
+|---|---|---|---|
+| Max line length | **697** | 195 | 259 |
+| Lines > 200 chars | **60** | **0** | 4 |
+| Trailing semicolons | **352** | 34 | 4 |
+| Spaces inside parens `( foo )` | **114** | 3 | 1 |
+| Module docstrings `/-! -/` | **0** | 81 | 42 |
+| Copyright headers | **0** | 36 | 38 |
+| Lines/declaration | **33.9** | 13.9 | 15.5 |
+
+**Diagnosis**: The codebase has unmistakable AI-generation artifacts.
+
+1. **Mega-lines**: 60 lines exceed 200 chars (worst: 697). Human Lean projects cap at ~120. These are multi-tactic chains crammed onto one line (e.g., `CoulombPSD.lean` landau_bound proof).
+2. **Trailing semicolons**: 352 occurrences. Idiomatic Lean uses one tactic per line with structured indentation, not `;` chains. Human projects have near-zero.
+3. **Spaces inside parentheses**: `( foo )` instead of `(foo)` — 114 occurrences vs. ~0 in human code. Dead giveaway.
+4. **No module docstrings**: Zero `/-! ... -/` headers. Every file in the human projects has one explaining purpose and contents.
+5. **No copyright headers**: Standard in collaborative Lean. Missing here.
+6. **Bloated proofs**: 33.9 lines/declaration vs. ~14 in human projects. AI inlines everything instead of decomposing into small helper lemmas.
+
+**Priority fixes** (by impact):
+1. Break lines > 100 chars (especially the 60 lines > 200 chars)
+2. Replace trailing `;` with structured `<;>` or newline-separated tactics
+3. Remove spaces inside parens: `( foo )` → `(foo)`
+4. Add `/-! ... -/` module docstrings to all 22 files
+5. Decompose long proofs into smaller lemmas
+
+---
+
 ## 9. Mathlib Upstreamability
 
 `iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` (in Section3Helpers) are PR-ready.
@@ -96,7 +130,8 @@ I found no issue.
 |---|-------|----------|--------|
 | 6b | 7 files over 600 lines | Minor | Open |
 | 8e | Defs.lean too large (788 lines) | Minor | Open |
+| 8f | AI code style artifacts (long lines, semicolons, spacing) | Moderate | Open |
 
 ### Conditions for ACCEPT
 
-This is an ACCEPT. All remaining issues are minor code quality.
+This is an ACCEPT. The math is sound. The code style issues (8f) do not affect correctness but make the codebase visibly AI-generated, which undermines credibility for peer review.
