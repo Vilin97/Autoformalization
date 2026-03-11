@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 71: Extract remaining derivative helpers
+
+### Changes
+- **Extracted 4 lemmas** (`norm_sq_le_normSq`, `contDiff_negNormSq_div`, `norm_iteratedFDeriv_proj_sq_le`, `quadratic_iteratedFDeriv_bound`) from CoulombConcreteTheorem42.lean to Section3Helpers.lean.
+- CoulombConcreteTheorem42.lean: 742→636 lines (reduced by 106 lines). Now a focused theorem file.
+- Section3Helpers.lean: 647→757 lines (received derivative bound helpers).
+- Updated critique to cycle 71 (still ACCEPT).
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 70: Code quality — extract helpers, fix long lines
 
 ### Changes
