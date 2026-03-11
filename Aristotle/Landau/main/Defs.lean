@@ -115,7 +115,7 @@ lemma equilibriumMaxwellian_pos (ρ T : ℝ) (hρ : 0 < ρ) (hT : 0 < T) (v : Fi
   unfold equilibriumMaxwellian
   apply mul_pos
   · apply div_pos hρ
-    exact Real.rpow_pos (by positivity)
+    exact Real.rpow_pos_of_pos (by positivity) _
   · exact Real.exp_pos _
 
 -- ============================================================================

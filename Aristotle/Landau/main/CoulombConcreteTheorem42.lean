@@ -357,6 +357,39 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
          fun _ => 0, fun _ => 0,
          fun _ v => equilibriumMaxwellian_pos ρ_ion T hρ_ion hT v,  -- (3) ✓
          ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  all_goals sorry
+  -- (4) hf_smooth_v: equilibriumMaxwellian is C^∞
+  · intro _
+    unfold equilibriumMaxwellian
+    apply ContDiff.mul contDiff_const
+    apply ContDiff.exp
+    apply ContDiff.div_const
+    apply ContDiff.neg
+    unfold normSq dotProduct
+    exact ContDiff.sum fun i _ =>
+      (contDiff_apply ℝ ℝ i).mul (contDiff_apply ℝ ℝ i)
+  -- (5) hf_smooth_x: periodicLift of constant is C^∞
+  · intro v
+    simp only [periodicLift, Function.comp]
+    exact contDiff_const
+  -- (6) hB_smooth: periodicLift of zero is C^∞
+  · intro i
+    simp only [periodicLift, Function.comp, Pi.zero_apply]
+    exact contDiff_const
+  -- (7) hSchwartz: Gaussian is UniformSchwartzDecay
+  · sorry
+  -- (8) hExpDecay: exponential decay bound
+  · sorry
+  -- (9) hGradBound: gradient bound
+  · sorry
+  -- (10) hVlasov: Vlasov equation
+  · sorry
+  -- (11) hAmpere: Ampere's law
+  · sorry
+  -- (12) hGauss: Gauss's law
+  · sorry
+  -- (13) hDivB: divergence of B = 0
+  · intro x
+    simp only [torusDivX, periodicLift, Function.comp, Pi.zero_apply]
+    simp [fderiv_const, ContinuousLinearMap.zero_apply]
 
 end VML
