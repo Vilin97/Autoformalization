@@ -99,8 +99,10 @@ lemma tendsto_landau_quadratic_diag
             have h2 := norm_le_pi_norm z (2 : Fin 3)
             rw [Real.norm_eq_abs] at h0 h1 h2
             nlinarith [sq_abs (z 0), sq_abs (z 1), sq_abs (z 2),
-              sq_nonneg ‖z‖, sq_le_sq' (by linarith) h0,
-              sq_le_sq' (by linarith) h1, sq_le_sq' (by linarith) h2]
+              sq_nonneg ‖z‖,
+              sq_le_sq' (by linarith [abs_nonneg (z 0), norm_nonneg z]) h0,
+              sq_le_sq' (by linarith [abs_nonneg (z 1), norm_nonneg z]) h1,
+              sq_le_sq' (by linarith [abs_nonneg (z 2), norm_nonneg z]) h2]
           refine ⟨ U, hU.1, hU.2.1, Real.sqrt 3 * L, fun u v hu hv => ?_ ⟩
           by_cases huv : u = v
           · simp [huv, eucNorm, normSq, dotProduct]
