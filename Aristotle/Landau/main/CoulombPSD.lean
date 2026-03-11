@@ -31,7 +31,13 @@ lemma landau_bound (z u : Fin 3 → ℝ) :
           exact h_cancel;
         rw [ Real.sq_sqrt (by positivity), Real.sq_sqrt (by exact Finset.sum_nonneg fun _ _ => mul_self_nonneg _) ];
         norm_num [ Fin.sum_univ_three, dotProduct ] at *;
-        exact abs_le.mpr ⟨ by nlinarith [ sq_nonneg (z 0 * u 1 - z 1 * u 0), sq_nonneg (z 0 * u 2 - z 2 * u 0), sq_nonneg (z 1 * u 2 - z 2 * u 1) ], by nlinarith [ sq_nonneg (z 0 * u 1 - z 1 * u 0), sq_nonneg (z 0 * u 2 - z 2 * u 0), sq_nonneg (z 1 * u 2 - z 2 * u 1) ] ⟩
+        exact abs_le.mpr
+          ⟨ by nlinarith [ sq_nonneg (z 0 * u 1 - z 1 * u 0),
+                           sq_nonneg (z 0 * u 2 - z 2 * u 0),
+                           sq_nonneg (z 1 * u 2 - z 2 * u 1) ],
+            by nlinarith [ sq_nonneg (z 0 * u 1 - z 1 * u 0),
+                           sq_nonneg (z 0 * u 2 - z 2 * u 0),
+                           sq_nonneg (z 1 * u 2 - z 2 * u 1) ] ⟩
 
 
 lemma tendsto_landau_quadratic_diag
@@ -75,9 +81,21 @@ lemma tendsto_landau_quadratic_diag
             norm_num [ normSq, Pi.norm_def ];
             constructor <;> norm_num [ Fin.sum_univ_three, dotProduct ] at * <;> ring_nf at * <;> norm_num at *;
             · rw [ Real.sqrt_le_iff ] ; norm_num [ Fin.univ_succ ] ; ring_nf ; norm_num;
-              nlinarith only [ abs_le.mp (show |G u 0 - G v 0| ≤ Max.max |G u 0 - G v 0| (Max.max |G u 1 - G v 1| |G u 2 - G v 2|) by exact le_max_left _ _), abs_le.mp (show |G u 1 - G v 1| ≤ Max.max |G u 0 - G v 0| (Max.max |G u 1 - G v 1| |G u 2 - G v 2|) by exact le_max_of_le_right (le_max_left _ _) ), abs_le.mp (show |G u 2 - G v 2| ≤ Max.max |G u 0 - G v 0| (Max.max |G u 1 - G v 1| |G u 2 - G v 2|) by exact le_max_of_le_right (le_max_right _ _) ) ];
+              nlinarith only [
+                abs_le.mp (show |G u 0 - G v 0| ≤ Max.max |G u 0 - G v 0| (Max.max |G u 1 - G v 1| |G u 2 - G v 2|)
+                  by exact le_max_left _ _),
+                abs_le.mp (show |G u 1 - G v 1| ≤ Max.max |G u 0 - G v 0| (Max.max |G u 1 - G v 1| |G u 2 - G v 2|)
+                  by exact le_max_of_le_right (le_max_left _ _) ),
+                abs_le.mp (show |G u 2 - G v 2| ≤ Max.max |G u 0 - G v 0| (Max.max |G u 1 - G v 1| |G u 2 - G v 2|)
+                  by exact le_max_of_le_right (le_max_right _ _) ) ];
             · refine Real.le_sqrt_of_sq_le _ ; norm_num [ Fin.univ_succ ] ; ring_nf ; (
-              rw [ max_def, max_def ] ; split_ifs <;> nlinarith [ sq_nonneg (u 0 - v 0), sq_nonneg (u 1 - v 1), sq_nonneg (u 2 - v 2), abs_mul_abs_self (u 0 - v 0), abs_mul_abs_self (u 1 - v 1), abs_mul_abs_self (u 2 - v 2) ] ;);
+              rw [ max_def, max_def ]
+              split_ifs <;> nlinarith [ sq_nonneg (u 0 - v 0),
+                                        sq_nonneg (u 1 - v 1),
+                                        sq_nonneg (u 2 - v 2),
+                                        abs_mul_abs_self (u 0 - v 0),
+                                        abs_mul_abs_self (u 1 - v 1),
+                                        abs_mul_abs_self (u 2 - v 2) ] );
           refine le_trans h_euc_norm.1 ?_;
           refine le_trans (mul_le_mul_of_nonneg_left (hL u hu v hv) (Real.sqrt_nonneg _) ) ?_;
           rw [ mul_assoc ];
@@ -87,17 +105,26 @@ lemma tendsto_landau_quadratic_diag
           · contrapose! hL;
             obtain ⟨u, hu, v, hv, huv⟩ : ∃ u ∈ U, ∃ v ∈ U, u ≠ v := by
               rcases Metric.isOpen_iff.mp hU.1 x hU.2.1 with ⟨ ε, εpos, hε ⟩;
-              exact ⟨ x, hε <| Metric.mem_ball_self εpos, x + fun _ => ε / 2, hε <| Metric.mem_ball.mpr <| by simpa [ abs_of_pos εpos ] using by linarith, ne_of_apply_ne (fun u => u 0) <| by norm_num; linarith ⟩;
+              exact ⟨ x, hε <| Metric.mem_ball_self εpos,
+                      x + fun _ => ε / 2,
+                      hε <| Metric.mem_ball.mpr <| by simpa [ abs_of_pos εpos ] using by linarith,
+                      ne_of_apply_ne (fun u => u 0) <| by norm_num; linarith ⟩;
             exact ⟨ u, hu, v, hv, lt_of_lt_of_le (mul_neg_of_neg_of_pos hL (norm_pos_iff.mpr (sub_ne_zero.mpr huv) )) (norm_nonneg _) ⟩;
           · exact h_euc_norm.2;
         obtain ⟨L, hL⟩ := hU.right.right;
-        have h_bound : ∀ᶠ p : (Fin 3 → ℝ) × (Fin 3 → ℝ) in nhds (x, x), abs ((G p.1 - G p.2) ⬝ᵥ landauMatrix coulombKernel (p.1 - p.2) *ᵥ (G p.1 - G p.2)) ≤ (if eucNorm (p.1 - p.2) = 0 then 0 else (eucNorm (p.1 - p.2))⁻¹) * (L * eucNorm (p.1 - p.2))^2 := by
+        have h_bound : ∀ᶠ p : (Fin 3 → ℝ) × (Fin 3 → ℝ) in nhds (x, x),
+            abs ((G p.1 - G p.2) ⬝ᵥ landauMatrix coulombKernel (p.1 - p.2) *ᵥ (G p.1 - G p.2)) ≤
+            (if eucNorm (p.1 - p.2) = 0 then 0 else (eucNorm (p.1 - p.2))⁻¹) *
+            (L * eucNorm (p.1 - p.2))^2 := by
           have h_bound : ∀ᶠ p : (Fin 3 → ℝ) × (Fin 3 → ℝ) in nhds (x, x), eucNorm (G p.1 - G p.2) ≤ L * eucNorm (p.1 - p.2) := by
             exact Filter.eventually_of_mem (IsOpen.mem_nhds (hU.1.prod hU.1) (by aesop) ) fun p hp => hL _ _ hp.1 hp.2;
           filter_upwards [ h_bound ] with p hp;
           refine le_trans (landau_bound _ _) _;
           split_ifs <;> simp_all +decide [ mul_pow ];
-          exact mul_le_mul_of_nonneg_left (by nlinarith [ show 0 ≤ eucNorm (G p.1 - G p.2) from Real.sqrt_nonneg _, show 0 ≤ L * eucNorm (p.1 - p.2) from le_trans (Real.sqrt_nonneg _) hp ]) (inv_nonneg.2 (Real.sqrt_nonneg _) );
+          exact mul_le_mul_of_nonneg_left
+            (by nlinarith [ show 0 ≤ eucNorm (G p.1 - G p.2) from Real.sqrt_nonneg _,
+                            show 0 ≤ L * eucNorm (p.1 - p.2) from le_trans (Real.sqrt_nonneg _) hp ])
+            (inv_nonneg.2 (Real.sqrt_nonneg _) );
         have h_simplified_bound : ∀ᶠ p : (Fin 3 → ℝ) × (Fin 3 → ℝ) in nhds (x, x), abs ((G p.1 - G p.2) ⬝ᵥ landauMatrix coulombKernel (p.1 - p.2) *ᵥ (G p.1 - G p.2)) ≤ L^2 * eucNorm (p.1 - p.2) := by
           filter_upwards [ h_bound ] with p hp using le_trans hp (by split_ifs <;> simpa [ *, sq, mul_assoc, mul_comm, mul_left_comm ] using by ring_nf; norm_num) ;
         refine squeeze_zero_norm' h_simplified_bound _;
@@ -130,7 +157,11 @@ lemma continuous_landau_quadratic
                 · filter_upwards [ lt_mem_nhds h_pos ] with z hz using by unfold coulombKernel; split_ifs <;> linarith;
               exact h_cont_coulomb.comp h_cont_eucNorm;
             · refine Continuous.tendsto _ _;
-              exact Continuous.smul (show Continuous fun z : Fin 3 → ℝ => normSq z from by exact Continuous.matrix_dotProduct (continuous_id') (continuous_id') ) (continuous_const) |> Continuous.sub <| Continuous.matrix_vecMulVec (continuous_id') (continuous_id')
+              exact Continuous.smul
+                (show Continuous fun z : Fin 3 → ℝ => normSq z from
+                  by exact Continuous.matrix_dotProduct (continuous_id') (continuous_id') )
+                (continuous_const)
+                |> Continuous.sub <| Continuous.matrix_vecMulVec (continuous_id') (continuous_id')
           have h_cont_G : ContinuousAt (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => G p.1 - G p.2) p := by
             exact ContinuousAt.sub (hG.continuous.continuousAt.comp continuousAt_fst) (hG.continuous.continuousAt.comp continuousAt_snd)
           have h_cont_F : ContinuousAt (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => (G p.1 - G p.2) ⬝ᵥ (landauMatrix coulombKernel (p.1 - p.2)) *ᵥ (G p.1 - G p.2)) p := by

@@ -26,7 +26,10 @@ lemma measure_torus_eq_map :
     (volume : Measure Torus3) =
     (volume.restrict box3).map torusMk := by
       have h_volume_eq : MeasureTheory.MeasureSpace.volume = MeasureTheory.Measure.map torusMk (MeasureTheory.Measure.pi (fun _ => MeasureTheory.MeasureSpace.volume.restrict (Set.Ioc 0 1))) := by
-        have h_volume_eq : ∀ i : Fin 3, (MeasureTheory.MeasureSpace.volume.restrict (Set.Ioc 0 1)).map (fun x => QuotientAddGroup.mk x : ℝ → AddCircle (1 : ℝ)) = MeasureTheory.MeasureSpace.volume := by
+        have h_volume_eq : ∀ i : Fin 3,
+            (MeasureTheory.MeasureSpace.volume.restrict (Set.Ioc 0 1)).map
+              (fun x => QuotientAddGroup.mk x : ℝ → AddCircle (1 : ℝ)) =
+            MeasureTheory.MeasureSpace.volume := by
           intro i;
           symm;
           convert (AddCircle.measurePreserving_mk 1 (0 : ℝ) |> MeasureTheory.MeasurePreserving.map_eq) using 1;
@@ -77,11 +80,24 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
     ∫ y in box3, fderiv ℝ F y (Pi.single i 1) = 0 := by
       have h_periodic : ∀ x : Fin 3 → ℝ, (F (x + Pi.single i 1)) = (F x) := by
         assumption;
-      have h_fubini : ∀ (g : (Fin 3 → ℝ) → ℝ), Continuous g → (∫ y in (Set.pi Set.univ (fun _ => Set.Ioc 0 1)), g y) = (∫ y : ℝ in Set.Ioc 0 1, ∫ z : Fin 2 → ℝ in (Set.pi Set.univ (fun _ => Set.Ioc 0 1)), g (Fin.insertNth i y z)) := by
+      have h_fubini : ∀ (g : (Fin 3 → ℝ) → ℝ), Continuous g →
+          (∫ y in (Set.pi Set.univ (fun _ => Set.Ioc 0 1)), g y) =
+          (∫ y : ℝ in Set.Ioc 0 1,
+            ∫ z : Fin 2 → ℝ in (Set.pi Set.univ (fun _ => Set.Ioc 0 1)),
+              g (Fin.insertNth i y z)) := by
         intro g hg
-        have h_fubini : ∫ y : Fin 3 → ℝ in (Set.pi Set.univ (fun _ => Set.Ioc 0 1)), g y = ∫ y : ℝ × (Fin 2 → ℝ) in (Set.Ioc 0 1) ×ˢ (Set.pi Set.univ (fun _ => Set.Ioc 0 1)), g (Fin.insertNth i y.1 y.2) := by
+        have h_fubini :
+            ∫ y : Fin 3 → ℝ in (Set.pi Set.univ (fun _ => Set.Ioc 0 1)), g y =
+            ∫ y : ℝ × (Fin 2 → ℝ) in
+              (Set.Ioc 0 1) ×ˢ (Set.pi Set.univ (fun _ => Set.Ioc 0 1)),
+              g (Fin.insertNth i y.1 y.2) := by
           rw [ ← MeasureTheory.integral_indicator, ← MeasureTheory.integral_indicator ];
-          · have h_iso : (MeasureTheory.volume : MeasureTheory.Measure (Fin 3 → ℝ)) = MeasureTheory.Measure.map (fun x : ℝ × (Fin 2 → ℝ) => Fin.insertNth i x.1 x.2) (MeasureTheory.volume.prod (MeasureTheory.volume : MeasureTheory.Measure (Fin 2 → ℝ))) := by
+          · have h_iso :
+                (MeasureTheory.volume : MeasureTheory.Measure (Fin 3 → ℝ)) =
+                MeasureTheory.Measure.map
+                  (fun x : ℝ × (Fin 2 → ℝ) => Fin.insertNth i x.1 x.2)
+                  (MeasureTheory.volume.prod
+                    (MeasureTheory.volume : MeasureTheory.Measure (Fin 2 → ℝ))) := by
               simp +decide [ MeasureTheory.MeasureSpace.volume ];
               erw [ MeasureTheory.Measure.pi_eq ];
               intro s hs; erw [ MeasureTheory.Measure.map_apply ];
@@ -136,14 +152,26 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
           refine hg.comp_continuousOn ?_;
           refine Continuous.continuousOn ?_;
           fin_cases i <;> simp +decide [ Fin.insertNth ];
-          · exact continuous_pi_iff.mpr fun i => by fin_cases i <;> [ exact continuous_fst; exact continuous_apply 0 |> Continuous.comp <| continuous_snd; exact continuous_apply 1 |> Continuous.comp <| continuous_snd ] ;
+          · exact continuous_pi_iff.mpr fun i => by
+              fin_cases i <;>
+              [ exact continuous_fst
+              ; exact continuous_apply 0 |> Continuous.comp <| continuous_snd
+              ; exact continuous_apply 1 |> Continuous.comp <| continuous_snd ] ;
           · refine continuous_pi_iff.mpr ?_;
             intro i; fin_cases i <;> simp +decide [ Fin.insertNth ] ;
             · exact continuous_apply 0 |> Continuous.comp <| continuous_snd;
             · exact continuous_fst;
             · exact continuous_apply 1 |> Continuous.comp <| continuous_snd;
-          · exact continuous_pi_iff.mpr fun i => by fin_cases i <;> [ exact continuous_pi_iff.mp continuous_snd 0; exact continuous_pi_iff.mp continuous_snd 1; exact continuous_fst ] ;
-        exact (h_integrable.integrableOn_compact (isCompact_Icc.prod (isCompact_univ_pi fun _ => CompactIccSpace.isCompact_Icc) )) |> fun h => h.mono_set (Set.prod_mono (Set.Ioc_subset_Icc_self) (Set.pi_mono fun _ _ => Set.Ioc_subset_Icc_self) );
+          · exact continuous_pi_iff.mpr fun i => by
+              fin_cases i <;>
+              [ exact continuous_pi_iff.mp continuous_snd 0
+              ; exact continuous_pi_iff.mp continuous_snd 1
+              ; exact continuous_fst ] ;
+        exact (h_integrable.integrableOn_compact
+            (isCompact_Icc.prod (isCompact_univ_pi fun _ => CompactIccSpace.isCompact_Icc)))
+          |> fun h => h.mono_set
+            (Set.prod_mono (Set.Ioc_subset_Icc_self)
+              (Set.pi_mono fun _ _ => Set.Ioc_subset_Icc_self));
       have h_ftc : ∀ (z : Fin 2 → ℝ), ∫ y in Set.Ioc 0 1, (fderiv ℝ F (Fin.insertNth i y z)) (Pi.single i 1) = 0 := by
         intro z
         have h_ftc : ∫ y in (0 : ℝ)..1, (fderiv ℝ F (Fin.insertNth i y z)) (Pi.single i 1) = F (Fin.insertNth i 1 z) - F (Fin.insertNth i 0 z) := by
@@ -196,7 +224,12 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
                 · exact continuous_fst;
             exact Continuous.eval_const h_cont (Pi.single i 1);
           rw [ MeasureTheory.Measure.prod_restrict ];
-          exact ContinuousOn.integrableOn_compact (isCompact_Icc.prod (isCompact_univ_pi fun _ => CompactIccSpace.isCompact_Icc) ) (h_cont.continuousOn) |> fun h => h.mono_set (Set.prod_mono (Set.Ioc_subset_Icc_self) (Set.pi_mono fun _ _ => Set.Ioc_subset_Icc_self) );
+          exact ContinuousOn.integrableOn_compact
+              (isCompact_Icc.prod (isCompact_univ_pi fun _ => CompactIccSpace.isCompact_Icc))
+              (h_cont.continuousOn)
+            |> fun h => h.mono_set
+              (Set.prod_mono (Set.Ioc_subset_Icc_self)
+                (Set.pi_mono fun _ _ => Set.Ioc_subset_Icc_self));
       · fun_prop (disch := norm_num)
 
 end AristotleLemmas

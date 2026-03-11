@@ -155,14 +155,31 @@ theorem fubini_symmetrization_logf (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
       2 * ∫ v, ∫ w, dotProduct (vGrad (Real.log ∘ f) v)
         (mulVec (landauMatrix Ψ (v - w))
           (f w • vGrad f v - f v • vGrad f w)) := by
-  have h_integrable_swap : Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => vGrad (Real.log ∘ f) p.2 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2)) MeasureSpace.volume := by
-    have h_integrable : Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2)) MeasureSpace.volume ∧ Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => f p.2 • (vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ vGrad f p.1) - f p.1 • (vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ vGrad f p.2)) MeasureSpace.volume := by
+  have h_integrable_swap :
+      Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
+        vGrad (Real.log ∘ f) p.2 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ
+          (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2)) MeasureSpace.volume := by
+    have h_integrable :
+        Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
+          vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ
+            (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2)) MeasureSpace.volume ∧
+        Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
+          f p.2 • (vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ vGrad f p.1) -
+          f p.1 • (vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ
+            vGrad f p.2)) MeasureSpace.volume := by
       convert h_int_double using 1
       simp +decide [mul_sub, sub_mul, mul_assoc, mul_comm, Finset.mul_sum _ _ _, Matrix.mulVec, dotProduct]
     have h_mp : MeasurePreserving (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => (p.2, p.1)) MeasureSpace.volume MeasureSpace.volume :=
       ⟨measurable_swap, Measure.prod_swap ..⟩
-    have h_swap_int : Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => vGrad (Real.log ∘ f) p.2 ⬝ᵥ landauMatrix Ψ (p.2 - p.1) *ᵥ (f p.1 • vGrad f p.2 - f p.2 • vGrad f p.1)) MeasureSpace.volume := by
-      have : Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2)) (Measure.map (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => (p.2, p.1)) MeasureSpace.volume) := by
+    have h_swap_int :
+        Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
+          vGrad (Real.log ∘ f) p.2 ⬝ᵥ landauMatrix Ψ (p.2 - p.1) *ᵥ
+            (f p.1 • vGrad f p.2 - f p.2 • vGrad f p.1)) MeasureSpace.volume := by
+      have : Integrable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
+          vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ
+            (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2))
+          (Measure.map (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => (p.2, p.1))
+            MeasureSpace.volume) := by
         rw [h_mp.map_eq]; exact h_integrable.1
       convert this.comp_measurable measurable_swap using 1
     convert h_swap_int.neg using 1
@@ -171,7 +188,16 @@ theorem fubini_symmetrization_logf (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
     rw [landauMatrix_sub_comm]
     simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_three, Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
     ring
-  have h_split : ∫ v, ∫ w, (vGrad (Real.log ∘ f) v - vGrad (Real.log ∘ f) w) ⬝ᵥ landauMatrix Ψ (v - w) *ᵥ (f w • vGrad f v - f v • vGrad f w) = (∫ v, ∫ w, vGrad (Real.log ∘ f) v ⬝ᵥ landauMatrix Ψ (v - w) *ᵥ (f w • vGrad f v - f v • vGrad f w)) - (∫ v, ∫ w, vGrad (Real.log ∘ f) w ⬝ᵥ landauMatrix Ψ (v - w) *ᵥ (f w • vGrad f v - f v • vGrad f w)) := by
+  have h_split :
+      ∫ v, ∫ w,
+        (vGrad (Real.log ∘ f) v - vGrad (Real.log ∘ f) w) ⬝ᵥ
+          landauMatrix Ψ (v - w) *ᵥ (f w • vGrad f v - f v • vGrad f w) =
+      (∫ v, ∫ w,
+        vGrad (Real.log ∘ f) v ⬝ᵥ
+          landauMatrix Ψ (v - w) *ᵥ (f w • vGrad f v - f v • vGrad f w)) -
+      (∫ v, ∫ w,
+        vGrad (Real.log ∘ f) w ⬝ᵥ
+          landauMatrix Ψ (v - w) *ᵥ (f w • vGrad f v - f v • vGrad f w)) := by
     convert MeasureTheory.integral_sub h_int_double h_integrable_swap using 1
     · erw [MeasureTheory.integral_prod]
       · simp +decide [sub_mul, dotProduct_sub]

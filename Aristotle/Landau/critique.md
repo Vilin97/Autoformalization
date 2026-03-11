@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-10 UTC (Cycle 75)
+# Adversarial Critique — 2026-03-10 UTC (Cycle 76)
 
 ## Verdict: ACCEPT
 
@@ -6,7 +6,7 @@
 
 ## 0. Errors
 
-`lake build` — **clean, 0 errors.** Builds from source (verified cycle 73).
+`lake build Aristotle.Landau.main.CoulombConcreteTheorem42` — **clean, 0 errors.** Forced rebuild of TorusDefs.lean and Section3Helpers.lean (deleted .olean, rebuilt) — also clean.
 
 ---
 
@@ -18,7 +18,7 @@
 
 ## 2. Hidden Axioms
 
-Zero axioms on both main theorems (verified cycle 70). I found no issue.
+`lean_verify` on `VML.coulomb_concrete_theorem42`: `{"axioms":[],"warnings":[]}`. Zero axioms beyond the standard Lean 4 kernel axioms. No `admit`, `axiom`, `native_decide`, or `Decidable.decide` in any source file. I found no issue.
 
 ---
 
@@ -50,31 +50,34 @@ I found no issue.
 
 | File | Lines |
 |------|-------|
+| Section3Helpers.lean | 944 |
 | TorusInstance.lean | 815 |
 | Defs.lean | 788 |
-| Section3Helpers.lean | 770 |
 | CoulombPSD.lean | 711 |
 | CoulombSpatialTransport.lean | 670 |
 | CoulombConcreteTheorem42.lean | 623 |
 | CoulombFluxDiff.lean | 616 |
 
+Section3Helpers.lean has grown to **944 lines** (from 770 last cycle) — the mega-line breaking added indentation lines. It is now the longest file and urgently needs splitting.
+
 ### 6c. AI code style artifacts
 
 | Metric | Current | Target |
 |---|---|---|
-| Lines > 200 chars | **51** (6 files) | 0 |
-| Semicolons (`;`) | **1146** (21 files) | < 50 |
-| ~~Spaces inside parens~~ | ~~0~~ | ~~0~~ DONE |
-| ~~Module docstrings~~ | ~~22/22~~ | ~~22/22~~ DONE |
-| Max line length | **697** (Section3Helpers) | < 120 |
+| Lines > 200 chars | **22** (4 files) | 0 |
+| Lines > 100 chars | **222** (17 files) | 0 |
+| Semicolons (`;`) | **1095** (21 files) | < 50 |
+| Max line length | **458** (CoulombPSD) | < 120 |
 
-Worst offenders for long lines: Section3Helpers (20), NewtonianPotential (9), TorusInstance (7), CoulombPSD (7).
+Worst offenders for long lines (> 200 chars): CoulombPSD (7), TorusInstance (7), Section3 (4), VelocityDecayInstance (4).
+
+Worst offenders for lines > 100 chars: Section3Helpers (65), CoulombPSD (46), TorusInstance (41), NewtonianPotential (18).
 
 ---
 
 ## 7. Documentation Lies
 
-I found no issue.
+MEMORY.md says Section3Helpers.lean is ~770 lines. It is actually **944 lines**. MEMORY.md says CoulombFlux.lean is ~616 lines; it is actually **597 lines**. These are stale.
 
 ---
 
@@ -90,6 +93,10 @@ I found no issue.
 
 ### 8e. Split Defs.lean (MEDIUM)
 
+### 8f. Split Section3Helpers.lean (NEW — HIGH PRIORITY)
+
+At 944 lines, Section3Helpers.lean is now the longest file. It contains both Gaussian-specific helpers (equilibrium Maxwellian) and general iterated-derivative helpers (iteratedFDeriv for CLMs). These are logically independent and should be in separate files.
+
 ---
 
 ## 9. Mathlib Upstreamability
@@ -102,9 +109,11 @@ I found no issue.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6b | 7 files over 600 lines | Minor | Open |
-| 6c | 51 mega-lines, 1146 semicolons | Moderate | Open |
+| 6b | 7 files over 600 lines (Section3Helpers now 944) | Moderate | Open |
+| 6c | 22 mega-lines (4 files), 222 lines >100 chars, 1095 semicolons | Moderate | Open |
+| 7 | MEMORY.md line counts stale | Minor | Open |
 | 8e | Defs.lean too large (788 lines) | Minor | Open |
+| 8f | Section3Helpers.lean too large (944 lines) | Moderate | **New** |
 
 ### Conditions for ACCEPT
 
