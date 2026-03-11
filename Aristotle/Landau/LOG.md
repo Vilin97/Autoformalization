@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 104: Extract current_density_of_gaussian
+
+### Changes
+- **Extracted `current_density_of_gaussian`** from Theorem42.lean into GaussianHelpers.lean: proves `∫ vᵢ f = (∫ f) * (-1/(2c₀)) * bᵢ` for Gaussian f. Replaces ~22-line inline block.
+- Theorem42 proof: 200 → 178 lines.
+- Issue 6d: only 2 proofs remain over 150 lines (Theorem42 at 178, coulomb_flux_deriv at 189).
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 103: Extract entropy_dissipation_continuous_coulomb + cleanup
 
 ### Changes

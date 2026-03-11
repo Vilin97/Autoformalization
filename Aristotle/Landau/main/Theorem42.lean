@@ -279,29 +279,7 @@ theorem Theorem42
       simp only [J, ρ]
       ext i
       simp only [Pi.smul_apply, smul_eq_mul]
-      have h_rw : ∫ v, v i * f x v = ∫ v, v i *
-          Real.exp (a₀ + dotProduct (b_func x) v + c₀ * normSq v) := by
-        congr 1
-        ext v
-        rw [ha₀]
-      rw [h_rw]
-      have hc₀_neg : c₀ < 0 := by
-        have := analysis_gaussian_integrability (f x) a₀ (b_func x) c₀
-          (hf_pos x) (hf_int x) ha₀
-        exact this
-      have h_int : Integrable (fun v : Fin 3 → ℝ =>
-          Real.exp (a₀ + dotProduct (b_func x) v + c₀ * normSq v)) := by
-        convert hf_int x using 1
-        ext v
-        rw [ha₀]
-      have h_fm := gaussian_first_moment a₀ (b_func x) c₀ hc₀_neg h_int i
-      rw [h_fm]
-      have h_rho : ∫ v : Fin 3 → ℝ,
-          Real.exp (a₀ + dotProduct (b_func x) v + c₀ * normSq v) = ρ x := by
-        congr 1
-        ext v
-        rw [ha₀]
-      rw [h_rho]; ring
+      exact current_density_of_gaussian (f x) (hf_pos x) (hf_int x) a₀ (b_func x) c₀ ha₀ i
     x_max := x_max
     hmax := hmax
     x_min := x_min

@@ -443,4 +443,27 @@ lemma poisson_boltzmann_max_principle
     constructor <;> nlinarith [hPB x_max, hPB x_min, hmax x_min, hmin x_max]
   exact fun x => le_antisymm (by linarith [hmax x]) (by linarith [hmin x])
 
+/-- If `f` equals a Gaussian `exp(a₀ + b·v + c₀|v|²)`, then the first moment
+    `∫ vᵢ f(v)` equals `(∫ f(v)) * (-1/(2c₀)) * bᵢ`. -/
+lemma current_density_of_gaussian
+    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_int : Integrable f)
+    (a₀ : ℝ) (b : Fin 3 → ℝ) (c₀ : ℝ)
+    (hform : ∀ v, f v = Real.exp (a₀ + dotProduct b v + c₀ * normSq v))
+    (i : Fin 3) :
+    ∫ v, v i * f v = (∫ v, f v) * ((-1 / (2 * c₀)) * b i) := by
+  have h_rw : ∫ v, v i * f v = ∫ v, v i *
+      Real.exp (a₀ + dotProduct b v + c₀ * normSq v) := by
+    congr 1; ext v; rw [hform]
+  rw [h_rw]
+  have hc₀_neg : c₀ < 0 := analysis_gaussian_integrability f a₀ b c₀ hf_pos hf_int hform
+  have h_int : Integrable (fun v : Fin 3 → ℝ =>
+      Real.exp (a₀ + dotProduct b v + c₀ * normSq v)) := by
+    convert hf_int using 1; ext v; rw [hform]
+  have h_fm := gaussian_first_moment a₀ b c₀ hc₀_neg h_int i
+  rw [h_fm]
+  have h_rho : ∫ v : Fin 3 → ℝ,
+      Real.exp (a₀ + dotProduct b v + c₀ * normSq v) = ∫ v, f v := by
+    congr 1; ext v; rw [hform]
+  rw [h_rho]; ring
+
 end VML
