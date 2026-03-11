@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 115: Add CoulombNonvacuous to build target, clean up dead parameters
+
+### Changes
+- **Added `CoulombNonvacuous` to default build target** (`Aristotle.lean`). Previously only `CoulombConcreteTheorem42` was in the build target, meaning the nonvacuousness proof could silently break. Verified it compiles clean.
+- **Removed dead parameter** from `torus_hSpatialVelocityFubini` in TorusDefs.lean — the pointwise integrability hypothesis was unused (matching the cycle-114 axiom weakening).
+- **Fixed stale docstring** in Defs.lean:378 — incorrectly claimed `hSpatialVelocityFubini` lacked explicit integrability hypothesis.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 114: Weaken hSpatialVelocityFubini axiom, fix Defs.lean line length
 
 ### Changes

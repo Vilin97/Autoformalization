@@ -1,71 +1,73 @@
-# Plan — Cycle 115
+# Plan -- Cycle 116
 
 ## Status summary
 
 - **Sorry count**: 0
-- **Files**: 32 files, 9,598 lines
-- **Build**: Clean, 0 errors, 0 warnings
-- **Critique verdict**: ACCEPT (cycle 114, no conditions)
-- **maxHeartbeats overrides**: 0
-- **`simp +decide`**: 0
-- **`aesop`**: 0
-- **Aristotle jobs**: 0 pending (all resolved or abandoned)
-- **Working tree**: clean (only critique.md modified, state.md untracked)
-- **Open issues**: all low severity (MEMORY.md staleness, hypothesis tightening, 1 long line)
+- **Files**: 32 files, 9,599 lines
+- **Build**: Clean (`lake env lean` on all 32 files: 0 errors, 0 warnings)
+- **Critique verdict**: CONDITIONAL ACCEPT (cycle 115)
+- **Condition for ACCEPT**: Add CoulombNonvacuous to default build target
+- **maxHeartbeats overrides**: 1 (TorusIntegration.lean:85, 400000)
+- **`simp +decide` / `aesop` / `decide`**: 0
+- **Working tree**: 4 modified files (CoulombFlux, CoulombFluxDiff, CoulombPSD, LandauMatrixDerivBound), state.md untracked
+- **Open issues**: 1 medium (build target), 3 low (dead parameter, stale docstring, maxHeartbeats)
 
 ## This cycle's work items
 
-### 1. Update MEMORY.md project statistics (`/simplify`)
-- **What**: Critique issues 8a, 8b, 8c (persisting since cycle 112). MEMORY.md says "22 files, ~8,700 lines" but actual is 32 files, 9,598 lines. The Coulomb file inventory lists 7 files but there are 12. Individual line counts are 3-4x off from reality (reflecting the pre-split structure).
-- **File**: `/home/vilin/.claude/projects/-home-vilin-aristotle/memory/MEMORY.md`
-- **Approach**:
-  1. Replace "22 files, ~8,700 lines" with "32 files, ~9,600 lines" in all occurrences.
-  2. Replace the 7-file Coulomb list with the full 12-file list and current `wc -l` counts:
-     - `CoulombKernel.lean` (117), `CoulombSpatialTransport.lean` (414), `CoulombForceTransport.lean` (332), `NewtonianPotential.lean` (436), `CoulombFlux.lean` (186), `CoulombFluxBound.lean` (465), `CoulombFluxConv.lean` (373), `CoulombFluxDiff.lean` (250), `CoulombPSD.lean` (298), `CoulombPSDHelpers.lean` (428), `CoulombConcreteTheorem42.lean` (241), `CoulombNonvacuous.lean` (351)
-  3. Update other stale line counts (SchwartzDecayDefs 213, VelocityDecayInstance 71, etc.)
-  4. Update sorry status section to say "32 files, ~9,600 lines"
-- **Resolves**: Critique issues 8a, 8b, 8c.
-- **Can start immediately**: yes, pure documentation edit.
+### 1. Add CoulombNonvacuous to default build target (`/simplify`)
+- **What**: Critique issue 0 (Medium). `CoulombNonvacuous.lean` compiles cleanly but is not imported by `Aristotle.lean`, so `lake build` never verifies it. This is the sole condition for upgrading the critique verdict from CONDITIONAL ACCEPT to ACCEPT.
+- **File**: `/home/vilin/aristotle/Aristotle.lean`
+- **Approach**: Add `import Aristotle.Landau.main.CoulombNonvacuous` as a second line. Verify with `lake build`.
+- **Risk**: None. One-line addition.
+- **Resolves**: Critique issue 0 (Medium). Satisfies the ACCEPT condition.
+- **START IMMEDIATELY.**
 
-### 2. Weaken hypothesis 4 from `ContDiff R top` to `ContDiff R 3` (`/strengthen`)
-- **What**: Critique issue 9a. The concrete theorem `CoulombConcreteTheorem42` requires `ContDiff R top (f x)` for velocity smoothness but the abstract chain (`VMLStructures`, `Theorem42`) only needs `ContDiff R 3`. The coercion happens at line 205 via `.of_le le_top`. Weakening the hypothesis makes the theorem statement tighter: it asserts that C3 velocity regularity suffices.
-- **Files**: `CoulombConcreteTheorem42.lean` lines 72 and 215 (both theorem statements)
+### 2. Remove dead parameter from `torus_hSpatialVelocityFubini` (`/simplify`)
+- **What**: Critique issue 9b. The concrete helper `torus_hSpatialVelocityFubini` (TorusDefs.lean:258) takes `(hF : forall x, Integrable (F x))` but the proof body (line 262) only uses `hF_joint`. The abstract `hSpatialVelocityFubini` in Defs.lean:481 already does NOT have this parameter -- the dead parameter is only in the concrete helper.
+- **File**: `/home/vilin/aristotle/Aristotle/Landau/main/TorusDefs.lean` (line 258-262)
 - **Approach**:
-  1. Change `ContDiff ℝ ⊤ (f x)` to `ContDiff ℝ 3 (f x)` in both `CoulombConcreteTheorem42` (line 72) and `CoulombConcreteTheorem42_unique_T` (line 215).
-  2. At line 205, the `.of_le le_top` coercion becomes unnecessary — replace with direct pass-through.
-  3. Check if any Coulomb-specific file (CoulombFlux, CoulombPSD, etc.) uses `hf_smooth_v` directly. If they do, verify they only need C3 or less. Based on critique analysis, they derive regularity from `hSchwartz` instead.
-  4. Verify with `lake env lean Aristotle/Landau/main/CoulombConcreteTheorem42.lean`.
-  5. Update the docstring (lines 52-58) to note that C3 suffices.
-- **Risk**: Low. The critique confirms the coercion is the only use site. If a Coulomb file does need C-infinity from `hf_smooth_v` (unlikely), revert.
-- **Resolves**: Critique issue 9a.
-
-### 3. Remove unused first argument from `hSpatialVelocityFubini` (`/strengthen`)
-- **What**: Critique issue 9b. The `hSpatialVelocityFubini` field in `FlatTorus3` takes `(forall x, Integrable (F x))` as its first argument after `F`, but the concrete instance (TorusInstance line 439) discards it, and the single call site (Section4 line 298) must supply it anyway. Removing it makes the abstract axiom strictly weaker.
-- **Files**: `Defs.lean` (line 480-484), `Section4.lean` (line 298), `TorusInstance.lean` (line 439), `TorusDefs.lean` (line 256-258)
-- **Approach**:
-  1. In `Defs.lean` line 480-484, remove the `(forall x, MeasureTheory.Integrable (F x)) ->` argument.
-  2. In `Section4.lean` line 298, remove the `hSpatialTransport_int` argument from the call.
-  3. In `TorusInstance.lean` line 439, update the instance proof (likely just remove `intro _`).
-  4. In `TorusDefs.lean`, update `torus_hSpatialVelocityFubini` signature to match.
-  5. Verify with `lake env lean` on all four files.
-- **Risk**: Low-medium. Need to verify that removing the argument doesn't break the concrete Fubini proof in `TorusInstance`. The concrete proof uses `MeasureTheory.integral_integral_swap` which requires joint integrability (still provided) but may also need per-section integrability internally. If so, derive it from joint integrability inside the proof.
+  1. Remove the `(hF : forall x, Integrable (F x))` argument from `torus_hSpatialVelocityFubini`.
+  2. Check callers: `TorusInstance.lean` passes this helper to the `hSpatialVelocityFubini` field. Since the abstract field already lacks this parameter, the instance proof may use `fun F hF_joint => torus_hSpatialVelocityFubini F hF_joint` -- removing the dead parameter should simplify the instance proof, not break it.
+  3. Verify with `lake env lean` on TorusDefs.lean and TorusInstance.lean.
+- **Risk**: Low. The abstract interface is unchanged; only the concrete helper loses an unused argument.
 - **Resolves**: Critique issue 9b.
 
-### 4. Fix Defs.lean line length violation (`/simplify`)
-- **What**: Critique issue 7f. Line 98 of Defs.lean exceeds the 100-character soft limit.
-- **File**: `Defs.lean`, line 98
-- **Approach**: Break the `have h0` line into two lines. Trivial formatting fix.
-- **Resolves**: Critique issue 7f.
+### 3. Fix stale docstring in Defs.lean (`/simplify`)
+- **What**: Critique issue 8a. Defs.lean:378 says "hSpatialVelocityFubini is stated without explicit integrability hypothesis at the abstract level" -- this is false. The actual definition (lines 481-484) takes `Integrable (Function.uncurry F)` as an explicit hypothesis.
+- **File**: `/home/vilin/aristotle/Aristotle/Landau/main/Defs.lean` (line 378-379)
+- **Approach**: Rewrite the sentence to accurately describe the current state: hSpatialVelocityFubini takes joint integrability of `uncurry F` as its hypothesis.
+- **Risk**: None. Pure documentation fix.
+- **Resolves**: Critique issue 8a.
 
-### 5. Run critique cycle 115
-- **What**: After completing items 1-4, run `/critique` to verify all issues are resolved and update the summary table.
+### 4. Attempt to eliminate maxHeartbeats 400000 in TorusIntegration.lean (`/simplify`)
+- **What**: Critique issue 7a. The sole remaining `maxHeartbeats` override is on `integral_derivative_periodic_zero` (TorusIntegration.lean:85). This is a Fubini-based FTC argument over the 3D box. The critique notes this "may be hard to eliminate."
+- **File**: `/home/vilin/aristotle/Aristotle/Landau/main/TorusIntegration.lean` (line 85)
+- **Approach**:
+  1. Profile the proof with `/profile` to find the expensive tactic.
+  2. Try targeted strategies: replace `simp` with explicit rewrites, add type annotations to reduce unification, break out intermediate `have` steps.
+  3. If the heartbeats drop below 200000, remove the override. If not, leave it and note in backlog.
+- **Risk**: Medium. The override is 2x default (400000 vs 200000). The proof involves nested Fubini decomposition over `Fin 3 -> R` which is inherently expensive for the elaborator.
+- **Resolves**: Critique issue 7a (if successful).
+
+### 5. Update MEMORY.md project statistics (`/simplify`)
+- **What**: Critique issue 8c. MEMORY.md says "22 files, ~8,700 lines" but actual is 32 files, 9,599 lines. The Coulomb file inventory lists 7 files but there are 12. Individual line counts are stale (reflecting the pre-split structure).
+- **File**: `/home/vilin/.claude/projects/-home-vilin-aristotle/memory/MEMORY.md`
+- **Approach**: Update all file counts, line counts, and the Coulomb file inventory to match current `wc -l` output. Update sorry status to say "32 files, ~9,600 lines".
+- **Risk**: None. Pure documentation.
+- **Resolves**: Critique issue 8c.
+
+### 6. Run critique cycle 116
+- **What**: After completing items 1-5, run `/critique` to verify all issues are resolved. The target is ACCEPT with 0 conditions.
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
-| Section3Helpers.lean 613 lines | Code quality | Just over 600-line limit; contents are tightly coupled, splitting would be artificial. Leave as-is. |
+| Weaken hypothesis 4 from `ContDiff R top` to `ContDiff R 3` | Strengthen | Critique 9a. Low priority: does not affect soundness, and `hSchwartz` implies C-infinity anyway. |
+| CoulombNonvacuous should import main theorem and apply it | Strengthen | Critique 9d. Currently proves hypotheses satisfiable but doesn't produce the equilibrium conclusion. |
+| Section3Helpers.lean 613 lines | Code quality | Just over 500-line guideline; contents are tightly coupled, splitting would be artificial. |
+| 12 long lines across 5 files | Code quality | Critique 7d. Trivial formatting. |
 | Dimension generalization (Fin n) | Feature | Hard; 3D is hard-coded everywhere (cross product, Killing equation, Coulomb kernel). |
 | Multi-species | Feature | Hard; requires coupling multiple distribution functions and cross-species entropy estimates. |
-| Mathlib PR candidates | Upstream | 5 lemmas: `inverse_poly_integrable`, `schwartz_pointwise_decay`, `schwartz_fderiv_component_decay`, `second_deriv_nonpos_at_local_max'`, `norm_fderiv_eq_iteratedFDeriv_one`. |
-| IsMaxwellian API | Mathematical | Add `IsMaxwellian.unique` or `IsMaxwellian.integrable`. Nice-to-have, no urgency. |
+| Mathlib PR candidates (5 lemmas) | Upstream | `inverse_poly_integrable`, `schwartz_pointwise_decay`, `schwartz_fderiv_component_decay`, `norm_fderiv_eq_iteratedFDeriv_one`, `poly_mul_gaussian_le`. |
+| IsMaxwellian API | Mathematical | Add `IsMaxwellian.unique` or `IsMaxwellian.integrable`. Nice-to-have. |
