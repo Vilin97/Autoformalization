@@ -1,3 +1,4 @@
+*.csv
 /.lake
 .DS_Store
 *.log
