@@ -1,5 +1,18 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 108: Eliminate remaining aesop, tighten simp +decide, add Maxwellian API
+
+### Changes
+- **Eliminated all `aesop` calls** from Section3Helpers.lean: replaced 2 remaining in `affine_gradient_antiderivative` with `simp_all` and `ring`.
+- **Tightened `simp +decide`** in `analysis_fluxFactor` and `analysis_scalarFactor`:
+  - `analysis_scalarFactor`: 2-line `simp +decide` proof → 1-line `simp only [...]; ring`
+  - `analysis_fluxFactor`: removed `+decide` from 3 `simp` calls where unnecessary, merged 2-line ending into 1 line
+  - `simp +decide` count: 35 → 29
+- **Added `IsMaxwellian.pos`** and **`IsMaxwellian.contDiff`** in Defs.lean: Maxwellians are strictly positive and C^∞.
+- Section3Helpers: 580 → 577 lines.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 107: Replace aesop with targeted tactics, add parameter uniqueness
 
 ### Changes

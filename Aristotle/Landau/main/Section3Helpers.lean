@@ -32,7 +32,7 @@ lemma analysis_fluxFactor
       (1 / f v) • VML.vGrad f v := by
     intro v
     ext i
-    by_cases H : DifferentiableAt ℝ f v <;> simp_all +decide [ VML.vGrad, fderiv_deriv ]
+    by_cases H : DifferentiableAt ℝ f v <;> simp_all [VML.vGrad, fderiv_deriv]
     ring
     · erw [ fderiv_comp ] <;> norm_num [ H, ne_of_gt (hf_pos v) ]; ring
     · rw [ fderiv_zero_of_not_differentiableAt ]
@@ -40,11 +40,8 @@ lemma analysis_fluxFactor
       · exact fun h => H <| by
           simpa [ Real.exp_log (hf_pos _) ] using
             h.exp.congr_of_eventuallyEq
-            (by filter_upwards [ ] using fun _ => by simp +decide [ Real.exp_log (hf_pos _) ])
-  simp +decide [ h_log_grad, mul_sub, smul_sub,
-    mul_assoc, mul_comm, mul_left_comm,
-    ne_of_gt (hf_pos _) ]
-  simp +decide [ mul_assoc, mul_comm (f v), mul_left_comm (f v), ne_of_gt (hf_pos _), smul_smul ]
+            (by filter_upwards [] using fun _ => by simp [Real.exp_log (hf_pos _)])
+  simp [h_log_grad, mul_sub, smul_sub, mul_assoc, mul_comm, mul_left_comm, ne_of_gt (hf_pos _)]
 
 /-- Scalar factors through mulVec and dotProduct:
     y ⬝ (A *ᵥ (c • y)) = c * (y ⬝ (A *ᵥ y)). -/
@@ -58,8 +55,7 @@ lemma analysis_scalarFactor
         (mulVec (landauMatrix Ψ (v - w))
           (vGrad (Real.log ∘ f) v - vGrad (Real.log ∘ f) w)) := by
   -- Proved by Aristotle (Harmonic)
-  simp +decide [ dotProduct, Matrix.mulVec ]
-  simp +decide [ mul_assoc, mul_left_comm, Finset.mul_sum _ _ _ ]
+  intro v w; simp only [dotProduct, Matrix.mulVec, Finset.sum_comm]; ring
 
 /-- Nonneg double integral zero → pointwise zero. -/
 lemma analysis_nonneg_dbl_zero
@@ -447,12 +443,12 @@ lemma affine_gradient_antiderivative (h : (Fin 3 → ℝ) → ℝ) (b : Fin 3 �
         rw [← smul_eq_mul, ← ContinuousLinearMap.map_smul]
         congr
         ext j
-        by_cases hi : i = j <;> aesop
+        by_cases hi : i = j <;> simp_all
     simp_all +decide [two_mul]
     ring
   intros v
   have : ∫ t in (0 : ℝ)..1, deriv (fun t => h (t • v)) t = h v - h 0 := by
-    rw [intervalIntegral.integral_deriv_eq_sub]; aesop
+    rw [intervalIntegral.integral_deriv_eq_sub]; ring
     · exact fun t ht => DifferentiableAt.comp t
         (hh_smooth.contDiffAt.differentiableAt (by norm_num))
         (differentiableAt_id.smul_const _)
