@@ -375,8 +375,8 @@ lemma vecMulVec_self_mulVec (z w : Fin 3 → ℝ) :
     on the concrete torus both sides collapse to 0 via fderiv's junk value, making
     the axiom vacuously true rather than expressing a genuine chain rule.
 
-    hSpatialVelocityFubini is stated without explicit integrability hypothesis at the
-    abstract level; the concrete instance (TorusInstance) provides it via Fubini.
+    hSpatialVelocityFubini requires joint integrability of uncurried F; the concrete
+    instance (TorusInstance) provides it via Mathlib's `integral_integral_swap`.
     hSpatialAdd requires integrability of both summands (honest: Mathlib's `integral_add`).
     hGradIntegrable provides integrability of gradient components for spatially differentiable
     functions (on torus: C¹ → continuous → integrable on compact).
