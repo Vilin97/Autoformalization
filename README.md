@@ -1,6 +1,6 @@
 # Formal Verification of the Vlasov-Maxwell-Landau Steady-State Theorem
 
-[![Documentation](https://img.shields.io/badge/docs-blueprint-blue)](https://vilin97.github.io/aristotle/blueprint/) [![Dependency Graph](https://img.shields.io/badge/docs-dep_graph-blue)](https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html)
+[![Lean Action CI](https://github.com/Vilin97/aristotle/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/Vilin97/aristotle/actions/workflows/lean_action_ci.yml) [![Documentation](https://img.shields.io/badge/docs-blueprint-blue)](https://vilin97.github.io/aristotle/blueprint/) [![Dependency Graph](https://img.shields.io/badge/docs-dep_graph-blue)](https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html)
 
 A complete formalization of the characterization of smooth steady-state solutions to the **Vlasov-Maxwell-Landau (VML) system** with Coulomb collisions on the 3-torus.
 
