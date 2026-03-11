@@ -26,9 +26,13 @@ lemma coulomb_flux_deriv_schwartz_decay
   -- ∂_j f is Schwartz
   have hdf_schwartz := fun j => schwartz_fderiv_component_schwartz f hf_smooth hf_schwartz j
   -- Each convolution K_{ij}, L_{ij} has uniformly bounded derivatives
+  -- Lift hf_schwartz to the ∀ N {k}, k ≤ 1 form needed by conv lemmas
+  have hf_schwartz_le1 : ∀ (N : ℕ) {k : ℕ}, k ≤ 1 → ∃ C > 0, ∀ v,
+      ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C :=
+    fun N k hk => hf_schwartz N (le_trans hk (by norm_num))
   have hK_fderiv_bdd : ∀ j, ∃ C > 0, ∀ v,
       ‖fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * f w) v‖ ≤ C :=
-    fun j => coulomb_entry_conv_deriv_bounded f hf_smooth hf_schwartz i j
+    fun j => coulomb_entry_conv_deriv_bounded f hf_smooth hf_schwartz_le1 i j
   have hL_fderiv_bdd : ∀ j, ∃ C > 0, ∀ v,
       ‖fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j *
         fderiv ℝ f w (Pi.single j 1)) v‖ ≤ C :=
@@ -47,7 +51,7 @@ lemma coulomb_flux_deriv_schwartz_decay
   -- Differentiability of components
   have hK_diff : ∀ j, Differentiable ℝ
       (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * f w) :=
-    fun j => coulomb_entry_conv_differentiable f hf_smooth hf_schwartz i j
+    fun j => coulomb_entry_conv_differentiable f hf_smooth hf_schwartz_le1 i j
   have hL_diff : ∀ j, Differentiable ℝ
       (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j *
         fderiv ℝ f w (Pi.single j 1)) :=
@@ -236,7 +240,7 @@ lemma coulomb_ibp_df_g_integrable
         _ = ‖fderiv ℝ _ v‖ := mul_one _
         _ ≤ ‖fderiv ℝ _ v‖ * (1 + ‖v‖) ^ (K_log + 4) :=
             le_mul_of_one_le_right (norm_nonneg _)
-              (one_le_pow_of_one_le (by linarith [norm_nonneg v]) _)
+              (one_le_pow_of_one_le' (by linarith [norm_nonneg v]) _)
         _ ≤ C_fd := hfd_bound v
     -- Combine: |deriv| * |log f| ≤ (C_fd/(1+‖v‖)^(K+4)) * (C_log*(1+‖v‖)^K) = C_fd*C_log/(1+‖v‖)^4
     calc |fderiv ℝ _ v (Pi.single i 1)| * |Real.log (f v)|
