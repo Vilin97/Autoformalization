@@ -1,5 +1,17 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 87: Fix compilation, split TorusInstance
+
+### Changes
+- **Fixed 3 broken files** that failed to compile from scratch (masked by cached .olean files):
+  - `TorusDefs.lean`: Added `import Mathlib.Analysis.Calculus.FDeriv.Symmetric` and fixed `isSymmSndFDerivAt` call (`by simp` → `by norm_num [minSmoothness]`) for Mathlib v4.24.0 compatibility.
+  - `IteratedDerivHelpers.lean` and `GaussianHelpers.lean`: compiled once TorusDefs (dependency) was fixed.
+- **Split TorusInstance.lean** (910 → 490 lines): extracted box integral machinery, IBP, curl integral, and harmonic-implies-constant proofs into new `TorusIntegration.lean` (434 lines).
+- Full project builds clean from scratch (`lake clean` + `lake exe cache get` + `lake build`).
+- Files: 25 → **26**. Lines: ~9,476.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 86: Extract GaussianHelpers, weaken hExpDecay
 
 ### Changes
