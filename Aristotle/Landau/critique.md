@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 83)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 84)
 
 ## Verdict: ACCEPT
 
@@ -67,7 +67,7 @@ I found no issue.
 | ~~Trailing semicolons~~ | ~~0~~ | ~~0~~ DONE |
 | ~~Multi-semi lines~~ | ~~4~~ (in `by` blocks) | ~~0~~ DONE |
 | ~~Lines > 100 chars~~ | ~~1~~ (intentional) | ~~0~~ DONE |
-| Plain semicolons | **355** (+ 126 `<;>`) | < 50 |
+| Plain semicolons | **~333** (+ 103 `<;>`) | < 50 |
 
 ---
 
@@ -138,10 +138,10 @@ For non-singular kernels (e.g., Maxwell molecules with Ψ = const, or any bounde
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 6b | 8 files over 600 lines (Section3Helpers 1020) | High | Open |
-| 6c | 355 plain semicolons | Low | Open |
+| 6c | ~333 plain semicolons | Low | Open |
 | 8e | Defs.lean too large (805 lines) | Minor | Open |
 | ~~8f~~ | ~~Section3Helpers.lean split~~ | ~~High~~ | ~~Done~~ |
 
 ### Conditions for ACCEPT
 
-This is an ACCEPT. The math is sound. The code style issues do not affect correctness but make the codebase visibly AI-generated, which undermines credibility for peer review.
+ACCEPT. All issues are code quality / style.
