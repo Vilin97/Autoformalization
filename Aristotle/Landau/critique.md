@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 101)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 102)
 
 ## Verdict: ACCEPT
 
@@ -18,7 +18,7 @@
 
 ## 2. Hidden Axioms
 
-Zero axioms on `CoulombConcreteTheorem42` (verified cycle 101 via `lean_verify`). I found no issue.
+Zero axioms on `CoulombConcreteTheorem42` (verified cycle 101). I found no issue.
 
 ---
 
@@ -48,23 +48,22 @@ I found no issue.
 
 ### ~~6b. Files over 600 lines~~ — RESOLVED (cycle 100)
 
-0 files over 600 lines. Defs.lean 634 → 455 lines.
+0 files over 600 lines.
 
 ### ~~6c. Long proofs~~ — RESOLVED (cycle 98)
 
-All proofs under 200 lines. Longest: `Theorem42` ~199, `fubini_double_integrable_coulomb` ~197, `coulomb_flux_deriv_schwartz_decay` ~195, `CoulombConcreteTheorem42` ~185.
+All proofs under 200 lines.
 
-### 6d. Proofs over 150 lines (5 proofs)
+### 6d. Proofs over 150 lines (4 proofs)
 
 | File | Proof | ~Lines |
 |------|-------|--------|
 | Theorem42.lean | `Theorem42` | 199 |
-| CoulombPSD.lean | `fubini_double_integrable_coulomb` | 197 |
-| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | 195 |
-| CoulombConcreteTheorem42.lean | `CoulombConcreteTheorem42` | 185 |
-| Section4.lean | `transport_entropy_from_vlasov` | 123 |
+| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | 197 |
+| CoulombConcreteTheorem42.lean | `CoulombConcreteTheorem42` | 188 |
+| CoulombPSD.lean | `fubini_double_integrable_coulomb` | 186 |
 
-These are under the 200-line hard limit but still long. Extracting helpers from any of them would improve maintainability.
+All under 200. `transport_entropy_from_vlasov` (124 lines) dropped below 150 threshold. Extracting helpers from the top 2 would improve maintainability.
 
 ---
 
@@ -84,7 +83,7 @@ I found no issue.
 
 ### 8d. Extract Mathlib-upstreamable lemmas (MEDIUM)
 
-5 PR candidates in `experiments/mathlib_pr_candidates.md`. All 5/5 SchwartzDecayDefs helpers now dimension-independent (cycle 96).
+5 PR candidates in `experiments/mathlib_pr_candidates.md`.
 
 ### ~~8e–8h~~ — DONE
 
@@ -104,7 +103,7 @@ I found no issue.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6d | 5 proofs over 150 lines | Low | Open (all under 200) |
+| 6d | 4 proofs over 150 lines | Low | Open (all under 200) |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |
 | 8j | lean-lsp build desync | Low | Open (tooling, persistent) |

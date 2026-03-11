@@ -57,14 +57,9 @@ lemma coulomb_flux_deriv_schwartz_decay
     fun j => ((hf_smooth.fderiv_right le_top).clm_apply contDiff_const).differentiable le_top
   have hf_diff := hf_smooth.differentiable le_top
   -- Schwartz decay facts: f and ∂_j f bounded, their fderiv decays
-  have hf_decay : ∀ M : ℕ, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ M ≤ C := by
-    intro M; obtain ⟨C, hC, h⟩ := hf_schwartz M (by omega)
-    exact ⟨C, hC, fun w => by simpa [norm_iteratedFDeriv_zero] using h w⟩
+  have hf_decay := schwartz_pointwise_decay hf_schwartz
   -- K_j and L_j uniformly bounded via coulomb_entry_conv_uniform_bound
-  have hdf_decay_abs : ∀ j, ∀ M : ℕ, ∃ C > 0, ∀ w,
-      |fderiv ℝ f w (Pi.single j 1)| * (1 + ‖w‖) ^ M ≤ C := by
-    intro j M; obtain ⟨C, hC, h⟩ := hdf_schwartz j M 0
-    exact ⟨C, hC, fun w => by simpa [norm_iteratedFDeriv_zero] using h w⟩
+  have hdf_decay_abs := schwartz_fderiv_component_decay hf_schwartz
   have hK_bdd : ∀ j, ∃ MK > 0, ∀ v,
       |∫ w, landauMatrix coulombKernel (v - w) i j * f w| ≤ MK :=
     fun j => coulomb_entry_conv_uniform_bound hf_decay
@@ -158,16 +153,14 @@ lemma coulomb_flux_deriv_schwartz_decay
             rw [this]; exact hCdj v
           -- Each term: one factor has Schwartz decay × P, the other is bounded
           -- t1: |∂_j f(v)| * ‖DK(v)‖ * P ≤ (|∂_j f(v)| * P) * ‖DK(v)‖ ≤ Mdj_N * CKj
-          have hMdj_N_v : |fderiv ℝ f v (Pi.single j 1)| * (1 + ‖v‖) ^ N ≤ Mdj_N := by
-            simpa [norm_iteratedFDeriv_zero] using hMdj_N v
+          have hMdj_N_v := hMdj_N v
           have t1 := mul_le_mul hMdj_N_v (hCKj v)
             (by positivity) (le_trans (by positivity) hMdj_N_v)
           -- t2: |K(v)| * ‖D(∂_j f)(v)‖ * P ≤ |K(v)| * (‖D(∂_j f)(v)‖ * P) ≤ MKj * Cdj
           have t2 := mul_le_mul (hMKj v) hCdj_v
             (by positivity) (le_trans (abs_nonneg _) (hMKj v))
           -- t3: |f(v)| * ‖DL(v)‖ * P ≤ (|f(v)| * P) * ‖DL(v)‖ ≤ Mf_N * CLj
-          have hMf_N_v : |f v| * (1 + ‖v‖) ^ N ≤ Mf_N := by
-            simpa [norm_iteratedFDeriv_zero] using hMf_N v
+          have hMf_N_v := hMf_N v
           have t3 := mul_le_mul hMf_N_v (hCLj v)
             (by positivity) (le_trans (by positivity) hMf_N_v)
           -- t4: |L(v)| * ‖Df(v)‖ * P ≤ |L(v)| * (‖Df(v)‖ * P) ≤ MLj * Cf

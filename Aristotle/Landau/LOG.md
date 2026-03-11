@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 102: Deduplicate Schwartz decay expansions in CoulombFluxDiff
+
+### Changes
+- Replaced 2 manual `schwartz_pointwise_decay` expansions in `coulomb_flux_deriv_schwartz_decay` with calls to `schwartz_pointwise_decay` and `schwartz_fderiv_component_decay`.
+- Simplified 2 `simpa [norm_iteratedFDeriv_zero]` blocks to direct applications.
+- CoulombFluxDiff.lean: 265 → 258 lines (-7). `coulomb_flux_deriv_schwartz_decay` now ~190 lines (was ~197).
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 101: Extract schwartz_poly_mul_integrable
 
 ### Changes
