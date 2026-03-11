@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 88: Split CoulombPSD, analyze Schwartz decay
+
+### Changes
+- **Split CoulombPSD.lean** (826 → 496 lines): extracted `landau_bound`, `tendsto_landau_quadratic_diag`, `continuous_landau_quadratic`, `psd_continuous_coulomb`, and `psd_pointwise_bound_coulomb` into new `CoulombPSDHelpers.lean` (348 lines). CoulombPSD retains the integrability and Fubini lemmas.
+- **Analyzed UniformSchwartzDecay minimality** (issue 8g): traced all `hDecay N k` call sites across the project. Found that **k ≤ 2 suffices** — the proof only uses f, ∇f, and ∇²f decay, not higher derivatives. Documented in `experiments/weaken_schwartz_decay.md` with a proposed `UniformC2Decay` structure and refactoring plan.
+- Files: 26 → **27**. Lines: ~9,500.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 87: Fix compilation, split TorusInstance
 
 ### Changes

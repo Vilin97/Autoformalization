@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 84)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 88)
 
 ## Verdict: ACCEPT
 
@@ -18,7 +18,7 @@
 
 ## 2. Hidden Axioms
 
-Zero axioms on main theorem (verified cycle 76). I found no issue.
+Zero axioms on main theorem `CoulombConcreteTheorem42_unique` (verified cycle 88 via `lean_verify`). I found no issue.
 
 ---
 
@@ -46,18 +46,18 @@ I found no issue.
 
 `synthInstance.maxHeartbeats 160000` in CoulombSpatialTransport.lean. Acceptable.
 
-### 6b. Files over 600 lines (8 files)
+### 6b. Files over 600 lines (6 files)
 
 | File | Lines |
 |------|-------|
-| Section3Helpers.lean | 1020 |
-| TorusInstance.lean | 910 |
 | CoulombPSD.lean | 826 |
 | CoulombSpatialTransport.lean | 676 |
+| CoulombConcreteTheorem42.lean | 653 |
 | CoulombFluxDiff.lean | 640 |
-| CoulombConcreteTheorem42.lean | 639 |
 | Defs.lean | 634 |
 | CoulombFlux.lean | 607 |
+
+Down from 8 files last cycle (Section3Helpers 1020→596, TorusInstance 910→490).
 
 ---
 
@@ -94,7 +94,7 @@ In Lean terms: `ContDiff ℝ 2 (f x)` in velocity, `ContDiff ℝ 1` in space (or
 
 ### ~~8e. Split Defs.lean~~ — DONE (805 → 634 + 189)
 
-### ~~8f. Split Section3Helpers.lean~~ — DONE (1162 → 1020 + 158)
+### ~~8f. Split Section3Helpers.lean~~ — DONE (1162 → 596 + 160 + 446)
 
 ### 8g. UniformSchwartzDecay is stronger than needed (MEDIUM)
 
@@ -105,13 +105,9 @@ A lighter condition like "f and its first 3 velocity derivatives satisfy |∂^k 
 
 ### ~~8h. hExpDecay weakened to hLogGrowth~~ — DONE
 
-Replaced `∃ C K, ∀ x v, exp(−C(1+‖v‖)^K) ≤ f x v` (stretched exponential lower bound) with the strictly weaker `∃ C_log K_log, ∀ x v, |log f(x,v)| ≤ C_log*(1+‖v‖)^K_log` (polynomial growth of |log f|). This is satisfied by a strictly larger class of distributions.
+### 8i. hGradBound is Coulomb-specific but not flagged as such (MINOR — DOCUMENTED)
 
-### 8i. hGradBound is Coulomb-specific but not flagged as such (MINOR)
-
-`hGradBound : ∃ Cg Kg, ∀ x v i, |∂f/∂vᵢ| ≤ Cg(1+‖v‖)^Kg · f` (polynomial score growth). This hypothesis exists solely to handle the Coulomb singularity: it ensures the PSD integrand is continuous at v = w despite the 1/|z| blow-up of the collision kernel, because the score difference ∇log f(v) − ∇log f(w) = O(|v−w|) cancels the singularity.
-
-For non-singular kernels (e.g., Maxwell molecules with Ψ = const, or any bounded Ψ), this hypothesis is unnecessary — the abstract Theorem42 correctly omits it. The concrete theorem should document that hGradBound is a Coulomb-specific regularity condition, not a general physical requirement.
+Already documented in the CoulombConcreteTheorem42 docstring. The hypothesis is correctly identified as Coulomb-specific.
 
 ---
 
@@ -125,10 +121,13 @@ For non-singular kernels (e.g., Maxwell molecules with Ψ = const, or any bounde
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6b | 8 files over 600 lines (Section3Helpers 1020) | High | Open |
+| 6b | 6 files over 600 lines (CoulombPSD 826) | Medium | Open |
+| 8b | Weaken regularity C^∞ → optimal | Medium | Deferred |
+| 8g | UniformSchwartzDecay stronger than needed | Medium | Open |
 | ~~8e~~ | ~~Defs.lean split~~ | ~~Minor~~ | ~~Done~~ |
 | ~~8f~~ | ~~Section3Helpers.lean split~~ | ~~High~~ | ~~Done~~ |
+| ~~8h~~ | ~~hExpDecay → hLogGrowth~~ | ~~Medium~~ | ~~Done~~ |
 
 ### Conditions for ACCEPT
 
-ACCEPT. All issues are code quality / style.
+ACCEPT. All remaining issues are code quality / generalization. No correctness concerns.
