@@ -278,7 +278,7 @@ lemma convolution_local_int_schwartz
       rw [ ← MeasureTheory.integrable_indicator_iff (measurableSet_closedBall) ] at *
       convert hK_local.comp_sub_left v using 1
       ext; simp [Set.indicator]
-      simp +decide [ dist_eq_norm' ]
+      simp [ dist_eq_norm' ]
     have h_prod_integrable :
         MeasureTheory.IntegrableOn (fun w => M * ‖v - w‖⁻¹) (Metric.closedBall v 1) :=
       h_inv_integrable.const_mul M
