@@ -123,7 +123,9 @@ lemma poisson_boltzmann_from_vlasov
   -- a₀ is spatially differentiable: a₀(x) = log(f(x,0)) and f(·,0) is IsSpatiallyDiff
   have ha₀_diff : FlatTorus3.IsSpatiallyDiff a₀ := by
     have ha₀_eq : a₀ = fun x => Real.log (f x 0) := by
-      ext x; have h := ha₀ x 0; simp [normSq, Fin.sum_univ_three] at h
+      ext x
+      have h := ha₀ x 0
+      simp [normSq, Fin.sum_univ_three] at h
       have : a₀ x = Real.log (Real.exp (a₀ x)) := (Real.log_exp _).symm
       rw [this, h]
     rw [ha₀_eq]
@@ -139,7 +141,10 @@ lemma poisson_boltzmann_from_vlasov
   have hTransport : ∀ x v,
       dotProduct v (FlatTorus3.gradX (fun y => f y v) x) +
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) = 0 := by
-    intro x v; have h := _hVlasov x v; rw [hQ x v, mul_zero] at h; exact h
+    intro x v
+    have h := _hVlasov x v
+    rw [hQ x v, mul_zero] at h
+    exact h
   -- Step 3: Compute vGrad(f(x,·))(v) = f(x,v) • 2c₀v (isotropic: b=0)
   have hvGrad : ∀ x v, vGrad (f x) v = f x v • ((2 * c₀) • v) := by
     intro x v
@@ -170,7 +175,9 @@ lemma poisson_boltzmann_from_vlasov
       have ht := hTransport x v
       have hg : dotProduct v (FlatTorus3.gradX (fun y => f y v) x) =
           f x v * dotProduct v (FlatTorus3.gradX a₀ x) := by
-        unfold dotProduct; simp_rw [Fin.sum_univ_three, hgradX x v]; ring
+        unfold dotProduct
+        simp_rw [Fin.sum_univ_three, hgradX x v]
+        ring
       have hv : dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
           f x v * ((2 * c₀) * dotProduct v (E x) +
             (2 * c₀) * dotProduct (cross v (B x)) v) := by

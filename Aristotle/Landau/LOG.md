@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 80: Break multi-semicolon lines (all remaining)
+
+### Changes
+- **Broke 60 lines with 2+ plain semicolons** across 15 files: Defs (8), Section2 (8), NewtonianPotential (7), CoulombFluxDiff (6), Section5 (5), CoulombConcreteTheorem42 (3), CoulombFlux (4), CoulombSpatialTransport (3), Theorem42 (4), TorusDefs (4), Section7 (3), VMLInputDerive (2), Section4 (1), Section8 (1), SchwartzDecayDefs (1).
+- Multi-semi lines: 64 → **4** (remaining 4 are correctly inside `(by ...)` blocks or comments).
+- Semicolons: 613 → **484** (129 removed).
+- All 15 files verified to compile clean.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 79: Break multi-semicolon lines
 
 ### Changes

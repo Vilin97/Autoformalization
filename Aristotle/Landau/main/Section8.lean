@@ -31,7 +31,9 @@ theorem magnetic_field_constant {X : Type*} [FlatTorus3 X] (ss : VMLSteadyState 
     intro x; rw [ss.hJ_def, hb0, smul_zero]
   -- Step 2: curl B = 0
   have hcurl_zero : ∀ x, FlatTorus3.curlX ss.B x = 0 := by
-    intro x; rw [ss.hAmpere]; exact hJ_zero x
+    intro x
+    rw [ss.hAmpere]
+    exact hJ_zero x
   -- Step 3: Each component is harmonic
   -- Derive C² condition for B from hDiff_grad + C¹ differentiability of B components
   have hDiff_B_C2 : ∀ i j, FlatTorus3.IsSpatiallyDiff (fun x =>

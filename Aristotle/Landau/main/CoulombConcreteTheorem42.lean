@@ -242,7 +242,9 @@ theorem CoulombConcreteTheorem42
       -- Key identity: ν * D(f x) = ∫ spatial * log f
       have h_key : ∀ x, ν * entropyDissipation coulombKernel (f x) =
           ∫ v, v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v) := by
-        intro x; unfold entropyDissipation; rw [← integral_mul_left]
+        intro x
+        unfold entropyDissipation
+        rw [← integral_mul_left]
         have hrw : (fun v => ν * (LandauOperator coulombKernel (f x) v * Real.log (f x v))) =
             (fun v => v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v) +
               (E x + cross v (B x)) ⬝ᵥ vGrad (f x) v * Real.log (f x v)) := by
@@ -263,7 +265,10 @@ theorem CoulombConcreteTheorem42
       have h_eq : (fun x => entropyDissipation coulombKernel (f x)) =
           (fun x => ν⁻¹ * ∫ v, v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x *
             Real.log (f x v)) := by
-        ext x; have := h_key x; field_simp at this ⊢; linarith
+        ext x
+        have := h_key x
+        field_simp at this ⊢
+        linarith
       rw [h_eq]
       exact continuous_const.mul
         (spatial_transport_continuous hf_pos hf_smooth_v hf_smooth_x hSchwartz hLB')
@@ -421,7 +426,9 @@ private lemma equilibriumMaxwellian_schwartz_decay (ρ T : ℝ) (hρ : 0 < ρ) (
   have hq_smooth : ContDiff ℝ ⊤ q := contDiff_negNormSq_div T
   have hexpq_smooth : ContDiff ℝ ⊤ (Real.exp ∘ q) := contDiff_exp.comp hq_smooth
   have heM_eq : equilibriumMaxwellian ρ T = fun v => pf * (Real.exp ∘ q) v := by
-    ext w; unfold equilibriumMaxwellian; rfl
+    ext w
+    unfold equilibriumMaxwellian
+    rfl
   -- Step 1: Pull constant pf out of iteratedFDeriv
   have h_norm : ∀ v, ‖iteratedFDeriv ℝ k (equilibriumMaxwellian ρ T) v‖ =
       pf * ‖iteratedFDeriv ℝ k (Real.exp ∘ q) v‖ := by

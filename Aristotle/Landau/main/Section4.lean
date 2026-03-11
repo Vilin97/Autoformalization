@@ -217,7 +217,11 @@ private lemma spatial_transport_log_zero {X : Type*} [FlatTorus3 X]
     fun x => FlatTorus3.hGradChainLog (fun y => f y v) hDiff_fv (fun x => hf_pos x v) x i
   have h_lhs : (∫ x, f x v * FlatTorus3.gradX (fun y => Real.log (f y v)) x i) =
       ∫ x, FlatTorus3.gradX (fun y => f y v) x i := by
-    congr 1; ext x; rw [h_chain]; have := ne_of_gt (hf_pos x v); field_simp
+    congr 1
+    ext x
+    rw [h_chain]
+    have := ne_of_gt (hf_pos x v)
+    field_simp
   rw [h_lhs] at h_ibp
   have h_grad_int : (∫ x, FlatTorus3.gradX (fun y => f y v) x i) = 0 := by
     have := FlatTorus3.hGradIntZero (fun y => f y v) hDiff_fv (Pi.single i 1)
