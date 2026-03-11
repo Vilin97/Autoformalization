@@ -41,6 +41,13 @@ namespace VML
     The polynomial score bound is a genuine additional assumption, satisfied by
     physically relevant distributions (Maxwellians, perturbations thereof).
 
+    **Coulomb-specificity of hGradBound:** This hypothesis is needed solely to
+    handle the Coulomb singularity Ψ(r) = r⁻³. The score difference
+    ∇log f(v) − ∇log f(w) = O(|v−w|) cancels the 1/|v−w| blow-up of the
+    Coulomb collision matrix, ensuring PSD integrability. For bounded kernels
+    (e.g. Maxwell molecules with Ψ = const), the abstract `Theorem42` applies
+    without any score bound hypothesis.
+
     **Scope:** Single species, non-relativistic, 3D flat torus, Coulomb kernel
     (Ψ(r) = r⁻³). Assumes existence of a smooth positive steady-state solution. -/
 theorem CoulombConcreteTheorem42
