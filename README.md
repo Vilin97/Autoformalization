@@ -4,6 +4,12 @@ A complete formalization in [Lean 4](https://lean-lang.org/) + [Mathlib](https:/
 
 **Status: fully verified by the Lean 4 kernel. 0 sorry's across 22 files (~8,300 lines).**
 
+## Contents
+
+- [The Mathematics](#the-mathematics) — [Physical System](#the-physical-system) | [Main Theorem](#the-main-theorem) | [Hypotheses](#hypotheses) | [Proof Architecture](#proof-architecture)
+- [Development Process](#development-process) — [Narrative](#narrative) | [Session Activity](#session-activity) | [Token Usage](#token-usage) | [Babysit Loop](#the-babysit-loop) | [Aristotle Integration](#aristotle-integration) | [LOC Over Time](#lines-of-code-over-time) | [Git Churn](#git-churn) | [Sorry Elimination](#sorry-elimination)
+- [Technical Stack](#technical-stack)
+
 | Metric | Value |
 |--------|-------|
 | Lean 4 files | 22 |
@@ -16,7 +22,7 @@ A complete formalization in [Lean 4](https://lean-lang.org/) + [Mathlib](https:/
 | Git commits | 85 |
 | Claude Code sessions | 32 (across 2 machines) |
 | Interactive human prompts | 836 |
-| Automated `/babysit` cycles | 161 |
+| `/babysit` invocations | 161 |
 | Assistant turns | 27,200+ |
 | Tokens consumed | 2.8 billion |
 | Estimated API cost | ~$6,300 |
@@ -84,8 +90,6 @@ The formal theorem takes 13 hypotheses:
 | 12 | `hGauss` | Gauss's law |
 | 13 | `hDivB` | Divergence-free magnetic field |
 
-**Note on minimality:** Hypothesis 9 (polynomial score bound) is likely derivable from hypotheses 7-8 (Schwartz decay + exponential lower bound), making the list 12-independent. Formalizing this derivation is nontrivial and was deferred.
-
 ### Proof Architecture
 
 The proof decomposes into 7 mathematically distinct steps, following a classical entropy method:
@@ -113,106 +117,6 @@ Section 8: Harmonic analysis on T³ → B is constant
 ```
 
 yielding a PSD integrand of order O(|v-w|), which vanishes on the diagonal.
-
-## Project Structure
-
-### File Overview
-
-The formalization consists of **22 Lean files** in `Aristotle/Landau/main/`:
-
-#### Abstract Framework
-| File | Lines | Content |
-|------|------:|---------|
-| `Defs.lean` | 761 | Core definitions: `FlatTorus3` typeclass, `landauMatrix`, `LandauOperator`, `PSDIntegrand`, `equilibriumMaxwellian`, `VMLInput`, `VMLSteadyState` |
-| `Section2.lean` | 141 | Landau matrix algebra: PSD, evenness, quadratic form characterization |
-| `Section3.lean` | 193 | H-theorem: D(f) ≤ 0, nullspace characterization Q=0 ⟹ Maxwellian |
-| `Section3Helpers.lean` | 637 | Supporting lemmas for Section 3 (Fubini symmetrization, IBP chain) |
-| `Section4.lean` | 353 | Transport constraints: steady state → local Maxwellian |
-| `Section5.lean` | 163 | Polynomial matching: constant temperature |
-| `Section6.lean` | 47 | Killing's equation: constant bulk velocity |
-| `Section7.lean` | 208 | Maximum principle: E = 0, u = 0 |
-| `Section8.lean` | 38 | Harmonic closure: B constant on T³ |
-| `VMLInputDerive.lean` | 436 | Maxwellian parameter extraction and polynomial identity decomposition |
-| `Theorem42.lean` | 302 | Main abstract theorem with `VelocityDecayConditions` bundle (19 fields) |
-
-#### Torus Instance
-| File | Lines | Content |
-|------|------:|---------|
-| `TorusInstance.lean` | 1,162 | Concrete `FlatTorus3` instance on T³ = Fin 3 → AddCircle 1 (validates all 22 abstract axioms) |
-
-#### Coulomb Kernel (Concrete Instance)
-| File | Lines | Content |
-|------|------:|---------|
-| `CoulombKernel.lean` | 113 | Coulomb kernel Ψ(r) = r⁻³, positivity, Schwartz helpers |
-| `CoulombSpatialTransport.lean` | 662 | Spatial/force transport integrability for Coulomb |
-| `NewtonianPotential.lean` | 283 | Matrix entry bound \|A_{ij}(z)\| ≤ \|z\|⁻¹, inverse-norm local integrability |
-| `CoulombFlux.lean` | 589 | Landau flux integrability, flux×log, flux component bounds |
-| `CoulombFluxDiff.lean` | 631 | Flux differentiability, convolution derivatives, IBP conditions |
-| `CoulombPSD.lean` | 703 | PSD continuity (singularity cancellation), pointwise bounds, Fubini |
-| `CoulombConcreteTheorem42.lean` | 288 | **Main theorem** — assembles all 19 `VelocityDecayConditions` fields |
-| `LandauMatrixDerivBound.lean` | 396 | Aristotle-proved matrix derivative bound with bridging lemmas |
-
-#### Supporting
-| File | Lines | Content |
-|------|------:|---------|
-| `SchwartzDecayDefs.lean` | 118 | `UniformSchwartzDecay` definition, polynomial integrability helpers |
-| `VelocityDecayInstance.lean` | 35 | Lorentz force component bound (proved by Aristotle) |
-
-### Dependency Graph
-
-```
-Theorem42 (abstract)
-  ├─ Sections 2-8 + VMLInputDerive
-  └─ Defs (FlatTorus3 typeclass)
-
-CoulombConcreteTheorem42 (concrete)
-  ├─ Theorem42 (abstract result)
-  ├─ TorusInstance (FlatTorus3 on T³)
-  ├─ CoulombSpatialTransport
-  │    ├─ CoulombKernel
-  │    └─ VelocityDecayInstance
-  ├─ CoulombFlux
-  │    └─ NewtonianPotential
-  │         └─ CoulombKernel
-  ├─ CoulombPSD
-  │    └─ CoulombFlux
-  └─ CoulombFluxDiff
-       └─ CoulombFlux
-```
-
-### Design: Abstract vs. Concrete
-
-The formalization separates **abstract structure** from **concrete computation**:
-
-- **`FlatTorus3 X`** is a typeclass with 22 axiom fields characterizing a flat compact 3-manifold (differential operators, integration axioms, Fubini, IBP, harmonic characterization, Killing equations). The entire Sections 2-8 proof chain is stated abstractly over `FlatTorus3 X`.
-
-- **`TorusInstance`** validates all 22 axioms for the concrete torus T³ = Fin 3 → AddCircle 1, where functions are automatically periodic and differential operators are defined via the periodic lift.
-
-- **`VelocityDecayConditions`** is a 19-field structure bundling all the integrability, continuity, and differentiability conditions that the abstract proof needs from the collision kernel. Sections 2-8 never mention the kernel directly — they only use these conditions.
-
-- The **Coulomb files** prove all 19 fields for the Coulomb kernel Ψ(r) = r⁻³, handling the singularity explicitly.
-
-This architecture means the abstract proof would apply to any collision kernel (e.g., hard/soft potentials) once the corresponding `VelocityDecayConditions` are verified.
-
-## Building
-
-### Prerequisites
-
-- [Lean 4](https://lean-lang.org/lean4/doc/setup.html) (v4.24.0)
-- [Lake](https://github.com/leanprover/lean4/tree/master/src/lake) (bundled with Lean)
-
-### Build
-
-```bash
-lake exe cache get   # download prebuilt Mathlib oleans
-lake build           # build the project (~2-5 min)
-```
-
-If the build seems to be rebuilding Mathlib from scratch (>30s), run:
-
-```bash
-lake clean && lake update && lake exe cache get && lake build
-```
 
 ## Development Process
 
@@ -306,7 +210,7 @@ Development was organized around an automated **babysit cycle** — a repeating 
 6. **`/check-aristotle`** — poll for completed Aristotle jobs and integrate solutions
 7. **`/log`** — record what was accomplished in `LOG.md`
 
-This loop ran for **58 cycles** over the course of the project. The development log (`Aristotle/Landau/LOG.md`, ~70KB) records every cycle.
+This loop ran for **72 documented cycles** over the course of the project. The development log (`Aristotle/Landau/LOG.md`) records every cycle.
 
 ### Aristotle Integration
 
@@ -357,13 +261,6 @@ Key Aristotle-proved results include:
 
 **Figure: Number of `sorry`'s in `main/` over time (85 commits).** The sorry count follows a characteristic "sawtooth" pattern: sorry's accumulate as new proof scaffolding is written, then are eliminated through proving campaigns. Key events: (1) **Peak 25** (Mar 2): the abstract proof chain (Sections 2–9) stated with gaps. (2) **Monolithic split** (Mar 3–4): first wave of Aristotle proofs drops count from 25→7. (3) **TorusInstance** (Mar 5 evening): +13 sorry's for the 22 torus axioms, quickly resolved. (4) **First 0 sorry's** (Mar 7): the abstract theorem is fully proved — all sorry's in the main proof chain are closed. (5) **CoulombConcrete added** (Mar 8 evening): +35 sorry's for all Coulomb integrability/continuity conditions needed to instantiate the abstract theorem on the physical kernel Ψ(r) = r⁻³. (6) **Coulomb proved** (Mar 9 evening): 35→0 sprint via Aristotle submissions + manual proving. (7) **Non-vacuousness** (Mar 10): brief +1 from adding a satisfiability theorem, immediately resolved to **0 sorry's (final)**.
 
-## Known Limitations
-
-- **Hypothesis 9 (hGradBound) is likely redundant:** The polynomial score bound should follow from Schwartz decay + exponential lower bound. Deriving it formally would strengthen the theorem.
-- **C^∞ smoothness may be overkill:** C² or C³ would likely suffice. Weakening this would make the theorem more general.
-- **Single species only:** The formalization handles one species of charged particles with a fixed ion background. Multi-species extensions would require additional structure.
-- **Non-relativistic:** The Lorentz force uses the classical form E + v × B, not the relativistic version.
-
 ## Technical Stack
 
 | Component | Version |
@@ -373,6 +270,14 @@ Key Aristotle-proved results include:
 | Aristotle | [aristotle.harmonic.fun](https://aristotle.harmonic.fun/) |
 | Claude Code | [claude.com/claude-code](https://claude.com/claude-code) |
 
+## Authors
+
+- [Vasily Ilin](https://github.com/Vilin97) (University of Washington) — project design, mathematical direction, hypothesis discipline, automation design
+- [Claude Code](https://claude.com/claude-code) (Anthropic) — code generation, proof writing, codebase management
+- [Aristotle](https://aristotle.harmonic.fun/) (Harmonic) — automated theorem proving (111 lemmas)
+
 ## License
 
-This project is research software. See the repository for license details.
+This work is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+[![CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
