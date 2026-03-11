@@ -1,28 +1,24 @@
-# Plan — Cycle 100
+# Plan — Cycle 101
 
 ## Status summary
 
 - **Sorry count**: 0
-- **Files**: 31 files, 9,537 lines
+- **Files**: 32 files, 9,563 lines
 - **Build**: Clean, 0 errors
 - **Critique verdict**: ACCEPT
 - **Aristotle jobs**: 0 pending
 
 ## This cycle's work items
 
-### 1. Move FlatTorus3 lemmas out of Defs.lean (`/simplify`)
-- **What**: Issue 6b. Defs.lean is 634 lines (only file over 600). Move the ~180 lines of FlatTorus3 derived lemmas (hSpatialMul through maxwellian_params_isSpatiallyDiff, lines 452-631) to a new `FlatTorus3Lemmas.lean`. Keep definitions, the class itself, instances, and spatialIntegral in Defs.lean.
-- **Why**: Gets Defs.lean under 600 lines (~454 after extraction). The user said "moving lemmas out is OK but definitions must stay together."
-- **Consumers**: Section4, Section6, Section7, VMLInputDerive, Theorem42 — all need `import Aristotle.Landau.main.FlatTorus3Lemmas` added.
-
-### 2. Update stale line counts in MEMORY.md (`/simplify`)
-- **What**: MEMORY.md says "22 files, ~8,700 lines" but we have 31 files, 9,537 lines. Several file line counts are also stale.
-- **Why**: Documentation accuracy (issue 7 in critique pattern).
+### 1. Extract duplicated `h_poly_int` block from CoulombPSD.lean (`/simplify`)
+- **What**: Issue 6d. The block proving `Integrable (fun v => (1+‖v‖)^{2*Kg} * f v)` from Schwartz decay appears identically (~14 lines each) in both `psd_outer_integrable_coulomb` (lines 78-91) and `fubini_double_integrable_coulomb` (lines 251-264). Extract to a standalone lemma.
+- **Why**: Deduplicates ~14 lines, shortens `fubini_double_integrable_coulomb` from 197 to ~183 and `psd_outer_integrable_coulomb` from 88 to ~74 lines.
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
+| 6d | 5 proofs over 150 lines | Low — all under 200 |
 | 8c | Generalize beyond T^3 | Hard |
 | 8d | Mathlib PR for helper lemmas | 5 candidates ready |
 | 8j | lean-lsp build desync | Persistent tooling issue |

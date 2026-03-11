@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 100)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 101)
 
 ## Verdict: ACCEPT
 
@@ -18,7 +18,7 @@
 
 ## 2. Hidden Axioms
 
-Zero axioms on main theorems (verified cycle 95). I found no issue.
+Zero axioms on `CoulombConcreteTheorem42` (verified cycle 101 via `lean_verify`). I found no issue.
 
 ---
 
@@ -44,15 +44,27 @@ I found no issue.
 
 ### ~~6a. maxHeartbeats overrides~~ — RESOLVED (cycle 99)
 
-0 overrides. `synthInstance.maxHeartbeats 160000` in CoulombForceTransport.lean eliminated (no longer needed).
+0 overrides.
 
 ### ~~6b. Files over 600 lines~~ — RESOLVED (cycle 100)
 
-0 files over 600 lines. Defs.lean 634 → 455 lines (extracted FlatTorus3 lemmas to `FlatTorus3Lemmas.lean`).
+0 files over 600 lines. Defs.lean 634 → 455 lines.
 
 ### ~~6c. Long proofs~~ — RESOLVED (cycle 98)
 
-All proofs now under 200 lines. `CoulombConcreteTheorem42` ~186 (was ~223, extracted `coulomb_ibp_f_dg_integrable`). `coulomb_flux_deriv_schwartz_decay` ~196 (cycle 97).
+All proofs under 200 lines. Longest: `Theorem42` ~199, `fubini_double_integrable_coulomb` ~197, `coulomb_flux_deriv_schwartz_decay` ~195, `CoulombConcreteTheorem42` ~185.
+
+### 6d. Proofs over 150 lines (5 proofs)
+
+| File | Proof | ~Lines |
+|------|-------|--------|
+| Theorem42.lean | `Theorem42` | 199 |
+| CoulombPSD.lean | `fubini_double_integrable_coulomb` | 197 |
+| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | 195 |
+| CoulombConcreteTheorem42.lean | `CoulombConcreteTheorem42` | 185 |
+| Section4.lean | `transport_entropy_from_vlasov` | 123 |
+
+These are under the 200-line hard limit but still long. Extracting helpers from any of them would improve maintainability.
 
 ---
 
@@ -92,8 +104,7 @@ I found no issue.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| ~~6b~~ | ~~1 file over 600 lines~~ | ~~Low~~ | ~~RESOLVED (cycle 100)~~ |
-| ~~6c~~ | ~~Long proofs~~ | ~~Low~~ | ~~RESOLVED (cycle 98)~~ |
+| 6d | 5 proofs over 150 lines | Low | Open (all under 200) |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |
 | 8j | lean-lsp build desync | Low | Open (tooling, persistent) |
