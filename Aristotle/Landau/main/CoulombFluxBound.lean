@@ -274,7 +274,8 @@ lemma coulomb_flux_component_bound
     (g : (Fin 3 → ℝ) → ℝ)
     (hg_pos : ∀ v, 0 < g v)
     (hg_smooth : ContDiff ℝ ⊤ g)
-    (hg_schwartz : ∀ N k, ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k g v‖ * (1 + ‖v‖) ^ N ≤ C)
+    (hg_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
+      ‖iteratedFDeriv ℝ k g v‖ * (1 + ‖v‖) ^ N ≤ C)
     {Cg : ℝ} {Kg : ℕ}
     (hGrad : ∀ (v : Fin 3 → ℝ) (j : Fin 3),
       |fderiv ℝ g v (Pi.single j 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * g v)
@@ -284,11 +285,11 @@ lemma coulomb_flux_component_bound
       (g w • vGrad g v - g v • vGrad g w)) i| ≤ Cf * g v * (1 + ‖v‖) ^ Kg := by
   -- Schwartz decay for g and ∂_j g
   have hg_decay : ∀ N, ∃ C > 0, ∀ w, |g w| * (1 + ‖w‖) ^ N ≤ C := by
-    intro N; obtain ⟨C, hC, hb⟩ := hg_schwartz N 0
+    intro N; obtain ⟨C, hC, hb⟩ := @hg_schwartz N 0 (by omega)
     exact ⟨C, hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
   have hdg_decay : ∀ j : Fin 3, ∀ N, ∃ C > 0, ∀ w,
       |fderiv ℝ g w (Pi.single j 1)| * (1 + ‖w‖) ^ N ≤ C := by
-    intro j N; obtain ⟨C, hC, hb⟩ := hg_schwartz N 1
+    intro j N; obtain ⟨C, hC, hb⟩ := @hg_schwartz N 1 (by omega)
     refine ⟨C, hC, fun w => le_trans (mul_le_mul_of_nonneg_right ?_ (by positivity)) (hb w)⟩
     rw [← Real.norm_eq_abs]
     exact le_trans (le_trans (ContinuousLinearMap.le_opNorm _ _)
