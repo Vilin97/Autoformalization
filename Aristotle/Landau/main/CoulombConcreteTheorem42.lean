@@ -318,24 +318,72 @@ theorem CoulombConcreteTheorem42_unique_T
   exact ⟨T_eq, B₀, hT_pos, hf_eq, hE_zero, hB_const,
     fun T' hT' h_eq => equilibriumMaxwellian_T_unique ρ_ion T' T_eq hρ_ion hT' hT_pos h_eq⟩
 
+/-- The directional derivative of the equilibrium Maxwellian:
+    ∂(eM)/∂vᵢ = -(vᵢ/T) · eM(v).
+    Proof: eM = C · exp(-normSq/(2T)), chain rule gives
+    fderiv(eM) v eᵢ = C · exp(…) · (-2vᵢ/(2T)) = eM(v) · (-vᵢ/T). -/
+private lemma fderiv_equilibriumMaxwellian (ρ T : ℝ) (hT : 0 < T) (v : Fin 3 → ℝ) (i : Fin 3) :
+    fderiv ℝ (equilibriumMaxwellian ρ T) v (Pi.single i 1) =
+    -(v i / T) * equilibriumMaxwellian ρ T v := by
+  simp [equilibriumMaxwellian, normSq, dotProduct]; ring
+
+/-- Exponential decay lower bound for equilibrium Maxwellian:
+    exp(-C(1+‖v‖)²) ≤ eM(v) for suitable C. Uses normSq v ≤ 3(1+‖v‖)² (sup norm). -/
+private lemma equilibriumMaxwellian_exp_lower_bound (ρ T : ℝ) (hρ : 0 < ρ) (hT : 0 < T) :
+    ∃ (C : ℝ) (K : ℕ), ∀ v : Fin 3 → ℝ,
+    Real.exp (-C * (1 + ‖v‖) ^ (K : ℕ)) ≤ equilibriumMaxwellian ρ T v := by
+  have hpf : 0 < ρ / (2 * π * T) ^ ((3 : ℝ) / 2) :=
+    div_pos hρ (rpow_pos_of_pos (by positivity) _)
+  refine ⟨3 / (2 * T) + max 0 (-Real.log (ρ / (2 * π * T) ^ ((3:ℝ)/2))), 2, fun v => ?_⟩
+  unfold equilibriumMaxwellian
+  set pf := ρ / (2 * π * T) ^ ((3 : ℝ) / 2)
+  set M := max (0 : ℝ) (-Real.log pf)
+  -- Key: normSq v ≤ 3(1+‖v‖)²
+  have h_normSq : normSq v ≤ 3 * (1 + ‖v‖) ^ 2 := by
+    unfold normSq dotProduct; simp only [Fin.sum_univ_three]
+    have h : ∀ j : Fin 3, v j * v j ≤ ‖v‖ * ‖v‖ := fun j => by
+      have : |v j| ≤ ‖v‖ := by rw [← Real.norm_eq_abs]; exact norm_le_pi_norm v j
+      calc v j * v j = |v j| * |v j| := (abs_mul_abs_self _).symm
+        _ ≤ ‖v‖ * ‖v‖ := mul_self_le_mul_self (abs_nonneg _) this
+    nlinarith [h 0, h 1, h 2, norm_nonneg v]
+  have h_s1 : (1 : ℝ) ≤ (1 + ‖v‖) ^ 2 := by nlinarith [norm_nonneg v]
+  have hM_nn : 0 ≤ M := le_max_left 0 _
+  -- Factor: exp(-(3/(2T)+M)*s) = exp(-M*s) * exp(-3s/(2T))
+  have h_split : -(3 / (2 * T) + M) * (1 + ‖v‖) ^ 2 =
+      -M * (1 + ‖v‖) ^ 2 + -(3 * (1 + ‖v‖) ^ 2 / (2 * T)) := by ring
+  rw [h_split, Real.exp_add]
+  apply mul_le_mul
+  -- exp(-M*s) ≤ pf: from M ≥ -log(pf) and s ≥ 1
+  · rw [← Real.exp_log hpf]
+    exact Real.exp_le_exp.mpr
+      (by nlinarith [le_max_right (0:ℝ) (-Real.log pf), le_mul_of_one_le_right hM_nn h_s1])
+  -- exp(-3s/(2T)) ≤ exp(-normSq/(2T)): from normSq ≤ 3s
+  · apply Real.exp_le_exp.mpr
+    linarith [div_le_div_of_nonneg_right h_normSq (show (0:ℝ) ≤ 2 * T by linarith)]
+  · exact Real.exp_nonneg _
+  · exact Real.exp_nonneg _
+
 /-- **Non-vacuousness of CoulombConcreteTheorem42.**
 
     The equilibrium Maxwellian f(v) = ρ/(2πT)^{3/2} exp(-|v|²/(2T)) with
     E = 0, B = 0 satisfies all 13 hypotheses of the main theorem. This
     proves the theorem is non-vacuous: at least one instance exists.
 
+    **Proof status: 8 of 10 non-trivial goals proved, 2 sorry'd.**
+
     Why each hypothesis holds for the equilibrium:
-    - (3) hf_pos: ρ/(2πT)^{3/2} > 0 and exp > 0 ⇒ f > 0
-    - (4) hf_smooth_v: composition of smooth functions (const, exp, polynomial)
-    - (5) hf_smooth_x: f is spatially constant ⇒ periodicLift is constant ⇒ C^∞
-    - (6) hB_smooth: B = 0, same argument as (5)
-    - (7) hSchwartz: Gaussian is Schwartz class, uniform in x (spatially constant)
-    - (8) hExpDecay: exp(-|v|²/(2T)) ≥ exp(-C(1+‖v‖)²) for C = 1/(2T)
-    - (9) hGradBound: |∂f/∂vᵢ| = |vᵢ/T| · f ≤ (1+‖v‖)/T · f
-    - (10) hVlasov: ∇ₓf = 0 (constant), E+v×B = 0, Q(M) = 0 (nullspace) ⇒ 0 = 0
-    - (11) hAmpere: ∇×0 = 0 = ∫ vᵢ M dv (odd integrand, symmetric Maxwellian)
-    - (12) hGauss: ∇·0 = 0 = ρ_ion - ρ_ion (Gaussian normalizes to ρ_ion)
-    - (13) hDivB: ∇·0 = 0 -/
+    - (3) hf_pos: ρ/(2πT)^{3/2} > 0 and exp > 0 ⇒ f > 0  ✓
+    - (4) hf_smooth_v: composition of smooth functions (const, exp, polynomial)  ✓
+    - (5) hf_smooth_x: f is spatially constant ⇒ periodicLift is constant ⇒ C^∞  ✓
+    - (6) hB_smooth: B = 0, same argument as (5)  ✓
+    - (7) hSchwartz: Gaussian is Schwartz class  ← sorry (hDecay needs
+          iteratedFDeriv poly×Gaussian bound; hGradDecay proved via const=0)
+    - (8) hExpDecay: normSq v ≤ 3(1+‖v‖)², choose C = 3/(2T)+max(0,-log prefix)  ✓
+    - (9) hGradBound: ∂eM/∂vᵢ = -(vᵢ/T)·eM, bound |vᵢ| ≤ 1+‖v‖  ✓
+    - (10) hVlasov: Maxwellian in kernel of Landau operator  ← sorry (hardest)
+    - (11) hAmpere: ∇×0 = 0, ∫ vᵢ eM dv = 0 by odd symmetry  ✓
+    - (12) hGauss: ∇·0 = 0 = ∫eM - ρ_ion (simp closes)  ✓
+    - (13) hDivB: ∇·0 = 0  ✓ -/
 theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
     (hν : 0 < ν) (hT : 0 < T) (hρ_ion : 0 < ρ_ion) :
     ∃ (f : Torus3 → (Fin 3 → ℝ) → ℝ) (E B : Torus3 → Fin 3 → ℝ),
@@ -357,6 +405,64 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
          fun _ => 0, fun _ => 0,
          fun _ v => equilibriumMaxwellian_pos ρ_ion T hρ_ion hT v,  -- (3) ✓
          ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  all_goals sorry
+  -- (4) hf_smooth_v: equilibriumMaxwellian is C^∞
+  · intro _
+    unfold equilibriumMaxwellian
+    apply ContDiff.mul contDiff_const
+    apply ContDiff.exp
+    apply ContDiff.div_const
+    apply ContDiff.neg
+    unfold normSq dotProduct
+    exact ContDiff.sum fun i _ =>
+      (contDiff_apply ℝ ℝ i).mul (contDiff_apply ℝ ℝ i)
+  -- (5) hf_smooth_x: periodicLift of constant is C^∞
+  · intro v
+    simp only [periodicLift, Function.comp]
+    exact contDiff_const
+  -- (6) hB_smooth: periodicLift of zero is C^∞
+  · intro i
+    simp only [periodicLift, Function.comp, Pi.zero_apply]
+    exact contDiff_const
+  -- (7) hSchwartz: Gaussian is UniformSchwartzDecay
+  · constructor
+    · -- hDecay: ‖iteratedFDeriv ℝ k eM v‖ * (1+‖v‖)^N ≤ C
+      sorry
+    · -- hGradDecay: spatial gradient of constant function is 0
+      intro N i
+      refine ⟨1, one_pos, fun x v => ?_⟩
+      simp only [torusGradX, periodicLift, Function.comp]
+      simp [fderiv_const, ContinuousLinearMap.zero_apply, mul_comm]
+  -- (8) hExpDecay: exponential decay bound
+  · obtain ⟨C, K, hCK⟩ := equilibriumMaxwellian_exp_lower_bound ρ_ion T hρ_ion hT
+    exact ⟨C, K, fun _ => hCK⟩
+  -- (9) hGradBound: |∂eM/∂vᵢ| = |vᵢ/T| · eM ≤ (1+‖v‖)/T · eM
+  · refine ⟨1 / T, 1, fun _ v i => ?_⟩
+    rw [fderiv_equilibriumMaxwellian ρ_ion T hT v i]
+    have hpos := equilibriumMaxwellian_pos ρ_ion T hρ_ion hT v
+    rw [abs_neg, abs_mul, abs_div, abs_of_pos hT, abs_of_pos hpos, pow_one]
+    have hvi : |v i| ≤ 1 + ‖v‖ :=
+      le_trans (norm_le_pi_norm v i) (le_add_of_nonneg_left one_nonneg)
+    calc |v i| / T * equilibriumMaxwellian ρ_ion T v
+        ≤ (1 + ‖v‖) / T * equilibriumMaxwellian ρ_ion T v := by
+          apply mul_le_mul_of_nonneg_right
+          · exact div_le_div_of_nonneg_right hvi hT
+          · exact hpos.le
+      _ = 1 / T * (1 + ‖v‖) * equilibriumMaxwellian ρ_ion T v := by ring
+  -- (10) hVlasov: Vlasov equation
+  · sorry
+  -- (11) hAmpere: Ampere's law (curl 0 = ∫ vᵢ eM dv)
+  · intro x
+    ext i
+    simp only [torusCurlX, periodicLift, Function.comp, Pi.zero_apply,
+      fderiv_const, ContinuousLinearMap.zero_apply, sub_self]
+    fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+  -- (12) hGauss: Gauss's law
+  · intro x
+    simp [torusDivX, periodicLift, Function.comp, Pi.zero_apply,
+      fderiv_const, ContinuousLinearMap.zero_apply]
+  -- (13) hDivB: divergence of B = 0
+  · intro x
+    simp only [torusDivX, periodicLift, Function.comp, Pi.zero_apply]
+    simp [fderiv_const, ContinuousLinearMap.zero_apply]
 
 end VML
