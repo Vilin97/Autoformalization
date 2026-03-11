@@ -343,5 +343,62 @@ lemma psd_pointwise_bound_coulomb
       _ = 18 * Cg ^ 2 * f v * ((1 + ‖v‖) ^ (2 * Kg) * (‖v - w‖⁻¹ * f w) +
                ‖v - w‖⁻¹ * ((1 + ‖w‖) ^ (2 * Kg) * f w)) := by ring
 
+/-- Pointwise bound on the Fubini double integrand for Coulomb.
+    |score(v) · (A(v-w) · flux(v,w))| ≤ 3Cg(1+‖v‖)^Kg * ‖v-w‖⁻¹ * Σ_j (...). -/
+lemma fubini_double_pointwise_bound
+    {f : (Fin 3 → ℝ) → ℝ} (hf_pos : ∀ v, 0 < f v)
+    {Cg : ℝ} {Kg : ℕ}
+    (h_score : ∀ u i, |vGrad (Real.log ∘ f) u i| ≤ Cg * (1 + ‖u‖) ^ Kg)
+    (v w : Fin 3 → ℝ) :
+    |dotProduct (vGrad (Real.log ∘ f) v)
+      (mulVec (landauMatrix coulombKernel (v - w))
+        (f w • vGrad f v - f v • vGrad f w))| ≤
+      3 * Cg * (1 + ‖v‖) ^ Kg * (‖v - w‖⁻¹ *
+        (∑ j : Fin 3, (f w * |vGrad f v j| + f v * |vGrad f w j|))) := by
+  simp only [dotProduct, mulVec]
+  calc |∑ i : Fin 3, vGrad (Real.log ∘ f) v i *
+          ∑ j : Fin 3, landauMatrix coulombKernel (v - w) i j *
+            (f w • vGrad f v - f v • vGrad f w) j|
+      ≤ ∑ i : Fin 3, |vGrad (Real.log ∘ f) v i| *
+          |∑ j : Fin 3, landauMatrix coulombKernel (v - w) i j *
+            (f w • vGrad f v - f v • vGrad f w) j| := by
+        exact le_trans (Finset.abs_sum_le_sum_abs _ _)
+          (Finset.sum_le_sum fun i _ => abs_mul _ _)
+    _ ≤ ∑ i : Fin 3, Cg * (1 + ‖v‖) ^ Kg *
+          (‖v - w‖⁻¹ * ∑ j : Fin 3, |(f w • vGrad f v - f v • vGrad f w) j|) := by
+        apply Finset.sum_le_sum; intro i _
+        apply mul_le_mul (h_score v i) _ (abs_nonneg _) (by positivity)
+        by_cases hvw : v - w = 0
+        · have : v = w := sub_eq_zero.mp hvw; subst this
+          simp [mulVec, dotProduct, landauMatrix, innerLandauMatrix, normSq, vecMulVec,
+            eucNorm, coulombKernel]
+        · calc |∑ j, landauMatrix coulombKernel (v - w) i j *
+                (f w • vGrad f v - f v • vGrad f w) j|
+              ≤ ∑ j, |landauMatrix coulombKernel (v - w) i j *
+                (f w • vGrad f v - f v • vGrad f w) j| :=
+                Finset.abs_sum_le_sum_abs _ _
+            _ ≤ ∑ j, ‖v - w‖⁻¹ * |(f w • vGrad f v - f v • vGrad f w) j| := by
+                apply Finset.sum_le_sum; intro j _
+                rw [abs_mul]
+                exact mul_le_mul_of_nonneg_right
+                  (coulomb_landauMatrix_entry_le_pi _ _ _ hvw) (abs_nonneg _)
+            _ = ‖v - w‖⁻¹ * ∑ j, |(f w • vGrad f v - f v • vGrad f w) j| :=
+                (Finset.mul_sum _ _ _).symm
+    _ = 3 * (Cg * (1 + ‖v‖) ^ Kg) *
+          (‖v - w‖⁻¹ * ∑ j, |(f w • vGrad f v - f v • vGrad f w) j|) := by
+        simp [Fin.sum_univ_three]; ring
+    _ ≤ 3 * Cg * (1 + ‖v‖) ^ Kg * (‖v - w‖⁻¹ *
+          ∑ j, (f w * |vGrad f v j| + f v * |vGrad f w j|)) := by
+        congr 1
+        congr 1
+        ring
+        congr 1
+        apply Finset.sum_le_sum; intro j _
+        simp only [Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
+        have := norm_sub_le (f w * vGrad f v j) (f v * vGrad f w j)
+        rw [Real.norm_eq_abs, Real.norm_eq_abs, Real.norm_eq_abs,
+          abs_mul, abs_mul, abs_of_pos (hf_pos w), abs_of_pos (hf_pos v)] at this
+        exact this
+
 end VML
 end

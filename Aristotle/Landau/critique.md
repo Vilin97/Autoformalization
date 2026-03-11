@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 94)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 95)
 
 ## Verdict: ACCEPT
 
@@ -6,7 +6,7 @@
 
 ## 0. Errors
 
-`lake build` — **clean, 0 errors.**
+`lake build Aristotle/Landau/main/CoulombConcreteTheorem42.lean` — **clean, 0 errors.**
 
 ---
 
@@ -18,7 +18,7 @@
 
 ## 2. Hidden Axioms
 
-Zero axioms on main theorems (verified cycle 93 via `lean_verify`). I found no issue.
+`lean_verify` on `CoulombConcreteTheorem42`: **0 axioms** (beyond `propext`, `Classical.choice`, `Quot.sound`). Same for `CoulombConcreteTheorem42_nonvacuous`. I found no issue.
 
 ---
 
@@ -58,17 +58,17 @@ Can't be split per user preference.
 
 | File | Proof | Lines |
 |------|-------|-------|
-| CoulombPSD.lean | `fubini_double_integrable_coulomb` | ~293 |
-| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | ~234 |
-| CoulombConcreteTheorem42.lean | `CoulombConcreteTheorem42` | ~223 |
+| CoulombPSD.lean | `fubini_double_integrable_coulomb` | ~286 |
+| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | ~231 |
+| CoulombConcreteTheorem42.lean | `CoulombConcreteTheorem42` | ~222 |
 
-Down from ~312/~231/~235 last cycle (deduplication into shared helpers). `fubini_double` is still the longest and has a natural split point: the pointwise bound `h_pw_bound` (~49 lines) could be extracted.
+`fubini_double` down from ~293 last cycle (hpf_decay deduplication). The pointwise bound `h_pw_bound` (~49 lines, starting ~line 310) and the integration bound `h_int_bound` (~61 lines, starting ~line 360) remain natural extraction candidates.
 
 ---
 
 ## 7. Documentation Lies
 
-I found no issue.
+MEMORY.md says "22 files, ~8,700 lines". Actual: **31 files, 9,518 lines**. Stale.
 
 ---
 
@@ -82,7 +82,7 @@ I found no issue.
 
 ### 8d. Extract Mathlib-upstreamable lemmas (MEDIUM)
 
-`iteratedFDeriv_clm_zero` confirmed not in Mathlib. PR-ready. See `experiments/mathlib_pr_candidates.md`.
+5 PR candidates identified in `experiments/mathlib_pr_candidates.md`: `iteratedFDeriv_clm_zero`, `norm_iteratedFDeriv_one_clm`, `integrable_one_add_norm_pow_mul`, `integrable_of_schwartz_bound`, `schwartz_poly_weighted_decay`. The latter 3 were generalized to arbitrary normed spaces in cycle 94.
 
 ### ~~8e–8h~~ — DONE
 
@@ -90,13 +90,13 @@ I found no issue.
 
 ### 8j. lean-lsp build desync (PERSISTENT)
 
-The lean-lsp MCP rebuilds from source and hits errors in IteratedDerivHelpers, TorusIntegration, GaussianHelpers that don't reproduce with `lake build`. Confirmed persistent after `lean_build --clean` (cycle 93).
+The lean-lsp MCP rebuilds from source and hits errors in IteratedDerivHelpers, TorusIntegration, GaussianHelpers that don't reproduce with `lake build`. Confirmed persistent.
 
 ---
 
 ## 9. Mathlib Upstreamability
 
-`iteratedFDeriv_clm_zero` is PR-ready. See `experiments/mathlib_pr_candidates.md`.
+5 candidates documented in `experiments/mathlib_pr_candidates.md`. `iteratedFDeriv_clm_zero` is the strongest candidate (genuinely new, fully generalized).
 
 ---
 
@@ -106,8 +106,9 @@ The lean-lsp MCP rebuilds from source and hits errors in IteratedDerivHelpers, T
 |---|-------|----------|--------|
 | 6b | 1 file over 600 lines | Low | Open (Defs.lean, can't split) |
 | 6c | 3 proofs over 200 lines | Low | Open (`fubini_double` splittable) |
+| 7 | MEMORY.md stale line counts | Low | Open |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
-| 8d | Mathlib PR for helper lemmas | Low | Open |
+| 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |
 | 8j | lean-lsp build desync | Low | Open (tooling, persistent) |
 
 ### Conditions for ACCEPT

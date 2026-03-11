@@ -128,9 +128,11 @@ lemma integrable_of_schwartz_bound
     calc ‖g v‖ ≤ C * (1 + ‖v‖) ^ K * |φ v| := hbound v
     _ = C * ((1 + ‖v‖) ^ K * |φ v|) := by ring)
 
-/-- Extract pointwise (k=0) decay from the Schwartz hypothesis. -/
+/-- Extract pointwise (k=0) decay from the Schwartz hypothesis.
+    Generalized to any normed space (dimension-independent). -/
 lemma schwartz_pointwise_decay
-    {f : (Fin 3 → ℝ) → ℝ}
+    {α : Type*} [NormedAddCommGroup α] [NormedSpace ℝ α]
+    {f : α → ℝ}
     (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
       ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C) :
     ∀ N, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ N ≤ C :=
