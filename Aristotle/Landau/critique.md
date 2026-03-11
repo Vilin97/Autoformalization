@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 106)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 107)
 
 ## Verdict: ACCEPT
 
@@ -44,11 +44,9 @@ I found no issue.
 
 ### ~~6a. maxHeartbeats overrides~~ — RESOLVED (cycle 99)
 
-0 overrides.
-
 ### ~~6b. Files over 600 lines~~ — RESOLVED (cycle 100)
 
-0 files over 600 lines. Largest: Section3Helpers.lean (596 — dangerously close to 600).
+Largest: Section3Helpers.lean (580).
 
 ### ~~6c. Long proofs~~ — RESOLVED (cycle 98)
 
@@ -60,13 +58,17 @@ All proofs under 200 lines.
 |------|-------|-------|
 | CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | 181 |
 | Theorem42.lean | `Theorem42` | 178 |
-| Section3Helpers.lean | `parallel_curl_free_affine` | 169 |
+| Section3Helpers.lean | `parallel_curl_free_affine` | 154 |
 
-**NOTE:** `parallel_curl_free_affine` was missed in cycles 100-105. It's an Aristotle-generated proof (170 lines) solving the functional equation "parallel + curl-free → affine". Since it's Aristotle output, it may be amenable to simplification.
+All under 200. Diminishing returns on further extraction — remaining bulk is intrinsic complexity.
 
-### ~~6e. Stale comments in CoulombPSD.lean~~ — RESOLVED (cycle 103)
+### ~~6e. Stale comments~~ — RESOLVED (cycle 103)
 
-### ~~6f. Dead code audit~~ — RESOLVED (cycle 105, 0 unused lemmas)
+### ~~6f. Dead code audit~~ — RESOLVED (cycle 105)
+
+### 6g. Verbose Aristotle proofs in Section3Helpers.lean
+
+Several Aristotle-generated proofs use broad tactics (`aesop`, `simp +decide`) that could be more targeted, and repetitive `fin_cases` patterns. Not a correctness concern but affects maintainability if Mathlib changes simp lemmas.
 
 ---
 
@@ -78,17 +80,11 @@ I found no issue.
 
 ## 8. Generalization Opportunities
 
-### ~~8a. Extract helpers~~ — DONE
-
-### ~~8b. Weaken regularity: C^∞ → optimal~~ — ANALYZED (cycle 90)
+### ~~8a–8b, 8e–8h~~ — DONE/ANALYZED
 
 ### 8c. Generalize beyond T^3 (HARD)
 
 ### 8d. Extract Mathlib-upstreamable lemmas (MEDIUM)
-
-5 PR candidates in `experiments/mathlib_pr_candidates.md`.
-
-### ~~8e–8h~~ — DONE
 
 ### 8i. hGradBound is Coulomb-specific (MINOR — DOCUMENTED)
 
@@ -106,10 +102,11 @@ I found no issue.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6d | 3 proofs over 150 lines | Low | Open (all under 200) |
+| 6d | 3 proofs over 150 lines | Low | Open (diminishing returns) |
+| 6g | Verbose Aristotle tactics | Low | New |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |
-| 8j | lean-lsp build desync | Low | Open (tooling, persistent) |
+| 8j | lean-lsp build desync | Low | Open (tooling) |
 
 ### Conditions for ACCEPT
 

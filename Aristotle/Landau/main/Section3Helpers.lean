@@ -276,8 +276,8 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
       have h_deriv_eq : ∀ t : ℝ, g (v + t • w) - g v ∈ Submodule.span ℝ {w} := by
         intro t
         by_cases ht : t = 0 ∨ w = 0 <;> simp_all +decide [Submodule.mem_span_singleton]
-        · aesop
-        · obtain ⟨l, hl⟩ := hparallel (v + t • w) v (by aesop)
+        · exact Submodule.zero_mem _
+        · obtain ⟨l, hl⟩ := hparallel (v + t • w) v (by simp_all)
           use l * t
           simp_all +decide [mul_comm, smul_smul]
       have h_lim : Filter.Tendsto
@@ -338,7 +338,7 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
       have hc_partial : ∀ v : Fin 3 → ℝ, ∀ i j : Fin 3,
           (fderiv ℝ g v) (Pi.single j 1) i =
           c v * (if i = j then 1 else 0) := by
-        aesop
+        intro v i j; simp only [hc, Pi.smul_apply, smul_eq_mul, Pi.single_apply]
       have h_diff_fderiv : ContDiff ℝ 1 (fderiv ℝ g) := hg_smooth.fderiv_right le_rfl
       have h_symm_second_deriv :
           ∀ v : Fin 3 → ℝ, ∀ i j k : Fin 3,
@@ -365,7 +365,7 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
           (if i = j then 1 else 0) := by
         intro v i j k
         rw [fderiv_pi]
-        aesop
+        simp [hc_partial]
         exact fun i => DifferentiableAt.comp v
           (differentiableAt_pi.1
             ((h_diff_fderiv.clm_apply contDiff_const).contDiffAt.differentiableAt le_rfl) i)
@@ -373,7 +373,7 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
       have h_zero_deriv : ∀ v : Fin 3 → ℝ, ∀ k : Fin 3, (fderiv ℝ c v) (Pi.single k 1) = 0 := by
         intro v k
         obtain ⟨i, hi⟩ : ∃ i : Fin 3, i ≠ k := by fin_cases k <;> trivial
-        specialize h_symm_second_deriv v i i k; aesop
+        specialize h_symm_second_deriv v i i k; simp_all
       have h_const_c : ∀ v : Fin 3 → ℝ, (fderiv ℝ c v) = 0 := by
         intro v; ext w
         have : (fderiv ℝ c v) w =
@@ -382,13 +382,13 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
           simp +decide [map_sum, map_smul, Finset.sum_apply, Pi.single_apply]; ring
           exact Finset.sum_congr rfl fun i _ => by
             rw [← ContinuousLinearMap.map_smul]; congr; ext j
-            by_cases hi : i = j <;> aesop
+            by_cases hi : i = j <;> simp_all
         simp [this, h_zero_deriv]
       have h_diff_c : Differentiable ℝ c := by
         have : ContDiff ℝ 1 (fun v => (fderiv ℝ g v) (Pi.single 0 1) 0) :=
           (contDiff_apply ℝ ℝ 0).comp (h_diff_fderiv.clm_apply contDiff_const)
         convert this.differentiable le_rfl using 1
-        aesop (simp_config := { singlePass := true })
+        funext v; simp [hc, smul_eq_mul]
       intro v w; exact is_const_of_fderiv_eq_zero h_diff_c h_const_c v w
     use c 0
     intro v w

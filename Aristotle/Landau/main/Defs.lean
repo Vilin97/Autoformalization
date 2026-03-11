@@ -87,6 +87,28 @@ def IsMaxwellian (f : (Fin 3 → ℝ) → ℝ) : Prop :=
   ∃ (a₀ : ℝ) (b : Fin 3 → ℝ) (c₀ : ℝ),
     c₀ < 0 ∧ ∀ v, f v = Real.exp (a₀ + dotProduct b v + c₀ * normSq v)
 
+/-- The Maxwellian parameters (a₀, b, c₀) are unique: if exp(a₀ + b·v + c₀|v|²) =
+    exp(a₀' + b'·v + c₀'|v|²) for all v, then a₀ = a₀', b = b', c₀ = c₀'. -/
+lemma IsMaxwellian_params_unique
+    (a₀ a₀' : ℝ) (b b' : Fin 3 → ℝ) (c₀ c₀' : ℝ)
+    (h : ∀ v : Fin 3 → ℝ, a₀ + dotProduct b v + c₀ * normSq v =
+      a₀' + dotProduct b' v + c₀' * normSq v) :
+    a₀ = a₀' ∧ b = b' ∧ c₀ = c₀' := by
+  -- Evaluate at v = 0 to get a₀ = a₀'
+  have h0 : a₀ = a₀' := by have := h 0; simp [dotProduct, normSq, Fin.sum_univ_three] at this; linarith
+  -- Evaluate at eᵢ and 2eᵢ to get c₀ = c₀' and bᵢ = bᵢ'
+  have hc : c₀ = c₀' := by
+    have h1 := h (Pi.single 0 1)
+    have h2 := h (Pi.single 0 2)
+    simp [dotProduct, normSq, Fin.sum_univ_three, Pi.single_apply] at h1 h2
+    linarith
+  have hb : b = b' := by
+    ext i
+    have hi := h (Pi.single i 1)
+    simp [dotProduct, normSq, Fin.sum_univ_three, Pi.single_apply] at hi
+    fin_cases i <;> linarith
+  exact ⟨h0, hb, hc⟩
+
 /-- The equilibrium Maxwellian (zero drift, density = ρ_ion):
     f∞(v) = ρ_ion/(2πT∞)^(3/2) · exp(-|v|²/(2T∞)) -/
 def equilibriumMaxwellian (ρ_ion T : ℝ) (v : Fin 3 → ℝ) : ℝ :=

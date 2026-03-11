@@ -1,5 +1,21 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 107: Replace aesop with targeted tactics, add parameter uniqueness
+
+### Changes
+- **Replaced 7 `aesop` calls** in Section3Helpers.lean with targeted tactics:
+  - `aesop` → `exact Submodule.zero_mem _` (line 279)
+  - `by aesop` → `by simp_all` (line 280)
+  - `aesop` → `intro v i j; simp only [hc, Pi.smul_apply, smul_eq_mul, Pi.single_apply]` (line 341)
+  - `aesop` → `simp [hc_partial]` (line 368)
+  - `aesop` → `simp_all` (line 376)
+  - `aesop` → `simp_all` (line 385)
+  - `aesop (simp_config := { singlePass := true })` → `funext v; simp [hc, smul_eq_mul]` (line 391)
+- **Added `IsMaxwellian_params_unique`** in Defs.lean: proves uniqueness of Maxwellian parameters (a₀, b, c₀) from the exponential-quadratic representation.
+- Issue 6g (verbose Aristotle tactics): partially resolved — 7 of ~7 `aesop` calls in `parallel_curl_free_affine` replaced.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 106: Simplify parallel_curl_free_affine
 
 ### Changes
