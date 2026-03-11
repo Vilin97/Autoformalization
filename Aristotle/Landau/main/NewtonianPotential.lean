@@ -126,7 +126,7 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
                 by rw [div_le_iff₀ hR] at hk; linarith⟩
             · exact div_pos (norm_pos_iff.mpr hx.2) hR
             · exact div_pos (norm_pos_iff.mpr hx.2) hR
-          aesop
+          exact ⟨k, hk.1, hk.2⟩
         · exact fun i => MeasurableSet.diff (measurableSet_closedBall) (measurableSet_closedBall)
         · intro k l hkl
           simp_all +decide [ mul_comm, Real.rpow_add, Real.rpow_sub ]
@@ -225,10 +225,10 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
           norm_num [ ← mul_pow ]
     refine ⟨ ?_, ?_ ⟩
     · exact Measurable.aestronglyMeasurable (by exact Measurable.inv (measurable_norm))
-    · rw [ MeasureTheory.hasFiniteIntegral_iff_norm ] ; aesop
+    · rw [MeasureTheory.hasFiniteIntegral_iff_norm]; exact this
   rwa [ MeasureTheory.IntegrableOn, MeasureTheory.Measure.restrict_congr_set ]
   rw [ MeasureTheory.ae_eq_set ] ; norm_num
-  exact MeasureTheory.measure_mono_null (fun x hx => by aesop) (MeasureTheory.measure_singleton 0)
+  exact MeasureTheory.measure_mono_null (fun x hx => by exact absurd rfl hx.2) (MeasureTheory.measure_singleton 0)
 
 
 /-- Convolution of a locally integrable kernel with a Schwartz function is integrable.
@@ -345,7 +345,7 @@ lemma convolution_local_int_schwartz
             exact le_of_not_gt fun h =>
               hw.2 <| mem_closedBall_iff_norm.mpr <|
                 by linarith)
-  convert h_integrable.1.union h_integrable.2 using 1 ; aesop
+  convert h_integrable.1.union h_integrable.2 using 1; simp [Set.compl_union_self]
 
 /-- Key integrability fact for Coulomb kernel: ‖·‖⁻¹ × Schwartz is integrable in ℝ³.
     Combines inv_norm_local_integrable and convolution_local_int_schwartz. -/

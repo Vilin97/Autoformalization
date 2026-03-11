@@ -529,6 +529,19 @@ lemma maxwellian_landau_flux_zero (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
     ring!
   · norm_num [Algebra.smul_def]
 
+/-- Maxwellians are in the nullspace of the Landau operator: Q(f,f) = 0.
+    The flux A(v-w)[f(w)∇f(v) - f(v)∇f(w)] vanishes pointwise (because
+    ∇log f is affine, so the score difference is proportional to v-w,
+    which is annihilated by A(v-w)), making the integral and its divergence zero. -/
+lemma IsMaxwellian.landauOperator_eq_zero (Ψ : ℝ → ℝ)
+    (hM : IsMaxwellian f) (v : Fin 3 → ℝ) :
+    LandauOperator Ψ f v = 0 := by
+  obtain ⟨a₀, b, c₀, _, hf⟩ := hM
+  have hflux := maxwellian_landau_flux_zero Ψ f a₀ b c₀ hf
+  unfold LandauOperator
+  simp only [hflux, MeasureTheory.integral_zero, Pi.zero_apply]
+  simp [vDiv, fderiv_const]
+
 /-- Gap 11: D(f) = 0 implies f is a Maxwellian.
     Chains: D=0 → parallelism (Lemma 6) → ∇log f affine (Lemma 7) →
     log f quadratic (Lemma 8) → f = exp(quadratic) → c₀ < 0 (L¹ integrability).

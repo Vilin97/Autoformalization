@@ -1,5 +1,19 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 110: Eliminate ALL aesop from codebase, add landauOperator_eq_zero
+
+### Changes
+- **Eliminated all 9 remaining `aesop` calls** across 4 files:
+  - CoulombPSDHelpers (2→0): `⟨hU.2, hU.2⟩`, `rw [ContinuousAt, hp]; exact h_tendsto`
+  - SchwartzDecayDefs (1→0): `exact this`
+  - NewtonianPotential (4→0): `exact ⟨k, hk.1, hk.2⟩`, `exact this`, `exact absurd rfl hx.2`, `simp [Set.compl_union_self]`
+  - CoulombFlux (2→0): `exact hf_schwartz N (by omega)`, `exact this`
+- **Codebase `aesop` count: 0.** Complete elimination across all 32 files.
+- **Added `IsMaxwellian.landauOperator_eq_zero`** in Section3Helpers.lean: Maxwellians are in the nullspace of the Landau operator (Q(f,f) = 0). Verified 0 axioms.
+- **Caught hidden sorry**: Initial placement in Defs.lean compiled without error but `lean_verify` revealed `sorryAx` — `maxwellian_landau_flux_zero` was out of scope. Moved to Section3Helpers.lean where it verifies clean.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 109: Eliminate aesop in GaussianHelpers/TorusIntegration, add equilibriumMaxwellian_isMaxwellian
 
 ### Changes
