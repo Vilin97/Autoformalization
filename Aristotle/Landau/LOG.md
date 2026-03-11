@@ -1,5 +1,65 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 67: Close sorry (12), decompose sorry (7) (3→2)
+
+### Changes
+- **Closed sorry (12)** `hGauss` in `CoulombConcreteTheorem42_nonvacuous`: Gauss's law ∇·E=0 = ∫eM-ρ_ion. Proof: `simp` simplifies divergence of zero to 0, then closes the integral equation.
+- **Decomposed sorry (7)** `hSchwartz`: split into `hDecay` (sorry — needs iteratedFDeriv × polynomial × Gaussian bound) and `hGradDecay` (proved — spatial gradient of constant function is 0).
+- **Updated MEMORY.md**: corrected sorry count (6→2), line counts (7900→8000, CoulombConcreteTheorem42 395→460).
+- **Updated docstring**: 8 of 10 non-trivial goals proved, 2 sorry'd.
+
+### Sorry count: 2 (all in `CoulombConcreteTheorem42_nonvacuous`)
+
+### Remaining sorry's
+- (7) hDecay in UniformSchwartzDecay — needs `‖iteratedFDeriv ℝ k eM v‖ * (1+‖v‖)^N ≤ C` (polynomial × Gaussian bound + `norm_iteratedFDeriv_comp_le`)
+- (10) Vlasov equation — Landau operator nullspace for Maxwellian (hardest)
+
+## 2026-03-10 UTC — Babysit cycle 66: Close 3 more non-vacuousness sorry's (6→3)
+
+### Changes
+- **Closed 3 sorry's** in `CoulombConcreteTheorem42_nonvacuous` (6→3):
+  - (8) `hExpDecay`: exponential decay lower bound — proved via `equilibriumMaxwellian_exp_lower_bound` helper: normSq v ≤ 3(1+‖v‖)², choose C = 3/(2T) + max(0,-log(prefix)), factor exp into two terms
+  - (9) `hGradBound`: gradient bound — proved via `fderiv_equilibriumMaxwellian` helper (`simp; ring`), then |vᵢ|/T ≤ (1+‖v‖)/T using `norm_le_pi_norm`
+  - (11) `hAmpere`: curl of B=0 equals ∫ vᵢ eM — proved by simplifying curl to 0, then `fin_cases i <;> simp`
+- **Added 2 helper lemmas** in `CoulombConcreteTheorem42.lean`:
+  - `fderiv_equilibriumMaxwellian`: directional derivative ∂eM/∂vᵢ = -(vᵢ/T)·eM
+  - `equilibriumMaxwellian_exp_lower_bound`: ∃ C K, exp(-C(1+‖v‖)^K) ≤ eM(v)
+- **Updated nonvacuous theorem docstring**: now documents proof status (7/10 proved, 3 sorry'd) with ✓/← markers
+- **Style fixes**: extracted inline `show...from by ring` to `have`, removed unnecessary parentheses
+
+### Sorry count: 3 (all in `CoulombConcreteTheorem42_nonvacuous`)
+
+### Remaining sorry's
+- (7) UniformSchwartzDecay — Gaussian iterated fderiv decay (hard)
+- (10) Vlasov equation — Landau operator nullspace for Maxwellian (hardest)
+- (12) Gauss's law — Gaussian integral normalization ∫ eM dv = ρ_ion (hard)
+
+### Critique meets ACCEPT condition
+Critique required closing ≥2 sorry's targeting (8) and (9). This cycle closed 3 including both targets.
+
+## 2026-03-10 UTC — Babysit cycle 65: Close 4 non-vacuousness sorry's, fix rpow_pos API
+
+### Changes
+- **Closed 4 sorry's** in `CoulombConcreteTheorem42_nonvacuous` (10→6):
+  - (4) `hf_smooth_v`: Maxwellian is C^∞ — proved via `ContDiff.mul`, `ContDiff.exp`, `contDiff_apply`
+  - (5) `hf_smooth_x`: periodicLift of spatially constant function is C^∞ — `contDiff_const`
+  - (6) `hB_smooth`: periodicLift of zero is C^∞ — `contDiff_const`
+  - (13) `hDivB`: divergence of B=0 is 0 — `fderiv_const` + `Finset.sum_const_zero`
+- **Fixed Defs.lean**: `Real.rpow_pos` → `Real.rpow_pos_of_pos` (Mathlib API rename)
+- **Decomposed `all_goals sorry`** into 10 individual `· sorry` blocks with labeled comments
+- **Documented spatial smoothness design** in `experiments/spatial_smoothness_design.md`: parametric `IsSpatiallySmooth n` predicate would enable C^2, ~95 call sites to change
+- **Updated MEMORY.md**: line counts, sorry status, new API notes
+
+### Sorry count: 6 (all in `CoulombConcreteTheorem42_nonvacuous`, goals 7-12)
+
+### Remaining sorry's
+- (7) UniformSchwartzDecay — Gaussian iterated fderiv decay (hard)
+- (8) Exponential decay bound — needs relating normSq to sup norm + log argument (medium)
+- (9) Gradient bound — fderiv of Gaussian (hard)
+- (10) Vlasov equation — Landau operator nullspace for Maxwellian (hard)
+- (11) Ampere's law — odd integral vanishes (medium-hard)
+- (12) Gauss's law — Gaussian integral normalization (medium-hard)
+
 ## 2026-03-10 UTC — Babysit cycle 64: Eliminate deprecated refine', non-vacuousness theorem
 
 ### Changes
