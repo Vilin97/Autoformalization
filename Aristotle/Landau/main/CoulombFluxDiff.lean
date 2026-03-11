@@ -137,20 +137,12 @@ lemma coulomb_flux_deriv_schwartz_decay
           simp [norm_smul, Real.norm_eq_abs]
       _ ≤ (Mdj_N * CKj + MKj * Cdj + Mf_N * CLj + MLj * Cf) * 1 + 0 := by
           rw [mul_one, add_zero]
-          -- Convert iteratedFDeriv 1 norms to fderiv norms
+          -- Convert fderiv norms to iteratedFDeriv 1 norms, then apply Schwartz bounds
           have hCf_v : ‖fderiv ℝ f v‖ * (1 + ‖v‖) ^ N ≤ Cf := by
-            have : ‖fderiv ℝ f v‖ = ‖iteratedFDeriv ℝ 1 f v‖ := by
-              rw [← norm_iteratedFDeriv_zero (𝕜 := ℝ) (f := fderiv ℝ f),
-                  norm_iteratedFDeriv_fderiv]
-            rw [this]; exact hCf v
+            rw [norm_fderiv_eq_iteratedFDeriv_one]; exact hCf v
           have hCdj_v : ‖fderiv ℝ (fun v => fderiv ℝ f v (Pi.single j 1)) v‖ *
               (1 + ‖v‖) ^ N ≤ Cdj := by
-            have : ‖fderiv ℝ (fun v => fderiv ℝ f v (Pi.single j 1)) v‖ =
-                ‖iteratedFDeriv ℝ 1 (fun w => fderiv ℝ f w (Pi.single j 1)) v‖ := by
-              rw [← norm_iteratedFDeriv_zero
-                    (𝕜 := ℝ) (f := fderiv ℝ (fun v => fderiv ℝ f v (Pi.single j 1))),
-                  norm_iteratedFDeriv_fderiv]
-            rw [this]; exact hCdj v
+            rw [norm_fderiv_eq_iteratedFDeriv_one]; exact hCdj v
           -- Each term: one factor has Schwartz decay × P, the other is bounded
           -- t1: |∂_j f(v)| * ‖DK(v)‖ * P ≤ (|∂_j f(v)| * P) * ‖DK(v)‖ ≤ Mdj_N * CKj
           have hMdj_N_v := hMdj_N v

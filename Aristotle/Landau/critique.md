@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 104)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 105)
 
 ## Verdict: ACCEPT
 
@@ -58,13 +58,16 @@ All proofs under 200 lines.
 
 | File | Proof | Lines |
 |------|-------|-------|
-| Theorem42.lean | `Theorem42` | 200 |
 | CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | 189 |
+| Theorem42.lean | `Theorem42` | 178 |
 
-Down from 4 proofs (cycle 103 resolved 2). Extraction candidates:
-- `Theorem42`: `hJ_from_maxwellian` (lines 275-304, ~30 lines) is a self-contained Gaussian first-moment identity. Extracting as `current_density_of_gaussian` into GaussianHelpers.lean saves ~22 lines.
+Both are complex proofs where the remaining bulk is intrinsic (4-term product-rule estimate, VMLInput construction). Further extraction yields diminishing returns.
 
 ### ~~6e. Stale comments in CoulombPSD.lean~~ — RESOLVED (cycle 103)
+
+### 6f. Dead code audit
+
+Exhaustive search found 0 unused lemmas across 208 declarations. No dead code.
 
 ---
 
@@ -104,11 +107,11 @@ I found no issue.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6d | 2 proofs over 150 lines | Low | Open (both under 200) |
+| 6d | 2 proofs over 150 lines | Low | Open (both under 200, diminishing returns) |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |
 | 8j | lean-lsp build desync | Low | Open (tooling, persistent) |
 
 ### Conditions for ACCEPT
 
-ACCEPT. All remaining issues are low severity. No correctness concerns.
+ACCEPT. All remaining issues are low severity. No correctness concerns. Dead code audit clean.

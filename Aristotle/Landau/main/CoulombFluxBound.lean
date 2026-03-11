@@ -171,8 +171,7 @@ lemma flux_times_log_integrable_coulomb
                   ContinuousLinearMap.le_opNorm _ _
               _ ≤ ‖fderiv ℝ (f x) v‖ * 1 := by gcongr
               _ = ‖fderiv ℝ (f x) v‖ := mul_one _
-              _ = ‖iteratedFDeriv ℝ 1 (f x) v‖ := by
-                  rw [← norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (n := 0)]; simp
+              _ = ‖iteratedFDeriv ℝ 1 (f x) v‖ := norm_fderiv_eq_iteratedFDeriv_one _ _
           -- |f v| = ‖iteratedFDeriv 0 f v‖
           have hf0 : |f x v| = ‖iteratedFDeriv ℝ 0 (f x) v‖ := by
             rw [iteratedFDeriv_zero_eq_comp]; simp [Real.norm_eq_abs]

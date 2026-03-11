@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 105: Add norm_fderiv_eq_iteratedFDeriv_one helper
+
+### Changes
+- **Added `norm_fderiv_eq_iteratedFDeriv_one`** to IteratedDerivHelpers.lean: converts `‖fderiv f v‖` to `‖iteratedFDeriv 1 f v‖` in one step (was 2-3 lines using `norm_iteratedFDeriv_zero` + `norm_iteratedFDeriv_fderiv`).
+- Applied across 6 files: CoulombFluxDiff (-8 lines), CoulombFlux (-2), CoulombFluxBound (-1), CoulombFluxConv (-1), CoulombForceTransport (-1), SchwartzDecayDefs (-1).
+- `coulomb_flux_deriv_schwartz_decay`: 189 → 181 lines.
+- Dead code audit: 0 unused lemmas across 208 declarations.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 104: Extract current_density_of_gaussian
 
 ### Changes

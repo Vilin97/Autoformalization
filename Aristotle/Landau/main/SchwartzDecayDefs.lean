@@ -152,8 +152,7 @@ lemma schwartz_fderiv_component_decay
   rw [← Real.norm_eq_abs]
   exact le_trans (le_trans (ContinuousLinearMap.le_opNorm _ _)
     (mul_le_of_le_one_right (norm_nonneg _) (by simp [Pi.norm_single])))
-    (by rw [show (1:ℕ) = 0+1 from rfl, ← norm_iteratedFDeriv_fderiv,
-            norm_iteratedFDeriv_zero])
+    (by rw [norm_fderiv_eq_iteratedFDeriv_one])
 
 /-- Score bound: |∂_i log f(u)| ≤ Cg * (1+‖u‖)^Kg from the gradient bound on f.
     Uses chain rule: ∂_i(log∘f) = (∂_if)/f, combined with |∂_if| ≤ Cg*(1+‖u‖)^Kg*f. -/
