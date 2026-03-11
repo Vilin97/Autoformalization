@@ -1,5 +1,28 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 65: Close 4 non-vacuousness sorry's, fix rpow_pos API
+
+### Changes
+- **Closed 4 sorry's** in `CoulombConcreteTheorem42_nonvacuous` (10→6):
+  - (4) `hf_smooth_v`: Maxwellian is C^∞ — proved via `ContDiff.mul`, `ContDiff.exp`, `contDiff_apply`
+  - (5) `hf_smooth_x`: periodicLift of spatially constant function is C^∞ — `contDiff_const`
+  - (6) `hB_smooth`: periodicLift of zero is C^∞ — `contDiff_const`
+  - (13) `hDivB`: divergence of B=0 is 0 — `fderiv_const` + `Finset.sum_const_zero`
+- **Fixed Defs.lean**: `Real.rpow_pos` → `Real.rpow_pos_of_pos` (Mathlib API rename)
+- **Decomposed `all_goals sorry`** into 10 individual `· sorry` blocks with labeled comments
+- **Documented spatial smoothness design** in `experiments/spatial_smoothness_design.md`: parametric `IsSpatiallySmooth n` predicate would enable C^2, ~95 call sites to change
+- **Updated MEMORY.md**: line counts, sorry status, new API notes
+
+### Sorry count: 6 (all in `CoulombConcreteTheorem42_nonvacuous`, goals 7-12)
+
+### Remaining sorry's
+- (7) UniformSchwartzDecay — Gaussian iterated fderiv decay (hard)
+- (8) Exponential decay bound — needs relating normSq to sup norm + log argument (medium)
+- (9) Gradient bound — fderiv of Gaussian (hard)
+- (10) Vlasov equation — Landau operator nullspace for Maxwellian (hard)
+- (11) Ampere's law — odd integral vanishes (medium-hard)
+- (12) Gauss's law — Gaussian integral normalization (medium-hard)
+
 ## 2026-03-10 UTC — Babysit cycle 64: Eliminate deprecated refine', non-vacuousness theorem
 
 ### Changes
