@@ -1,61 +1,59 @@
-# Plan — Cycle 65
+# Plan — Cycle 66
 
 ## Status summary
 
-- **Sorry count**: 10 (all in `CoulombConcreteTheorem42_nonvacuous`, non-critical)
-- **Files**: 22 files, 7,888 lines
-- **Heartbeat overrides**: 1 (`synthInstance.maxHeartbeats 160000` in CoulombSpatialTransport.lean)
+- **Sorry count**: 6 (all in `CoulombConcreteTheorem42_nonvacuous`, goals 7-12)
+- **Files**: 22 files, 7,921 lines
+- **Heartbeat overrides**: 1 (`synthInstance.maxHeartbeats 160000`)
 - **Build**: Clean, 0 errors
-- **Critique verdict**: CONDITIONAL ACCEPT — close ≥2 non-vacuousness sorry's or make progress on file splitting
+- **Critique verdict**: CONDITIONAL ACCEPT — close ≥2 more sorry's, prioritize (8) and (9)
 
 ## Active multi-cycle strategies
 
-### Non-vacuousness theorem (started cycle 64)
-10 sorry goals for hypotheses (4)-(13) of `CoulombConcreteTheorem42_nonvacuous`. Difficulty assessment:
+### Non-vacuousness theorem (cycles 64-66)
+6 remaining sorry goals. Updated difficulty after cycle 65 analysis:
 
-| Goal | Hypothesis | What to prove | Difficulty |
-|------|-----------|---------------|------------|
-| (13) | hDivB | `torusDivX (fun _ => 0) = 0` | **Trivial** — fderiv of constant = 0 |
-| (6)  | hB_smooth | `periodicLift (fun _ => 0) is C^∞` | **Easy** — constant function |
-| (5)  | hf_smooth_x | `periodicLift (fun _ => eM ρ T v) is C^∞` | **Easy** — constant function (same as 6) |
-| (4)  | hf_smooth_v | `eM ρ T is C^∞` | **Medium** — composition: const, normSq, exp, div |
-| (8)  | hExpDecay | `exp(-C(1+‖v‖)^K) ≤ eM` | **Medium** — algebraic + (1+‖v‖)² ≥ normSq |
-| (12) | hGauss | `∫ eM dv = ρ_ion` | **Hard** — Gaussian integral normalization |
-| (11) | hAmpere | `∫ vᵢ eM dv = 0` | **Hard** — odd integral vanishes |
-| (9)  | hGradBound | `|∂eM/∂vᵢ| ≤ poly * eM` | **Hard** — fderiv of Gaussian |
-| (7)  | hSchwartz | Gaussian is UniformSchwartzDecay | **Hard** — iterated fderiv decay |
-| (10) | hVlasov | `0 = ν * Q(eM)` | **Hard** — Landau operator nullspace |
+| Goal | What to prove | Difficulty | Approach |
+|------|---------------|------------|----------|
+| (9) | `|∂eM/∂vᵢ| ≤ (1/T)(1+‖v‖) * eM` | **Medium** | Compute fderiv of Gaussian: `∂eM/∂vᵢ = -(vᵢ/T)*eM`, then `|vᵢ| ≤ 1+‖v‖` |
+| (8) | `exp(-C(1+‖v‖)^K) ≤ eM` | **Medium** | Use `normSq v ≤ 3‖v‖²`, choose C = 3/(2T) - log(prefix), K = 2 |
+| (11) | `∫ vᵢ * eM dv = 0` | **Medium** | Odd function × even Gaussian integrand → 0 (needs symmetry argument) |
+| (12) | `∫ eM dv = ρ_ion` | **Hard** | Gaussian integral `∫ exp(-|v|²/(2T)) = (2πT)^(3/2)` |
+| (7) | `UniformSchwartzDecay eM` | **Hard** | Iterated fderiv of Gaussian is polynomial × Gaussian |
+| (10) | `0 = ν * LandauOperator eM` | **Hard** | Maxwellian in nullspace of Landau operator |
 
-### C^∞ → C^k weakening (velocity done, spatial deferred)
-Velocity smoothness weakened to C³ in cycle 63. Spatial smoothness still C^∞, blocked by `hDiff_grad` typeclass design. Deferred.
+### Spatial smoothness (deferred)
+Design documented in `experiments/spatial_smoothness_design.md`. ~95 call-site refactor. Low priority.
 
 ## This cycle's work items
 
-### 1. Close sorry's (13), (6), (5) — three easiest goals (`/prove`)
-- **Why**: Critique #8 acceptance condition. These three are clearly provable right now.
+### 1. Close sorry (9) — gradient bound (`/prove`)
+- **Why**: Critique acceptance condition. Most tractable of the remaining 6.
 - **File**: `CoulombConcreteTheorem42.lean`
-- **Approach**: Replace `all_goals sorry` with individual tactic blocks:
-  - (13): unfold `torusDivX`, show fderiv of constant = 0, sum of zeros = 0
-  - (6): unfold `periodicLift`, `(0 : Fin 3 → ℝ) i = 0`, `contDiff_const`
-  - (5): same as (6) — `equilibriumMaxwellian ρ_ion T v` doesn't depend on x
+- **Approach**:
+  1. Compute `fderiv ℝ normSq v (Pi.single i 1) = 2 * v i` (bilinear form derivative)
+  2. Chain rule: `fderiv ℝ eM v (eᵢ) = eM(v) * (-v_i / T)`
+  3. Bound: `|v_i| / T ≤ (1 + ‖v‖) / T`
+  4. Choose `Cg = 1/T, Kg = 1`
+- **Key Mathlib lemmas**: `HasFDerivAt.exp`, `fderiv_inner_apply` or manual bilinear, `norm_le_pi_norm`
 
-### 2. Attempt sorry (4) — Maxwellian is C^∞ (`/prove`)
-- **Why**: Should be doable with Mathlib's `ContDiff` API.
-- **Approach**: `contDiff_const.div contDiff_const ≠ 0` for prefix, `ContDiff.exp` for the exponential, `ContDiff.neg`, `contDiff_normSq` or manual proof.
+### 2. Close sorry (8) — exponential decay bound (`/prove`)
+- **Why**: Algebraic, no integrals needed.
+- **Approach**:
+  1. Helper: `normSq v ≤ 3 * ‖v‖ ^ 2` (sup norm on Fin 3 → ℝ)
+  2. Helper: `∃ C, exp(-C) ≤ ρ_ion / (2πT)^(3/2)` (via `Real.exp_log`)
+  3. Choose `C₀ = 3/(2T) + max 0 (-Real.log prefix)`, K = 2
+  4. Show: `exp(-C₀(1+‖v‖)²) ≤ prefix * exp(-normSq(v)/(2T))`
 
-### 3. Attempt sorry (8) — exponential decay bound (`/prove`)
-- **Why**: Algebraic, no Gaussian integral needed.
-- **Approach**: Choose `C = 1/(2T), K = 2`. Show `exp(-(1/(2T))(1+‖v‖)²) ≤ eM(v)` by comparing exponents and using positivity of the prefactor `ρ/(2πT)^(3/2)`.
-
-### 4. Fix MEMORY.md line count drift (`/simplify`)
-- **Why**: Critique #7. Says ~8,300 lines, actual 7,888.
-- **Approach**: Update the number.
+### 3. Attempt sorry (11) — Ampere (odd integral vanishes) (`/prove`)
+- **Why**: If time allows after (8) and (9). Uses symmetry, no hard analysis.
+- **Approach**: Show `fun v => v i * eM v` is odd in vᵢ; use `MeasureTheory.integral_comp_neg` or manual symmetry.
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
-| #6: 6 files over 600 lines | Code quality | TorusInstance 816, Defs 785, CoulombPSD 703 |
-| #18: multiGoal violations, long lines | Cosmetic | Low priority |
-| #21: C^∞ spatial smoothness overkill | Epistemic | Blocked by typeclass design |
-| Sorry's (7)(9)(10)(11)(12) | Epistemic | Hard, need Gaussian integrals / Landau nullspace |
+| #6: 5 files over 600 lines | Code quality | TorusInstance 816, Defs 785, CoulombPSD 703 |
+| #18: long lines | Cosmetic | Low priority |
+| #21: C^∞ spatial smoothness | Epistemic | Deferred |
+| Sorry's (7)(10)(12) | Epistemic | Hard — Schwartz, Landau nullspace, Gaussian integral |

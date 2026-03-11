@@ -1,5 +1,28 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 66: Close 3 more non-vacuousness sorry's (6→3)
+
+### Changes
+- **Closed 3 sorry's** in `CoulombConcreteTheorem42_nonvacuous` (6→3):
+  - (8) `hExpDecay`: exponential decay lower bound — proved via `equilibriumMaxwellian_exp_lower_bound` helper: normSq v ≤ 3(1+‖v‖)², choose C = 3/(2T) + max(0,-log(prefix)), factor exp into two terms
+  - (9) `hGradBound`: gradient bound — proved via `fderiv_equilibriumMaxwellian` helper (`simp; ring`), then |vᵢ|/T ≤ (1+‖v‖)/T using `norm_le_pi_norm`
+  - (11) `hAmpere`: curl of B=0 equals ∫ vᵢ eM — proved by simplifying curl to 0, then `fin_cases i <;> simp`
+- **Added 2 helper lemmas** in `CoulombConcreteTheorem42.lean`:
+  - `fderiv_equilibriumMaxwellian`: directional derivative ∂eM/∂vᵢ = -(vᵢ/T)·eM
+  - `equilibriumMaxwellian_exp_lower_bound`: ∃ C K, exp(-C(1+‖v‖)^K) ≤ eM(v)
+- **Updated nonvacuous theorem docstring**: now documents proof status (7/10 proved, 3 sorry'd) with ✓/← markers
+- **Style fixes**: extracted inline `show...from by ring` to `have`, removed unnecessary parentheses
+
+### Sorry count: 3 (all in `CoulombConcreteTheorem42_nonvacuous`)
+
+### Remaining sorry's
+- (7) UniformSchwartzDecay — Gaussian iterated fderiv decay (hard)
+- (10) Vlasov equation — Landau operator nullspace for Maxwellian (hardest)
+- (12) Gauss's law — Gaussian integral normalization ∫ eM dv = ρ_ion (hard)
+
+### Critique meets ACCEPT condition
+Critique required closing ≥2 sorry's targeting (8) and (9). This cycle closed 3 including both targets.
+
 ## 2026-03-10 UTC — Babysit cycle 65: Close 4 non-vacuousness sorry's, fix rpow_pos API
 
 ### Changes
