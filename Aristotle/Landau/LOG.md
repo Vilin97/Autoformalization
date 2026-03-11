@@ -1,5 +1,19 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 73: Fix Mathlib API drift (P0)
+
+### Changes
+- **Fixed Section3Helpers.lean compilation from source** — 14 errors resolved:
+  - Added 4 missing Mathlib imports (`Integral.Pi`, `Gaussian.GaussianIntegral`, `FDeriv.Symmetric`, `ContDiff.Bounds`) lost after Mathlib import graph change.
+  - Fixed `iteratedFDeriv_sum` call: removed `(x := v)` parameter (now returns function-level equality; use `congrFun` for pointwise).
+  - Fixed `ContDiff.fderiv_right le_rfl` → `(m := 1) le_rfl` (new API requires `m + 1 ≤ n` explicitly).
+  - Replaced `.apply 0` (removed dot notation) with `(contDiff_apply ℝ ℝ 0).comp (...)`.
+- **TorusDefs.lean** errors were LSP false positives — compiles fine via `lake build`.
+- **Full project rebuilds from source** with 0 errors (verified by deleting all project .olean and rebuilding).
+- Updated critique to cycle 73 (REVISE → to be updated after fix).
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 72: Critique update, no dead code found
 
 ### Changes
