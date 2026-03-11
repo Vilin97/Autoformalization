@@ -1,5 +1,13 @@
 import Aristotle.Landau.main.CoulombKernel
 
+/-!
+# Newtonian Potential Bounds and Inverse-Norm Integrability
+
+Proves `coulomb_landauMatrix_entry_le` (|A(z)_{ij}| <= ||z||^{-1}) and local
+integrability of ||z||^{-1} against Schwartz functions, the key estimates for
+handling the Coulomb singularity in collision integrals.
+-/
+
 open MeasureTheory Matrix Finset BigOperators Real
 
 noncomputable section
@@ -78,34 +86,34 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
           obtain ⟨k, hk⟩ : ∃ k : ℕ, 2^(-k-1 : ℝ) * R < ‖x‖ ∧ ‖x‖ ≤ 2^(-k : ℝ) * R := by
             obtain ⟨k, hk⟩ : ∃ k : ℕ, -k - 1 < Real.logb 2 (‖x‖ / R) ∧ Real.logb 2 (‖x‖ / R) ≤ -k := by
               use Nat.floor (-Real.logb 2 (‖x‖ / R));
-              constructor <;> linarith [ Nat.floor_le ( show 0 ≤ -Real.logb 2 ( ‖x‖ / R ) by exact neg_nonneg_of_nonpos ( Real.logb_nonpos ( by norm_num ) ( div_nonneg ( norm_nonneg x ) hR.le ) ( div_le_one_of_le₀ ( by simpa using hx.1.out ) hR.le ) ) ), Nat.lt_floor_add_one ( -Real.logb 2 ( ‖x‖ / R ) ) ];
+              constructor <;> linarith [ Nat.floor_le (show 0 ≤ -Real.logb 2 (‖x‖ / R) by exact neg_nonneg_of_nonpos (Real.logb_nonpos (by norm_num) (div_nonneg (norm_nonneg x) hR.le) (div_le_one_of_le₀ (by simpa using hx.1.out) hR.le))), Nat.lt_floor_add_one ( -Real.logb 2 (‖x‖ / R)) ];
             rw [ Real.lt_logb_iff_rpow_lt, Real.logb_le_iff_le_rpow ] at hk <;> norm_num at * <;> try positivity;
             · exact ⟨ k, by rw [ lt_div_iff₀ hR ] at hk; linarith, by rw [ div_le_iff₀ hR ] at hk; linarith ⟩;
-            · exact div_pos ( norm_pos_iff.mpr hx.2 ) hR;
-            · exact div_pos ( norm_pos_iff.mpr hx.2 ) hR;
+            · exact div_pos (norm_pos_iff.mpr hx.2) hR;
+            · exact div_pos (norm_pos_iff.mpr hx.2) hR;
           aesop;
-        · exact fun i => MeasurableSet.diff ( measurableSet_closedBall ) ( measurableSet_closedBall );
+        · exact fun i => MeasurableSet.diff (measurableSet_closedBall) (measurableSet_closedBall);
         · intro k l hkl; simp_all +decide [ mul_comm, Real.rpow_add, Real.rpow_sub ] ; ring_nf; norm_num [ hR.ne' ] ;
           cases lt_or_gt_of_ne hkl <;> norm_num [ Set.disjoint_left ];
-          · intro a ha₁ ha₂ ha₃; nlinarith [ show ( 1 / 2 : ℝ ) ^ l ≤ ( 1 / 2 : ℝ ) ^ k / 2 by exact le_trans ( pow_le_pow_of_le_one ( by norm_num ) ( by norm_num ) ( show l ≥ k + 1 by linarith ) ) ( by ring_nf; norm_num ) ] ;
-          · intro a ha₁ ha₂ ha₃; nlinarith [ show ( 1 / 2 : ℝ ) ^ k ≤ ( 1 / 2 : ℝ ) ^ l * ( 1 / 2 ) by rw [ ← pow_succ ] ; exact pow_le_pow_of_le_one ( by norm_num ) ( by norm_num ) ( by linarith ) ] ;
+          · intro a ha₁ ha₂ ha₃; nlinarith [ show (1 / 2 : ℝ) ^ l ≤ (1 / 2 : ℝ) ^ k / 2 by exact le_trans (pow_le_pow_of_le_one (by norm_num) (by norm_num) (show l ≥ k + 1 by linarith)) (by ring_nf; norm_num) ] ;
+          · intro a ha₁ ha₂ ha₃; nlinarith [ show (1 / 2 : ℝ) ^ k ≤ (1 / 2 : ℝ) ^ l * (1 / 2) by rw [ ← pow_succ ] ; exact pow_le_pow_of_le_one (by norm_num) (by norm_num) (by linarith) ] ;
       have h_bounded : ∀ k : ℕ, ∫⁻ (z : Fin 3 → ℝ) in Metric.closedBall 0 (2^(-k : ℝ) * R) \ Metric.closedBall 0 (2^(-k-1 : ℝ) * R), ENNReal.ofReal (‖z‖⁻¹) ≤ ENNReal.ofReal ((2^(-k-1 : ℝ) * R)⁻¹ * (MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) (2^(-k : ℝ) * R))).toReal) := by
         intro k
         have h_bounded : ∀ z : Fin 3 → ℝ, z ∈ Metric.closedBall 0 (2^(-k : ℝ) * R) \ Metric.closedBall 0 (2^(-k-1 : ℝ) * R) → ‖z‖⁻¹ ≤ (2^(-k-1 : ℝ) * R)⁻¹ := by
           simp +zetaDelta at *;
           intro z hz₁ hz₂; rw [ ← mul_inv ] ; gcongr ; norm_num [ Real.rpow_sub ] at * ; linarith;
-        refine le_trans ( MeasureTheory.lintegral_mono_ae ?_ ) ?_;
-        use fun z => ENNReal.ofReal ( ( 2 ^ ( - ( k : ℝ ) - 1 ) * R ) ⁻¹ );
+        refine le_trans (MeasureTheory.lintegral_mono_ae ?_) ?_;
+        use fun z => ENNReal.ofReal ((2 ^ ( - (k : ℝ) - 1) * R) ⁻¹);
         · filter_upwards [ MeasureTheory.ae_restrict_mem <| measurableSet_closedBall.diff measurableSet_closedBall ] with z hz using ENNReal.ofReal_le_ofReal <| h_bounded z hz;
         · simp +zetaDelta at *;
-          rw [ ENNReal.ofReal_mul ( by positivity ) ];
-          rw [ ENNReal.ofReal_mul ( by positivity ), ENNReal.ofReal_mul ( by positivity ) ];
+          rw [ ENNReal.ofReal_mul (by positivity) ];
+          rw [ ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_mul (by positivity) ];
           gcongr;
-          refine le_trans ( MeasureTheory.measure_mono ?_ ) ?_;
-          exact Metric.closedBall 0 ( ( 2 ^ k ) ⁻¹ * R );
+          refine le_trans (MeasureTheory.measure_mono ?_) ?_;
+          exact Metric.closedBall 0 ((2 ^ k) ⁻¹ * R);
           · grind;
           · rw [ ENNReal.ofReal_toReal ];
-            exact ne_of_lt ( isCompact_closedBall _ _ |> IsCompact.measure_lt_top );
+            exact ne_of_lt (isCompact_closedBall _ _ |> IsCompact.measure_lt_top);
       have h_volume : ∀ k : ℕ, (MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) (2^(-k : ℝ) * R))).toReal = (2^(-k : ℝ) * R)^3 * (MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) 1)).toReal := by
         intro k; rw [ MeasureTheory.Measure.addHaar_closedBall ] ; norm_num ; ring;
         · positivity;
@@ -114,22 +122,22 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
         norm_num [ Real.rpow_sub ] ; ring_nf ; norm_num [ hR.ne' ];
         norm_num [ pow_mul', mul_assoc, hR.ne' ];
         norm_num only [ ← mul_assoc, ← mul_pow ] ; ring_nf ; norm_num [ hR.ne' ];
-        exact Summable.mul_right _ ( Summable.mul_left _ ( summable_geometric_of_lt_one ( by norm_num ) ( by norm_num ) ) );
-      refine lt_of_le_of_lt h_integrable <| lt_of_le_of_lt ( ENNReal.tsum_le_tsum h_bounded ) ?_;
+        exact Summable.mul_right _ (Summable.mul_left _ (summable_geometric_of_lt_one (by norm_num) (by norm_num)));
+      refine lt_of_le_of_lt h_integrable <| lt_of_le_of_lt (ENNReal.tsum_le_tsum h_bounded) ?_;
       rw [ ← ENNReal.ofReal_tsum_of_nonneg ] <;> norm_num [ h_volume ];
       · exact fun k => by positivity;
-      · convert h_series.mul_right ( ( MeasureTheory.volume ( Metric.closedBall ( 0 : Fin 3 → ℝ ) 1 ) |> ENNReal.toReal ) ) using 2 ; norm_num [ Real.rpow_add, Real.rpow_sub ] ; ring;
-        convert congr_arg ( · * R⁻¹ * 2 ^ ‹_› * 2 ) ( h_volume ‹_› ) using 1 <;> norm_num [ Real.rpow_neg, Real.rpow_mul ] ; ring;
+      · convert h_series.mul_right ((MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) 1) |> ENNReal.toReal)) using 2 ; norm_num [ Real.rpow_add, Real.rpow_sub ] ; ring;
+        convert congr_arg (· * R⁻¹ * 2 ^ ‹_› * 2) (h_volume ‹_›) using 1 <;> norm_num [ Real.rpow_neg, Real.rpow_mul ] ; ring;
         · norm_num [ mul_comm ];
         · field_simp
           ring;
           norm_num [ ← mul_pow ];
     refine ⟨ ?_, ?_ ⟩;
-    · exact Measurable.aestronglyMeasurable ( by exact Measurable.inv ( measurable_norm ) );
+    · exact Measurable.aestronglyMeasurable (by exact Measurable.inv (measurable_norm));
     · rw [ MeasureTheory.hasFiniteIntegral_iff_norm ] ; aesop;
   rwa [ MeasureTheory.IntegrableOn, MeasureTheory.Measure.restrict_congr_set ];
   rw [ MeasureTheory.ae_eq_set ] ; norm_num;
-  exact MeasureTheory.measure_mono_null ( fun x hx => by aesop ) ( MeasureTheory.measure_singleton 0 )
+  exact MeasureTheory.measure_mono_null (fun x hx => by aesop) (MeasureTheory.measure_singleton 0)
 
 
 /-- Convolution of a locally integrable kernel with a Schwartz function is integrable.
@@ -150,14 +158,14 @@ lemma convolution_local_int_schwartz
         obtain ⟨ C, hC₀, hC ⟩ := hg_decay 0 ; exact ⟨ C, hC₀, fun w hw => by simpa using hC w ⟩ ;
       have h_prod_integrable : MeasureTheory.IntegrableOn (fun w => M / ‖v - w‖) (Metric.closedBall v 1) := by
         have h_integrable : MeasureTheory.IntegrableOn (fun w => ‖v - w‖⁻¹) (Metric.closedBall v 1) := by
-          rw [ ← MeasureTheory.integrable_indicator_iff ( measurableSet_closedBall ) ] at *;
+          rw [ ← MeasureTheory.integrable_indicator_iff (measurableSet_closedBall) ] at *;
           convert hK_local.comp_sub_left v using 1;
           ext; simp [Set.indicator];
           simp +decide [ dist_eq_norm', norm_sub_rev ];
         simpa only [ div_eq_mul_inv ] using h_integrable.const_mul M;
       refine h_prod_integrable.mono' ?_ ?_;
-      · exact MeasureTheory.AEStronglyMeasurable.mul ( hg_meas.mono_measure <| MeasureTheory.Measure.restrict_le_self ) ( Measurable.aestronglyMeasurable <| by exact Measurable.inv <| measurable_norm.comp <| measurable_const.sub measurable_id' );
-      · filter_upwards [ MeasureTheory.ae_restrict_mem measurableSet_closedBall ] with w hw using by simpa [ abs_div ] using div_le_div_of_nonneg_right ( hM.2 w hw ) ( norm_nonneg _ ) ;
+      · exact MeasureTheory.AEStronglyMeasurable.mul (hg_meas.mono_measure <| MeasureTheory.Measure.restrict_le_self) (Measurable.aestronglyMeasurable <| by exact Measurable.inv <| measurable_norm.comp <| measurable_const.sub measurable_id');
+      · filter_upwards [ MeasureTheory.ae_restrict_mem measurableSet_closedBall ] with w hw using by simpa [ abs_div ] using div_le_div_of_nonneg_right (hM.2 w hw) (norm_nonneg _) ;
     · have h_far_integrable : MeasureTheory.IntegrableOn (fun w => g w) (Set.univ \ Metric.closedBall v 1) := by
         have h_integrable_g : MeasureTheory.Integrable g := by
           obtain ⟨ C, hC₀, hC ⟩ := hg_decay 4;
@@ -165,24 +173,24 @@ lemma convolution_local_int_schwartz
             have h_integrable : MeasureTheory.Integrable (fun w : Fin 3 → ℝ => (1 + ‖w‖) ^ (-4 : ℝ)) MeasureTheory.MeasureSpace.volume := by
               have h_integrable : MeasureTheory.Integrable (fun w : Fin 3 → ℝ => (1 + ‖w‖) ^ (-4 : ℝ)) MeasureTheory.MeasureSpace.volume := by
                 have h_integrable : ∀ w : Fin 3 → ℝ, (1 + ‖w‖) ^ (-4 : ℝ) ≤ (1 + ‖w‖ ^ 2) ^ (-2 : ℝ) := by
-                  intro w; rw [ Real.rpow_neg ( by positivity ), Real.rpow_neg ( by positivity ) ] ; norm_cast; norm_num; ring_nf; (
-                  exact inv_anti₀ ( by positivity ) ( by nlinarith [ norm_nonneg w ] ));
+                  intro w; rw [ Real.rpow_neg (by positivity), Real.rpow_neg (by positivity) ] ; norm_cast; norm_num; ring_nf; (
+                  exact inv_anti₀ (by positivity) (by nlinarith [ norm_nonneg w ]));
                 have h_integrable : MeasureTheory.Integrable (fun w : Fin 3 → ℝ => (1 + ‖w‖ ^ 2) ^ (-2 : ℝ)) MeasureTheory.MeasureSpace.volume := by
                   have := @integrable_rpow_neg_one_add_norm_sq;
-                  convert @this ( Fin 3 → ℝ ) _ _ _ _ _ ( MeasureTheory.MeasureSpace.volume ) _ 4 ( by norm_num ) using 1 ; norm_num [ div_eq_mul_inv ];
+                  convert @this (Fin 3 → ℝ) _ _ _ _ _ (MeasureTheory.MeasureSpace.volume) _ 4 (by norm_num) using 1 ; norm_num [ div_eq_mul_inv ];
                 refine h_integrable.mono' ?_ ?_;
-                · exact Measurable.aestronglyMeasurable ( by exact Measurable.pow_const ( by exact measurable_const.add ( measurable_norm ) ) _ );
-                · filter_upwards [ ] using fun w => by rw [ Real.norm_of_nonneg ( by positivity ) ] ; exact ‹∀ w : Fin 3 → ℝ, ( 1 + ‖w‖ ) ^ ( -4 : ℝ ) ≤ ( 1 + ‖w‖ ^ 2 ) ^ ( -2 : ℝ ) › w;
+                · exact Measurable.aestronglyMeasurable (by exact Measurable.pow_const (by exact measurable_const.add (measurable_norm)) _);
+                · filter_upwards [ ] using fun w => by rw [ Real.norm_of_nonneg (by positivity) ] ; exact ‹∀ w : Fin 3 → ℝ, (1 + ‖w‖) ^ ( -4 : ℝ) ≤ (1 + ‖w‖ ^ 2) ^ ( -2 : ℝ) › w;
               exact h_integrable;
             norm_cast at * ; simpa using h_integrable.const_mul C;
           refine h_integrable.mono' ?_ ?_;
           · exact hg_meas;
-          · filter_upwards [ ] with w using by rw [ le_div_iff₀ ( by positivity ) ] ; exact hC w;
+          · filter_upwards [ ] with w using by rw [ le_div_iff₀ (by positivity) ] ; exact hC w;
         exact h_integrable_g.integrableOn;
       refine h_far_integrable.norm.mono' ?_ ?_;
-      · exact MeasureTheory.AEStronglyMeasurable.mul ( h_far_integrable.aestronglyMeasurable ) ( Measurable.aestronglyMeasurable ( by exact Measurable.inv ( measurable_norm.comp ( measurable_const.sub measurable_id' ) ) ) );
+      · exact MeasureTheory.AEStronglyMeasurable.mul (h_far_integrable.aestronglyMeasurable) (Measurable.aestronglyMeasurable (by exact Measurable.inv (measurable_norm.comp (measurable_const.sub measurable_id'))));
       · simp +zetaDelta at *;
-        filter_upwards [ MeasureTheory.ae_restrict_mem ( show MeasurableSet ( Set.univ \ Metric.closedBall v 1 ) from MeasurableSet.univ.diff ( measurableSet_closedBall ) ) ] with w hw using div_le_self ( abs_nonneg _ ) ( by rw [ norm_sub_rev ] ; exact le_of_not_gt fun h => hw.2 <| mem_closedBall_iff_norm.mpr <| by linarith );
+        filter_upwards [ MeasureTheory.ae_restrict_mem (show MeasurableSet (Set.univ \ Metric.closedBall v 1) from MeasurableSet.univ.diff (measurableSet_closedBall)) ] with w hw using div_le_self (abs_nonneg _) (by rw [ norm_sub_rev ] ; exact le_of_not_gt fun h => hw.2 <| mem_closedBall_iff_norm.mpr <| by linarith);
   convert h_integrable.1.union h_integrable.2 using 1 ; aesop
 
 /-- Key integrability fact for Coulomb kernel: ‖·‖⁻¹ × Schwartz is integrable in ℝ³.

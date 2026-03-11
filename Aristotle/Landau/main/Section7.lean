@@ -1,6 +1,15 @@
 import Aristotle.Landau.main.Defs
 import Aristotle.Landau.main.Section3
 import Aristotle.Landau.main.Section6
+
+/-!
+# Poisson-Boltzmann and Electric Field (Section 7)
+
+Derives the Poisson-Boltzmann equation from force balance and Gauss's law,
+then proves the electric field vanishes (E = 0) and the magnetic field is
+spatially constant using harmonic function theory on the torus.
+-/
+
 open Matrix Finset BigOperators Real MeasureTheory
 noncomputable section
 namespace VML

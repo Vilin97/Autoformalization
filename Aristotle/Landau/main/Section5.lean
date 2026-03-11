@@ -1,5 +1,14 @@
 import Aristotle.Landau.main.Defs
 import Aristotle.Landau.main.Section3
+
+/-!
+# Polynomial Matching (Section 5)
+
+Temperature is spatially constant, Lorentz force expansion, and polynomial
+identity matching that constrains the Maxwellian parameters (a, b, c) from the
+Vlasov transport equation.
+-/
+
 open Matrix Finset BigOperators Real MeasureTheory
 noncomputable section
 namespace VML

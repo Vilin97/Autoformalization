@@ -1,4 +1,13 @@
 import Aristotle.Landau.main.VMLInputDerive
+
+/-!
+# Abstract Theorem 4.2: Steady State Implies Maxwellian
+
+States and proves the main abstract result: any smooth steady state of the
+Vlasov-Maxwell-Landau system satisfying `VelocityDecayConditions` is a global
+Maxwellian with E = 0 and B = const.
+-/
+
 open Matrix Finset BigOperators Real MeasureTheory
 noncomputable section
 namespace VML

@@ -1,4 +1,12 @@
 import Aristotle.Landau.main.Defs
+
+/-!
+# Bulk Velocity Vanishes (Section 6)
+
+Proves that the drift velocity u_inf = 0 using Ampere's law, Stokes' theorem
+on the torus, and positivity of the charge density.
+-/
+
 open Matrix Finset BigOperators Real MeasureTheory
 noncomputable section
 namespace VML

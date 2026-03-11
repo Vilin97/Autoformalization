@@ -1,4 +1,12 @@
 import Aristotle.Landau.main.Defs
+
+/-!
+# Entropy Dissipation Identity (Section 2)
+
+Properties of the Landau collision matrix: evenness, positive semidefiniteness,
+the symmetrized weak form, and the entropy dissipation identity D(f) as a double integral.
+-/
+
 open Matrix Finset BigOperators Real MeasureTheory
 noncomputable section
 namespace VML

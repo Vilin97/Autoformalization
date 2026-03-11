@@ -1,12 +1,13 @@
-/-
-  Schwartz decay definitions and integrability lemmas for T³ = (ℝ/ℤ)³.
-
-  Defines `UniformSchwartzDecay` (the standard Schwartz-class assumption
-  for kinetic theory) and proves basic integrability lemmas. Used by
-  CoulombKernel.lean and the Coulomb concrete theorem.
--/
 import Aristotle.Landau.main.Theorem42
 import Aristotle.Landau.main.TorusInstance
+
+/-!
+# Schwartz Decay Definitions and Integrability Helpers
+
+Defines `UniformSchwartzDecay` (uniform-in-x Schwartz-class decay in velocity)
+and proves basic integrability lemmas. This is the standard regularity assumption
+for kinetic theory used throughout the Coulomb concrete theorem files.
+-/
 
 open MeasureTheory Matrix Finset BigOperators Real
 

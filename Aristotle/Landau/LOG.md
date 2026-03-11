@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 74: Code style cleanup
+
+### Changes
+- **Removed 121 spaced parens** `( foo )` → `(foo)` across 6 files (0 remaining).
+- **Added module docstrings** `/-! ... -/` to all 22 files (was 0).
+- Build verified clean after both changes.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 73: Fix Mathlib API drift (P0)
 
 ### Changes

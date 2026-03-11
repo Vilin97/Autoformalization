@@ -1,8 +1,11 @@
-/-
-  Coulomb kernel definition and basic Schwartz helpers.
-  Extracted from CoulombConcreteTheorem42.lean.
--/
 import Aristotle.Landau.main.SchwartzDecayDefs
+
+/-!
+# Coulomb Kernel Definition and Schwartz Helpers
+
+Defines `coulombKernel` (Psi(r) = r^{-3} for r > 0) and proves basic properties:
+strict positivity, Schwartz uniform bounds, and `inv_norm_schwartz_integrable`.
+-/
 
 open MeasureTheory Matrix Finset BigOperators Real
 
@@ -60,7 +63,7 @@ lemma schwartz_log_bound
   have h1v_nn : (0 : ℝ) ≤ (1 + ‖v‖) ^ K_exp := le_trans zero_le_one h1v_ge
   constructor
   · -- -((|log C_up| + |C_exp| + 1) * (1+‖v‖)^K_exp) ≤ log(f x v)
-    calc -(( |Real.log C_up| + |C_exp| + 1) * (1 + ‖v‖) ^ K_exp)
+    calc -((|Real.log C_up| + |C_exp| + 1) * (1 + ‖v‖) ^ K_exp)
         ≤ -(C_exp * (1 + ‖v‖) ^ K_exp) := by
           apply neg_le_neg
           exact mul_le_mul_of_nonneg_right (by linarith [le_abs_self C_exp, abs_nonneg (Real.log C_up)]) h1v_nn

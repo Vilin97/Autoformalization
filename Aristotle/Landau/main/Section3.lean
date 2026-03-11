@@ -1,5 +1,13 @@
 import Aristotle.Landau.main.Section3Helpers
 
+/-!
+# Nullspace of the Landau Operator (Section 3)
+
+H-theorem for the Landau operator (D(f) <= 0), characterization of D(f) = 0
+as f being a Maxwellian, and Corollary 1: if entropy dissipation vanishes then
+f is a local Maxwellian at each spatial point.
+-/
+
 open Matrix Finset BigOperators Real MeasureTheory
 
 noncomputable section

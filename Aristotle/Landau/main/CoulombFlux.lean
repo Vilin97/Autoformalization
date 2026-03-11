@@ -1,5 +1,13 @@
 import Aristotle.Landau.main.NewtonianPotential
 
+/-!
+# Flux Integrability and Component Bounds for Coulomb
+
+Proves integrability of the Landau collision flux, the flux times log f product,
+and the flux component bound `|flux_i(v)| <= C * f(v) * (1 + ||v||)^K` for the
+Coulomb kernel.
+-/
+
 open MeasureTheory Matrix Finset BigOperators Real
 
 noncomputable section

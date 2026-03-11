@@ -5,6 +5,15 @@ import Aristotle.Landau.main.Section5
 import Aristotle.Landau.main.Section6
 import Aristotle.Landau.main.Section7
 import Aristotle.Landau.main.Section8
+
+/-!
+# Deriving VMLInput from Concrete Hypotheses
+
+Constructs a `VMLInput` from a `VMLSteadyState` and `VelocityDecayConditions`,
+then applies the abstract proof chain (Sections 2-8) to derive the main theorem
+`ConcreteTheorem42` with minimal physical hypotheses.
+-/
+
 open Matrix Finset BigOperators Real MeasureTheory
 noncomputable section
 namespace VML
