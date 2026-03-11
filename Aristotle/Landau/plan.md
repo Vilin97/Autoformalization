@@ -1,59 +1,56 @@
-# Plan — Cycle 66
+# Plan — Cycle 67
 
 ## Status summary
 
-- **Sorry count**: 6 (all in `CoulombConcreteTheorem42_nonvacuous`, goals 7-12)
-- **Files**: 22 files, 7,921 lines
+- **Sorry count**: 3 (all in `CoulombConcreteTheorem42_nonvacuous`, goals 7, 10, 12)
+- **Files**: 22 files, 7,984 lines
 - **Heartbeat overrides**: 1 (`synthInstance.maxHeartbeats 160000`)
 - **Build**: Clean, 0 errors
-- **Critique verdict**: CONDITIONAL ACCEPT — close ≥2 more sorry's, prioritize (8) and (9)
+- **Critique verdict**: CONDITIONAL ACCEPT — fix MEMORY.md, no new sorry's
+- **Aristotle jobs**: 0 pending
 
 ## Active multi-cycle strategies
 
-### Non-vacuousness theorem (cycles 64-66)
-6 remaining sorry goals. Updated difficulty after cycle 65 analysis:
+### Non-vacuousness theorem (cycles 64–67)
+3 remaining sorry goals after cycle 66 closed (8), (9), (11):
 
 | Goal | What to prove | Difficulty | Approach |
 |------|---------------|------------|----------|
-| (9) | `|∂eM/∂vᵢ| ≤ (1/T)(1+‖v‖) * eM` | **Medium** | Compute fderiv of Gaussian: `∂eM/∂vᵢ = -(vᵢ/T)*eM`, then `|vᵢ| ≤ 1+‖v‖` |
-| (8) | `exp(-C(1+‖v‖)^K) ≤ eM` | **Medium** | Use `normSq v ≤ 3‖v‖²`, choose C = 3/(2T) - log(prefix), K = 2 |
-| (11) | `∫ vᵢ * eM dv = 0` | **Medium** | Odd function × even Gaussian integrand → 0 (needs symmetry argument) |
-| (12) | `∫ eM dv = ρ_ion` | **Hard** | Gaussian integral `∫ exp(-|v|²/(2T)) = (2πT)^(3/2)` |
-| (7) | `UniformSchwartzDecay eM` | **Hard** | Iterated fderiv of Gaussian is polynomial × Gaussian |
-| (10) | `0 = ν * LandauOperator eM` | **Hard** | Maxwellian in nullspace of Landau operator |
+| (12) | `∫ eM dv = ρ_ion` | **Medium-Hard** | Gaussian integral `∫ exp(-|v|²/(2T)) = (2πT)^{3/2}` cancels prefactor |
+| (7) | `UniformSchwartzDecay eM` | **Hard** | Iterated fderiv of Gaussian is polynomial × Gaussian → decay |
+| (10) | `0 = ν * LandauOperator eM` | **Hardest** | Maxwellian in nullspace of Landau operator |
 
 ### Spatial smoothness (deferred)
 Design documented in `experiments/spatial_smoothness_design.md`. ~95 call-site refactor. Low priority.
 
 ## This cycle's work items
 
-### 1. Close sorry (9) — gradient bound (`/prove`)
-- **Why**: Critique acceptance condition. Most tractable of the remaining 6.
-- **File**: `CoulombConcreteTheorem42.lean`
-- **Approach**:
-  1. Compute `fderiv ℝ normSq v (Pi.single i 1) = 2 * v i` (bilinear form derivative)
-  2. Chain rule: `fderiv ℝ eM v (eᵢ) = eM(v) * (-v_i / T)`
-  3. Bound: `|v_i| / T ≤ (1 + ‖v‖) / T`
-  4. Choose `Cg = 1/T, Kg = 1`
-- **Key Mathlib lemmas**: `HasFDerivAt.exp`, `fderiv_inner_apply` or manual bilinear, `norm_le_pi_norm`
+### 1. Fix MEMORY.md — stale documentation (`/simplify`)
+- **Why**: Critique flagged sorry count (says 6, actual 3), line counts wrong.
+- **Immediate**: Update sorry count, file line counts, CoulombConcreteTheorem42 line count.
 
-### 2. Close sorry (8) — exponential decay bound (`/prove`)
-- **Why**: Algebraic, no integrals needed.
-- **Approach**:
-  1. Helper: `normSq v ≤ 3 * ‖v‖ ^ 2` (sup norm on Fin 3 → ℝ)
-  2. Helper: `∃ C, exp(-C) ≤ ρ_ion / (2πT)^(3/2)` (via `Real.exp_log`)
-  3. Choose `C₀ = 3/(2T) + max 0 (-Real.log prefix)`, K = 2
-  4. Show: `exp(-C₀(1+‖v‖)²) ≤ prefix * exp(-normSq(v)/(2T))`
+### 2. Prove sorry (12) — Gaussian integral normalization (`/prove`)
+- **Why**: Most tractable of the 3 remaining. Pure computation.
+- **File**: `CoulombConcreteTheorem42.lean` line ~452
+- **Goal**: `∀ x, torusDivX (fun _ => (0 : Fin 3 → ℝ)) x = (∫ v, eM v) - ρ_ion`
+- **Approach**: LHS simplifies to `0 = ∫ eM dv - ρ_ion`, so need `∫ eM dv = ρ_ion`. The prefactor `ρ/(2πT)^{3/2}` is chosen exactly so this holds. Need:
+  1. `∫ exp(-normSq(v)/(2T)) dv = (2πT)^{3/2}` — product of 3 Gaussian integrals
+  2. Pull out constant prefactor: `∫ eM = ρ/(2πT)^{3/2} * (2πT)^{3/2} = ρ`
+  3. With `ρ = ρ_ion`, done.
+- **Key Mathlib**: `MeasureTheory.integral_gaussian` or `integral_exp_neg_sq` for 1D Gaussian, then Fubini for product.
 
-### 3. Attempt sorry (11) — Ampere (odd integral vanishes) (`/prove`)
-- **Why**: If time allows after (8) and (9). Uses symmetry, no hard analysis.
-- **Approach**: Show `fun v => v i * eM v` is odd in vᵢ; use `MeasureTheory.integral_comp_neg` or manual symmetry.
+### 3. Attempt sorry (7) — UniformSchwartzDecay for Gaussian (`/prove`)
+- **Why**: If (12) is closed quickly, attempt decomposition of (7).
+- **Approach**: Decompose into sub-lemmas:
+  1. `iteratedFDeriv ℝ k (equilibriumMaxwellian ρ T) v = P_k(v) * eM(v)` where P_k is polynomial of degree k
+  2. `‖P_k(v) * eM(v)‖ * (1+‖v‖)^N ≤ C` — polynomial × Gaussian decays
+  3. Combine for UniformSchwartzDecay
+- Even if the full proof isn't possible, decomposition into well-typed sub-lemmas is progress.
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
 | #6: 5 files over 600 lines | Code quality | TorusInstance 816, Defs 785, CoulombPSD 703 |
-| #18: long lines | Cosmetic | Low priority |
+| Sorry (10): Landau nullspace | Epistemic | Hardest — needs collision operator analysis |
 | #21: C^∞ spatial smoothness | Epistemic | Deferred |
-| Sorry's (7)(10)(12) | Epistemic | Hard — Schwartz, Landau nullspace, Gaussian integral |
