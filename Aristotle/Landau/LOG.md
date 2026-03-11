@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 75: Break mega-lines
+
+### Changes
+- **Broke 29 mega-lines** (> 200 chars) in Section3Helpers.lean (20) and NewtonianPotential.lean (9).
+- Mega-line count: 51 → 22 (57% reduction). Section3Helpers max line: 697 → <100.
+- 4 files remain with mega-lines: CoulombPSD (7), TorusInstance (7), Section3 (4), VelocityDecayInstance (4).
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 74: Code style cleanup
 
 ### Changes
