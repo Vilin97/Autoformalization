@@ -31,8 +31,12 @@ lemma lorentz_component_bound (E₀ B₀ : Fin 3 → ℝ) :
     nlinarith [ abs_nonneg (E₀ 0), abs_nonneg (v 1 * B₀ 2), abs_nonneg (v 2 * B₀ 1), abs_nonneg (B₀ 0), abs_nonneg (B₀ 1), abs_nonneg (B₀ 2), norm_nonneg E₀, norm_nonneg v ]
   · have h_triangle : |E₀ 1| ≤ ‖E₀‖ ∧ |v 2 * B₀ 0| ≤ ‖v‖ * |B₀ 0| ∧ |v 0 * B₀ 2| ≤ ‖v‖ * |B₀ 2| := by
       exact ⟨ by simpa using norm_le_pi_norm E₀ 1,
-               by rw [ abs_mul ]; exact mul_le_mul_of_nonneg_right (norm_le_pi_norm v 2) (abs_nonneg _),
-               by rw [ abs_mul ]; exact mul_le_mul_of_nonneg_right (norm_le_pi_norm v 0) (abs_nonneg _) ⟩
+               by
+                 rw [ abs_mul ]
+                 exact mul_le_mul_of_nonneg_right (norm_le_pi_norm v 2) (abs_nonneg _),
+               by
+                 rw [ abs_mul ]
+                 exact mul_le_mul_of_nonneg_right (norm_le_pi_norm v 0) (abs_nonneg _) ⟩
     exact abs_le.mpr ⟨
       by nlinarith [ abs_le.mp h_triangle.1, abs_le.mp h_triangle.2.1, abs_le.mp h_triangle.2.2,
                      abs_nonneg (B₀ 0), abs_nonneg (B₀ 1), abs_nonneg (B₀ 2), norm_nonneg v ],

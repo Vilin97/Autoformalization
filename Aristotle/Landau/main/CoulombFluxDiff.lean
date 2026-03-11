@@ -131,7 +131,8 @@ private lemma coulomb_entry_conv_hasFDerivAt_aux
   · -- Dominator integrable
     have : Integrable (fun u : Fin 3 → ℝ => ‖u‖⁻¹ * (1 : ℝ)) := by
       have h1_decay : ∀ N : ℕ, ∃ C > 0, ∀ w : Fin 3 → ℝ, |(1 : ℝ)| * (1 + ‖w‖) ^ N ≤ C := by
-        intro N; exact ⟨1, one_pos, fun _ => by simp [one_le_pow_of_one_le (by linarith [norm_nonneg (α := Fin 3 → ℝ)])]⟩
+        intro N
+        exact ⟨1, one_pos, fun _ => by simp [one_le_pow_of_one_le (by linarith [norm_nonneg (α := Fin 3 → ℝ)])]⟩
       exact inv_norm_schwartz_integrable _ h1_decay aestronglyMeasurable_const 0
     exact this.const_mul Cf |>.congr (ae_of_all _ fun u => by ring)
   · -- HasFDerivAt pointwise
