@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 110)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 111)
 
 ## Verdict: ACCEPT
 
@@ -46,7 +46,7 @@ I found no issue.
 
 ### ~~6b. Files over 600 lines~~ — RESOLVED (cycle 100)
 
-Largest: Section3Helpers.lean (576).
+Largest: Section3Helpers.lean (589). Approaching 600 limit — monitor.
 
 ### ~~6c. Long proofs~~ — RESOLVED (cycle 98)
 
@@ -64,15 +64,13 @@ All under 200. Diminishing returns.
 
 ### ~~6f. Dead code audit~~ — RESOLVED (cycle 105)
 
-### ~~6g. Verbose Aristotle `aesop` in Section3Helpers~~ — RESOLVED (cycle 108)
+### ~~6g. Verbose Aristotle `aesop`~~ — RESOLVED (cycle 110)
+
+0 `aesop` remaining in entire codebase.
 
 ### 6h. Broad `simp +decide` usage (103 occurrences across 13 files)
 
 Low priority — most in `Fin 3` case analysis where `decide` is the correct discharger.
-
-### 6i. `aesop` in non-Section3Helpers files (9 occurrences across 4 files)
-
-Targeted for elimination this cycle.
 
 ---
 
@@ -108,7 +106,6 @@ I found no issue.
 |---|-------|----------|--------|
 | 6d | 3 proofs over 150 lines | Low | Open (diminishing returns) |
 | 6h | 103 `simp +decide` calls | Low | Open |
-| 6i | 9 `aesop` remaining | Low | Targeted this cycle |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |
 | 8j | lean-lsp build desync | Low | Open (tooling) |

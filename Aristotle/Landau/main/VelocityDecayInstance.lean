@@ -22,7 +22,7 @@ lemma lorentz_component_bound (E₀ B₀ : Fin 3 → ℝ) :
   simp only [cross]
   use ‖E₀‖ + ∑ i, ‖B₀ i‖ * 3 + 1
   refine ⟨ by positivity, fun v i => ?_ ⟩
-  fin_cases i <;> simp +decide [ Fin.sum_univ_succ ] <;> ring_nf
+  fin_cases i <;> simp [ Fin.sum_univ_succ ] <;> ring_nf
   · have h_triangle :
           |E₀ 0 + (v 1 * B₀ 2 - v 2 * B₀ 1)| ≤ |E₀ 0| + |v 1 * B₀ 2| + |v 2 * B₀ 1| := by
       cases abs_cases (E₀ 0 + (v 1 * B₀ 2 - v 2 * B₀ 1) ) <;>

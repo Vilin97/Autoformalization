@@ -18,7 +18,7 @@ lemma landau_bound (z u : Fin 3 → ℝ) :
     (if eucNorm z = 0 then 0 else (eucNorm z)⁻¹) * (eucNorm u)^2 := by
       unfold landauMatrix eucNorm coulombKernel innerLandauMatrix normSq
       split_ifs <;> norm_cast <;> norm_num [ Matrix.vecMulVec ] at *
-      · simp_all +decide [ Fin.sum_univ_three, dotProduct ]
+      · simp_all [ Fin.sum_univ_three, dotProduct ]
         rw [ Real.sqrt_eq_zero' ] at *
         norm_num [ show z 0 = 0 by nlinarith, show z 1 = 0 by nlinarith,
                    show z 2 = 0 by nlinarith, Matrix.mulVec ]
@@ -127,7 +127,7 @@ lemma tendsto_landau_quadratic_diag
               fun p hp => hL _ _ hp.1 hp.2
           filter_upwards [ h_bound ] with p hp
           refine le_trans (landau_bound _ _) _
-          split_ifs <;> simp_all +decide [ mul_pow ]
+          split_ifs <;> simp_all [ mul_pow ]
           exact mul_le_mul_of_nonneg_left
             (by nlinarith [ show 0 ≤ eucNorm (G p.1 - G p.2) from Real.sqrt_nonneg _,
                             show 0 ≤ L * eucNorm (p.1 - p.2) from
@@ -170,8 +170,8 @@ lemma continuous_landau_quadratic
                     by exact Continuous.dotProduct continuous_id continuous_id)
               have h_pos : 0 < eucNorm (p.1 - p.2) := by
                 unfold eucNorm
-                unfold normSq; simp +decide [ sub_eq_zero, hp_ne ]
-                simp_all +decide [ dotProduct, Fin.sum_univ_three ]
+                unfold normSq; simp [ sub_eq_zero, hp_ne ]
+                simp_all [ dotProduct, Fin.sum_univ_three ]
                 exact not_le.mp fun h => hp_ne <| by
                   ext i; fin_cases i <;> nlinarith! [ sq_nonneg (p.1 0 - p.2 0),
                     sq_nonneg (p.1 1 - p.2 1), sq_nonneg (p.1 2 - p.2 2) ]

@@ -32,7 +32,7 @@ private theorem second_deriv_nonpos_at_local_max' {f : ℝ → ℝ} {x₀ : ℝ}
     use δ, δ_pos
     intro x hx
     have := H (show |x - x₀| < δ from abs_lt.mpr ⟨by linarith [hx.1], by linarith [hx.2]⟩)
-    simp_all +decide [div_eq_mul_inv]
+    simp_all [div_eq_mul_inv]
     rw [← div_eq_mul_inv, div_lt_iff₀] at this <;>
       cases abs_cases (deriv f x - (x - x₀) * deriv (deriv f) x₀) <;>
       cases abs_cases (x - x₀) <;>

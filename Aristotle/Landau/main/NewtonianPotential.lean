@@ -137,7 +137,7 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
               linarith [hk.1]⟩
         · exact fun i => MeasurableSet.diff (measurableSet_closedBall) (measurableSet_closedBall)
         · intro k l hkl
-          simp_all +decide [ mul_comm, Real.rpow_sub ]
+          simp_all [ mul_comm, Real.rpow_sub ]
           ring_nf
           norm_num [ hR.ne' ]
           cases lt_or_gt_of_ne hkl <;> norm_num [ Set.disjoint_left ]

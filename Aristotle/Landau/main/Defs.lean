@@ -138,14 +138,11 @@ def equilibriumMaxwellian (ρ_ion T : ℝ) (v : Fin 3 → ℝ) : ℝ :=
 lemma equilibriumMaxwellian_isMaxwellian (ρ T : ℝ) (hρ : 0 < ρ) (hT : 0 < T) :
     IsMaxwellian (equilibriumMaxwellian ρ T) := by
   refine ⟨Real.log (ρ / (2 * π * T) ^ ((3 : ℝ) / 2)), 0, -1 / (2 * T),
-    by field_simp; linarith, fun v => ?_⟩
+    by exact div_neg_of_neg_of_pos (by norm_num) (by positivity), fun v => ?_⟩
   unfold equilibriumMaxwellian
   rw [zero_dotProduct, normSq, add_zero]
-  have hpos : 0 < ρ / (2 * π * T) ^ ((3 : ℝ) / 2) :=
-    div_pos hρ (Real.rpow_pos_of_pos (by positivity) _)
-  conv_lhs => rw [show ρ / (2 * π * T) ^ ((3 : ℝ) / 2) =
-    Real.exp (Real.log (ρ / (2 * π * T) ^ ((3 : ℝ) / 2))) from (Real.exp_log hpos).symm]
-  rw [← Real.exp_add]
+  rw [← Real.exp_log (div_pos hρ (Real.rpow_pos_of_pos (by positivity) _)).ne',
+    ← Real.exp_add]
   congr 1; ring
 
 /-- The equilibrium temperature T is uniquely determined: if two Maxwellians with
@@ -306,7 +303,7 @@ lemma landau_ibp (Ψ : ℝ → ℝ) (g : (Fin 3 → ℝ) → ℝ)
     ∑ i : Fin 3, ContinuousLinearMap.smulRight (ContinuousLinearMap.proj i) (c i)
   have hL : ∀ x, L x = dotProduct c x := by
     intro x
-    simp +decide [L, dotProduct, Fin.sum_univ_three]
+    simp [L, dotProduct, Fin.sum_univ_three]
     ring
   rw [show dotProduct c (∫ w, F w) = L (∫ w, F w) from (hL _).symm]
   rw [show (∫ w, dotProduct c (F w)) = ∫ w, L (F w) from by
@@ -330,11 +327,11 @@ def PSDIntegrand (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ) (v w : Fin 3 �
 
 /-- Cross product antisymmetry: -cross a b = cross b a. -/
 lemma neg_cross (a b : Fin 3 → ℝ) : -cross a b = cross b a := by
-  ext i; fin_cases i <;> simp +decide [cross, Pi.neg_apply] <;> ring
+  ext i; fin_cases i <;> simp [cross, Pi.neg_apply] <;> ring
 
 lemma cross_smul_left (c : ℝ) (a b : Fin 3 → ℝ) :
     cross (c • a) b = c • cross a b := by
-  ext i; fin_cases i <;> simp +decide [cross, Pi.smul_apply, smul_eq_mul, mul_sub] <;> ring
+  ext i; fin_cases i <;> simp [cross, Pi.smul_apply, smul_eq_mul, mul_sub] <;> ring
 
 
 /-- Helper: cross product with zero first argument -/

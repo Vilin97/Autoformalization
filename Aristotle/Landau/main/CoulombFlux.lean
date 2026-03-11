@@ -52,7 +52,7 @@ lemma landau_flux_integrable_coulomb
               have : |fderiv ℝ f w (Pi.single j 1)| ≤ ‖fderiv ℝ f w‖ := by
                 simpa using (ContinuousLinearMap.le_opNorm (fderiv ℝ f w) (Pi.single j 1))
                   |> le_trans <| mul_le_of_le_one_right (norm_nonneg _) <|
-                  by simp +decide [Pi.norm_single]
+                  by simp [Pi.norm_single]
               generalize_proofs at *
               erw [iteratedFDeriv_succ_eq_comp_left]; norm_num [fderiv_deriv]
               erw [iteratedFDeriv_zero_eq_comp]; norm_num [fderiv_deriv]
@@ -80,15 +80,15 @@ lemma landau_flux_integrable_coulomb
               Continuous.dotProduct (continuous_const.sub continuous_id')
                 (continuous_const.sub continuous_id')) _
         · unfold innerLandauMatrix
-          simp +decide [normSq, Matrix.vecMulVec]
+          simp [normSq, Matrix.vecMulVec]
           fun_prop (disch := norm_num)
       · exact AEStronglyMeasurable.sub
           (Continuous.aestronglyMeasurable (hf_smooth.continuous.mul continuous_const))
           (AEStronglyMeasurable.mul aestronglyMeasurable_const
             ((hf_smooth.continuous_fderiv le_top).eval_const (Pi.single j 1)).aestronglyMeasurable)
     · filter_upwards [] with w
-      by_cases hw : v - w = 0 <;> simp_all +decide
-      · simp_all +decide [sub_eq_zero, landauMatrix, innerLandauMatrix, normSq, vecMulVec,
+      by_cases hw : v - w = 0 <;> simp_all
+      · simp_all [sub_eq_zero, landauMatrix, innerLandauMatrix, normSq, vecMulVec,
           eucNorm, coulombKernel]
       · exact mul_le_mul_of_nonneg_right
           (coulomb_landauMatrix_entry_le_pi _ _ _ hw) (abs_nonneg _)
@@ -115,7 +115,7 @@ lemma schwartz_partial_decay
   have h1 : |fderiv ℝ (f x) w (Pi.single j 1)| ≤ ‖fderiv ℝ (f x) w‖ := by
     rw [← Real.norm_eq_abs]
     exact le_trans (ContinuousLinearMap.le_opNorm _ _)
-      (mul_le_of_le_one_right (norm_nonneg _) (by simp +decide [Pi.norm_single]))
+      (mul_le_of_le_one_right (norm_nonneg _) (by simp [Pi.norm_single]))
   rw [norm_fderiv_eq_iteratedFDeriv_one] at h1
   exact le_trans (mul_le_mul_of_nonneg_right h1 (by positivity)) (hC x w)
 

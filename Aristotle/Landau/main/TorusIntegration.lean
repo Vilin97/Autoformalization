@@ -107,52 +107,52 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
                   (fun x : ℝ × (Fin 2 → ℝ) => Fin.insertNth i x.1 x.2)
                   (MeasureTheory.volume.prod
                     (MeasureTheory.volume : MeasureTheory.Measure (Fin 2 → ℝ))) := by
-              simp +decide [ MeasureTheory.MeasureSpace.volume ]
+              simp [ MeasureTheory.MeasureSpace.volume ]
               erw [ MeasureTheory.Measure.pi_eq ]
               intro s hs; erw [ MeasureTheory.Measure.map_apply ]
               · rw [ show (fun x : ℝ × (Fin 2 → ℝ) => i.insertNth x.1 x.2) ⁻¹' Set.univ.pi s =
                     (s i) ×ˢ (Set.pi Set.univ fun j => s (Fin.succAbove i j)) from ?_ ]
-                · simp +decide [ Fin.prod_univ_three, MeasureTheory.Measure.prod_prod ]
+                · simp [ Fin.prod_univ_three, MeasureTheory.Measure.prod_prod ]
                   fin_cases i <;> ring!
                 · ext ⟨x, y⟩; simp [Fin.insertNth]
-                  fin_cases i <;> simp +decide [ Fin.forall_fin_succ ]
+                  fin_cases i <;> simp [ Fin.forall_fin_succ ]
                   · tauto
                   · tauto
               · refine measurable_pi_iff.mpr ?_
-                intro a; fin_cases a <;> simp +decide [ Fin.insertNth ]
-                · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+                intro a; fin_cases a <;> simp [ Fin.insertNth ]
+                · fin_cases i <;> simp [ Fin.succAboveCases ]
                   · exact measurable_fst
                   · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd
                   · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd
-                · fin_cases i <;> simp +decide [ Fin.succAboveCases ] <;> measurability
-                · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+                · fin_cases i <;> simp [ Fin.succAboveCases ] <;> measurability
+                · fin_cases i <;> simp [ Fin.succAboveCases ]
                   · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd
                   · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd
                   · exact measurable_fst
               · exact MeasurableSet.univ_pi hs
             rw [ h_iso, MeasureTheory.integral_map ]
-            · simp +decide [ Set.indicator ]
-              fin_cases i <;> simp +decide [ Fin.forall_fin_succ ]
+            · simp [ Set.indicator ]
+              fin_cases i <;> simp [ Fin.forall_fin_succ ]
               · rfl
-              · simp +decide only [and_left_comm]
+              · simp only [and_left_comm]
                 rfl
-              · simp +decide [ Fin.insertNth ]
-                simp +decide [ Fin.succAboveCases ]
+              · simp [ Fin.insertNth ]
+                simp [ Fin.succAboveCases ]
                 congr
                 ext
                 split_ifs <;> tauto
             · refine Measurable.aemeasurable ?_
               refine measurable_pi_iff.mpr ?_
-              intro a; fin_cases a <;> simp +decide [ Fin.insertNth ]
-              · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+              intro a; fin_cases a <;> simp [ Fin.insertNth ]
+              · fin_cases i <;> simp [ Fin.succAboveCases ]
                 · exact measurable_fst
                 · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd
                 · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd
-              · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+              · fin_cases i <;> simp [ Fin.succAboveCases ]
                 · exact measurable_pi_apply 0 |> Measurable.comp <| measurable_snd
                 · exact measurable_fst
                 · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd
-              · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+              · fin_cases i <;> simp [ Fin.succAboveCases ]
                 · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd
                 · exact measurable_pi_apply _ |> Measurable.comp <| measurable_snd
                 · exact measurable_fst
@@ -167,14 +167,14 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
             (Set.Icc 0 1 ×ˢ Set.pi Set.univ (fun _ => Set.Icc 0 1)) := by
           refine hg.comp_continuousOn ?_
           refine Continuous.continuousOn ?_
-          fin_cases i <;> simp +decide [ Fin.insertNth ]
+          fin_cases i <;> simp [ Fin.insertNth ]
           · exact continuous_pi_iff.mpr fun i => by
               fin_cases i <;>
               [ exact continuous_fst
               ; exact continuous_apply 0 |> Continuous.comp <| continuous_snd
               ; exact continuous_apply 1 |> Continuous.comp <| continuous_snd ]
           · refine continuous_pi_iff.mpr ?_
-            intro i; fin_cases i <;> simp +decide [ Fin.insertNth ]
+            intro i; fin_cases i <;> simp [ Fin.insertNth ]
             · exact continuous_apply 0 |> Continuous.comp <| continuous_snd
             · exact continuous_fst
             · exact continuous_apply 1 |> Continuous.comp <| continuous_snd
@@ -204,9 +204,9 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
                   (hasFDerivAt_pi.mpr _)) using 1
             rotate_left
             use fun j => if j = i then 1 else 0
-            · intro j; split_ifs <;> simp_all +decide [ hasFDerivAt_iff_isLittleO_nhds_zero ]
-              simp_all +decide [ Fin.insertNth ]
-              fin_cases i <;> fin_cases j <;> simp_all +decide [ Fin.succAboveCases ]
+            · intro j; split_ifs <;> simp_all [ hasFDerivAt_iff_isLittleO_nhds_zero ]
+              simp_all [ Fin.insertNth ]
+              fin_cases i <;> fin_cases j <;> simp_all [ Fin.succAboveCases ]
             · simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.pi_apply]
               congr 1
               ext j
@@ -221,7 +221,7 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
         rw [ eq_comm, sub_eq_zero ]
         convert h_periodic (Fin.insertNth i 0 z) using 2
         ext j
-        fin_cases i <;> fin_cases j <;> simp +decide [ Fin.insertNth ]
+        fin_cases i <;> fin_cases j <;> simp [ Fin.insertNth ]
         · rfl
         · rfl
         · rfl
@@ -238,16 +238,16 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
                 exact hF.continuous_fderiv le_rfl
               refine h_cont.comp ?_
               refine continuous_pi_iff.mpr ?_
-              intro j; fin_cases j <;> simp +decide [ Fin.insertNth ]
-              · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+              intro j; fin_cases j <;> simp [ Fin.insertNth ]
+              · fin_cases i <;> simp [ Fin.succAboveCases ]
                 · exact continuous_fst
                 · exact continuous_apply 0 |> Continuous.comp <| continuous_snd
                 · exact continuous_apply 0 |> Continuous.comp <| continuous_snd
-              · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+              · fin_cases i <;> simp [ Fin.succAboveCases ]
                 · exact continuous_apply 0 |> Continuous.comp <| continuous_snd
                 · exact continuous_fst
                 · exact continuous_apply _ |> Continuous.comp <| continuous_snd
-              · fin_cases i <;> simp +decide [ Fin.succAboveCases ]
+              · fin_cases i <;> simp [ Fin.succAboveCases ]
                 · exact continuous_apply _ |> Continuous.comp <| continuous_snd
                 · exact continuous_apply _ |> Continuous.comp <| continuous_snd
                 · exact continuous_fst

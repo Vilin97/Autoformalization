@@ -15,7 +15,7 @@ namespace VML
 
 private lemma landauMatrix_coulombKernel_zero (i j : Fin 3) :
     landauMatrix coulombKernel 0 i j = 0 := by
-  simp +decide [landauMatrix, innerLandauMatrix, normSq, eucNorm, coulombKernel,
+  simp [landauMatrix, innerLandauMatrix, normSq, eucNorm, coulombKernel,
     dotProduct, vecMulVec]
 
 /-- Partial derivatives of a Schwartz function are Schwartz. Uses
@@ -66,7 +66,7 @@ lemma coulomb_entry_schwartz_integrable
         (continuous_const.sub continuous_id')
         (continuous_const.sub continuous_id'))).sqrt)).mul
       (by apply Continuous.measurable; unfold innerLandauMatrix
-          simp +decide [normSq, vecMulVec]; fun_prop (disch := norm_num)
+          simp [normSq, vecMulVec]; fun_prop (disch := norm_num)
       )).aestronglyMeasurable).mul hg_smooth.continuous.aestronglyMeasurable
   · -- Domination bound
     rw [norm_mul, norm_mul, Real.norm_of_nonneg (inv_nonneg.mpr (norm_nonneg _))]

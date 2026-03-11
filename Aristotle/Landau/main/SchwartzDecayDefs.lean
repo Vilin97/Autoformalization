@@ -105,7 +105,7 @@ lemma integrable_one_add_norm_pow_mul
     Integrable (fun v => (1 + ‖v‖) ^ K * |φ v|) := by
   have h_binom : ∀ v : α, (1 + ‖v‖) ^ K * |φ v| =
       ∑ k ∈ Finset.range (K + 1), Nat.choose K k * ‖v‖ ^ k * |φ v| := by
-    simp +decide [add_comm (1 : ℝ), add_pow, mul_assoc, mul_comm, mul_left_comm,
+    simp [add_comm (1 : ℝ), add_pow, mul_assoc, mul_comm, mul_left_comm,
       Finset.mul_sum _ _ _]
   simp_rw [h_binom]
   exact MeasureTheory.integrable_finset_sum _ fun k _ => by
