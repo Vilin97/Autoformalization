@@ -83,13 +83,22 @@ I found no issue.
 
 ### ~~8a. Extract helpers~~ — DONE
 
-### 8b. Weaken spatial smoothness: C^∞ → C^2 (DEFERRED)
+### 8b. Weaken regularity: C^∞ → optimal (DEFERRED)
 
-The concrete theorem requires `ContDiff ℝ ⊤` (C^∞) in both space and velocity. What the proof actually uses:
-- **Velocity**: C² for the Landau operator (divergence of an integral), C¹ for ∇_v log f. C³ is a safe margin.
-- **Space**: C¹ for gradients, C² for the Laplacian in the maximum principle.
+The concrete theorem requires `ContDiff ℝ ⊤` (C^∞) in both space and velocity. The optimal regularity, confirmed by Gemini DeepThink's independent analysis, is:
 
-`ContDiff ℝ 3` in velocity and `ContDiff ℝ 2` in space would be mathematically sufficient. The C^∞ is cosmetic (simpler to state) but strictly stronger than needed.
+- **Distribution f**: f ∈ C¹(T³ × ℝ³) with ∇²_v f ∈ C⁰. That is: C¹ jointly in (x,v), plus second velocity derivatives exist and are continuous.
+- **Fields E, B**: E, B ∈ C¹(T³; ℝ³).
+
+What the proof actually uses at each step:
+- **Landau operator** (divergence of integral): C² in v (need ∂²f/∂v²)
+- **∇_v log f**: C¹ in v (need ∂f/∂v + f > 0)
+- **Spatial gradient ∇_x f**: C¹ in x
+- **Maximum principle** (Δ log n at extremum): C² in x for log n, but log n = a(x) + const where a comes from the Maxwellian; a inherits regularity from f, so C¹ of f in x gives C¹ of a, and we need C² of a. This forces f ∈ C² in x — **or** the maximum principle can be applied to the PB equation T Δ(log n) = n − ρ_ion directly, where C¹ of ∇ log n suffices since ∇ log n = E/T.
+- **Killing equation**: C¹ of b(x) (drift), which inherits from C¹ of f in x
+- **Curl, divergence of E, B**: C¹ of E, B
+
+In Lean terms: `ContDiff ℝ 2 (f x)` in velocity, `ContDiff ℝ 1` in space (or jointly C¹ with continuous second velocity derivatives), and `ContDiff ℝ 1` for E, B components. The current C^∞ is ~3 regularity levels stronger than needed.
 
 ### 8c. Generalize beyond T^3 (HARD)
 
