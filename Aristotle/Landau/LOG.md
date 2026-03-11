@@ -1,5 +1,18 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 94: Deduplicate hpf_decay, generalize helpers
+
+### Changes
+- **Deduplicated `hpf_decay` pattern** in CoulombPSD.lean (454 → 435 lines, -19): replaced 3 identical 6-7 line inline "polynomial-weighted Schwartz decay" proof blocks with calls to new shared `schwartz_poly_weighted_decay` helper.
+- **Added `schwartz_poly_weighted_decay`** to SchwartzDecayDefs.lean (167 → 185 lines): captures the pattern `|f(w)|*(1+‖w‖)^N ≤ C ∀ N → |(1+‖w‖)^M * f(w)|*(1+‖w‖)^N ≤ C' ∀ N`.
+- **Generalized 3 helpers** from `Fin 3 → ℝ` to arbitrary normed spaces:
+  - `schwartz_poly_weighted_decay` → `{α : Type*} [SeminormedAddCommGroup α]`
+  - `integrable_one_add_norm_pow_mul` → `{α : Type*} [MeasureSpace α] [SeminormedAddCommGroup α]`
+  - `integrable_of_schwartz_bound` → same
+- **Updated Mathlib PR candidates** (issue 8d): added 3 new candidates (items 3-5) to `experiments/mathlib_pr_candidates.md`.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 93: Extract shared Schwartz helpers, deduplicate proofs
 
 ### Changes

@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 93)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 94)
 
 ## Verdict: ACCEPT
 
@@ -18,7 +18,7 @@
 
 ## 2. Hidden Axioms
 
-Zero axioms on `CoulombConcreteTheorem42` and `CoulombConcreteTheorem42_nonvacuous` (verified via `lean_verify` this cycle). I found no issue.
+Zero axioms on main theorems (verified cycle 93 via `lean_verify`). I found no issue.
 
 ---
 
@@ -44,7 +44,7 @@ I found no issue.
 
 ### 6a. maxHeartbeats overrides: 1 total
 
-`synthInstance.maxHeartbeats 160000` in CoulombForceTransport.lean. Acceptable (typeclass diamond workaround).
+`synthInstance.maxHeartbeats 160000` in CoulombForceTransport.lean. Acceptable.
 
 ### 6b. Files over 600 lines (1 file)
 
@@ -52,17 +52,17 @@ I found no issue.
 |------|-------|
 | Defs.lean | 634 |
 
-Can't be split per user preference. No change from last cycle.
+Can't be split per user preference.
 
 ### 6c. Long proofs (3 proofs over 200 lines)
 
 | File | Proof | Lines |
 |------|-------|-------|
-| CoulombPSD.lean | `fubini_double_integrable_coulomb` | ~312 |
-| CoulombConcreteTheorem42.lean | `CoulombConcreteTheorem42` | ~235 |
-| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | ~231 |
+| CoulombPSD.lean | `fubini_double_integrable_coulomb` | ~293 |
+| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | ~234 |
+| CoulombConcreteTheorem42.lean | `CoulombConcreteTheorem42` | ~223 |
 
-All three are single extended calculations. `fubini_double_integrable_coulomb` is the most concerning at 312 lines — it might benefit from extracting helper lemmas for the inner/outer integrability steps. The other two are natural monoliths.
+Down from ~312/~231/~235 last cycle (deduplication into shared helpers). `fubini_double` is still the longest and has a natural split point: the pointwise bound `h_pw_bound` (~49 lines) could be extracted.
 
 ---
 
@@ -78,27 +78,19 @@ I found no issue.
 
 ### ~~8b. Weaken regularity: C^∞ → optimal~~ — ANALYZED (cycle 90)
 
-ContDiff ℝ ⊤ is necessary for Coulomb. See `experiments/contdiff_regularity_analysis.md`.
-
 ### 8c. Generalize beyond T^3 (HARD)
 
 ### 8d. Extract Mathlib-upstreamable lemmas (MEDIUM)
 
-`iteratedFDeriv_clm_zero` confirmed not in Mathlib (loogle, cycle 91). PR-ready. See `experiments/mathlib_pr_candidates.md`.
+`iteratedFDeriv_clm_zero` confirmed not in Mathlib. PR-ready. See `experiments/mathlib_pr_candidates.md`.
 
-### ~~8e. Split Defs.lean~~ — DONE
-
-### ~~8f. Split Section3Helpers.lean~~ — DONE
-
-### ~~8g. UniformSchwartzDecay → k ≤ 2~~ — DONE (cycle 89)
-
-### ~~8h. hExpDecay weakened to hLogGrowth~~ — DONE
+### ~~8e–8h~~ — DONE
 
 ### 8i. hGradBound is Coulomb-specific (MINOR — DOCUMENTED)
 
 ### 8j. lean-lsp build desync (PERSISTENT)
 
-The lean-lsp MCP rebuilds from source and hits errors in IteratedDerivHelpers, TorusIntegration, GaussianHelpers that don't reproduce with `lake build`. `lean_verify` still works for some theorems but fails for others. `lake build` remains authoritative.
+The lean-lsp MCP rebuilds from source and hits errors in IteratedDerivHelpers, TorusIntegration, GaussianHelpers that don't reproduce with `lake build`. Confirmed persistent after `lean_build --clean` (cycle 93).
 
 ---
 
@@ -113,11 +105,11 @@ The lean-lsp MCP rebuilds from source and hits errors in IteratedDerivHelpers, T
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 6b | 1 file over 600 lines | Low | Open (Defs.lean, can't split) |
-| 6c | 3 proofs over 200 lines | Low | Open (monoliths, `fubini_double` splittable) |
+| 6c | 3 proofs over 200 lines | Low | Open (`fubini_double` splittable) |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open |
-| 8j | lean-lsp build desync | Low | Open (tooling) |
+| 8j | lean-lsp build desync | Low | Open (tooling, persistent) |
 
 ### Conditions for ACCEPT
 
-ACCEPT. All remaining issues are low severity — code quality, generalization, tooling. No correctness concerns.
+ACCEPT. All remaining issues are low severity. No correctness concerns.
