@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 105)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 106)
 
 ## Verdict: ACCEPT
 
@@ -48,26 +48,25 @@ I found no issue.
 
 ### ~~6b. Files over 600 lines~~ — RESOLVED (cycle 100)
 
-0 files over 600 lines. Largest: Section3Helpers.lean (596).
+0 files over 600 lines. Largest: Section3Helpers.lean (596 — dangerously close to 600).
 
 ### ~~6c. Long proofs~~ — RESOLVED (cycle 98)
 
 All proofs under 200 lines.
 
-### 6d. Proofs over 150 lines (2 proofs)
+### 6d. Proofs over 150 lines (3 proofs)
 
 | File | Proof | Lines |
 |------|-------|-------|
-| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | 189 |
+| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | 181 |
 | Theorem42.lean | `Theorem42` | 178 |
+| Section3Helpers.lean | `parallel_curl_free_affine` | 169 |
 
-Both are complex proofs where the remaining bulk is intrinsic (4-term product-rule estimate, VMLInput construction). Further extraction yields diminishing returns.
+**NOTE:** `parallel_curl_free_affine` was missed in cycles 100-105. It's an Aristotle-generated proof (170 lines) solving the functional equation "parallel + curl-free → affine". Since it's Aristotle output, it may be amenable to simplification.
 
 ### ~~6e. Stale comments in CoulombPSD.lean~~ — RESOLVED (cycle 103)
 
-### 6f. Dead code audit
-
-Exhaustive search found 0 unused lemmas across 208 declarations. No dead code.
+### ~~6f. Dead code audit~~ — RESOLVED (cycle 105, 0 unused lemmas)
 
 ---
 
@@ -107,11 +106,11 @@ I found no issue.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6d | 2 proofs over 150 lines | Low | Open (both under 200, diminishing returns) |
+| 6d | 3 proofs over 150 lines | Low | Open (all under 200) |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |
 | 8j | lean-lsp build desync | Low | Open (tooling, persistent) |
 
 ### Conditions for ACCEPT
 
-ACCEPT. All remaining issues are low severity. No correctness concerns. Dead code audit clean.
+ACCEPT. All remaining issues are low severity. No correctness concerns.

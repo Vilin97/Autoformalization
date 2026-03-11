@@ -1,25 +1,24 @@
-# Plan — Cycle 105
+# Plan — Cycle 106
 
 ## Status summary
 
 - **Sorry count**: 0
-- **Files**: 32 files, 9,538 lines
+- **Files**: 32 files, 9,530 lines
 - **Build**: Clean, 0 errors
 - **Critique verdict**: ACCEPT
 - **Aristotle jobs**: 0 pending
-- **Dead code**: 0 unused lemmas (208 checked)
 
 ## This cycle's work items
 
-### 1. Shorten `coulomb_flux_deriv_schwartz_decay` calc chain (`/simplify`)
-- **What**: Issue 6d. The calc chain (lines 112-170) has a verbose triangle-inequality + norm_smul step (lines 112-137, ~26 lines) that could be tightened by combining the two calc steps into one. The mechanical `simp [norm_smul, Real.norm_eq_abs]` after the triangle inequality can be fused with it.
-- **Why**: Reduces the longest remaining proof. Even 10 lines saved is worthwhile.
+### 1. Simplify `parallel_curl_free_affine` in Section3Helpers.lean (`/simplify`)
+- **What**: Issue 6d. This 169-line Aristotle-generated proof solves "parallel + curl-free → affine". Aristotle proofs are often verbose — look for redundant steps, unused `have`s, and tactic chains that could be shortened. Also serves as preventive maintenance: Section3Helpers is at 596 lines (4 from the 600 threshold).
+- **Why**: Reduces the 3rd longest proof and protects Section3Helpers from breaching 600 lines.
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
-| 6d | 2 proofs over 150 lines | Low — diminishing returns |
+| 6d | 3 proofs over 150 lines | Low — all under 200 |
 | 8c | Generalize beyond T^3 | Hard |
 | 8d | Mathlib PR for helper lemmas | 5 candidates ready |
 | 8j | lean-lsp build desync | Persistent tooling issue |
