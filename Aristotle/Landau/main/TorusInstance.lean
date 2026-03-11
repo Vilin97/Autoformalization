@@ -1,4 +1,5 @@
 import Aristotle.Landau.main.TorusIntegration
+import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
 /-!
 # FlatTorus3 Instance for T^3

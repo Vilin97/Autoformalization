@@ -63,102 +63,58 @@ lemma tendsto_landau_quadratic_diag
               u ∈ U → v ∈ U → eucNorm (G u - G v) ≤ L * eucNorm (u - v) := by
           obtain ⟨U, hU⟩ : ∃ U : Set (Fin 3 → ℝ), IsOpen U ∧ x ∈ U ∧
               ∃ L : ℝ, ∀ u ∈ U, ∀ v ∈ U, ‖G u - G v‖ ≤ L * ‖u - v‖ := by
-            have := hG.differentiable le_rfl
+            have hG_diff := hG.differentiable le_rfl
             obtain ⟨K, hK⟩ : ∃ K : ℝ, ∀ u ∈ Metric.closedBall x 1, ‖fderiv ℝ G u‖ ≤ K := by
               exact IsCompact.exists_bound_of_continuousOn
                 (ProperSpace.isCompact_closedBall x 1)
                 (hG.continuous_fderiv le_rfl |> Continuous.continuousOn)
-            refine ⟨ Metric.ball x 1, Metric.isOpen_ball, Metric.mem_ball_self zero_lt_one, K, _ ⟩
-            intro u hu v hv
-            have h_mean_value : ∀ t ∈ Set.Icc (0 : ℝ) 1,
-                ‖deriv (fun t => G (v + t • (u - v))) t‖ ≤ K * ‖u - v‖ := by
-              intro t ht
-              have h_mean_value :
-                  ‖deriv (fun t => G (v + t • (u - v))) t‖ =
-                  ‖(fderiv ℝ G (v + t • (u - v))) (u - v)‖ := by
-                rw [ deriv ]
-                erw [ fderiv_comp ] <;> norm_num [ this.differentiableAt, fderiv_deriv ]
-                rw [ deriv_pi ] <;> norm_num [ Fin.forall_fin_succ ]
-                rw [ ← map_sub ] ; rfl
-              refine h_mean_value ▸ le_trans (ContinuousLinearMap.le_opNorm _ _)
-                (mul_le_mul_of_nonneg_right (hK _ _) (norm_nonneg _) )
-              simp_all +decide [ dist_eq_norm ]
-              rw [ show v + t • (u - v) - x = (1 - t) • (v - x) + t • (u - x) by
-                     ext i
-                     simpa using by ring ]
-              exact le_trans (norm_add_le _ _) (by
-                rw [ norm_smul, norm_smul,
-                     Real.norm_of_nonneg (by linarith : 0 ≤ 1 - t),
-                     Real.norm_of_nonneg (by linarith : 0 ≤ t) ]
-                nlinarith)
-            have h_ftc : G u - G v = ∫ t in (0 : ℝ)..1, deriv (fun t => G (v + t • (u - v))) t := by
-              rw [ intervalIntegral.integral_deriv_eq_sub ]
-              · norm_num
-              · exact fun t ht => this.differentiableAt.comp _
-                  (DifferentiableAt.add (differentiableAt_const _)
-                    (differentiableAt_id.smul_const _) )
-              · apply_rules [ Continuous.intervalIntegrable ]
-                apply_rules [ ContDiff.continuous_deriv ]
-                exacts [ hG.comp (contDiff_const.add (contDiff_id.smul contDiff_const) ),
-                         by norm_num ]
-            rw [ h_ftc ]
-            refine le_trans (intervalIntegral.norm_integral_le_of_norm_le_const _) _
-            exacts [ K * ‖u - v‖,
-                     fun t ht => h_mean_value t <| by
-                       constructor <;> cases Set.mem_uIoc.mp ht <;> linarith,
-                     by norm_num ]
+            refine ⟨ Metric.ball x 1, Metric.isOpen_ball, Metric.mem_ball_self one_pos, K,
+              fun u hu v hv => ?_ ⟩
+            exact (convex_ball x 1).norm_image_sub_le_of_norm_fderiv_le
+              (fun y hy => hG_diff.differentiableAt)
+              (fun y hy => hK y (Metric.ball_subset_closedBall hy))
+              (Metric.mem_ball.mp hv) (Metric.mem_ball.mp hu)
           obtain ⟨ L, hL ⟩ := hU.2.2
-          refine ⟨ U, hU.1, hU.2.1, 3 * L, fun u v hu hv => _ ⟩
-          have h_euc_norm :
-              eucNorm (G u - G v) ≤ Real.sqrt 3 * ‖G u - G v‖ ∧
-              eucNorm (u - v) ≥ ‖u - v‖ := by
-            unfold eucNorm
-            norm_num [ normSq, Pi.norm_def ]
-            constructor <;> norm_num [ Fin.sum_univ_three, dotProduct ] at * <;>
-              ring_nf at * <;> norm_num at *
-            · rw [ Real.sqrt_le_iff ]
-              norm_num [ Fin.univ_succ ]
-              ring_nf
-              norm_num
-              nlinarith only [
-                abs_le.mp (show |G u 0 - G v 0| ≤
-                    Max.max |G u 0 - G v 0| (Max.max |G u 1 - G v 1| |G u 2 - G v 2|)
-                  by exact le_max_left _ _),
-                abs_le.mp (show |G u 1 - G v 1| ≤
-                    Max.max |G u 0 - G v 0| (Max.max |G u 1 - G v 1| |G u 2 - G v 2|)
-                  by exact le_max_of_le_right (le_max_left _ _) ),
-                abs_le.mp (show |G u 2 - G v 2| ≤
-                    Max.max |G u 0 - G v 0| (Max.max |G u 1 - G v 1| |G u 2 - G v 2|)
-                  by exact le_max_of_le_right (le_max_right _ _) ) ]
-            · refine Real.le_sqrt_of_sq_le _
-              norm_num [ Fin.univ_succ ]
-              ring_nf
-              (
-              rw [ max_def, max_def ]
-              split_ifs <;> nlinarith [ sq_nonneg (u 0 - v 0),
-                                        sq_nonneg (u 1 - v 1),
-                                        sq_nonneg (u 2 - v 2),
-                                        abs_mul_abs_self (u 0 - v 0),
-                                        abs_mul_abs_self (u 1 - v 1),
-                                        abs_mul_abs_self (u 2 - v 2) ] )
-          refine le_trans h_euc_norm.1 ?_
-          refine le_trans (mul_le_mul_of_nonneg_left (hL u hu v hv) (Real.sqrt_nonneg _) ) ?_
-          rw [ mul_assoc ]
-          gcongr
-          · exact le_trans (norm_nonneg _) (hL u hu v hv)
-          · rw [ Real.sqrt_le_left ] <;> norm_num
-          · contrapose! hL
-            obtain ⟨u, hu, v, hv, huv⟩ : ∃ u ∈ U, ∃ v ∈ U, u ≠ v := by
-              rcases Metric.isOpen_iff.mp hU.1 x hU.2.1 with ⟨ ε, εpos, hε ⟩
-              exact ⟨ x, hε <| Metric.mem_ball_self εpos,
-                      x + fun _ => ε / 2,
-                      hε <| Metric.mem_ball.mpr <| by simpa [ abs_of_pos εpos ] using by linarith,
-                      ne_of_apply_ne (fun u => u 0) <| by norm_num; linarith ⟩
-            exact ⟨ u, hu, v, hv,
-              lt_of_lt_of_le
-                (mul_neg_of_neg_of_pos hL (norm_pos_iff.mpr (sub_ne_zero.mpr huv) ))
-                (norm_nonneg _) ⟩
-          · exact h_euc_norm.2
+          -- eucNorm z ≤ √3 * ‖z‖ and ‖z‖ ≤ eucNorm z for Fin 3 → ℝ
+          have h_norm_le_euc : ∀ z : Fin 3 → ℝ, ‖z‖ ≤ eucNorm z := by
+            intro z; unfold eucNorm normSq
+            have h_each : ∀ i : Fin 3, |z i| ≤ Real.sqrt (z ⬝ᵥ z) := by
+              intro i
+              refine Real.le_sqrt_of_sq_le ?_
+              simp only [dotProduct, Fin.sum_univ_three]
+              fin_cases i <;> simp [sq_abs] <;>
+                nlinarith [sq_nonneg (z 0), sq_nonneg (z 1), sq_nonneg (z 2)]
+            calc ‖z‖ = ‖z‖ := rfl
+              _ ≤ Real.sqrt (z ⬝ᵥ z) := by
+                  rw [pi_norm_le_iff_of_nonneg (Real.sqrt_nonneg _)]
+                  exact fun i => by rw [Real.norm_eq_abs]; exact h_each i
+          have h_euc_le_norm : ∀ z : Fin 3 → ℝ, eucNorm z ≤ Real.sqrt 3 * ‖z‖ := by
+            intro z; unfold eucNorm normSq
+            rw [show Real.sqrt 3 * ‖z‖ = Real.sqrt (3 * ‖z‖ ^ 2) from by
+              rw [Real.sqrt_mul (by norm_num : (3 : ℝ) ≥ 0), Real.sqrt_sq (norm_nonneg z)]]
+            apply Real.sqrt_le_sqrt
+            simp only [dotProduct, Fin.sum_univ_three]
+            have h0 := norm_le_pi_norm z (0 : Fin 3)
+            have h1 := norm_le_pi_norm z (1 : Fin 3)
+            have h2 := norm_le_pi_norm z (2 : Fin 3)
+            rw [Real.norm_eq_abs] at h0 h1 h2
+            nlinarith [sq_abs (z 0), sq_abs (z 1), sq_abs (z 2),
+              sq_nonneg ‖z‖, sq_le_sq' (by linarith) h0,
+              sq_le_sq' (by linarith) h1, sq_le_sq' (by linarith) h2]
+          refine ⟨ U, hU.1, hU.2.1, Real.sqrt 3 * L, fun u v hu hv => ?_ ⟩
+          by_cases huv : u = v
+          · simp [huv, eucNorm, normSq, dotProduct]
+          · have hLuv := hL u hu v hv
+            have hL_nn : 0 ≤ L := by
+              have hn := norm_nonneg (G u - G v)
+              have hpos : 0 < ‖u - v‖ := norm_pos_iff.mpr (sub_ne_zero.mpr huv)
+              nlinarith
+            calc eucNorm (G u - G v)
+                ≤ Real.sqrt 3 * ‖G u - G v‖ := h_euc_le_norm _
+              _ ≤ Real.sqrt 3 * (L * ‖u - v‖) := by gcongr
+              _ ≤ Real.sqrt 3 * (L * eucNorm (u - v)) := by
+                  gcongr; exact h_norm_le_euc _
+              _ = Real.sqrt 3 * L * eucNorm (u - v) := by ring
         obtain ⟨L, hL⟩ := hU.right.right
         have h_bound : ∀ᶠ p : (Fin 3 → ℝ) × (Fin 3 → ℝ) in nhds (x, x),
             abs ((G p.1 - G p.2) ⬝ᵥ landauMatrix coulombKernel (p.1 - p.2) *ᵥ (G p.1 - G p.2)) ≤
@@ -167,7 +123,7 @@ lemma tendsto_landau_quadratic_diag
           have h_bound : ∀ᶠ p : (Fin 3 → ℝ) × (Fin 3 → ℝ) in nhds (x, x),
               eucNorm (G p.1 - G p.2) ≤ L * eucNorm (p.1 - p.2) := by
             exact Filter.eventually_of_mem
-              (IsOpen.mem_nhds (hU.1.prod hU.1) ⟨hU.2, hU.2⟩)
+              (IsOpen.mem_nhds (hU.1.prod hU.1) ⟨hU.2.1, hU.2.1⟩)
               fun p hp => hL _ _ hp.1 hp.2
           filter_upwards [ h_bound ] with p hp
           refine le_trans (landau_bound _ _) _
@@ -183,13 +139,16 @@ lemma tendsto_landau_quadratic_diag
           filter_upwards [ h_bound ] with p hp using le_trans hp
             (by split_ifs <;>
               simpa [ *, sq, mul_assoc, mul_comm, mul_left_comm ] using by ring_nf; norm_num)
-        refine squeeze_zero_norm' h_simplified_bound _
-        refine Continuous.tendsto' _ _ _ _ <;> norm_num [ eucNorm ]
-        · exact Continuous.mul continuous_const <| Real.continuous_sqrt.comp <|
-            Continuous.dotProduct
-              (continuous_fst.sub continuous_snd)
-              (continuous_fst.sub continuous_snd)
-        · norm_num [ normSq ]
+        have h_cont : Continuous (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
+            L ^ 2 * eucNorm (p.1 - p.2)) :=
+          Continuous.mul continuous_const <| Real.continuous_sqrt.comp <|
+            (Continuous.dotProduct (continuous_fst.sub continuous_snd)
+              (continuous_fst.sub continuous_snd))
+        have h_tends : Filter.Tendsto (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
+            L ^ 2 * eucNorm (p.1 - p.2)) (nhds (x, x)) (nhds 0) :=
+          h_cont.tendsto' _ _ (by simp [eucNorm, normSq, dotProduct])
+        exact squeeze_zero_norm' (h_simplified_bound.mono fun p hp => by
+          rw [Real.norm_eq_abs]; exact hp) h_tends
 
 
 lemma continuous_landau_quadratic
@@ -203,7 +162,8 @@ lemma continuous_landau_quadratic
         have h_cont_away : ∀ p : (Fin 3 → ℝ) × (Fin 3 → ℝ), p.1 ≠ p.2 → ContinuousAt F p := by
           intro p hp_ne
           have h_cont_A : ContinuousAt (fun z => landauMatrix coulombKernel z) (p.1 - p.2) := by
-            refine ContinuousAt.smul _ _ <;> norm_num [ ContinuousAt ]
+            show ContinuousAt (fun z => coulombKernel (eucNorm z) • innerLandauMatrix z) (p.1 - p.2)
+            apply ContinuousAt.smul
             · have h_cont_eucNorm : ContinuousAt (fun z => eucNorm z) (p.1 - p.2) := by
                 exact Continuous.continuousAt
                   (by exact Real.continuous_sqrt.comp <|
@@ -217,19 +177,19 @@ lemma continuous_landau_quadratic
                     sq_nonneg (p.1 1 - p.2 1), sq_nonneg (p.1 2 - p.2 2) ]
               have h_cont_coulomb :
                   ContinuousAt (fun z => coulombKernel z) (eucNorm (p.1 - p.2)) := by
-                refine ContinuousAt.congr _ _
-                use fun z => z ^ ( -3 : ℝ)
-                · exact ContinuousAt.rpow continuousAt_id continuousAt_const <|
+                have h_rpow : ContinuousAt (fun z => z ^ ((-3 : ℝ) : ℝ)) (eucNorm (p.1 - p.2)) :=
+                  ContinuousAt.rpow continuousAt_id continuousAt_const <|
                     Or.inl <| ne_of_gt h_pos
-                · filter_upwards [ lt_mem_nhds h_pos ] with z hz using by
-                    unfold coulombKernel; split_ifs <;> linarith
+                exact h_rpow.congr (Filter.eventuallyEq_iff_exists_mem.mpr
+                  ⟨Set.Ioi 0, lt_mem_nhds h_pos, fun z hz => by
+                    simp only [Set.mem_Ioi] at hz
+                    simp only [coulombKernel, if_neg (not_le.mpr hz)]⟩)
               exact h_cont_coulomb.comp h_cont_eucNorm
-            · refine Continuous.tendsto _ _
-              exact Continuous.smul
+            · exact (Continuous.smul
                 (show Continuous fun z : Fin 3 → ℝ => normSq z from
-                  by exact Continuous.matrix_dotProduct (continuous_id') (continuous_id') )
+                  Continuous.dotProduct (continuous_id') (continuous_id') )
                 (continuous_const)
-                |> Continuous.sub <| Continuous.matrix_vecMulVec (continuous_id') (continuous_id')
+                |>.sub <| Continuous.matrix_vecMulVec (continuous_id') (continuous_id')).continuousAt
           have h_cont_G : ContinuousAt (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => G p.1 - G p.2) p := by
             exact ContinuousAt.sub
               (hG.continuous.continuousAt.comp continuousAt_fst)
@@ -239,11 +199,16 @@ lemma continuous_landau_quadratic
               (landauMatrix coulombKernel (p.1 - p.2)) *ᵥ (G p.1 - G p.2)) p := by
             fun_prop (disch := norm_num)
           exact h_cont_F
-        refine continuous_iff_continuousAt.mpr fun p =>
-          if hp : p.1 = p.2 then _ else h_cont_away p hp
-        have h_tendsto : Filter.Tendsto F (nhds (p.1, p.1)) (nhds 0) := by
-          convert tendsto_landau_quadratic_diag G hG p.1 using 1
-        rw [ContinuousAt, hp]; exact h_tendsto
+        apply continuous_iff_continuousAt.mpr
+        intro p
+        by_cases hp : p.1 = p.2
+        · have h_tendsto : Filter.Tendsto F (nhds (p.1, p.1)) (nhds 0) := by
+            convert tendsto_landau_quadratic_diag G hG p.1 using 1
+          show ContinuousAt F p
+          have hpeq : p = (p.1, p.1) := Prod.ext rfl hp.symm
+          rw [ContinuousAt, hpeq, show F (p.1, p.1) = 0 from by simp [F]]
+          exact h_tendsto
+        · exact h_cont_away p hp
 
 /-- PSD integrand is jointly continuous for Coulomb kernel.
     Despite Ψ(r) = r⁻³ being singular, the score difference cancels the singularity.
@@ -255,17 +220,18 @@ lemma psd_continuous_coulomb
     (hf_smooth : ContDiff ℝ ⊤ f) :
     Continuous (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
       PSDIntegrand coulombKernel f p.1 p.2) := by
+  simp only [PSDIntegrand]
   refine Continuous.mul
     (Continuous.mul
       (hf_smooth.continuous.comp continuous_fst)
-      (hf_smooth.continuous.comp continuous_snd) ) _
+      (hf_smooth.continuous.comp continuous_snd) ) ?_
   set G := fun v => fderiv ℝ (Real.log ∘ f) v
   have h_log_smooth : ContDiff ℝ ⊤ (Real.log ∘ f) := by
     exact ContDiff.log hf_smooth fun v => ne_of_gt <| hf_pos v
   have h_G_smooth : ContDiff ℝ 1 G := by
     apply_rules [ ContDiff.fderiv, h_log_smooth ]
     exacts [ h_log_smooth.comp (contDiff_snd), contDiff_id, by norm_num ]
-  convert continuous_landau_quadratic (fun v => (fun i => G v (Pi.single i 1) )) _ using 1
+  convert continuous_landau_quadratic (fun v => (fun i => G v (Pi.single i 1) )) ?_ using 1
   exact contDiff_pi.mpr fun i => h_G_smooth.clm_apply (contDiff_const)
 
 
@@ -285,7 +251,7 @@ lemma psd_pointwise_bound_coulomb
   by_cases hvw : v - w = 0
   · have hveqw : v = w := sub_eq_zero.mp hvw; subst hveqw
     simp only [Δ, sub_self, Pi.zero_apply, dotProduct, mulVec, Finset.sum_const_zero,
-      mul_zero, abs_zero]; positivity
+      mul_zero, abs_zero]; simp [norm_zero, _root_.inv_zero]
   · have h_entry : ∀ i j, |landauMatrix coulombKernel (v - w) i j| ≤ ‖v - w‖⁻¹ :=
       fun i j => coulomb_landauMatrix_entry_le_pi _ i j hvw
     have h_mulvec : ∀ i, |(mulVec (landauMatrix coulombKernel (v - w)) Δ) i| ≤
@@ -321,14 +287,17 @@ lemma psd_pointwise_bound_coulomb
               rw [Real.norm_eq_abs, Real.norm_eq_abs, Real.norm_eq_abs] at this
               linarith [h_score v i, h_score w i]
         _ = 3 * Cg * ((1 + ‖v‖) ^ Kg + (1 + ‖w‖) ^ Kg) := by
-            simp [Fin.sum_univ_three]; ring
+            simp; ring
     have h_sq_bound : (∑ i : Fin 3, |Δ i|) ^ 2 ≤
         18 * Cg ^ 2 * ((1 + ‖v‖) ^ (2 * Kg) + (1 + ‖w‖) ^ (2 * Kg)) := by
+      have h_sum_nn : 0 ≤ ∑ i : Fin 3, |Δ i| :=
+        Finset.sum_nonneg fun i _ => abs_nonneg _
       have h1 : (∑ i : Fin 3, |Δ i|) ^ 2 ≤
           9 * Cg ^ 2 * ((1 + ‖v‖) ^ Kg + (1 + ‖w‖) ^ Kg) ^ 2 := by
+        have h_neg : -(3 * Cg * ((1 + ‖v‖) ^ Kg + (1 + ‖w‖) ^ Kg)) ≤ ∑ i : Fin 3, |Δ i| := by
+          linarith
         calc _ ≤ (3 * Cg * ((1 + ‖v‖) ^ Kg + (1 + ‖w‖) ^ Kg)) ^ 2 :=
-              sq_le_sq' (by linarith [Finset.sum_nonneg
-                (s := Finset.univ) (fun (i : Fin 3) _ => abs_nonneg (Δ i))]) h_delta_sum
+              sq_le_sq' h_neg h_delta_sum
           _ = _ := by ring
       have h2 : ((1 + ‖v‖) ^ Kg + (1 + ‖w‖) ^ Kg) ^ 2 ≤
           2 * ((1 + ‖v‖) ^ (2 * Kg) + (1 + ‖w‖) ^ (2 * Kg)) := by
@@ -338,8 +307,10 @@ lemma psd_pointwise_bound_coulomb
     calc f v * f w * |dotProduct Δ (mulVec (landauMatrix coulombKernel (v - w)) Δ)|
         ≤ f v * f w * (‖v - w‖⁻¹ *
             (18 * Cg ^ 2 * ((1 + ‖v‖) ^ (2 * Kg) + (1 + ‖w‖) ^ (2 * Kg)))) := by
-          gcongr; exact le_trans h_quad (mul_le_mul_of_nonneg_left h_sq_bound
-            (inv_nonneg.mpr (norm_nonneg _)))
+          gcongr
+          · exact mul_nonneg (le_of_lt (hf_pos v)) (le_of_lt (hf_pos w))
+          · exact le_trans h_quad (mul_le_mul_of_nonneg_left h_sq_bound
+              (inv_nonneg.mpr (norm_nonneg _)))
       _ = 18 * Cg ^ 2 * f v * ((1 + ‖v‖) ^ (2 * Kg) * (‖v - w‖⁻¹ * f w) +
                ‖v - w‖⁻¹ * ((1 + ‖w‖) ^ (2 * Kg) * f w)) := by ring
 
@@ -363,14 +334,16 @@ lemma fubini_double_pointwise_bound
           |∑ j : Fin 3, landauMatrix coulombKernel (v - w) i j *
             (f w • vGrad f v - f v • vGrad f w) j| := by
         exact le_trans (Finset.abs_sum_le_sum_abs _ _)
-          (Finset.sum_le_sum fun i _ => abs_mul _ _)
+          (Finset.sum_le_sum fun i _ => (abs_mul _ _).le)
     _ ≤ ∑ i : Fin 3, Cg * (1 + ‖v‖) ^ Kg *
           (‖v - w‖⁻¹ * ∑ j : Fin 3, |(f w • vGrad f v - f v • vGrad f w) j|) := by
         apply Finset.sum_le_sum; intro i _
-        apply mul_le_mul (h_score v i) _ (abs_nonneg _) (by positivity)
+        have h_nn : 0 ≤ Cg * (1 + ‖v‖) ^ Kg :=
+          le_trans (abs_nonneg _) (h_score v i)
+        apply mul_le_mul (h_score v i) _ (abs_nonneg _) h_nn
         by_cases hvw : v - w = 0
         · have : v = w := sub_eq_zero.mp hvw; subst this
-          simp [mulVec, dotProduct, landauMatrix, innerLandauMatrix, normSq, vecMulVec,
+          simp [dotProduct, landauMatrix, innerLandauMatrix, normSq, vecMulVec,
             eucNorm, coulombKernel]
         · calc |∑ j, landauMatrix coulombKernel (v - w) i j *
                 (f w • vGrad f v - f v • vGrad f w) j|
@@ -386,19 +359,21 @@ lemma fubini_double_pointwise_bound
                 (Finset.mul_sum _ _ _).symm
     _ = 3 * (Cg * (1 + ‖v‖) ^ Kg) *
           (‖v - w‖⁻¹ * ∑ j, |(f w • vGrad f v - f v • vGrad f w) j|) := by
-        simp [Fin.sum_univ_three]; ring
+        simp; ring
     _ ≤ 3 * Cg * (1 + ‖v‖) ^ Kg * (‖v - w‖⁻¹ *
           ∑ j, (f w * |vGrad f v j| + f v * |vGrad f w j|)) := by
-        congr 1
-        congr 1
-        ring
-        congr 1
-        apply Finset.sum_le_sum; intro j _
-        simp only [Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
-        have := norm_sub_le (f w * vGrad f v j) (f v * vGrad f w j)
-        rw [Real.norm_eq_abs, Real.norm_eq_abs, Real.norm_eq_abs,
-          abs_mul, abs_mul, abs_of_pos (hf_pos w), abs_of_pos (hf_pos v)] at this
-        exact this
+        rw [show 3 * Cg * (1 + ‖v‖) ^ Kg = 3 * (Cg * (1 + ‖v‖) ^ Kg) from by ring]
+        gcongr
+        · have hCg : 0 ≤ Cg := nonneg_of_mul_nonneg_left
+            (le_trans (abs_nonneg _) (h_score v 0))
+            (pow_pos (by linarith [norm_nonneg v]) _)
+          exact mul_nonneg (by linarith) (mul_nonneg hCg (pow_nonneg (by linarith [norm_nonneg v]) _))
+        · next j _ =>
+          simp only [Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
+          have := norm_sub_le (f w * vGrad f v j) (f v * vGrad f w j)
+          rw [Real.norm_eq_abs, Real.norm_eq_abs, Real.norm_eq_abs,
+            abs_mul, abs_mul, abs_of_pos (hf_pos w), abs_of_pos (hf_pos v)] at this
+          exact this
 
 /-- The Fubini double integrand (score · Landau matrix · flux) is
     AEStronglyMeasurable on the product space (Fin 3 → ℝ) × (Fin 3 → ℝ). -/
@@ -410,15 +385,17 @@ lemma fubini_double_aestronglyMeasurable
           (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2)))
       (volume.prod volume) := by
   simp only [dotProduct, mulVec]
-  apply Finset.aestronglyMeasurable_sum
-  intro i _
-  apply AEStronglyMeasurable.mul
-  · exact ((hf_smooth.continuous.log (fun v => ne_of_gt (hf_pos v))).fderiv le_top
-      |>.clm_apply continuous_const).comp continuous_fst |>.aestronglyMeasurable
-  · apply Finset.aestronglyMeasurable_sum
+  apply Measurable.aestronglyMeasurable
+  apply Finset.measurable_sum; intro i _
+  apply Measurable.mul
+  · -- score component: v ↦ fderiv ℝ (log ∘ f) v (Pi.single i 1) composed with fst
+    exact ((ContDiff.continuous_fderiv
+      (hf_smooth.log (fun v => ne_of_gt (hf_pos v))) le_top).clm_apply
+      continuous_const).comp continuous_fst |>.measurable
+  · apply Finset.measurable_sum
     intro j _
-    apply AEStronglyMeasurable.mul
-    · apply Measurable.aestronglyMeasurable
+    apply Measurable.mul
+    · -- landauMatrix entry: measurable via coulombKernel ∘ eucNorm and innerLandauMatrix
       simp only [landauMatrix, smul_apply, smul_eq_mul]
       apply Measurable.mul
       · apply ((Measurable.ite measurableSet_Iic measurable_const
@@ -439,12 +416,13 @@ lemma fubini_double_aestronglyMeasurable
           · simp [h]; exact continuous_const
         · exact ((continuous_apply i).comp (continuous_fst.sub continuous_snd)).mul
                 ((continuous_apply j).comp (continuous_fst.sub continuous_snd))
-    · apply Continuous.aestronglyMeasurable
-      apply Continuous.sub
-      · exact (hf_smooth.continuous.comp continuous_snd).mul
-          ((hf_smooth.continuous_fderiv le_top).comp continuous_fst |>.clm_apply continuous_const)
-      · exact (hf_smooth.continuous.comp continuous_fst).mul
-          ((hf_smooth.continuous_fderiv le_top).comp continuous_snd |>.clm_apply continuous_const)
+    · -- flux component: continuous hence measurable
+      exact (Continuous.sub
+        ((hf_smooth.continuous.comp continuous_snd).mul
+          ((hf_smooth.continuous_fderiv le_top).comp continuous_fst |>.clm_apply continuous_const))
+        ((hf_smooth.continuous.comp continuous_fst).mul
+          ((hf_smooth.continuous_fderiv le_top).comp continuous_snd |>.clm_apply continuous_const))
+        ).measurable
 
 end VML
 end

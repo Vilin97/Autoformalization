@@ -95,20 +95,24 @@ lemma gaussian_normalization_maxwellian
     generalize_proofs at *; (
     have := integral_gaussian ( -c₀)
     simp_all +decide [ div_eq_mul_inv, mul_comm, mul_assoc, mul_left_comm ]
-    ring; (
+    have hnn : (0 : ℝ) ≤ -(π * c₀⁻¹) := by
+      have : c₀⁻¹ < 0 := inv_neg''.mpr hc₀
+      nlinarith [Real.pi_pos]
     rw [ Real.sqrt_eq_rpow, ← Real.rpow_natCast,
-      ← Real.rpow_mul (by nlinarith [ Real.pi_pos,
-        mul_inv_cancel₀ hc₀.ne ]) ]
-    norm_num) )
+      ← Real.rpow_mul hnn ]
+    norm_num )
   simp_all +decide [ Real.exp_add, MeasureTheory.integral_const_mul ]
   intro v
   rw [ ← hf_int ]
   unfold equilibriumMaxwellian
-  ring
-  norm_num [ mul_assoc, mul_comm, mul_left_comm,
-    ne_of_gt (Real.rpow_pos_of_pos
-      (show 0 < - (Real.pi * c₀⁻¹) by nlinarith [ Real.pi_pos, mul_inv_cancel₀ (ne_of_lt hc₀) ])
-      _) ]
+  have hc₀_ne : c₀ ≠ 0 := ne_of_lt hc₀
+  have h_eq : 2 * Real.pi * (-1 / (2 * c₀)) = Real.pi / (-c₀) := by field_simp
+  rw [h_eq]
+  have h_rpow_ne : (Real.pi / (-c₀)) ^ ((3 : ℝ) / 2) ≠ 0 :=
+    ne_of_gt (Real.rpow_pos_of_pos (by
+      exact div_pos Real.pi_pos (neg_pos.mpr hc₀)) _)
+  rw [mul_div_assoc, div_self h_rpow_ne, mul_one]
+  congr 1; field_simp
 
 
 /-- Gaussian first moment: ∫ vᵢ exp(a+b·v+c|v|²) = (-bᵢ/(2c)) · ∫ exp(a+b·v+c|v|²).
@@ -140,7 +144,9 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
             have h_symm : ∫ x : ℝ, f x = ∫ x : ℝ, f (-x) := by
               rw [ MeasureTheory.integral_neg_eq_self ]
             have h_zero : ∫ x : ℝ, f x = -∫ x : ℝ, f x := by
-              rw [← MeasureTheory.integral_neg]; congr 1; ext x; exact hf_odd x
+              conv_lhs => rw [h_symm]
+              simp_rw [hf_odd]
+              rw [MeasureTheory.integral_neg]
             linarith [h_zero]
           exact h_subst.trans (h_odd _ fun x => by ring)
         rw [ ← MeasureTheory.integral_add_right_eq_self _ ( -b / (2 * c) ) ]
@@ -179,15 +185,14 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
                 (fun v : ℝ => v * Real.exp (c * v^2 / 2))
                 MeasureTheory.MeasureSpace.volume := by
               have := @integrable_rpow_mul_exp_neg_mul_sq
-              convert @this ( -c / 2) (by linarith) 1 (by norm_num) using 3; ring
-              · norm_num; ring
+              convert @this ( -c / 2) (by linarith) 1 (by norm_num) using 3
+              · simp [Real.rpow_one]
+              · congr 1; ring
             convert h_integrable.norm using 2 ; norm_num [ abs_mul, abs_of_nonneg, Real.exp_nonneg ]
-          refine MeasureTheory.Integrable.mono' ?_ ?_ ?_
-          exacts [
-            fun v => |v| * Real.exp (c * v ^ 2 / 2) * Real.exp (b ^ 2 / (2 * |c|)),
-            h_integrable.mul_const _,
-            Continuous.aestronglyMeasurable (by continuity),
-            Filter.Eventually.of_forall h_gauss ]
+          exact MeasureTheory.Integrable.mono'
+            (h_integrable.mul_const _)
+            (Continuous.aestronglyMeasurable (by continuity))
+            (Filter.Eventually.of_forall h_gauss)
         convert h_integrable.mul_const (Real.exp a) using 2 ; ring
         rw [ mul_assoc, ← Real.exp_add ]
       · have h_gauss_integral :
@@ -333,7 +338,7 @@ lemma analysis_gaussian_integrability
               { x : ℝ × (Fin 2 → ℝ) |
                 x.1 ∈ s 0 ∧ x.2 0 ∈ s 1 ∧ x.2 1 ∈ s 2 } =
               (s 0 ×ˢ { x : Fin 2 → ℝ | x 0 ∈ s 1 ∧ x 1 ∈ s 2 })
-              by ext; simp [Set.mem_prod]; tauto,
+              by ext; simp [Set.mem_prod],
               MeasureTheory.Measure.prod_prod ]
             simp +decide [ Fin.prod_univ_three ]
             erw [ show
@@ -375,7 +380,7 @@ lemma analysis_gaussian_integrability
             (∫ (a : Fin 2 → ℝ),
               Real.exp (b 1 * a 0) *
               Real.exp (b 2 * a 1) ) using 1
-          rfl
+          ext v; simp [mul_div_cancel_of_imp (fun h' => absurd h' h)]
       · exact h_integrable.1
     exact h_integrable ‹_›
   by_cases hb0 : b 0 = 0

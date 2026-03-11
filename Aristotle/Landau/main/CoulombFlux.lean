@@ -1,4 +1,5 @@
 import Aristotle.Landau.main.NewtonianPotential
+import Mathlib.MeasureTheory.SpecificCodomains.Pi
 
 /-!
 # Flux Integrability and Measurability Helpers for Coulomb
@@ -40,12 +41,12 @@ lemma landau_flux_integrable_coulomb
         constructor
         · apply inv_norm_schwartz_integrable
           · intro N
-            specialize hf_schwartz N (by omega)
-            exact hf_schwartz N (by omega)
+            obtain ⟨C, hC, hb⟩ := hf_schwartz (k := 0) N (by omega)
+            exact ⟨C, hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
           · exact hf_smooth.continuous.aestronglyMeasurable
         · apply inv_norm_schwartz_integrable
           · intro N
-            obtain ⟨C, hC_pos, hC⟩ := hf_schwartz N (by omega)
+            obtain ⟨C, hC_pos, hC⟩ := hf_schwartz (k := 1) N (by omega)
             use C, hC_pos; intro w
             have h_deriv_bound : |vGrad f w j| ≤ ‖iteratedFDeriv ℝ 1 f w‖ := by
               have : |fderiv ℝ f w (Pi.single j 1)| ≤ ‖fderiv ℝ f w‖ := by
@@ -87,7 +88,8 @@ lemma landau_flux_integrable_coulomb
             ((hf_smooth.continuous_fderiv le_top).eval_const (Pi.single j 1)).aestronglyMeasurable)
     · filter_upwards [] with w
       by_cases hw : v - w = 0 <;> simp_all +decide
-      · simp_all +decide [sub_eq_zero, landauMatrix coulombKernel]
+      · simp_all +decide [sub_eq_zero, landauMatrix, innerLandauMatrix, normSq, vecMulVec,
+          eucNorm, coulombKernel]
       · exact mul_le_mul_of_nonneg_right
           (coulomb_landauMatrix_entry_le_pi _ _ _ hw) (abs_nonneg _)
   exact integrable_pi_iff.mpr fun i => by
@@ -108,7 +110,7 @@ lemma schwartz_partial_decay
     ∀ N : ℕ, ∃ C > 0, ∀ w : Fin 3 → ℝ,
       |fderiv ℝ (f x) w (Pi.single j 1)| * (1 + ‖w‖) ^ N ≤ C := by
   intro N
-  obtain ⟨C, hC_pos, hC⟩ := hSchwartz.hDecay N (by omega)
+  obtain ⟨C, hC_pos, hC⟩ := hSchwartz.hDecay (k := 1) N (by omega)
   refine ⟨C, hC_pos, fun w => ?_⟩
   have h1 : |fderiv ℝ (f x) w (Pi.single j 1)| ≤ ‖fderiv ℝ (f x) w‖ := by
     rw [← Real.norm_eq_abs]

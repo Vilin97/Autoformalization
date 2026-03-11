@@ -1,5 +1,6 @@
 import Aristotle.Landau.main.Theorem42
 import Aristotle.Landau.main.TorusInstance
+import Aristotle.Landau.main.IteratedDerivHelpers
 
 /-!
 # Schwartz Decay Definitions and Integrability Helpers
@@ -35,38 +36,40 @@ lemma inverse_poly_integrable (C : ℝ) :
     have h_integrable :
         IntegrableOn (fun v : Fin 3 → ℝ => (1 + ‖v‖)⁻¹ ^ 4)
           (Set.univ : Set (Fin 3 → ℝ)) := by
-      have : ∀ v : Fin 3 → ℝ, (1 + ‖v‖)⁻¹ ^ 4 ≤ (1 + ‖v‖ ^ 2)⁻¹ ^ 2 := by
+      have hpw : ∀ v : Fin 3 → ℝ, (1 + ‖v‖)⁻¹ ^ 4 ≤ (1 + ‖v‖ ^ 2)⁻¹ ^ 2 := by
         intro v
         rw [inv_pow, inv_pow]
         gcongr
         nlinarith [norm_nonneg v]
-      have h_integrable :
+      have h_integrable2 :
           IntegrableOn (fun v : Fin 3 → ℝ => (1 + ‖v‖ ^ 2)⁻¹ ^ 2)
             (Set.univ : Set (Fin 3 → ℝ)) := by
         have := @integrable_rpow_neg_one_add_norm_sq
         specialize @this (Fin 3 → ℝ) _ _ _ _ _ (MeasureSpace.volume) _ 4; norm_num at this
         simpa [add_comm] using this
-      refine h_integrable.mono' ?_ ?_
+      refine h_integrable2.mono' ?_ ?_
       · exact Measurable.aestronglyMeasurable (by measurability)
-      · filter_upwards [] using fun v => by rw [Real.norm_of_nonneg (by positivity)]; exact this v
-    exact this
+      · filter_upwards [] with v
+        rw [Real.norm_of_nonneg (by positivity)]
+        exact hpw v
+    rwa [integrableOn_univ] at h_integrable
   simpa using h_integrable.const_mul C
 
 /-- Schwartz decay implies integrability. -/
 lemma UniformSchwartzDecay.integrable {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (hS : UniformSchwartzDecay f) (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
     (x : Torus3) : Integrable (f x) := by
-  obtain ⟨C, hC_pos, hbound⟩ := hS.hDecay 4 (by omega)
+  obtain ⟨C, hC_pos, hbound⟩ := hS.hDecay (k := 0) 4 (by omega)
   have hint := inverse_poly_integrable C
   apply hint.mono' (hf_smooth x).continuous.aestronglyMeasurable
   filter_upwards [] with v
   have hb := hbound x v
-  simp at hb
+  simp [iteratedFDeriv_zero_eq_comp] at hb
   -- hb : |f x v| * (1 + ‖v‖) ^ 4 ≤ C
-  -- goal : ‖f x v‖ ≤ (fun v => C / (1 + ‖v‖) ^ 4) v
+  -- goal : ‖f x v‖ ≤ C / (1 + ‖v‖) ^ 4
   have hv_pos : (0 : ℝ) < (1 + ‖v‖) ^ 4 := by positivity
-  rw [Real.norm_eq_abs]
-  rwa [le_div_iff₀ hv_pos]
+  rw [Real.norm_eq_abs, le_div_iff₀ hv_pos]
+  linarith
 
 /-- Schwartz decay implies integrability with polynomial weight.
     If f(x,·) decays faster than any polynomial, then (1+‖v‖)^M * |f(x,v)| is integrable
@@ -75,15 +78,14 @@ lemma UniformSchwartzDecay.integrable_poly_mul {f : Torus3 → (Fin 3 → ℝ) �
     (hS : UniformSchwartzDecay f) (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
     (x : Torus3) (M : ℕ) :
     Integrable (fun v => (1 + ‖v‖) ^ M * f x v) := by
-  obtain ⟨C, hC_pos, hbound⟩ := hS.hDecay (M + 4) (by omega)
+  obtain ⟨C, hC_pos, hbound⟩ := hS.hDecay (k := 0) (M + 4) (by omega)
   have hint := inverse_poly_integrable C
   apply hint.mono' ((continuous_const.add continuous_norm).pow M |>.mul
     (hf_smooth x).continuous).aestronglyMeasurable
   filter_upwards [] with v
   have hb := hbound x v
-  simp at hb
+  simp [iteratedFDeriv_zero_eq_comp] at hb
   have hv_pos : (0 : ℝ) < (1 + ‖v‖) ^ 4 := by positivity
-  have hv1_pos : (0 : ℝ) < (1 + ‖v‖) ^ M := by positivity
   rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (by positivity)]
   rw [le_div_iff₀ hv_pos]
   calc (1 + ‖v‖) ^ M * |f x v| * (1 + ‖v‖) ^ 4
@@ -136,7 +138,7 @@ lemma schwartz_pointwise_decay
     (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
       ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C) :
     ∀ N, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ N ≤ C :=
-  fun N => (hf_schwartz N (by omega)).imp fun C ⟨hC, hb⟩ =>
+  fun N => (hf_schwartz (k := 0) N (by omega)).imp fun C ⟨hC, hb⟩ =>
     ⟨hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
 
 /-- Extract partial derivative (k=1) decay from the Schwartz hypothesis.
@@ -147,7 +149,7 @@ lemma schwartz_fderiv_component_decay
       ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C) :
     ∀ (j : Fin n) (N : ℕ), ∃ C > 0, ∀ w,
       |fderiv ℝ f w (Pi.single j 1)| * (1 + ‖w‖) ^ N ≤ C := by
-  intro j N; obtain ⟨C, hC, hb⟩ := hf_schwartz N (by omega)
+  intro j N; obtain ⟨C, hC, hb⟩ := hf_schwartz (k := 1) N (by omega)
   refine ⟨C, hC, fun w => le_trans (mul_le_mul_of_nonneg_right ?_ (by positivity)) (hb w)⟩
   rw [← Real.norm_eq_abs]
   exact le_trans (le_trans (ContinuousLinearMap.le_opNorm _ _)
@@ -198,13 +200,14 @@ lemma schwartz_poly_mul_integrable
   apply (inverse_poly_integrable C).mono'
   · exact ((continuous_const.add continuous_norm).pow _ |>.mul hf_cont).aestronglyMeasurable
   · filter_upwards with v
-    simp only [Real.norm_eq_abs, abs_mul,
-      abs_of_nonneg (pow_nonneg (by linarith [norm_nonneg v]) _),
-      abs_of_pos (hf_pos v)]
-    rw [le_div_iff₀ (by positivity : (0 : ℝ) < (1 + ‖v‖) ^ 4)]
-    have : (1 + ‖v‖) ^ K * f v * (1 + ‖v‖) ^ 4 =
-        |f v| * (1 + ‖v‖) ^ (K + 4) := by
-      rw [abs_of_pos (hf_pos v), pow_add]; ring
-    linarith [hbound v]
+    rw [Real.norm_eq_abs, abs_mul,
+      abs_of_nonneg (pow_nonneg (by linarith [norm_nonneg v]) K),
+      abs_of_pos (hf_pos v),
+      le_div_iff₀ (by positivity : (0 : ℝ) < (1 + ‖v‖) ^ 4)]
+    calc (1 + ‖v‖) ^ K * f v * (1 + ‖v‖) ^ 4
+        = f v * ((1 + ‖v‖) ^ K * (1 + ‖v‖) ^ 4) := by ring
+      _ = f v * (1 + ‖v‖) ^ (K + 4) := by rw [pow_add]
+      _ = |f v| * (1 + ‖v‖) ^ (K + 4) := by rw [abs_of_pos (hf_pos v)]
+      _ ≤ C := hbound v
 
 end VML

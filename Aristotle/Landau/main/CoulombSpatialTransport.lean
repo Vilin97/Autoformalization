@@ -395,7 +395,7 @@ lemma entropy_dissipation_continuous_coulomb
           v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x := rfl
       rw [this]; ring
     rw [hrw, integral_add (hST_int x) (hFT_int x)]
-    rw [force_transport_zero (f x) (E x) (B x) (hf_pos x) (hf_smooth_v x)
+    rw [force_transport_zero (f x) (E x) (B x) (hf_pos x) ((hf_smooth_v x).of_le le_top)
       ((hSchwartz.integrable hf_smooth_v) x)
       (fun i => force_ibp_f_dg_integrable_coulomb E B hf_pos hf_smooth_v hSchwartz hLB' x i)
       (fun i => force_ibp_fg_integrable_coulomb E B hf_pos hf_smooth_v hSchwartz hLB' x i)]

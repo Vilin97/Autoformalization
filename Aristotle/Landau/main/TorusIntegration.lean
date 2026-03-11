@@ -48,11 +48,11 @@ lemma measure_torus_eq_map :
             norm_num +zetaDelta at *
         convert MeasureTheory.Measure.pi_map_pi _ using 1
         any_goals tauto
-        any_goals exact fun i => MeasureTheory.MeasureSpace.volume
+        case convert_6 => exact fun _ => MeasureTheory.MeasureSpace.volume
         all_goals try infer_instance
         · exact Eq.symm Measure.map_id'
         · convert MeasureTheory.Measure.pi_map_pi (fun i => _) using 1
-          · rfl
+          · congr 1; funext i; simp only [Measure.map_id']; exact (h_volume_eq i).symm
           · exact fun i ↦ sigmaFinite_of_locallyFinite
           · exact Continuous.aemeasurable (by continuity)
         · exact fun i => measurable_id.aemeasurable
@@ -63,7 +63,7 @@ lemma measure_torus_eq_map :
             Set.pi Set.univ fun i => s i ∩ Set.Ioc 0 1 from ?_,
           MeasureTheory.Measure.pi_pi ]
         simp [Set.pi_inter_compl]
-        unfold box3; rfl
+        unfold box3; exact Set.pi_inter_distrib.symm
       · exact MeasurableSet.univ_pi hs
 
 /-- ∫ over T³ = ∫ over [0,1]³ of the periodic lift. -/
@@ -82,6 +82,7 @@ lemma integral_torus_eq_integral_box (g : Torus3 → ℝ) (hg : Continuous g) :
       · exact measurable_id.aemeasurable
       · exact hg.aestronglyMeasurable
 
+set_option maxHeartbeats 400000 in
 /-- ∫ ∂F/∂xᵢ over [0,1]³ = 0 for periodic F (FTC + periodicity). -/
 lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3)
     (hF : ContDiff ℝ 1 F) (hper : ∀ x, F (x + Pi.single i 1) = F x) :
@@ -206,10 +207,11 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
             · intro j; split_ifs <;> simp_all +decide [ hasFDerivAt_iff_isLittleO_nhds_zero ]
               simp_all +decide [ Fin.insertNth ]
               fin_cases i <;> fin_cases j <;> simp_all +decide [ Fin.succAboveCases ]
-            · simp +decide [ Pi.single_apply ]
-              congr
+            · simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.pi_apply]
+              congr 1
               ext j
-              simp_all
+              simp [Pi.single_apply]
+              split <;> simp
           · apply_rules [ Continuous.intervalIntegrable ]
             have h_cont : Continuous (fun y => fderiv ℝ F (Fin.insertNth i y z)) := by
               exact hF.continuous_fderiv le_rfl |> Continuous.comp <|
@@ -227,7 +229,7 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
         · rfl
       convert h_fubini _ _ using 1
       · rw [ MeasureTheory.integral_integral_swap ]
-        · rfl
+        · simp_rw [h_ftc]; simp
         · have h_cont : Continuous
               (fun p : ℝ × (Fin 2 → ℝ) => (fderiv ℝ F (i.insertNth p.1 p.2)) (Pi.single i 1)) := by
             have h_cont : Continuous
