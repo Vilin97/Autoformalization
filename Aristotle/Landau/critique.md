@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 103)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 104)
 
 ## Verdict: ACCEPT
 
@@ -54,28 +54,23 @@ I found no issue.
 
 All proofs under 200 lines.
 
-### 6d. Proofs over 150 lines (4 proofs)
+### 6d. Proofs over 150 lines (2 proofs)
 
 | File | Proof | Lines |
 |------|-------|-------|
-| Theorem42.lean | `Theorem42` | 199 |
-| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | 190 |
-| CoulombConcreteTheorem42.lean | `CoulombConcreteTheorem42` | 188 |
-| CoulombPSD.lean | `fubini_double_integrable_coulomb` | 186 |
+| Theorem42.lean | `Theorem42` | 200 |
+| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | 189 |
 
-All under 200. Extraction candidates:
-- `Theorem42`: `hJ_from_maxwellian` block (lines 275-304, ~30 lines) is a self-contained Gaussian first-moment calculation that could be a standalone lemma.
-- `CoulombConcreteTheorem42`: `hD_cont` field (lines 192-233, ~42 lines) derives continuity of entropy dissipation from the Vlasov equation. Could be extracted as `entropy_dissipation_continuous_coulomb`.
+Down from 4 proofs (cycle 103 resolved 2). Extraction candidates:
+- `Theorem42`: `hJ_from_maxwellian` (lines 275-304, ~30 lines) is a self-contained Gaussian first-moment identity. Extracting as `current_density_of_gaussian` into GaussianHelpers.lean saves ~22 lines.
 
-### 6e. Stale comments in CoulombPSD.lean
-
-`fubini_double_integrable_coulomb` contains ~20 lines of comment blocks (lines 191-215) with intermediate calculation notes that read like scratch work. These don't add clarity to the proof; the actual code is clear enough.
+### ~~6e. Stale comments in CoulombPSD.lean~~ — RESOLVED (cycle 103)
 
 ---
 
 ## 7. Documentation Lies
 
-I found no issue. File counts: 32 files, 9,543 lines — matches MEMORY.md ("~8,700 lines" is stale but within tolerance for an approximate count).
+I found no issue.
 
 ---
 
@@ -109,8 +104,7 @@ I found no issue. File counts: 32 files, 9,543 lines — matches MEMORY.md ("~8,
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6d | 4 proofs over 150 lines | Low | Open (all under 200) |
-| 6e | Stale comments in CoulombPSD.lean | Low | New |
+| 6d | 2 proofs over 150 lines | Low | Open (both under 200) |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |
 | 8j | lean-lsp build desync | Low | Open (tooling, persistent) |
