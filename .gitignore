@@ -13,6 +13,7 @@
 blueprint/web/
 blueprint/print/
 blueprint/lean_decls
+*.paux
 
 # Claude Code sandbox artifacts
 HEAD
