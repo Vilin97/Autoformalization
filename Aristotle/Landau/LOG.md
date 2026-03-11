@@ -1,5 +1,26 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 84: Split Defs.lean, document hGradBound
+
+### Changes
+- **Split Defs.lean** (805 → 634 lines): extracted VMLSteadyState, VMLEquilibrium, VMLInput into new `VMLStructures.lean` (189 lines).
+- Updated imports in Section6, Section7, Section8, VMLInputDerive to use VMLStructures.
+- **Documented hGradBound Coulomb-specificity** (issue 8i): added docstring explaining the score bound is needed only for singular kernels, not bounded ones.
+- Files: 23 → **24**. Lines: ~9,405.
+
+### Sorry count: 0
+
+## 2026-03-11 UTC — Babysit cycle 83: Split Section3Helpers, generalize CLM lemmas
+
+### Changes
+- **Split Section3Helpers.lean** (1162 → 1020 lines): extracted iterated derivative helpers into new `IteratedDerivHelpers.lean` (158 lines).
+- **Fixed latent missing-import bug**: CoulombConcreteTheorem42 used `contDiff_negNormSq_div`, `quadratic_iteratedFDeriv_bound`, and `norm_sq_le_normSq` from Section3Helpers without a direct import path. Added explicit `import IteratedDerivHelpers`.
+- **Made `norm_sq_le_normSq` non-private**: was incorrectly `private` despite cross-file usage.
+- **Generalized CLM lemmas for Mathlib** (issue 8d): `iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` now work over any `𝕜 : NontriviallyNormedField` (was hardcoded to `ℝ`).
+- Files: 22 → **23**. Lines: ~9,394.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 82: Break remaining long lines
 
 ### Changes

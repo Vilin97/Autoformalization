@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 82)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 84)
 
 ## Verdict: ACCEPT
 
@@ -50,14 +50,14 @@ I found no issue.
 
 | File | Lines |
 |------|-------|
-| Section3Helpers.lean | 1162 |
+| Section3Helpers.lean | 1020 |
 | TorusInstance.lean | 910 |
 | CoulombPSD.lean | 826 |
 | Defs.lean | 805 |
 | CoulombSpatialTransport.lean | 676 |
-| CoulombConcreteTheorem42.lean | 630 |
-| CoulombFluxDiff.lean | 629 |
-| CoulombFlux.lean | 605 |
+| CoulombFluxDiff.lean | 640 |
+| CoulombConcreteTheorem42.lean | 632 |
+| CoulombFlux.lean | 607 |
 
 ### 6c. AI code style artifacts
 
@@ -66,10 +66,8 @@ I found no issue.
 | ~~Lines > 200 chars~~ | ~~0~~ | ~~0~~ DONE |
 | ~~Trailing semicolons~~ | ~~0~~ | ~~0~~ DONE |
 | ~~Multi-semi lines~~ | ~~4~~ (in `by` blocks) | ~~0~~ DONE |
-| Lines > 100 chars | **60** (14 files) | 0 |
-| Plain semicolons | **356** (+ 126 `<;>`) | < 50 |
-
-Worst offenders: NewtonianPotential (15), CoulombFluxDiff (12), VelocityDecayInstance (10).
+| ~~Lines > 100 chars~~ | ~~1~~ (intentional) | ~~0~~ DONE |
+| Plain semicolons | **~333** (+ 103 `<;>`) | < 50 |
 
 ---
 
@@ -104,7 +102,9 @@ In Lean terms: `ContDiff ℝ 2 (f x)` in velocity, `ContDiff ℝ 1` in space (or
 
 ### 8d. Extract Mathlib-upstreamable lemmas (MEDIUM)
 
-### 8e. Split Defs.lean (MEDIUM)
+### 8e. Split Defs.lean (MEDIUM — 805 lines)
+
+### ~~8f. Split Section3Helpers.lean~~ — DONE (1162 → 1020 + 158)
 
 ### 8g. UniformSchwartzDecay is stronger than needed (MEDIUM)
 
@@ -125,13 +125,11 @@ A weaker sufficient condition: `∃ C K, ∀ x v, |log f(x,v)| ≤ C(1+‖v‖)^
 
 For non-singular kernels (e.g., Maxwell molecules with Ψ = const, or any bounded Ψ), this hypothesis is unnecessary — the abstract Theorem42 correctly omits it. The concrete theorem should document that hGradBound is a Coulomb-specific regularity condition, not a general physical requirement.
 
-### 8f. Split Section3Helpers.lean (CRITICAL — 1162 lines)
-
 ---
 
 ## 9. Mathlib Upstreamability
 
-`iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` are PR-ready.
+`iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` are PR-ready (generalized to `𝕜`).
 
 ---
 
@@ -139,10 +137,11 @@ For non-singular kernels (e.g., Maxwell molecules with Ψ = const, or any bounde
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6b | 7 files over 600 lines | Minor | Open |
-| 8e | Defs.lean too large (788 lines) | Minor | Open |
-| 8f | AI code style artifacts (long lines, semicolons, spacing) | Moderate | Open |
+| 6b | 8 files over 600 lines (Section3Helpers 1020) | High | Open |
+| 6c | ~333 plain semicolons | Low | Open |
+| 8e | Defs.lean too large (805 lines) | Minor | Open |
+| ~~8f~~ | ~~Section3Helpers.lean split~~ | ~~High~~ | ~~Done~~ |
 
 ### Conditions for ACCEPT
 
-This is an ACCEPT. The math is sound. The code style issues (8f) do not affect correctness but make the codebase visibly AI-generated, which undermines credibility for peer review.
+ACCEPT. All issues are code quality / style.
