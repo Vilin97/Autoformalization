@@ -22,26 +22,30 @@ jobs:
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
-
-      - name: Install Python
-        uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-
-      - name: Install graphviz
-        run: sudo apt-get install -y graphviz libgraphviz-dev
-
-      - name: Install leanblueprint
-        run: pip install pygraphviz leanblueprint
+          fetch-depth: 0
 
       - name: Build blueprint
-        run: leanblueprint web
+        uses: xu-cheng/texlive-action@v2
+        with:
+          docker_image: ghcr.io/xu-cheng/texlive-full:20231201
+          run: |
+            export PIP_BREAK_SYSTEM_PACKAGES=1
+            apk update
+            apk add --update py3-pip git pkgconfig graphviz graphviz-dev gcc musl-dev
+            git config --global --add safe.directory $GITHUB_WORKSPACE
+            python3 -m venv env
+            source env/bin/activate
+            pip install --upgrade pip requests wheel
+            CFLAGS="-I/usr/include/graphviz" LDFLAGS="-L/usr/lib/graphviz" pip install pygraphviz
+            pip install leanblueprint
+            leanblueprint web
 
-      - name: Copy home page
+      - name: Prepare site
         run: |
-          mkdir -p _site
-          cp home_page/index.md _site/index.html || true
-          cp -r blueprint/web _site/blueprint || true
+          mkdir -p _site/blueprint
+          cp -r blueprint/web/* _site/blueprint/
+          if [ -f home_page/index.md ]; then cp home_page/index.md _site/index.html; fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
