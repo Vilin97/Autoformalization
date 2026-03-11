@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-10 UTC (Cycle 74)
+# Adversarial Critique — 2026-03-10 UTC (Cycle 75)
 
 ## Verdict: ACCEPT
 
@@ -46,28 +46,29 @@ I found no issue.
 
 `synthInstance.maxHeartbeats 160000` in CoulombSpatialTransport.lean. Acceptable.
 
-### 6b. Files over 600 lines (6 files)
+### 6b. Files over 600 lines (7 files)
 
 | File | Lines |
 |------|-------|
-| TorusInstance.lean | 816 |
+| TorusInstance.lean | 815 |
 | Defs.lean | 788 |
-| Section3Helpers.lean | 762 |
-| CoulombPSD.lean | 703 |
-| CoulombSpatialTransport.lean | 662 |
-| CoulombConcreteTheorem42.lean | 636 |
+| Section3Helpers.lean | 770 |
+| CoulombPSD.lean | 711 |
+| CoulombSpatialTransport.lean | 670 |
+| CoulombConcreteTheorem42.lean | 623 |
+| CoulombFluxDiff.lean | 616 |
 
 ### 6c. AI code style artifacts
 
 | Metric | Current | Target |
 |---|---|---|
-| Lines > 200 chars | **53** (across 6 files) | 0 |
-| Lines with `;` chains | **482** | < 50 |
-| Spaces inside parens `( foo )` | **121** | 0 |
-| Module docstrings `/-! -/` | **0** | 22 |
-| Max line length | **697** (Section3Helpers.lean) | < 120 |
+| Lines > 200 chars | **51** (6 files) | 0 |
+| Semicolons (`;`) | **1146** (21 files) | < 50 |
+| ~~Spaces inside parens~~ | ~~0~~ | ~~0~~ DONE |
+| ~~Module docstrings~~ | ~~22/22~~ | ~~22/22~~ DONE |
+| Max line length | **697** (Section3Helpers) | < 120 |
 
-Worst offenders by lines > 200 chars: Section3Helpers (21), NewtonianPotential (10), TorusInstance (7), CoulombPSD (7).
+Worst offenders for long lines: Section3Helpers (20), NewtonianPotential (9), TorusInstance (7), CoulombPSD (7).
 
 ---
 
@@ -101,10 +102,10 @@ I found no issue.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6b | 6 files over 600 lines | Minor | Open |
-| 6c | AI code style: 53 mega-lines, 482 semicolons, 121 spaced parens, 0 docstrings | Moderate | Open |
+| 6b | 7 files over 600 lines | Minor | Open |
+| 6c | 51 mega-lines, 1146 semicolons | Moderate | Open |
 | 8e | Defs.lean too large (788 lines) | Minor | Open |
 
 ### Conditions for ACCEPT
 
-ACCEPT. All issues are code quality / style. The math is sound.
+ACCEPT. All issues are code quality / style.

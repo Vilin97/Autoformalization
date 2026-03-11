@@ -33,7 +33,13 @@ lemma coulomb_landauMatrix_entry_le (z : Fin 3 → ℝ) (i j : Fin 3) :
         simp [normSq, dotProduct, Fin.sum_univ_three]
       split_ifs with hij
       · subst hij; rw [hns]; simp only [Fin.sum_univ_three]
-        fin_cases i <;> simp <;> (rw [abs_of_nonneg (by nlinarith [mul_self_nonneg (z 0), mul_self_nonneg (z 1), mul_self_nonneg (z 2)])]; nlinarith [mul_self_nonneg (z 0), mul_self_nonneg (z 1), mul_self_nonneg (z 2)])
+        fin_cases i <;> simp
+        all_goals rw [abs_of_nonneg (by nlinarith
+          [mul_self_nonneg (z 0), mul_self_nonneg (z 1),
+           mul_self_nonneg (z 2)])]
+        all_goals nlinarith
+          [mul_self_nonneg (z 0), mul_self_nonneg (z 1),
+           mul_self_nonneg (z 2)]
       · simp only [zero_sub, abs_neg]; rw [hns]; simp only [Fin.sum_univ_three]
         fin_cases i <;> fin_cases j <;> simp_all <;>
           nlinarith [sq_nonneg (|z 0| - |z 1|), sq_nonneg (|z 0| - |z 2|),
@@ -77,34 +83,84 @@ lemma coulomb_landauMatrix_entry_le_pi (z : Fin 3 → ℝ) (i j : Fin 3)
 lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
     IntegrableOn (fun z : Fin 3 → ℝ => ‖z‖⁻¹)
       (Metric.closedBall (0 : Fin 3 → ℝ) R) := by
-  have h_integrable : MeasureTheory.IntegrableOn (fun z : (Fin 3) → ℝ => (‖z‖)⁻¹) (Metric.closedBall 0 R \ {0}) := by
-    have h_integrable : ∫⁻ (z : (Fin 3) → ℝ) in Metric.closedBall 0 R \ {0}, ENNReal.ofReal (‖z‖⁻¹) < ⊤ := by
-      have h_integrable : ∫⁻ (z : Fin 3 → ℝ) in Metric.closedBall 0 R \ {0}, ENNReal.ofReal (‖z‖⁻¹) ≤ ∑' (k : ℕ), ∫⁻ (z : Fin 3 → ℝ) in Metric.closedBall 0 (2^(-k : ℝ) * R) \ Metric.closedBall 0 (2^(-k-1 : ℝ) * R), ENNReal.ofReal (‖z‖⁻¹) := by
+  have h_integrable : MeasureTheory.IntegrableOn
+      (fun z : (Fin 3) → ℝ => (‖z‖)⁻¹)
+      (Metric.closedBall 0 R \ {0}) := by
+    have h_integrable : ∫⁻ (z : (Fin 3) → ℝ) in
+        Metric.closedBall 0 R \ {0},
+        ENNReal.ofReal (‖z‖⁻¹) < ⊤ := by
+      have h_integrable : ∫⁻ (z : Fin 3 → ℝ) in
+          Metric.closedBall 0 R \ {0},
+          ENNReal.ofReal (‖z‖⁻¹) ≤
+        ∑' (k : ℕ), ∫⁻ (z : Fin 3 → ℝ) in
+          Metric.closedBall 0 (2^(-k : ℝ) * R) \
+          Metric.closedBall 0 (2^(-k-1 : ℝ) * R),
+          ENNReal.ofReal (‖z‖⁻¹) := by
         rw [ ← MeasureTheory.lintegral_iUnion ];
         · refine MeasureTheory.lintegral_mono_set ?_;
           intro x hx
           obtain ⟨k, hk⟩ : ∃ k : ℕ, 2^(-k-1 : ℝ) * R < ‖x‖ ∧ ‖x‖ ≤ 2^(-k : ℝ) * R := by
             obtain ⟨k, hk⟩ : ∃ k : ℕ, -k - 1 < Real.logb 2 (‖x‖ / R) ∧ Real.logb 2 (‖x‖ / R) ≤ -k := by
               use Nat.floor (-Real.logb 2 (‖x‖ / R));
-              constructor <;> linarith [ Nat.floor_le (show 0 ≤ -Real.logb 2 (‖x‖ / R) by exact neg_nonneg_of_nonpos (Real.logb_nonpos (by norm_num) (div_nonneg (norm_nonneg x) hR.le) (div_le_one_of_le₀ (by simpa using hx.1.out) hR.le))), Nat.lt_floor_add_one ( -Real.logb 2 (‖x‖ / R)) ];
-            rw [ Real.lt_logb_iff_rpow_lt, Real.logb_le_iff_le_rpow ] at hk <;> norm_num at * <;> try positivity;
-            · exact ⟨ k, by rw [ lt_div_iff₀ hR ] at hk; linarith, by rw [ div_le_iff₀ hR ] at hk; linarith ⟩;
+              constructor <;> linarith [
+                Nat.floor_le (show 0 ≤ -Real.logb 2 (‖x‖ / R) by
+                  exact neg_nonneg_of_nonpos
+                    (Real.logb_nonpos (by norm_num)
+                      (div_nonneg (norm_nonneg x) hR.le)
+                      (div_le_one_of_le₀
+                        (by simpa using hx.1.out)
+                        hR.le))),
+                Nat.lt_floor_add_one
+                  (-Real.logb 2 (‖x‖ / R))];
+            rw [Real.lt_logb_iff_rpow_lt,
+              Real.logb_le_iff_le_rpow] at hk
+              <;> norm_num at *
+              <;> try positivity
+            · exact ⟨k,
+                by rw [lt_div_iff₀ hR] at hk; linarith,
+                by rw [div_le_iff₀ hR] at hk; linarith⟩
             · exact div_pos (norm_pos_iff.mpr hx.2) hR;
             · exact div_pos (norm_pos_iff.mpr hx.2) hR;
           aesop;
         · exact fun i => MeasurableSet.diff (measurableSet_closedBall) (measurableSet_closedBall);
         · intro k l hkl; simp_all +decide [ mul_comm, Real.rpow_add, Real.rpow_sub ] ; ring_nf; norm_num [ hR.ne' ] ;
           cases lt_or_gt_of_ne hkl <;> norm_num [ Set.disjoint_left ];
-          · intro a ha₁ ha₂ ha₃; nlinarith [ show (1 / 2 : ℝ) ^ l ≤ (1 / 2 : ℝ) ^ k / 2 by exact le_trans (pow_le_pow_of_le_one (by norm_num) (by norm_num) (show l ≥ k + 1 by linarith)) (by ring_nf; norm_num) ] ;
-          · intro a ha₁ ha₂ ha₃; nlinarith [ show (1 / 2 : ℝ) ^ k ≤ (1 / 2 : ℝ) ^ l * (1 / 2) by rw [ ← pow_succ ] ; exact pow_le_pow_of_le_one (by norm_num) (by norm_num) (by linarith) ] ;
-      have h_bounded : ∀ k : ℕ, ∫⁻ (z : Fin 3 → ℝ) in Metric.closedBall 0 (2^(-k : ℝ) * R) \ Metric.closedBall 0 (2^(-k-1 : ℝ) * R), ENNReal.ofReal (‖z‖⁻¹) ≤ ENNReal.ofReal ((2^(-k-1 : ℝ) * R)⁻¹ * (MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) (2^(-k : ℝ) * R))).toReal) := by
+          · intro a ha₁ ha₂ ha₃
+            nlinarith [show (1 / 2 : ℝ) ^ l ≤
+                (1 / 2 : ℝ) ^ k / 2 by
+              exact le_trans
+                (pow_le_pow_of_le_one
+                  (by norm_num) (by norm_num)
+                  (show l ≥ k + 1 by linarith))
+                (by ring_nf; norm_num)]
+          · intro a ha₁ ha₂ ha₃
+            nlinarith [show (1 / 2 : ℝ) ^ k ≤
+                (1 / 2 : ℝ) ^ l * (1 / 2) by
+              rw [← pow_succ]
+              exact pow_le_pow_of_le_one
+                (by norm_num) (by norm_num)
+                (by linarith)]
+      have h_bounded : ∀ k : ℕ,
+          ∫⁻ (z : Fin 3 → ℝ) in
+            Metric.closedBall 0 (2^(-k : ℝ) * R) \
+            Metric.closedBall 0 (2^(-k-1 : ℝ) * R),
+            ENNReal.ofReal (‖z‖⁻¹) ≤
+          ENNReal.ofReal ((2^(-k-1 : ℝ) * R)⁻¹ *
+            (MeasureTheory.volume
+              (Metric.closedBall (0 : Fin 3 → ℝ)
+                (2^(-k : ℝ) * R))).toReal) := by
         intro k
         have h_bounded : ∀ z : Fin 3 → ℝ, z ∈ Metric.closedBall 0 (2^(-k : ℝ) * R) \ Metric.closedBall 0 (2^(-k-1 : ℝ) * R) → ‖z‖⁻¹ ≤ (2^(-k-1 : ℝ) * R)⁻¹ := by
           simp +zetaDelta at *;
           intro z hz₁ hz₂; rw [ ← mul_inv ] ; gcongr ; norm_num [ Real.rpow_sub ] at * ; linarith;
         refine le_trans (MeasureTheory.lintegral_mono_ae ?_) ?_;
         use fun z => ENNReal.ofReal ((2 ^ ( - (k : ℝ) - 1) * R) ⁻¹);
-        · filter_upwards [ MeasureTheory.ae_restrict_mem <| measurableSet_closedBall.diff measurableSet_closedBall ] with z hz using ENNReal.ofReal_le_ofReal <| h_bounded z hz;
+        · filter_upwards [MeasureTheory.ae_restrict_mem <|
+            measurableSet_closedBall.diff
+              measurableSet_closedBall]
+            with z hz using
+            ENNReal.ofReal_le_ofReal <|
+              h_bounded z hz;
         · simp +zetaDelta at *;
           rw [ ENNReal.ofReal_mul (by positivity) ];
           rw [ ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_mul (by positivity) ];
@@ -114,7 +170,14 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
           · grind;
           · rw [ ENNReal.ofReal_toReal ];
             exact ne_of_lt (isCompact_closedBall _ _ |> IsCompact.measure_lt_top);
-      have h_volume : ∀ k : ℕ, (MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) (2^(-k : ℝ) * R))).toReal = (2^(-k : ℝ) * R)^3 * (MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) 1)).toReal := by
+      have h_volume : ∀ k : ℕ,
+          (MeasureTheory.volume
+            (Metric.closedBall (0 : Fin 3 → ℝ)
+              (2^(-k : ℝ) * R))).toReal =
+          (2^(-k : ℝ) * R)^3 *
+            (MeasureTheory.volume
+              (Metric.closedBall
+                (0 : Fin 3 → ℝ) 1)).toReal := by
         intro k; rw [ MeasureTheory.Measure.addHaar_closedBall ] ; norm_num ; ring;
         · positivity;
         · positivity;
@@ -151,7 +214,13 @@ lemma convolution_local_int_schwartz
       (Metric.closedBall (0 : Fin 3 → ℝ) 1))
     (v : Fin 3 → ℝ) :
     Integrable (fun w => ‖v - w‖⁻¹ * g w) := by
-  have h_integrable : MeasureTheory.IntegrableOn (fun w => ‖v - w‖⁻¹ * g w) (Metric.closedBall v 1) ∧ MeasureTheory.IntegrableOn (fun w => ‖v - w‖⁻¹ * g w) (Set.univ \ Metric.closedBall v 1) := by
+  have h_integrable :
+      MeasureTheory.IntegrableOn
+        (fun w => ‖v - w‖⁻¹ * g w)
+        (Metric.closedBall v 1) ∧
+      MeasureTheory.IntegrableOn
+        (fun w => ‖v - w‖⁻¹ * g w)
+        (Set.univ \ Metric.closedBall v 1) := by
     field_simp;
     constructor;
     · obtain ⟨M, hM⟩ : ∃ M > 0, ∀ w ∈ Metric.closedBall v 1, |g w| ≤ M := by
@@ -164,8 +233,20 @@ lemma convolution_local_int_schwartz
           simp +decide [ dist_eq_norm', norm_sub_rev ];
         simpa only [ div_eq_mul_inv ] using h_integrable.const_mul M;
       refine h_prod_integrable.mono' ?_ ?_;
-      · exact MeasureTheory.AEStronglyMeasurable.mul (hg_meas.mono_measure <| MeasureTheory.Measure.restrict_le_self) (Measurable.aestronglyMeasurable <| by exact Measurable.inv <| measurable_norm.comp <| measurable_const.sub measurable_id');
-      · filter_upwards [ MeasureTheory.ae_restrict_mem measurableSet_closedBall ] with w hw using by simpa [ abs_div ] using div_le_div_of_nonneg_right (hM.2 w hw) (norm_nonneg _) ;
+      · exact MeasureTheory.AEStronglyMeasurable.mul
+          (hg_meas.mono_measure <|
+            MeasureTheory.Measure.restrict_le_self)
+          (Measurable.aestronglyMeasurable <| by
+            exact Measurable.inv <|
+              measurable_norm.comp <|
+              measurable_const.sub measurable_id')
+      · filter_upwards [
+          MeasureTheory.ae_restrict_mem
+            measurableSet_closedBall]
+          with w hw using by
+          simpa [abs_div] using
+            div_le_div_of_nonneg_right
+              (hM.2 w hw) (norm_nonneg _)
     · have h_far_integrable : MeasureTheory.IntegrableOn (fun w => g w) (Set.univ \ Metric.closedBall v 1) := by
         have h_integrable_g : MeasureTheory.Integrable g := by
           obtain ⟨ C, hC₀, hC ⟩ := hg_decay 4;
@@ -188,9 +269,26 @@ lemma convolution_local_int_schwartz
           · filter_upwards [ ] with w using by rw [ le_div_iff₀ (by positivity) ] ; exact hC w;
         exact h_integrable_g.integrableOn;
       refine h_far_integrable.norm.mono' ?_ ?_;
-      · exact MeasureTheory.AEStronglyMeasurable.mul (h_far_integrable.aestronglyMeasurable) (Measurable.aestronglyMeasurable (by exact Measurable.inv (measurable_norm.comp (measurable_const.sub measurable_id'))));
-      · simp +zetaDelta at *;
-        filter_upwards [ MeasureTheory.ae_restrict_mem (show MeasurableSet (Set.univ \ Metric.closedBall v 1) from MeasurableSet.univ.diff (measurableSet_closedBall)) ] with w hw using div_le_self (abs_nonneg _) (by rw [ norm_sub_rev ] ; exact le_of_not_gt fun h => hw.2 <| mem_closedBall_iff_norm.mpr <| by linarith);
+      · exact MeasureTheory.AEStronglyMeasurable.mul
+          (h_far_integrable.aestronglyMeasurable)
+          (Measurable.aestronglyMeasurable (by
+            exact Measurable.inv
+              (measurable_norm.comp
+                (measurable_const.sub
+                  measurable_id'))))
+      · simp +zetaDelta at *
+        filter_upwards [
+          MeasureTheory.ae_restrict_mem
+            (show MeasurableSet
+                (Set.univ \ Metric.closedBall v 1)
+              from MeasurableSet.univ.diff
+                measurableSet_closedBall)]
+          with w hw using
+          div_le_self (abs_nonneg _) (by
+            rw [norm_sub_rev]
+            exact le_of_not_gt fun h =>
+              hw.2 <| mem_closedBall_iff_norm.mpr <|
+                by linarith)
   convert h_integrable.1.union h_integrable.2 using 1 ; aesop
 
 /-- Key integrability fact for Coulomb kernel: ‖·‖⁻¹ × Schwartz is integrable in ℝ³.
