@@ -34,11 +34,11 @@ lemma poisson_boltzmann_algebraic
     (hDivLinear : ∀ (α : ℝ) (G : X → Fin 3 → ℝ),
       ∀ x, divX (fun y => α • G y) x = α * divX G x) :
     ∀ x, (-1 / (2 * c₀)) * divX (gradX (Real.log ∘ ρ)) x = ρ x - ρ_ion := by
-  simp_all +decide [div_eq_mul_inv]
+  simp_all [div_eq_mul_inv]
   intro x
   rw [show gradX (Real.log ∘ ρ) = _ from funext hGradLogRho]
   specialize hDivLinear (-(2 * c₀)) E x
-  simp_all +decide [mul_assoc, mul_comm, mul_left_comm]
+  simp_all [mul_assoc, mul_comm, mul_left_comm]
   rw [mul_left_comm, mul_inv_cancel₀ _hc₀.ne, mul_one]
 
 -- ============================================================================

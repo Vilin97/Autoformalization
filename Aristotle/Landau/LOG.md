@@ -1,5 +1,19 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 112: Fix CI build, eliminate ALL simp +decide
+
+### Changes
+- **P0: Fixed CI build failure.** Root cause: `checkdecls` dependency (pinned to Lean 4.17.0) incompatible with our Lean 4.24.0. Removed unused dependency from `lakefile.toml`.
+- **Fixed 3 pre-existing bugs in Defs.lean** hidden by stale `.olean` cache:
+  - `(contDiff_apply ℝ ℝ i).const_mul _` → `contDiff_const.mul (contDiff_apply ℝ ℝ i)` (Mathlib API change)
+  - `by linarith` → `by exact div_neg_of_neg_of_pos (by norm_num) (by positivity)` (linarith can't handle division)
+  - `dotProduct_zero_left` → `zero_dotProduct` (renamed in Mathlib)
+  - `.le.lt.ne'` → `.ne'` (redundant chain)
+- **Eliminated ALL `simp +decide` from codebase** (69 → 0 across 13 files). Every call verified with `lean_multi_attempt` before replacement. All were unnecessarily using the `decide` discharger — plain `simp` suffices.
+- **Full rebuild from source verified** — all modified `.olean` files deleted and rebuilt clean.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 110: Eliminate ALL aesop from codebase, add landauOperator_eq_zero
 
 ### Changes

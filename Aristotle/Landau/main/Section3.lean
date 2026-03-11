@@ -168,7 +168,7 @@ theorem fubini_symmetrization_logf (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
           f p.1 • (vGrad (Real.log ∘ f) p.1 ⬝ᵥ landauMatrix Ψ (p.1 - p.2) *ᵥ
             vGrad f p.2)) MeasureSpace.volume := by
       convert h_int_double using 1
-      simp +decide [mul_sub, sub_mul, mul_assoc, mul_comm,
+      simp [mul_sub, sub_mul, mul_assoc, mul_comm,
         Finset.mul_sum _ _ _, Matrix.mulVec, dotProduct]
     have h_mp : MeasurePreserving
         (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => (p.2, p.1))
@@ -204,7 +204,7 @@ theorem fubini_symmetrization_logf (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
           landauMatrix Ψ (v - w) *ᵥ (f w • vGrad f v - f v • vGrad f w)) := by
     convert MeasureTheory.integral_sub h_int_double h_integrable_swap using 1
     · erw [MeasureTheory.integral_prod]
-      · simp +decide [sub_mul, dotProduct_sub]
+      · simp [sub_mul, dotProduct_sub]
       · exact Integrable.sub h_int_double h_integrable_swap
     · erw [MeasureTheory.integral_prod, MeasureTheory.integral_prod]
       · exact h_integrable_swap
