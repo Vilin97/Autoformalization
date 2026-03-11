@@ -400,5 +400,51 @@ lemma fubini_double_pointwise_bound
           abs_mul, abs_mul, abs_of_pos (hf_pos w), abs_of_pos (hf_pos v)] at this
         exact this
 
+/-- The Fubini double integrand (score · Landau matrix · flux) is
+    AEStronglyMeasurable on the product space (Fin 3 → ℝ) × (Fin 3 → ℝ). -/
+lemma fubini_double_aestronglyMeasurable
+    {f : (Fin 3 → ℝ) → ℝ} (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f) :
+    AEStronglyMeasurable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
+      dotProduct (vGrad (Real.log ∘ f) p.1)
+        (mulVec (landauMatrix coulombKernel (p.1 - p.2))
+          (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2)))
+      (volume.prod volume) := by
+  simp only [dotProduct, mulVec]
+  apply Finset.aestronglyMeasurable_sum
+  intro i _
+  apply AEStronglyMeasurable.mul
+  · exact ((hf_smooth.continuous.log (fun v => ne_of_gt (hf_pos v))).fderiv le_top
+      |>.clm_apply continuous_const).comp continuous_fst |>.aestronglyMeasurable
+  · apply Finset.aestronglyMeasurable_sum
+    intro j _
+    apply AEStronglyMeasurable.mul
+    · apply Measurable.aestronglyMeasurable
+      simp only [landauMatrix, smul_apply, smul_eq_mul]
+      apply Measurable.mul
+      · apply ((Measurable.ite measurableSet_Iic measurable_const
+          (measurable_id.pow measurable_const)) : Measurable coulombKernel).comp
+        simp only [eucNorm, normSq, dotProduct]
+        exact (continuous_sqrt.comp (continuous_finset_sum _ fun k _ =>
+          ((continuous_apply k).comp (continuous_fst.sub continuous_snd)).mul
+          ((continuous_apply k).comp (continuous_fst.sub continuous_snd)))).measurable
+      · simp only [innerLandauMatrix, sub_apply, HSMul.hSMul, SMul.smul,
+          one_apply, vecMulVec_apply]
+        apply Continuous.measurable
+        apply Continuous.sub
+        · by_cases h : i = j
+          · simp only [h, ↓reduceIte, normSq, dotProduct, mul_one]
+            exact continuous_finset_sum _ fun k _ =>
+              ((continuous_apply k).comp (continuous_fst.sub continuous_snd)).mul
+              ((continuous_apply k).comp (continuous_fst.sub continuous_snd))
+          · simp [h]; exact continuous_const
+        · exact ((continuous_apply i).comp (continuous_fst.sub continuous_snd)).mul
+                ((continuous_apply j).comp (continuous_fst.sub continuous_snd))
+    · apply Continuous.aestronglyMeasurable
+      apply Continuous.sub
+      · exact (hf_smooth.continuous.comp continuous_snd).mul
+          ((hf_smooth.continuous_fderiv le_top).comp continuous_fst |>.clm_apply continuous_const)
+      · exact (hf_smooth.continuous.comp continuous_fst).mul
+          ((hf_smooth.continuous_fderiv le_top).comp continuous_snd |>.clm_apply continuous_const)
+
 end VML
 end

@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 96: Extract measurability, fubini_double under 200 lines
+
+### Changes
+- **Extracted `fubini_double_aestronglyMeasurable`** (~47 lines) from CoulombPSD.lean into CoulombPSDHelpers.lean. CoulombPSD: 390 → 346 lines (-44). `fubini_double_integrable_coulomb` proof: ~241 → **~197 lines** (now under 200).
+- **Generalized `schwartz_fderiv_component_decay`** from `Fin 3` to `{n : ℕ}` / `Fin n → ℝ`. Now **all 5/5** SchwartzDecayDefs helpers are dimension-independent.
+- Issue 6c: only 2 proofs over 200 lines remain (`coulomb_flux_deriv_schwartz_decay` ~231, `CoulombConcreteTheorem42` ~222).
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 95: Extract fubini_double_pointwise_bound, generalize schwartz_pointwise_decay
 
 ### Changes

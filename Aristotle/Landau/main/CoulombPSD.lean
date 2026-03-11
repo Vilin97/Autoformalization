@@ -185,53 +185,9 @@ lemma fubini_double_integrable_coulomb
     dotProduct (vGrad (Real.log ∘ f) p.1)
       (mulVec (landauMatrix coulombKernel (p.1 - p.2))
         (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2)) with hF_def
-  -- Step 1: AEStronglyMeasurable on product space
-  have h_meas : AEStronglyMeasurable F (volume.prod volume) := by
-    -- F(v,w) = ∑_i score_i(v) * (∑_j A_{ij}(v-w) * flux_j(v,w))
-    -- = ∑_i ∑_j score_i(v) * A_{ij}(v-w) * flux_j(v,w)
-    show AEStronglyMeasurable (fun p => dotProduct (vGrad (Real.log ∘ f) p.1)
-      (mulVec (landauMatrix coulombKernel (p.1 - p.2))
-        (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2))) _
-    simp only [dotProduct, mulVec]
-    apply Finset.aestronglyMeasurable_sum
-    intro i _
-    apply AEStronglyMeasurable.mul
-    · -- score_i(v) is measurable in p.1
-      exact ((hf_smooth.continuous.log (fun v => ne_of_gt (hf_pos v))).fderiv le_top
-        |>.clm_apply continuous_const).comp continuous_fst |>.aestronglyMeasurable
-    · -- (∑_j A_{ij}(v-w) * flux_j(v,w)) is measurable on product
-      apply Finset.aestronglyMeasurable_sum
-      intro j _
-      apply AEStronglyMeasurable.mul
-      · -- A_{ij}(v-w) is measurable
-        apply Measurable.aestronglyMeasurable
-        simp only [landauMatrix, smul_apply, smul_eq_mul]
-        apply Measurable.mul
-        · apply ((Measurable.ite measurableSet_Iic measurable_const
-            (measurable_id.pow measurable_const)) : Measurable coulombKernel).comp
-          simp only [eucNorm, normSq, dotProduct]
-          exact (continuous_sqrt.comp (continuous_finset_sum _ fun k _ =>
-            ((continuous_apply k).comp (continuous_fst.sub continuous_snd)).mul
-            ((continuous_apply k).comp (continuous_fst.sub continuous_snd)))).measurable
-        · simp only [innerLandauMatrix, sub_apply, HSMul.hSMul, SMul.smul,
-            one_apply, vecMulVec_apply]
-          apply Continuous.measurable
-          apply Continuous.sub
-          · by_cases h : i = j
-            · simp only [h, ↓reduceIte, normSq, dotProduct, mul_one]
-              exact continuous_finset_sum _ fun k _ =>
-                ((continuous_apply k).comp (continuous_fst.sub continuous_snd)).mul
-                ((continuous_apply k).comp (continuous_fst.sub continuous_snd))
-            · simp [h]; exact continuous_const
-          · exact ((continuous_apply i).comp (continuous_fst.sub continuous_snd)).mul
-                  ((continuous_apply j).comp (continuous_fst.sub continuous_snd))
-      · -- flux_j(v,w) = f(w)*∂_jf(v) - f(v)*∂_jf(w) is measurable
-        apply Continuous.aestronglyMeasurable
-        apply Continuous.sub
-        · exact (hf_smooth.continuous.comp continuous_snd).mul
-            ((hf_smooth.continuous_fderiv le_top).comp continuous_fst |>.clm_apply continuous_const)
-        · exact (hf_smooth.continuous.comp continuous_fst).mul
-            ((hf_smooth.continuous_fderiv le_top).comp continuous_snd |>.clm_apply continuous_const)
+  -- Step 1: AEStronglyMeasurable on product space (via extracted helper)
+  have h_meas : AEStronglyMeasurable F (volume.prod volume) :=
+    fubini_double_aestronglyMeasurable hf_pos hf_smooth
   -- Step 2: Inner integrability (for a.e. v, w ↦ F(v,w) integrable)
   have h_inner : ∀ v, Integrable (fun w => F (v, w)) := by
     intro v
