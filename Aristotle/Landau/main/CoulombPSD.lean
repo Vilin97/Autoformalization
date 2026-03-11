@@ -27,14 +27,7 @@ lemma psd_inner_integrable_coulomb
   have h_score := score_bound_of_grad_bound hf_pos hf_smooth hGrad
   have hf_decay := schwartz_pointwise_decay hf_schwartz
   -- Schwartz decay of (1+‖w‖)^{2Kg} * f(w)
-  have hpf_decay : ∀ N, ∃ C > 0, ∀ w,
-      |(1 + ‖w‖) ^ (2 * Kg) * f w| * (1 + ‖w‖) ^ N ≤ C := by
-    intro N; obtain ⟨C, hC, hb⟩ := hf_decay (2 * Kg + N)
-    refine ⟨C, hC, fun w => ?_⟩
-    rw [abs_mul, abs_of_nonneg (pow_nonneg (by linarith [norm_nonneg w]) _)]
-    calc (1 + ‖w‖) ^ (2 * Kg) * |f w| * (1 + ‖w‖) ^ N
-        = |f w| * (1 + ‖w‖) ^ (2 * Kg + N) := by rw [pow_add]; ring
-      _ ≤ C := hb w
+  have hpf_decay := schwartz_poly_weighted_decay hf_decay (2 * Kg)
   -- Newtonian potential integrability
   have h_int_f : Integrable (fun w => ‖v - w‖⁻¹ * f w) :=
     inv_norm_schwartz_integrable f hf_decay hf_smooth.continuous.aestronglyMeasurable v
@@ -66,13 +59,7 @@ lemma psd_outer_integrable_coulomb
     Integrable (fun v => ∫ w, PSDIntegrand coulombKernel f v w) := by
   have h_score := score_bound_of_grad_bound hf_pos hf_smooth hGrad
   have hf_decay := schwartz_pointwise_decay hf_schwartz
-  have hpf_decay : ∀ N, ∃ C > 0, ∀ w,
-      |(1 + ‖w‖) ^ (2 * Kg) * f w| * (1 + ‖w‖) ^ N ≤ C := by
-    intro N; obtain ⟨C, hC, hb⟩ := hf_decay (2 * Kg + N)
-    exact ⟨C, hC, fun w => by
-      rw [abs_mul, abs_of_nonneg (pow_nonneg (by linarith [norm_nonneg w]) _)]
-      calc _ = |f w| * (1 + ‖w‖) ^ (2 * Kg + N) := by rw [pow_add]; ring
-        _ ≤ C := hb w⟩
+  have hpf_decay := schwartz_poly_weighted_decay hf_decay (2 * Kg)
   -- Newtonian uniform bounds
   obtain ⟨M₁, hM₁, hM₁b⟩ := newtonian_schwartz_uniform_bound f hf_decay
     hf_smooth.continuous.aestronglyMeasurable
@@ -169,13 +156,7 @@ lemma fubini_double_integrable_coulomb
           (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2))) := by
   have h_score := score_bound_of_grad_bound hf_pos hf_smooth hGrad
   have hf_decay := schwartz_pointwise_decay hf_schwartz
-  have hpf_decay : ∀ N, ∃ C > 0, ∀ w,
-      |(1 + ‖w‖) ^ (2 * Kg) * f w| * (1 + ‖w‖) ^ N ≤ C := by
-    intro N; obtain ⟨C, hC, hb⟩ := hf_decay (2 * Kg + N)
-    exact ⟨C, hC, fun w => by
-      rw [abs_mul, abs_of_nonneg (pow_nonneg (by linarith [norm_nonneg w]) _)]
-      calc _ = |f w| * (1 + ‖w‖) ^ (2 * Kg + N) := by rw [pow_add]; ring
-        _ ≤ C := hb w⟩
+  have hpf_decay := schwartz_poly_weighted_decay hf_decay (2 * Kg)
   -- Flux integrability
   have hFlux : ∀ v, Integrable (fun w => mulVec (landauMatrix coulombKernel (v - w))
       (f w • vGrad f v - f v • vGrad f w)) :=

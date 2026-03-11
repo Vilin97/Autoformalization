@@ -49,3 +49,53 @@ Both lemmas are:
 - `norm_iteratedFDeriv_one_clm`: **Partially exists.** `norm_iteratedFDeriv_one` gives `‖iteratedFDeriv 𝕜 1 f x‖ = ‖fderiv 𝕜 f x‖`. For a CLM `f`, `fderiv 𝕜 ↑f x = f` by `ContinuousLinearMap.hasFDerivAt.fderiv`, so our lemma is a one-liner corollary. Still useful but lower priority for PR.
 
 **Recommendation**: PR `iteratedFDeriv_clm_zero` to `Mathlib.Analysis.Calculus.ContDiff.Basic` or similar. The `norm_iteratedFDeriv_one_clm` version is a convenience lemma that could go in the same PR.
+
+## 3. `integrable_one_add_norm_pow_mul` (NEW — cycle 94)
+
+**Statement**: If `‖v‖^k * |φ(v)|` is integrable for every `k`, then `(1+‖v‖)^K * |φ(v)|` is integrable for any `K`.
+
+```lean
+lemma integrable_one_add_norm_pow_mul
+    {α : Type*} [MeasureSpace α] [SeminormedAddCommGroup α]
+    {φ : α → ℝ}
+    (hφ : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
+    (K : ℕ) :
+    Integrable (fun v => (1 + ‖v‖) ^ K * |φ v|)
+```
+
+**Proof**: Binomial expansion of `(1 + ‖v‖)^K` into `∑ choose(K,k) * ‖v‖^k`, then `integrable_finset_sum`.
+
+**Mathlib location**: `Mathlib.MeasureTheory.Integral.IntegrableOn` or similar.
+
+**Status**: Fully generalized to arbitrary `SeminormedAddCommGroup` (cycle 94). Previously used `Fin 3 → ℝ`.
+
+## 4. `integrable_of_schwartz_bound` (NEW — cycle 94)
+
+**Statement**: If `‖v‖^k * |φ(v)|` is integrable for every `k`, and `‖g(v)‖ ≤ C*(1+‖v‖)^K*|φ(v)|`, then `g` is integrable.
+
+```lean
+lemma integrable_of_schwartz_bound
+    {α : Type*} [MeasureSpace α] [SeminormedAddCommGroup α]
+    {φ : α → ℝ} (hφ : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
+    {g : α → ℝ} (hg_meas : AEStronglyMeasurable g)
+    {C : ℝ} (_ : 0 ≤ C) {K : ℕ}
+    (hbound : ∀ v, ‖g v‖ ≤ C * (1 + ‖v‖) ^ K * |φ v|) :
+    Integrable g
+```
+
+**Status**: Fully generalized (cycle 94). Corollary of `integrable_one_add_norm_pow_mul`.
+
+## 5. `schwartz_poly_weighted_decay` (NEW — cycle 94)
+
+**Statement**: Polynomial-weighted Schwartz decay is preserved.
+
+```lean
+lemma schwartz_poly_weighted_decay
+    {α : Type*} [SeminormedAddCommGroup α]
+    {f : α → ℝ}
+    (hf_decay : ∀ N, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ N ≤ C)
+    (M : ℕ) :
+    ∀ N, ∃ C > 0, ∀ w, |(1 + ‖w‖) ^ M * f w| * (1 + ‖w‖) ^ N ≤ C
+```
+
+**Status**: Fully generalized (cycle 94). Purely pointwise — no measure theory needed.

@@ -93,13 +93,15 @@ lemma UniformSchwartzDecay.integrable_poly_mul {f : Torus3 → (Fin 3 → ℝ) �
 
 
 /-- If ‖v‖^k * |φ(v)| is integrable for every k, then (1+‖v‖)^K * |φ(v)| is too.
-    Uses the binomial theorem to expand (1+‖v‖)^K as a finite sum. -/
+    Uses the binomial theorem to expand (1+‖v‖)^K as a finite sum.
+    Generalized to any normed space (dimension-independent). -/
 lemma integrable_one_add_norm_pow_mul
-    {φ : (Fin 3 → ℝ) → ℝ}
+    {α : Type*} [MeasureSpace α] [SeminormedAddCommGroup α]
+    {φ : α → ℝ}
     (hφ : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
     (K : ℕ) :
     Integrable (fun v => (1 + ‖v‖) ^ K * |φ v|) := by
-  have h_binom : ∀ v : (Fin 3 → ℝ), (1 + ‖v‖) ^ K * |φ v| =
+  have h_binom : ∀ v : α, (1 + ‖v‖) ^ K * |φ v| =
       ∑ k ∈ Finset.range (K + 1), Nat.choose K k * ‖v‖ ^ k * |φ v| := by
     simp +decide [add_comm (1 : ℝ), add_pow, mul_assoc, mul_comm, mul_left_comm,
       Finset.mul_sum _ _ _]
@@ -108,11 +110,13 @@ lemma integrable_one_add_norm_pow_mul
     simpa only [mul_assoc] using MeasureTheory.Integrable.const_mul (hφ k) _
 
 /-- If ‖v‖^k * |φ(v)| is integrable for every k, and ‖g(v)‖ ≤ C*(1+‖v‖)^K*|φ(v)|,
-    then g is integrable. Core tool for Schwartz-dominance arguments. -/
+    then g is integrable. Core tool for Schwartz-dominance arguments.
+    Generalized to any normed space (dimension-independent). -/
 lemma integrable_of_schwartz_bound
-    {φ : (Fin 3 → ℝ) → ℝ}
+    {α : Type*} [MeasureSpace α] [SeminormedAddCommGroup α]
+    {φ : α → ℝ}
     (hφ : ∀ k : ℕ, Integrable (fun v => ‖v‖ ^ k * |φ v|))
-    {g : (Fin 3 → ℝ) → ℝ}
+    {g : α → ℝ}
     (hg_meas : AEStronglyMeasurable g)
     {C : ℝ} (_ : 0 ≤ C) {K : ℕ}
     (hbound : ∀ v, ‖g v‖ ≤ C * (1 + ‖v‖) ^ K * |φ v|) :
@@ -163,5 +167,21 @@ lemma score_bound_of_grad_bound
   simp only [ContinuousLinearMap.smul_apply, smul_eq_mul, abs_mul,
     abs_of_pos (inv_pos.mpr hfu)]
   rw [inv_mul_le_iff₀ hfu]; linarith [hGrad u i]
+
+/-- Polynomial-weighted Schwartz decay: if |f(w)|*(1+‖w‖)^N ≤ C for all N,
+    then |(1+‖w‖)^M * f(w)| * (1+‖w‖)^N ≤ C' for all N.
+    Generalized to any normed space (dimension-independent). -/
+lemma schwartz_poly_weighted_decay
+    {α : Type*} [SeminormedAddCommGroup α]
+    {f : α → ℝ}
+    (hf_decay : ∀ N, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ N ≤ C)
+    (M : ℕ) :
+    ∀ N, ∃ C > 0, ∀ w, |(1 + ‖w‖) ^ M * f w| * (1 + ‖w‖) ^ N ≤ C := by
+  intro N; obtain ⟨C, hC, hb⟩ := hf_decay (M + N)
+  exact ⟨C, hC, fun w => by
+    rw [abs_mul, abs_of_nonneg (pow_nonneg (by linarith [norm_nonneg w]) _)]
+    calc (1 + ‖w‖) ^ M * |f w| * (1 + ‖w‖) ^ N
+        = |f w| * (1 + ‖w‖) ^ (M + N) := by rw [pow_add]; ring
+      _ ≤ C := hb w⟩
 
 end VML
