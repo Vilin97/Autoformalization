@@ -13,12 +13,41 @@ open MeasureTheory Matrix Finset BigOperators Real
 noncomputable section
 namespace VML
 
+/-- The directional derivative of a differentiable function is measurable.
+    Uses the fact that fderiv(f)(v)(h) = lim_{n→∞} (n+1)*(f(v+(n+1)⁻¹*h) - f(v)),
+    which is a pointwise limit of continuous (hence measurable) functions. -/
+private lemma aestronglyMeasurable_fderiv_apply
+    {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [MeasurableSpace E] [OpensMeasurableSpace E] [SecondCountableTopology E]
+    [MeasureSpace E]
+    [MeasurableSpace F] [BorelSpace F] [SecondCountableTopology F]
+    {f : E → F} (hf : Differentiable ℝ f) (h : E) :
+    AEStronglyMeasurable (fun v => fderiv ℝ f v h) := by
+  have h_meas : Measurable (fun v => fderiv ℝ f v h) := by
+    apply measurable_of_tendsto_metrizable
+      (f := fun (n : ℕ) (v : E) => ((n : ℝ) + 1) • (f (v + ((n : ℝ) + 1)⁻¹ • h) - f v))
+    · intro n
+      exact (continuous_const.smul
+        ((hf.continuous.comp (continuous_id.add continuous_const)).sub
+          hf.continuous)).measurable
+    · rw [tendsto_pi_nhds]
+      intro v
+      have hc : Filter.Tendsto (fun n : ℕ => ‖((n : ℝ) + 1)‖) Filter.atTop Filter.atTop := by
+        have : (fun n : ℕ => ‖((n : ℝ) + 1)‖) = (fun n : ℕ => ((n : ℝ) + 1)) := by
+          ext n; exact Real.norm_of_nonneg (by positivity)
+        rw [this]
+        exact tendsto_natCast_atTop_atTop.atTop_add tendsto_const_nhds
+      exact (hf v).hasFDerivAt.lim h hc
+  exact h_meas.aestronglyMeasurable
+
 /-- The derivative of the Coulomb flux component has Schwartz-class decay.
     Since the flux decomposes into convolutions of Coulomb entries with Schwartz functions,
     its derivatives inherit Schwartz decay via coulomb_entry_conv_deriv_decay. -/
 lemma coulomb_flux_deriv_schwartz_decay
     (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
-    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
+    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 →
+      ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
     (i : Fin 3) (N : ℕ) :
     ∃ C > 0, ∀ v, ‖fderiv ℝ (fun v =>
       (∫ w, mulVec (landauMatrix coulombKernel (v - w))
@@ -37,7 +66,7 @@ lemma coulomb_flux_deriv_schwartz_decay
       ‖fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j *
         fderiv ℝ f w (Pi.single j 1)) v‖ ≤ C :=
     fun j => coulomb_entry_conv_deriv_bounded _ (hf_smooth.fderiv_right le_top |>.clm_apply
-      contDiff_const) (hdf_schwartz j) i j
+      contDiff_const) (fun N {k} (hk : k ≤ 1) => hdf_schwartz j N (show k + 1 ≤ 2 by omega)) i j
   -- Replace flux with K/L decomposition
   have h_fn_eq : (fun v => (∫ w, mulVec (landauMatrix coulombKernel (v - w))
       (f w • vGrad f v - f v • vGrad f w)) i) =
@@ -56,7 +85,7 @@ lemma coulomb_flux_deriv_schwartz_decay
       (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j *
         fderiv ℝ f w (Pi.single j 1)) :=
     fun j => coulomb_entry_conv_differentiable _ (hf_smooth.fderiv_right le_top |>.clm_apply
-      contDiff_const) (hdf_schwartz j) i j
+      contDiff_const) (fun N {k} (hk : k ≤ 1) => hdf_schwartz j N (show k + 1 ≤ 2 by omega)) i j
   have ha_diff : ∀ j, Differentiable ℝ (fun v => fderiv ℝ f v (Pi.single j 1)) :=
     fun j => ((hf_smooth.fderiv_right le_top).clm_apply contDiff_const).differentiable le_top
   have hf_diff := hf_smooth.differentiable le_top
@@ -71,8 +100,8 @@ lemma coulomb_flux_deriv_schwartz_decay
   have hL_bdd : ∀ j, ∃ ML > 0, ∀ v, |∫ w, landauMatrix coulombKernel (v - w) i j *
       fderiv ℝ f w (Pi.single j 1)| ≤ ML :=
     fun j => coulomb_entry_conv_uniform_bound (hdf_decay_abs j)
-      ((hf_smooth.fderiv_right le_top |>.clm_apply contDiff_const)
-        .continuous.aestronglyMeasurable) i j
+      ((ContDiff.continuous (n := ⊤) ((hf_smooth.fderiv_right le_top).clm_apply
+        (contDiff_const (c := (Pi.single j 1 : Fin 3 → ℝ))))).aestronglyMeasurable) i j
   -- f is bounded
   obtain ⟨Mf, hMf_pos, hMf⟩ := hf_decay 0
   have hf_sup : ∀ v, |f v| ≤ Mf := fun v => by simpa using hMf v
@@ -82,7 +111,7 @@ lemma coulomb_flux_deriv_schwartz_decay
     exact ⟨C, fun v => by simpa using h v⟩
   obtain ⟨Mdf, hMdf⟩ := hdf_sup 0  -- use as proxy; bound for all j by taking max
   -- fderiv(f) Schwartz decay: ‖fderiv f v‖ * (1+‖v‖)^N ≤ Cf
-  obtain ⟨Cf, hCf_pos, hCf⟩ := hf_schwartz N (by omega)
+  obtain ⟨Cf, hCf_pos, hCf⟩ := hf_schwartz N (show 1 ≤ 2 by norm_num)
   -- fderiv(∂_j f) Schwartz decay
   -- Per-component fderiv decay: for each j, bound ‖fderiv(∂_j f * K_j - f * L_j)(v)‖ * (1+‖v‖)^N
   -- by product rule: ≤ |∂_j f(v)| * ‖fderiv(K_j)(v)‖ + |K_j(v)| * ‖fderiv(∂_j f)(v)‖
@@ -99,7 +128,9 @@ lemma coulomb_flux_deriv_schwartz_decay
     obtain ⟨MLj, hMLj_pos, hMLj⟩ := hL_bdd j
     -- Schwartz decay of ∂_j f with polynomial weight N
     obtain ⟨Mdj_N, hMdj_N_pos, hMdj_N⟩ := hdf_decay_abs j N
-    obtain ⟨Cdj, hCdj_pos, hCdj⟩ := schwartz_fderiv_component_schwartz f hf_smooth hf_schwartz j N (by omega)
+    obtain ⟨Cdj, hCdj_pos, hCdj⟩ :=
+      schwartz_fderiv_component_schwartz f hf_smooth hf_schwartz j N
+        (show 1 + 1 ≤ 2 by norm_num)
     -- Uniform bounds on fderiv of K and L convolutions
     obtain ⟨CKj, hCKj_pos, hCKj⟩ := hK_fderiv_bdd j
     obtain ⟨CLj, hCLj_pos, hCLj⟩ := hL_fderiv_bdd j
@@ -111,7 +142,16 @@ lemma coulomb_flux_deriv_schwartz_decay
     have h_ab := (ha_diff j v).hasFDerivAt.mul (hK_diff j v).hasFDerivAt
     have h_cd := (hf_diff v).hasFDerivAt.mul (hL_diff j v).hasFDerivAt
     have h_fderiv := (h_ab.sub h_cd).fderiv
-    rw [h_fderiv]
+    have h_fn_eq' : (fun v => fderiv ℝ f v (Pi.single j 1) *
+        (∫ w, landauMatrix coulombKernel (v - w) i j * f w) -
+       f v * (∫ w, landauMatrix coulombKernel (v - w) i j *
+        fderiv ℝ f w (Pi.single j 1))) =
+      (((fun v => fderiv ℝ f v (Pi.single j 1)) *
+        (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * f w)) -
+       (f * (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j *
+        fderiv ℝ f w (Pi.single j 1)))) := by
+      ext v; simp [Pi.mul_apply, Pi.sub_apply]
+    rw [h_fn_eq', h_fderiv]
     -- ‖a•K' + K•a' - (f•L' + L•f')‖ * (1+‖v‖)^N
     calc ‖fderiv ℝ f v (Pi.single j 1) • fderiv ℝ (fun v => ∫ w,
             landauMatrix coulombKernel (v - w) i j * f w) v +
@@ -129,7 +169,26 @@ lemma coulomb_flux_deriv_schwartz_decay
               fderiv ℝ f w (Pi.single j 1)) v‖ +
            ‖(∫ w, landauMatrix coulombKernel (v - w) i j *
               fderiv ℝ f w (Pi.single j 1)) • fderiv ℝ f v‖) * (1 + ‖v‖) ^ N := by
-          gcongr; exact le_trans (norm_sub_le _ _) (add_le_add_right (norm_add_le _ _) _)
+          gcongr
+          have h_tri := norm_sub_le
+            ((fderiv ℝ f v) (Pi.single j 1) •
+              fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * f w) v +
+             (∫ w, landauMatrix coulombKernel (v - w) i j * f w) •
+              fderiv ℝ (fun v => fderiv ℝ f v (Pi.single j 1)) v)
+            (f v • fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j *
+              fderiv ℝ f w (Pi.single j 1)) v +
+             (∫ w, landauMatrix coulombKernel (v - w) i j *
+              fderiv ℝ f w (Pi.single j 1)) • fderiv ℝ f v)
+          linarith [norm_add_le
+            ((fderiv ℝ f v) (Pi.single j 1) •
+              fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * f w) v)
+            ((∫ w, landauMatrix coulombKernel (v - w) i j * f w) •
+              fderiv ℝ (fun v => fderiv ℝ f v (Pi.single j 1)) v),
+            norm_add_le
+            (f v • fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j *
+              fderiv ℝ f w (Pi.single j 1)) v)
+            ((∫ w, landauMatrix coulombKernel (v - w) i j *
+              fderiv ℝ f w (Pi.single j 1)) • fderiv ℝ f v)]
       _ = (|fderiv ℝ f v (Pi.single j 1)| * ‖fderiv ℝ (fun v => ∫ w,
               landauMatrix coulombKernel (v - w) i j * f w) v‖ +
            |∫ w, landauMatrix coulombKernel (v - w) i j * f w| *
@@ -183,8 +242,10 @@ lemma coulomb_flux_deriv_schwartz_decay
     ∑ j : Fin 3, fderiv ℝ (fun v => fderiv ℝ f v (Pi.single j 1) *
       (∫ w, landauMatrix coulombKernel (v - w) i j * f w) -
      f v * (∫ w, landauMatrix coulombKernel (v - w) i j *
-      fderiv ℝ f w (Pi.single j 1))) v :=
-    fderiv_sum (fun j _ => h_sum_diff j)
+      fderiv ℝ f w (Pi.single j 1))) v := by
+    simp only [Fin.sum_univ_three]
+    exact ((h_sum_diff 0).hasFDerivAt.add (h_sum_diff 1).hasFDerivAt |>.add
+      (h_sum_diff 2).hasFDerivAt).fderiv
   rw [h_fderiv_sum]
   calc ‖∑ j : Fin 3, fderiv ℝ _ v‖ * (1 + ‖v‖) ^ N
       ≤ (∑ j : Fin 3, ‖fderiv ℝ (fun v => fderiv ℝ f v (Pi.single j 1) *
@@ -196,7 +257,7 @@ lemma coulomb_flux_deriv_schwartz_decay
           (∫ w, landauMatrix coulombKernel (v - w) i j * f w) -
          f v * (∫ w, landauMatrix coulombKernel (v - w) i j *
           fderiv ℝ f w (Pi.single j 1))) v‖ * (1 + ‖v‖) ^ N := by
-        rw [Fin.sum_univ_three]; ring
+        rw [Finset.sum_mul]
     _ ≤ C0 + C1 + C2 := by
         rw [Fin.sum_univ_three]; linarith [h0 v, h1 v, h2 v]
     _ ≤ C0 + C1 + C2 + 1 := le_add_of_nonneg_right (by positivity)
@@ -205,7 +266,8 @@ lemma coulomb_flux_deriv_schwartz_decay
     Uses Schwartz decay of the flux derivative and polynomial growth of log(f). -/
 lemma coulomb_ibp_df_g_integrable
     (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
-    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
+    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 →
+      ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
     (hLogBound : ∃ C K, ∀ v, |Real.log (f v)| ≤ C * (1 + ‖v‖) ^ K)
     (i : Fin 3) :
     Integrable (fun v =>
@@ -219,8 +281,8 @@ lemma coulomb_ibp_df_g_integrable
   -- Apply domination by C_fd * C_log / (1+‖v‖)^4
   apply (inverse_poly_integrable (C_fd * C_log)).mono'
   · apply AEStronglyMeasurable.mul
-    · exact ((coulomb_flux_differentiable f hf_pos hf_smooth hf_schwartz i).fderiv
-        |>.continuous.clm_apply continuous_const).aestronglyMeasurable
+    · exact aestronglyMeasurable_fderiv_apply
+        (coulomb_flux_differentiable f hf_pos hf_smooth hf_schwartz i) _
     · exact (hf_smooth.continuous.log (fun v => ne_of_gt (hf_pos v))).aestronglyMeasurable
   · filter_upwards with v
     rw [Real.norm_eq_abs, abs_mul, Function.comp_apply]
@@ -232,23 +294,27 @@ lemma coulomb_ibp_df_g_integrable
         C_fd / (1 + ‖v‖) ^ (K_log + 4) := by
       have hv_pos' : (0 : ℝ) < (1 + ‖v‖) ^ (K_log + 4) := by positivity
       rw [le_div_iff₀ hv_pos']
-      calc |fderiv ℝ _ v (Pi.single i 1)|
-          ≤ ‖fderiv ℝ _ v‖ * ‖Pi.single i (1 : ℝ)‖ :=
-            ContinuousLinearMap.le_opNorm _ _
-        _ ≤ ‖fderiv ℝ _ v‖ * 1 := by
-            gcongr; simp [Pi.norm_single]
-        _ = ‖fderiv ℝ _ v‖ := mul_one _
-        _ ≤ ‖fderiv ℝ _ v‖ * (1 + ‖v‖) ^ (K_log + 4) :=
-            le_mul_of_one_le_right (norm_nonneg _)
-              (one_le_pow_of_one_le' (by linarith [norm_nonneg v]) _)
+      have h_abs_le : |fderiv ℝ (fun v' => (∫ w, mulVec (landauMatrix coulombKernel (v' - w))
+          (f w • vGrad f v' - f v' • vGrad f w)) i) v (Pi.single i 1)| ≤
+          ‖fderiv ℝ (fun v' => (∫ w, mulVec (landauMatrix coulombKernel (v' - w))
+          (f w • vGrad f v' - f v' • vGrad f w)) i) v‖ := by
+        have h_le := ContinuousLinearMap.le_opNorm (fderiv ℝ (fun v' => (∫ w,
+          mulVec (landauMatrix coulombKernel (v' - w))
+          (f w • vGrad f v' - f v' • vGrad f w)) i) v) (Pi.single i (1 : ℝ))
+        rw [Pi.norm_single, norm_one, mul_one] at h_le
+        rwa [Real.norm_eq_abs] at h_le
+      calc |fderiv ℝ _ v (Pi.single i 1)| * (1 + ‖v‖) ^ (K_log + 4)
+          ≤ ‖fderiv ℝ _ v‖ * (1 + ‖v‖) ^ (K_log + 4) := by gcongr
         _ ≤ C_fd := hfd_bound v
-    -- Combine: |deriv| * |log f| ≤ (C_fd/(1+‖v‖)^(K+4)) * (C_log*(1+‖v‖)^K) = C_fd*C_log/(1+‖v‖)^4
-    calc |fderiv ℝ _ v (Pi.single i 1)| * |Real.log (f v)|
-        ≤ C_fd / (1 + ‖v‖) ^ (K_log + 4) * (C_log * (1 + ‖v‖) ^ K_log) :=
-          mul_le_mul h1 (hLB v) (abs_nonneg _) (div_nonneg (le_of_lt hC_fd) (by positivity))
-      _ = C_fd * C_log / (1 + ‖v‖) ^ 4 * (1 + ‖v‖) ^ 4 := by
-          rw [div_mul_cancel₀]; exact ne_of_gt hv_pos
-      _ ≤ C_fd * C_log * (1 + ‖v‖) ^ 4 := by
-          rw [div_mul_cancel₀]; exact ne_of_gt hv_pos
+    -- Combine: |deriv| * |log f| * P^4 ≤ (C_fd/P^(K+4)) * (C_log*P^K) * P^4 = C_fd*C_log
+    have hP : (0 : ℝ) < 1 + ‖v‖ := by linarith [norm_nonneg v]
+    have h2 : |Real.log (f v)| ≤ C_log * (1 + ‖v‖) ^ K_log := hLB v
+    calc |fderiv ℝ _ v (Pi.single i 1)| * |Real.log (f v)| * (1 + ‖v‖) ^ 4
+        ≤ (C_fd / (1 + ‖v‖) ^ (K_log + 4)) * (C_log * (1 + ‖v‖) ^ K_log) * (1 + ‖v‖) ^ 4 := by
+          gcongr
+      _ = C_fd * C_log := by
+          have hPne : (1 + ‖v‖) ^ (K_log + 4) ≠ 0 := ne_of_gt (by positivity)
+          rw [pow_add] at hPne ⊢
+          field_simp
 
 end VML
