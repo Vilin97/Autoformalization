@@ -1,1 +1,0 @@
-Prove that a regular local ring is a UFD. The attached .txt file contains the proof and the attached .lean file contains some partial progress.
