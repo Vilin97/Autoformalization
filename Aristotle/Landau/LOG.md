@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 83: Split Section3Helpers, generalize CLM lemmas
+
+### Changes
+- **Split Section3Helpers.lean** (1162 → 1020 lines): extracted iterated derivative helpers into new `IteratedDerivHelpers.lean` (158 lines).
+- **Fixed latent missing-import bug**: CoulombConcreteTheorem42 used `contDiff_negNormSq_div`, `quadratic_iteratedFDeriv_bound`, and `norm_sq_le_normSq` from Section3Helpers without a direct import path. Added explicit `import IteratedDerivHelpers`.
+- **Made `norm_sq_le_normSq` non-private**: was incorrectly `private` despite cross-file usage.
+- **Generalized CLM lemmas for Mathlib** (issue 8d): `iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` now work over any `𝕜 : NontriviallyNormedField` (was hardcoded to `ℝ`).
+- Files: 22 → **23**. Lines: ~9,394.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 82: Break remaining long lines
 
 ### Changes
