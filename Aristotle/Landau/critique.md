@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 96)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 97)
 
 ## Verdict: ACCEPT
 
@@ -18,7 +18,7 @@
 
 ## 2. Hidden Axioms
 
-Zero axioms on main theorems (verified cycle 95 via `lean_verify`). I found no issue.
+Zero axioms on main theorems (verified cycle 95). I found no issue.
 
 ---
 
@@ -54,15 +54,13 @@ I found no issue.
 
 Can't be split per user preference.
 
-### 6c. Long proofs (3 proofs over 200 lines)
+### 6c. Long proofs (1 proof over 200 lines)
 
 | File | Proof | Lines |
 |------|-------|-------|
-| CoulombPSD.lean | `fubini_double_integrable_coulomb` | ~241 |
-| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | ~231 |
 | CoulombConcreteTheorem42.lean | `CoulombConcreteTheorem42` | ~222 |
 
-`fubini_double` down from ~286 last cycle (pointwise bound extraction). The integration bound `h_int_bound` (~61 lines, starting ~line 318) and `h_norm_int` setup (~17 lines) remain extraction candidates.
+`coulomb_flux_deriv_schwartz_decay` now under 200 lines (~196, cycle 97). `CoulombConcreteTheorem42` is the main 19-field record construction, hard to split further.
 
 ---
 
@@ -82,7 +80,7 @@ I found no issue.
 
 ### 8d. Extract Mathlib-upstreamable lemmas (MEDIUM)
 
-5 PR candidates in `experiments/mathlib_pr_candidates.md`. 4/5 SchwartzDecayDefs helpers now dimension-independent (cycle 94-95).
+5 PR candidates in `experiments/mathlib_pr_candidates.md`. All 5/5 SchwartzDecayDefs helpers now dimension-independent (cycle 96).
 
 ### ~~8e–8h~~ — DONE
 
@@ -103,7 +101,7 @@ I found no issue.
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 6b | 1 file over 600 lines | Low | Open (Defs.lean, can't split) |
-| 6c | 3 proofs over 200 lines | Low | Open (`fubini_double` h_int_bound extractable) |
+| 6c | 1 proof over 200 lines | Low | Open (CoulombConcreteTheorem42, hard to split) |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |
 | 8j | lean-lsp build desync | Low | Open (tooling, persistent) |
