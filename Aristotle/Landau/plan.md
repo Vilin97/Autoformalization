@@ -1,4 +1,4 @@
-# Plan — Cycle 77
+# Plan — Cycle 78
 
 ## Status summary
 
@@ -10,18 +10,17 @@
 
 ## This cycle's work items
 
-### 1. Begin semicolon cleanup (`/simplify`)
-- **What**: Start removing unnecessary semicolons in the worst-offending files. Target: TorusInstance (257 semis), Section3Helpers (214 semis), CoulombPSD (159 semis).
-- **Why**: 1092 semicolons is the largest remaining code style issue. Semicolons between independent tactics on separate lines are unnecessary noise.
-- **Approach**: For each file, replace `;\n` (semicolon at end of line before newline) with `\n`. Verify build after each file. Do NOT touch semicolons within single lines (e.g. `<;>` or tactic chains).
+### 1. Break long lines with semicolons (`/simplify`)
+- **What**: For lines > 100 chars that contain mid-line semicolons, break the semicolon-separated tactics onto separate lines. Target files: Section3Helpers, NewtonianPotential, Defs.
+- **Why**: Simultaneously reduces both the >100 char line count (205) and the semicolon count (625). This is the highest-leverage cleanup remaining.
+- **Approach**: For each file, find lines >100 chars containing `;`, break at `;` boundaries onto separate indented lines. Verify build after each file.
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
 | 6b | 7 files over 600 lines | Code quality — ongoing |
-| 6c | 206 lines > 100 chars | Code style — future cycles |
-| 6c | ~800 remaining semicolons (after this cycle) | Code style — future cycles |
+| 6c | Remaining short-line semicolons after this cycle | Code style — future |
 | 8b | Weaken C^∞ → C^2 | Epistemic — hard |
 | 8c | Generalize beyond T^3 | Epistemic — hard |
 | 8d | Mathlib PR for helper lemmas | Community |

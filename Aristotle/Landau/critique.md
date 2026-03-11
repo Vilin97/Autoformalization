@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-10 UTC (Cycle 77)
+# Adversarial Critique — 2026-03-10 UTC (Cycle 78)
 
 ## Verdict: ACCEPT
 
@@ -63,8 +63,11 @@ I found no issue.
 | Metric | Current | Target |
 |---|---|---|
 | ~~Lines > 200 chars~~ | ~~0~~ | ~~0~~ DONE |
-| Lines > 100 chars | **206** (17 files) | 0 |
-| Semicolons (`;`) | **1092** (21 files) | < 50 |
+| ~~Trailing semicolons~~ | ~~0~~ | ~~0~~ DONE |
+| Lines > 100 chars | **205** (17 files) | 0 |
+| Mid-line semicolons | **625** (+ 126 `<;>` combinators) | < 50 |
+
+Worst offenders for mid-line semicolons: Section3Helpers (139), TorusInstance (76), CoulombPSD (56), Defs (42), NewtonianPotential (44).
 
 ---
 
@@ -101,7 +104,7 @@ I found no issue.
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 6b | 7 files over 600 lines (Section3Helpers 944) | Moderate | Open |
-| 6c | 206 lines >100 chars, 1092 semicolons | Moderate | Open |
+| 6c | 205 lines >100 chars, 625 mid-line semicolons | Moderate | Open |
 | 8e | Defs.lean too large (788 lines) | Minor | Open |
 | 8f | Section3Helpers.lean too large (944 lines) | Moderate | Open |
 

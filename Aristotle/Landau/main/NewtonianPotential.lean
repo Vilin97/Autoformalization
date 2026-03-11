@@ -123,7 +123,10 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
             · exact div_pos (norm_pos_iff.mpr hx.2) hR
           aesop
         · exact fun i => MeasurableSet.diff (measurableSet_closedBall) (measurableSet_closedBall)
-        · intro k l hkl; simp_all +decide [ mul_comm, Real.rpow_add, Real.rpow_sub ] ; ring_nf; norm_num [ hR.ne' ]
+        · intro k l hkl
+          simp_all +decide [ mul_comm, Real.rpow_add, Real.rpow_sub ]
+          ring_nf
+          norm_num [ hR.ne' ]
           cases lt_or_gt_of_ne hkl <;> norm_num [ Set.disjoint_left ]
           · intro a ha₁ ha₂ ha₃
             nlinarith [show (1 / 2 : ℝ) ^ l ≤
@@ -189,7 +192,9 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
       refine lt_of_le_of_lt h_integrable <| lt_of_le_of_lt (ENNReal.tsum_le_tsum h_bounded) ?_
       rw [ ← ENNReal.ofReal_tsum_of_nonneg ] <;> norm_num [ h_volume ]
       · exact fun k => by positivity
-      · convert h_series.mul_right ((MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) 1) |> ENNReal.toReal)) using 2 ; norm_num [ Real.rpow_add, Real.rpow_sub ] ; ring
+      · convert h_series.mul_right ((MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) 1) |> ENNReal.toReal)) using 2
+        norm_num [ Real.rpow_add, Real.rpow_sub ]
+        ring
         convert congr_arg (· * R⁻¹ * 2 ^ ‹_› * 2) (h_volume ‹_›) using 1 <;> norm_num [ Real.rpow_neg, Real.rpow_mul ] ; ring
         · norm_num [ mul_comm ]
         · field_simp
@@ -254,14 +259,22 @@ lemma convolution_local_int_schwartz
             have h_integrable : MeasureTheory.Integrable (fun w : Fin 3 → ℝ => (1 + ‖w‖) ^ (-4 : ℝ)) MeasureTheory.MeasureSpace.volume := by
               have h_integrable : MeasureTheory.Integrable (fun w : Fin 3 → ℝ => (1 + ‖w‖) ^ (-4 : ℝ)) MeasureTheory.MeasureSpace.volume := by
                 have h_integrable : ∀ w : Fin 3 → ℝ, (1 + ‖w‖) ^ (-4 : ℝ) ≤ (1 + ‖w‖ ^ 2) ^ (-2 : ℝ) := by
-                  intro w; rw [ Real.rpow_neg (by positivity), Real.rpow_neg (by positivity) ] ; norm_cast; norm_num; ring_nf; (
+                  intro w
+                  rw [ Real.rpow_neg (by positivity), Real.rpow_neg (by positivity) ]
+                  norm_cast
+                  norm_num
+                  ring_nf
+                  (
                   exact inv_anti₀ (by positivity) (by nlinarith [ norm_nonneg w ]))
                 have h_integrable : MeasureTheory.Integrable (fun w : Fin 3 → ℝ => (1 + ‖w‖ ^ 2) ^ (-2 : ℝ)) MeasureTheory.MeasureSpace.volume := by
                   have := @integrable_rpow_neg_one_add_norm_sq
-                  convert @this (Fin 3 → ℝ) _ _ _ _ _ (MeasureTheory.MeasureSpace.volume) _ 4 (by norm_num) using 1 ; norm_num [ div_eq_mul_inv ]
+                  convert @this (Fin 3 → ℝ) _ _ _ _ _ (MeasureTheory.MeasureSpace.volume) _ 4 (by norm_num) using 1
+                  norm_num [ div_eq_mul_inv ]
                 refine h_integrable.mono' ?_ ?_
                 · exact Measurable.aestronglyMeasurable (by exact Measurable.pow_const (by exact measurable_const.add (measurable_norm)) _)
-                · filter_upwards [ ] using fun w => by rw [ Real.norm_of_nonneg (by positivity) ] ; exact ‹∀ w : Fin 3 → ℝ, (1 + ‖w‖) ^ ( -4 : ℝ) ≤ (1 + ‖w‖ ^ 2) ^ ( -2 : ℝ) › w
+                · filter_upwards [ ] using fun w => by
+                    rw [ Real.norm_of_nonneg (by positivity) ]
+                    exact ‹∀ w : Fin 3 → ℝ, (1 + ‖w‖) ^ ( -4 : ℝ) ≤ (1 + ‖w‖ ^ 2) ^ ( -2 : ℝ) › w
               exact h_integrable
             norm_cast at * ; simpa using h_integrable.const_mul C
           refine h_integrable.mono' ?_ ?_

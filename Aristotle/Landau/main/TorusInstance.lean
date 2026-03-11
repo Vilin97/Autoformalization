@@ -55,7 +55,8 @@ lemma measure_torus_eq_map :
       erw [ MeasureTheory.Measure.pi_eq ] at h_volume_eq
       convert h_volume_eq
       intro s hs; erw [ MeasureTheory.Measure.restrict_apply ]
-      · erw [ show (Set.univ.pi s ∩ box3 : Set (Fin 3 → ℝ) ) = Set.pi Set.univ fun i => s i ∩ Set.Ioc 0 1 from ?_, MeasureTheory.Measure.pi_pi ] ; aesop
+      · erw [ show (Set.univ.pi s ∩ box3 : Set (Fin 3 → ℝ) ) = Set.pi Set.univ fun i => s i ∩ Set.Ioc 0 1 from ?_, MeasureTheory.Measure.pi_pi ]
+        aesop
         unfold box3; aesop
       · exact MeasurableSet.univ_pi hs
 

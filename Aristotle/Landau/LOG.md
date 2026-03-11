@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 78: Break long semicolon lines
+
+### Changes
+- **Broke 29 long lines** (>100 chars with mid-line semicolons) across 6 files: Section3Helpers (17), NewtonianPotential (5), CoulombPSD (3), VelocityDecayInstance (2), CoulombFluxDiff (1), TorusInstance (1).
+- Semicolons: 751 → **700** (51 removed). Lines >100: 205 → **186** (19 removed).
+- All files verified to compile clean.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 77: Remove trailing semicolons
 
 ### Changes

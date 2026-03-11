@@ -19,7 +19,8 @@ lemma landau_bound (z u : Fin 3 → ℝ) :
       unfold landauMatrix eucNorm coulombKernel innerLandauMatrix normSq
       split_ifs <;> norm_cast <;> norm_num [ Matrix.vecMulVec ] at *
       · simp_all +decide [ Fin.sum_univ_three, dotProduct ]
-        rw [ Real.sqrt_eq_zero' ] at *; norm_num [ show z 0 = 0 by nlinarith, show z 1 = 0 by nlinarith, show z 2 = 0 by nlinarith, Matrix.mulVec ]
+        rw [ Real.sqrt_eq_zero' ] at *
+        norm_num [ show z 0 = 0 by nlinarith, show z 1 = 0 by nlinarith, show z 2 = 0 by nlinarith, Matrix.mulVec ]
       · exact False.elim <| ‹¬Real.sqrt (z ⬝ᵥ z) = 0› <| le_antisymm ‹_› <| Real.sqrt_nonneg _
       · rw [ Real.sqrt_eq_zero' ] at * ; linarith
       · suffices h_simp : abs ((Real.sqrt (dotProduct z z))⁻¹ ^ 3 * (dotProduct z z * dotProduct u u - (dotProduct z u) ^ 2)) ≤ (Real.sqrt (dotProduct z z))⁻¹ * (Real.sqrt (dotProduct u u)) ^ 2 by
@@ -62,8 +63,12 @@ lemma tendsto_landau_quadratic_diag
                 rw [ ← map_sub ] ; rfl
               refine h_mean_value ▸ le_trans (ContinuousLinearMap.le_opNorm _ _) (mul_le_mul_of_nonneg_right (hK _ _) (norm_nonneg _) )
               simp_all +decide [ dist_eq_norm ]
-              rw [ show v + t • (u - v) - x = (1 - t) • (v - x) + t • (u - x) by ext i; simpa using by ring ]
-              exact le_trans (norm_add_le _ _) (by rw [ norm_smul, norm_smul, Real.norm_of_nonneg (by linarith : 0 ≤ 1 - t), Real.norm_of_nonneg (by linarith : 0 ≤ t) ] ; nlinarith)
+              rw [ show v + t • (u - v) - x = (1 - t) • (v - x) + t • (u - x) by
+                     ext i
+                     simpa using by ring ]
+              exact le_trans (norm_add_le _ _) (by
+                rw [ norm_smul, norm_smul, Real.norm_of_nonneg (by linarith : 0 ≤ 1 - t), Real.norm_of_nonneg (by linarith : 0 ≤ t) ]
+                nlinarith)
             have h_ftc : G u - G v = ∫ t in (0 : ℝ)..1, deriv (fun t => G (v + t • (u - v))) t := by
               rw [ intervalIntegral.integral_deriv_eq_sub ]
               · norm_num
