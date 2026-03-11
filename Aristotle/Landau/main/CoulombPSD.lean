@@ -24,7 +24,9 @@ lemma landau_bound (z u : Fin 3 → ℝ) :
       · exact False.elim <| ‹¬Real.sqrt (z ⬝ᵥ z) = 0› <| le_antisymm ‹_› <| Real.sqrt_nonneg _
       · rw [ Real.sqrt_eq_zero' ] at * ; linarith
       · suffices h_simp : abs ((Real.sqrt (dotProduct z z))⁻¹ ^ 3 * (dotProduct z z * dotProduct u u - (dotProduct z u) ^ 2)) ≤ (Real.sqrt (dotProduct z z))⁻¹ * (Real.sqrt (dotProduct u u)) ^ 2 by
-          convert h_simp using 2 ; norm_num [ Matrix.mulVec, dotProduct ] ; ring
+          convert h_simp using 2
+          norm_num [ Matrix.mulVec, dotProduct ]
+          ring
           norm_num [ Fin.sum_univ_three, Matrix.one_apply ] ; ring
         suffices h_cancel : abs (z ⬝ᵥ z * u ⬝ᵥ u - (z ⬝ᵥ u) ^ 2) ≤ (Real.sqrt (z ⬝ᵥ z)) ^ 2 * (Real.sqrt (u ⬝ᵥ u)) ^ 2 by
           rw [ abs_mul, abs_of_nonneg (by positivity) ]
@@ -85,7 +87,10 @@ lemma tendsto_landau_quadratic_diag
             unfold eucNorm
             norm_num [ normSq, Pi.norm_def ]
             constructor <;> norm_num [ Fin.sum_univ_three, dotProduct ] at * <;> ring_nf at * <;> norm_num at *
-            · rw [ Real.sqrt_le_iff ] ; norm_num [ Fin.univ_succ ] ; ring_nf ; norm_num
+            · rw [ Real.sqrt_le_iff ]
+              norm_num [ Fin.univ_succ ]
+              ring_nf
+              norm_num
               nlinarith only [
                 abs_le.mp (show |G u 0 - G v 0| ≤ Max.max |G u 0 - G v 0| (Max.max |G u 1 - G v 1| |G u 2 - G v 2|)
                   by exact le_max_left _ _),
@@ -93,7 +98,10 @@ lemma tendsto_landau_quadratic_diag
                   by exact le_max_of_le_right (le_max_left _ _) ),
                 abs_le.mp (show |G u 2 - G v 2| ≤ Max.max |G u 0 - G v 0| (Max.max |G u 1 - G v 1| |G u 2 - G v 2|)
                   by exact le_max_of_le_right (le_max_right _ _) ) ]
-            · refine Real.le_sqrt_of_sq_le _ ; norm_num [ Fin.univ_succ ] ; ring_nf ; (
+            · refine Real.le_sqrt_of_sq_le _
+              norm_num [ Fin.univ_succ ]
+              ring_nf
+              (
               rw [ max_def, max_def ]
               split_ifs <;> nlinarith [ sq_nonneg (u 0 - v 0),
                                         sq_nonneg (u 1 - v 1),
@@ -665,7 +673,9 @@ lemma fubini_double_integrable_coulomb
             simp [Fin.sum_univ_three]; ring
         _ ≤ 3 * Cg * (1 + ‖v‖) ^ Kg * (‖v - w‖⁻¹ *
               ∑ j, (f w * |vGrad f v j| + f v * |vGrad f w j|)) := by
-            congr 1; congr 1; ring
+            congr 1
+            congr 1
+            ring
             congr 1
             apply Finset.sum_le_sum; intro j _
             simp only [Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
@@ -706,7 +716,9 @@ lemma fubini_double_integrable_coulomb
             · -- ∑_j ∫ |vGrad f v j| * ‖v-w‖⁻¹ * f(w) ≤ (∑|∂_j f(v)|) * M₁
               calc ∑ j : Fin 3, ∫ w, |vGrad f v j| * (‖v - w‖⁻¹ * |f w|)
                   = ∑ j : Fin 3, |vGrad f v j| * ∫ w, ‖v - w‖⁻¹ * |f w| := by
-                    congr 1; ext j; rw [integral_mul_left]
+                    congr 1
+                    ext j
+                    rw [integral_mul_left]
                 _ ≤ ∑ j : Fin 3, |vGrad f v j| * M₁ :=
                     Finset.sum_le_sum fun j _ =>
                       mul_le_mul_of_nonneg_left (hM₁b v) (abs_nonneg _)

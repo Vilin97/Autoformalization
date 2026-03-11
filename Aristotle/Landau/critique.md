@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-10 UTC (Cycle 78)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 79)
 
 ## Verdict: ACCEPT
 
@@ -50,13 +50,13 @@ I found no issue.
 
 | File | Lines |
 |------|-------|
-| Section3Helpers.lean | 944 |
-| TorusInstance.lean | 848 |
+| Section3Helpers.lean | 976 |
+| TorusInstance.lean | 849 |
 | Defs.lean | 788 |
-| CoulombPSD.lean | 742 |
+| CoulombPSD.lean | 747 |
 | CoulombSpatialTransport.lean | 670 |
 | CoulombConcreteTheorem42.lean | 623 |
-| CoulombFluxDiff.lean | 616 |
+| CoulombFluxDiff.lean | 617 |
 
 ### 6c. AI code style artifacts
 
@@ -64,10 +64,10 @@ I found no issue.
 |---|---|---|
 | ~~Lines > 200 chars~~ | ~~0~~ | ~~0~~ DONE |
 | ~~Trailing semicolons~~ | ~~0~~ | ~~0~~ DONE |
-| Lines > 100 chars | **205** (17 files) | 0 |
-| Mid-line semicolons | **625** (+ 126 `<;>` combinators) | < 50 |
+| Lines > 100 chars | **186** (17 files) | 0 |
+| Plain semicolons | **574** (+ 126 `<;>` combinators) | < 50 |
 
-Worst offenders for mid-line semicolons: Section3Helpers (139), TorusInstance (76), CoulombPSD (56), Defs (42), NewtonianPotential (44).
+Worst semicolon offenders: Section3Helpers (140), TorusInstance (110), CoulombPSD (70), Defs (47), NewtonianPotential (44).
 
 ---
 
@@ -79,7 +79,7 @@ I found no issue.
 
 ## 8. Generalization Opportunities
 
-### ~~8a. Extract helpers from CoulombConcreteTheorem42~~ — DONE (cycles 70-71)
+### ~~8a. Extract helpers from CoulombConcreteTheorem42~~ — DONE
 
 ### 8b. Weaken spatial smoothness: C^∞ → C^2 (DEFERRED)
 
@@ -89,7 +89,7 @@ I found no issue.
 
 ### 8e. Split Defs.lean (MEDIUM)
 
-### 8f. Split Section3Helpers.lean (HIGH PRIORITY — 944 lines)
+### 8f. Split Section3Helpers.lean (HIGH PRIORITY — 976 lines)
 
 ---
 
@@ -103,10 +103,10 @@ I found no issue.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6b | 7 files over 600 lines (Section3Helpers 944) | Moderate | Open |
-| 6c | 205 lines >100 chars, 625 mid-line semicolons | Moderate | Open |
+| 6b | 7 files over 600 lines (Section3Helpers 976) | Moderate | Open |
+| 6c | 186 lines >100 chars, 574 plain semicolons | Moderate | Open |
 | 8e | Defs.lean too large (788 lines) | Minor | Open |
-| 8f | Section3Helpers.lean too large (944 lines) | Moderate | Open |
+| 8f | Section3Helpers.lean too large (976 lines) | Moderate | Open |
 
 ### Conditions for ACCEPT
 

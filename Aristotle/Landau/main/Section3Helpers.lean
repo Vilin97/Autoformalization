@@ -81,17 +81,24 @@ lemma gaussian_normalization_maxwellian
     have h_gauss : ∫ v : Fin 3 → ℝ, Real.exp (c₀ * normSq v) = (∏ i : Fin 3, ∫ v : ℝ, Real.exp (c₀ * v^2)) := by
       have h_fubini : ∫ v : Fin 3 → ℝ, Real.exp (c₀ * normSq v) = ∫ v : Fin 3 → ℝ, (∏ i : Fin 3, Real.exp (c₀ * (v i) ^ 2)) := by
         norm_num [ ← Real.exp_sum, normSq ]
-        norm_num [ dotProduct, Fin.sum_univ_three ] ; congr ; ext ; ring
+        norm_num [ dotProduct, Fin.sum_univ_three ]
+        congr
+        ext
+        ring
       generalize_proofs at *; (
-      erw [ h_fubini, ← MeasureTheory.integral_fintype_prod_eq_prod ] ; aesop;)
+      erw [ h_fubini, ← MeasureTheory.integral_fintype_prod_eq_prod ]
+      aesop)
     generalize_proofs at *; (
     have := integral_gaussian ( -c₀)
     simp_all +decide [ div_eq_mul_inv, mul_comm, mul_assoc, mul_left_comm ]
     ring; (
     rw [ Real.sqrt_eq_rpow, ← Real.rpow_natCast, ← Real.rpow_mul (by nlinarith [ Real.pi_pos, mul_inv_cancel₀ hc₀.ne ]) ]
-    norm_num;) ;)
+    norm_num) )
   simp_all +decide [ Real.exp_add, MeasureTheory.integral_const_mul ]
-  intro v; rw [ ← hf_int ] ; unfold equilibriumMaxwellian; ring
+  intro v
+  rw [ ← hf_int ]
+  unfold equilibriumMaxwellian
+  ring
   norm_num [ mul_assoc, mul_comm, mul_left_comm, ne_of_gt (Real.rpow_pos_of_pos (show 0 < - (Real.pi * c₀⁻¹) by nlinarith [ Real.pi_pos, mul_inv_cancel₀ (ne_of_lt hc₀) ]) _) ]
 
 
@@ -139,9 +146,8 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
           have h_integrable : MeasureTheory.Integrable (fun v : ℝ => |v| * Real.exp (c * v^2 / 2)) MeasureTheory.MeasureSpace.volume := by
             have h_integrable : MeasureTheory.Integrable (fun v : ℝ => v * Real.exp (c * v^2 / 2)) MeasureTheory.MeasureSpace.volume := by
               have := @integrable_rpow_mul_exp_neg_mul_sq
-              convert @this ( -c / 2) (by linarith) 1 (by norm_num) using 3 ; ring
-              · norm_num
-              · ring
+              convert @this ( -c / 2) (by linarith) 1 (by norm_num) using 3; ring
+              · norm_num; ring
             convert h_integrable.norm using 2 ; norm_num [ abs_mul, abs_of_nonneg, Real.exp_nonneg ]
           refine MeasureTheory.Integrable.mono' ?_ ?_ ?_
           exacts [
@@ -155,8 +161,13 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
           have h_gauss_integral : ∫ v : ℝ, Real.exp (c * (v - (-b / (2 * c)))^2) = Real.sqrt (Real.pi / (-c)) := by
             convert integral_gaussian ( -c) using 1 <;> norm_num [ hc_neg.le ]
             rw [ eq_comm, ← MeasureTheory.integral_sub_right_eq_self ]
-          rw [ ← h_gauss_integral, ← MeasureTheory.integral_mul_const ] ; congr ; ext v ; ring
-          rw [ ← Real.exp_add ] ; norm_num [ sq, mul_assoc, hc_neg.ne ] ; ring
+          rw [ ← h_gauss_integral, ← MeasureTheory.integral_mul_const ]
+          congr
+          ext v
+          ring
+          rw [ ← Real.exp_add ]
+          norm_num [ sq, mul_assoc, hc_neg.ne ]
+          ring
         exact MeasureTheory.Integrable.const_mul (by
           exact (by
             contrapose! h_gauss_integral
@@ -181,7 +192,10 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
               else Real.exp (b j * v j + c * v j^2))) := by
         simp +decide [ Finset.prod_ite, Finset.filter_eq', Finset.filter_ne' ]
         simp +decide [ mul_assoc, ← Real.exp_sum, Finset.sum_add_distrib, Finset.mul_sum _ _ _, Finset.sum_mul, normSq ]
-        simp +decide [ ← Real.exp_add, Fin.sum_univ_three, dotProduct ] ; congr ; ext ; ring!
+        simp +decide [ ← Real.exp_add, Fin.sum_univ_three, dotProduct ]
+        congr
+        ext
+        ring!
       have h_fubini2 :
           ∫ v : Fin 3 → ℝ, (∏ j, (if j = i
             then v j * Real.exp (a + b j * v j + c * v j^2)
@@ -216,7 +230,10 @@ lemma analysis_fluxFactor
   -- Proved by Aristotle (Harmonic)
   intro v w
   have h_log_grad : ∀ (v : (Fin 3) → ℝ), VML.vGrad (Real.log ∘ f) v = (1 / f v) • VML.vGrad f v := by
-    intro v; ext i; by_cases H : DifferentiableAt ℝ f v <;> simp_all +decide [ VML.vGrad, fderiv_deriv ] ; ring
+    intro v
+    ext i
+    by_cases H : DifferentiableAt ℝ f v <;> simp_all +decide [ VML.vGrad, fderiv_deriv ]
+    ring
     · erw [ fderiv_comp ] <;> norm_num [ H, ne_of_gt (hf_pos v) ]; ring
     · rw [ fderiv_zero_of_not_differentiableAt ]
       · rw [ fderiv_zero_of_not_differentiableAt H ] ; norm_num
@@ -270,7 +287,9 @@ lemma analysis_nonneg_dbl_zero
               from fun x hx => hε.2 x hx)))
       · exact Filter.Eventually.of_forall fun x => hnn v x
       · exact hint_inner v
-    intro v w; by_contra h_nonzero; push_neg at h_nonzero
+    intro v w
+    by_contra h_nonzero
+    push_neg at h_nonzero
     obtain ⟨U, hU_open, hU_v, hU_nonzero⟩ : ∃ U : Set (Fin 3 → ℝ), IsOpen U ∧ v ∈ U ∧ ∀ u ∈ U, g u w ≠ 0 := by
       exact ⟨ { u | g u w ≠ 0 }, isOpen_ne.preimage (show Continuous fun u => g u w from hcont.comp (continuous_id.prodMk continuous_const) ), h_nonzero, fun u hu => hu ⟩
     exact absurd h_zero_ae (ne_of_gt (lt_of_lt_of_le
@@ -301,7 +320,9 @@ lemma analysis_gaussian_integrability
         unfold VML.normSq
         exact Finset.sum_nonneg fun i _ => mul_self_nonneg _)
   have h_integrable : MeasureTheory.Integrable (fun v : Fin 3 → ℝ => Real.exp (b ⬝ᵥ v)) MeasureTheory.MeasureSpace.volume := by
-    convert h_integrable.const_mul (Real.exp ( -a₀) ) using 2 ; rw [ ← Real.exp_add ] ; ring
+    convert h_integrable.const_mul (Real.exp ( -a₀) ) using 2
+    rw [ ← Real.exp_add ]
+    ring
   have h_integrable : MeasureTheory.Integrable (fun v : ℝ => Real.exp (b 0 * v)) MeasureTheory.MeasureSpace.volume := by
     have h_integrable :
         MeasureTheory.Integrable
@@ -343,20 +364,18 @@ lemma analysis_gaussian_integrability
             erw [ MeasureTheory.Measure.pi_pi ]
             simp +decide [ mul_assoc ]
           · exact measurable_pi_iff.mpr fun i => by
-              fin_cases i <;> [
-                exact measurable_fst
-                exact measurable_pi_iff.mp measurable_snd 0
-                exact measurable_pi_iff.mp measurable_snd 1 ]
+              fin_cases i <;> [exact measurable_fst;
+                exact measurable_pi_iff.mp measurable_snd 0;
+                exact measurable_pi_iff.mp measurable_snd 1]
           · exact MeasurableSet.univ_pi hs
         rw [ h_iso, MeasureTheory.integrable_map_measure ]
         · rfl
         · exact Continuous.aestronglyMeasurable (by exact Real.continuous_exp.comp <| continuous_const.dotProduct continuous_id')
         · refine Continuous.aemeasurable ?_
           exact continuous_pi_iff.mpr fun i => by
-            fin_cases i <;> [
-              exact continuous_fst
-              exact continuous_apply 0 |> Continuous.comp <| continuous_snd
-              exact continuous_apply 1 |> Continuous.comp <| continuous_snd ]
+            fin_cases i <;> [exact continuous_fst;
+              exact continuous_apply 0 |> Continuous.comp <| continuous_snd;
+              exact continuous_apply 1 |> Continuous.comp <| continuous_snd]
       rw [ MeasureTheory.integrable_prod_iff ] at h_integrable
       · simp_all +decide [ Real.exp_add, MeasureTheory.integral_const_mul, MeasureTheory.integral_mul_const ]
         by_cases h : ∫ (a : Fin 2 → ℝ), Real.exp (b 1 * a 0) * Real.exp (b 2 * a 1) = 0 <;> simp_all +decide [ MeasureTheory.integrable_const_mul_iff ]
@@ -413,7 +432,10 @@ lemma poly_cubic_extraction
   have h_cubic_zero : ∀ t : ℝ, t^3 * (v ⬝ᵥ d_c * (v ⬝ᵥ v)) +
       t^2 * (∑ i, ∑ j, (v i) * (v j) * (K i j)) +
       t * (v ⬝ᵥ d_lin) + C = 0 := by
-    convert h_poly_zero using 2 ; ring; simp +decide [ Fin.sum_univ_three ] ; ring
+    convert h_poly_zero using 2
+    ring
+    simp +decide [ Fin.sum_univ_three ]
+    ring
   have h_coeff_zero : v ⬝ᵥ d_c * (v ⬝ᵥ v) = 0 := by
     linarith [ h_cubic_zero ( -2), h_cubic_zero ( -1), h_cubic_zero 0,
                h_cubic_zero 1, h_cubic_zero 2 ]
@@ -575,14 +597,19 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
       simp_all +decide [funext_iff, Fin.forall_fin_succ]
       fin_cases i <;> fin_cases j <;> simp +decide at this ⊢ <;> linarith!
     use c (Pi.single 0 1)
-    intro w; rw [hc]; ext i; simp +decide [← h_c_const i 0]
+    intro w
+    rw [hc]
+    ext i
+    simp +decide [← h_c_const i 0]
     have h_c_const : ∀ w : Fin 3 → ℝ, (fderiv ℝ g v) w = ∑ i, w i • (fderiv ℝ g v) (Pi.single i 1) := by
       intro w; exact (by
       rw [show w = ∑ i, Pi.single i (w i) by ext i; simp +decide]
       simp +decide [Finset.sum_apply, Pi.single_apply]
       ring
       exact Finset.sum_congr rfl fun i _ => by rw [← map_smul]; congr; ext j; fin_cases i <;> fin_cases j <;> simp +decide [Pi.single_apply])
-    specialize h_c_const w; rw [hc] at h_c_const; simp +decide [Fin.sum_univ_three] at h_c_const
+    specialize h_c_const w
+    rw [hc] at h_c_const
+    simp +decide [Fin.sum_univ_three] at h_c_const
     replace h_c_const := congr_fun h_c_const i; fin_cases i <;> simp +decide [hc] at h_c_const ⊢
     · exact Classical.or_iff_not_imp_right.2 fun h => mul_left_cancel₀ h <| by linarith
     · exact Classical.or_iff_not_imp_right.2 fun h => mul_left_cancel₀ h <| by linarith
@@ -614,7 +641,9 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
           exact h_diff.differentiable le_rfl v
         · exact differentiableAt_const _
       have h_second_deriv : ∀ v : Fin 3 → ℝ, ∀ i j k : Fin 3, (fderiv ℝ (fun v => (fderiv ℝ g v) (Pi.single j 1)) v) (Pi.single k 1) i = (fderiv ℝ c v) (Pi.single k 1) * (if i = j then 1 else 0) := by
-        intro v i j k; rw [fderiv_pi]; aesop
+        intro v i j k
+        rw [fderiv_pi]
+        aesop
         have h_diff : ContDiff ℝ 1 (fun v => (fderiv ℝ g v) (Pi.single j 1)) := by
           exact (hg_smooth.fderiv_right le_rfl).clm_apply contDiff_const
         exact fun i => DifferentiableAt.comp v (differentiableAt_pi.1 (h_diff.contDiffAt.differentiableAt le_rfl) i) (differentiableAt_id)
@@ -629,7 +658,9 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
         exact h_nonzero_deriv h_zero
         skip
       have h_const_c : ∀ v : Fin 3 → ℝ, (fderiv ℝ c v) = 0 := by
-        intro v; ext w; simp [h_zero_deriv]
+        intro v
+        ext w
+        simp [h_zero_deriv]
         convert (show (fderiv ℝ c v) w = ∑ k : Fin 3, w k • (fderiv ℝ c v) (Pi.single k 1) from ?_) using 1
         · simp [h_zero_deriv]
         · rw [show w = ∑ k, Pi.single k (w k) by ext i; simp +decide [Pi.single_apply]]
@@ -652,12 +683,18 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
     have h_integral_eq : ∀ a b : ℝ, ∫ t in a..b, (fderiv ℝ g (t • v)) v = g (b • v) - g (a • v) := by
       intro a b
       rw [intervalIntegral.integral_deriv_eq_sub']
-      · ext t; erw [deriv]; erw [fderiv_comp] <;> norm_num [hg_smooth.contDiffAt.differentiableAt (by norm_num), hc₀]
+      · ext t
+        erw [deriv]
+        erw [fderiv_comp] <;> norm_num [hg_smooth.contDiffAt.differentiableAt (by norm_num), hc₀]
         rw [deriv_pi] <;> norm_num [Fin.forall_fin_succ]
       · exact fun x hx => DifferentiableAt.comp x (hg_smooth.contDiffAt.differentiableAt (by norm_num)) (differentiableAt_id.smul_const _)
       · exact Continuous.continuousOn (by continuity)
     simp +decide [h_integral_eq]
-  use g 0, c₀ / 2; intro v; rw [h_ftc v]; norm_num [hc₀]; ring
+  use g 0, c₀ / 2
+  intro v
+  rw [h_ftc v]
+  norm_num [hc₀]
+  ring
 
 /-- Gap 7: Antiderivative of an affine gradient.
     If ∇h(v) = b + 2c₀ v, then h(v) = h(0) + b · v + c₀|v|².
@@ -685,7 +722,9 @@ lemma affine_gradient_antiderivative (h : (Fin 3 → ℝ) → ℝ) (b : Fin 3 �
       ring
       exact Finset.sum_congr rfl fun i _ => by
         rw [← smul_eq_mul, ← ContinuousLinearMap.map_smul]
-        congr; ext j; by_cases hi : i = j <;> aesop
+        congr
+        ext j
+        by_cases hi : i = j <;> aesop
     simp_all +decide [two_mul]
     ring
   intros v
@@ -711,7 +750,9 @@ lemma maxwellian_landau_flux_zero (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
   have h_grad : ∀ v : Fin 3 → ℝ, VML.vGrad f v = f v • (b + 2 * c₀ • v) := by
     unfold VML.vGrad
     rw [show f = _ from funext hf]
-    intro v; ext i; rw [fderiv_exp]
+    intro v
+    ext i
+    rw [fderiv_exp]
     norm_num [dotProduct, Fin.sum_univ_three]
     ring
     · unfold VML.normSq
@@ -811,7 +852,9 @@ lemma D_zero_implies_maxwellian (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → ℝ)
 lemma cubic_coeff_zero (a : Fin 3 → ℝ) (h : ∀ v, dotProduct v a * normSq v = 0) :
     a = 0 := by
   -- Proved by Aristotle (Harmonic)
-  ext j; by_contra h_a_nonzero; specialize h (Pi.single j 1)
+  ext j
+  by_contra h_a_nonzero
+  specialize h (Pi.single j 1)
   simp_all +decide [Fin.sum_univ_three, dotProduct]
   fin_cases j <;> simp_all +decide [VML.normSq]
 
@@ -886,7 +929,9 @@ private lemma norm_sq_le_normSq (v : Fin 3 → ℝ) : ‖v‖ ^ 2 ≤ normSq v :
 
 lemma contDiff_negNormSq_div (T : ℝ) :
     ContDiff ℝ ⊤ (fun v : Fin 3 → ℝ => -(normSq v) / (2 * T)) := by
-  apply ContDiff.div_const; apply ContDiff.neg; unfold normSq dotProduct
+  apply ContDiff.div_const
+  apply ContDiff.neg
+  unfold normSq dotProduct
   exact ContDiff.sum fun i _ => (contDiff_apply ℝ ℝ i).mul (contDiff_apply ℝ ℝ i)
 
 /-- ‖iteratedFDeriv i (v_j²) v‖ ≤ 2(1+‖v‖) for i ≥ 1, via Leibniz on proj_j * proj_j. -/
@@ -934,7 +979,10 @@ lemma quadratic_iteratedFDeriv_bound (T : ℝ) (hT : 0 < T) (k : ℕ) :
   -- Step 1: Express q as sum of scaled components and bound iteratedFDeriv
   have hfn_eq : (fun v : Fin 3 → ℝ => -(normSq v) / (2 * T)) =
       (fun v => ∑ j : Fin 3, -(v j * v j) / (2 * T)) := by
-    ext w; unfold normSq dotProduct; simp [Fin.sum_univ_three]; ring
+    ext w
+    unfold normSq dotProduct
+    simp [Fin.sum_univ_three]
+    ring
   have hcomp_smooth : ∀ j : Fin 3,
       ContDiff ℝ ⊤ (fun v : Fin 3 → ℝ => -(v j * v j) / (2 * T)) := fun j =>
     ((contDiff_apply ℝ ℝ j).mul (contDiff_apply ℝ ℝ j)).neg.div_const _
@@ -944,7 +992,10 @@ lemma quadratic_iteratedFDeriv_bound (T : ℝ) (hT : 0 < T) (k : ℕ) :
   -- Each component: -(v_j²)/(2T) = (-1/(2T)) • (v_j²)
   have hcomp_eq : ∀ j : Fin 3, (fun v : Fin 3 → ℝ => -(v j * v j) / (2 * T)) =
       (-1 / (2 * T)) • (fun v : Fin 3 → ℝ => v j * v j) := by
-    intro j; ext w; simp [Pi.smul_apply, smul_eq_mul]; ring
+    intro j
+    ext w
+    simp [Pi.smul_apply, smul_eq_mul]
+    ring
   -- Bound: ‖iteratedFDeriv i q v‖ ≤ (3/T)(1+‖v‖)
   have hbound : ‖iteratedFDeriv ℝ i (fun v : Fin 3 → ℝ => -(normSq v) / (2 * T)) v‖ ≤
       3 / T * (1 + ‖v‖) := by

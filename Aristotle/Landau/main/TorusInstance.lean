@@ -128,7 +128,10 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
               · simp +decide only [and_left_comm]
                 rfl
               · simp +decide [ Fin.insertNth ]
-                simp +decide [ Fin.succAboveCases ] ; congr ; ext ; split_ifs <;> tauto
+                simp +decide [ Fin.succAboveCases ]
+                congr
+                ext
+                split_ifs <;> tauto
             · refine Measurable.aemeasurable ?_
               refine measurable_pi_iff.mpr ?_
               intro a; fin_cases a <;> simp +decide [ Fin.insertNth ]
@@ -188,14 +191,18 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
               simp_all +decide [ Fin.insertNth ]
               fin_cases i <;> fin_cases j <;> simp_all +decide [ Fin.succAboveCases ]
             · simp +decide [ Pi.single_apply ]
-              congr ; ext j ; aesop
+              congr
+              ext j
+              aesop
           · apply_rules [ Continuous.intervalIntegrable ]
             have h_cont : Continuous (fun y => fderiv ℝ F (Fin.insertNth i y z)) := by
               exact hF.continuous_fderiv le_rfl |> Continuous.comp <| continuous_pi_iff.mpr fun j => by fin_cases i <;> fin_cases j <;> continuity
             exact h_cont.clm_apply continuous_const
         convert h_ftc using 1 <;> norm_num [ intervalIntegral.integral_of_le zero_le_one ]
         rw [ eq_comm, sub_eq_zero ]
-        convert h_periodic (Fin.insertNth i 0 z) using 2 ; ext j ; fin_cases i <;> fin_cases j <;> simp +decide [ Fin.insertNth ]
+        convert h_periodic (Fin.insertNth i 0 z) using 2
+        ext j
+        fin_cases i <;> fin_cases j <;> simp +decide [ Fin.insertNth ]
         · rfl
         · rfl
         · rfl
@@ -311,7 +318,9 @@ theorem torus_hCurlIntZero (F : Torus3 → Fin 3 → ℝ) (u : Fin 3 → ℝ)
       u 0 * (torusGradX (fun z => F z 2) x 1 - torusGradX (fun z => F z 1) x 2) +
       (u 1 * (torusGradX (fun z => F z 0) x 2 - torusGradX (fun z => F z 2) x 0) +
        u 2 * (torusGradX (fun z => F z 1) x 0 - torusGradX (fun z => F z 0) x 1)) := by
-    ext x; simp only [dotProduct, Fin.sum_univ_three, hcurl0, hcurl1, hcurl2]; ring
+    ext x
+    simp only [dotProduct, Fin.sum_univ_three, hcurl0, hcurl1, hcurl2]
+    ring
   rw [key]
   have h₀ : ∫ x : Torus3, u 0 * (torusGradX (fun z => F z 2) x 1 -
       torusGradX (fun z => F z 1) x 2) = 0 := by
@@ -345,7 +354,9 @@ theorem torus_hHarmonic_const (φ : Torus3 → ℝ)
       fun y => fderiv ℝ (periodicLift φ) y (Pi.single i 1) :=
     fun i => funext (periodicLift_torusGradX φ i)
   have hgrad_c1 : ∀ i, ContDiff ℝ 1 (periodicLift (fun x => torusGradX φ x i)) := by
-    intro i; rw [hgrad_pl]; exact ((hd.fderiv_right le_top).clm_apply contDiff_const).of_le le_top
+    intro i
+    rw [hgrad_pl]
+    exact ((hd.fderiv_right le_top).clm_apply contDiff_const).of_le le_top
   have hφ_cont : Continuous φ :=
     isOpenQuotientMap_torusMk.isQuotientMap.continuous_iff.mpr hd.continuous
   -- IBP: ∫ (∂φ/∂xᵢ)² = -∫ φ·∂²φ/∂xᵢ²
@@ -415,7 +426,9 @@ private theorem second_deriv_nonpos_at_local_max' {f : ℝ → ℝ} {x₀ : ℝ}
   by_contra h_contra; push_neg at h_contra
   obtain ⟨ε, hε⟩ : ∃ ε > 0, ∀ x ∈ Set.Ioo x₀ (x₀ + ε), deriv f x > 0 := by
     have := Metric.tendsto_nhds_nhds.1 (hf''.hasDerivAt.isLittleO.tendsto_div_nhds_zero)
-    obtain ⟨δ, δ_pos, H⟩ := this _ h_contra; use δ, δ_pos; intro x hx
+    obtain ⟨δ, δ_pos, H⟩ := this _ h_contra
+    use δ, δ_pos
+    intro x hx
     have := H (show |x - x₀| < δ from abs_lt.mpr ⟨by linarith [hx.1], by linarith [hx.2]⟩)
     simp_all +decide [div_eq_mul_inv]
     rw [← div_eq_mul_inv, div_lt_iff₀] at this <;>
@@ -484,7 +497,9 @@ private theorem curl_div_harmonic_rn' {n : ℕ} (F : (Fin n → ℝ) → (Fin n 
     ∑ i : Fin n, fderiv ℝ (fun y => fderiv ℝ (fun z => F z j) y (Pi.single i 1)) x (Pi.single i 1) = 0 := by
   have hcurl_fun : ∀ i, (fun y => fderiv ℝ (fun z => F z j) y (Pi.single i 1)) =
       (fun y => fderiv ℝ (fun z => F z i) y (Pi.single j 1)) := by
-    intro i; ext y; exact hcurl y i j
+    intro i
+    ext y
+    exact hcurl y i j
   simp_rw [hcurl_fun]
   simp_rw [clairaut_fderiv (fun z => F z _) x _ j (hF _)]
   have hdiff_comp : ∀ i, DifferentiableAt ℝ (fun y => fderiv ℝ (fun z => F z i) y (Pi.single i 1)) x := by
@@ -676,11 +691,17 @@ theorem torus_hCurlZeroDivZeroHarmonic (F : Torus3 → Fin 3 → ℝ)
     rw [hcurl_expand] at hcurl_y
     -- Extract the three symmetry conditions
     have h0 : torusGradX (fun w => F w 2) (torusMk y) 1 = torusGradX (fun w => F w 1) (torusMk y) 2 := by
-      have := congr_fun hcurl_y 0; simp at this; linarith
+      have := congr_fun hcurl_y 0
+      simp at this
+      linarith
     have h1 : torusGradX (fun w => F w 0) (torusMk y) 2 = torusGradX (fun w => F w 2) (torusMk y) 0 := by
-      have := congr_fun hcurl_y 1; simp at this; linarith
+      have := congr_fun hcurl_y 1
+      simp at this
+      linarith
     have h2 : torusGradX (fun w => F w 1) (torusMk y) 0 = torusGradX (fun w => F w 0) (torusMk y) 1 := by
-      have := congr_fun hcurl_y 2; simp at this; linarith
+      have := congr_fun hcurl_y 2
+      simp at this
+      linarith
     fin_cases i <;> fin_cases j <;> simp_all
   -- Divergence-free in ℝⁿ form
   -- torusDivX F (torusMk y) = 0 gives the sum at x₀ = (torusMk_surjective (torusMk y)).choose.
@@ -774,7 +795,9 @@ instance : VML.FlatTorus3 Torus3 where
   hLaplacianMaxNonpos := fun φ x₀ hd => torus_hLaplacianMaxNonpos φ x₀ (hd.of_le le_top)
   hGradAdd := fun f g hf hg => torus_hGradAdd' f g (hf.of_le le_top) (hg.of_le le_top)
   hGradScalarMul := by
-    intro c f x; ext i; simp only [torusGradX, Pi.smul_apply, smul_eq_mul]
+    intro c f x
+    ext i
+    simp only [torusGradX, Pi.smul_apply, smul_eq_mul]
     show fderiv ℝ (periodicLift (fun y => c * f y)) _ (Pi.single i 1) = _
     simp only [show periodicLift (fun y => c * f y) = fun y => c * periodicLift f y
       from by ext y; simp [periodicLift]]
