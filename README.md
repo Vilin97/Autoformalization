@@ -62,7 +62,7 @@ where **A(z) = Ψ(|z|)(|z|²I - zz^T)** is the Landau collision matrix with the 
 
 ### The Main Theorem
 
-> **Theorem (CoulombConcreteTheorem42).** Let f > 0 be a smooth steady-state solution of the VML system with Coulomb collisions on T³ = (R/Z)³, with Schwartz-class velocity decay and a stretched-exponential lower bound. Then:
+> **Theorem ([CoulombConcreteTheorem42](Aristotle/Landau/main/CoulombConcreteTheorem42.lean#L46)).** Let f > 0 be a smooth steady-state solution of the VML system with Coulomb collisions on T³ = (R/Z)³, with Schwartz-class velocity decay and a stretched-exponential lower bound. Then:
 >
 > 1. **f is a spatially uniform Maxwellian:** f(x, v) = ρ_ion / (2πT)^(3/2) · exp(-|v|² / 2T) for some T > 0
 > 2. **The electric field vanishes:** E(x) = 0 everywhere
