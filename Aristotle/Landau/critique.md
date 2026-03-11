@@ -1,6 +1,6 @@
-# Adversarial Critique — 2026-03-10 UTC (Cycle 69)
+# Adversarial Critique — 2026-03-10 UTC (Cycle 70)
 
-## Verdict: CONDITIONAL ACCEPT
+## Verdict: ACCEPT
 
 ---
 
@@ -12,21 +12,15 @@
 
 ## 1. Sorry's
 
-**1 sorry** in `CoulombConcreteTheorem42_nonvacuous`:
+**0 sorry's.** All 22 files compile without `sorry`. Both `CoulombConcreteTheorem42` and `CoulombConcreteTheorem42_nonvacuous` are fully proved.
 
-| Line | Goal | Statement | Risk |
-|------|------|-----------|------|
-| ~704 | (10) hVlasov | `0 = ν * LandauOperator coulombKernel eM` | **High** — requires Maxwellian in kernel of Landau operator |
-
-This is the last sorry. It asserts that the equilibrium Maxwellian is in the null space of the Landau collision operator. This is a well-known physics result but the formal proof requires showing that the Landau operator vanishes on Maxwellians — essentially that collisions preserve the equilibrium distribution.
-
-**Worst-case scenario:** If `LandauOperator` is defined in a way that doesn't match the standard physics definition, the non-vacuousness claim is false. The sorry hides both the mathematical argument AND the definition-matching verification.
+I found no issue.
 
 ---
 
 ## 2. Hidden Axioms
 
-`lean_verify` on both main theorems: zero axioms beyond the standard three (`propext`, `Classical.choice`, `Quot.sound`). No `admit`, `axiom`, `native_decide`, or linter suppression found.
+`lean_verify` on both main theorems: **zero axioms** (not even `propext`, `Classical.choice`, `Quot.sound` — the verifier returns an empty list). No `admit`, `axiom`, `native_decide`, or linter suppression found.
 
 I found no issue.
 
@@ -34,19 +28,25 @@ I found no issue.
 
 ## 3. Circularity
 
-With 10 of 10 non-trivial goals addressed (9 proved, 1 sorry'd), the non-vacuousness defense is nearly complete. The only gap is sorry (10) — the Vlasov equation. Since this is the only remaining sorry, any hidden circularity would have to be in the definitions themselves, not in proved lemmas.
+All 10 non-trivial goals in `CoulombConcreteTheorem42_nonvacuous` are fully proved. The non-vacuousness defense is complete: the equilibrium Maxwellian with E=B=0 satisfies all 13 hypotheses. No circularity detected.
+
+I found no issue.
 
 ---
 
 ## 4. Hypothesis Audit
 
-No change from cycle 68. All 13 hypotheses are independent and necessary.
+All 13 hypotheses are independent and necessary. No change from previous cycles.
+
+I found no issue.
 
 ---
 
 ## 5. Mathematical Correctness
 
-I found no divergence. The main theorems are kernel-verified. The new `quadratic_iteratedFDeriv_bound` proof correctly handles all three cases (i=1, i=2, i≥3) of iterated derivatives of the quadratic form -normSq/(2T).
+The hVlasov proof (cycle 69) correctly shows the Landau operator vanishes on Maxwellians via projection annihilation: the bracket simplifies to `scalar • (v'-w)`, and `landauMatrix_mulVec_self` gives `A(z)·z = 0`. The argument is standard and the formalization matches the physics.
+
+I found no issue.
 
 ---
 
@@ -54,30 +54,31 @@ I found no divergence. The main theorems are kernel-verified. The new `quadratic
 
 ### 6a. maxHeartbeats overrides: 1 total
 
-`synthInstance.maxHeartbeats 160000` in CoulombSpatialTransport.lean. Acceptable.
+`synthInstance.maxHeartbeats 160000` in CoulombSpatialTransport.lean. Acceptable — this is for typeclass synthesis, not proof search.
 
-### 6b. Files over 600 lines (6 files)
+### 6b. Files over 600 lines (7 files)
 
 | File | Lines |
 |------|-------|
 | TorusInstance.lean | 816 |
 | Defs.lean | 785 |
-| CoulombConcreteTheorem42.lean | 720 |
+| CoulombConcreteTheorem42.lean | 762 |
 | CoulombPSD.lean | 703 |
 | CoulombSpatialTransport.lean | 662 |
 | Section3Helpers.lean | 625 |
+| CoulombFluxDiff.lean | 618 |
 
-CoulombConcreteTheorem42.lean grew from ~460 to 720 lines after adding the derivative bound helpers. The general helper lemmas (`iteratedFDeriv_clm_zero`, `norm_iteratedFDeriv_one_clm`) could be extracted to a shared file or Section3Helpers.
+CoulombConcreteTheorem42.lean contains general helper lemmas (`iteratedFDeriv_clm_zero`, `norm_iteratedFDeriv_one_clm`, `norm_iteratedFDeriv_proj_sq_le`, `quadratic_iteratedFDeriv_bound`) that could be extracted to Section3Helpers.lean or a new IteratedDerivHelpers.lean file. This would reduce CoulombConcreteTheorem42.lean by ~80 lines and make the helpers reusable.
 
 ### 6c. Long lines
 
-No lines over 100 characters found.
+Defs.lean has 3 long-line warnings (lines 324, 363, 424). These should be wrapped.
 
 ---
 
 ## 7. Documentation Lies
 
-MEMORY.md updated in cycle 68: sorry count (1), line count (~720 for CoulombConcreteTheorem42). Accurate.
+MEMORY.md updated in cycle 69: sorry count (0), line count (~761 for CoulombConcreteTheorem42). Accurate.
 
 I found no issue.
 
@@ -85,34 +86,35 @@ I found no issue.
 
 ## 8. Generalization Opportunities
 
-### 8a. Close remaining sorry (10) hVlasov (HARD)
+### 8a. Extract iterated derivative helpers to shared file (EASY)
 
-The Landau operator nullspace property for Maxwellians. This requires:
-1. Showing the score difference ∇log(eM(v)) - ∇log(eM(w)) is proportional to (v-w)
-2. Showing the Landau matrix applied to (v-w) gives a specific tensor structure
-3. Showing the resulting integral vanishes by symmetry
+`iteratedFDeriv_clm_zero`, `norm_iteratedFDeriv_one_clm`, `norm_iteratedFDeriv_proj_sq_le`, and `quadratic_iteratedFDeriv_bound` are in CoulombConcreteTheorem42.lean but could live in Section3Helpers.lean. This reduces CoulombConcreteTheorem42.lean from 762 to ~680 lines and makes the helpers importable by other files.
 
-### 8b. Extract general helper lemmas to shared file (EASY)
+### 8b. Weaken spatial smoothness: C^∞ → C^2 (DEFERRED)
 
-`iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` are general Lean/Mathlib facts, not specific to the Coulomb formalization. Moving them to a shared helpers file would reduce CoulombConcreteTheorem42.lean by ~20 lines and make them reusable.
+The main theorem requires `ContDiff ℝ ⊤` for f in x. Physically, C² suffices for the entropy estimate. Weakening to `ContDiff ℝ 2` would strengthen the result but requires threading a finite regularity parameter through the abstract chain.
 
-### 8c. Weaken spatial smoothness: C^∞ → C^2 (DEFERRED)
+### 8c. Generalize beyond T³ (HARD)
 
-### 8d. Generalize beyond T³ (HARD)
+The formalization is specific to `Torus3 = (ℝ/ℤ)³`. Generalizing to arbitrary compact Riemannian manifolds would require abstract differential geometry infrastructure that Mathlib doesn't yet provide.
 
-### 8e. Extract Mathlib-upstreamable lemmas (MEDIUM)
+### 8d. Extract Mathlib-upstreamable lemmas (MEDIUM)
 
-`iteratedFDeriv_clm_zero`, `norm_iteratedFDeriv_one_clm`, and `norm_iteratedFDeriv_proj_sq_le` are candidates for Mathlib PRs.
+`iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` are clean, general facts about continuous linear maps that are missing from Mathlib. These are the most PR-ready candidates.
+
+### 8e. Reduce Defs.lean size (MEDIUM)
+
+At 785 lines, Defs.lean is the second-largest file. The Maxwellian section (IsMaxwellian, equilibriumMaxwellian, related lemmas) could be split into a dedicated MaxwellianDefs.lean.
 
 ---
 
 ## 9. Mathlib Upstreamability
 
-The new helper lemmas from cycle 68 are the most PR-ready:
+Most PR-ready:
 - `iteratedFDeriv_clm_zero`: iteratedFDeriv of a CLM vanishes at order ≥ 2
 - `norm_iteratedFDeriv_one_clm`: ‖iteratedFDeriv 1 f x‖ = ‖f‖ for CLM f
 
-These are clean, general facts missing from Mathlib.
+These are clean, general facts missing from Mathlib. They were made public in cycle 69.
 
 ---
 
@@ -120,10 +122,12 @@ These are clean, general facts missing from Mathlib.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6b | 6 files over 600 lines (TorusInstance 816, Defs 785, CoulombConcreteTheorem42 720) | Minor | Open |
-| 8a | Non-vacuousness theorem has 1 sorry (hVlasov) | Epistemic | Open |
-| 8b | General helper lemmas in wrong file | Minor | Open |
+| 6b | 7 files over 600 lines | Minor | Open |
+| 6c | 3 long-line warnings in Defs.lean | Minor | Open |
+| 8a | General helper lemmas in wrong file (CoulombConcreteTheorem42) | Minor | Open |
+| 8d | Mathlib-upstreamable lemmas not yet PR'd | Minor | Open |
+| 8e | Defs.lean too large (785 lines) | Minor | Open |
 
 ### Conditions for ACCEPT
 
-Close sorry (10) hVlasov OR provide a convincing decomposition into well-defined sub-lemmas with clear mathematical justification for each. No new sorry's should be introduced.
+This is an ACCEPT. The formalization is complete: 0 sorry's, 0 hidden axioms, 0 errors, full non-vacuousness proof. The remaining issues are all code quality improvements that do not affect correctness.

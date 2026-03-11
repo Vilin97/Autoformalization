@@ -442,26 +442,6 @@ private lemma contDiff_negNormSq_div (T : ℝ) :
   apply ContDiff.div_const; apply ContDiff.neg; unfold normSq dotProduct
   exact ContDiff.sum fun i _ => (contDiff_apply ℝ ℝ i).mul (contDiff_apply ℝ ℝ i)
 
--- iteratedFDeriv of a CLM vanishes at order ≥ 2
-/-- The iterated derivative of a continuous linear map vanishes at order ≥ 2. -/
-lemma iteratedFDeriv_clm_zero {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [NormedAddCommGroup F] [NormedSpace ℝ F]
-    (f : E →L[ℝ] F) (n : ℕ) (hn : 2 ≤ n) (x : E) :
-    iteratedFDeriv ℝ n f x = 0 := by
-  rw [show n = (n - 1) + 1 from by omega, iteratedFDeriv_succ_eq_comp_right]
-  simp only [Function.comp, show (fun y => fderiv ℝ (↑f) y) = fun _ => (f : E →L[ℝ] F) from
-    funext fun y => f.hasFDerivAt.fderiv]
-  rw [iteratedFDeriv_const_of_ne (by omega : n - 1 ≠ 0)]; simp
-
-/-- The norm of the first iterated derivative of a CLM equals the operator norm. -/
-lemma norm_iteratedFDeriv_one_clm {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [NormedAddCommGroup F] [NormedSpace ℝ F] (f : E →L[ℝ] F) (x : E) :
-    ‖iteratedFDeriv ℝ 1 f x‖ = ‖f‖ := by
-  rw [show (1:ℕ) = 0 + 1 from rfl, iteratedFDeriv_succ_eq_comp_right]
-  simp only [Function.comp, show (fun y => fderiv ℝ (↑f) y) = fun _ => (f : E →L[ℝ] F) from
-    funext fun y => f.hasFDerivAt.fderiv, iteratedFDeriv_zero_eq_comp,
-    LinearIsometryEquiv.norm_map]
-
 -- ‖iteratedFDeriv i (v_j²) v‖ ≤ 2(1+‖v‖) for i ≥ 1, via Leibniz on proj_j * proj_j
 private lemma norm_iteratedFDeriv_proj_sq_le (j : Fin 3) (i : ℕ) (hi : 1 ≤ i)
     (v : Fin 3 → ℝ) :
