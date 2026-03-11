@@ -167,7 +167,7 @@ lemma tendsto_landau_quadratic_diag
           have h_bound : ∀ᶠ p : (Fin 3 → ℝ) × (Fin 3 → ℝ) in nhds (x, x),
               eucNorm (G p.1 - G p.2) ≤ L * eucNorm (p.1 - p.2) := by
             exact Filter.eventually_of_mem
-              (IsOpen.mem_nhds (hU.1.prod hU.1) (by aesop) )
+              (IsOpen.mem_nhds (hU.1.prod hU.1) ⟨hU.2, hU.2⟩)
               fun p hp => hL _ _ hp.1 hp.2
           filter_upwards [ h_bound ] with p hp
           refine le_trans (landau_bound _ _) _
@@ -243,7 +243,7 @@ lemma continuous_landau_quadratic
           if hp : p.1 = p.2 then _ else h_cont_away p hp
         have h_tendsto : Filter.Tendsto F (nhds (p.1, p.1)) (nhds 0) := by
           convert tendsto_landau_quadratic_diag G hG p.1 using 1
-        rw [ ContinuousAt ] ; aesop
+        rw [ContinuousAt, hp]; exact h_tendsto
 
 /-- PSD integrand is jointly continuous for Coulomb kernel.
     Despite Ψ(r) = r⁻³ being singular, the score difference cancels the singularity.

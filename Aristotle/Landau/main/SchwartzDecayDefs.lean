@@ -49,7 +49,7 @@ lemma inverse_poly_integrable (C : ℝ) :
       refine h_integrable.mono' ?_ ?_
       · exact Measurable.aestronglyMeasurable (by measurability)
       · filter_upwards [] using fun v => by rw [Real.norm_of_nonneg (by positivity)]; exact this v
-    aesop
+    exact this
   simpa using h_integrable.const_mul C
 
 /-- Schwartz decay implies integrability. -/

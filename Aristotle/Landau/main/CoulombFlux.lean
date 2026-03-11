@@ -41,7 +41,7 @@ lemma landau_flux_integrable_coulomb
         · apply inv_norm_schwartz_integrable
           · intro N
             specialize hf_schwartz N (by omega)
-            aesop
+            exact hf_schwartz N (by omega)
           · exact hf_smooth.continuous.aestronglyMeasurable
         · apply inv_norm_schwartz_integrable
           · intro N
@@ -58,7 +58,7 @@ lemma landau_flux_integrable_coulomb
               erw [fderiv_comp] <;> norm_num [hf_smooth.contDiffAt.differentiableAt]
               · erw [LinearIsometryEquiv.fderiv]; norm_num [fderiv_deriv]
                 erw [ContinuousLinearMap.norm_def]; norm_num [ContinuousLinearMap.opNorm]
-                ring; aesop
+                ring; exact this
               · exact (LinearIsometryEquiv.differentiable _) _
             exact le_trans (mul_le_mul_of_nonneg_right h_deriv_bound (by positivity)) (hC w)
           · exact ((hf_smooth.continuous_fderiv le_top).eval_const
