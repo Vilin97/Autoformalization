@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 99, updated)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 100)
 
 ## Verdict: ACCEPT
 
@@ -46,13 +46,9 @@ I found no issue.
 
 0 overrides. `synthInstance.maxHeartbeats 160000` in CoulombForceTransport.lean eliminated (no longer needed).
 
-### 6b. Files over 600 lines (1 file)
+### ~~6b. Files over 600 lines~~ — RESOLVED (cycle 100)
 
-| File | Lines |
-|------|-------|
-| Defs.lean | 634 |
-
-Can't be split per user preference.
+0 files over 600 lines. Defs.lean 634 → 455 lines (extracted FlatTorus3 lemmas to `FlatTorus3Lemmas.lean`).
 
 ### ~~6c. Long proofs~~ — RESOLVED (cycle 98)
 
@@ -96,7 +92,7 @@ I found no issue.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6b | 1 file over 600 lines | Low | Open (Defs.lean, can't split) |
+| ~~6b~~ | ~~1 file over 600 lines~~ | ~~Low~~ | ~~RESOLVED (cycle 100)~~ |
 | ~~6c~~ | ~~Long proofs~~ | ~~Low~~ | ~~RESOLVED (cycle 98)~~ |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |

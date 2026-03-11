@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 100: Extract FlatTorus3 lemmas from Defs.lean
+
+### Changes
+- **Created `FlatTorus3Lemmas.lean`** (~180 lines): moved all derived FlatTorus3 lemmas (hSpatialMul, hGradZeroConst, hGradChainLog, hGradIntZero, hGradAddConst, hLaplacianMinNonneg, maxwellian_params_isSpatiallyDiff) out of Defs.lean.
+- **Defs.lean**: 634 → 455 lines. Now well under 600 lines. Issue 6b resolved.
+- Added `import FlatTorus3Lemmas` to Section4.lean and Section6.lean; other consumers get it transitively.
+- Updated MEMORY.md with accurate file/line counts (32 files, ~9,540 lines).
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 99: Eliminate last heartbeat override
 
 ### Changes
