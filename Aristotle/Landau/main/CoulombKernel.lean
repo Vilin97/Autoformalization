@@ -39,7 +39,7 @@ lemma schwartz_log_bound
     ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
       |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log := by
   -- Upper bound on f from Schwartz (N=0, k=0)
-  obtain ⟨C_up, hC_up_pos, hbound_up⟩ := hSchwartz.hDecay 0 0
+  obtain ⟨C_up, hC_up_pos, hbound_up⟩ := hSchwartz.hDecay 0 (by omega)
   -- Lower bound from stretched-exponential decay
   obtain ⟨C_exp, K_exp, hbound_low⟩ := hExpDecay
   -- From Schwartz: ‖iteratedFDeriv ℝ 0 (f x) v‖ * 1 ≤ C_up → |f x v| ≤ C_up
@@ -93,7 +93,7 @@ lemma schwartz_norm_pow_integrable
   rw [habs]
   -- From Schwartz: |f x v| * (1+‖v‖)^(k+4) ≤ C, so f x v ≤ C/(1+‖v‖)^(k+4)
   -- Then ‖v‖^k * f x v ≤ (1+‖v‖)^k * C/(1+‖v‖)^(k+4) = C/(1+‖v‖)^4
-  obtain ⟨C, hC_pos, hbound⟩ := hSchwartz.hDecay (k + 4) 0
+  obtain ⟨C, hC_pos, hbound⟩ := hSchwartz.hDecay (k + 4) (by omega)
   apply (inverse_poly_integrable C).mono'
     ((continuous_norm.pow k |>.mul (hf_smooth x).continuous).aestronglyMeasurable)
   filter_upwards [] with v
