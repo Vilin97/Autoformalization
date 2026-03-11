@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 70: Code quality — extract helpers, fix long lines
+
+### Changes
+- **Extracted 2 CLM lemmas** (`iteratedFDeriv_clm_zero`, `norm_iteratedFDeriv_one_clm`) from CoulombConcreteTheorem42.lean to Section3Helpers.lean. CoulombConcreteTheorem42: 762→742 lines.
+- **Fixed 3 long-line warnings** in Defs.lean (lines 324, 363, 424).
+- **Updated critique** to cycle 70: verdict ACCEPT (0 sorry's, 0 errors, 0 axioms).
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 69: Close last sorry (10) hVlasov (1→0)
 
 ### Changes

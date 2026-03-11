@@ -321,7 +321,8 @@ lemma vecMulVec_self_mulVec (z w : Fin 3 → ℝ) :
     Property fields (23):
     - Operator properties (5): hDivLinear, hGradConst, hGradAdd, hGradScalarMul, hGradChainExp
     - Closed manifold integration (2): hCurlIntZero, hIBP_spatial
-    - Analysis on compact manifold (4): hHarmonic_const, hLaplacianMaxNonpos, hSpatialPos, hSpatialNonnegZero
+    - Analysis on compact manifold (4): hHarmonic_const, hLaplacianMaxNonpos,
+      hSpatialPos, hSpatialNonnegZero
     - Flat geometry (2): hKillingToHarmonic, hCurlZeroDivZeroHarmonic
     - Abstract measure (3): hSpatialVelocityFubini, hSpatialAdd, hGradIntegrable
     - Differentiability predicate + closure (7): IsSpatiallyDiff, hDiff_const, hDiff_add,
@@ -360,7 +361,8 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
   hDiff_continuous : ∀ f, IsSpatiallyDiff f → Continuous f
   -- Gradient closure: if f is spatially differentiable, so is each component of its gradient.
   -- On the concrete torus: requires IsSpatiallyDiff = ContDiff ℝ ⊤ (smooth);
-  -- then ContDiff.fderiv_right gives ContDiff ℝ ⊤ for the fderiv, and clm_apply gives the component.
+  -- then ContDiff.fderiv_right gives ContDiff ℝ ⊤ for the fderiv,
+  -- and clm_apply gives the component.
   hDiff_grad : ∀ (f : X → ℝ) (i : Fin 3), IsSpatiallyDiff f →
     IsSpatiallyDiff (fun x => gradX f x i)
   -- Curl integral vanishes (Stokes theorem for 2-forms)
@@ -421,7 +423,8 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
     (∫ x, (g₁ x + g₂ x)) = (∫ x, g₁ x) + ∫ x, g₂ x
   -- Gradient components of spatially differentiable functions are integrable
   -- (on the concrete torus: C¹ gradient → continuous → integrable on compact domain)
-  hGradIntegrable : ∀ (g : X → ℝ), IsSpatiallyDiff g → ∀ i, MeasureTheory.Integrable (fun x => gradX g x i)
+  hGradIntegrable : ∀ (g : X → ℝ), IsSpatiallyDiff g →
+    ∀ i, MeasureTheory.Integrable (fun x => gradX g x i)
 
 namespace FlatTorus3
 

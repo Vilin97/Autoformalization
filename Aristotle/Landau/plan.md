@@ -1,63 +1,36 @@
-# Plan — Cycle 69
+# Plan — Cycle 70
 
 ## Status summary
 
-- **Sorry count**: 1 (in `CoulombConcreteTheorem42_nonvacuous`)
+- **Sorry count**: 0
 - **Files**: 22 files, ~8,300 lines
 - **Build**: Clean, 0 errors
-- **Critique verdict**: CONDITIONAL ACCEPT — close (10) hVlasov
+- **Critique verdict**: ACCEPT
 - **Aristotle jobs**: 0 pending
 
 ## Active multi-cycle strategies
 
-### Non-vacuousness theorem (cycles 64–69)
-1 remaining sorry goal:
-
-| Goal | What to prove | Difficulty | Approach |
-|------|---------------|------------|----------|
-| (10) hVlasov | `0 = ν * LandauOperator coulombKernel eM` | **Medium** | Integrand vanishes: A(z)·z = 0 |
+### Code quality reduction (cycle 70+)
+With 0 sorry's, focus shifts to code quality. 7 files over 600 lines. Target: reduce the largest files by extracting reusable helpers.
 
 ## This cycle's work items
 
-### 1. Prove sorry (10) hVlasov — Maxwellian in kernel of Landau operator (`/prove`)
+### 1. Fix long-line warnings in Defs.lean (`/simplify`)
+- **File**: `Defs.lean` lines 324, 363, 424
+- **What**: Wrap lines exceeding 100 characters
+- Fixes critique issue 6c
 
-- **File**: `CoulombConcreteTheorem42.lean` line ~704
-- **Mathematical argument**:
-  1. LHS of Vlasov = 0 (f constant in x, E=B=0, so spatial transport and force terms vanish)
-  2. RHS = ν * LandauOperator coulombKernel eM v
-  3. The integrand in LandauOperator is:
-     `mulVec A(v'-w) (eM(w) · vGrad eM v' - eM(v') · vGrad eM w)`
-  4. For Maxwellian: `vGrad eM v = -(v/T) · eM(v)` (componentwise)
-  5. So the bracket = `eM(v')·eM(w) · (-(v'-w)/T)` = scalar × `(v'-w)`
-  6. Key property: `mulVec (landauMatrix Ψ z) z = 0` because (|z|²I - zzᵀ)·z = 0
-  7. Hence integrand = 0, integral = 0, vDiv of 0 = 0
-
-- **Sub-lemmas to prove**:
-
-  **Sub-lemma A** (projection annihilation): `mulVec (innerLandauMatrix z) z = 0`
-  - Proof: `(normSq z • I - vecMulVec z z) *ᵥ z = normSq z • z - (zᵀz) • z = 0`
-
-  **Sub-lemma B** (Landau matrix annihilation): `mulVec (landauMatrix Ψ z) z = 0`
-  - Proof: `Ψ(|z|) • (innerLandauMatrix z) *ᵥ z = Ψ(|z|) • 0 = 0`
-
-  **Sub-lemma C** (integrand vanishes): For eM = equilibriumMaxwellian:
-  `mulVec A(v-w) (eM(w) • vGrad eM v - eM(v) • vGrad eM w) = 0`
-  - Uses: `vGrad eM v i = -(v i / T) * eM(v)`, then bracket simplifies to scalar × (v-w)
-
-  **Sub-lemma D** (LandauOperator vanishes): `LandauOperator coulombKernel eM v = 0`
-  - Uses sub-lemma C to show the integrand is 0, hence integral is 0
-  - Then vDiv of zero function is 0
-
-  **Final step**: Show LHS = 0 = ν * 0 = RHS
-
-### 2. Extract general CLM lemmas to shared file (`/simplify`)
-- Move `iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` from CoulombConcreteTheorem42.lean to Section3Helpers.lean or a new helpers file
-- Reduces CoulombConcreteTheorem42.lean by ~20 lines
+### 2. Extract iterated derivative helpers from CoulombConcreteTheorem42.lean (`/simplify`)
+- **What**: Move `iteratedFDeriv_clm_zero`, `norm_iteratedFDeriv_one_clm`, `norm_iteratedFDeriv_proj_sq_le`, `quadratic_iteratedFDeriv_bound` to Section3Helpers.lean
+- **Why**: Reduces CoulombConcreteTheorem42.lean from 762 to ~680 lines, makes helpers reusable
+- Fixes critique issues 6b (partially) and 8a
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
-| #6b: 6 files over 600 lines | Code quality | TorusInstance 816, Defs 785, CoulombConcreteTheorem42 720 |
-| 8c: Generalize beyond T³ | Epistemic | Hard — requires abstract manifold theory |
-| 8e: Mathlib-upstreamable lemmas | Community | iteratedFDeriv_clm_zero, norm_iteratedFDeriv_one_clm |
+| 6b | 7 files over 600 lines | Code quality — ongoing reduction |
+| 8b | Weaken C^∞ → C^2 | Epistemic — requires threading finite regularity |
+| 8c | Generalize beyond T³ | Epistemic — hard, needs Mathlib manifold infra |
+| 8d | Mathlib PR for helper lemmas | Community — iteratedFDeriv_clm_zero, norm_iteratedFDeriv_one_clm |
+| 8e | Split Defs.lean | Code quality — extract Maxwellian section |

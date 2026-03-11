@@ -621,5 +621,27 @@ lemma poisson_boltzmann_max_principle
     constructor <;> nlinarith [hPB x_max, hPB x_min, hmax x_min, hmin x_max]
   exact fun x => le_antisymm (by linarith [hmax x]) (by linarith [hmin x])
 
+-- ============================================================================
+-- Iterated derivative helpers for continuous linear maps
+-- ============================================================================
+
+/-- The iterated derivative of a continuous linear map vanishes at order ≥ 2. -/
+lemma iteratedFDeriv_clm_zero {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (f : E →L[ℝ] F) (n : ℕ) (hn : 2 ≤ n) (x : E) :
+    iteratedFDeriv ℝ n f x = 0 := by
+  rw [show n = (n - 1) + 1 from by omega, iteratedFDeriv_succ_eq_comp_right]
+  simp only [Function.comp, show (fun y => fderiv ℝ (↑f) y) = fun _ => (f : E →L[ℝ] F) from
+    funext fun y => f.hasFDerivAt.fderiv]
+  rw [iteratedFDeriv_const_of_ne (by omega : n - 1 ≠ 0)]; simp
+
+/-- The norm of the first iterated derivative of a CLM equals the operator norm. -/
+lemma norm_iteratedFDeriv_one_clm {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [NormedAddCommGroup F] [NormedSpace ℝ F] (f : E →L[ℝ] F) (x : E) :
+    ‖iteratedFDeriv ℝ 1 f x‖ = ‖f‖ := by
+  rw [show (1:ℕ) = 0 + 1 from rfl, iteratedFDeriv_succ_eq_comp_right]
+  simp only [Function.comp, show (fun y => fderiv ℝ (↑f) y) = fun _ => (f : E →L[ℝ] F) from
+    funext fun y => f.hasFDerivAt.fderiv, iteratedFDeriv_zero_eq_comp,
+    LinearIsometryEquiv.norm_map]
 
 end VML
