@@ -83,9 +83,9 @@ lemma coulomb_landauMatrix_entry_le_pi (z : Fin 3 → ℝ) (i j : Fin 3)
 
 
 -- lintegral_iUnion + ENNReal arithmetic requires extended unification
+set_option maxHeartbeats 800000 in
 /-- ‖·‖⁻¹ is locally integrable in ℝ³. Proved by Aristotle (job 3dc1b4dc).
     Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun> -/
-set_option maxHeartbeats 800000 in
 lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
     IntegrableOn (fun z : Fin 3 → ℝ => ‖z‖⁻¹)
       (Metric.closedBall (0 : Fin 3 → ℝ) R) := by
