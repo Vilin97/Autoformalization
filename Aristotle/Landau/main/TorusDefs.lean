@@ -1,4 +1,6 @@
 import Aristotle.Landau.main.Defs
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
+import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
 /-!
 # Torus Type Definitions and Differential Operators
@@ -18,6 +20,9 @@ noncomputable section
 
 /-- The 3-torus: product of three circles with period 1. -/
 abbrev Torus3 := Fin 3 → AddCircle (1 : ℝ)
+
+-- Period 1 > 0, needed for AddCircle.measureSpace
+instance : Fact (0 < (1 : ℝ)) := ⟨one_pos⟩
 
 -- All measure/topology instances come for free:
 instance : CompactSpace Torus3 := inferInstance
@@ -196,7 +201,7 @@ theorem clairaut_fderiv {n : ℕ} (g : (Fin n → ℝ) → ℝ) (x : Fin n → �
     (i j : Fin n) (hg : ContDiff ℝ 2 g) :
     fderiv ℝ (fun y => fderiv ℝ g y (Pi.single j 1)) x (Pi.single i 1) =
     fderiv ℝ (fun y => fderiv ℝ g y (Pi.single i 1)) x (Pi.single j 1) := by
-  have hsymm := (hg.contDiffAt (x := x)).isSymmSndFDerivAt (by simp)
+  have hsymm := (hg.contDiffAt (x := x)).isSymmSndFDerivAt (by norm_num [minSmoothness])
   have hd : DifferentiableAt ℝ (fderiv ℝ g) x :=
     ((hg.contDiffAt (x := x)).fderiv_right (le_refl _)).differentiableAt le_rfl
   have key : ∀ v w, fderiv ℝ (fun y => fderiv ℝ g y v) x w = fderiv ℝ (fderiv ℝ g) x w v := by
