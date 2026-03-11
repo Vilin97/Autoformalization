@@ -360,7 +360,7 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
   -- On the concrete torus: ContDiff ℝ ⊤ (periodicLift f) → Continuous f.
   hDiff_continuous : ∀ f, IsSpatiallyDiff f → Continuous f
   -- Gradient closure: if f is spatially differentiable, so is each component of its gradient.
-  -- On the concrete torus: requires IsSpatiallyDiff = ContDiff ℝ ⊤ (smooth);
+  -- On the concrete torus: requires IsSpatiallyDiff = ContDiff ℝ ⊤ (smooth)
   -- then ContDiff.fderiv_right gives ContDiff ℝ ⊤ for the fderiv,
   -- and clm_apply gives the component.
   hDiff_grad : ∀ (f : X → ℝ) (i : Fin 3), IsSpatiallyDiff f →
