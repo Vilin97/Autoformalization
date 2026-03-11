@@ -1,18 +1,22 @@
-# Plan — Cycle 102
+# Plan — Cycle 103
 
 ## Status summary
 
 - **Sorry count**: 0
-- **Files**: 32 files, 9,550 lines
+- **Files**: 32 files, 9,543 lines
 - **Build**: Clean, 0 errors
 - **Critique verdict**: ACCEPT
 - **Aristotle jobs**: 0 pending
 
 ## This cycle's work items
 
-### 1. Replace manual `schwartz_pointwise_decay` expansions in CoulombFluxDiff.lean (`/simplify`)
-- **What**: Issue 6d. Lines 60-62 and 64-67 manually expand `schwartz_pointwise_decay` instead of calling it. Replace with direct calls. Also check for similar cleanup in the `h_per_term` block (lines 162, 170).
-- **Why**: Reduces `coulomb_flux_deriv_schwartz_decay` by ~6 lines (197→~191). Consistent with pattern used in CoulombPSD and CoulombFluxBound.
+### 1. Extract `entropy_dissipation_continuous_coulomb` from CoulombConcreteTheorem42.lean (`/simplify`)
+- **What**: The `hD_cont` field (lines 192-233, ~42 lines) is a self-contained proof that `fun x => entropyDissipation coulombKernel (f x)` is continuous, deriving it from the Vlasov equation. Extract it as a standalone lemma in `CoulombFluxDiff.lean` (or a new small file), reducing `CoulombConcreteTheorem42` from 188 to ~150 lines.
+- **Why**: Issue 6d — reduces 4th longest proof below 150-line threshold. The logic is reusable and currently buried inside the VelocityDecayConditions construction.
+
+### 2. Clean up stale comments in CoulombPSD.lean (`/simplify`)
+- **What**: Issue 6e. Remove ~20 lines of scratch-work comments in `fubini_double_integrable_coulomb` (lines 191-215) that describe intermediate bounds but don't add value over the actual code.
+- **Why**: Reduces noise and brings `fubini_double_integrable_coulomb` closer to 150 lines.
 
 ## Backlog
 

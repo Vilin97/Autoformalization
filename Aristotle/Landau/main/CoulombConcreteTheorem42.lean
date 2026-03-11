@@ -189,48 +189,9 @@ theorem CoulombConcreteTheorem42
     -- Despite Ψ(r) = r⁻³ being singular, the PSD integrand is continuous
     -- because the score difference Δ = O(|v-w|) cancels the singularity.
     hPSD_cont := fun x => psd_continuous_coulomb (f x) (hf_pos x) (hf_smooth_v x)
-    hD_cont := by
-      -- Express D(f x) using Vlasov: force transport vanishes, so D = ν⁻¹ * ∫ spatial*log
-      obtain ⟨C_log, K_log, hLB⟩ := hLogBound
-      have hLB' : ∃ C K, ∀ x v, |Real.log (f x v)| ≤ C * (1 + ‖v‖) ^ K :=
-        ⟨C_log, K_log, hLB⟩
-      have hST_int := fun x =>
-        spatial_transport_integrable hf_pos hf_smooth_v hf_smooth_x hSchwartz hLB' x
-      have hFT_int := fun x =>
-        force_transport_integrable_coulomb E B hf_pos hf_smooth_v hSchwartz hLB' x
-      -- Key identity: ν * D(f x) = ∫ spatial * log f
-      have h_key : ∀ x, ν * entropyDissipation coulombKernel (f x) =
-          ∫ v, v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v) := by
-        intro x
-        unfold entropyDissipation
-        rw [← integral_mul_left]
-        have hrw : (fun v => ν * (LandauOperator coulombKernel (f x) v * Real.log (f x v))) =
-            (fun v => v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v) +
-              (E x + cross v (B x)) ⬝ᵥ vGrad (f x) v * Real.log (f x v)) := by
-          ext v; have hV := hVlasov x v
-          have : ν * (LandauOperator coulombKernel (f x) v * Real.log (f x v)) =
-              (ν * LandauOperator coulombKernel (f x) v) * Real.log (f x v) := by ring
-          rw [this, ← hV]
-          have : v ⬝ᵥ torusGradX (fun y => f y v) x =
-              v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x := rfl
-          rw [this]; ring
-        rw [hrw, integral_add (hST_int x) (hFT_int x)]
-        rw [force_transport_zero (f x) (E x) (B x) (hf_pos x) (hf_smooth_v x)
-          ((hSchwartz.integrable hf_smooth_v) x)
-          (fun i => force_ibp_f_dg_integrable_coulomb E B hf_pos hf_smooth_v hSchwartz hLB' x i)
-          (fun i => force_ibp_fg_integrable_coulomb E B hf_pos hf_smooth_v hSchwartz hLB' x i)]
-        simp [add_zero]
-      -- So D(f x) = ν⁻¹ * ∫ spatial * log f
-      have h_eq : (fun x => entropyDissipation coulombKernel (f x)) =
-          (fun x => ν⁻¹ * ∫ v, v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x *
-            Real.log (f x v)) := by
-        ext x
-        have := h_key x
-        field_simp at this ⊢
-        linarith
-      rw [h_eq]
-      exact continuous_const.mul
-        (spatial_transport_continuous hf_pos hf_smooth_v hf_smooth_x hSchwartz hLB')
+    hD_cont :=
+      entropy_dissipation_continuous_coulomb f E B ν hν hf_pos hf_smooth_v hf_smooth_x
+        hSchwartz hLogBound hVlasov
   }
   exact Theorem42 f E B coulombKernel ν ρ_ion
     hν hρ_ion coulombKernel_pos hf_pos (fun x => (hf_smooth_v x).of_le le_top)

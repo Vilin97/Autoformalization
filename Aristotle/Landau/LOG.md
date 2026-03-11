@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 103: Extract entropy_dissipation_continuous_coulomb + cleanup
+
+### Changes
+- **Extracted `entropy_dissipation_continuous_coulomb`** from CoulombConcreteTheorem42.lean into CoulombSpatialTransport.lean (~42-line `hD_cont` block → 2-line call). CoulombConcreteTheorem42 proof: 188 → 147 lines — now below 150 threshold.
+- **Cleaned stale comments** in CoulombPSD.lean: removed ~20 lines of scratch-work comments from `fubini_double_integrable_coulomb`. Proof: 186 → 162 lines.
+- Issue 6d: only 2 proofs remain over 150 lines (Theorem42 at 199, coulomb_flux_deriv_schwartz_decay at 190).
+- Issue 6e (stale comments): resolved.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 102: Deduplicate Schwartz decay expansions in CoulombFluxDiff
 
 ### Changes
