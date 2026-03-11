@@ -1,5 +1,17 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 106: Simplify parallel_curl_free_affine
+
+### Changes
+- **Simplified `parallel_curl_free_affine`** in Section3Helpers.lean (Aristotle-generated proof):
+  - Factored out duplicated `ContDiff ℝ 1 (fderiv ℝ g)` computation
+  - Removed unused `h_eq`, redundant `by_contra`/`skip` in `h_zero_deriv`
+  - Streamlined `h_const_c` (fderiv c = 0) proof
+- Proof: 169 → 154 lines. Section3Helpers: 596 → 580 lines (safer margin from 600 limit).
+- Issue 6d: `parallel_curl_free_affine` was missed in cycles 100-105, now tracked.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 105: Add norm_fderiv_eq_iteratedFDeriv_one helper
 
 ### Changes
