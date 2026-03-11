@@ -119,7 +119,7 @@ lemma psd_outer_integrable_coulomb
             _ ≤ M₂ := hM₂b v
     _ ≤ C_out * ((1 + ‖v‖) ^ (2 * Kg) * f v) := by
         have h1 : (1 : ℝ) ≤ (1 + ‖v‖) ^ (2 * Kg) :=
-          one_le_pow_of_one_le (by linarith [norm_nonneg v]) _
+          one_le_pow_of_one_le' (by linarith [norm_nonneg v]) _
         have h2 : M₂ ≤ (1 + ‖v‖) ^ (2 * Kg) * M₂ := le_mul_of_one_le_left (le_of_lt hM₂) h1
         simp only [C_out]
         calc 18 * Cg ^ 2 * f v * ((1 + ‖v‖) ^ (2 * Kg) * M₁ + M₂)
@@ -281,7 +281,7 @@ lemma fubini_double_integrable_coulomb
         _ = C_out * ((1 + ‖v‖) ^ (2 * Kg) * f v) := by
             simp only [C_out]
             have h1 : (1 : ℝ) ≤ (1 + ‖v‖) ^ Kg :=
-              one_le_pow_of_one_le (by linarith [norm_nonneg v]) _
+              one_le_pow_of_one_le' (by linarith [norm_nonneg v]) _
             rw [show 2 * Kg = Kg + Kg from by omega, pow_add]
             nlinarith [hf_pos v]
     -- Apply integrable_prod_iff
