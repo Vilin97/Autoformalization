@@ -6,6 +6,10 @@ A complete formalization in [Lean 4](https://lean-lang.org/) + [Mathlib](https:/
 
 [Documentation](https://vilin97.github.io/aristotle/blueprint/) | [Dependency graph](https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html)
 
+![Dependency graph](scripts/dep_graph.png)
+
+**Proof dependency graph.** All nodes are green (fully proved). The graph flows from primitive definitions (`normSq`, `eucNorm`, `landauMatrix`) at the top through intermediate results (`H_theorem`, `D_zero_implies_maxwellian`, the field and conservation lemmas) down to `theorem42` and its concrete Coulomb instantiation `coulomb_concrete` at the bottom. The interactive version is available [here](https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html).
+
 ## The Mathematics
 
 ### The Physical System
@@ -196,6 +200,20 @@ lake clean && lake update && lake exe cache get && lake build
 
 This formalization was developed by a human mathematician ([Vasily Ilin](https://github.com/Vilin97)) working collaboratively with [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (Anthropic's AI coding agent) and [Aristotle](https://aristotle.harmonic.fun/) (Harmonic's automated theorem prover).
 
+### Session Activity
+
+![Claude Code session activity](scripts/session_activity.png)
+
+**Figure: Claude Code activity across two machines (local + university server).** Top: messages per hour, split into interactive human prompts (red), automated slash commands like `/babysit` (orange), and assistant turns (blue). Bottom: hour-of-day heatmap. Of 1,207 total human messages, **835 were interactive** (the mathematician directing the proof), **210 were automated** (161 `/babysit` invocations plus `/compact`, `/clear`, etc.), and 162 were context continuations. These generated **27,186 assistant turns** — a 26:1 ratio reflecting the high autonomy of each `/babysit` cycle (typically 20–50 tool calls per invocation). The heatmap shows near-round-the-clock activity on Mar 9–10 when both machines ran babysit loops concurrently, and overnight automated sessions (dark spots at 00:00–06:00) where the loop ran unattended.
+
+### Token Usage
+
+![Token usage](scripts/token_usage.png)
+
+**Figure: Token consumption across the project.** Top: cumulative input tokens (blue, left axis, billions) and output tokens (red, right axis, millions). The project consumed **2.8 billion input tokens** (dominated by cache reads of the Lean 4 codebase and Mathlib context) and **11 million output tokens** (code generation, proof tactics, tool calls). The 254:1 input-to-output ratio reflects the read-heavy nature of formal verification — Claude reads far more context than it writes. Bottom: per-turn context size, showing a sawtooth pattern as the context window fills to ~175K tokens and resets at each of the **164 autocompacts** (red vertical lines). The dense compaction clusters on Mar 6–10 correspond to the intensive Coulomb kernel analysis and `/babysit` loop periods.
+
+At Opus 4 API pricing, this usage would cost approximately **$6,300**: $4,071 in cache reads ($1.50/M), $1,401 in cache creation ($18.75/M), $826 in output ($75/M), and $6 in fresh input ($15/M). Without prompt caching, the same workload would cost ~$42,700 — caching saves 85%.
+
 ### The `/babysit` Loop
 
 Development was organized around an automated **babysit cycle** — a repeating loop of:
@@ -217,10 +235,15 @@ This loop ran for **58 cycles** over the course of the project. The development 
 - Required sophisticated integration arguments (e.g., `landau_flux_integrable_coulomb`, `psd_continuous_coulomb`)
 - Needed counterexample construction (e.g., negated `force_entropy_integrable` via Vitali set)
 
-Over the project, **50 jobs** were submitted to Aristotle:
-- **8 lemmas fully proved** by Aristotle and integrated into the codebase
-- **18 lemmas proved manually** after Aristotle failed or timed out
-- **8 submissions negated** (statement was false) or returned errors
+Over the project, **220 jobs** were submitted to Aristotle:
+- **111 lemmas proved** cleanly by Aristotle (50%)
+- **28 statements disproved** — Aristotle found counterexamples or proved the negation (13%)
+- **66 returned with sorry** — partial progress but incomplete (30%)
+- **15 failed** or were not started (7%)
+
+![Aristotle outcomes](scripts/aristotle_outcomes.png)
+
+**Figure: Outcomes of 220 Aristotle submissions (data from API).** Aristotle proved 111 lemmas cleanly (50%), disproved 28 false statements (13%), returned 66 with sorry's still present (30%), and 15 failed or were never started (7%). The disproved statements were particularly valuable — they caught false conjectures early (e.g., Schwartz decay of Coulomb convolution derivatives, which actually have only O(‖v‖⁻²) decay). The stacked bar chart shows peak submission activity on Mar 2 (57 jobs) and Mar 6 (45 jobs). The high "returned with sorry" rate reflects the difficulty of the integrability estimates: many required domain-specific techniques (singularity cancellation, Leibniz integral rule) that exceeded Aristotle's current capabilities.
 
 Key Aristotle-proved results include:
 - `inv_norm_local_integrable`: ‖z‖⁻¹ is locally integrable in R³
@@ -233,6 +256,10 @@ Key Aristotle-proved results include:
 ![Lean LOC over time](scripts/loc_history.png)
 
 **Figure: Lean lines of code in `Aristotle/Landau/` across all 83 commits.** The project progressed in four phases. (1) **Abstract proof chain** (Mar 3–6): the mathematical argument (Sections 2–8) was formalized against an abstract `FlatTorus3` typeclass, and all 22 axioms were validated on the concrete torus T³ = (ℝ/ℤ)³. (2) **Coulomb kernel analysis** (Mar 7–9): the sharp LOC increase reflects the hard analytical work — proving integrability, differentiability, and continuity of the Landau collision operator for the Coulomb kernel Ψ(r) = r⁻³, which required handling the singularity at r = 0. This phase produced ~6K lines across `VelocityDecayInstance`, `CoulombFlux`, `CoulombPSD`, `CoulombFluxDiff`, and `CoulombConcreteTheorem42`, closing all 16 sorry's in the concrete theorem with help from [Aristotle](https://aristotle.harmonic.fun/). (3) **Cleanup** (Mar 10, early): 30+ commits systematically removed ~3K lines of dead code, redundant lemmas, unnecessary heartbeat overrides, and linter suppressions. (4) **Non-vacuousness** (Mar 10, late): a separate theorem proving that the hypotheses are satisfiable (the equilibrium Maxwellian with E = 0, B = 0 witnesses all 13 conditions). Generated by `scripts/loc_history.py`.
+
+![LOC by file group](scripts/loc_breakdown.png)
+
+**Figure: LOC by file group over time.** Red shades are the mathematical proof chain (Sections 2–8, Theorem42, VMLInputDerive, CoulombConcreteTheorem42); blue shades are supporting infrastructure (definitions, torus instance, Coulomb kernel integrability files, decay helpers). The sharp blue growth on Mar 7–8 is the Coulomb kernel analysis: proving that the Landau collision operator with Ψ(r) = r⁻³ satisfies all 19 integrability, differentiability, and continuity conditions required by the abstract proof. This was the hardest part of the formalization — handling the singularity at r = 0 required ~4K lines of analytical estimates. The cleanup phase (Mar 10) primarily removed blue infrastructure code (redundant decay helpers, primed definitions, dead lemmas), while the red proof chain remained stable.
 
 ### Timeline Highlights
 
