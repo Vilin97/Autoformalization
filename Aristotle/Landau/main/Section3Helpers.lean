@@ -1,5 +1,9 @@
 import Aristotle.Landau.main.Defs
 import Aristotle.Landau.main.Section2
+import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
+import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+import Mathlib.Analysis.Calculus.ContDiff.Bounds
 
 open Matrix Finset BigOperators Real MeasureTheory
 
@@ -471,7 +475,8 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
           exact Finset.sum_congr rfl fun i _ => by rw [← smul_eq_mul, ← ContinuousLinearMap.map_smul]; congr; ext j; by_cases hi : i = j <;> aesop
       intro v w; exact is_const_of_fderiv_eq_zero (show Differentiable ℝ c from by
         have h_diff_c : ContDiff ℝ 1 (fun v => (fderiv ℝ g v) (Pi.single 0 1) 0) := by
-          exact ((hg_smooth.fderiv_right le_rfl).clm_apply contDiff_const).apply 0
+          exact (contDiff_apply ℝ ℝ 0).comp
+            ((hg_smooth.fderiv_right (m := 1) le_rfl).clm_apply contDiff_const)
         convert h_diff_c.differentiable le_rfl using 1; aesop (simp_config := { singlePass := true })) h_const_c v w
     use c 0
     intro v w
@@ -720,8 +725,8 @@ lemma quadratic_iteratedFDeriv_bound (T : ℝ) (hT : 0 < T) (k : ℕ) :
       ContDiff ℝ ⊤ (fun v : Fin 3 → ℝ => -(v j * v j) / (2 * T)) := fun j =>
     ((contDiff_apply ℝ ℝ j).mul (contDiff_apply ℝ ℝ j)).neg.div_const _
   -- iteratedFDeriv of sum = sum of iteratedFDeriv
-  have h_sum := iteratedFDeriv_sum (fun j _ => (hcomp_smooth j).of_le le_top)
-    (x := v) (n := i)
+  have h_sum := congrFun (iteratedFDeriv_sum (i := i)
+    (fun j _ => (hcomp_smooth j).of_le le_top)) v
   -- Each component: -(v_j²)/(2T) = (-1/(2T)) • (v_j²)
   have hcomp_eq : ∀ j : Fin 3, (fun v : Fin 3 → ℝ => -(v j * v j) / (2 * T)) =
       (-1 / (2 * T)) • (fun v : Fin 3 → ℝ => v j * v j) := by
