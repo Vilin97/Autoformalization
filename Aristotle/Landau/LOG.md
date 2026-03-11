@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 76: Eliminate all mega-lines
+
+### Changes
+- **Broke all 22 remaining mega-lines** (> 200 chars) in CoulombPSD (7), TorusInstance (7), Section3 (4), VelocityDecayInstance (4).
+- Mega-line count: 22 → **0**. Max line length across project now < 200 chars.
+- All 4 modified files verified to compile clean from source (deleted .olean, rebuilt).
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 75: Break mega-lines
 
 ### Changes
