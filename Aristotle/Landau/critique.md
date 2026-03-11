@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 89)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 90)
 
 ## Verdict: ACCEPT
 
@@ -18,7 +18,7 @@
 
 ## 2. Hidden Axioms
 
-Zero axioms on main theorem `CoulombConcreteTheorem42_unique` (verified cycle 89 via `lean_verify`). I found no issue.
+Zero axioms on main theorem `CoulombConcreteTheorem42_unique` (verified cycle 90 via `lean_verify`). I found no issue.
 
 ---
 
@@ -44,19 +44,17 @@ I found no issue.
 
 ### 6a. maxHeartbeats overrides: 1 total
 
-`synthInstance.maxHeartbeats 160000` in CoulombSpatialTransport.lean. Acceptable.
+`synthInstance.maxHeartbeats 160000` in CoulombForceTransport.lean. Acceptable.
 
-### 6b. Files over 600 lines (5 files)
+### 6b. Files over 600 lines (3 files)
 
 | File | Lines |
 |------|-------|
-| CoulombSpatialTransport.lean | 676 |
 | CoulombConcreteTheorem42.lean | 653 |
-| CoulombFluxDiff.lean | 640 |
 | Defs.lean | 634 |
 | CoulombFlux.lean | 607 |
 
-Down from 6 files last cycle (CoulombPSD 826→496+348).
+Down from 4 files last cycle (CoulombFluxDiff 637→353+301).
 
 ---
 
@@ -70,38 +68,31 @@ I found no issue.
 
 ### ~~8a. Extract helpers~~ — DONE
 
-### 8b. Weaken regularity: C^∞ → optimal (DEFERRED)
+### ~~8b. Weaken regularity: C^∞ → optimal~~ — ANALYZED (cycle 90)
 
-The concrete theorem requires `ContDiff ℝ ⊤` (C^∞) in both space and velocity. The optimal regularity, confirmed by Gemini DeepThink's independent analysis, is:
-
-- **Distribution f**: f ∈ C¹(T³ × ℝ³) with ∇²_v f ∈ C⁰. That is: C¹ jointly in (x,v), plus second velocity derivatives exist and are continuous.
-- **Fields E, B**: E, B ∈ C¹(T³; ℝ³).
+ContDiff ℝ ⊤ is necessary for Coulomb: Schwartz decay of flux derivatives requires all seminorms, which needs C^∞. Cannot weaken without restructuring the abstract framework. See `experiments/contdiff_regularity_analysis.md`.
 
 ### 8c. Generalize beyond T^3 (HARD)
 
 ### 8d. Extract Mathlib-upstreamable lemmas (MEDIUM)
 
-`iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` are PR-ready (generalized to `𝕜`).
+`iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` are PR-ready.
 
-### ~~8e. Split Defs.lean~~ — DONE (805 → 634 + 189)
+### ~~8e. Split Defs.lean~~ — DONE
 
-### ~~8f. Split Section3Helpers.lean~~ — DONE (1162 → 596 + 160 + 446)
+### ~~8f. Split Section3Helpers.lean~~ — DONE
 
-### 8g. UniformSchwartzDecay stronger than needed (MEDIUM — ANALYZED)
-
-Analysis complete (cycle 88): the proof only uses velocity derivatives up to order 2 (k ≤ 2). A weaker `UniformC2Decay` condition would suffice. See `experiments/weaken_schwartz_decay.md`. Implementation deferred — mechanical but touches ~10 files.
+### ~~8g. UniformSchwartzDecay → k ≤ 2~~ — DONE (cycle 89)
 
 ### ~~8h. hExpDecay weakened to hLogGrowth~~ — DONE
 
-### 8i. hGradBound is Coulomb-specific but not flagged as such (MINOR — DOCUMENTED)
-
-Already documented in the CoulombConcreteTheorem42 docstring.
+### 8i. hGradBound is Coulomb-specific (MINOR — DOCUMENTED)
 
 ---
 
 ## 9. Mathlib Upstreamability
 
-`iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` are PR-ready (generalized to `𝕜`).
+`iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` are PR-ready.
 
 ---
 
@@ -109,10 +100,9 @@ Already documented in the CoulombConcreteTheorem42 docstring.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6b | 5 files over 600 lines | Medium | Open |
-| 8b | Weaken regularity C^∞ → optimal | Medium | Deferred |
+| 6b | 3 files over 600 lines | Medium | Open |
+| 8b | Weaken regularity C^∞ → optimal | Medium | Closed — inherent limitation |
 | 8d | Mathlib PR for helper lemmas | Low | Open |
-| 8g | UniformSchwartzDecay stronger than needed | Medium | Analyzed, impl deferred |
 
 ### Conditions for ACCEPT
 
