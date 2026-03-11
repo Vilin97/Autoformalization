@@ -1,28 +1,32 @@
-# Plan — Cycle 90
+# Plan — Cycle 91
 
 ## Status summary
 
 - **Sorry count**: 0
-- **Files**: 28 files, ~9,505 lines
+- **Files**: 29 files, ~9,521 lines
 - **Build**: Clean, 0 errors
 - **Critique verdict**: ACCEPT
 - **Aristotle jobs**: 0 pending
 
 ## This cycle's work items
 
-### 1. Split CoulombFluxDiff.lean (637 lines) (`/simplify`)
-- **What**: CoulombFluxDiff.lean is the second largest file. Split at line ~354: extract the first part (schwartz_fderiv_component_schwartz, coulomb_entry_schwartz_integrable, coulomb_entry_conv_hasFDerivAt_aux, coulomb_entry_conv_differentiable, coulomb_entry_conv_deriv_bounded, coulomb_flux_differentiable, coulomb_flux_eq_decomposed) into CoulombFluxConv.lean. Keep the second part (coulomb_flux_deriv_schwartz_decay, coulomb_ibp_df_g_integrable) in CoulombFluxDiff.lean.
-- **Why**: Issue 6b. Reduces files over 600 lines from 4 to 3.
+### 1. Split CoulombFlux.lean (607 lines) (`/simplify`)
+- **What**: CoulombFlux.lean is the last remaining Coulomb file over 600 lines. Split the flux measurability / integrability helpers from the flux component bounds and log-integrability results.
+- **Why**: Issue 6b. Reduces files over 600 lines from 3 to 2 (Defs.lean 634 and CoulombConcreteTheorem42 653 are harder to split).
 
-### 2. Weaken ContDiff hypothesis — scope analysis (`/strengthen`)
-- **What**: Issue 8b. The concrete theorem uses `ContDiff ℝ ⊤` (C^∞) for f, E, B. The proof only needs finite regularity. Audit exactly which `ContDiff` orders are used and document the minimum required.
-- **Why**: Understanding the minimum regularity is the prerequisite for any future weakening.
+### 2. Extract Lorentz HasFDerivAt helper in Section4.lean (`/simplify`)
+- **What**: Issue 6d. `lorentz_force_div_zero` and `lorentz_partial_diag_zero` duplicate identical `HasFDerivAt` computations for all 3 Lorentz force components (~18 lines). Extract a shared helper lemma.
+- **Why**: Reduces code duplication, makes Section4 more maintainable.
+
+### 3. Prepare Mathlib PR for helper lemmas (`/strengthen`)
+- **What**: Issue 8d. `iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` are PR-ready. Prepare standalone files with Mathlib-style proofs and documentation.
+- **Why**: Community contribution, validates our helpers against Mathlib standards.
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
-| 6b | 4 files over 600 lines | Code quality — ongoing, splitting 1 per cycle |
-| 8b | Weaken C^∞ → C^2 | Epistemic — hard, analyzing this cycle |
-| 8c | Generalize beyond T^3 | Epistemic — hard |
-| 8d | Mathlib PR for helper lemmas | Community — ready |
+| 6b | 2 files over 600 lines (after splitting CoulombFlux) | Defs.lean + CoulombConcreteTheorem42 — hard to split |
+| 6c | 2 proofs over 100 lines | transport_entropy_from_vlasov, polynomial_identity_from_vlasov — natural monoliths |
+| 8c | Generalize beyond T^3 | Hard |
+| 8d | Mathlib PR for helper lemmas | Community — in progress |

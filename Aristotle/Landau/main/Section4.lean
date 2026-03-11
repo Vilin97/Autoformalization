@@ -50,6 +50,34 @@ private lemma hasFDerivAt_proj_mul_const (j : Fin 3) (c : ℝ) (v : Fin 3 → �
   convert (ContinuousLinearMap.proj (ι := Fin 3) (φ := fun _ => ℝ) j :
     (Fin 3 → ℝ) →L[ℝ] ℝ).hasFDerivAt.mul_const c using 1
 
+/-- HasFDerivAt for each component of the Lorentz force E + v×B.
+    Component 0: fderiv is B₂·proj₁ - B₁·proj₂
+    Component 1: fderiv is B₀·proj₂ - B₂·proj₀
+    Component 2: fderiv is B₁·proj₀ - B₀·proj₁ -/
+private lemma lorentz_hasFDerivAt_components (E_val B_val : Fin 3 → ℝ) (v : Fin 3 → ℝ) :
+    HasFDerivAt (fun w => E_val 0 + cross w B_val 0)
+      ((B_val 2 • ContinuousLinearMap.proj 1 - B_val 1 • ContinuousLinearMap.proj 2 :
+        (Fin 3 → ℝ) →L[ℝ] ℝ)) v ∧
+    HasFDerivAt (fun w => E_val 1 + cross w B_val 1)
+      ((B_val 0 • ContinuousLinearMap.proj 2 - B_val 2 • ContinuousLinearMap.proj 0 :
+        (Fin 3 → ℝ) →L[ℝ] ℝ)) v ∧
+    HasFDerivAt (fun w => E_val 2 + cross w B_val 2)
+      ((B_val 1 • ContinuousLinearMap.proj 0 - B_val 0 • ContinuousLinearMap.proj 1 :
+        (Fin 3 → ℝ) →L[ℝ] ℝ)) v := by
+  refine ⟨?_, ?_, ?_⟩ <;> apply HasFDerivAt.const_add
+  · show HasFDerivAt (fun w => cross w B_val 0) _ v
+    unfold cross; simp only [Matrix.cons_val_zero]
+    exact (hasFDerivAt_proj_mul_const 1 (B_val 2) v).sub
+      (hasFDerivAt_proj_mul_const 2 (B_val 1) v)
+  · show HasFDerivAt (fun w => cross w B_val 1) _ v
+    unfold cross; simp only [Matrix.cons_val_one]
+    exact (hasFDerivAt_proj_mul_const 2 (B_val 0) v).sub
+      (hasFDerivAt_proj_mul_const 0 (B_val 2) v)
+  · show HasFDerivAt (fun w => cross w B_val 2) _ v
+    unfold cross; simp only [Matrix.cons_val_two]
+    exact (hasFDerivAt_proj_mul_const 0 (B_val 1) v).sub
+      (hasFDerivAt_proj_mul_const 1 (B_val 0) v)
+
 /-- Velocity divergence of the Lorentz force vanishes: div_v(E + v×B) = 0.
     E is constant in v, and the cross product v×B has zero trace. -/
 lemma lorentz_force_div_zero (E_val B_val : Fin 3 → ℝ) :
@@ -60,30 +88,7 @@ lemma lorentz_force_div_zero (E_val B_val : Fin 3 → ℝ) :
   have hsimp : ∀ i : Fin 3, (fun w : Fin 3 → ℝ => (E_val + cross w B_val) i) =
       (fun w => E_val i + cross w B_val i) := fun i => by ext; simp [Pi.add_apply]
   simp_rw [hsimp]
-  have h0 : HasFDerivAt (fun w : Fin 3 → ℝ => E_val 0 + cross w B_val 0)
-      ((B_val 2 • ContinuousLinearMap.proj 1 - B_val 1 • ContinuousLinearMap.proj 2 :
-        (Fin 3 → ℝ) →L[ℝ] ℝ)) v := by
-    apply HasFDerivAt.const_add
-    show HasFDerivAt (fun w => cross w B_val 0) _ v
-    unfold cross; simp only [Matrix.cons_val_zero]
-    exact (hasFDerivAt_proj_mul_const 1 (B_val 2) v).sub
-      (hasFDerivAt_proj_mul_const 2 (B_val 1) v)
-  have h1 : HasFDerivAt (fun w : Fin 3 → ℝ => E_val 1 + cross w B_val 1)
-      ((B_val 0 • ContinuousLinearMap.proj 2 - B_val 2 • ContinuousLinearMap.proj 0 :
-        (Fin 3 → ℝ) →L[ℝ] ℝ)) v := by
-    apply HasFDerivAt.const_add
-    show HasFDerivAt (fun w => cross w B_val 1) _ v
-    unfold cross; simp only [Matrix.cons_val_one]
-    exact (hasFDerivAt_proj_mul_const 2 (B_val 0) v).sub
-      (hasFDerivAt_proj_mul_const 0 (B_val 2) v)
-  have h2 : HasFDerivAt (fun w : Fin 3 → ℝ => E_val 2 + cross w B_val 2)
-      ((B_val 1 • ContinuousLinearMap.proj 0 - B_val 0 • ContinuousLinearMap.proj 1 :
-        (Fin 3 → ℝ) →L[ℝ] ℝ)) v := by
-    apply HasFDerivAt.const_add
-    show HasFDerivAt (fun w => cross w B_val 2) _ v
-    unfold cross; simp only [Matrix.cons_val_two]
-    exact (hasFDerivAt_proj_mul_const 0 (B_val 1) v).sub
-      (hasFDerivAt_proj_mul_const 1 (B_val 0) v)
+  obtain ⟨h0, h1, h2⟩ := lorentz_hasFDerivAt_components E_val B_val v
   rw [h0.fderiv, h1.fderiv, h2.fderiv]
   simp [ContinuousLinearMap.sub_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.proj_apply]
@@ -120,30 +125,9 @@ private lemma fderiv_entropy_potential (g : (Fin 3 → ℝ) → ℝ) (v : Fin 3 
     This is because cross product component i depends on v_j, v_k (j,k ≠ i) but not v_i. -/
 private lemma lorentz_partial_diag_zero (E_val B_val : Fin 3 → ℝ) (i : Fin 3) (v : Fin 3 → ℝ) :
     fderiv ℝ (fun w => (E_val + cross w B_val) i) v (Pi.single i 1) = 0 := by
-  -- Reuse the HasFDerivAt computations from lorentz_force_div_zero.
-  -- Each component's fderiv is a CLM involving proj j for j ≠ i,
-  -- so applying Pi.single i 1 gives 0.
   have hsimp : ∀ j : Fin 3, (fun w : Fin 3 → ℝ => (E_val + cross w B_val) j) =
       (fun w => E_val j + cross w B_val j) := fun j => by ext; simp [Pi.add_apply]
-  -- HasFDerivAt for each component (from lorentz_force_div_zero proof)
-  have h0 : HasFDerivAt (fun w : Fin 3 → ℝ => E_val 0 + cross w B_val 0)
-      ((B_val 2 • ContinuousLinearMap.proj 1 - B_val 1 • ContinuousLinearMap.proj 2 :
-        (Fin 3 → ℝ) →L[ℝ] ℝ)) v := by
-    apply HasFDerivAt.const_add; show HasFDerivAt (fun w => cross w B_val 0) _ v
-    unfold cross; simp only [Matrix.cons_val_zero]
-    exact (hasFDerivAt_proj_mul_const 1 (B_val 2) v).sub (hasFDerivAt_proj_mul_const 2 (B_val 1) v)
-  have h1 : HasFDerivAt (fun w : Fin 3 → ℝ => E_val 1 + cross w B_val 1)
-      ((B_val 0 • ContinuousLinearMap.proj 2 - B_val 2 • ContinuousLinearMap.proj 0 :
-        (Fin 3 → ℝ) →L[ℝ] ℝ)) v := by
-    apply HasFDerivAt.const_add; show HasFDerivAt (fun w => cross w B_val 1) _ v
-    unfold cross; simp only [Matrix.cons_val_one]
-    exact (hasFDerivAt_proj_mul_const 2 (B_val 0) v).sub (hasFDerivAt_proj_mul_const 0 (B_val 2) v)
-  have h2 : HasFDerivAt (fun w : Fin 3 → ℝ => E_val 2 + cross w B_val 2)
-      ((B_val 1 • ContinuousLinearMap.proj 0 - B_val 0 • ContinuousLinearMap.proj 1 :
-        (Fin 3 → ℝ) →L[ℝ] ℝ)) v := by
-    apply HasFDerivAt.const_add; show HasFDerivAt (fun w => cross w B_val 2) _ v
-    unfold cross; simp only [Matrix.cons_val_two]
-    exact (hasFDerivAt_proj_mul_const 0 (B_val 1) v).sub (hasFDerivAt_proj_mul_const 1 (B_val 0) v)
+  obtain ⟨h0, h1, h2⟩ := lorentz_hasFDerivAt_components E_val B_val v
   fin_cases i
   · change (fderiv ℝ (fun w => (E_val + cross w B_val) 0) v) (Pi.single 0 1) = 0
     rw [hsimp, h0.fderiv]; simp [ContinuousLinearMap.sub_apply, ContinuousLinearMap.smul_apply,

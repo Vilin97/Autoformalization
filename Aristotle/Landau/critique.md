@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 90)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 91)
 
 ## Verdict: ACCEPT
 
@@ -18,7 +18,7 @@
 
 ## 2. Hidden Axioms
 
-Zero axioms on main theorem `CoulombConcreteTheorem42_unique` (verified cycle 90 via `lean_verify`). I found no issue.
+Zero axioms on main theorem `CoulombConcreteTheorem42_unique` (verified cycle 91 via `lean_verify`). I found no issue.
 
 ---
 
@@ -54,7 +54,20 @@ I found no issue.
 | Defs.lean | 634 |
 | CoulombFlux.lean | 607 |
 
-Down from 4 files last cycle (CoulombFluxDiff 637→353+301).
+Down from 4 files last cycle (CoulombFluxDiff 637→301+353).
+
+### 6c. Long proofs (2 proofs over 100 lines)
+
+| File | Proof | Lines |
+|------|-------|-------|
+| Section4.lean | `transport_entropy_from_vlasov` | ~122 |
+| Section5.lean | `polynomial_identity_from_vlasov` | ~128 |
+
+These are the main entropy transport derivations. Each is a single long calculation — hard to split without losing readability.
+
+### 6d. Duplicate HasFDerivAt computations in Section4.lean
+
+`lorentz_force_div_zero` and `lorentz_partial_diag_zero` both compute identical `HasFDerivAt` for all 3 Lorentz force components (~18 lines duplicated). Extract a shared helper.
 
 ---
 
@@ -101,7 +114,9 @@ ContDiff ℝ ⊤ is necessary for Coulomb: Schwartz decay of flux derivatives re
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 6b | 3 files over 600 lines | Medium | Open |
-| 8b | Weaken regularity C^∞ → optimal | Medium | Closed — inherent limitation |
+| 6c | 2 proofs over 100 lines | Low | Open |
+| 6d | Duplicate HasFDerivAt in Section4 | Low | Open |
+| 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open |
 
 ### Conditions for ACCEPT

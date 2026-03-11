@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 91: Split CoulombFlux, deduplicate Lorentz HasFDerivAt
+
+### Changes
+- **Split CoulombFlux.lean** (607 → 187 lines): extracted `flux_times_log_integrable_coulomb` and `coulomb_flux_component_bound` into new `CoulombFluxBound.lean` (435 lines). CoulombFlux retains `landau_flux_integrable_coulomb`, `schwartz_partial_decay`, `flux_component_aestronglyMeasurable`.
+- **Deduplicated Lorentz HasFDerivAt** (issue 6d): extracted `lorentz_hasFDerivAt_components` shared helper in Section4.lean, eliminating 16 lines of identical `HasFDerivAt` computations from `lorentz_force_div_zero` and `lorentz_partial_diag_zero`. Section4: 369 → 353 lines.
+- **Documented Mathlib PR candidates** (issue 8d): `iteratedFDeriv_clm_zero` confirmed not in Mathlib via loogle. `norm_iteratedFDeriv_one_clm` is a corollary of existing `norm_iteratedFDeriv_one`. Written up in `experiments/mathlib_pr_candidates.md`.
+- Files over 600 lines: 3 → **2** (CoulombConcreteTheorem42 653, Defs 634).
+- Files: 29 → **30**. Lines: ~9,521.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 90: Split CoulombFluxDiff, analyze ContDiff regularity
 
 ### Changes
