@@ -1,51 +1,42 @@
-# Plan — Cycle 67
+# Plan — Cycle 68
 
 ## Status summary
 
-- **Sorry count**: 3 (all in `CoulombConcreteTheorem42_nonvacuous`, goals 7, 10, 12)
-- **Files**: 22 files, 7,984 lines
-- **Heartbeat overrides**: 1 (`synthInstance.maxHeartbeats 160000`)
+- **Sorry count**: 2 (both in `CoulombConcreteTheorem42_nonvacuous`)
+- **Files**: 22 files, ~8,000 lines
 - **Build**: Clean, 0 errors
-- **Critique verdict**: CONDITIONAL ACCEPT — fix MEMORY.md, no new sorry's
+- **Critique verdict**: CONDITIONAL ACCEPT — close (7) hDecay
 - **Aristotle jobs**: 0 pending
 
 ## Active multi-cycle strategies
 
-### Non-vacuousness theorem (cycles 64–67)
-3 remaining sorry goals after cycle 66 closed (8), (9), (11):
+### Non-vacuousness theorem (cycles 64–68)
+2 remaining sorry goals:
 
 | Goal | What to prove | Difficulty | Approach |
 |------|---------------|------------|----------|
-| (12) | `∫ eM dv = ρ_ion` | **Medium-Hard** | Gaussian integral `∫ exp(-|v|²/(2T)) = (2πT)^{3/2}` cancels prefactor |
-| (7) | `UniformSchwartzDecay eM` | **Hard** | Iterated fderiv of Gaussian is polynomial × Gaussian → decay |
-| (10) | `0 = ν * LandauOperator eM` | **Hardest** | Maxwellian in nullspace of Landau operator |
-
-### Spatial smoothness (deferred)
-Design documented in `experiments/spatial_smoothness_design.md`. ~95 call-site refactor. Low priority.
+| (7) hDecay | `‖iteratedFDeriv ℝ k eM v‖ * (1+‖v‖)^N ≤ C` | **Medium-Hard** | `norm_iteratedFDeriv_comp_le` + polynomial×Gaussian bound |
+| (10) hVlasov | `0 = ν * LandauOperator coulombKernel eM` | **Hardest** | Maxwellian in nullspace of Landau operator |
 
 ## This cycle's work items
 
-### 1. Fix MEMORY.md — stale documentation (`/simplify`)
-- **Why**: Critique flagged sorry count (says 6, actual 3), line counts wrong.
-- **Immediate**: Update sorry count, file line counts, CoulombConcreteTheorem42 line count.
+### 1. Prove sorry (7) hDecay — polynomial×Gaussian bound (`/prove`)
+- **Why**: Critique acceptance condition. Identified sub-lemmas in cycle 67.
+- **File**: `CoulombConcreteTheorem42.lean` line ~429
+- **Strategy (two sub-lemmas)**:
 
-### 2. Prove sorry (12) — Gaussian integral normalization (`/prove`)
-- **Why**: Most tractable of the 3 remaining. Pure computation.
-- **File**: `CoulombConcreteTheorem42.lean` line ~452
-- **Goal**: `∀ x, torusDivX (fun _ => (0 : Fin 3 → ℝ)) x = (∫ v, eM v) - ρ_ion`
-- **Approach**: LHS simplifies to `0 = ∫ eM dv - ρ_ion`, so need `∫ eM dv = ρ_ion`. The prefactor `ρ/(2πT)^{3/2}` is chosen exactly so this holds. Need:
-  1. `∫ exp(-normSq(v)/(2T)) dv = (2πT)^{3/2}` — product of 3 Gaussian integrals
-  2. Pull out constant prefactor: `∫ eM = ρ/(2πT)^{3/2} * (2πT)^{3/2} = ρ`
-  3. With `ρ = ρ_ion`, done.
-- **Key Mathlib**: `MeasureTheory.integral_gaussian` or `integral_exp_neg_sq` for 1D Gaussian, then Fubini for product.
+  **Sub-lemma A**: `poly_mul_exp_bounded` — `∀ M a > 0, ∃ C, ∀ u ≥ 0, (1+u)^M * exp(-a*u²) ≤ C`
+  - Split: u ≤ 1 → bound by 2^M; u > 1 → use u² ≥ u, then `(2u)^M * exp(-a*u) → 0`
+  - Use `Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero` for the limit
+  - Extract bound from the limit via `Metric.tendsto_atTop` or `Filter.Tendsto.eventually`
 
-### 3. Attempt sorry (7) — UniformSchwartzDecay for Gaussian (`/prove`)
-- **Why**: If (12) is closed quickly, attempt decomposition of (7).
-- **Approach**: Decompose into sub-lemmas:
-  1. `iteratedFDeriv ℝ k (equilibriumMaxwellian ρ T) v = P_k(v) * eM(v)` where P_k is polynomial of degree k
-  2. `‖P_k(v) * eM(v)‖ * (1+‖v‖)^N ≤ C` — polynomial × Gaussian decays
-  3. Combine for UniformSchwartzDecay
-- Even if the full proof isn't possible, decomposition into well-typed sub-lemmas is progress.
+  **Sub-lemma B**: iterated derivative bound via `norm_iteratedFDeriv_comp_le`
+  - `eM = const * (exp ∘ q)` where `q(v) = -normSq(v)/(2T)`
+  - `‖iteratedFDeriv ℝ i exp (q v)‖ = |exp(q v)|` for all i (exp is its own derivative)
+  - `‖iteratedFDeriv ℝ i q v‖ ≤ D^i` where D ≈ c*(1+‖v‖) (q is quadratic: zero for i ≥ 3)
+  - Result: `‖iteratedFDeriv ℝ n eM v‖ ≤ n! * |eM v| * (c(1+‖v‖))^n`
+
+  **Combine**: `n! * |eM v| * c^n * (1+‖v‖)^n * (1+‖v‖)^N ≤ n! * c^n * C_{n+N}` via sub-lemma A
 
 ## Backlog
 
@@ -53,4 +44,3 @@ Design documented in `experiments/spatial_smoothness_design.md`. ~95 call-site r
 |-------|----------|-------|
 | #6: 5 files over 600 lines | Code quality | TorusInstance 816, Defs 785, CoulombPSD 703 |
 | Sorry (10): Landau nullspace | Epistemic | Hardest — needs collision operator analysis |
-| #21: C^∞ spatial smoothness | Epistemic | Deferred |

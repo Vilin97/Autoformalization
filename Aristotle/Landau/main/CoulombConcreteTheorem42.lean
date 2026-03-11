@@ -363,21 +363,270 @@ private lemma equilibriumMaxwellian_exp_lower_bound (ρ T : ℝ) (hρ : 0 < ρ) 
   · exact Real.exp_nonneg _
   · exact Real.exp_nonneg _
 
+/-- Bound x^M * exp(-ax) ≤ M!/a^M via the Taylor expansion of exp. -/
+private lemma pow_mul_exp_neg_le (M : ℕ) (a : ℝ) (ha : 0 < a) (x : ℝ) (hx : 0 ≤ x) :
+    x ^ M * Real.exp (-a * x) ≤ M.factorial / a ^ M := by
+  have hax : 0 ≤ a * x := mul_nonneg ha.le hx
+  have h1 : (a * x) ^ M / M.factorial ≤ Real.exp (a * x) := by
+    have := Real.sum_le_exp_of_nonneg hax (M + 1)
+    calc (a * x) ^ M / ↑M.factorial
+        = ∑ i ∈ Finset.range (M + 1),
+            if i = M then (a * x) ^ i / ↑i.factorial else 0 := by
+          simp [Finset.sum_ite_eq']
+      _ ≤ ∑ i ∈ Finset.range (M + 1), (a * x) ^ i / ↑i.factorial := by
+          gcongr with i hi; split_ifs with h
+          · exact le_refl _
+          · exact div_nonneg (pow_nonneg hax _) (Nat.cast_nonneg _)
+      _ ≤ Real.exp (a * x) := this
+  have h2 : (a * x) ^ M ≤ M.factorial * Real.exp (a * x) := by
+    have := (div_le_iff₀ (Nat.cast_pos.mpr M.factorial_pos)).mp h1; linarith
+  have h3 : x ^ M * Real.exp (-a * x) * a ^ M ≤ M.factorial := by
+    calc x ^ M * Real.exp (-a * x) * a ^ M
+        = (a * x) ^ M * Real.exp (-a * x) := by rw [mul_pow]; ring
+      _ ≤ M.factorial * Real.exp (a * x) * Real.exp (-a * x) :=
+          mul_le_mul_of_nonneg_right h2 (Real.exp_nonneg _)
+      _ = M.factorial * (Real.exp (a * x) * Real.exp (-a * x)) := by ring
+      _ = M.factorial * Real.exp (a * x + (-a * x)) := by rw [← Real.exp_add]
+      _ = M.factorial := by simp
+  rwa [le_div_iff₀ (pow_pos ha M)]
+
+/-- Polynomial times Gaussian is bounded: (1+u)^M * exp(-au²) ≤ C for all u ≥ 0. -/
+private lemma poly_mul_gaussian_le (M : ℕ) (a : ℝ) (ha : 0 < a) :
+    ∃ C : ℝ, 0 < C ∧ ∀ u : ℝ, 0 ≤ u → (1 + u) ^ M * Real.exp (-a * u ^ 2) ≤ C := by
+  refine ⟨2 ^ M * (1 + M.factorial / a ^ M), by positivity, fun u hu => ?_⟩
+  by_cases h : u ≤ 1
+  · calc (1 + u) ^ M * Real.exp (-a * u ^ 2)
+        ≤ 2 ^ M * 1 := by
+          apply mul_le_mul
+          · exact pow_le_pow_left₀ (by linarith) (by linarith) M
+          · rw [← Real.exp_zero]; exact Real.exp_le_exp_of_le (by nlinarith)
+          · exact Real.exp_nonneg _
+          · positivity
+      _ ≤ 2 ^ M * (1 + M.factorial / a ^ M) := by
+          gcongr
+          linarith [div_nonneg (Nat.cast_nonneg M.factorial) (pow_nonneg ha.le M)]
+  · push_neg at h
+    have hu1 : 1 ≤ u := h.le
+    have h_sq : u ≤ u ^ 2 := le_self_pow₀ hu1 two_ne_zero
+    calc (1 + u) ^ M * Real.exp (-a * u ^ 2)
+        ≤ (2 * u) ^ M * Real.exp (-a * u) := by
+          apply mul_le_mul
+          · exact pow_le_pow_left₀ (by linarith) (by linarith) M
+          · exact Real.exp_le_exp_of_le (by nlinarith)
+          · exact Real.exp_nonneg _
+          · positivity
+      _ = 2 ^ M * (u ^ M * Real.exp (-a * u)) := by ring_nf
+      _ ≤ 2 ^ M * (M.factorial / a ^ M) := by
+          gcongr; exact pow_mul_exp_neg_le M a ha u hu
+      _ ≤ 2 ^ M * (1 + M.factorial / a ^ M) := by gcongr; linarith
+
+/-- For `Fin 3 → ℝ` with sup norm: ‖v‖² ≤ normSq v = ∑ vᵢ². -/
+private lemma norm_sq_le_normSq (v : Fin 3 → ℝ) : ‖v‖ ^ 2 ≤ normSq v := by
+  unfold normSq dotProduct; simp only [Fin.sum_univ_three]
+  obtain ⟨j, _, hj⟩ := (Finset.univ (α := Fin 3)).exists_max_image
+    (fun i => ‖v i‖) ⟨0, Finset.mem_univ _⟩
+  have hj_eq : ‖v‖ = ‖v j‖ :=
+    le_antisymm
+      (pi_norm_le_iff_of_nonneg (norm_nonneg (v j)) |>.mpr
+        (fun i => hj i (Finset.mem_univ i)))
+      (norm_le_pi_norm v j)
+  calc ‖v‖ ^ 2 = ‖v j‖ ^ 2 := by rw [hj_eq]
+    _ = |v j| ^ 2 := by rw [Real.norm_eq_abs]
+    _ = v j * v j := by rw [sq_abs]; ring
+    _ ≤ ∑ i : Fin 3, v i * v i :=
+        Finset.single_le_sum (fun i _ => mul_self_nonneg (v i)) (Finset.mem_univ j)
+    _ = v 0 * v 0 + v 1 * v 1 + v 2 * v 2 := by simp [Fin.sum_univ_three]
+
+private lemma contDiff_negNormSq_div (T : ℝ) :
+    ContDiff ℝ ⊤ (fun v : Fin 3 → ℝ => -(normSq v) / (2 * T)) := by
+  apply ContDiff.div_const; apply ContDiff.neg; unfold normSq dotProduct
+  exact ContDiff.sum fun i _ => (contDiff_apply ℝ ℝ i).mul (contDiff_apply ℝ ℝ i)
+
+-- iteratedFDeriv of a CLM vanishes at order ≥ 2
+private lemma iteratedFDeriv_clm_zero {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (f : E →L[ℝ] F) (n : ℕ) (hn : 2 ≤ n) (x : E) :
+    iteratedFDeriv ℝ n f x = 0 := by
+  rw [show n = (n - 1) + 1 from by omega, iteratedFDeriv_succ_eq_comp_right]
+  simp only [Function.comp, show (fun y => fderiv ℝ (↑f) y) = fun _ => (f : E →L[ℝ] F) from
+    funext fun y => f.hasFDerivAt.fderiv]
+  rw [iteratedFDeriv_const_of_ne (by omega : n - 1 ≠ 0)]; simp
+
+-- ‖iteratedFDeriv 1 f x‖ = ‖f‖ for a CLM f
+private lemma norm_iteratedFDeriv_one_clm {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [NormedAddCommGroup F] [NormedSpace ℝ F] (f : E →L[ℝ] F) (x : E) :
+    ‖iteratedFDeriv ℝ 1 f x‖ = ‖f‖ := by
+  rw [show (1:ℕ) = 0 + 1 from rfl, iteratedFDeriv_succ_eq_comp_right]
+  simp only [Function.comp, show (fun y => fderiv ℝ (↑f) y) = fun _ => (f : E →L[ℝ] F) from
+    funext fun y => f.hasFDerivAt.fderiv, iteratedFDeriv_zero_eq_comp,
+    LinearIsometryEquiv.norm_map]
+
+-- ‖iteratedFDeriv i (v_j²) v‖ ≤ 2(1+‖v‖) for i ≥ 1, via Leibniz on proj_j * proj_j
+private lemma norm_iteratedFDeriv_proj_sq_le (j : Fin 3) (i : ℕ) (hi : 1 ≤ i)
+    (v : Fin 3 → ℝ) :
+    ‖iteratedFDeriv ℝ i (fun w : Fin 3 → ℝ => w j * w j) v‖ ≤ 2 * (1 + ‖v‖) := by
+  set pj := ContinuousLinearMap.proj (R := ℝ) (φ := fun _ => ℝ) j
+  have hpj : ContDiff ℝ ⊤ (fun w : Fin 3 → ℝ => w j) := contDiff_apply ℝ ℝ j
+  have hleib := norm_iteratedFDeriv_mul_le hpj hpj v (n := i) le_top
+  have hpj_le : ‖pj‖ ≤ 1 :=
+    ContinuousLinearMap.opNorm_le_bound _ zero_le_one fun w => by
+      simp only [one_mul]; exact norm_le_pi_norm w j
+  have hpj_eq : (fun w : Fin 3 → ℝ => w j) = (pj : (Fin 3 → ℝ) →L[ℝ] ℝ) := rfl
+  have hpj_sq : ‖pj‖ * ‖pj‖ ≤ 1 := mul_le_one₀ hpj_le (norm_nonneg pj) hpj_le
+  refine le_trans hleib ?_
+  by_cases h3 : 3 ≤ i
+  · refine le_trans (Finset.sum_nonpos fun s hs => ?_) (by positivity)
+    rw [Finset.mem_range] at hs
+    rcases show s ≥ 2 ∨ i - s ≥ 2 from by omega with h | h
+    · simp [hpj_eq, iteratedFDeriv_clm_zero pj s h v]
+    · simp [hpj_eq, iteratedFDeriv_clm_zero pj (i - s) h v]
+  · push_neg at h3; interval_cases i
+    · -- i = 1
+      simp only [Nat.reduceAdd, Nat.reduceSub, Finset.sum_range_succ, Finset.sum_range_zero,
+        zero_add, Nat.choose, norm_iteratedFDeriv_zero, hpj_eq,
+        norm_iteratedFDeriv_one_clm pj v]
+      push_cast
+      have := mul_le_mul_of_nonneg_right (pj.le_opNorm v) (norm_nonneg pj)
+      nlinarith [norm_nonneg v]
+    · -- i = 2
+      simp only [Nat.reduceAdd, Nat.reduceSub, Finset.sum_range_succ, Finset.sum_range_zero,
+        zero_add, Nat.choose, norm_iteratedFDeriv_zero, hpj_eq,
+        norm_iteratedFDeriv_one_clm pj v,
+        iteratedFDeriv_clm_zero pj 2 le_rfl v, norm_zero]
+      push_cast; linarith [norm_nonneg v]
+
+/-- Derivative bound for the quadratic form q(v) = -normSq(v)/(2T).
+    Since q is a degree-2 polynomial: fderiv is O(1+‖v‖), second derivative is constant,
+    and all higher derivatives vanish. -/
+private lemma quadratic_iteratedFDeriv_bound (T : ℝ) (hT : 0 < T) (k : ℕ) :
+    ∃ c > 0, ∀ v : Fin 3 → ℝ, ∀ i : ℕ, 1 ≤ i → i ≤ k →
+      ‖iteratedFDeriv ℝ i (fun v => -(normSq v) / (2 * T)) v‖ ≤ (c * (1 + ‖v‖)) ^ i := by
+  refine ⟨3 / T + 1, by positivity, fun v i hi1 hik => ?_⟩
+  set c := 3 / T + 1
+  -- Step 1: Express q as sum of scaled components and bound iteratedFDeriv
+  have hfn_eq : (fun v : Fin 3 → ℝ => -(normSq v) / (2 * T)) =
+      (fun v => ∑ j : Fin 3, -(v j * v j) / (2 * T)) := by
+    ext w; unfold normSq dotProduct; simp [Fin.sum_univ_three]; ring
+  have hcomp_smooth : ∀ j : Fin 3,
+      ContDiff ℝ ⊤ (fun v : Fin 3 → ℝ => -(v j * v j) / (2 * T)) := fun j =>
+    ((contDiff_apply ℝ ℝ j).mul (contDiff_apply ℝ ℝ j)).neg.div_const _
+  -- iteratedFDeriv of sum = sum of iteratedFDeriv
+  have h_sum := iteratedFDeriv_sum (fun j _ => (hcomp_smooth j).of_le le_top)
+    (x := v) (n := i)
+  -- Each component: -(v_j²)/(2T) = (-1/(2T)) • (v_j²)
+  have hcomp_eq : ∀ j : Fin 3, (fun v : Fin 3 → ℝ => -(v j * v j) / (2 * T)) =
+      (-1 / (2 * T)) • (fun v : Fin 3 → ℝ => v j * v j) := by
+    intro j; ext w; simp [Pi.smul_apply, smul_eq_mul]; ring
+  -- Bound: ‖iteratedFDeriv i q v‖ ≤ (3/T)(1+‖v‖)
+  have hbound : ‖iteratedFDeriv ℝ i (fun v : Fin 3 → ℝ => -(normSq v) / (2 * T)) v‖ ≤
+      3 / T * (1 + ‖v‖) := by
+    rw [hfn_eq]; rw [show (fun v : Fin 3 → ℝ => ∑ j : Fin 3, -(v j * v j) / (2 * T)) =
+      (fun v => ∑ j : Fin 3, ((-1 / (2 * T)) • fun v : Fin 3 → ℝ => v j * v j) v) from by
+      ext w; congr 1; ext j; simp [Pi.smul_apply, smul_eq_mul]; ring]
+    -- After distributing iteratedFDeriv through the sum
+    conv => arg 1; rw [iteratedFDeriv_sum (fun j _ =>
+      ((contDiff_apply ℝ ℝ j).mul (contDiff_apply ℝ ℝ j)).const_smul _|>.of_le le_top)]
+    refine le_trans (norm_sum_le _ _) ?_
+    -- Bound each component
+    have habs : |(-1 : ℝ) / (2 * T)| = 1 / (2 * T) := by
+      rw [abs_of_nonpos (by linarith)]; ring
+    refine le_trans (Finset.sum_le_sum fun j _ => ?_) ?_
+    · rw [iteratedFDeriv_const_smul_apply
+        (((contDiff_apply ℝ ℝ j).mul (contDiff_apply ℝ ℝ j)).contDiffAt.of_le le_top),
+        norm_smul, Real.norm_eq_abs, habs]
+      exact mul_le_mul_of_nonneg_left (norm_iteratedFDeriv_proj_sq_le j i hi1 v)
+        (by positivity)
+    · simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, smul_eq_mul]
+      ring_nf; linarith [norm_nonneg v]
+  -- Step 2: (3/T)(1+‖v‖) ≤ c(1+‖v‖) ≤ (c(1+‖v‖))^i
+  calc ‖iteratedFDeriv ℝ i (fun v => -(normSq v) / (2 * T)) v‖
+      ≤ 3 / T * (1 + ‖v‖) := hbound
+    _ ≤ c * (1 + ‖v‖) := by unfold_let c; nlinarith [norm_nonneg v]
+    _ ≤ (c * (1 + ‖v‖)) ^ i := le_self_pow₀
+        (by unfold_let c; nlinarith [norm_nonneg v] : 1 ≤ c * (1 + ‖v‖)) hi1
+
+/-- The equilibrium Maxwellian has Schwartz decay: all iterated velocity derivatives
+    decay faster than any polynomial. Uses `norm_iteratedFDeriv_comp_le` (Faà di Bruno bound)
+    with exp(q(v)) where q = -normSq/(2T) is quadratic, combined with the
+    polynomial-times-Gaussian bound. -/
+private lemma equilibriumMaxwellian_schwartz_decay (ρ T : ℝ) (hρ : 0 < ρ) (hT : 0 < T) :
+    ∀ (N k : ℕ), ∃ C > 0, ∀ (v : Fin 3 → ℝ),
+      ‖iteratedFDeriv ℝ k (equilibriumMaxwellian ρ T) v‖ * (1 + ‖v‖) ^ N ≤ C := by
+  intro N k
+  set pf := ρ / (2 * π * T) ^ ((3 : ℝ) / 2)
+  set q := fun v : Fin 3 → ℝ => -(normSq v) / (2 * T)
+  have hpf_pos : 0 < pf := div_pos hρ (rpow_pos_of_pos (by positivity) _)
+  have hq_smooth : ContDiff ℝ ⊤ q := contDiff_negNormSq_div T
+  have hexpq_smooth : ContDiff ℝ ⊤ (Real.exp ∘ q) := contDiff_exp.comp hq_smooth
+  have heM_eq : equilibriumMaxwellian ρ T = fun v => pf * (Real.exp ∘ q) v := by
+    ext w; unfold equilibriumMaxwellian; rfl
+  -- Step 1: Pull constant pf out of iteratedFDeriv
+  have h_norm : ∀ v, ‖iteratedFDeriv ℝ k (equilibriumMaxwellian ρ T) v‖ =
+      pf * ‖iteratedFDeriv ℝ k (Real.exp ∘ q) v‖ := by
+    intro v
+    rw [heM_eq, show (fun v => pf * (Real.exp ∘ q) v) = pf • (Real.exp ∘ q) from by
+      ext w; simp [Pi.smul_apply, smul_eq_mul]]
+    rw [iteratedFDeriv_const_smul_apply (hexpq_smooth.contDiffAt.of_le le_top)]
+    rw [norm_smul, Real.norm_eq_abs, abs_of_pos hpf_pos]
+  -- Step 2: Derivative bound for q (quadratic form)
+  obtain ⟨c, hc_pos, hc⟩ := quadratic_iteratedFDeriv_bound T hT k
+  -- Step 3: Apply norm_iteratedFDeriv_comp_le (Faà di Bruno)
+  have h_comp_bound : ∀ v, ‖iteratedFDeriv ℝ k (Real.exp ∘ q) v‖ ≤
+      k.factorial * Real.exp (q v) * (c * (1 + ‖v‖)) ^ k := by
+    intro v
+    apply norm_iteratedFDeriv_comp_le contDiff_exp hq_smooth le_top v
+    · -- exp derivatives: ‖iteratedFDeriv i exp y‖ = exp(y)
+      intro i _
+      rw [norm_iteratedFDeriv_eq_norm_iteratedDeriv,
+        show Real.exp = fun s => Real.exp (1 * s) from by ext s; simp,
+        iteratedDeriv_exp_const_mul]
+      simp only [one_pow, one_mul, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+      exact le_refl _
+    · exact fun i hi1 hi2 => hc v i hi1 hi2
+  -- Step 4: q(v) ≤ -‖v‖²/(2T) since normSq v ≥ ‖v‖²
+  have h_q_ub : ∀ v, q v ≤ -(1/(2*T)) * ‖v‖ ^ 2 := by
+    intro v; simp only [q]
+    rw [show -(1 / (2 * T)) * ‖v‖ ^ 2 = -(‖v‖ ^ 2 / (2 * T)) from by ring, neg_div]
+    exact neg_le_neg
+      (div_le_div_of_nonneg_right (norm_sq_le_normSq v) (by positivity : (0:ℝ) ≤ 2*T))
+  -- Step 5: Polynomial × Gaussian bound
+  obtain ⟨Cg, hCg_pos, hCg⟩ := poly_mul_gaussian_le (k + N) (1/(2*T)) (by positivity)
+  refine ⟨pf * k.factorial * c ^ k * Cg, by positivity, fun v => ?_⟩
+  have hv_nn : 0 ≤ 1 + ‖v‖ := by linarith [norm_nonneg v]
+  rw [h_norm v]
+  -- Chain the inequalities
+  have step1 : pf * ‖iteratedFDeriv ℝ k (Real.exp ∘ q) v‖ * (1 + ‖v‖) ^ N ≤
+      pf * (k.factorial * Real.exp (q v) * (c * (1 + ‖v‖)) ^ k) * (1 + ‖v‖) ^ N := by
+    gcongr; exact h_comp_bound v
+  have step2 : pf * (k.factorial * Real.exp (q v) * (c * (1 + ‖v‖)) ^ k) *
+      (1 + ‖v‖) ^ N =
+      pf * k.factorial * c ^ k * (Real.exp (q v) * (1 + ‖v‖) ^ (k + N)) := by
+    rw [mul_pow]; ring
+  have step3 : Real.exp (q v) * (1 + ‖v‖) ^ (k + N) ≤
+      (1 + ‖v‖) ^ (k + N) * Real.exp (-(1/(2*T)) * ‖v‖ ^ 2) :=
+    calc Real.exp (q v) * (1 + ‖v‖) ^ (k + N)
+        ≤ Real.exp (-(1/(2*T)) * ‖v‖ ^ 2) * (1 + ‖v‖) ^ (k + N) :=
+          mul_le_mul_of_nonneg_right (Real.exp_le_exp_of_le (h_q_ub v)) (pow_nonneg hv_nn _)
+      _ = (1 + ‖v‖) ^ (k + N) * Real.exp (-(1/(2*T)) * ‖v‖ ^ 2) := by ring
+  have step4 : (1 + ‖v‖) ^ (k + N) * Real.exp (-(1/(2*T)) * ‖v‖ ^ 2) ≤ Cg :=
+    hCg ‖v‖ (norm_nonneg v)
+  linarith [mul_le_mul_of_nonneg_left (le_trans step3 step4)
+    (by positivity : (0:ℝ) ≤ pf * k.factorial * c ^ k)]
+
 /-- **Non-vacuousness of CoulombConcreteTheorem42.**
 
     The equilibrium Maxwellian f(v) = ρ/(2πT)^{3/2} exp(-|v|²/(2T)) with
     E = 0, B = 0 satisfies all 13 hypotheses of the main theorem. This
     proves the theorem is non-vacuous: at least one instance exists.
 
-    **Proof status: 8 of 10 non-trivial goals proved, 2 sorry'd.**
+    **Proof status: 10 of 10 non-trivial goals addressed, 1 sorry'd.**
 
     Why each hypothesis holds for the equilibrium:
     - (3) hf_pos: ρ/(2πT)^{3/2} > 0 and exp > 0 ⇒ f > 0  ✓
     - (4) hf_smooth_v: composition of smooth functions (const, exp, polynomial)  ✓
     - (5) hf_smooth_x: f is spatially constant ⇒ periodicLift is constant ⇒ C^∞  ✓
     - (6) hB_smooth: B = 0, same argument as (5)  ✓
-    - (7) hSchwartz: Gaussian is Schwartz class  ← sorry (hDecay needs
-          iteratedFDeriv poly×Gaussian bound; hGradDecay proved via const=0)
+    - (7) hSchwartz: Gaussian is Schwartz class via Faà di Bruno + poly×Gaussian bound  ✓
     - (8) hExpDecay: normSq v ≤ 3(1+‖v‖)², choose C = 3/(2T)+max(0,-log prefix)  ✓
     - (9) hGradBound: ∂eM/∂vᵢ = -(vᵢ/T)·eM, bound |vᵢ| ≤ 1+‖v‖  ✓
     - (10) hVlasov: Maxwellian in kernel of Landau operator  ← sorry (hardest)
@@ -426,7 +675,10 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
   -- (7) hSchwartz: Gaussian is UniformSchwartzDecay
   · constructor
     · -- hDecay: ‖iteratedFDeriv ℝ k eM v‖ * (1+‖v‖)^N ≤ C
-      sorry
+      intro N k
+      obtain ⟨C, hC, hbound⟩ :=
+        equilibriumMaxwellian_schwartz_decay ρ_ion T hρ_ion hT N k
+      exact ⟨C, hC, fun _ v => hbound v⟩
     · -- hGradDecay: spatial gradient of constant function is 0
       intro N i
       refine ⟨1, one_pos, fun x v => ?_⟩

@@ -1,5 +1,18 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 68: Close sorry (7) hDecay (2→1)
+
+### Changes
+- **Closed sorry (7)** `hDecay` — the polynomial×Gaussian bound for equilibrium Maxwellian Schwartz decay. Proved `quadratic_iteratedFDeriv_bound`: ‖iteratedFDeriv i (-normSq/(2T)) v‖ ≤ (c(1+‖v‖))^i via Leibniz formula on each v_j² component.
+- **Added 3 helper lemmas**: `iteratedFDeriv_clm_zero` (iteratedFDeriv of CLM = 0 for n ≥ 2), `norm_iteratedFDeriv_one_clm` (‖iteratedFDeriv 1 f x‖ = ‖f‖ for CLM f), `norm_iteratedFDeriv_proj_sq_le` (component bound 2(1+‖v‖))
+- **Removed `maxHeartbeats 400000`** from `equilibriumMaxwellian_schwartz_decay` — now compiles within default heartbeats
+- **Updated docstring**: 10 of 10 goals addressed, 1 sorry'd
+
+### Sorry count: 1 (in `CoulombConcreteTheorem42_nonvacuous`)
+
+### Remaining sorry
+- (10) hVlasov: Maxwellian in kernel of Landau operator (hardest — needs collision operator analysis)
+
 ## 2026-03-10 UTC — Babysit cycle 67: Close sorry (12), decompose sorry (7) (3→2)
 
 ### Changes
