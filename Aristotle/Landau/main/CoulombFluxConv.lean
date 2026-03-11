@@ -349,4 +349,27 @@ lemma coulomb_flux_eq_decomposed
       integral_const_mul_of_integrable (h_Adf j)]
 
 
+/-- Coulomb convolution of a Schwartz-decaying function is uniformly bounded:
+    |∫ A_{ij}(v-w) * g(w) dw| ≤ M for all v. Uses |A_{ij}(z)| ≤ ‖z‖⁻¹ and the
+    Newtonian potential uniform bound. -/
+lemma coulomb_entry_conv_uniform_bound
+    {g : (Fin 3 → ℝ) → ℝ}
+    (hg_decay : ∀ M : ℕ, ∃ C > 0, ∀ w, |g w| * (1 + ‖w‖) ^ M ≤ C)
+    (hg_meas : AEStronglyMeasurable g)
+    (i j : Fin 3) :
+    ∃ M > 0, ∀ v, |∫ w, landauMatrix coulombKernel (v - w) i j * g w| ≤ M := by
+  obtain ⟨M, hM, hMb⟩ := newtonian_schwartz_uniform_bound g hg_decay hg_meas
+  exact ⟨M, hM, fun v =>
+    le_trans (norm_integral_le_integral_norm _)
+      (le_trans (integral_mono_of_nonneg (ae_of_all _ fun w => abs_nonneg _)
+        (inv_norm_schwartz_integrable g hg_decay hg_meas v)
+        (ae_of_all _ fun w => by
+          rw [abs_mul]
+          by_cases hvw : v - w = 0
+          · simp [hvw, landauMatrix_coulombKernel_zero]
+          · exact mul_le_mul_of_nonneg_right
+              (le_trans (le_of_eq (Real.norm_eq_abs _))
+                (coulomb_landauMatrix_entry_le_pi _ i j hvw)) (abs_nonneg _)))
+        (hMb v))⟩
+
 end VML

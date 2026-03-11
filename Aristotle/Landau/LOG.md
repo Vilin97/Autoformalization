@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 97: Extract coulomb_entry_conv_uniform_bound, flux_deriv under 200 lines
+
+### Changes
+- **Added `coulomb_entry_conv_uniform_bound`** to CoulombFluxConv.lean (~20 lines): captures the pattern "|∫ A_{ij}(v-w) * g(w) dw| ≤ M for all v" using |A_{ij}(z)| ≤ ‖z‖⁻¹ and `newtonian_schwartz_uniform_bound`.
+- **Replaced inline `hK_sup` and `hL_sup`** in CoulombFluxDiff.lean with calls to the new helper. CoulombFluxDiff: 301 → 265 lines (-36). `coulomb_flux_deriv_schwartz_decay` proof: ~231 → **~196 lines** (now under 200).
+- Issue 6c: only 1 proof over 200 lines remains (`CoulombConcreteTheorem42` ~222, hard to split — 19-field record construction).
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 96: Extract measurability, fubini_double under 200 lines
 
 ### Changes
