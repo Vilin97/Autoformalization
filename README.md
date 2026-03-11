@@ -184,6 +184,8 @@ A university server was brought online on March 8 to run babysit loops concurren
 
 The `/babysit` loop was iteratively refined throughout the project. Early versions were permissive; later iterations were rewritten to enforce strict execution of all steps and to drive work from `critique.md` rather than ad hoc priorities.
 
+All 463 interactive human prompts (with timestamps) are archived in [`scripts/human_prompts.txt`](scripts/human_prompts.txt).
+
 ### Session Activity
 
 ![Claude Code session activity](scripts/session_activity.png)
