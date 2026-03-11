@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 84: Split Defs.lean, document hGradBound
+
+### Changes
+- **Split Defs.lean** (805 → 634 lines): extracted VMLSteadyState, VMLEquilibrium, VMLInput into new `VMLStructures.lean` (189 lines).
+- Updated imports in Section6, Section7, Section8, VMLInputDerive to use VMLStructures.
+- **Documented hGradBound Coulomb-specificity** (issue 8i): added docstring explaining the score bound is needed only for singular kernels, not bounded ones.
+- Files: 23 → **24**. Lines: ~9,405.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 83: Split Section3Helpers, generalize CLM lemmas
 
 ### Changes

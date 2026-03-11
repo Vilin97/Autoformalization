@@ -1,4 +1,4 @@
-import Aristotle.Landau.main.Defs
+import Aristotle.Landau.main.VMLStructures
 import Aristotle.Landau.main.Section6
 
 /-!

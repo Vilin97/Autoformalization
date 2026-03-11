@@ -1,4 +1,4 @@
-import Aristotle.Landau.main.Defs
+import Aristotle.Landau.main.VMLStructures
 
 /-!
 # Bulk Velocity Vanishes (Section 6)
