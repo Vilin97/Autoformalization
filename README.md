@@ -4,6 +4,24 @@ A complete formalization in [Lean 4](https://lean-lang.org/) + [Mathlib](https:/
 
 **Status: fully verified by the Lean 4 kernel. 0 sorry's across 22 files (~8,300 lines).**
 
+| Metric | Value |
+|--------|-------|
+| Lean 4 files | 22 |
+| Lines of code | 8,297 |
+| Theorems | 38 |
+| Lemmas | 154 |
+| Definitions | 28 |
+| Sorry's | 0 |
+| Development period | 10 days (Mar 1–10, 2026) |
+| Git commits | 85 |
+| Claude Code sessions | 32 (across 2 machines) |
+| Interactive human prompts | 836 |
+| Automated `/babysit` cycles | 161 |
+| Assistant turns | 27,200+ |
+| Tokens consumed | 2.8 billion |
+| Estimated API cost | ~$6,300 |
+| Aristotle ATP submissions | 220 (111 proved, 28 disproved) |
+
 [Documentation](https://vilin97.github.io/aristotle/blueprint/) | [Dependency graph](https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html)
 
 ![Dependency graph](scripts/dep_graph.png)
@@ -200,6 +218,68 @@ lake clean && lake update && lake exe cache get && lake build
 
 This formalization was developed by a human mathematician ([Vasily Ilin](https://github.com/Vilin97)) working collaboratively with [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (Anthropic's AI coding agent) and [Aristotle](https://aristotle.harmonic.fun/) (Harmonic's automated theorem prover).
 
+### Narrative
+
+The project began on the evening of February 28, 2026 (PDT). The initial prompt was:
+
+> *"Look at H-theorem-formal.tex. I want to formalize that the steady state of the VML."*
+
+After setting up Mathlib and the toolchain, the first Lean code was committed on March 1 as a single monolithic file (`landau-steady-state.lean`) stating the full theorem chain from the paper. Within hours the file exceeded a thousand lines, with `sorry`'s marking every gap. Claude estimated the formalization would require "multiple months." The project was completed in 11 days.
+
+**Hypothesis discipline.** The most persistent methodological issue was controlling hypothesis creep. Claude's default behavior when encountering a hard lemma was to assume it as a hypothesis of the main theorem rather than prove it. The mathematician rejected this pattern throughout:
+
+> *"You keep doing the same thing — adding hypotheses that are actually lemmas to be proven! Why do you do that? I keep telling you not to, and I wrote it in CLAUDE.md, but you keep doing it."* (Mar 2)
+>
+> *"I have told you time and again to keep the hypotheses to Theorem42 minimal. If you need a mathematical fact, it should be a lemma with a sorry, not a hypothesis!"* (Mar 3)
+
+This principle was codified in the project's `CLAUDE.md`: *"The goal is not to end up with 0 sorry's! The goal is to make an honest formalization of the main theorem, with only the genuinely needed mathematical/physical assumptions."* A `sorry` — an acknowledged gap — was considered preferable to an unnecessary hypothesis, which silently weakens the theorem statement.
+
+By March 4, an audit revealed that Theorem42 had accumulated **42 hypotheses**, including analytical regularity and integrability conditions that should have been derived rather than assumed. These were systematically reduced: velocity-space decay conditions were bundled into a single `VelocityDecayConditions` structure (replacing 15 scattered hypotheses), and regularity facts like continuity of the density ρ were derived inside the proof from domination bounds. The final concrete theorem has 13 hypotheses, all physically meaningful.
+
+**Aristotle integration.** On March 1, the mathematician shared [Kim Morrison's Zulip post](https://leanprover.zulipchat.com/) describing a pipeline where Claude sends lemma statements to [Aristotle](https://aristotle.harmonic.fun/) for automated proving:
+
+> *"Somehow they got Claude to call Aristotle programmatically. Maybe we can do something similar here?"*
+
+This established the core workflow: decompose the proof into lemmas, submit each to Aristotle, check results, and iterate. The instruction was explicit: *"Don't be scared by the difficulty — if the lemma is true, there is a good chance Aristotle can prove it even if it's hard. And if it doesn't prove it, decompose it into smaller pieces, and have Aristotle prove those."* (Mar 2)
+
+Aristotle's negation results were particularly valuable. When Aristotle proved the negation of a submitted lemma, it indicated a bug in the statement — typically a missing measurability hypothesis or a claim that fails on pathological counterexamples (e.g., a Vitali set). The fix-and-resubmit cycle (*"The lemmas that Aristotle negated — fix them and rerun Aristotle"*) served as the primary mechanism for catching false conjectures.
+
+Over the project, 220 jobs were submitted: 111 proved (50%), 28 disproved (13%), 66 returned with `sorry` (30%), 15 failed (7%). Key Aristotle-proved results include `inv_norm_local_integrable`, `single_summand_deriv_bound`, `fubini_symmetrization_logf`, `ibp_real_line`, and `lorentz_force_div_zero`.
+
+**Abstract/concrete split (Mar 2–4).** An early design decision was to separate the proof into an abstract framework and a concrete instantiation. The `FlatTorus3` typeclass specifies what the proof requires of the spatial domain — integration by parts, curl and divergence identities, a maximum principle, constancy of harmonic functions — without fixing it to a particular manifold. The mathematical argument (Sections 2–9 of the paper) was formalized against this interface, while a separate `TorusInstance` module proves that T³ = (ℝ/ℤ)³ satisfies all 22 fields. This separation ensured that when the torus proofs required rewrites (e.g., removing the false hypothesis `hDiff_velocityIntegral`), the abstract proof chain was unaffected.
+
+On March 3, the monolithic file was split into the `main/` directory structure. The first batch of Aristotle submissions dropped the sorry count from 25 to 7 overnight.
+
+**Spatial domain representation (Mar 2–5).** The choice of spatial domain representation was the project's longest-running design question. The theorem concerns functions on a 3-torus T³, but the Lean representation was not obvious. The initial approach used a fully abstract `FlatTorus3` typeclass. The mathematician was concerned about the resulting axiom count from the start: *"Can we now honestly instantiate the structure? And what are those 7 axioms?"* (Mar 2). *"Isn't T³ = S¹ × S¹ × S¹? What's the issue of instantiating it?"*
+
+On March 5, several concrete representations were explored: the unit cube [0,1]³ ⊂ ℝ³ with periodic boundary conditions, a smooth manifold structure via Mathlib, and Mathlib's `AddCircle`:
+
+> *"How big of an undertaking to add a smooth manifold structure? Make a new file outside of main/ and experiment with various ways to represent our spatial domain."* (Mar 5)
+>
+> *"I want the torus to be concrete. Let's go with the best long-term option. BUT let's first make sure it fits our needs."* (Mar 5)
+
+A central concern was how to handle periodicity: *"What about the periodicity of all functions, will it be an assumption in every lemma? Seems awkward. Any way to package it with the torus itself? I mean, on a real torus every function is periodic."* The chosen representation — `Fin 3 → AddCircle 1` with `IsSpatiallyDiff f` defined as `ContDiff ℝ ⊤ (periodicLift f)` — resolves this: functions on the torus factor through the quotient map ℝ → ℝ/ℤ, so periodicity is automatic. The choice was validated by consulting Gemini (Google DeepMind's model, via MCP). The `TorusInstance` added 22 `sorry`'s — one per field of `FlatTorus3` — ranging from straightforward (`hGradConst`) to hard (`torus_hHarmonic_const`, proved via the energy method ∫|∇φ|² = −∫φΔφ = 0). All were closed by March 7, when the abstract theorem first reached **0 sorry's**.
+
+**Automation (Mar 7–8).** On March 7, an adversarial self-review process was introduced. Claude was instructed to critique the formalization as a hostile reviewer: *"You are a hostile reviewer trying to REJECT this formalization. Your job is to find every weakness, gap, and dishonesty."* The output, `critique.md`, identified false hypotheses, unnecessary assumptions, and dead code.
+
+Before boarding a flight on the evening of March 7, the mathematician submitted remaining lemmas to Aristotle (*"If there are any lemmas left, submit them to Aristotle now. I am boarding a plane"*, Mar 7, 20:29). On March 8 at 1 AM, upon landing, the automation suite was created in a 20-minute session (01:09–01:30). Four slash commands (`/critique`, `/prove`, `/check-aristotle`, `/cleanup`) were combined into `/babysit` and set to run on a 10-minute timer:
+
+> *"Now we have /critique, /prove, /check-aristotle, and /cleanup. I want to run these commands in a loop until there are no issues in /critique."* (Mar 8, 01:13)
+
+The first `/babysit` invocation ran at 01:19 AM on March 8. The loop eventually executed 72 documented cycles over the following two days, each cycle critiquing the codebase, planning work, proving theorems, submitting hard lemmas to Aristotle, and logging results.
+
+**Coulomb kernel (Mar 8–9).** With the abstract theorem proved, the next step was instantiating it for the physical Coulomb kernel Ψ(r) = r⁻³. This required proving that the Landau collision operator with this singular kernel satisfies all 17 integrability, differentiability, and continuity conditions in the `VelocityDecayConditions` bundle. The `CoulombConcreteTheorem42.lean` file was created on the evening of March 8 with **35 sorry's**.
+
+The Coulomb singularity at r = 0 makes |A_{ij}(z)| ~ ‖z‖⁻¹, which is just barely integrable in ℝ³. Each integrability proof required decomposing the domain into a ball around the origin (handled by local integrability of ‖z‖⁻¹) and the complement (handled by Schwartz decay). Key results such as `inv_norm_local_integrable` and `convolution_local_int_schwartz` were proved by Aristotle; others, such as `landau_flux_component_diff_with_bound`, required 800K heartbeats and the Leibniz integral rule (`hasFDerivAt_integral_of_dominated_of_fderiv_le`).
+
+A university server was brought online on March 8 to run babysit loops concurrently with the local machine, enabling near-continuous progress. The session activity heatmap shows both machines running simultaneously on March 9–10.
+
+**Sprint to zero (Mar 9).** On March 9, the sorry count in the Coulomb theorem dropped from 35 → 6 (file splitting + Aristotle results) → 0. The last sorry was closed at 11:15 PM — commit `20d0f4b`: *"Achieve 0 sorry's: prove differentiability + fix false Schwartz decay lemma."*
+
+**Cleanup and non-vacuousness (Mar 10).** With 0 sorry's achieved, the babysit loop shifted to code quality: removing dead code (−3K lines), eliminating unnecessary `maxHeartbeats` overrides, and re-enabling linters. A separate theorem `CoulombConcreteTheorem42_nonvacuous` was added to verify that the hypotheses are satisfiable — the equilibrium Maxwellian with E = 0, B = 0 witnesses all 13 conditions. This briefly reintroduced sorry's (peaking at 6), all closed by the evening of March 10. Final state: **0 sorry's, 22 files, ~8,300 lines**.
+
+The `/babysit` loop was iteratively refined throughout the project. Early versions were permissive; later iterations were rewritten to enforce strict execution of all steps and to drive work from `critique.md` rather than ad hoc priorities.
+
 ### Session Activity
 
 ![Claude Code session activity](scripts/session_activity.png)
@@ -251,6 +331,10 @@ Key Aristotle-proved results include:
 - `psd_continuous_coulomb`: the PSD integrand is continuous despite the Coulomb singularity
 - `landau_flux_integrable_coulomb`: the Landau flux is integrable for Coulomb
 
+![Aristotle turnaround](scripts/aristotle_turnaround.png)
+
+**Figure: Aristotle turnaround times for 214 Landau-related submissions, colored by outcome.** Left: histogram of turnaround times. Proved lemmas (green) cluster in the first few bins (median **9 minutes**), while "returned with sorry" (red) dominates the long tail. The overall median was **19 minutes**. Right: median turnaround by outcome category. Successfully proved lemmas are fast (9 min); disproved statements take moderately longer (29 min, as Aristotle must construct a counterexample); but submissions returned with sorry take a median of **5.6 hours** — Aristotle exhausts its time budget searching before giving up. Failed submissions (56 min median) terminate earlier on infrastructure errors.
+
 ### Lines of Code Over Time
 
 ![Lean LOC over time](scripts/loc_history.png)
@@ -261,16 +345,17 @@ Key Aristotle-proved results include:
 
 **Figure: LOC by file group over time.** Red shades are the mathematical proof chain (Sections 2–8, Theorem42, VMLInputDerive, CoulombConcreteTheorem42); blue shades are supporting infrastructure (definitions, torus instance, Coulomb kernel integrability files, decay helpers). The sharp blue growth on Mar 7–8 is the Coulomb kernel analysis: proving that the Landau collision operator with Ψ(r) = r⁻³ satisfies all 19 integrability, differentiability, and continuity conditions required by the abstract proof. This was the hardest part of the formalization — handling the singularity at r = 0 required ~4K lines of analytical estimates. The cleanup phase (Mar 10) primarily removed blue infrastructure code (redundant decay helpers, primed definitions, dead lemmas), while the red proof chain remained stable.
 
-### Timeline Highlights
+### Git Churn
 
-| Phase | Sorry Count | Key Milestone |
-|-------|------------|---------------|
-| Initial formalization | ~50+ | Abstract proof chain stated, many gaps |
-| Concrete torus instance | ~30 | FlatTorus3 validated on T³ |
-| Coulomb kernel split | ~16 | Single 1827-line file split into 6 |
-| Aristotle integration | 14 → 8 | Automated proofs for key integrability lemmas |
-| Manual closing | 8 → 0 | Joint measurability, IBP, PSD bounds proved by hand |
-| Cleanup (cycles 52-58) | 0 | Dead code removal (-2000 lines), heartbeat elimination |
+![Git churn](scripts/git_churn.png)
+
+**Figure: Lines of Lean code added and deleted per day.** Top: raw additions (green) and deletions (red). Bottom: net change. Most days are net-positive (new content being written), with two notable exceptions: **Mar 3** (the monolithic `landau-steady-state.lean` file was split into `main/` — same code reorganized, hence large add + delete with net negative), and **Mar 9–10** (the dead code cleanup phase removed ~3K lines of redundant lemmas, primed definitions, and unnecessary heartbeat overrides). Total over the project: +21,783 added, -13,478 deleted, net +8,305 lines.
+
+### Sorry Elimination
+
+![Sorry count over time](scripts/sorry_history.png)
+
+**Figure: Number of `sorry`'s in `main/` over time (85 commits).** The sorry count follows a characteristic "sawtooth" pattern: sorry's accumulate as new proof scaffolding is written, then are eliminated through proving campaigns. Key events: (1) **Peak 25** (Mar 2): the abstract proof chain (Sections 2–9) stated with gaps. (2) **Monolithic split** (Mar 3–4): first wave of Aristotle proofs drops count from 25→7. (3) **TorusInstance** (Mar 5 evening): +13 sorry's for the 22 torus axioms, quickly resolved. (4) **First 0 sorry's** (Mar 7): the abstract theorem is fully proved — all sorry's in the main proof chain are closed. (5) **CoulombConcrete added** (Mar 8 evening): +35 sorry's for all Coulomb integrability/continuity conditions needed to instantiate the abstract theorem on the physical kernel Ψ(r) = r⁻³. (6) **Coulomb proved** (Mar 9 evening): 35→0 sprint via Aristotle submissions + manual proving. (7) **Non-vacuousness** (Mar 10): brief +1 from adding a satisfiability theorem, immediately resolved to **0 sorry's (final)**.
 
 ## Known Limitations
 
