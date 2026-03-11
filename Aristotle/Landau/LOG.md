@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 72: Critique update, no dead code found
+
+### Changes
+- Updated critique to cycle 72 (ACCEPT, 0 sorry's).
+- Searched for dead code across 4 largest files: all flagged lemmas are actually used (agent's search missed intra-file references).
+- **Observed**: Section3Helpers.lean has Mathlib API drift (e.g., `norm_iteratedFDeriv_mul_le`, `integral_gaussian` renamed). Builds pass via cached .olean but fresh builds would fail. This is pre-existing.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 71: Extract remaining derivative helpers
 
 ### Changes
