@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 99: Eliminate last heartbeat override
+
+### Changes
+- **Removed `synthInstance.maxHeartbeats 160000`** from CoulombForceTransport.lean. The override is no longer needed (likely fixed by Mathlib typeclass synthesis improvements). Now **0 heartbeat overrides** across all 31 files.
+- Issue 6a resolved: no `maxHeartbeats` overrides remaining.
+- Checked for dead code across all 31 files — no unused declarations found.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 98: Extract coulomb_ibp_f_dg_integrable, 0 proofs over 200 lines
 
 ### Changes
