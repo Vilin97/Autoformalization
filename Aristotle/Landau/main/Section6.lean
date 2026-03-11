@@ -1,4 +1,5 @@
 import Aristotle.Landau.main.VMLStructures
+import Aristotle.Landau.main.FlatTorus3Lemmas
 
 /-!
 # Bulk Velocity Vanishes (Section 6)

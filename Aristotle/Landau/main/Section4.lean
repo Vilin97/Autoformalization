@@ -1,4 +1,5 @@
 import Aristotle.Landau.main.Defs
+import Aristotle.Landau.main.FlatTorus3Lemmas
 import Aristotle.Landau.main.Section3
 
 /-!
