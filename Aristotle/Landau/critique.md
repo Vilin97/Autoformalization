@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 97)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 98, updated)
 
 ## Verdict: ACCEPT
 
@@ -54,13 +54,9 @@ I found no issue.
 
 Can't be split per user preference.
 
-### 6c. Long proofs (1 proof over 200 lines)
+### ~~6c. Long proofs~~ — RESOLVED (cycle 98)
 
-| File | Proof | Lines |
-|------|-------|-------|
-| CoulombConcreteTheorem42.lean | `CoulombConcreteTheorem42` | ~222 |
-
-`coulomb_flux_deriv_schwartz_decay` now under 200 lines (~196, cycle 97). `CoulombConcreteTheorem42` is the main 19-field record construction, hard to split further.
+All proofs now under 200 lines. `CoulombConcreteTheorem42` ~186 (was ~223, extracted `coulomb_ibp_f_dg_integrable`). `coulomb_flux_deriv_schwartz_decay` ~196 (cycle 97).
 
 ---
 
@@ -101,7 +97,7 @@ I found no issue.
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 6b | 1 file over 600 lines | Low | Open (Defs.lean, can't split) |
-| 6c | 1 proof over 200 lines | Low | Open (CoulombConcreteTheorem42, hard to split) |
+| ~~6c~~ | ~~Long proofs~~ | ~~Low~~ | ~~RESOLVED (cycle 98)~~ |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |
 | 8j | lean-lsp build desync | Low | Open (tooling, persistent) |

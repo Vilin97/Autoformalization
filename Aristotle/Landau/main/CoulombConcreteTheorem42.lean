@@ -97,50 +97,13 @@ theorem CoulombConcreteTheorem42
     (hSchwartz.hDecay N hk).imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩
   -- Extract gradient bound components (used in multiple fields)
   obtain ⟨Cg, Kg, hCg⟩ := hGradBound
-  -- Extract hIBP_f_dg: used for both hLandauIBP_f_dg and hFubini_outer
+  -- Flux × score integrability (used for hLandauIBP_f_dg and hFubini_outer)
   have hIBP_f_dg : ∀ x i, Integrable (fun v =>
       (∫ w, mulVec (landauMatrix coulombKernel (v - w))
         (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i *
-      fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)) := by
-    intro x i
-    have h_score : ∀ v, |fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)| ≤
-        Cg * (1 + ‖v‖) ^ Kg := fun v =>
-      score_bound_of_grad_bound (hf_pos x) (hf_smooth_v x) (fun v j => hCg x v j) v i
-    -- Step 2: Flux component bound
-    -- |(∫ w, A(v-w)(f(w)∇f(v) - f(v)∇f(w)))_i| ≤ Cf * f(v) * (1+‖v‖)^Kg
-    -- (uses |A(v-w)_{ij}| ≤ ‖v-w‖⁻¹, newtonian_schwartz_uniform_bound, hGradBound)
-    have h_flux : ∃ Cf > 0, ∀ v,
-        |(∫ w, mulVec (landauMatrix coulombKernel (v - w))
-          (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i| ≤
-        Cf * f x v * (1 + ‖v‖) ^ Kg :=
-      coulomb_flux_component_bound (f x) (hf_pos x) (hf_smooth_v x)
-        (hSchwartz_x x)
-        (fun v j => hCg x v j) i
-    -- Step 3: Combine → product ≤ Cf*Cg * f(v) * (1+‖v‖)^{2Kg} → integrable
-    obtain ⟨Cf, hCf_pos, hCf⟩ := h_flux
-    apply ((hSchwartz.integrable_poly_mul hf_smooth_v x (2 * Kg)).const_mul (Cf * Cg)).mono'
-    · -- Measurability: score is continuous (smooth log∘f), flux is parametric integral
-      have h_score_meas : AEStronglyMeasurable
-          (fun v => fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)) volume :=
-        ((ContDiff.log (hf_smooth_v x) (fun v => ne_of_gt (hf_pos x v))).continuous_fderiv le_top
-          |>.clm_apply continuous_const).aestronglyMeasurable
-      exact AEStronglyMeasurable.mul
-        (flux_component_aestronglyMeasurable (f x) (hf_smooth_v x)
-          (fun v => landau_flux_integrable_coulomb (f x) (hf_pos x) (hf_smooth_v x)
-            (hSchwartz_x x) v) i)
-        h_score_meas
-    · filter_upwards with v
-      rw [Real.norm_eq_abs, abs_mul]
-      have hCf_nn : (0 : ℝ) ≤ Cf * f x v * (1 + ‖v‖) ^ Kg :=
-        mul_nonneg (mul_nonneg (le_of_lt hCf_pos) (le_of_lt (hf_pos x v)))
-          (pow_nonneg (by linarith [norm_nonneg v]) _)
-      calc |(∫ w, mulVec (landauMatrix coulombKernel (v - w))
-              (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i| *
-            |fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)|
-          ≤ (Cf * f x v * (1 + ‖v‖) ^ Kg) * (Cg * (1 + ‖v‖) ^ Kg) :=
-            mul_le_mul (hCf v) (h_score v) (abs_nonneg _) hCf_nn
-        _ = Cf * Cg * ((1 + ‖v‖) ^ (2 * Kg) * f x v) := by
-            rw [show 2 * Kg = Kg + Kg from by omega, pow_add]; ring
+      fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)) := fun x i =>
+    coulomb_ibp_f_dg_integrable (f x) (hf_pos x) (hf_smooth_v x)
+      (hSchwartz_x x) (fun v j => hCg x v j) i
   -- Extract hFluxInt for reuse
   have hFluxInt : ∀ x v, Integrable (fun w =>
       mulVec (landauMatrix coulombKernel (v - w))

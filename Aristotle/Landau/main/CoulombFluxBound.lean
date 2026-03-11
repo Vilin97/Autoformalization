@@ -423,4 +423,58 @@ lemma coulomb_flux_component_bound
         nlinarith [hg_pos v, one_le_pow_of_one_le_of_le
           (show (1:ℝ) ≤ 1 + ‖v‖ by linarith [norm_nonneg v]) (le_refl Kg)]
 
+/-- The product flux_i(v) * score_i(v) is integrable for the Coulomb kernel.
+    Uses coulomb_flux_component_bound (|flux_i| ≤ Cf*f*(1+‖v‖)^Kg) and
+    score_bound_of_grad_bound (|score_i| ≤ Cg*(1+‖v‖)^Kg), giving a
+    Cf*Cg*(1+‖v‖)^{2Kg}*f(v) dominator which is integrable by Schwartz decay. -/
+lemma coulomb_ibp_f_dg_integrable
+    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
+    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
+      ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
+    {Cg : ℝ} {Kg : ℕ}
+    (hGrad : ∀ v i, |fderiv ℝ f v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f v)
+    (i : Fin 3) :
+    Integrable (fun v =>
+      (∫ w, mulVec (landauMatrix coulombKernel (v - w))
+        (f w • vGrad f v - f v • vGrad f w)) i *
+      fderiv ℝ (Real.log ∘ f) v (Pi.single i 1)) := by
+  have h_score : ∀ v, |fderiv ℝ (Real.log ∘ f) v (Pi.single i 1)| ≤
+      Cg * (1 + ‖v‖) ^ Kg := fun v =>
+    score_bound_of_grad_bound hf_pos hf_smooth hGrad v i
+  obtain ⟨Cf, hCf_pos, hCf⟩ :=
+    coulomb_flux_component_bound f hf_pos hf_smooth hf_schwartz hGrad i
+  -- Polynomial-weighted integrability of f from Schwartz decay
+  have h_poly_int : Integrable (fun v => (1 + ‖v‖) ^ (2 * Kg) * f v) := by
+    obtain ⟨C, hC_pos, hbound⟩ := hf_schwartz (2 * Kg + 4) (by omega)
+    apply (inverse_poly_integrable C).mono'
+      ((continuous_const.add continuous_norm).pow _ |>.mul
+        hf_smooth.continuous).aestronglyMeasurable
+    filter_upwards with v
+    have hb := hbound v; simp [norm_iteratedFDeriv_zero] at hb
+    have hv_pos : (0 : ℝ) < (1 + ‖v‖) ^ 4 := by positivity
+    rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (by positivity), le_div_iff₀ hv_pos]
+    calc (1 + ‖v‖) ^ (2 * Kg) * |f v| * (1 + ‖v‖) ^ 4
+        = |f v| * ((1 + ‖v‖) ^ (2 * Kg) * (1 + ‖v‖) ^ 4) := by ring
+      _ = |f v| * (1 + ‖v‖) ^ (2 * Kg + 4) := by rw [pow_add]
+      _ ≤ C := hb
+  -- Combine: |flux_i * score_i| ≤ Cf*Cg * (1+‖v‖)^{2Kg} * f(v)
+  apply (h_poly_int.const_mul (Cf * Cg)).mono'
+  · exact AEStronglyMeasurable.mul
+      (flux_component_aestronglyMeasurable f hf_smooth
+        (fun v => landau_flux_integrable_coulomb f hf_pos hf_smooth hf_schwartz v) i)
+      ((ContDiff.log hf_smooth (fun v => ne_of_gt (hf_pos v))).continuous_fderiv le_top
+        |>.clm_apply continuous_const).aestronglyMeasurable
+  · filter_upwards with v
+    rw [Real.norm_eq_abs, abs_mul]
+    have hCf_nn : (0 : ℝ) ≤ Cf * f v * (1 + ‖v‖) ^ Kg :=
+      mul_nonneg (mul_nonneg (le_of_lt hCf_pos) (le_of_lt (hf_pos v)))
+        (pow_nonneg (by linarith [norm_nonneg v]) _)
+    calc |(∫ w, mulVec (landauMatrix coulombKernel (v - w))
+            (f w • vGrad f v - f v • vGrad f w)) i| *
+          |fderiv ℝ (Real.log ∘ f) v (Pi.single i 1)|
+        ≤ (Cf * f v * (1 + ‖v‖) ^ Kg) * (Cg * (1 + ‖v‖) ^ Kg) :=
+          mul_le_mul (hCf v) (h_score v) (abs_nonneg _) hCf_nn
+      _ = Cf * Cg * ((1 + ‖v‖) ^ (2 * Kg) * f v) := by
+          rw [show 2 * Kg = Kg + Kg from by omega, pow_add]; ring
+
 end VML

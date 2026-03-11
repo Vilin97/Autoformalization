@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 98: Extract coulomb_ibp_f_dg_integrable, 0 proofs over 200 lines
+
+### Changes
+- **Added `coulomb_ibp_f_dg_integrable`** (~54 lines) to CoulombFluxBound.lean: standalone lemma for flux×score integrability using `coulomb_flux_component_bound` + `score_bound_of_grad_bound` + Schwartz polynomial-weighted integrability.
+- **Replaced inline `hIBP_f_dg`** (43-line block) in CoulombConcreteTheorem42 with 3-line call to the new helper. CoulombConcreteTheorem42: 309 → 272 lines (-37). Proof: ~223 → **~186 lines** (now under 200).
+- Issue 6c fully resolved: **0 proofs over 200 lines** remaining.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 97: Extract coulomb_entry_conv_uniform_bound, flux_deriv under 200 lines
 
 ### Changes
