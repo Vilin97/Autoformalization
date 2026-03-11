@@ -128,13 +128,11 @@ lemma tendsto_landau_quadratic_diag
               (IsOpen.mem_nhds (hU.1.prod hU.1) ⟨hU.2.1, hU.2.1⟩)
               fun p hp => hL _ _ hp.1 hp.2
           filter_upwards [ h_bound ] with p hp
-          refine le_trans (landau_bound _ _) _
-          split_ifs <;> simp_all [ mul_pow ]
-          exact mul_le_mul_of_nonneg_left
-            (by nlinarith [ show 0 ≤ eucNorm (G p.1 - G p.2) from Real.sqrt_nonneg _,
-                            show 0 ≤ L * eucNorm (p.1 - p.2) from
-                              le_trans (Real.sqrt_nonneg _) hp ])
-            (inv_nonneg.2 (Real.sqrt_nonneg _) )
+          exact le_trans (landau_bound _ _) (mul_le_mul_of_nonneg_left
+            (pow_le_pow_left₀ (Real.sqrt_nonneg _) hp 2)
+            (by split_ifs with h
+                · exact le_refl 0
+                · exact inv_nonneg.2 (Real.sqrt_nonneg _)))
         have h_simplified_bound : ∀ᶠ p : (Fin 3 → ℝ) × (Fin 3 → ℝ) in nhds (x, x),
             abs ((G p.1 - G p.2) ⬝ᵥ landauMatrix coulombKernel (p.1 - p.2) *ᵥ
               (G p.1 - G p.2)) ≤ L^2 * eucNorm (p.1 - p.2) := by
