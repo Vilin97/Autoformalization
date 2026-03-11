@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 107)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 108)
 
 ## Verdict: ACCEPT
 
@@ -56,9 +56,9 @@ All proofs under 200 lines.
 
 | File | Proof | Lines |
 |------|-------|-------|
-| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | 181 |
+| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | 183 |
 | Theorem42.lean | `Theorem42` | 178 |
-| Section3Helpers.lean | `parallel_curl_free_affine` | 154 |
+| Section3Helpers.lean | `parallel_curl_free_affine` | 157 |
 
 All under 200. Diminishing returns on further extraction — remaining bulk is intrinsic complexity.
 
@@ -66,9 +66,13 @@ All under 200. Diminishing returns on further extraction — remaining bulk is i
 
 ### ~~6f. Dead code audit~~ — RESOLVED (cycle 105)
 
-### 6g. Verbose Aristotle proofs in Section3Helpers.lean
+### ~~6g. Verbose Aristotle `aesop` in parallel_curl_free_affine~~ — RESOLVED (cycle 107)
 
-Several Aristotle-generated proofs use broad tactics (`aesop`, `simp +decide`) that could be more targeted, and repetitive `fin_cases` patterns. Not a correctness concern but affects maintainability if Mathlib changes simp lemmas.
+7 `aesop` calls replaced with targeted `simp`/`exact` tactics. 2 `aesop` calls remain in other proofs (`affine_gradient_antiderivative` line 455, unnamed case at line 450), acceptable.
+
+### 6h. Broad `simp +decide` usage (35 occurrences)
+
+Section3Helpers.lean has 35 `simp +decide` / `simp_all +decide` calls across Aristotle-generated proofs. While more predictable than `aesop`, broad `simp` calls are fragile if Mathlib changes simp lemmas. Low priority — most are in `Fin 3` case analysis where `decide` handles index equality.
 
 ---
 
@@ -86,7 +90,7 @@ I found no issue.
 
 ### 8d. Extract Mathlib-upstreamable lemmas (MEDIUM)
 
-### 8i. hGradBound is Coulomb-specific (MINOR — DOCUMENTED)
+### ~~8i. hGradBound is Coulomb-specific~~ — DOCUMENTED
 
 ### 8j. lean-lsp build desync (PERSISTENT)
 
@@ -103,7 +107,7 @@ I found no issue.
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 6d | 3 proofs over 150 lines | Low | Open (diminishing returns) |
-| 6g | Verbose Aristotle tactics | Low | New |
+| 6h | 35 broad `simp +decide` calls | Low | New |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |
 | 8j | lean-lsp build desync | Low | Open (tooling) |

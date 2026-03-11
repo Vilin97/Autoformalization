@@ -109,6 +109,24 @@ lemma IsMaxwellian_params_unique
     fin_cases i <;> linarith
   exact ⟨h0, hb, hc⟩
 
+/-- A Maxwellian distribution is strictly positive everywhere. -/
+lemma IsMaxwellian.pos (hM : IsMaxwellian f) : ∀ v, 0 < f v := by
+  obtain ⟨a₀, b, c₀, _, hf⟩ := hM
+  intro v; rw [hf]; exact Real.exp_pos _
+
+/-- A Maxwellian distribution is smooth (C^∞). -/
+lemma IsMaxwellian.contDiff (hM : IsMaxwellian f) : ContDiff ℝ ⊤ f := by
+  obtain ⟨a₀, b, c₀, _, hf⟩ := hM
+  have : f = fun v => Real.exp (a₀ + dotProduct b v + c₀ * normSq v) := funext hf
+  rw [this]
+  apply Real.contDiff_exp.comp
+  have hDot : ContDiff ℝ ⊤ (fun v : Fin 3 → ℝ => dotProduct b v) :=
+    ContDiff.sum fun i _ => (contDiff_apply ℝ ℝ i).const_mul _
+  have hNorm : ContDiff ℝ ⊤ (fun v : Fin 3 → ℝ => normSq v) := by
+    unfold normSq dotProduct
+    exact ContDiff.sum fun i _ => (contDiff_apply ℝ ℝ i).mul (contDiff_apply ℝ ℝ i)
+  exact (contDiff_const.add hDot).add (contDiff_const.mul hNorm)
+
 /-- The equilibrium Maxwellian (zero drift, density = ρ_ion):
     f∞(v) = ρ_ion/(2πT∞)^(3/2) · exp(-|v|²/(2T∞)) -/
 def equilibriumMaxwellian (ρ_ion T : ℝ) (v : Fin 3 → ℝ) : ℝ :=
