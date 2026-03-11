@@ -1,42 +1,40 @@
-# Plan — Cycle 61
+# Plan — Cycle 64
 
 ## Status summary
 
 - **Sorry count**: 0
-- **Files**: 21 files, 7,850 lines
+- **Files**: 22 files, 7,838 lines
 - **Heartbeat overrides**: 1 (`synthInstance.maxHeartbeats 160000`)
-- **Linter suppressions**: 0
-- **lean_verify**: both theorems clean
-- **Critique verdict**: CONDITIONAL ACCEPT (condition: fix unused simp args in Defs.lean)
+- **Deprecated `refine'`**: 36 uses across 5 files
+- **Critique verdict**: CONDITIONAL ACCEPT
 
 ## Active multi-cycle strategies
 
-None yet. This is the first plan.md.
+### C^∞ → C^k weakening
+Velocity smoothness weakened to C³ in cycle 63 (DONE). Spatial smoothness still C^∞ — C¹ suffices but requires changing `IsSpatiallyDiff` in the `FlatTorus3` typeclass. Deferred to backlog.
 
 ## This cycle's work items
 
-### 1. Fix unused simp args in Defs.lean (`/simplify`)
-- **Why**: Defs.lean is imported by every file. ~8 unused simp arg warnings there affect the whole chain. This is the blocking ACCEPT condition.
-- **Approach**: Read each warning, remove the unused argument, rebuild.
-- **Files**: `Aristotle/Landau/main/Defs.lean`
+### 1. Replace 36 deprecated `refine'` with `refine` (`/simplify`)
+- **Why**: Critique #16. `refine'` is deprecated in Lean 4. 36 uses across 5 files.
+- **Files**: CoulombPSD.lean (13), TorusInstance.lean (10), NewtonianPotential.lean (8), Section3Helpers.lean (4), SchwartzDecayDefs.lean (1)
+- **Approach**: Mechanical replacement. `refine'` → `refine` with `?_` placeholders where needed.
 
-### 2. Fix deprecated `integral_mul_right` (`/simplify`)
-- **Why**: Trivial, one-line fix. Will break on next Mathlib update.
-- **Approach**: Replace `integral_mul_right` with `integral_mul_const` at Defs.lean:419.
-- **Files**: `Aristotle/Landau/main/Defs.lean`
+### 2. Fix MEMORY.md (`/simplify`)
+- **Why**: Critique #19. Says 21 files — now 22.
+- **Approach**: Update file count and line counts.
 
-### 3. Prove uniqueness of T_eq (`/strengthen`)
-- **Why**: Rated EASY in critique. The conclusion asserts `∃ T_eq` but not `∃! T_eq`. Uniqueness follows from the Gaussian integral being strictly monotone in T and normalization ∫ f = ρ_ion.
-- **Approach**: Add a uniqueness lemma, then strengthen the conclusion of CoulombConcreteTheorem42 (or add a corollary). This may require Mathlib's `integral_gaussian` or monotonicity results.
-- **Files**: `Aristotle/Landau/main/CoulombConcreteTheorem42.lean`, possibly `Defs.lean` or a new helper
+### 3. Strengthen: make progress on one epistemic/generalization issue (`/strengthen`)
+- **Why**: Critique conditions require progress on #6, #8, or #21.
+- **Options (pick one)**:
+  - Split Defs.lean (776 lines) — extract VMLInput/VMLSteadyState structures into separate file
+  - Begin spatial smoothness weakening (C^∞ → C¹) — requires typeclass change, high risk
 
 ## Backlog
 
-| Issue | Category | Step | Notes |
-|-------|----------|------|-------|
-| #7: hGradBound derivable | Epistemic | `/strengthen` | Medium-High effort. Requires formalizing compactness argument for exp-polynomial bounds. |
-| #8: No non-equilibrium VDC instance | Epistemic | `/strengthen` | The single most important structural weakness per critique. Hard: requires constructing a non-trivial solution. |
-| #9: C^∞ → C^k | Epistemic | `/strengthen` | Medium effort. Audit every ContDiff usage across the chain. |
-| #6: 5 files over 600 lines | Code quality | `/simplify` | TorusInstance (1162) most pressing. Large effort to split well. |
-| #16: ~40 unused simp args (Section3Helpers) | Code quality | `/simplify` | Tedious but low risk. Do after Defs.lean is clean. |
-| #18: Style issues in Section3Helpers | Code quality | `/simplify` | refine' → refine, multiGoal fixes, long lines. |
+| Issue | Category | Notes |
+|-------|----------|-------|
+| #6: 6 files over 600 lines | Code quality | TorusInstance 816, Defs 776, CoulombPSD 703 |
+| #8: No non-equilibrium VDC instance | Epistemic | Hard |
+| #18: multiGoal violations, long lines | Cosmetic | Low priority |
+| #21: C^∞ spatial smoothness overkill | Epistemic | Requires typeclass change |

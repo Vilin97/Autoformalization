@@ -20,7 +20,7 @@ theorem steady_state_is_local_maxwellian
     (X : Type*)
     (f : X → (Fin 3 → ℝ) → ℝ) (Ψ : ℝ → ℝ)
     (hΨ : ∀ r, 0 < Ψ r) (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth : ∀ x, ContDiff ℝ 3 (f x))
     (hf_int : ∀ x, Integrable (f x))
     (hD_zero : ∀ x, entropyDissipation Ψ (f x) = 0)
     -- Analytical interface: score form + PSD properties for each x
@@ -82,10 +82,10 @@ lemma lorentz_force_div_zero (E_val B_val : Fin 3 → ℝ) :
 /-- Chain rule for the entropy potential: ∇(g·log g - g) = log(g) · ∇g.
     This is the Fréchet derivative version, used to relate IBP to entropy integrals. -/
 private lemma fderiv_entropy_potential (g : (Fin 3 → ℝ) → ℝ) (v : Fin 3 → ℝ)
-    (hg_smooth : ContDiff ℝ ⊤ g) (hg_pos : 0 < g v) :
+    (hg_smooth : ContDiff ℝ 3 g) (hg_pos : 0 < g v) :
     fderiv ℝ (fun w => g w * Real.log (g w) - g w) v =
       Real.log (g v) • fderiv ℝ g v := by
-  have hg_diff : DifferentiableAt ℝ g v := hg_smooth.differentiable le_top |>.differentiableAt
+  have hg_diff : DifferentiableAt ℝ g v := hg_smooth.differentiable (by norm_num) |>.differentiableAt
   have hg_ne : g v ≠ 0 := ne_of_gt hg_pos
   have hlog_diff : DifferentiableAt ℝ (fun w => Real.log (g w)) v :=
     (Real.differentiableAt_log hg_ne).comp v hg_diff
@@ -149,7 +149,7 @@ private lemma lorentz_partial_diag_zero (E_val B_val : Fin 3 → ℝ) (i : Fin 3
 lemma force_transport_zero
     (g : (Fin 3 → ℝ) → ℝ) (E_val B_val : Fin 3 → ℝ)
     (hg_pos : ∀ v, 0 < g v)
-    (hg_smooth : ContDiff ℝ ⊤ g)
+    (hg_smooth : ContDiff ℝ 3 g)
     (hg_int : Integrable g)
     (h_int_f_dg : ∀ i, Integrable (fun v =>
       (E_val + cross v B_val) i *
@@ -179,7 +179,7 @@ lemma force_transport_zero
         intro i; simp only [cross, Pi.add_apply]
         fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one] <;> fun_prop)
       (by -- differentiability of entropy potential (g smooth, g > 0)
-        exact ((hg_smooth.mul (hg_smooth.log (fun v => ne_of_gt (hg_pos v)))).sub hg_smooth).differentiable le_top)
+        exact ((hg_smooth.mul (hg_smooth.log (fun v => ne_of_gt (hg_pos v)))).sub hg_smooth).differentiable (by norm_num))
       (by -- ∂(F_i)/∂v_i = 0 for Lorentz force (cross product structure), so integrand = 0
         intro i
         have key : ∀ v, fderiv ℝ (fun w => (fun v => E_val + cross v B_val) w i) v
@@ -232,7 +232,7 @@ lemma transport_entropy_from_vlasov
     (Ψ : ℝ → ℝ) (ν : ℝ)
     (hν : 0 < ν)
     (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth : ∀ x, ContDiff ℝ 3 (f x))
     (hf_int : ∀ x, Integrable (f x))
     -- Spatial differentiability of f(·,v) and log f(·,v)
     (hDiff_fv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => f x v))

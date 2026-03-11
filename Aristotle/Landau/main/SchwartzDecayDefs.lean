@@ -38,7 +38,7 @@ lemma inverse_poly_integrable (C : ℝ) :
         have := @integrable_rpow_neg_one_add_norm_sq
         specialize @this (Fin 3 → ℝ) _ _ _ _ _ (MeasureSpace.volume) _ 4; norm_num at this
         simpa [add_comm] using this
-      refine' h_integrable.mono' _ _
+      refine h_integrable.mono' ?_ ?_
       · exact Measurable.aestronglyMeasurable (by measurability)
       · filter_upwards [] using fun v => by rw [Real.norm_of_nonneg (by positivity)]; exact this v
     aesop
