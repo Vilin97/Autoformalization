@@ -1,4 +1,5 @@
 import Aristotle.Landau.main.CoulombFlux
+import Mathlib.Analysis.Calculus.ParametricIntegral
 
 /-!
 # Coulomb Entry Convolution: Differentiability and Bounds
@@ -87,7 +88,9 @@ private lemma coulomb_entry_conv_hasFDerivAt_aux
   -- Uniform bound on ‖fderiv g‖: from Schwartz decay with N=0, k=1
   obtain ⟨Cf, hCf_pos, hCf⟩ : ∃ Cf > 0, ∀ w : Fin 3 → ℝ, ‖fderiv ℝ g w‖ ≤ Cf := by
     obtain ⟨Cf, hCf_pos, hCf⟩ := hg_schwartz 0 1
-    exact ⟨Cf, hCf_pos, fun w => by simpa [pow_zero] using hCf w⟩
+    exact ⟨Cf, hCf_pos, fun w => by
+      have := hCf w; simp [pow_zero] at this
+      exact le_trans (by rw [norm_iteratedFDeriv_fderiv]) this⟩
   have hg_diff : ∀ w, HasFDerivAt g (fderiv ℝ g w) w :=
     fun w => (hg_smooth.differentiable le_top).differentiableAt.hasFDerivAt
   refine hasFDerivAt_integral_of_dominated_of_fderiv_le
@@ -167,14 +170,17 @@ lemma coulomb_entry_conv_deriv_bounded
     ∃ C > 0, ∀ v,
         ‖fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * g w) v‖ ≤ C := by
   -- Schwartz decay of fderiv g (absolute value form)
+  have hfderiv_decay : ∀ N : ℕ, ∃ C > 0, ∀ w,
+      ‖fderiv ℝ g w‖ * (1 + ‖w‖) ^ N ≤ C := by
+    intro N; obtain ⟨C, hC, hb⟩ := hg_schwartz N 1
+    exact ⟨C, hC, fun w => by
+      calc ‖fderiv ℝ g w‖ * (1 + ‖w‖) ^ N
+          = ‖iteratedFDeriv ℝ 1 g w‖ * (1 + ‖w‖) ^ N := by rw [norm_fderiv_eq_iteratedFDeriv_one]
+        _ ≤ C := hb w⟩
   have hfderiv_abs_decay : ∀ N : ℕ, ∃ C > 0, ∀ w,
       |‖fderiv ℝ g w‖| * (1 + ‖w‖) ^ N ≤ C := by
-    intro N; obtain ⟨C, hC, hb⟩ := hg_schwartz N 1
-    refine ⟨C, hC, fun w => ?_⟩
-    rw [abs_of_nonneg (norm_nonneg _)]
-    calc ‖fderiv ℝ g w‖ * (1 + ‖w‖) ^ N
-        = ‖iteratedFDeriv ℝ 1 g w‖ * (1 + ‖w‖) ^ N := by rw [norm_fderiv_eq_iteratedFDeriv_one]
-      _ ≤ C := hb w
+    intro N; obtain ⟨C, hC, hb⟩ := hfderiv_decay N
+    exact ⟨C, hC, fun w => by rw [abs_of_nonneg (norm_nonneg _)]; exact hb w⟩
   -- Uniform bound on convolution via newtonian_schwartz_uniform_bound
   obtain ⟨M, hM_pos, hM⟩ := newtonian_schwartz_uniform_bound
     (fun w => ‖fderiv ℝ g w‖) hfderiv_abs_decay
@@ -219,7 +225,7 @@ lemma coulomb_entry_conv_deriv_bounded
         congr 1
         ext u
         simp [sub_sub_cancel]
-    _ ≤ M := hM v
+    _ ≤ M := by simp only [abs_norm] at hM; exact hM v
     _ ≤ M + 1 := le_add_of_nonneg_right one_pos.le
 
 /-- The Coulomb flux component v ↦ (∫_w A(v-w)·[f(w)∇f(v)-f(v)∇f(w)])_i is differentiable.
