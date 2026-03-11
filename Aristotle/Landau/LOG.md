@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 114: Weaken hSpatialVelocityFubini axiom, fix Defs.lean line length
+
+### Changes
+- **Weakened `hSpatialVelocityFubini` axiom** in `FlatTorus3` structure: removed unused pointwise integrability hypothesis `(∀ x, Integrable (F x))`. The axiom now only requires joint integrability `Integrable (uncurry F)`, which is strictly weaker. Verified 0 axioms with `lean_verify`. Touches Defs.lean, TorusInstance.lean, Section4.lean.
+- **Fixed line-length violation** in Defs.lean:98 (split long one-liner).
+- **Restored `maxHeartbeats 400000`** for `integral_derivative_periodic_zero` in TorusIntegration.lean — the Defs.lean structure change increased unifier work.
+- **Updated MEMORY.md** with correct individual file line counts (many were 20-50% off after splits).
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 113: Eliminate all maxHeartbeats, document hLogGrowth independence
 
 ### Changes

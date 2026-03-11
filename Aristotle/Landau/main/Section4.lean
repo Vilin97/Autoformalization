@@ -295,7 +295,7 @@ lemma transport_entropy_from_vlasov
     ext x; exact h_key x
   rw [h_eq]
   -- Fubini: swap ∫_X and ∫_v
-  rw [FlatTorus3.hSpatialVelocityFubini _ hSpatialTransport_int hSpatialTransport_joint]
+  rw [FlatTorus3.hSpatialVelocityFubini _ hSpatialTransport_joint]
   -- For each v, spatial integral vanishes
   suffices h_v : ∀ v : Fin 3 → ℝ, (∫ x,
       v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v)) = 0 by
