@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 98, updated)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 99, updated)
 
 ## Verdict: ACCEPT
 
@@ -42,9 +42,9 @@ I found no issue.
 
 ## 6. Code Quality
 
-### 6a. maxHeartbeats overrides: 1 total
+### ~~6a. maxHeartbeats overrides~~ — RESOLVED (cycle 99)
 
-`synthInstance.maxHeartbeats 160000` in CoulombForceTransport.lean. Acceptable.
+0 overrides. `synthInstance.maxHeartbeats 160000` in CoulombForceTransport.lean eliminated (no longer needed).
 
 ### 6b. Files over 600 lines (1 file)
 

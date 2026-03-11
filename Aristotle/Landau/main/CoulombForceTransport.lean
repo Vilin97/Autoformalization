@@ -14,8 +14,6 @@ open MeasureTheory Matrix Finset BigOperators Real
 noncomputable section
 namespace VML
 
-set_option synthInstance.maxHeartbeats 160000 in
-
 /-- Spatial gradient of f w.r.t. x is AEStronglyMeasurable in v, via difference quotient limits. -/
 lemma torusGradX_aestronglyMeasurable
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
