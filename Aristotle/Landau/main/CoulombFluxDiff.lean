@@ -201,7 +201,9 @@ lemma coulomb_entry_conv_deriv_bounded
   calc ‖∫ u, landauMatrix coulombKernel u i j • fderiv ℝ g (v - u)‖
       ≤ ∫ u, ‖landauMatrix coulombKernel u i j • fderiv ℝ g (v - u)‖ := norm_integral_le_integral_norm _
     _ = ∫ u, ‖landauMatrix coulombKernel u i j‖ * ‖fderiv ℝ g (v - u)‖ := by
-        congr 1; ext u; exact norm_smul _ _
+        congr 1
+        ext u
+        exact norm_smul _ _
     _ ≤ ∫ u, ‖u‖⁻¹ * ‖fderiv ℝ g (v - u)‖ := by
         apply integral_mono_of_nonneg
           (ae_of_all _ fun u => by positivity)
@@ -217,7 +219,9 @@ lemma coulomb_entry_conv_deriv_bounded
                 (norm_nonneg _))
     _ = ∫ w, ‖v - w‖⁻¹ * ‖fderiv ℝ g w‖ := by
         rw [← integral_sub_left_eq_self (fun u => ‖u‖⁻¹ * ‖fderiv ℝ g (v - u)‖) volume v]
-        congr 1; ext u; simp [sub_sub_cancel]
+        congr 1
+        ext u
+        simp [sub_sub_cancel]
     _ ≤ M := hM v
     _ ≤ M + 1 := le_add_of_nonneg_right one_pos.le
 
@@ -276,7 +280,9 @@ lemma coulomb_flux_differentiable
           (f w • vGrad f v - f v • vGrad f w) j) =
         (fun w => fderiv ℝ f v (Pi.single j 1) * (landauMatrix coulombKernel (v - w) i j * f w) -
           f v * (landauMatrix coulombKernel (v - w) i j * fderiv ℝ f w (Pi.single j 1))) := by
-        ext w; simp [vGrad, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]; ring
+        ext w
+        simp [vGrad, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
+        ring
       rw [this]; exact ((h_Af v j).const_mul _).sub ((h_Adf v j).const_mul _))]
     -- Step 4: for each j, expand and distribute the integral
     congr 1; ext j
@@ -284,7 +290,9 @@ lemma coulomb_flux_differentiable
         (f w • vGrad f v - f v • vGrad f w) j =
       fderiv ℝ f v (Pi.single j 1) * (landauMatrix coulombKernel (v - w) i j * f w) -
       f v * (landauMatrix coulombKernel (v - w) i j * fderiv ℝ f w (Pi.single j 1)) := by
-      intro w; simp [vGrad, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]; ring
+      intro w
+      simp [vGrad, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
+      ring
     simp_rw [h_eq]
     rw [integral_sub ((h_Af v j).const_mul _) ((h_Adf v j).const_mul _),
         integral_const_mul_of_integrable (h_Af v j),
@@ -319,14 +327,18 @@ lemma coulomb_flux_eq_decomposed
         (f w • vGrad f v - f v • vGrad f w) j) =
       (fun w => fderiv ℝ f v (Pi.single j 1) * (landauMatrix coulombKernel (v - w) i j * f w) -
         f v * (landauMatrix coulombKernel (v - w) i j * fderiv ℝ f w (Pi.single j 1))) := by
-      ext w; simp [vGrad, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]; ring
+      ext w
+      simp [vGrad, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
+      ring
     rw [this]; exact ((h_Af j).const_mul _).sub ((h_Adf j).const_mul _))]
   congr 1; ext j
   have h_eq : ∀ w, landauMatrix coulombKernel (v - w) i j *
       (f w • vGrad f v - f v • vGrad f w) j =
     fderiv ℝ f v (Pi.single j 1) * (landauMatrix coulombKernel (v - w) i j * f w) -
     f v * (landauMatrix coulombKernel (v - w) i j * fderiv ℝ f w (Pi.single j 1)) := by
-    intro w; simp [vGrad, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]; ring
+    intro w
+    simp [vGrad, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
+    ring
   simp_rw [h_eq]
   rw [integral_sub ((h_Af j).const_mul _) ((h_Adf j).const_mul _),
       integral_const_mul_of_integrable (h_Af j),

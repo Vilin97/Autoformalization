@@ -193,7 +193,9 @@ lemma VMLInput.hForceBalance (p : VMLInput X) :
         p.hDiff_abc.1 p.hDiff_abc.2.1 p.hDiff_abc.2.2 p.hMaxwellianForm x v
   have hgrad_c : FlatTorus3.gradX p.c_loc x = 0 := p.hc_const_grad x
   have hgrad_b : ∀ j : Fin 3, FlatTorus3.gradX (fun y => p.b_loc y j) x = 0 := by
-    intro j; apply FlatTorus3.hGradConst; intro x' y'
+    intro j
+    apply FlatTorus3.hGradConst
+    intro x' y'
     show p.b_loc x' j = p.b_loc y' j
     rw [p.hb_const x', p.hb_const y']
   -- Reduce to linear + constant form (using c_loc = c₀, b_loc = b₀)
@@ -395,7 +397,9 @@ noncomputable def VMLInput.toSteadyState (p : VMLInput X) : VMLSteadyState X whe
   b₀ := (-1 / (2 * p.c₀)) • p.b₀
   hb_const := fun x => by
     -- b_loc x = (-2 * c₀) • ((-1/(2c₀)) • b₀) = b₀
-    rw [p.hb_const x]; ext i; simp [Pi.smul_apply, smul_eq_mul]
+    rw [p.hb_const x]
+    ext i
+    simp [Pi.smul_apply, smul_eq_mul]
     have hc₀_ne : p.c₀ ≠ 0 := ne_of_lt p.hc₀_neg
     field_simp
   hForceBalance := fun x => by

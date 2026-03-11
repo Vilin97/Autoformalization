@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 79)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 80)
 
 ## Verdict: ACCEPT
 
@@ -50,13 +50,15 @@ I found no issue.
 
 | File | Lines |
 |------|-------|
-| Section3Helpers.lean | 976 |
-| TorusInstance.lean | 849 |
+| Section3Helpers.lean | 1027 |
+| TorusInstance.lean | 872 |
 | Defs.lean | 788 |
-| CoulombPSD.lean | 747 |
+| CoulombPSD.lean | 759 |
 | CoulombSpatialTransport.lean | 670 |
 | CoulombConcreteTheorem42.lean | 623 |
 | CoulombFluxDiff.lean | 617 |
+
+Section3Helpers.lean has **exceeded 1000 lines** — splitting is now critical.
 
 ### 6c. AI code style artifacts
 
@@ -64,10 +66,9 @@ I found no issue.
 |---|---|---|
 | ~~Lines > 200 chars~~ | ~~0~~ | ~~0~~ DONE |
 | ~~Trailing semicolons~~ | ~~0~~ | ~~0~~ DONE |
-| Lines > 100 chars | **186** (17 files) | 0 |
-| Plain semicolons | **574** (+ 126 `<;>` combinators) | < 50 |
-
-Worst semicolon offenders: Section3Helpers (140), TorusInstance (110), CoulombPSD (70), Defs (47), NewtonianPotential (44).
+| Lines > 100 chars | **183** | 0 |
+| Plain semicolons | **487** (+ 126 `<;>`) | < 50 |
+| Lines with 2+ plain semis | **64** | 0 |
 
 ---
 
@@ -89,7 +90,7 @@ I found no issue.
 
 ### 8e. Split Defs.lean (MEDIUM)
 
-### 8f. Split Section3Helpers.lean (HIGH PRIORITY — 976 lines)
+### 8f. Split Section3Helpers.lean (CRITICAL — 1027 lines)
 
 ---
 
@@ -103,10 +104,10 @@ I found no issue.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6b | 7 files over 600 lines (Section3Helpers 976) | Moderate | Open |
-| 6c | 186 lines >100 chars, 574 plain semicolons | Moderate | Open |
+| 6b | 7 files over 600 lines (Section3Helpers **1027**) | High | Open |
+| 6c | 183 lines >100 chars, 487 plain semicolons | Moderate | Open |
 | 8e | Defs.lean too large (788 lines) | Minor | Open |
-| 8f | Section3Helpers.lean too large (976 lines) | Moderate | Open |
+| 8f | Section3Helpers.lean >1000 lines — needs splitting | High | **New priority** |
 
 ### Conditions for ACCEPT
 

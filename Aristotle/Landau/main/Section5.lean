@@ -23,7 +23,9 @@ namespace VML
 lemma lorentz_force_expansion (E b B v : Fin 3 → ℝ) (c : ℝ) :
     dotProduct (E + cross v B) (b + (2 * c) • v) =
     dotProduct E b + dotProduct v ((2 * c) • E + cross B b) := by
-  unfold cross dotProduct; simp [Fin.sum_univ_three, Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
+  unfold cross dotProduct
+  simp [Fin.sum_univ_three, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+  ring
 
 -- ============================================================================
 -- Section 5c: Polynomial Matching (Section 5 of tex)
@@ -86,13 +88,17 @@ lemma polynomial_identity_from_vlasov
   -- Step 3: Vlasov simplifies to collisionless transport = 0
   have hTransport : dotProduct v (FlatTorus3.gradX (fun y => f y v) x) +
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) = 0 := by
-    have h := _hVlasov x v; rw [hQ_zero x v, mul_zero] at h; exact h
+    have h := _hVlasov x v
+    rw [hQ_zero x v, mul_zero] at h
+    exact h
   -- Step 4: Compute vGrad(f x)(v) = f(x,v) · (b x + 2c(x)·v)
   have hvGrad : vGrad (f x) v = f x v • (b x + (2 * c x) • v) := by
     have h1 := vGrad_exp_quadratic (a x) (b x) (c x) v
     conv_lhs => rw [show f x = (fun w => Real.exp (a x + dotProduct (b x) w + c x * normSq w))
       from funext (hform x)]
-    rw [h1]; congr 1; exact (hform x v).symm
+    rw [h1]
+    congr 1
+    exact (hform x v).symm
   -- Step 5: Compute gradX(f(·,v)) via chain rule + linearity
   have hgradX_i : ∀ i, FlatTorus3.gradX (fun y => f y v) x i =
       f x v * (FlatTorus3.gradX a x i +
@@ -104,7 +110,9 @@ lemma polynomial_identity_from_vlasov
       funext (fun y => hform y v)
     have hbv : FlatTorus3.IsSpatiallyDiff (fun y => dotProduct (b y) v) := by
       have : (fun y => dotProduct (b y) v) = (fun y => v 0 * b y 0 + (v 1 * b y 1 + v 2 * b y 2)) := by
-        ext y; simp [dotProduct, Fin.sum_univ_three]; ring
+        ext y
+        simp [dotProduct, Fin.sum_univ_three]
+        ring
       rw [this]
       exact FlatTorus3.hDiff_add _ _ (FlatTorus3.hDiff_smul _ _ (hb 0))
         (FlatTorus3.hDiff_add _ _ (FlatTorus3.hDiff_smul _ _ (hb 1)) (FlatTorus3.hDiff_smul _ _ (hb 2)))
@@ -148,7 +156,9 @@ lemma polynomial_identity_from_vlasov
         ∑ i : Fin 3, ∑ j : Fin 3, v i * v j * FlatTorus3.gradX (fun y => b y j) x i +
         dotProduct v (FlatTorus3.gradX c x) * normSq v) := by
     -- Expand dot products, sums over Fin 3, and substitute hgradX_i
-    have h0 := hgradX_i 0; have h1 := hgradX_i 1; have h2 := hgradX_i 2
+    have h0 := hgradX_i 0
+    have h1 := hgradX_i 1
+    have h2 := hgradX_i 2
     simp only [dotProduct, Fin.sum_univ_three, normSq] at h0 h1 h2 ⊢
     rw [h0, h1, h2]; ring
   -- Rewrite vGrad term

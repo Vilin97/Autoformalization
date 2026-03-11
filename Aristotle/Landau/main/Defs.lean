@@ -162,7 +162,9 @@ lemma velocity_ibp
   -- Both sides equal Finset.sum over per-component integrals
   have lhs_eq : (fun v => vDiv F v * g v) = fun v =>
       ∑ i : Fin 3, fderiv ℝ (fun w => F w i) v (Pi.single i 1) * g v := by
-    ext v; simp only [vDiv, Fin.sum_univ_three]; ring
+    ext v
+    simp only [vDiv, Fin.sum_univ_three]
+    ring
   have rhs_eq : (fun v => dotProduct (F v) (vGrad g v)) = fun v =>
       ∑ i : Fin 3, F v i * fderiv ℝ g v (Pi.single i 1) := by
     ext v; simp only [dotProduct, vGrad, Fin.sum_univ_three]
@@ -235,7 +237,9 @@ lemma landau_ibp (Ψ : ℝ → ℝ) (g : (Fin 3 → ℝ) → ℝ)
     h_int_df_g h_int_f_dg h_int_fg
   rw [h_ibp]
   -- Step 3: Pull w-integral through dot product: ⟨c, ∫ F dw⟩ = ∫ ⟨c, F⟩ dw
-  congr 1; congr 1; funext v
+  congr 1
+  congr 1
+  funext v
   rw [dotProduct_comm]
   -- ⟨∇log g(v), ∫ w, A·flux dw⟩ = ∫ w, ⟨∇log g(v), A·flux(w)⟩ via CLM
   set c := vGrad (Real.log ∘ g) v
@@ -245,10 +249,14 @@ lemma landau_ibp (Ψ : ℝ → ℝ) (g : (Fin 3 → ℝ) → ℝ)
   let L : (Fin 3 → ℝ) →L[ℝ] ℝ :=
     ∑ i : Fin 3, ContinuousLinearMap.smulRight (ContinuousLinearMap.proj i) (c i)
   have hL : ∀ x, L x = dotProduct c x := by
-    intro x; simp +decide [L, dotProduct, Fin.sum_univ_three]; ring
+    intro x
+    simp +decide [L, dotProduct, Fin.sum_univ_three]
+    ring
   rw [show dotProduct c (∫ w, F w) = L (∫ w, F w) from (hL _).symm]
   rw [show (∫ w, dotProduct c (F w)) = ∫ w, L (F w) from by
-    congr 1; ext w; exact (hL _).symm]
+    congr 1
+    ext w
+    exact (hL _).symm]
   exact (L.integral_comp_comm (hFlux_int v)).symm
 
 /-- The PSD integrand: g(v,w) = f(v)·f(w)·⟨Δ(v,w), A(v-w) Δ(v,w)⟩
@@ -533,7 +541,9 @@ lemma hGradAddConst (f : X → ℝ) (hf : IsSpatiallyDiff f) (c : ℝ) :
 lemma hLaplacianMinNonneg (φ : X → ℝ) (hφ : IsSpatiallyDiff φ) (x₀ : X)
     (hmin : ∀ x, φ x₀ ≤ φ x) : 0 ≤ divX (gradX φ) x₀ := by
   have hmax : ∀ x, (fun y => (-1) * φ y) x ≤ (fun y => (-1) * φ y) x₀ := by
-    intro x; simp; linarith [hmin x]
+    intro x
+    simp
+    linarith [hmin x]
   have h := hLaplacianMaxNonpos (fun y => (-1) * φ y) x₀ (hDiff_smul (-1) φ hφ) hmax
   have h2 : divX (gradX (fun y => (-1) * φ y)) x₀ =
       (-1) * divX (gradX φ) x₀ := by
@@ -563,7 +573,9 @@ lemma maxwellian_params_isSpatiallyDiff
     intros x v; rw [hform x v, Real.log_exp]
   -- At v = 0: log f(x, 0) = a x
   have ha_val : ∀ x, a x = Real.log (f x 0) := by
-    intro x; have := hlogform x 0; simp [normSq_zero, dotProduct] at this
+    intro x
+    have := hlogform x 0
+    simp [normSq_zero, dotProduct] at this
     linarith
   -- At v = eⱼ: log f(x, eⱼ) = a x + b x j + c x
   have hform_single : ∀ x (j : Fin 3), Real.log (f x (Pi.single j 1)) = a x + b x j + c x := by
@@ -595,7 +607,10 @@ lemma maxwellian_params_isSpatiallyDiff
   have hc_diff : IsSpatiallyDiff c := by
     have hc_eq : c = fun x => (1/2 : ℝ) * (Real.log (f x (2 • Pi.single 0 1)) +
         (-2) * Real.log (f x (Pi.single 0 1)) + Real.log (f x 0)) := by
-      funext x; have := hc_val x; field_simp; linarith
+      funext x
+      have := hc_val x
+      field_simp
+      linarith
     rw [hc_eq]
     exact hDiff_smul _ _ (hDiff_add _ _ (hDiff_add _ _ (hDiff_lf _)
       (hDiff_smul _ _ (hDiff_lf _))) (hDiff_lf _))
@@ -607,7 +622,9 @@ lemma maxwellian_params_isSpatiallyDiff
     intro j
     have hbj_eq : (fun x => b x j) = fun x =>
         Real.log (f x (Pi.single j 1)) + (-1) * Real.log (f x 0) + (-1) * c x := by
-      funext x; have := hbj_val x j; linarith
+      funext x
+      have := hbj_val x j
+      linarith
     rw [hbj_eq]
     exact hDiff_add _ _ (hDiff_add _ _ (hDiff_lf _) (hDiff_smul _ _ (hDiff_lf _)))
       (hDiff_smul _ _ hc_diff)

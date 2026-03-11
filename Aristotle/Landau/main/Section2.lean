@@ -76,7 +76,9 @@ theorem landauMatrix_quadForm_eq_zero_iff {Ψ : ℝ → ℝ} {z : Fin 3 → ℝ}
     have hqf : Ψ (eucNorm z) * dotProduct Y (mulVec (innerLandauMatrix z) Y) = 0 := by
       have : dotProduct Y (mulVec (landauMatrix Ψ z) Y) =
         Ψ (eucNorm z) * dotProduct Y (mulVec (innerLandauMatrix z) Y) := by
-        unfold landauMatrix; rw [smul_mulVec]; simp [dotProduct_smul, smul_eq_mul]
+        unfold landauMatrix
+        rw [smul_mulVec]
+        simp [dotProduct_smul, smul_eq_mul]
       linarith
     exact (mul_eq_zero.mp hqf).resolve_left (ne_of_gt hΨ)
   -- Step 2: Cauchy-Schwarz equality: normSq z * normSq Y = (z . Y)^2
@@ -106,26 +108,40 @@ theorem landauMatrix_quadForm_eq_zero_iff {Ψ : ℝ → ℝ} {z : Fin 3 → ℝ}
   -- Step 5: Since z != 0, find a nonzero component and set l = Y_k / z_k
   have hne : ¬(z 0 = 0 ∧ z 1 = 0 ∧ z 2 = 0) := by
     intro ⟨h0, h1, h2⟩
-    apply hz; ext i; fin_cases i <;> assumption
+    apply hz
+    ext i
+    fin_cases i <;> assumption
   rcases not_and_or.mp hne with h0 | h12ne
   · -- Case z 0 != 0: let l = Y 0 / z 0
     refine ⟨Y 0 / z 0, ?_⟩
     ext i; fin_cases i
     · simp [Pi.smul_apply, smul_eq_mul, div_mul_cancel₀ _ h0]
-    · simp [Pi.smul_apply, smul_eq_mul]; field_simp; linarith [h01]
-    · simp [Pi.smul_apply, smul_eq_mul]; field_simp; linarith [h02]
+    · simp [Pi.smul_apply, smul_eq_mul]
+      field_simp
+      linarith [h01]
+    · simp [Pi.smul_apply, smul_eq_mul]
+      field_simp
+      linarith [h02]
   · rcases not_and_or.mp h12ne with h1 | h2
     · -- Case z 1 != 0: let l = Y 1 / z 1
       refine ⟨Y 1 / z 1, ?_⟩
       ext i; fin_cases i
-      · simp [Pi.smul_apply, smul_eq_mul]; field_simp; linarith [h01]
+      · simp [Pi.smul_apply, smul_eq_mul]
+        field_simp
+        linarith [h01]
       · simp [Pi.smul_apply, smul_eq_mul, div_mul_cancel₀ _ h1]
-      · simp [Pi.smul_apply, smul_eq_mul]; field_simp; linarith [h12]
+      · simp [Pi.smul_apply, smul_eq_mul]
+        field_simp
+        linarith [h12]
     · -- Case z 2 != 0: let l = Y 2 / z 2
       refine ⟨Y 2 / z 2, ?_⟩
       ext i; fin_cases i
-      · simp [Pi.smul_apply, smul_eq_mul]; field_simp; linarith [h02]
-      · simp [Pi.smul_apply, smul_eq_mul]; field_simp; linarith [h12]
+      · simp [Pi.smul_apply, smul_eq_mul]
+        field_simp
+        linarith [h02]
+      · simp [Pi.smul_apply, smul_eq_mul]
+        field_simp
+        linarith [h12]
       · simp [Pi.smul_apply, smul_eq_mul, div_mul_cancel₀ _ h2]
 
 -- ============================================================================

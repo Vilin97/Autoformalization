@@ -83,7 +83,9 @@ lemma spatial_transport_integrable
     have heq : (fun v => v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v)) =
         fun v => ∑ i : Fin 3, v i * FlatTorus3.gradX (fun y => f y v) x i *
           Real.log (f x v) := by
-      ext v; simp only [dotProduct, Fin.sum_univ_three]; ring
+      ext v
+      simp only [dotProduct, Fin.sum_univ_three]
+      ring
     rw [heq]; exact integrable_finset_sum _ fun i _ => h i
   intro i
   obtain ⟨Ci, hCi, hGi⟩ := hSchwartz.hGradDecay (K_log + 6) i
@@ -209,7 +211,9 @@ lemma force_transport_integrable_coulomb
   have heq : (fun v => (E x + cross v (B x)) ⬝ᵥ vGrad (f x) v * Real.log (f x v)) =
       fun v => ∑ i : Fin 3, (E x + cross v (B x)) i *
         fderiv ℝ (f x) v (Pi.single i 1) * Real.log (f x v) := by
-    ext v; simp only [dotProduct, vGrad, Fin.sum_univ_three]; ring
+    ext v
+    simp only [dotProduct, vGrad, Fin.sum_univ_three]
+    ring
   rw [heq]; exact integrable_finset_sum _ fun i _ =>
     force_fderiv_log_component_integrable E B hf_pos hf_smooth hSchwartz C_log K_log hLB x i
 
@@ -255,7 +259,9 @@ lemma force_ibp_f_dg_integrable_coulomb
       fderiv ℝ (fun w => f x w * Real.log (f x w) - f x w) v (Pi.single i 1)) =
       fun v => (E x + cross v (B x)) i *
         fderiv ℝ (f x) v (Pi.single i 1) * Real.log (f x v) := by
-    ext v; rw [hfder_eq]; ring
+    ext v
+    rw [hfder_eq]
+    ring
   rw [heq]
   exact force_fderiv_log_component_integrable E B hf_pos hf_smooth hSchwartz
     C_log K_log hLB x i

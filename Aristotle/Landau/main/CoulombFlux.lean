@@ -40,7 +40,9 @@ lemma landau_flux_integrable_coulomb
           Integrable (fun w => ‖v - w‖⁻¹ * (vGrad f w) j) := by
         constructor
         · apply inv_norm_schwartz_integrable
-          · intro N; specialize hf_schwartz N 0; aesop
+          · intro N
+            specialize hf_schwartz N 0
+            aesop
           · exact hf_smooth.continuous.aestronglyMeasurable
         · apply inv_norm_schwartz_integrable
           · intro N
@@ -255,7 +257,9 @@ lemma flux_times_log_integrable_coulomb
             ≤ ∑ j : Fin 3, |landauMatrix coulombKernel (v - w) i j * u w j| :=
               Finset.abs_sum_le_sum_abs _ _
           _ = ∑ j : Fin 3, |landauMatrix coulombKernel (v - w) i j| * |u w j| := by
-              congr 1; ext j; exact abs_mul _ _
+              congr 1
+              ext j
+              exact abs_mul _ _
           _ ≤ ∑ j : Fin 3, ‖v - w‖⁻¹ * |u w j| :=
               Finset.sum_le_sum fun j _ =>
                 mul_le_mul_of_nonneg_right (coulomb_landauMatrix_entry_le_pi _ _ _ hvw)
@@ -424,7 +428,9 @@ lemma flux_times_log_integrable_coulomb
       _ = (M₀ * 3 * C_df + M_df * C_f) * C_log / (1 + ‖v‖) ^ 4 := by
           rw [pow_add (1 + ‖v‖) K_log 4]; field_simp
       _ ≤ C_bound / (1 + ‖v‖) ^ 4 := by
-          gcongr; simp only [C_bound]; linarith
+          gcongr
+          simp only [C_bound]
+          linarith
 
 -- ============================================================================
 -- Flux component bound with polynomial gradient hypothesis
@@ -513,7 +519,9 @@ lemma coulomb_flux_component_bound
           ≤ ∑ j, |landauMatrix coulombKernel (v - w) i j * u w j| :=
             Finset.abs_sum_le_sum_abs _ _
         _ = ∑ j, |landauMatrix coulombKernel (v - w) i j| * |u w j| := by
-            congr 1; ext j; exact abs_mul _ _
+            congr 1
+            ext j
+            exact abs_mul _ _
         _ ≤ ∑ j, ‖v - w‖⁻¹ * |u w j| :=
             Finset.sum_le_sum fun j _ =>
               mul_le_mul_of_nonneg_right (coulomb_landauMatrix_entry_le_pi _ _ _ hvw)

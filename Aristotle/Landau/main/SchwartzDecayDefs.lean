@@ -34,7 +34,10 @@ lemma inverse_poly_integrable (C : ℝ) :
   have h_integrable : Integrable (fun v : Fin 3 → ℝ => (1 + ‖v‖)⁻¹ ^ 4) volume := by
     have h_integrable : IntegrableOn (fun v : Fin 3 → ℝ => (1 + ‖v‖)⁻¹ ^ 4) (Set.univ : Set (Fin 3 → ℝ)) := by
       have : ∀ v : Fin 3 → ℝ, (1 + ‖v‖)⁻¹ ^ 4 ≤ (1 + ‖v‖ ^ 2)⁻¹ ^ 2 := by
-        intro v; rw [inv_pow, inv_pow]; gcongr; nlinarith [norm_nonneg v]
+        intro v
+        rw [inv_pow, inv_pow]
+        gcongr
+        nlinarith [norm_nonneg v]
       have h_integrable : IntegrableOn (fun v : Fin 3 → ℝ => (1 + ‖v‖ ^ 2)⁻¹ ^ 2) (Set.univ : Set (Fin 3 → ℝ)) := by
         have := @integrable_rpow_neg_one_add_norm_sq
         specialize @this (Fin 3 → ℝ) _ _ _ _ _ (MeasureSpace.volume) _ 4; norm_num at this

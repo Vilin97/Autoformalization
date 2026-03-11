@@ -32,7 +32,9 @@ lemma coulomb_landauMatrix_entry_le (z : Fin 3 → ℝ) (i j : Fin 3) :
       have hns : normSq z = ∑ k : Fin 3, z k * z k := by
         simp [normSq, dotProduct, Fin.sum_univ_three]
       split_ifs with hij
-      · subst hij; rw [hns]; simp only [Fin.sum_univ_three]
+      · subst hij
+        rw [hns]
+        simp only [Fin.sum_univ_three]
         fin_cases i <;> simp
         all_goals rw [abs_of_nonneg (by nlinarith
           [mul_self_nonneg (z 0), mul_self_nonneg (z 1),
@@ -40,7 +42,9 @@ lemma coulomb_landauMatrix_entry_le (z : Fin 3 → ℝ) (i j : Fin 3) :
         all_goals nlinarith
           [mul_self_nonneg (z 0), mul_self_nonneg (z 1),
            mul_self_nonneg (z 2)]
-      · simp only [zero_sub, abs_neg]; rw [hns]; simp only [Fin.sum_univ_three]
+      · simp only [zero_sub, abs_neg]
+        rw [hns]
+        simp only [Fin.sum_univ_three]
         fin_cases i <;> fin_cases j <;> simp_all <;>
           nlinarith [sq_nonneg (|z 0| - |z 1|), sq_nonneg (|z 0| - |z 2|),
             sq_nonneg (|z 1| - |z 2|),
@@ -155,7 +159,11 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
         intro k
         have h_bounded : ∀ z : Fin 3 → ℝ, z ∈ Metric.closedBall 0 (2^(-k : ℝ) * R) \ Metric.closedBall 0 (2^(-k-1 : ℝ) * R) → ‖z‖⁻¹ ≤ (2^(-k-1 : ℝ) * R)⁻¹ := by
           simp +zetaDelta at *
-          intro z hz₁ hz₂; rw [ ← mul_inv ] ; gcongr ; norm_num [ Real.rpow_sub ] at * ; linarith
+          intro z hz₁ hz₂
+          rw [ ← mul_inv ]
+          gcongr
+          norm_num [ Real.rpow_sub ] at *
+          linarith
         refine le_trans (MeasureTheory.lintegral_mono_ae ?_) ?_
         use fun z => ENNReal.ofReal ((2 ^ ( - (k : ℝ) - 1) * R) ⁻¹)
         · filter_upwards [MeasureTheory.ae_restrict_mem <|
@@ -181,13 +189,20 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
             (MeasureTheory.volume
               (Metric.closedBall
                 (0 : Fin 3 → ℝ) 1)).toReal := by
-        intro k; rw [ MeasureTheory.Measure.addHaar_closedBall ] ; norm_num ; ring
+        intro k
+        rw [ MeasureTheory.Measure.addHaar_closedBall ]
+        norm_num
+        ring
         · positivity
         · positivity
       have h_series : Summable (fun k : ℕ => (2^(-k-1 : ℝ) * R)⁻¹ * (2^(-k : ℝ) * R)^3) := by
-        norm_num [ Real.rpow_sub ] ; ring_nf ; norm_num [ hR.ne' ]
+        norm_num [ Real.rpow_sub ]
+        ring_nf
+        norm_num [ hR.ne' ]
         norm_num [ pow_mul', mul_assoc, hR.ne' ]
-        norm_num only [ ← mul_assoc, ← mul_pow ] ; ring_nf ; norm_num [ hR.ne' ]
+        norm_num only [ ← mul_assoc, ← mul_pow ]
+        ring_nf
+        norm_num [ hR.ne' ]
         exact Summable.mul_right _ (Summable.mul_left _ (summable_geometric_of_lt_one (by norm_num) (by norm_num)))
       refine lt_of_le_of_lt h_integrable <| lt_of_le_of_lt (ENNReal.tsum_le_tsum h_bounded) ?_
       rw [ ← ENNReal.ofReal_tsum_of_nonneg ] <;> norm_num [ h_volume ]
@@ -389,7 +404,9 @@ lemma newtonian_schwartz_uniform_bound
   refine ⟨C₀ * I_near + I_far + 1, by linarith [mul_nonneg hC₀.le hI_near_nn], fun v => ?_⟩
   have h_translate : ∫ w, ‖v - w‖⁻¹ * |g w| = ∫ z, ‖z‖⁻¹ * |g (v - z)| := by
     rw [← integral_sub_left_eq_self (fun w => ‖v - w‖⁻¹ * |g w|) volume v]
-    congr 1; ext z; simp [sub_sub_cancel]
+    congr 1
+    ext z
+    simp [sub_sub_cancel]
   have h_int_translated : Integrable (fun z => ‖z‖⁻¹ * |g (v - z)|) :=
     ((h_int v).comp_sub_left v).congr
       (Filter.Eventually.of_forall fun z => by simp [sub_sub_cancel])
