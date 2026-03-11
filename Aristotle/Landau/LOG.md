@@ -1,5 +1,20 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 93: Extract shared Schwartz helpers, deduplicate proofs
+
+### Changes
+- **Extracted 3 shared helpers** to SchwartzDecayDefs.lean (127 → 167 lines):
+  - `schwartz_pointwise_decay`: k=0 pointwise decay from Schwartz hypothesis (was duplicated 4×)
+  - `schwartz_fderiv_component_decay`: k=1 partial derivative decay (was duplicated 3×)
+  - `score_bound_of_grad_bound`: score bound |∂_i log f| ≤ Cg*(1+‖u‖)^Kg (was duplicated 4×)
+- **Deduplicated CoulombPSD.lean** (495 → 454 lines, -41): replaced 3 inline score bound proofs + 1 hdg_decay block with calls to shared helpers.
+- **Deduplicated CoulombFluxBound.lean** (436 → 426 lines, -10): replaced inline hg_decay + hdg_decay with shared helpers.
+- **Simplified CoulombConcreteTheorem42.lean** (322 → 309 lines, -13): replaced 13-line inline score bound proof with `score_bound_of_grad_bound`.
+- **lean-lsp desync** (issue 8j): `lean_build --clean` still fails on IteratedDerivHelpers, TorusIntegration, GaussianHelpers. Confirmed persistent tooling issue.
+- Net reduction: ~24 lines. Key win is deduplication — 11 inline proof blocks → 3 shared lemmas.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 92: Split CoulombConcreteTheorem42, weaken hg_schwartz
 
 ### Changes

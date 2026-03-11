@@ -1,32 +1,33 @@
-# Plan — Cycle 92
+# Plan — Cycle 93
 
 ## Status summary
 
 - **Sorry count**: 0
-- **Files**: 30 files, ~9,520 lines
+- **Files**: 31 files, ~9,520 lines
 - **Build**: Clean, 0 errors
 - **Critique verdict**: ACCEPT
 - **Aristotle jobs**: 0 pending
 
 ## This cycle's work items
 
-### 1. Fix lean-lsp build desync (`/simplify`)
-- **What**: Issue 8j. The lean-lsp MCP reports errors in IteratedDerivHelpers, TorusIntegration, GaussianHelpers that don't reproduce with `lake build`. Likely needs `lake clean` + `lake exe cache get` + rebuild to resync Mathlib oleans.
-- **Why**: Blocks `lean_verify` and other LSP tools needed for critique.
+### 1. Split `fubini_double_integrable_coulomb` (`/simplify`)
+- **What**: Issue 6c. At ~312 lines, this is the longest proof in the project. Extract helper lemmas for the inner integrability bound, the outer integrability bound, and the product-space integrability step into standalone lemmas in CoulombPSD.lean (or a new CoulombFubini.lean if needed).
+- **Why**: The 312-line monolith is the most actionable code quality issue remaining.
 
-### 2. Split CoulombConcreteTheorem42.lean (653 lines) (`/simplify`)
-- **What**: Issue 6b. The only remaining splittable file over 600 lines (Defs.lean can't be split per user preference). Extract the VelocityDecayConditions proof block (which constructs the 19-field instance) into a separate file, keeping the final theorem assembly in the main file.
-- **Why**: Last achievable file size reduction.
+### 2. Fix lean-lsp build desync (`/simplify`)
+- **What**: Issue 8j. The lean-lsp MCP fails on IteratedDerivHelpers, TorusIntegration, GaussianHelpers. Previous `lake clean` + rebuild didn't fix it. Try `lake build` first, then `lean_build` to force LSP resync.
+- **Why**: Blocks `lean_verify` for some theorems.
 
-### 3. Weaken `hg_schwartz` in `coulomb_flux_component_bound` (`/strengthen`)
-- **What**: `coulomb_flux_component_bound` in CoulombFluxBound.lean takes `hg_schwartz : ∀ N k, ...` (all derivatives), but only uses k=0 and k=1 decay. Weaken to match the k≤2 pattern used elsewhere.
-- **Why**: Consistency with the UniformSchwartzDecay weakening done in cycle 89.
+### 3. Investigate weakening `coulomb_flux_deriv_schwartz_decay` hypotheses (`/strengthen`)
+- **What**: Check if `coulomb_flux_deriv_schwartz_decay` (CoulombFluxDiff.lean) uses more Schwartz regularity than needed for its role in the proof chain.
+- **Why**: Consistent weakening pattern from cycles 89-92.
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
-| 6b | 2 files over 600 lines | Defs.lean hard to split (user pref), CoulombConcreteTheorem42 being split this cycle |
-| 6c | 2 proofs over 100 lines | Natural monoliths, low ROI to split |
+| 6b | 1 file over 600 lines | Defs.lean, can't split per user pref |
+| 6c | 3 proofs over 200 lines | `fubini_double` being split this cycle |
 | 8c | Generalize beyond T^3 | Hard |
 | 8d | Mathlib PR for helper lemmas | Community — ready |
+| 8j | lean-lsp build desync | Tooling issue |

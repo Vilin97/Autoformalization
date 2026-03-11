@@ -124,4 +124,44 @@ lemma integrable_of_schwartz_bound
     calc ‖g v‖ ≤ C * (1 + ‖v‖) ^ K * |φ v| := hbound v
     _ = C * ((1 + ‖v‖) ^ K * |φ v|) := by ring)
 
+/-- Extract pointwise (k=0) decay from the Schwartz hypothesis. -/
+lemma schwartz_pointwise_decay
+    {f : (Fin 3 → ℝ) → ℝ}
+    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
+      ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C) :
+    ∀ N, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ N ≤ C :=
+  fun N => (hf_schwartz N (by omega)).imp fun C ⟨hC, hb⟩ =>
+    ⟨hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
+
+/-- Extract partial derivative (k=1) decay from the Schwartz hypothesis. -/
+lemma schwartz_fderiv_component_decay
+    {f : (Fin 3 → ℝ) → ℝ}
+    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
+      ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C) :
+    ∀ (j : Fin 3) (N : ℕ), ∃ C > 0, ∀ w,
+      |fderiv ℝ f w (Pi.single j 1)| * (1 + ‖w‖) ^ N ≤ C := by
+  intro j N; obtain ⟨C, hC, hb⟩ := hf_schwartz N (by omega)
+  refine ⟨C, hC, fun w => le_trans (mul_le_mul_of_nonneg_right ?_ (by positivity)) (hb w)⟩
+  rw [← Real.norm_eq_abs]
+  exact le_trans (le_trans (ContinuousLinearMap.le_opNorm _ _)
+    (mul_le_of_le_one_right (norm_nonneg _) (by simp [Pi.norm_single])))
+    (by rw [show (1:ℕ) = 0+1 from rfl, ← norm_iteratedFDeriv_fderiv,
+            norm_iteratedFDeriv_zero])
+
+/-- Score bound: |∂_i log f(u)| ≤ Cg * (1+‖u‖)^Kg from the gradient bound on f.
+    Uses chain rule: ∂_i(log∘f) = (∂_if)/f, combined with |∂_if| ≤ Cg*(1+‖u‖)^Kg*f. -/
+lemma score_bound_of_grad_bound
+    {f : (Fin 3 → ℝ) → ℝ}
+    (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
+    {Cg : ℝ} {Kg : ℕ}
+    (hGrad : ∀ v i, |fderiv ℝ f v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f v) :
+    ∀ u i, |vGrad (Real.log ∘ f) u i| ≤ Cg * (1 + ‖u‖) ^ Kg := by
+  intro u i; simp only [vGrad]
+  have hfu := hf_pos u
+  rw [show Real.log ∘ f = fun u => Real.log (f u) from rfl,
+      fderiv.log (hf_smooth.differentiable le_top).differentiableAt (ne_of_gt hfu)]
+  simp only [ContinuousLinearMap.smul_apply, smul_eq_mul, abs_mul,
+    abs_of_pos (inv_pos.mpr hfu)]
+  rw [inv_mul_le_iff₀ hfu]; linarith [hGrad u i]
+
 end VML

@@ -24,18 +24,8 @@ lemma psd_inner_integrable_coulomb
     (v : Fin 3 → ℝ) :
     Integrable (PSDIntegrand coulombKernel f v) := by
   -- Score bound: |∂_i log f(u)| ≤ Cg * (1+‖u‖)^Kg
-  have h_score : ∀ u i, |vGrad (Real.log ∘ f) u i| ≤ Cg * (1 + ‖u‖) ^ Kg := by
-    intro u i; simp only [vGrad]
-    have hfu := hf_pos u
-    rw [show Real.log ∘ f = fun u => Real.log (f u) from rfl,
-        fderiv.log (hf_smooth.differentiable le_top).differentiableAt (ne_of_gt hfu)]
-    simp only [ContinuousLinearMap.smul_apply, smul_eq_mul, abs_mul,
-      abs_of_pos (inv_pos.mpr hfu)]
-    rw [inv_mul_le_iff₀ hfu]; linarith [hGrad u i]
-  -- Schwartz decay of f
-  have hf_decay : ∀ N, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ N ≤ C := by
-    intro N; obtain ⟨C, hC, hb⟩ := hf_schwartz N (by omega)
-    exact ⟨C, hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
+  have h_score := score_bound_of_grad_bound hf_pos hf_smooth hGrad
+  have hf_decay := schwartz_pointwise_decay hf_schwartz
   -- Schwartz decay of (1+‖w‖)^{2Kg} * f(w)
   have hpf_decay : ∀ N, ∃ C > 0, ∀ w,
       |(1 + ‖w‖) ^ (2 * Kg) * f w| * (1 + ‖w‖) ^ N ≤ C := by
@@ -74,19 +64,8 @@ lemma psd_outer_integrable_coulomb
     {Cg : ℝ} {Kg : ℕ}
     (hGrad : ∀ v i, |fderiv ℝ f v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f v) :
     Integrable (fun v => ∫ w, PSDIntegrand coulombKernel f v w) := by
-  -- Score bound
-  have h_score : ∀ u i, |vGrad (Real.log ∘ f) u i| ≤ Cg * (1 + ‖u‖) ^ Kg := by
-    intro u i; simp only [vGrad]
-    have hfu := hf_pos u
-    rw [show Real.log ∘ f = fun u => Real.log (f u) from rfl,
-        fderiv.log (hf_smooth.differentiable le_top).differentiableAt (ne_of_gt hfu)]
-    simp only [ContinuousLinearMap.smul_apply, smul_eq_mul, abs_mul,
-      abs_of_pos (inv_pos.mpr hfu)]
-    rw [inv_mul_le_iff₀ hfu]; linarith [hGrad u i]
-  -- Schwartz decay
-  have hf_decay : ∀ N, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ N ≤ C :=
-    fun N => (hf_schwartz N (by omega)).imp fun C ⟨hC, hb⟩ =>
-      ⟨hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
+  have h_score := score_bound_of_grad_bound hf_pos hf_smooth hGrad
+  have hf_decay := schwartz_pointwise_decay hf_schwartz
   have hpf_decay : ∀ N, ∃ C > 0, ∀ w,
       |(1 + ‖w‖) ^ (2 * Kg) * f w| * (1 + ‖w‖) ^ N ≤ C := by
     intro N; obtain ⟨C, hC, hb⟩ := hf_decay (2 * Kg + N)
@@ -188,19 +167,8 @@ lemma fubini_double_integrable_coulomb
       dotProduct (vGrad (Real.log ∘ f) p.1)
         (mulVec (landauMatrix coulombKernel (p.1 - p.2))
           (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2))) := by
-  -- Score bound
-  have h_score : ∀ u i, |vGrad (Real.log ∘ f) u i| ≤ Cg * (1 + ‖u‖) ^ Kg := by
-    intro u i; simp only [vGrad]
-    have hfu := hf_pos u
-    rw [show Real.log ∘ f = fun u => Real.log (f u) from rfl,
-        fderiv.log (hf_smooth.differentiable le_top).differentiableAt (ne_of_gt hfu)]
-    simp only [ContinuousLinearMap.smul_apply, smul_eq_mul, abs_mul,
-      abs_of_pos (inv_pos.mpr hfu)]
-    rw [inv_mul_le_iff₀ hfu]; linarith [hGrad u i]
-  -- Schwartz decay
-  have hf_decay : ∀ N, ∃ C > 0, ∀ w, |f w| * (1 + ‖w‖) ^ N ≤ C :=
-    fun N => (hf_schwartz N (by omega)).imp fun C ⟨hC, hb⟩ =>
-      ⟨hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
+  have h_score := score_bound_of_grad_bound hf_pos hf_smooth hGrad
+  have hf_decay := schwartz_pointwise_decay hf_schwartz
   have hpf_decay : ∀ N, ∃ C > 0, ∀ w,
       |(1 + ‖w‖) ^ (2 * Kg) * f w| * (1 + ‖w‖) ^ N ≤ C := by
     intro N; obtain ⟨C, hC, hb⟩ := hf_decay (2 * Kg + N)
@@ -320,16 +288,7 @@ lemma fubini_double_integrable_coulomb
     -- = f(v) * (9Cg²(1+‖v‖)^{2Kg}*M₁ + 3Cg(1+‖v‖)^Kg * M_df)
     -- ≤ C_out * (1+‖v‖)^{2Kg} * f(v)
     -- which is integrable by Schwartz decay
-    -- Partial derivative Schwartz decay
-    have hdg_decay : ∀ j : Fin 3, ∀ N, ∃ C > 0, ∀ w,
-        |fderiv ℝ f w (Pi.single j 1)| * (1 + ‖w‖) ^ N ≤ C := by
-      intro j N; obtain ⟨C, hC, hb⟩ := hf_schwartz N (by omega)
-      refine ⟨C, hC, fun w => le_trans (mul_le_mul_of_nonneg_right ?_ (by positivity)) (hb w)⟩
-      rw [← Real.norm_eq_abs]
-      exact le_trans (le_trans (ContinuousLinearMap.le_opNorm _ _)
-        (mul_le_of_le_one_right (norm_nonneg _) (by simp [Pi.norm_single])))
-        (by rw [show (1:ℕ) = 0+1 from rfl, ← norm_iteratedFDeriv_fderiv,
-                norm_iteratedFDeriv_zero])
+    have hdg_decay := schwartz_fderiv_component_decay hf_schwartz
     -- Newtonian bounds for partial derivatives
     have hMj : ∀ j, ∃ M > 0, ∀ v,
         ∫ w, ‖v - w‖⁻¹ * |fderiv ℝ f w (Pi.single j 1)| ≤ M :=
