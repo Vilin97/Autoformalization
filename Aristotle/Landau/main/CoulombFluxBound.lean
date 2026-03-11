@@ -284,18 +284,8 @@ lemma coulomb_flux_component_bound
     |(∫ w, mulVec (landauMatrix coulombKernel (v - w))
       (g w • vGrad g v - g v • vGrad g w)) i| ≤ Cf * g v * (1 + ‖v‖) ^ Kg := by
   -- Schwartz decay for g and ∂_j g
-  have hg_decay : ∀ N, ∃ C > 0, ∀ w, |g w| * (1 + ‖w‖) ^ N ≤ C := by
-    intro N; obtain ⟨C, hC, hb⟩ := @hg_schwartz N 0 (by omega)
-    exact ⟨C, hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
-  have hdg_decay : ∀ j : Fin 3, ∀ N, ∃ C > 0, ∀ w,
-      |fderiv ℝ g w (Pi.single j 1)| * (1 + ‖w‖) ^ N ≤ C := by
-    intro j N; obtain ⟨C, hC, hb⟩ := @hg_schwartz N 1 (by omega)
-    refine ⟨C, hC, fun w => le_trans (mul_le_mul_of_nonneg_right ?_ (by positivity)) (hb w)⟩
-    rw [← Real.norm_eq_abs]
-    exact le_trans (le_trans (ContinuousLinearMap.le_opNorm _ _)
-      (mul_le_of_le_one_right (norm_nonneg _) (by simp [Pi.norm_single])))
-      (by rw [show (1:ℕ) = 0+1 from rfl, ← norm_iteratedFDeriv_fderiv,
-              norm_iteratedFDeriv_zero])
+  have hg_decay := schwartz_pointwise_decay hg_schwartz
+  have hdg_decay := schwartz_fderiv_component_decay hg_schwartz
   -- Newtonian uniform bounds
   obtain ⟨M₀, hM₀, hM₀_bound⟩ := newtonian_schwartz_uniform_bound g hg_decay
     hg_smooth.continuous.aestronglyMeasurable

@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 92)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 93)
 
 ## Verdict: ACCEPT
 
@@ -18,7 +18,7 @@
 
 ## 2. Hidden Axioms
 
-Zero axioms on main theorem `CoulombConcreteTheorem42_unique` (verified cycle 91 via `lean_verify`). I found no issue.
+Zero axioms on `CoulombConcreteTheorem42` and `CoulombConcreteTheorem42_nonvacuous` (verified via `lean_verify` this cycle). I found no issue.
 
 ---
 
@@ -44,7 +44,7 @@ I found no issue.
 
 ### 6a. maxHeartbeats overrides: 1 total
 
-`synthInstance.maxHeartbeats 160000` in CoulombForceTransport.lean. Acceptable.
+`synthInstance.maxHeartbeats 160000` in CoulombForceTransport.lean. Acceptable (typeclass diamond workaround).
 
 ### 6b. Files over 600 lines (1 file)
 
@@ -52,16 +52,17 @@ I found no issue.
 |------|-------|
 | Defs.lean | 634 |
 
-Down from 2 files last cycle (CoulombConcreteTheorem42 653→322+340). Only Defs.lean remains, which can't be split per user preference.
+Can't be split per user preference. No change from last cycle.
 
-### 6c. Long proofs (2 proofs over 100 lines)
+### 6c. Long proofs (3 proofs over 200 lines)
 
 | File | Proof | Lines |
 |------|-------|-------|
-| Section4.lean | `transport_entropy_from_vlasov` | ~122 |
-| Section5.lean | `polynomial_identity_from_vlasov` | ~128 |
+| CoulombPSD.lean | `fubini_double_integrable_coulomb` | ~312 |
+| CoulombConcreteTheorem42.lean | `CoulombConcreteTheorem42` | ~235 |
+| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | ~231 |
 
-Natural monoliths — each is a single long calculation.
+All three are single extended calculations. `fubini_double_integrable_coulomb` is the most concerning at 312 lines — it might benefit from extracting helper lemmas for the inner/outer integrability steps. The other two are natural monoliths.
 
 ---
 
@@ -95,9 +96,9 @@ ContDiff ℝ ⊤ is necessary for Coulomb. See `experiments/contdiff_regularity_
 
 ### 8i. hGradBound is Coulomb-specific (MINOR — DOCUMENTED)
 
-### 8j. lean-lsp build failures (NEW)
+### 8j. lean-lsp build desync (PERSISTENT)
 
-The lean-lsp MCP reports build errors in IteratedDerivHelpers, TorusIntegration, GaussianHelpers that do not reproduce with `lake build`. This is a tooling issue, not a code issue, but it blocks `lean_verify` and other LSP-dependent tools.
+The lean-lsp MCP rebuilds from source and hits errors in IteratedDerivHelpers, TorusIntegration, GaussianHelpers that don't reproduce with `lake build`. `lean_verify` still works for some theorems but fails for others. `lake build` remains authoritative.
 
 ---
 
@@ -112,7 +113,7 @@ The lean-lsp MCP reports build errors in IteratedDerivHelpers, TorusIntegration,
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 6b | 1 file over 600 lines | Low | Open (Defs.lean, can't split) |
-| 6c | 2 proofs over 100 lines | Low | Open (natural monoliths) |
+| 6c | 3 proofs over 200 lines | Low | Open (monoliths, `fubini_double` splittable) |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open |
 | 8j | lean-lsp build desync | Low | Open (tooling) |

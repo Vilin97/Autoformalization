@@ -103,22 +103,9 @@ theorem CoulombConcreteTheorem42
         (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) i *
       fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)) := by
     intro x i
-    -- Step 1: Score bound |d(log f)/dv_i| ≤ Cg(1+‖v‖)^Kg
-    -- (from chain rule: d(log∘f)/dv_i = (df/dv_i)/f,
-    --  and hGradBound gives |df/dv_i| ≤ Cg(1+‖v‖)^Kg * f)
     have h_score : ∀ v, |fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)| ≤
-        Cg * (1 + ‖v‖) ^ Kg := by
-      intro v
-      have hfv_pos := hf_pos x v
-      have hfv_ne : f x v ≠ 0 := ne_of_gt hfv_pos
-      have hf_diff : DifferentiableAt ℝ (f x) v :=
-        ((hf_smooth_v x).differentiable le_top).differentiableAt
-      rw [show Real.log ∘ f x = fun v => Real.log (f x v) from rfl,
-          fderiv.log hf_diff hfv_ne]
-      simp only [ContinuousLinearMap.smul_apply, smul_eq_mul, abs_mul,
-        abs_of_pos (inv_pos.mpr hfv_pos)]
-      rw [inv_mul_le_iff₀ hfv_pos]
-      linarith [hCg x v i]
+        Cg * (1 + ‖v‖) ^ Kg := fun v =>
+      score_bound_of_grad_bound (hf_pos x) (hf_smooth_v x) (fun v j => hCg x v j) v i
     -- Step 2: Flux component bound
     -- |(∫ w, A(v-w)(f(w)∇f(v) - f(v)∇f(w)))_i| ≤ Cf * f(v) * (1+‖v‖)^Kg
     -- (uses |A(v-w)_{ij}| ≤ ‖v-w‖⁻¹, newtonian_schwartz_uniform_bound, hGradBound)
