@@ -437,7 +437,7 @@ instance : VML.FlatTorus3 Torus3 where
       (fun i j => (hF_C2 i j).of_le le_top) hcurl hdiv
   hIBP_spatial := fun φ ψ i hφ hψ => torus_hIBP_spatial φ ψ i (hφ.of_le le_top) (hψ.of_le le_top)
   hSpatialVelocityFubini := by
-    intro F _ hF_joint
+    intro F hF_joint
     exact integral_integral_swap hF_joint
   hSpatialAdd := fun g₁ g₂ h1 h2 => integral_add h1 h2
   hGradIntegrable := by

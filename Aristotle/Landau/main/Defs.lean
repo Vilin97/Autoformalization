@@ -95,7 +95,8 @@ lemma IsMaxwellian_params_unique
       a₀' + dotProduct b' v + c₀' * normSq v) :
     a₀ = a₀' ∧ b = b' ∧ c₀ = c₀' := by
   -- Evaluate at v = 0 to get a₀ = a₀'
-  have h0 : a₀ = a₀' := by have := h 0; simp [dotProduct, normSq, Fin.sum_univ_three] at this; linarith
+  have h0 : a₀ = a₀' := by
+    have := h 0; simp [dotProduct, normSq, Fin.sum_univ_three] at this; linarith
   -- Evaluate at eᵢ and 2eᵢ to get c₀ = c₀' and bᵢ = bᵢ'
   have hc : c₀ = c₀' := by
     have h1 := h (Pi.single 0 1)
@@ -478,7 +479,6 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
     (∫ x, φ x * gradX ψ x i) = -(∫ x, ψ x * gradX φ x i)
   -- Fubini: swap spatial integral (over compact X) with velocity integral (over ℝ³)
   hSpatialVelocityFubini : ∀ (F : X → (Fin 3 → ℝ) → ℝ),
-    (∀ x, MeasureTheory.Integrable (F x)) →
     MeasureTheory.Integrable (Function.uncurry F)
       (volume.prod (MeasureSpace.volume (α := Fin 3 → ℝ))) →
     (∫ x, ∫ v, F x v) = ∫ v, ∫ x, F x v
