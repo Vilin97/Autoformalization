@@ -30,7 +30,7 @@ lemma flux_times_log_integrable_coulomb
   obtain ⟨C_log, K_log, hLB⟩ := hLogBound
   -- Schwartz decay for f(x) and ∂_j(f(x))
   have hf_decay : ∀ N : ℕ, ∃ C > 0, ∀ w, |f x w| * (1 + ‖w‖) ^ N ≤ C := by
-    intro N; obtain ⟨C, hC, hb⟩ := hSchwartz.hDecay N (by omega)
+    intro N; obtain ⟨C, hC, hb⟩ := hSchwartz.hDecay N (k := 0) (by omega)
     exact ⟨C, hC, fun w => by simpa using hb x w⟩
   have hdf_decay : ∀ j : Fin 3, ∀ N : ℕ, ∃ C > 0, ∀ w,
       |fderiv ℝ (f x) w (Pi.single j 1)| * (1 + ‖w‖) ^ N ≤ C :=
@@ -53,13 +53,13 @@ lemma flux_times_log_integrable_coulomb
   -- |flux_i(v)| ≤ M₀ * ∑|∂_jf(v)| + M_df * f(v)
   -- |flux_i(v) * log(f(v))| ≤ (M₀ * ∑|∂_jf(v)| + M_df * f(v)) * C_log * (1+‖v‖)^K
   -- Each term like |∂_jf(v)| * (1+‖v‖)^K ≤ C_{j,K+4}/(1+‖v‖)^4
-  obtain ⟨C_f, hC_f, hC_f_bound⟩ := hSchwartz.hDecay (K_log + 4) (by omega)
-  obtain ⟨C_df, hC_df, hC_df_bound⟩ := hSchwartz.hDecay (K_log + 4) (by omega)
+  obtain ⟨C_f, hC_f, hC_f_bound⟩ := hSchwartz.hDecay (K_log + 4) (k := 0) (by omega)
+  obtain ⟨C_df, hC_df, hC_df_bound⟩ := hSchwartz.hDecay (K_log + 4) (k := 1) (by omega)
   set C_bound := (M₀ * 3 * C_df + M_df * C_f) * C_log + 1
   -- Flux integrability for eval_integral
   have hf_schwartz_x : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
       ‖iteratedFDeriv ℝ k (f x) v‖ * (1 + ‖v‖) ^ N ≤ C :=
-    fun N hk => (hSchwartz.hDecay N hk).imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩
+    fun N {k} hk => (hSchwartz.hDecay N hk).imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩
   have hFlux : ∀ v, Integrable (fun w => mulVec (landauMatrix coulombKernel (v - w))
       (f x w • vGrad (f x) v - f x v • vGrad (f x) w)) :=
     fun v => landau_flux_integrable_coulomb (f x) (fun v => hf_pos x v)
@@ -201,7 +201,7 @@ lemma flux_times_log_integrable_coulomb
                 |f x v| * (M₁ + M₂ + M₃) := by
                 rw [integral_add (h_f_abs.const_mul _)
                   ((integrable_finset_sum _ fun j _ => h_dj_abs j).const_mul _),
-                  integral_mul_left, integral_mul_left]
+                  integral_const_mul, integral_const_mul]
                 apply add_le_add
                 · exact mul_le_mul_of_nonneg_left (hM₀_bound v)
                     (Finset.sum_nonneg fun j _ => abs_nonneg _)
@@ -384,26 +384,16 @@ lemma coulomb_flux_component_bound
   calc |∫ w, (landauMatrix coulombKernel (v - w) *ᵥ u w) i|
       ≤ ∫ w, |(landauMatrix coulombKernel (v - w) *ᵥ u w) i| :=
         abs_integral_le_integral_abs
-    _ ≤ ∫ w, ‖v - w‖⁻¹ * ∑ j : Fin 3, |u w j| :=
-        integral_mono_of_nonneg (Filter.Eventually.of_forall fun w => abs_nonneg _)
-          (h_rhs_int.mono' (by fun_prop) (Filter.Eventually.of_forall fun w =>
-            le_trans (h_pw w) (h_pw2 w)))
-          (Filter.Eventually.of_forall h_pw)
     _ ≤ ∫ w, ((∑ j : Fin 3, |vGrad g v j|) * (‖v - w‖⁻¹ * |g w|) +
         g v * ∑ j : Fin 3, (‖v - w‖⁻¹ * |vGrad g w j|)) :=
-        integral_mono_of_nonneg
-          (Filter.Eventually.of_forall fun w =>
-            mul_nonneg (inv_nonneg.mpr (norm_nonneg _))
-              (Finset.sum_nonneg fun j _ => abs_nonneg _))
+        integral_mono_of_nonneg (Filter.Eventually.of_forall fun w => abs_nonneg _)
           h_rhs_int
-          (Filter.Eventually.of_forall h_pw2)
-    _ = (∑ j : Fin 3, |vGrad g v j|) * ∫ w, ‖v - w‖⁻¹ * |g w| +
-        g v * ∑ j : Fin 3, ∫ w, ‖v - w‖⁻¹ * |vGrad g w j| := by
+          (Filter.Eventually.of_forall fun w => le_trans (h_pw w) (h_pw2 w))
+    _ ≤ (∑ j : Fin 3, |vGrad g v j|) * M₀ + g v * M_df := by
         rw [integral_add ((h_f_abs v).const_mul _)
           ((integrable_finset_sum _ fun j _ => h_dj_abs j v).const_mul _),
-          integral_mul_left, integral_mul_left,
+          integral_const_mul, integral_const_mul,
           integral_finset_sum _ fun j _ => h_dj_abs j v]
-    _ ≤ (∑ j : Fin 3, |vGrad g v j|) * M₀ + g v * M_df := by
         apply add_le_add
         · exact mul_le_mul_of_nonneg_left (hM₀_bound v)
             (Finset.sum_nonneg fun j _ => abs_nonneg _)
@@ -412,15 +402,21 @@ lemma coulomb_flux_component_bound
           linarith [hM₁b v, hM₂b v, hM₃b v]
     _ ≤ 3 * (Cg * (1 + ‖v‖) ^ Kg * g v) * M₀ + g v * M_df := by
         gcongr
-        simp only [Fin.sum_univ_three]
+        simp only [Fin.sum_univ_three, vGrad]
         linarith [hGrad v 0, hGrad v 1, hGrad v 2]
     _ ≤ (3 * Cg * M₀ + M_df) * g v * (1 + ‖v‖) ^ Kg := by
         have h1 : (1 : ℝ) ≤ (1 + ‖v‖) ^ Kg :=
-          one_le_pow_of_one_le_of_le (by linarith [norm_nonneg v]) le_rfl
-        nlinarith [hg_pos v, hM₀.le]
+          one_le_pow₀ (by linarith [norm_nonneg v])
+        have hgv : (0 : ℝ) < g v := hg_pos v
+        have hMdf : (0 : ℝ) < M_df := by simp only [M_df]; linarith
+        -- Need: 3*Cg*M₀*(g v)*(1+‖v‖)^Kg + M_df*(g v)*(1+‖v‖)^Kg
+        --     ≥ 3*(Cg*(1+‖v‖)^Kg*(g v))*M₀ + (g v)*M_df
+        -- i.e., M_df*(g v)*((1+‖v‖)^Kg - 1) ≥ 0
+        nlinarith [mul_nonneg (mul_nonneg hMdf.le hgv.le) (sub_nonneg.mpr h1)]
     _ ≤ (3 * Cg * M₀ + M_df + 1) * g v * (1 + ‖v‖) ^ Kg := by
-        nlinarith [hg_pos v, one_le_pow_of_one_le_of_le
-          (show (1:ℝ) ≤ 1 + ‖v‖ by linarith [norm_nonneg v]) (le_refl Kg)]
+        have h1 : (1 : ℝ) ≤ (1 + ‖v‖) ^ Kg :=
+          one_le_pow₀ (by linarith [norm_nonneg v])
+        nlinarith [hg_pos v]
 
 /-- The product flux_i(v) * score_i(v) is integrable for the Coulomb kernel.
     Uses coulomb_flux_component_bound (|flux_i| ≤ Cf*f*(1+‖v‖)^Kg) and

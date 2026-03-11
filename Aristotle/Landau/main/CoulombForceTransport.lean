@@ -135,7 +135,7 @@ lemma force_fderiv_log_component_integrable
     Integrable (fun v => (E x + cross v (B x)) i *
       fderiv ℝ (f x) v (Pi.single i 1) * Real.log (f x v)) := by
   obtain ⟨CL, hCL_nn, hCL⟩ := lorentz_component_bound (E x) (B x)
-  obtain ⟨C_fder, hC_fder_pos, hbound_fder⟩ := hSchwartz.hDecay (K_log + 6) (by omega)
+  obtain ⟨C_fder, hC_fder_pos, hbound_fder⟩ := hSchwartz.hDecay (k := 1) (K_log + 6) (by omega)
   apply (inverse_poly_integrable (CL * |C_log| * C_fder + 1)).mono'
   · -- AEStronglyMeasurable: each factor is continuous in v
     refine Continuous.aestronglyMeasurable ?_

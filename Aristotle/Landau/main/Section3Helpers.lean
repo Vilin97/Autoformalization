@@ -41,7 +41,12 @@ lemma analysis_fluxFactor
           simpa [ Real.exp_log (hf_pos _) ] using
             h.exp.congr_of_eventuallyEq
             (by filter_upwards [] using fun _ => by simp [Real.exp_log (hf_pos _)])
-  simp [h_log_grad, mul_sub, smul_sub, mul_assoc, mul_comm, mul_left_comm, ne_of_gt (hf_pos _)]
+  simp only [h_log_grad, smul_sub]
+  ext i
+  simp only [Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
+  have hfv := ne_of_gt (hf_pos v)
+  have hfw := ne_of_gt (hf_pos w)
+  field_simp
 
 /-- Scalar factors through mulVec and dotProduct:
     y ⬝ (A *ᵥ (c • y)) = c * (y ⬝ (A *ᵥ y)). -/
@@ -55,7 +60,7 @@ lemma analysis_scalarFactor
         (mulVec (landauMatrix Ψ (v - w))
           (vGrad (Real.log ∘ f) v - vGrad (Real.log ∘ f) w)) := by
   -- Proved by Aristotle (Harmonic)
-  intro v w; simp only [dotProduct, Matrix.mulVec, Finset.sum_comm]; ring
+  intro v w; simp only [dotProduct, Matrix.mulVec, Pi.smul_apply, smul_eq_mul, Fin.sum_univ_three]; ring
 
 /-- Nonneg double integral zero → pointwise zero. -/
 lemma analysis_nonneg_dbl_zero
@@ -272,7 +277,7 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
       have h_deriv_eq : ∀ t : ℝ, g (v + t • w) - g v ∈ Submodule.span ℝ {w} := by
         intro t
         by_cases ht : t = 0 ∨ w = 0 <;> simp_all +decide [Submodule.mem_span_singleton]
-        · exact Submodule.zero_mem _
+        · exact ⟨0, by rcases ht with rfl | rfl <;> simp⟩
         · obtain ⟨l, hl⟩ := hparallel (v + t • w) v (by simp_all)
           use l * t
           simp_all +decide [mul_comm, smul_smul]
@@ -360,12 +365,27 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
           (fderiv ℝ c v) (Pi.single k 1) *
           (if i = j then 1 else 0) := by
         intro v i j k
-        rw [fderiv_pi]
-        simp [hc_partial]
-        exact fun i => DifferentiableAt.comp v
-          (differentiableAt_pi.1
-            ((h_diff_fderiv.clm_apply contDiff_const).contDiffAt.differentiableAt le_rfl) i)
-          differentiableAt_id
+        have hDiff_comp_j : ∀ i', DifferentiableAt ℝ
+            (fun v => (fderiv ℝ g v) (Pi.single j 1) i') v :=
+          fun i' => DifferentiableAt.comp v
+            (differentiableAt_pi.1
+              ((h_diff_fderiv.clm_apply contDiff_const).contDiffAt.differentiableAt le_rfl) i')
+            differentiableAt_id
+        have h_pi_comp : (fderiv ℝ (fun v => (fderiv ℝ g v) (Pi.single j 1)) v)
+            (Pi.single k 1) i =
+            (fderiv ℝ (fun v => (fderiv ℝ g v) (Pi.single j 1) i) v) (Pi.single k 1) := by
+          rw [fderiv_pi hDiff_comp_j]; simp only [ContinuousLinearMap.pi_apply]
+        rw [h_pi_comp]
+        by_cases hij : i = j
+        · subst hij
+          simp only [ite_true, mul_one]
+          have heq : (fun v => (fderiv ℝ g v) (Pi.single i 1) i) = c := by
+            ext v; rw [hc_partial]; simp
+          rw [heq]
+        · simp only [hij, ite_false, mul_zero]
+          have heq : (fun v => (fderiv ℝ g v) (Pi.single j 1) i) = fun _ => 0 := by
+            ext v; rw [hc_partial]; simp [hij]
+          rw [heq]; simp [fderiv_const]
       have h_zero_deriv : ∀ v : Fin 3 → ℝ, ∀ k : Fin 3, (fderiv ℝ c v) (Pi.single k 1) = 0 := by
         intro v k
         obtain ⟨i, hi⟩ : ∃ i : Fin 3, i ≠ k := by fin_cases k <;> trivial
@@ -374,11 +394,12 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
         intro v; ext w
         have : (fderiv ℝ c v) w =
             ∑ k : Fin 3, w k • (fderiv ℝ c v) (Pi.single k 1) := by
-          rw [show w = ∑ k, Pi.single k (w k) by ext i; simp +decide [Pi.single_apply]]
-          simp +decide [map_sum, map_smul, Finset.sum_apply, Pi.single_apply]; ring
+          conv_lhs => rw [show w = ∑ k, Pi.single k (w k) by ext i; simp +decide]
+          simp only [map_sum, map_smul, smul_eq_mul]
           exact Finset.sum_congr rfl fun i _ => by
-            rw [← ContinuousLinearMap.map_smul]; congr; ext j
-            by_cases hi : i = j <;> simp_all
+            have : Pi.single i (w i) = w i • (Pi.single i (1 : ℝ) : Fin 3 → ℝ) := by
+              ext j; simp [Pi.single_apply, smul_eq_mul]
+            rw [this, map_smul, smul_eq_mul]
         simp [this, h_zero_deriv]
       have h_diff_c : Differentiable ℝ c := by
         have : ContDiff ℝ 1 (fun v => (fderiv ℝ g v) (Pi.single 0 1) 0) :=
@@ -436,24 +457,27 @@ lemma affine_gradient_antiderivative (h : (Fin 3 → ℝ) → ℝ) (b : Fin 3 �
             <| HasFDerivAt.smul (hasFDerivAt_id t)
             <| hasFDerivAt_const _ _)) using 1
       norm_num [fderiv_deriv, dotProduct]
-      rw [show v = ∑ i, Pi.single i (v i) by ext i; simp +decide]
-      simp +decide [mul_comm, Finset.mul_sum _ _ _, Finset.sum_mul]
-      ring
-      exact Finset.sum_congr rfl fun i _ => by
-        rw [← smul_eq_mul, ← ContinuousLinearMap.map_smul]
-        congr
-        ext j
-        by_cases hi : i = j <;> simp_all
+      set L := fderiv ℝ h (t • v)
+      have hv_decomp : v = ∑ i, v i • (Pi.single i (1 : ℝ) : Fin 3 → ℝ) := by
+        ext i; simp [Pi.single_apply, Finset.sum_apply, smul_eq_mul]
+      conv_rhs => rw [hv_decomp]
+      simp only [map_sum, map_smul, smul_eq_mul, mul_comm]
     simp_all +decide [two_mul]
     ring
   intros v
   have : ∫ t in (0 : ℝ)..1, deriv (fun t => h (t • v)) t = h v - h 0 := by
-    rw [intervalIntegral.integral_deriv_eq_sub]; ring
-    · exact fun t ht => DifferentiableAt.comp t
+    have hint : IntervalIntegrable (deriv (fun t => h (t • v))) MeasureTheory.volume 0 1 :=
+      Continuous.intervalIntegrable
+        (by rw [show deriv (fun t => h (t • v)) = fun t => (b + 2 * c₀ • t • v) ⬝ᵥ v
+              from funext fun t => h_deriv v t]
+            continuity) 0 1
+    have := intervalIntegral.integral_deriv_eq_sub
+      (f := fun t => h (t • v))
+      (fun t _ => DifferentiableAt.comp t
         (hh_smooth.contDiffAt.differentiableAt (by norm_num))
-        (differentiableAt_id.smul_const _)
-    · exact Continuous.intervalIntegrable (by rw [show deriv _ = _ from funext fun t => h_deriv v t]
-                                               continuity) _ _
+        (differentiableAt_id.smul_const _))
+      hint
+    simp at this; linarith
   simp_all +decide [VML.normSq]
   norm_num [mul_assoc, mul_comm, mul_left_comm, Fin.sum_univ_three, dotProduct] at *; linarith!
 

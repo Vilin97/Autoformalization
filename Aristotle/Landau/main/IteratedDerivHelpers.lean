@@ -127,42 +127,55 @@ lemma quadratic_iteratedFDeriv_bound (T : ℝ) (hT : 0 < T) (k : ℕ) :
   have hcomp_smooth : ∀ j : Fin 3,
       ContDiff ℝ ⊤ (fun v : Fin 3 → ℝ => -(v j * v j) / (2 * T)) := fun j =>
     ((contDiff_apply ℝ ℝ j).mul (contDiff_apply ℝ ℝ j)).neg.div_const _
-  -- iteratedFDeriv of sum = sum of iteratedFDeriv
-  have h_sum := congrFun (iteratedFDeriv_sum (i := i)
-    (fun j _ => (hcomp_smooth j).of_le le_top)) v
   -- Each component: -(v_j²)/(2T) = (-1/(2T)) • (v_j²)
   have hcomp_eq : ∀ j : Fin 3, (fun v : Fin 3 → ℝ => -(v j * v j) / (2 * T)) =
       (-1 / (2 * T)) • (fun v : Fin 3 → ℝ => v j * v j) := by
-    intro j
-    ext w
-    simp [Pi.smul_apply, smul_eq_mul]
-    ring
+    intro j; ext w; simp [Pi.smul_apply, smul_eq_mul]; ring
   -- Bound: ‖iteratedFDeriv i q v‖ ≤ (3/T)(1+‖v‖)
   have hbound : ‖iteratedFDeriv ℝ i (fun v : Fin 3 → ℝ => -(normSq v) / (2 * T)) v‖ ≤
       3 / T * (1 + ‖v‖) := by
-    rw [hfn_eq]; rw [show (fun v : Fin 3 → ℝ => ∑ j : Fin 3, -(v j * v j) / (2 * T)) =
-      (fun v => ∑ j : Fin 3, ((-1 / (2 * T)) • fun v : Fin 3 → ℝ => v j * v j) v) from by
-      ext w; congr 1; ext j; simp [Pi.smul_apply, smul_eq_mul]; ring]
-    -- After distributing iteratedFDeriv through the sum
-    conv => arg 1; rw [iteratedFDeriv_sum (fun j _ =>
-      ((contDiff_apply ℝ ℝ j).mul (contDiff_apply ℝ ℝ j)).const_smul _|>.of_le le_top)]
+    rw [hfn_eq]
+    -- Distribute iteratedFDeriv through the sum
+    have hsmooth_i : ∀ j ∈ (Finset.univ : Finset (Fin 3)),
+        ContDiff ℝ (↑i) (fun v : Fin 3 → ℝ => -(v j * v j) / (2 * T)) :=
+      fun j _ => (hcomp_smooth j).of_le le_top
+    rw [show (fun v : Fin 3 → ℝ => ∑ j : Fin 3, -(v j * v j) / (2 * T)) =
+      (fun v => ∑ j ∈ Finset.univ, (fun j (v : Fin 3 → ℝ) => -(v j * v j) / (2 * T)) j v) from
+      by ext w; simp]
+    have hsum := congrFun (iteratedFDeriv_sum (fun j hj => hsmooth_i j hj)) v
+    -- hsum rewrites LHS to the sum form
+    rw [hsum, Finset.sum_apply]
     refine le_trans (norm_sum_le _ _) ?_
-    -- Bound each component
+    -- Bound each component using smul decomposition
     have habs : |(-1 : ℝ) / (2 * T)| = 1 / (2 * T) := by
-      rw [abs_of_nonpos (by linarith)]; ring
-    refine le_trans (Finset.sum_le_sum fun j _ => ?_) ?_
-    · rw [iteratedFDeriv_const_smul_apply
+      rw [abs_of_nonpos (by exact div_nonpos_of_nonpos_of_nonneg (by norm_num) (by linarith))]; ring
+    refine le_trans (Finset.sum_le_sum (g := fun _ => 1 / T * (1 + ‖v‖))
+      fun j _ => ?_) ?_
+    · rw [show (fun v : Fin 3 → ℝ => -(v j * v j) / (2 * T)) =
+        ((-1 / (2 * T)) • fun v : Fin 3 → ℝ => v j * v j) from hcomp_eq j]
+      rw [iteratedFDeriv_const_smul_apply
         (((contDiff_apply ℝ ℝ j).mul (contDiff_apply ℝ ℝ j)).contDiffAt.of_le le_top),
         norm_smul, Real.norm_eq_abs, habs]
-      exact mul_le_mul_of_nonneg_left (norm_iteratedFDeriv_proj_sq_le j i hi1 v)
-        (by positivity)
-    · simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, smul_eq_mul]
-      ring_nf; linarith [norm_nonneg v]
+      calc 1 / (2 * T) * ‖iteratedFDeriv ℝ i (fun w : Fin 3 → ℝ => w j * w j) v‖
+          ≤ 1 / (2 * T) * (2 * (1 + ‖v‖)) :=
+            mul_le_mul_of_nonneg_left (norm_iteratedFDeriv_proj_sq_le j i hi1 v)
+              (by positivity)
+        _ = 1 / T * (1 + ‖v‖) := by ring
+    · simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
+      ring_nf; exact le_refl _
   -- Step 2: (3/T)(1+‖v‖) ≤ c(1+‖v‖) ≤ (c(1+‖v‖))^i
   calc ‖iteratedFDeriv ℝ i (fun v => -(normSq v) / (2 * T)) v‖
       ≤ 3 / T * (1 + ‖v‖) := hbound
-    _ ≤ c * (1 + ‖v‖) := by unfold_let c; nlinarith [norm_nonneg v]
+    _ ≤ c * (1 + ‖v‖) := by
+        have hv := norm_nonneg v
+        have : 3 / T * (1 + ‖v‖) ≤ (3 / T + 1) * (1 + ‖v‖) := by nlinarith
+        exact this
     _ ≤ (c * (1 + ‖v‖)) ^ i := le_self_pow₀
-        (by unfold_let c; nlinarith [norm_nonneg v] : 1 ≤ c * (1 + ‖v‖)) hi1
+        (by have hv := norm_nonneg v
+            have h3T : 0 ≤ 3 / T := by positivity
+            calc (1 : ℝ) = 1 * 1 := by ring
+              _ ≤ (3 / T + 1) * (1 + ‖v‖) := by
+                  apply mul_le_mul <;> linarith
+            : 1 ≤ c * (1 + ‖v‖)) (by omega : i ≠ 0)
 
 end VML
