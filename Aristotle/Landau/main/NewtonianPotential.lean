@@ -82,7 +82,6 @@ lemma coulomb_landauMatrix_entry_le_pi (z : Fin 3 → ℝ) (i j : Fin 3)
   exact le_trans h (inv_anti₀ (norm_pos_iff.mpr hz) (pi_norm_le_eucNorm z))
 
 
-set_option maxHeartbeats 800000 in
 -- lintegral_iUnion + ENNReal arithmetic requires extended unification
 /-- ‖·‖⁻¹ is locally integrable in ℝ³. Proved by Aristotle (job 3dc1b4dc).
     Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun> -/
