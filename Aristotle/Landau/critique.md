@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-10 UTC (Cycle 68)
+# Adversarial Critique — 2026-03-10 UTC (Cycle 69)
 
 ## Verdict: CONDITIONAL ACCEPT
 
@@ -12,24 +12,21 @@
 
 ## 1. Sorry's
 
-**2 sorry's** in `CoulombConcreteTheorem42_nonvacuous`:
+**1 sorry** in `CoulombConcreteTheorem42_nonvacuous`:
 
 | Line | Goal | Statement | Risk |
 |------|------|-----------|------|
-| ~429 | (7) hDecay | `∀ N k, ∃ C > 0, ∀ x v, ‖iteratedFDeriv ℝ k eM v‖ * (1+‖v‖)^N ≤ C` | Medium — needs polynomial×Gaussian bound + `norm_iteratedFDeriv_comp_le` |
-| ~452 | (10) | Vlasov equation: `0 = ν * LandauOperator coulombKernel eM` | **High** — requires Maxwellian in kernel of Landau operator |
+| ~704 | (10) hVlasov | `0 = ν * LandauOperator coulombKernel eM` | **High** — requires Maxwellian in kernel of Landau operator |
 
-Note: (7) was decomposed in cycle 67 — `hGradDecay` is proved, only `hDecay` remains sorry'd.
+This is the last sorry. It asserts that the equilibrium Maxwellian is in the null space of the Landau collision operator. This is a well-known physics result but the formal proof requires showing that the Landau operator vanishes on Maxwellians — essentially that collisions preserve the equilibrium distribution.
 
-~~(12) Gauss~~ — **closed** in cycle 67 via `simp` (divergence of zero simplifies).
-
-**Worst-case scenario for sorry (10):** If `LandauOperator` is defined in a way that doesn't match the standard physics definition, the non-vacuousness claim would be false. Sorry (10) is the only thing standing between "rigorous theorem" and "vacuous tautology".
+**Worst-case scenario:** If `LandauOperator` is defined in a way that doesn't match the standard physics definition, the non-vacuousness claim is false. The sorry hides both the mathematical argument AND the definition-matching verification.
 
 ---
 
 ## 2. Hidden Axioms
 
-`lean_verify` on both main theorems: zero axioms beyond the standard three. No `admit`, `axiom`, `native_decide`, or linter suppression found.
+`lean_verify` on both main theorems: zero axioms beyond the standard three (`propext`, `Classical.choice`, `Quot.sound`). No `admit`, `axiom`, `native_decide`, or linter suppression found.
 
 I found no issue.
 
@@ -37,19 +34,19 @@ I found no issue.
 
 ## 3. Circularity
 
-With 8 of 10 non-trivial goals proved, the non-vacuousness defense is substantially complete. The critical gap is sorry (10) — the Vlasov equation.
+With 10 of 10 non-trivial goals addressed (9 proved, 1 sorry'd), the non-vacuousness defense is nearly complete. The only gap is sorry (10) — the Vlasov equation. Since this is the only remaining sorry, any hidden circularity would have to be in the definitions themselves, not in proved lemmas.
 
 ---
 
 ## 4. Hypothesis Audit
 
-No change. All 13 hypotheses are independent and necessary.
+No change from cycle 68. All 13 hypotheses are independent and necessary.
 
 ---
 
 ## 5. Mathematical Correctness
 
-I found no divergence. The main theorems are kernel-verified.
+I found no divergence. The main theorems are kernel-verified. The new `quadratic_iteratedFDeriv_bound` proof correctly handles all three cases (i=1, i=2, i≥3) of iterated derivatives of the quadratic form -normSq/(2T).
 
 ---
 
@@ -59,15 +56,18 @@ I found no divergence. The main theorems are kernel-verified.
 
 `synthInstance.maxHeartbeats 160000` in CoulombSpatialTransport.lean. Acceptable.
 
-### 6b. Files over 600 lines (5 files)
+### 6b. Files over 600 lines (6 files)
 
 | File | Lines |
 |------|-------|
 | TorusInstance.lean | 816 |
 | Defs.lean | 785 |
+| CoulombConcreteTheorem42.lean | 720 |
 | CoulombPSD.lean | 703 |
 | CoulombSpatialTransport.lean | 662 |
 | Section3Helpers.lean | 625 |
+
+CoulombConcreteTheorem42.lean grew from ~460 to 720 lines after adding the derivative bound helpers. The general helper lemmas (`iteratedFDeriv_clm_zero`, `norm_iteratedFDeriv_one_clm`) could be extracted to a shared file or Section3Helpers.
 
 ### 6c. Long lines
 
@@ -77,7 +77,7 @@ No lines over 100 characters found.
 
 ## 7. Documentation Lies
 
-MEMORY.md updated in cycle 67: sorry count (2), line counts (~8,000, ~460 for CoulombConcreteTheorem42). Accurate.
+MEMORY.md updated in cycle 68: sorry count (1), line count (~720 for CoulombConcreteTheorem42). Accurate.
 
 I found no issue.
 
@@ -85,22 +85,34 @@ I found no issue.
 
 ## 8. Generalization Opportunities
 
-### 8a. Close remaining 2 non-vacuousness sorry's (MEDIUM-HARD)
+### 8a. Close remaining sorry (10) hVlasov (HARD)
 
-- (7) hDecay: `‖iteratedFDeriv ℝ k eM v‖ * (1+‖v‖)^N ≤ C`. Strategy: use `norm_iteratedFDeriv_comp_le` (Mathlib) for the iterated derivative bound, plus `Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero` for the polynomial×Gaussian bound. Sub-lemmas identified in cycle 67.
-- (10) Vlasov: `LandauOperator coulombKernel eM = 0`. Hardest sorry — requires collision operator analysis.
+The Landau operator nullspace property for Maxwellians. This requires:
+1. Showing the score difference ∇log(eM(v)) - ∇log(eM(w)) is proportional to (v-w)
+2. Showing the Landau matrix applied to (v-w) gives a specific tensor structure
+3. Showing the resulting integral vanishes by symmetry
 
-### 8b. Weaken spatial smoothness: C^∞ → C^2 (DEFERRED)
+### 8b. Extract general helper lemmas to shared file (EASY)
 
-### 8c. Generalize beyond T³ (HARD)
+`iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` are general Lean/Mathlib facts, not specific to the Coulomb formalization. Moving them to a shared helpers file would reduce CoulombConcreteTheorem42.lean by ~20 lines and make them reusable.
 
-### 8d. Extract Mathlib-upstreamable lemmas (MEDIUM)
+### 8c. Weaken spatial smoothness: C^∞ → C^2 (DEFERRED)
+
+### 8d. Generalize beyond T³ (HARD)
+
+### 8e. Extract Mathlib-upstreamable lemmas (MEDIUM)
+
+`iteratedFDeriv_clm_zero`, `norm_iteratedFDeriv_one_clm`, and `norm_iteratedFDeriv_proj_sq_le` are candidates for Mathlib PRs.
 
 ---
 
 ## 9. Mathlib Upstreamability
 
-Unchanged. Schwartz decay machinery and torus IBP lemmas are most plausible candidates.
+The new helper lemmas from cycle 68 are the most PR-ready:
+- `iteratedFDeriv_clm_zero`: iteratedFDeriv of a CLM vanishes at order ≥ 2
+- `norm_iteratedFDeriv_one_clm`: ‖iteratedFDeriv 1 f x‖ = ‖f‖ for CLM f
+
+These are clean, general facts missing from Mathlib.
 
 ---
 
@@ -108,9 +120,10 @@ Unchanged. Schwartz decay machinery and torus IBP lemmas are most plausible cand
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6 | 5 files over 600 lines (TorusInstance 816, Defs 785) | Minor | Open |
-| 8 | Non-vacuousness theorem has 2 sorry's | Epistemic | Open (8 of 10 goals closed) |
+| 6b | 6 files over 600 lines (TorusInstance 816, Defs 785, CoulombConcreteTheorem42 720) | Minor | Open |
+| 8a | Non-vacuousness theorem has 1 sorry (hVlasov) | Epistemic | Open |
+| 8b | General helper lemmas in wrong file | Minor | Open |
 
 ### Conditions for ACCEPT
 
-Close sorry (7) hDecay (polynomial×Gaussian bound). Sorry (10) is genuinely hard and may require extended effort. No new sorry's should be introduced.
+Close sorry (10) hVlasov OR provide a convincing decomposition into well-defined sub-lemmas with clear mathematical justification for each. No new sorry's should be introduced.

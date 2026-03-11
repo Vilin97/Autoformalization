@@ -1,46 +1,63 @@
-# Plan — Cycle 68
+# Plan — Cycle 69
 
 ## Status summary
 
-- **Sorry count**: 2 (both in `CoulombConcreteTheorem42_nonvacuous`)
-- **Files**: 22 files, ~8,000 lines
+- **Sorry count**: 1 (in `CoulombConcreteTheorem42_nonvacuous`)
+- **Files**: 22 files, ~8,300 lines
 - **Build**: Clean, 0 errors
-- **Critique verdict**: CONDITIONAL ACCEPT — close (7) hDecay
+- **Critique verdict**: CONDITIONAL ACCEPT — close (10) hVlasov
 - **Aristotle jobs**: 0 pending
 
 ## Active multi-cycle strategies
 
-### Non-vacuousness theorem (cycles 64–68)
-2 remaining sorry goals:
+### Non-vacuousness theorem (cycles 64–69)
+1 remaining sorry goal:
 
 | Goal | What to prove | Difficulty | Approach |
 |------|---------------|------------|----------|
-| (7) hDecay | `‖iteratedFDeriv ℝ k eM v‖ * (1+‖v‖)^N ≤ C` | **Medium-Hard** | `norm_iteratedFDeriv_comp_le` + polynomial×Gaussian bound |
-| (10) hVlasov | `0 = ν * LandauOperator coulombKernel eM` | **Hardest** | Maxwellian in nullspace of Landau operator |
+| (10) hVlasov | `0 = ν * LandauOperator coulombKernel eM` | **Medium** | Integrand vanishes: A(z)·z = 0 |
 
 ## This cycle's work items
 
-### 1. Prove sorry (7) hDecay — polynomial×Gaussian bound (`/prove`)
-- **Why**: Critique acceptance condition. Identified sub-lemmas in cycle 67.
-- **File**: `CoulombConcreteTheorem42.lean` line ~429
-- **Strategy (two sub-lemmas)**:
+### 1. Prove sorry (10) hVlasov — Maxwellian in kernel of Landau operator (`/prove`)
 
-  **Sub-lemma A**: `poly_mul_exp_bounded` — `∀ M a > 0, ∃ C, ∀ u ≥ 0, (1+u)^M * exp(-a*u²) ≤ C`
-  - Split: u ≤ 1 → bound by 2^M; u > 1 → use u² ≥ u, then `(2u)^M * exp(-a*u) → 0`
-  - Use `Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero` for the limit
-  - Extract bound from the limit via `Metric.tendsto_atTop` or `Filter.Tendsto.eventually`
+- **File**: `CoulombConcreteTheorem42.lean` line ~704
+- **Mathematical argument**:
+  1. LHS of Vlasov = 0 (f constant in x, E=B=0, so spatial transport and force terms vanish)
+  2. RHS = ν * LandauOperator coulombKernel eM v
+  3. The integrand in LandauOperator is:
+     `mulVec A(v'-w) (eM(w) · vGrad eM v' - eM(v') · vGrad eM w)`
+  4. For Maxwellian: `vGrad eM v = -(v/T) · eM(v)` (componentwise)
+  5. So the bracket = `eM(v')·eM(w) · (-(v'-w)/T)` = scalar × `(v'-w)`
+  6. Key property: `mulVec (landauMatrix Ψ z) z = 0` because (|z|²I - zzᵀ)·z = 0
+  7. Hence integrand = 0, integral = 0, vDiv of 0 = 0
 
-  **Sub-lemma B**: iterated derivative bound via `norm_iteratedFDeriv_comp_le`
-  - `eM = const * (exp ∘ q)` where `q(v) = -normSq(v)/(2T)`
-  - `‖iteratedFDeriv ℝ i exp (q v)‖ = |exp(q v)|` for all i (exp is its own derivative)
-  - `‖iteratedFDeriv ℝ i q v‖ ≤ D^i` where D ≈ c*(1+‖v‖) (q is quadratic: zero for i ≥ 3)
-  - Result: `‖iteratedFDeriv ℝ n eM v‖ ≤ n! * |eM v| * (c(1+‖v‖))^n`
+- **Sub-lemmas to prove**:
 
-  **Combine**: `n! * |eM v| * c^n * (1+‖v‖)^n * (1+‖v‖)^N ≤ n! * c^n * C_{n+N}` via sub-lemma A
+  **Sub-lemma A** (projection annihilation): `mulVec (innerLandauMatrix z) z = 0`
+  - Proof: `(normSq z • I - vecMulVec z z) *ᵥ z = normSq z • z - (zᵀz) • z = 0`
+
+  **Sub-lemma B** (Landau matrix annihilation): `mulVec (landauMatrix Ψ z) z = 0`
+  - Proof: `Ψ(|z|) • (innerLandauMatrix z) *ᵥ z = Ψ(|z|) • 0 = 0`
+
+  **Sub-lemma C** (integrand vanishes): For eM = equilibriumMaxwellian:
+  `mulVec A(v-w) (eM(w) • vGrad eM v - eM(v) • vGrad eM w) = 0`
+  - Uses: `vGrad eM v i = -(v i / T) * eM(v)`, then bracket simplifies to scalar × (v-w)
+
+  **Sub-lemma D** (LandauOperator vanishes): `LandauOperator coulombKernel eM v = 0`
+  - Uses sub-lemma C to show the integrand is 0, hence integral is 0
+  - Then vDiv of zero function is 0
+
+  **Final step**: Show LHS = 0 = ν * 0 = RHS
+
+### 2. Extract general CLM lemmas to shared file (`/simplify`)
+- Move `iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` from CoulombConcreteTheorem42.lean to Section3Helpers.lean or a new helpers file
+- Reduces CoulombConcreteTheorem42.lean by ~20 lines
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
-| #6: 5 files over 600 lines | Code quality | TorusInstance 816, Defs 785, CoulombPSD 703 |
-| Sorry (10): Landau nullspace | Epistemic | Hardest — needs collision operator analysis |
+| #6b: 6 files over 600 lines | Code quality | TorusInstance 816, Defs 785, CoulombConcreteTheorem42 720 |
+| 8c: Generalize beyond T³ | Epistemic | Hard — requires abstract manifold theory |
+| 8e: Mathlib-upstreamable lemmas | Community | iteratedFDeriv_clm_zero, norm_iteratedFDeriv_one_clm |

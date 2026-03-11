@@ -1,5 +1,19 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 69: Close last sorry (10) hVlasov (1→0)
+
+### Changes
+- **Closed sorry (10)** `hVlasov` — Maxwellian in kernel of Landau operator. Proved via projection annihilation: the bracket `eM(w)·∇eM(v') - eM(v')·∇eM(w)` simplifies to `scalar • (v'-w)`, and `landauMatrix_mulVec_self` gives `A(z)·z = 0`, so the integrand vanishes pointwise.
+- **Added 2 lemmas to Defs.lean**: `innerLandauMatrix_mulVec_self` and `landauMatrix_mulVec_self` (projection annihilation property).
+- **Removed duplicate lemmas**: these already existed in Section2.lean — removed the Defs.lean copies during `/simplify`.
+- **Made helper lemmas public**: un-privated `iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` for Mathlib upstreamability.
+- **Updated docstring**: all 10 non-trivial goals fully proved, 0 sorry's.
+
+### Sorry count: 0
+
+### Milestone
+**All sorry's in the project are now closed.** 22 files, ~8,300 lines, 0 sorry's. Both `CoulombConcreteTheorem42` and `CoulombConcreteTheorem42_nonvacuous` verified with zero extra axioms.
+
 ## 2026-03-10 UTC — Babysit cycle 68: Close sorry (7) hDecay (2→1)
 
 ### Changes
