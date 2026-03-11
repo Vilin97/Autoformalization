@@ -1,5 +1,50 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 64: Eliminate deprecated refine', non-vacuousness theorem
+
+### Changes
+- **Eliminated all 36 deprecated `refine'`** across 5 files (CoulombPSD 13, TorusInstance 10, NewtonianPotential 8, Section3Helpers 4, SchwartzDecayDefs 1). Replaced with `refine` + `?_` placeholders.
+- **Added `equilibriumMaxwellian_pos`** (Defs.lean): standalone lemma proving the equilibrium Maxwellian is strictly positive for ρ > 0, T > 0.
+- **Added `CoulombConcreteTheorem42_nonvacuous`** (CoulombConcreteTheorem42.lean): non-vacuousness theorem showing the equilibrium Maxwellian with E=0, B=0 satisfies all 13 hypotheses. Hypothesis (3) proved; (4)-(13) sorry'd with detailed documentation explaining why each holds.
+- **Fixed MEMORY.md**: updated file count (21→22) and line count (~7,895→~7,838).
+- **Investigated spatial smoothness weakening** (C^∞ → C¹): blocked by `hDiff_grad` in FlatTorus3 typeclass requiring same smoothness level for gradient components. Would need two-level predicate design.
+
+### Sorry count: 10 (all in `CoulombConcreteTheorem42_nonvacuous`, non-critical)
+
+## 2026-03-10 UTC — Babysit cycle 63: Split TorusInstance, weaken C^∞ → C³ velocity smoothness
+
+### Changes
+- **Split TorusInstance.lean** (1,162 → 299 + 816 lines): Extracted `TorusDefs.lean` with Torus3 type, periodicLift, gradient/div/curl operators, and basic spatial lemmas. Made `isOpenQuotientMap_torusMk` and `continuous_torusGradX` non-private to enable cross-file usage. All downstream files build clean.
+- **Weakened velocity smoothness C^∞ → C³** across the entire abstract proof chain (8 files):
+  - `Defs.lean`: `VMLInput.hf_smooth` and `landau_ibp` changed from `ContDiff ℝ ⊤` to `ContDiff ℝ 3`
+  - `Section3Helpers.lean`: `analysis_vGrad_smooth` (⊤→2), `entropy_score_form`, `entropy_zero_quadform_zero`, `parallel_curl_free_affine` (⊤→2), `affine_gradient_antiderivative`, `D_zero_implies_maxwellian` all weakened. Fixed all `le_top` → `by norm_num` for `ContDiff.differentiable`.
+  - `Section3.lean`: `H_theorem`, `log_f_quadratic`, `nullspace_necessity`, `fubini_symmetrization_logf` all C³
+  - `Section4.lean`: `fderiv_entropy_potential`, `force_transport_zero`, `transport_entropy_from_vlasov` all C³
+  - `Section5.lean`: `polynomial_identity_from_vlasov` C³
+  - `Section7.lean`: `poisson_boltzmann_from_vlasov` C³
+  - `Theorem42.lean`: Main theorem signature now takes `ContDiff ℝ 3` instead of `ContDiff ℝ ⊤`
+  - `CoulombConcreteTheorem42.lean`: Concrete theorem keeps `ContDiff ℝ ⊤` (needed for Schwartz), converts via `.of_le le_top` at the Theorem42 call site
+- **Full clean build** verified: 22 files, ~7,838 lines, 0 sorry's
+
+### Mathematical significance
+The abstract proof chain (H-theorem → nullspace → Maxwellian form → polynomial matching → Poisson-Boltzmann → spatial uniformity) only requires C³ velocity regularity. C^∞ is only genuinely needed in the concrete Coulomb path for `schwartz_fderiv_component_schwartz`. This makes the theorem applicable to a strictly larger class of distribution functions.
+
+### Sorry count: 0
+
+## 2026-03-10 UTC — Babysit cycle 62: Fix build regression, linter cleanup, smoothness audit
+
+### Changes
+- **Fixed build-breaking regression** from cycle 61: `linarith` in `equilibriumMaxwellian_T_unique` couldn't handle nonlinear reasoning about π. Fix: `nlinarith [Real.pi_pos]`.
+- **Fixed 6 unused simp args in Section3Helpers.lean**: lines 544-546 (`Pi.single_apply`), 552 (`Finset.sum_add_distrib`), 606 (`mul_assoc`), 607 (`Fin.sum_univ_three`).
+- **Fixed 2 unused variables** in Section3Helpers.lean (line 618: `hn_pos`, `hρ`).
+- **Fixed 1 unused variable** in Defs.lean (line 192: `hg_int`).
+- **Fixed 1 deprecated `refine'`** in VelocityDecayInstance.lean (line 21).
+- **Updated MEMORY.md** line counts and added build verification note.
+- **Hardened `/commit` command**: now force-recompiles modified `.lean` files from source.
+- **Smoothness audit** (experiments/smoothness_audit.md): C³ velocity + C¹ spatial suffices. ~80 occurrences across 15 files to change. Multi-cycle effort.
+
+### Sorry count: 0
+
 ## 2026-03-10 UTC — Babysit cycle 61: T_eq uniqueness, hGradBound independence, simp cleanup
 
 ### Changes

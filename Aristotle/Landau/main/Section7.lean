@@ -91,7 +91,7 @@ lemma poisson_boltzmann_from_vlasov
     (Ψ : ℝ → ℝ) (ν : ℝ)
     (ρ : X → ℝ) (ρ_ion : ℝ)
     (_hf_pos : ∀ x v, 0 < f x v)
-    (_hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
+    (_hf_smooth : ∀ x, ContDiff ℝ 3 (f x))
     (_hf_int : ∀ x, Integrable (f x))
     (_hΨ : ∀ r, 0 < Ψ r)
     (_hρ_def : ∀ x, ρ x = ∫ v, f x v)
