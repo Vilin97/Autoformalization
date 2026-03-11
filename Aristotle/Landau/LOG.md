@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 79: Break multi-semicolon lines
+
+### Changes
+- **Broke 42 lines with 2+ semicolons** in Section3Helpers (26), TorusInstance (11), CoulombPSD (5).
+- Semicolons: 700 → **613** (87 removed). Lines >100: 186 → **183**.
+- Fixed 4 build errors from incorrect semicolon splitting (`;` inside `<;> [...]` list separators and `(by ...)` blocks).
+- All files verified to compile clean from source.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 78: Break long semicolon lines
 
 ### Changes
