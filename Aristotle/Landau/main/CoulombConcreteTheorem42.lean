@@ -369,19 +369,20 @@ private lemma equilibriumMaxwellian_exp_lower_bound (ρ T : ℝ) (hρ : 0 < ρ) 
     E = 0, B = 0 satisfies all 13 hypotheses of the main theorem. This
     proves the theorem is non-vacuous: at least one instance exists.
 
-    **Proof status: 7 of 10 non-trivial goals proved, 3 sorry'd.**
+    **Proof status: 8 of 10 non-trivial goals proved, 2 sorry'd.**
 
     Why each hypothesis holds for the equilibrium:
     - (3) hf_pos: ρ/(2πT)^{3/2} > 0 and exp > 0 ⇒ f > 0  ✓
     - (4) hf_smooth_v: composition of smooth functions (const, exp, polynomial)  ✓
     - (5) hf_smooth_x: f is spatially constant ⇒ periodicLift is constant ⇒ C^∞  ✓
     - (6) hB_smooth: B = 0, same argument as (5)  ✓
-    - (7) hSchwartz: Gaussian is Schwartz class  ← sorry (needs iterated fderiv bounds)
+    - (7) hSchwartz: Gaussian is Schwartz class  ← sorry (hDecay needs
+          iteratedFDeriv poly×Gaussian bound; hGradDecay proved via const=0)
     - (8) hExpDecay: normSq v ≤ 3(1+‖v‖)², choose C = 3/(2T)+max(0,-log prefix)  ✓
     - (9) hGradBound: ∂eM/∂vᵢ = -(vᵢ/T)·eM, bound |vᵢ| ≤ 1+‖v‖  ✓
     - (10) hVlasov: Maxwellian in kernel of Landau operator  ← sorry (hardest)
     - (11) hAmpere: ∇×0 = 0, ∫ vᵢ eM dv = 0 by odd symmetry  ✓
-    - (12) hGauss: Gaussian integral normalization ∫ eM dv = ρ_ion  ← sorry
+    - (12) hGauss: ∇·0 = 0 = ∫eM - ρ_ion (simp closes)  ✓
     - (13) hDivB: ∇·0 = 0  ✓ -/
 theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
     (hν : 0 < ν) (hT : 0 < T) (hρ_ion : 0 < ρ_ion) :
@@ -423,7 +424,14 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
     simp only [periodicLift, Function.comp, Pi.zero_apply]
     exact contDiff_const
   -- (7) hSchwartz: Gaussian is UniformSchwartzDecay
-  · sorry
+  · constructor
+    · -- hDecay: ‖iteratedFDeriv ℝ k eM v‖ * (1+‖v‖)^N ≤ C
+      sorry
+    · -- hGradDecay: spatial gradient of constant function is 0
+      intro N i
+      refine ⟨1, one_pos, fun x v => ?_⟩
+      simp only [torusGradX, periodicLift, Function.comp]
+      simp [fderiv_const, ContinuousLinearMap.zero_apply, mul_comm]
   -- (8) hExpDecay: exponential decay bound
   · obtain ⟨C, K, hCK⟩ := equilibriumMaxwellian_exp_lower_bound ρ_ion T hρ_ion hT
     exact ⟨C, K, fun _ => hCK⟩
@@ -449,7 +457,9 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
       fderiv_const, ContinuousLinearMap.zero_apply, sub_self]
     fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
   -- (12) hGauss: Gauss's law
-  · sorry
+  · intro x
+    simp [torusDivX, periodicLift, Function.comp, Pi.zero_apply,
+      fderiv_const, ContinuousLinearMap.zero_apply]
   -- (13) hDivB: divergence of B = 0
   · intro x
     simp only [torusDivX, periodicLift, Function.comp, Pi.zero_apply]

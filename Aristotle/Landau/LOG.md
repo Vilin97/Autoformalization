@@ -1,5 +1,19 @@
 # Log
 
+## 2026-03-10 UTC — Babysit cycle 67: Close sorry (12), decompose sorry (7) (3→2)
+
+### Changes
+- **Closed sorry (12)** `hGauss` in `CoulombConcreteTheorem42_nonvacuous`: Gauss's law ∇·E=0 = ∫eM-ρ_ion. Proof: `simp` simplifies divergence of zero to 0, then closes the integral equation.
+- **Decomposed sorry (7)** `hSchwartz`: split into `hDecay` (sorry — needs iteratedFDeriv × polynomial × Gaussian bound) and `hGradDecay` (proved — spatial gradient of constant function is 0).
+- **Updated MEMORY.md**: corrected sorry count (6→2), line counts (7900→8000, CoulombConcreteTheorem42 395→460).
+- **Updated docstring**: 8 of 10 non-trivial goals proved, 2 sorry'd.
+
+### Sorry count: 2 (all in `CoulombConcreteTheorem42_nonvacuous`)
+
+### Remaining sorry's
+- (7) hDecay in UniformSchwartzDecay — needs `‖iteratedFDeriv ℝ k eM v‖ * (1+‖v‖)^N ≤ C` (polynomial × Gaussian bound + `norm_iteratedFDeriv_comp_le`)
+- (10) Vlasov equation — Landau operator nullspace for Maxwellian (hardest)
+
 ## 2026-03-10 UTC — Babysit cycle 66: Close 3 more non-vacuousness sorry's (6→3)
 
 ### Changes
