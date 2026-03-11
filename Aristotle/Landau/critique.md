@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 81)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 82)
 
 ## Verdict: ACCEPT
 
@@ -50,10 +50,10 @@ I found no issue.
 
 | File | Lines |
 |------|-------|
-| Section3Helpers.lean | 1027 |
-| TorusInstance.lean | 872 |
+| Section3Helpers.lean | 1162 |
+| TorusInstance.lean | 910 |
+| CoulombPSD.lean | 826 |
 | Defs.lean | 805 |
-| CoulombPSD.lean | 759 |
 | CoulombSpatialTransport.lean | 676 |
 | CoulombConcreteTheorem42.lean | 630 |
 | CoulombFluxDiff.lean | 629 |
@@ -66,10 +66,10 @@ I found no issue.
 | ~~Lines > 200 chars~~ | ~~0~~ | ~~0~~ DONE |
 | ~~Trailing semicolons~~ | ~~0~~ | ~~0~~ DONE |
 | ~~Multi-semi lines~~ | ~~4~~ (in `by` blocks) | ~~0~~ DONE |
-| Lines > 100 chars | **183** (17 files) | 0 |
-| Plain semicolons | **358** (+ 126 `<;>`) | < 50 |
+| Lines > 100 chars | **60** (14 files) | 0 |
+| Plain semicolons | **356** (+ 126 `<;>`) | < 50 |
 
-Worst offenders for >100 char lines: Section3Helpers (49), CoulombPSD (42), TorusInstance (32), NewtonianPotential (15), CoulombFluxDiff (12), VelocityDecayInstance (10).
+Worst offenders: NewtonianPotential (15), CoulombFluxDiff (12), VelocityDecayInstance (10).
 
 ---
 
@@ -81,7 +81,7 @@ I found no issue.
 
 ## 8. Generalization Opportunities
 
-### ~~8a. Extract helpers from CoulombConcreteTheorem42~~ — DONE
+### ~~8a. Extract helpers~~ — DONE
 
 ### 8b. Weaken spatial smoothness: C^∞ → C^2 (DEFERRED)
 
@@ -91,13 +91,13 @@ I found no issue.
 
 ### 8e. Split Defs.lean (MEDIUM)
 
-### 8f. Split Section3Helpers.lean (CRITICAL — 1027 lines)
+### 8f. Split Section3Helpers.lean (CRITICAL — 1162 lines)
 
 ---
 
 ## 9. Mathlib Upstreamability
 
-`iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` (in Section3Helpers) are PR-ready.
+`iteratedFDeriv_clm_zero` and `norm_iteratedFDeriv_one_clm` are PR-ready.
 
 ---
 
@@ -105,8 +105,8 @@ I found no issue.
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 6b | 8 files over 600 lines (Section3Helpers 1027) | High | Open |
-| 6c | 183 lines >100 chars, 358 plain semicolons | Moderate | Open |
+| 6b | 8 files over 600 lines (Section3Helpers 1162) | High | Open |
+| 6c | 60 lines >100 chars, 356 plain semicolons | Moderate | Open |
 | 8f | Section3Helpers.lean >1000 lines — needs splitting | High | Open |
 
 ### Conditions for ACCEPT

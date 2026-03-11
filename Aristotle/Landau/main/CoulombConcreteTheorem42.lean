@@ -96,7 +96,8 @@ theorem CoulombConcreteTheorem42
       fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)) := by
     intro x i
     -- Step 1: Score bound |d(log f)/dv_i| ≤ Cg(1+‖v‖)^Kg
-    -- (from chain rule: d(log∘f)/dv_i = (df/dv_i)/f, and hGradBound gives |df/dv_i| ≤ Cg(1+‖v‖)^Kg * f)
+    -- (from chain rule: d(log∘f)/dv_i = (df/dv_i)/f,
+    --  and hGradBound gives |df/dv_i| ≤ Cg(1+‖v‖)^Kg * f)
     have h_score : ∀ v, |fderiv ℝ (Real.log ∘ f x) v (Pi.single i 1)| ≤
         Cg * (1 + ‖v‖) ^ Kg := by
       intro v

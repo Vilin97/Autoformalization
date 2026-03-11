@@ -39,7 +39,8 @@ theorem magnetic_field_constant {X : Type*} [FlatTorus3 X] (ss : VMLSteadyState 
   have hDiff_B_C2 : ∀ i j, FlatTorus3.IsSpatiallyDiff (fun x =>
       FlatTorus3.gradX (fun y => ss.B y i) x j) :=
     fun i j => FlatTorus3.hDiff_grad (fun y => ss.B y i) j (ss.hDiff_B i)
-  have hBi_harmonic := FlatTorus3.hCurlZeroDivZeroHarmonic ss.B ss.hDiff_B hDiff_B_C2 hcurl_zero ss.hDivB
+  have hBi_harmonic :=
+    FlatTorus3.hCurlZeroDivZeroHarmonic ss.B ss.hDiff_B hDiff_B_C2 hcurl_zero ss.hDivB
   -- Step 4: Each component is constant
   have hBi_const : ∀ i, ∀ x y, ss.B x i = ss.B y i := by
     intro i; exact FlatTorus3.hHarmonic_const (fun y => ss.B y i) (ss.hDiff_B i) (hBi_harmonic i)

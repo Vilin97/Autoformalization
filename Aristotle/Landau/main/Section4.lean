@@ -94,7 +94,8 @@ private lemma fderiv_entropy_potential (g : (Fin 3 → ℝ) → ℝ) (v : Fin 3 
     (hg_smooth : ContDiff ℝ 3 g) (hg_pos : 0 < g v) :
     fderiv ℝ (fun w => g w * Real.log (g w) - g w) v =
       Real.log (g v) • fderiv ℝ g v := by
-  have hg_diff : DifferentiableAt ℝ g v := hg_smooth.differentiable (by norm_num) |>.differentiableAt
+  have hg_diff : DifferentiableAt ℝ g v :=
+    hg_smooth.differentiable (by norm_num) |>.differentiableAt
   have hg_ne : g v ≠ 0 := ne_of_gt hg_pos
   have hlog_diff : DifferentiableAt ℝ (fun w => Real.log (g w)) v :=
     (Real.differentiableAt_log hg_ne).comp v hg_diff
@@ -111,7 +112,8 @@ private lemma fderiv_entropy_potential (g : (Fin 3 → ℝ) → ℝ) (v : Fin 3 
       (fderiv ℝ (fun w => g w * Real.log (g w)) v - fderiv ℝ g v) v :=
     (hg_diff.mul hlog_diff).hasFDerivAt.sub hg_diff.hasFDerivAt
   rw [h_sub.fderiv, h1]; ext x
-  simp [ContinuousLinearMap.sub_apply, ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply]
+  simp [ContinuousLinearMap.sub_apply, ContinuousLinearMap.add_apply,
+        ContinuousLinearMap.smul_apply]
   field_simp; ring
 
 /-- The diagonal partial derivative ∂(E + v×B)_i/∂v_i = 0 for each i.
@@ -188,7 +190,8 @@ lemma force_transport_zero
         intro i; simp only [cross, Pi.add_apply]
         fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one] <;> fun_prop)
       (by -- differentiability of entropy potential (g smooth, g > 0)
-        exact ((hg_smooth.mul (hg_smooth.log (fun v => ne_of_gt (hg_pos v)))).sub hg_smooth).differentiable (by norm_num))
+        exact ((hg_smooth.mul (hg_smooth.log (fun v => ne_of_gt (hg_pos v)))).sub
+          hg_smooth).differentiable (by norm_num))
       (by -- ∂(F_i)/∂v_i = 0 for Lorentz force (cross product structure), so integrand = 0
         intro i
         have key : ∀ v, fderiv ℝ (fun w => (fun v => E_val + cross v B_val) w i) v
