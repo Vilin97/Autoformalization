@@ -1,30 +1,17 @@
-/-
-  Concrete Theorem 42 for Coulomb collisions on T³ = (ℝ/ℤ)³.
-
-  This specializes ConcreteTheorem42 to the physical Coulomb collision kernel
-  Ψ(r) = r⁻³, the most important case in plasma physics. The Coulomb kernel
-  is singular at r = 0 (NOT continuous), so it cannot satisfy `Continuous Ψ`.
-
-  Key mathematical fact: even though the Landau matrix A(z) = Ψ(|z|)(|z|²I - zz^T)
-  diverges as z → 0 for Coulomb, the PSD integrand is continuous because the score
-  difference Δ = ∇log f(v) - ∇log f(w) = O(|v-w|) cancels the singularity:
-    |PSDIntegrand(v,w)| ≤ C|v-w|^{γ+4} = C|v-w| → 0  (γ = -3).
-
-  We define coulombKernel with value 1 at r ≤ 0 (instead of 0 or ∞) so that
-  ∀ r, 0 < coulombKernel r. The value at 0 is irrelevant since
-  landauMatrix Ψ 0 = 0 always (the projection |z|²I - zz^T vanishes at z = 0).
-
-  Hypotheses (13 total, all independent):
-  - 2 physical parameters (ν > 0, ρ_ion > 0)
-  - 1 strict positivity (f > 0)
-  - 3 smoothness (f smooth in v and x, B smooth)
-  - 3 decay (Schwartz in v; stretched-exponential lower bound; polynomial score)
-  - 4 equations (Vlasov, Ampère, Gauss, div B = 0)
--/
 import Aristotle.Landau.main.CoulombSpatialTransport
 import Aristotle.Landau.main.CoulombFlux
 import Aristotle.Landau.main.CoulombPSD
 import Aristotle.Landau.main.CoulombFluxDiff
+
+/-!
+# Concrete Theorem 4.2 for Coulomb Collisions on T^3
+
+Specializes the abstract `ConcreteTheorem42` to the Coulomb kernel Psi(r) = r^{-3},
+the physically most important case in plasma physics. Verifies all 19 fields of
+`VelocityDecayConditions` for Coulomb and states the main result: any smooth
+steady state of the VML system with Coulomb collisions is a global Maxwellian
+with E = 0 and B = const.
+-/
 
 open MeasureTheory Matrix Finset BigOperators Real
 

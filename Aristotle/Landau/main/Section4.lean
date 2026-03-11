@@ -1,5 +1,14 @@
 import Aristotle.Landau.main.Defs
 import Aristotle.Landau.main.Section3
+
+/-!
+# Transport Constraints (Section 4)
+
+Derives that steady states are local Maxwellians: from the transport equation
+and D(f) = 0 at each spatial point, applies Corollary 1 to conclude f(x, .) is
+Maxwellian for each x.
+-/
+
 open Matrix Finset BigOperators Real MeasureTheory
 noncomputable section
 namespace VML

@@ -1,15 +1,13 @@
-/-
-  Differentiability and Schwartz decay of the Coulomb flux.
-
-  This file establishes:
-  1. Partial derivatives of Schwartz functions are Schwartz
-  2. Coulomb entry convolutions are integrable, differentiable, and uniformly bounded
-  3. The Coulomb flux component is differentiable with Schwartz-class decay
-  4. The IBP integrability condition for the Coulomb flux derivative × log f
-
-  Split from CoulombPSD.lean (cycle 39) for maintainability.
--/
 import Aristotle.Landau.main.CoulombFlux
+
+/-!
+# Flux Differentiability and Integration by Parts for Coulomb
+
+Establishes that partial derivatives of Schwartz functions are Schwartz, Coulomb
+entry convolutions are differentiable with uniform bounds, and the flux component
+is differentiable with Schwartz-class derivative decay. Proves the IBP
+integrability condition for the flux derivative times log f.
+-/
 
 open MeasureTheory Matrix Finset BigOperators Real
 

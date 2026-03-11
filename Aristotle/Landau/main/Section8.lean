@@ -1,5 +1,14 @@
 import Aristotle.Landau.main.Defs
 import Aristotle.Landau.main.Section6
+
+/-!
+# Magnetic Field and Final Assembly (Section 8)
+
+Proves the magnetic field is spatially constant (from curl B = 0 and div B = 0),
+derives E = 0 from the Poisson-Boltzmann equation, and assembles the abstract
+`ConcreteTheorem42` combining all sections.
+-/
+
 open Matrix Finset BigOperators Real MeasureTheory
 noncomputable section
 namespace VML

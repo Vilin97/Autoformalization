@@ -1,13 +1,13 @@
-/-
-  Definitions for the VML steady-state formalization.
-
-  Extracted from Aristotle/Landau/landau-steady-state.lean.
-  Contains all `def`, `noncomputable def`, structures, `@[simp]` unfolding lemmas,
-  and small auxiliary lemmas about definitions.
--/
-
 import Mathlib.Data.Real.StarOrdered
 import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
+
+/-!
+# Core Definitions for the Vlasov-Maxwell-Landau System
+
+Defines the Landau collision operator, velocity decay conditions, the `VMLSteadyState`
+structure, and the `FlatTorus3` typeclass. Also provides `@[simp]` unfolding lemmas and
+small auxiliary lemmas about the definitions.
+-/
 
 open Matrix Finset BigOperators Real MeasureTheory
 

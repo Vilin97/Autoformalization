@@ -1,13 +1,12 @@
-/-
-  Torus type definitions and basic operators on Fin 3 → AddCircle 1.
-
-  Defines the 3-torus T³ = (ℝ/ℤ)³, the projection torusMk : ℝ³ → T³,
-  the periodic lift, and differential operators (gradX, divX, curlX)
-  via the periodic lift. Also proves basic axioms and helper lemmas.
-
-  The FlatTorus3 instance is in TorusInstance.lean.
--/
 import Aristotle.Landau.main.Defs
+
+/-!
+# Torus Type Definitions and Differential Operators
+
+Defines the 3-torus T^3 = (R/Z)^3, the projection `torusMk`, the periodic lift,
+and differential operators (`torusGradX`, `torusDivX`, `torusCurlX`) via the
+periodic lift. The `FlatTorus3` instance is assembled in `TorusInstance.lean`.
+-/
 
 open MeasureTheory Matrix Finset BigOperators Real Filter
 

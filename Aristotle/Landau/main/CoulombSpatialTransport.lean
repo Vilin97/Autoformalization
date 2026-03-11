@@ -1,6 +1,14 @@
 import Aristotle.Landau.main.CoulombKernel
 import Aristotle.Landau.main.VelocityDecayInstance
 
+/-!
+# Spatial and Force Transport Integrability for Coulomb
+
+Proves that the spatial transport term (v . grad_x f) and the force transport
+term ((E + v x B) . grad_v f) are integrable in velocity for the Coulomb kernel,
+using Schwartz decay and the Lorentz force component bound.
+-/
+
 open MeasureTheory Matrix Finset BigOperators Real
 
 noncomputable section
