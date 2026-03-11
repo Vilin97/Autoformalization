@@ -139,12 +139,13 @@ lemma schwartz_pointwise_decay
   fun N => (hf_schwartz N (by omega)).imp fun C ⟨hC, hb⟩ =>
     ⟨hC, fun w => by simpa [iteratedFDeriv_zero_eq_comp] using hb w⟩
 
-/-- Extract partial derivative (k=1) decay from the Schwartz hypothesis. -/
+/-- Extract partial derivative (k=1) decay from the Schwartz hypothesis.
+    Generalized to Fin n → ℝ (dimension-independent). -/
 lemma schwartz_fderiv_component_decay
-    {f : (Fin 3 → ℝ) → ℝ}
+    {n : ℕ} {f : (Fin n → ℝ) → ℝ}
     (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
       ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C) :
-    ∀ (j : Fin 3) (N : ℕ), ∃ C > 0, ∀ w,
+    ∀ (j : Fin n) (N : ℕ), ∃ C > 0, ∀ w,
       |fderiv ℝ f w (Pi.single j 1)| * (1 + ‖w‖) ^ N ≤ C := by
   intro j N; obtain ⟨C, hC, hb⟩ := hf_schwartz N (by omega)
   refine ⟨C, hC, fun w => le_trans (mul_le_mul_of_nonneg_right ?_ (by positivity)) (hb w)⟩
