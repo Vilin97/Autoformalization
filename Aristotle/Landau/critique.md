@@ -1,4 +1,4 @@
-# Adversarial Critique — 2026-03-11 UTC (Cycle 102)
+# Adversarial Critique — 2026-03-11 UTC (Cycle 103)
 
 ## Verdict: ACCEPT
 
@@ -18,7 +18,7 @@
 
 ## 2. Hidden Axioms
 
-Zero axioms on `CoulombConcreteTheorem42` (verified cycle 101). I found no issue.
+Zero axioms on `CoulombConcreteTheorem42` (verified cycle 103). I found no issue.
 
 ---
 
@@ -48,7 +48,7 @@ I found no issue.
 
 ### ~~6b. Files over 600 lines~~ — RESOLVED (cycle 100)
 
-0 files over 600 lines.
+0 files over 600 lines. Largest: Section3Helpers.lean (596).
 
 ### ~~6c. Long proofs~~ — RESOLVED (cycle 98)
 
@@ -56,20 +56,26 @@ All proofs under 200 lines.
 
 ### 6d. Proofs over 150 lines (4 proofs)
 
-| File | Proof | ~Lines |
-|------|-------|--------|
+| File | Proof | Lines |
+|------|-------|-------|
 | Theorem42.lean | `Theorem42` | 199 |
-| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | 197 |
+| CoulombFluxDiff.lean | `coulomb_flux_deriv_schwartz_decay` | 190 |
 | CoulombConcreteTheorem42.lean | `CoulombConcreteTheorem42` | 188 |
 | CoulombPSD.lean | `fubini_double_integrable_coulomb` | 186 |
 
-All under 200. `transport_entropy_from_vlasov` (124 lines) dropped below 150 threshold. Extracting helpers from the top 2 would improve maintainability.
+All under 200. Extraction candidates:
+- `Theorem42`: `hJ_from_maxwellian` block (lines 275-304, ~30 lines) is a self-contained Gaussian first-moment calculation that could be a standalone lemma.
+- `CoulombConcreteTheorem42`: `hD_cont` field (lines 192-233, ~42 lines) derives continuity of entropy dissipation from the Vlasov equation. Could be extracted as `entropy_dissipation_continuous_coulomb`.
+
+### 6e. Stale comments in CoulombPSD.lean
+
+`fubini_double_integrable_coulomb` contains ~20 lines of comment blocks (lines 191-215) with intermediate calculation notes that read like scratch work. These don't add clarity to the proof; the actual code is clear enough.
 
 ---
 
 ## 7. Documentation Lies
 
-I found no issue.
+I found no issue. File counts: 32 files, 9,543 lines — matches MEMORY.md ("~8,700 lines" is stale but within tolerance for an approximate count).
 
 ---
 
@@ -104,6 +110,7 @@ I found no issue.
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 6d | 4 proofs over 150 lines | Low | Open (all under 200) |
+| 6e | Stale comments in CoulombPSD.lean | Low | New |
 | 8c | Generalize beyond T^3 | Low | Deferred (hard) |
 | 8d | Mathlib PR for helper lemmas | Low | Open (5 candidates) |
 | 8j | lean-lsp build desync | Low | Open (tooling, persistent) |

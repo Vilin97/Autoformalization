@@ -354,4 +354,61 @@ lemma spatial_transport_continuous
           (continuous_const.mul (hcont_grad 1))).add (continuous_const.mul (hcont_grad 2))
       exact hcont_dot.mul hcont_log)
 
+/-- Continuity of entropy dissipation for the Coulomb kernel.
+    Derives from the Vlasov equation: force transport vanishes by IBP,
+    so D(f x) = ν⁻¹ ∫ spatial·log f, which is continuous by `spatial_transport_continuous`. -/
+lemma entropy_dissipation_continuous_coulomb
+    (f : Torus3 → (Fin 3 → ℝ) → ℝ)
+    (E B : Torus3 → Fin 3 → ℝ)
+    (ν : ℝ) (hν : 0 < ν)
+    (hf_pos : ∀ x v, 0 < f x v)
+    (hf_smooth_v : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
+    (hSchwartz : UniformSchwartzDecay f)
+    (hLogBound : ∃ (C : ℝ) (K : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
+      |Real.log (f x v)| ≤ C * (1 + ‖v‖) ^ K)
+    (hVlasov : ∀ x v,
+      dotProduct v (torusGradX (fun y => f y v) x) +
+      dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
+      ν * LandauOperator coulombKernel (f x) v) :
+    Continuous (fun x => entropyDissipation coulombKernel (f x)) := by
+  obtain ⟨C_log, K_log, hLB⟩ := hLogBound
+  have hLB' : ∃ C K, ∀ x v, |Real.log (f x v)| ≤ C * (1 + ‖v‖) ^ K :=
+    ⟨C_log, K_log, hLB⟩
+  have hST_int := fun x =>
+    spatial_transport_integrable hf_pos hf_smooth_v hf_smooth_x hSchwartz hLB' x
+  have hFT_int := fun x =>
+    force_transport_integrable_coulomb E B hf_pos hf_smooth_v hSchwartz hLB' x
+  have h_key : ∀ x, ν * entropyDissipation coulombKernel (f x) =
+      ∫ v, v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v) := by
+    intro x
+    unfold entropyDissipation
+    rw [← integral_mul_left]
+    have hrw : (fun v => ν * (LandauOperator coulombKernel (f x) v * Real.log (f x v))) =
+        (fun v => v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v) +
+          (E x + cross v (B x)) ⬝ᵥ vGrad (f x) v * Real.log (f x v)) := by
+      ext v; have hV := hVlasov x v
+      have : ν * (LandauOperator coulombKernel (f x) v * Real.log (f x v)) =
+          (ν * LandauOperator coulombKernel (f x) v) * Real.log (f x v) := by ring
+      rw [this, ← hV]
+      have : v ⬝ᵥ torusGradX (fun y => f y v) x =
+          v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x := rfl
+      rw [this]; ring
+    rw [hrw, integral_add (hST_int x) (hFT_int x)]
+    rw [force_transport_zero (f x) (E x) (B x) (hf_pos x) (hf_smooth_v x)
+      ((hSchwartz.integrable hf_smooth_v) x)
+      (fun i => force_ibp_f_dg_integrable_coulomb E B hf_pos hf_smooth_v hSchwartz hLB' x i)
+      (fun i => force_ibp_fg_integrable_coulomb E B hf_pos hf_smooth_v hSchwartz hLB' x i)]
+    simp [add_zero]
+  have h_eq : (fun x => entropyDissipation coulombKernel (f x)) =
+      (fun x => ν⁻¹ * ∫ v, v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x *
+        Real.log (f x v)) := by
+    ext x
+    have := h_key x
+    field_simp at this ⊢
+    linarith
+  rw [h_eq]
+  exact continuous_const.mul
+    (spatial_transport_continuous hf_pos hf_smooth_v hf_smooth_x hSchwartz hLB')
+
 end VML

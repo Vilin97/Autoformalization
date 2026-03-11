@@ -187,32 +187,8 @@ lemma fubini_double_integrable_coulomb
       ((integrable_pi_iff.mp (hFlux v) 1).const_mul _) |>.add
       ((integrable_pi_iff.mp (hFlux v) 2).const_mul _)
   -- Step 3: ∫ ‖F(v,·)‖ is integrable in v
-  -- We reuse the bound from psd_outer_integrable_coulomb style argument
-  -- |F(v,w)| ≤ 3 * Cg * (1+‖v‖)^Kg * ‖v-w‖⁻¹ * (3*Cg*(1+‖v‖)^Kg*f(w) + ...)
-  -- But more directly: |F(v,w)| = |score(v) · (A·flux)(v,w)|
-  -- ≤ (∑_i |score_i(v)|) * max_i |(A·flux)_i(v,w)|
-  -- The bound on (A·flux)_i follows from |A_{ij}| ≤ ‖v-w‖⁻¹
-  -- Overall: |F(v,w)| ≤ 3*Cg*(1+‖v‖)^Kg * ‖v-w‖⁻¹ * (3*Cg*(1+‖v‖)^Kg*f(w) + 3*f(v)*...)
-  -- Actually, let's use a cleaner approach: bound via the PSD-style bound
+  -- Strategy: bound ∫‖F(v,w)‖ ≤ C_out * (1+‖v‖)^{2Kg} * f(v), integrable by Schwartz decay
   have h_norm_int : Integrable (fun v => ∫ w, ‖F (v, w)‖) := by
-    -- Pointwise bound: |F(v,w)| ≤ 3Cg(1+‖v‖)^Kg * ‖v-w‖⁻¹ * 3 *
-    --   (f(w)*3Cg(1+‖v‖)^Kg + f(v)*3Cg(1+‖w‖)^Kg)
-    -- which simplifies to 9Cg²(1+‖v‖)^{2Kg} * ‖v-w‖⁻¹ * f(w) +
-    --   9Cg²(1+‖v‖)^Kg * f(v) * ‖v-w‖⁻¹ * (1+‖w‖)^Kg * ...
-    -- This gets complicated. Let's just use that ∫‖F(v,w)‖ ≤ C * (1+‖v‖)^{2Kg} * f(v)
-    -- and f(v)*(1+‖v‖)^{2Kg} is integrable by Schwartz decay
-    -- Bound on ∫ ‖F(v,·)‖:
-    -- |F(v,w)| = |∑_i score_i(v) * (A·flux)_i(v,w)|
-    -- ≤ ∑_i |score_i(v)| * |(A·flux)_i(v,w)|
-    -- ≤ ∑_i |score_i(v)| * (‖v-w‖⁻¹ * ∑_j |flux_j(v,w)|)
-    -- ≤ (∑_i Cg(1+‖v‖)^Kg) * ‖v-w‖⁻¹ * ∑_j (f(w)*|∂_jf(v)| + f(v)*|∂_jf(w)|)
-    -- = 3Cg(1+‖v‖)^Kg * ‖v-w‖⁻¹ * ∑_j (f(w)*|∂_jf(v)| + f(v)*|∂_jf(w)|)
-    -- Integrate in w:
-    -- ≤ 3Cg(1+‖v‖)^Kg * (∑_j |∂_jf(v)| * M₁ + f(v) * M_dj)
-    -- ≤ 3Cg(1+‖v‖)^Kg * (3*Cg*(1+‖v‖)^Kg*f(v)*M₁ + f(v) * M_df)
-    -- = f(v) * (9Cg²(1+‖v‖)^{2Kg}*M₁ + 3Cg(1+‖v‖)^Kg * M_df)
-    -- ≤ C_out * (1+‖v‖)^{2Kg} * f(v)
-    -- which is integrable by Schwartz decay
     have hdg_decay := schwartz_fderiv_component_decay hf_schwartz
     -- Newtonian bounds for partial derivatives
     have hMj : ∀ j, ∃ M > 0, ∀ v,
