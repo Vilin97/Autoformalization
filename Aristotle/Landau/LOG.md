@@ -1,5 +1,14 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 81: Break long lines in 3 worst files
+
+### Changes
+- **Broke 123 lines >100 chars** in Section3Helpers (49→0), CoulombPSD (42→0), TorusInstance (32→0).
+- Lines >100ch: 183 → **60** (67% reduction).
+- All 3 files verified to compile clean from source.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 80: Break multi-semicolon lines (all remaining)
 
 ### Changes
