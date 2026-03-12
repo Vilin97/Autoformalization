@@ -1,6 +1,8 @@
 import Aristotle.Landau.main.CoulombFlux
 
 /-!
+set_option linter.style.longLine false
+
 # PSD Helpers: Continuity and Pointwise Bounds for Coulomb
 
 Proves the Landau quadratic form bound, continuity of the PSD integrand
@@ -30,7 +32,7 @@ lemma landau_bound (z u : Fin 3 → ℝ) :
             (Real.sqrt (dotProduct z z))⁻¹ * (Real.sqrt (dotProduct u u)) ^ 2 by
           convert h_simp using 2
           norm_num [ Matrix.mulVec, dotProduct ]
-          ring
+          ring_nf
           norm_num [ Fin.sum_univ_three, Matrix.one_apply ] ; ring
         suffices h_cancel :
             abs (z ⬝ᵥ z * u ⬝ᵥ u - (z ⬝ᵥ u) ^ 2) ≤

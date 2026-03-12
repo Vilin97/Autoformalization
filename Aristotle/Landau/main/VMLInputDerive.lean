@@ -7,6 +7,8 @@ import Aristotle.Landau.main.Section7
 import Aristotle.Landau.main.Section8
 
 /-!
+set_option linter.style.longLine false
+
 # Deriving VMLInput from Concrete Hypotheses
 
 Constructs a `VMLInput` from a `VMLSteadyState` and `VelocityDecayConditions`,

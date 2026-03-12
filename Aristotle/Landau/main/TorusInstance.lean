@@ -2,6 +2,8 @@ import Aristotle.Landau.main.TorusIntegration
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
 /-!
+set_option linter.style.longLine false
+
 # FlatTorus3 Instance for T^3
 
 Proves the remaining `FlatTorus3` axioms (Laplacian maximum principle, Killing
@@ -176,7 +178,7 @@ theorem torus_hLaplacianMaxNonpos (φ : Torus3 → ℝ) (x₀ : Torus3)
     have hderiv_gi_diff : DifferentiableAt ℝ (deriv gᵢ) 0 := by
       rw [show deriv gᵢ = fun t => fderiv ℝ (periodicLift φ) (x₀' + t • eᵢ) eᵢ from
             funext hderiv_gi]
-      show DifferentiableAt ℝ
+      change DifferentiableAt ℝ
           ((fun y => fderiv ℝ (periodicLift φ) y eᵢ) ∘ (fun t : ℝ => x₀' + t • eᵢ)) 0
       apply DifferentiableAt.comp
       · simp only [zero_smul, add_zero]; exact hdiff
@@ -221,7 +223,7 @@ private lemma contDiff2_from_partials {g : (Fin 3 → ℝ) → ℝ}
     ext y
     set L := fderiv ℝ g y with hL
     have hv : v = ∑ i : Fin 3, v i • (Pi.single i (1 : ℝ) : Fin 3 → ℝ) := by
-      ext m; simp [Pi.single_apply, mul_ite, Finset.sum_ite_eq']
+      ext m; simp [Pi.single_apply, mul_ite]
     -- conv_lhs rewrites only the argument of L, not the v inside the sum on the RHS
     calc L v = L (∑ i : Fin 3, v i • (Pi.single i (1 : ℝ) : Fin 3 → ℝ)) := by
             conv_lhs => rw [hv]
@@ -422,7 +424,7 @@ instance : VML.FlatTorus3 Torus3 where
       by ext y; simp [periodicLift]
     rw [hlift, fderiv_exp_comp_always, ContinuousLinearMap.smul_apply, smul_eq_mul]
     have hx₀ := (torusMk_surjective x).choose_spec
-    show Real.exp (periodicLift φ _) * _ = Real.exp (φ x) * _
+    change Real.exp (periodicLift φ _) * _ = Real.exp (φ x) * _
     simp [periodicLift, hx₀]
   hKillingToHarmonic := fun b hb_C1 hb_C2 hKilling =>
     torus_hKillingToHarmonic b (fun j => (hb_C1 j).of_le (by decide))

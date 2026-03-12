@@ -1,3 +1,12 @@
+## 2026-03-12 UTC — Babysit cycle 121: CI Docs Fix, Linter Cleanup, Physical Context
+
+### Changes
+- **CI Documentation Fix**: Resolved the failing `Build and Deploy Documentation` CI workflow by correcting invalid action inputs (`deploy: false` and `build-page: false`) in `.github/workflows/deploy.yml` and adding a branch protection check to allow pushing to `landau` without triggering GitHub Pages deployment failures.
+- **Code Quality & Linter Fixes**: Replaced multiple instances of `ring` and `ring!` with `ring_nf` and `ring_nf!` across `Aristotle/Landau/main/` based on Lean 4 compiler suggestions. Replaced `show` with `change` where the goal state was materially modified. Removed unused `simp` arguments and renamed unused variables.
+- **Physical Context Documentation**: Strengthened the epistemic precision of `Theorem42.lean` by adding an explicit disclaimer about the non-relativistic framework admitting superluminal velocities, matching `CoulombConcreteTheorem42.lean`.
+
+### Sorry count: 0
+
 # Log
 
 ## 2026-03-12 UTC — Babysit cycle 120: Adversarial critique, spatial smoothness weakened

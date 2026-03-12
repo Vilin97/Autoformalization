@@ -1,6 +1,8 @@
 import Aristotle.Landau.main.CoulombForceTransport
 
 /-\!
+set_option linter.style.longLine false
+
 # Spatial Transport: Measurability, Joint Integrability, and Continuity
 
 Proves measurability of the spatial gradient component, joint integrability of

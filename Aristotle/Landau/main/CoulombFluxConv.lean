@@ -2,6 +2,8 @@ import Aristotle.Landau.main.CoulombFlux
 import Mathlib.Analysis.Calculus.ParametricIntegral
 
 /-!
+set_option linter.style.longLine false
+
 # Coulomb Entry Convolution: Differentiability and Bounds
 
 Establishes that partial derivatives of functions with C² decay are C² decay,
@@ -239,7 +241,7 @@ private lemma coulomb_entry_conv_hasFDerivAt_aux
     exact (h_w_int.comp_sub_left v₀).congr (ae_of_all _ fun u => by
       change ‖v₀ - (v₀ - u)‖⁻¹ * (D / (1 + ‖v₀ - u‖) ^ 4) =
         ‖u‖⁻¹ * (D / (1 + ‖v₀ - u‖) ^ 4)
-      congr 1; congr 1; abel)
+      congr 1; congr 1; abel_nf)
   · -- HasFDerivAt pointwise
     apply ae_of_all
     intro u v _

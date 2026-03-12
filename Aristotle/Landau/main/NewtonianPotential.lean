@@ -216,7 +216,7 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
         intro k
         rw [ MeasureTheory.Measure.addHaar_closedBall ]
         norm_num
-        ring
+        ring_nf
         · positivity
         · positivity
       have h_series : Summable (fun k : ℕ => (2^(-k-1 : ℝ) * R)⁻¹ * (2^(-k : ℝ) * R)^3) := by
@@ -237,12 +237,12 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
             ((MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) 1)
               |> ENNReal.toReal)) using 2
         norm_num [ Real.rpow_add, Real.rpow_sub ]
-        ring
+        ring_nf
         convert congr_arg (· * R⁻¹ * 2 ^ ‹_› * 2) (h_volume ‹_›) using 1
-          <;> norm_num [ Real.rpow_neg, Real.rpow_mul ] ; ring
+          <;> norm_num [ Real.rpow_neg, Real.rpow_mul ] ; ring_nf
         · norm_num [ mul_comm ]
         · field_simp
-          ring
+          ring_nf
           norm_num [ ← mul_pow ]
     refine ⟨ ?_, ?_ ⟩
     · exact Measurable.aestronglyMeasurable (by exact Measurable.inv (measurable_norm))

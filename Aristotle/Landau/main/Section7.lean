@@ -3,6 +3,8 @@ import Aristotle.Landau.main.Section3
 import Aristotle.Landau.main.Section6
 
 /-!
+set_option linter.style.longLine false
+
 # Poisson-Boltzmann and Electric Field (Section 7)
 
 Derives the Poisson-Boltzmann equation from force balance and Gauss's law,

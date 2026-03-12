@@ -38,7 +38,7 @@ lemma vGrad_exp_quadratic (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) :
   ext i
   erw [ fderiv_exp ]
   norm_num [ dotProduct, Fin.sum_univ_three ]
-  ring
+  ring_nf
   · field_simp
     erw [ HasFDerivAt.fderiv (by
       exact HasFDerivAt.add
@@ -66,7 +66,7 @@ lemma vGrad_exp_quadratic (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) :
         (HasFDerivAt.mul
           (hasFDerivAt_const _ _)
           (hasFDerivAt_apply _ _ |> HasFDerivAt.pow <| 2))) ]
-    ring
+    ring_nf
     fin_cases i <;> simp [ Pi.single_apply ] <;> ring!
   · norm_num [ dotProduct ]
     fun_prop (disch := norm_num)
@@ -94,7 +94,7 @@ lemma gaussian_normalization_maxwellian
         norm_num [ dotProduct, Fin.sum_univ_three ]
         congr
         ext
-        ring
+        ring_nf
       generalize_proofs at *; (
       erw [ h_fubini, ← MeasureTheory.integral_fintype_prod_eq_prod ]
       exact rfl)
@@ -154,13 +154,13 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
               simp_rw [hf_odd]
               rw [MeasureTheory.integral_neg]
             linarith [h_zero]
-          exact h_subst.trans (h_odd _ fun x => by ring)
+          exact h_subst.trans (h_odd _ fun x => by ring_nf)
         rw [ ← MeasureTheory.integral_add_right_eq_self _ ( -b / (2 * c) ) ]
         congr
         ext
-        ring
+        ring_nf
         norm_num [ hc_neg.ne ]
-        ring
+        ring_nf
         grind
       simp_all [ add_mul, div_eq_mul_inv, MeasureTheory.integral_const_mul ]
       rw [ MeasureTheory.integral_add ] at h_gauss_integral <;> norm_num at *
@@ -199,7 +199,7 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
             (h_integrable.mul_const _)
             (Continuous.aestronglyMeasurable (by continuity))
             (Filter.Eventually.of_forall h_gauss)
-        convert h_integrable.mul_const (Real.exp a) using 2 ; ring
+        convert h_integrable.mul_const (Real.exp a) using 2 ; ring_nf
         rw [ mul_assoc, ← Real.exp_add ]
       · have h_gauss_integral :
             ∫ v : ℝ, Real.exp (a + b * v + c * v^2) =
@@ -213,7 +213,7 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
           rw [ ← h_gauss_integral, ← MeasureTheory.integral_mul_const ]
           congr
           ext v
-          ring
+          ring_nf
           rw [ ← Real.exp_add ]
           norm_num [ sq, mul_assoc, hc_neg.ne ]
           ring
@@ -246,7 +246,7 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
         simp [ ← Real.exp_add, Fin.sum_univ_three, dotProduct ]
         congr
         ext
-        ring!
+        ring_nf!
       have h_fubini2 :
           ∫ v : Fin 3 → ℝ, (∏ j, (if j = i
             then v j * Real.exp (a + b j * v j + c * v j^2)
@@ -273,13 +273,13 @@ lemma gaussian_first_moment (a : ℝ) (b : Fin 3 → ℝ) (c : ℝ) (hc : c < 0)
         simp [ normSq, dotProduct, Fin.sum_univ_three, ← Real.exp_sum, ← Real.exp_add ]
         congr
         ext
-        ring
+        ring_nf
       rw [ h_gauss_integral_component3, mul_comm ]
       rw [ MeasureTheory.integral_const_mul ]
       congr 1
       erw [← MeasureTheory.integral_fintype_prod_eq_prod]; rfl
     simp_all [ Finset.prod_erase_mul _ _ (Finset.mem_univ i) ]
-    rw [ ← Finset.mul_prod_erase _ _ (Finset.mem_univ i) ] ; ring
+    rw [ ← Finset.mul_prod_erase _ _ (Finset.mem_univ i) ] ; ring_nf
     simp [ Real.exp_add, mul_add, add_comm,
       add_left_comm, mul_assoc, mul_comm, mul_left_comm,
       MeasureTheory.integral_const_mul,
@@ -311,7 +311,7 @@ lemma analysis_gaussian_integrability
       MeasureTheory.MeasureSpace.volume := by
     convert h_integrable.const_mul (Real.exp ( -a₀) ) using 2
     rw [ ← Real.exp_add ]
-    ring
+    ring_nf
   have h_integrable : MeasureTheory.Integrable
       (fun v : ℝ => Real.exp (b 0 * v))
       MeasureTheory.MeasureSpace.volume := by
