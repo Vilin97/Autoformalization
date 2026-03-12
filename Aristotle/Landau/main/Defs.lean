@@ -87,26 +87,26 @@ def IsMaxwellian (f : (Fin 3 → ℝ) → ℝ) : Prop :=
   ∃ (a₀ : ℝ) (b : Fin 3 → ℝ) (c₀ : ℝ),
     c₀ < 0 ∧ ∀ v, f v = Real.exp (a₀ + dotProduct b v + c₀ * normSq v)
 
-/-- The Maxwellian parameters (a₀, b, c₀) are unique: if exp(a₀ + b·v + c₀|v|²) =
+/-- The Maxwellian parameters (a₀, b, c₀) are injective: if exp(a₀ + b·v + c₀|v|²) =
     exp(a₀' + b'·v + c₀'|v|²) for all v, then a₀ = a₀', b = b', c₀ = c₀'. -/
-lemma IsMaxwellian_params_unique
+lemma IsMaxwellian_params_injective
     (a₀ a₀' : ℝ) (b b' : Fin 3 → ℝ) (c₀ c₀' : ℝ)
     (h : ∀ v : Fin 3 → ℝ, a₀ + dotProduct b v + c₀ * normSq v =
       a₀' + dotProduct b' v + c₀' * normSq v) :
     a₀ = a₀' ∧ b = b' ∧ c₀ = c₀' := by
   -- Evaluate at v = 0 to get a₀ = a₀'
   have h0 : a₀ = a₀' := by
-    have := h 0; simp [dotProduct, normSq, Fin.sum_univ_three] at this; linarith
+    have := h 0; simp [dotProduct, normSq] at this; linarith
   -- Evaluate at eᵢ and 2eᵢ to get c₀ = c₀' and bᵢ = bᵢ'
   have hc : c₀ = c₀' := by
     have h1 := h (Pi.single 0 1)
     have h2 := h (Pi.single 0 2)
-    simp [dotProduct, normSq, Fin.sum_univ_three, Pi.single_apply] at h1 h2
+    simp [dotProduct, normSq, Pi.single_apply] at h1 h2
     linarith
   have hb : b = b' := by
     ext i
     have hi := h (Pi.single i 1)
-    simp [dotProduct, normSq, Fin.sum_univ_three, Pi.single_apply] at hi
+    simp [dotProduct, normSq, Pi.single_apply] at hi
     fin_cases i <;> linarith
   exact ⟨h0, hb, hc⟩
 
@@ -149,9 +149,9 @@ lemma equilibriumMaxwellian_isMaxwellian (ρ T : ℝ) (hρ : 0 < ρ) (hT : 0 < T
   rw [← Real.exp_add]
   congr 1; ring
 
-/-- The equilibrium temperature T is uniquely determined: if two Maxwellians with
+/-- The equilibrium temperature T is an injective parameter: if two Maxwellians with
     the same density agree as functions, their temperatures must be equal. -/
-lemma equilibriumMaxwellian_T_unique (ρ T₁ T₂ : ℝ) (hρ : 0 < ρ) (hT₁ : 0 < T₁) (hT₂ : 0 < T₂)
+lemma equilibriumMaxwellian_T_injective (ρ T₁ T₂ : ℝ) (hρ : 0 < ρ) (hT₁ : 0 < T₁) (hT₂ : 0 < T₂)
     (h : ∀ v, equilibriumMaxwellian ρ T₁ v = equilibriumMaxwellian ρ T₂ v) : T₁ = T₂ := by
   -- Evaluate at v = 0: ρ/(2πT₁)^{3/2} * 1 = ρ/(2πT₂)^{3/2} * 1
   have h0 := h 0

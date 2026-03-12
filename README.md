@@ -40,6 +40,8 @@ A complete formalization of the characterization of smooth steady-state solution
 
 ### The Physical System
 
+*Disclaimer: This formalization studies the classic non-relativistic Vlasov-Maxwell-Landau system, where the velocity domain is the entire $\mathbb{R}^3$. While mathematically standard in kinetic theory literature for studying entropy methods, this formulation formally admits superluminal particle velocities ($|v| > c$). A strictly rigorous physical model would require the relativistic formulation replacing $v$ with momentum $p$.*
+
 The Vlasov-Maxwell-Landau system models the dynamics of a charged plasma. The unknowns are:
 - **f(x, v)**: the particle distribution function (density of particles at position x with velocity v)
 - **E(x)**: the electric field
@@ -81,9 +83,9 @@ The formal theorem takes 13 hypotheses:
 | 1 | `hν` | Collision frequency ν > 0 |
 | 2 | `hρ_ion` | Ion background density ρ_ion > 0 |
 | 3 | `hf_pos` | Strict positivity: f(x, v) > 0 for all x, v |
-| 4 | `hf_smooth_v` | f is C^∞ in velocity |
-| 5 | `hf_smooth_x` | f is C^∞ in space (via periodic lift) |
-| 6 | `hB_smooth` | B is C^∞ in space |
+| 4 | `hf_smooth_v` | f is C³ in velocity |
+| 5 | `hf_smooth_x` | f is C² in space (via periodic lift) |
+| 6 | `hB_smooth` | B is C² in space |
 | 7 | `hSchwartz` | Schwartz decay in v: \|D^k f(x,v)\| · (1+\|v\|)^N ≤ C for all N, k |
 | 8 | `hExpDecay` | Stretched-exponential lower bound: f ≥ exp(-C(1+\|v\|)^K) |
 | 9 | `hGradBound` | Polynomial score bound: \|∂f/∂vᵢ\| ≤ Cg(1+\|v\|)^Kg · f |

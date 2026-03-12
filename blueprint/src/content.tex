@@ -274,13 +274,13 @@ This blueprint describes the formalization of the characterization of global ste
 \begin{theorem}[Coulomb concrete Theorem 42]\label{thm:coulomb_concrete}
   \lean{VML.CoulombConcreteTheorem42}
   \leanok
-  \uses{thm:theorem42, def:torusInstance, def:schwartzDecayEB, thm:equilibriumMaxwellian_T_unique}
+  \uses{thm:theorem42, def:torusInstance, def:schwartzDecayEB, thm:equilibriumMaxwellian_T_injective}
   Specialization of Theorem~42 to the Coulomb kernel $\Psi(r) = r^{-3}$ on the concrete torus $\T^3 = (\R / \mathbb{Z})^3$, with Schwartz-class decay assumptions on $f$.
-  The conclusion is the same: $f$ is an equilibrium Maxwellian with unique $T_{\mathrm{eq}}$, $E = 0$, and $B$ is constant.
+  The conclusion is the same: $f$ is an equilibrium Maxwellian with an injective parameter $T_{\mathrm{eq}}$, $E = 0$, and $B$ is constant.
 \end{theorem}
 
-\begin{theorem}[Temperature uniqueness]\label{thm:equilibriumMaxwellian_T_unique}
-  \lean{VML.equilibriumMaxwellian_T_unique}
+\begin{theorem}[Temperature injectivity]\label{thm:equilibriumMaxwellian_T_injective}
+  \lean{VML.equilibriumMaxwellian_T_injective}
   \leanok
   \uses{def:equilibriumMaxwellian}
   If $\rho > 0$, $T_1 > 0$, $T_2 > 0$, and $M_{\rho, T_1} = M_{\rho, T_2}$, then $T_1 = T_2$.

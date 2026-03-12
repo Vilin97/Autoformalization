@@ -22,6 +22,11 @@ namespace VML
 /-- **Coulomb Theorem 42.** Characterization of smooth steady states of the
     Vlasov–Maxwell–Landau system with Coulomb collisions on T³ = (ℝ/ℤ)³.
 
+    *Note on Physical Rigor:* This theorem addresses the classic non-relativistic formulation
+    over $v \in \mathbb{R}^3$. As with all non-relativistic kinetic theory over an unbounded
+    velocity space, this formally admits unphysical superluminal velocities ($|v| > c$).
+    A strictly correct physical model would require replacing $v$ with momentum $p$.
+
     This is the physically most important case: Coulomb interactions between
     charged particles in a plasma. The collision kernel Ψ(r) = r⁻³ is singular
     at r = 0 but the formalization handles this via the PSD continuity condition
@@ -206,10 +211,10 @@ theorem CoulombConcreteTheorem42
     (hSchwartz.integrable hf_smooth_v)
     hAmpere hGauss hDivB (fun i => (hB_smooth i).of_le (by decide)) hVlasov (fun v => (hf_smooth_x v).of_le (by decide)) hDecay
 
-/-- The equilibrium temperature T_eq is unique: any two temperatures giving the
-    same Maxwellian with the same density must be equal. This follows from
-    `CoulombConcreteTheorem42` and the injectivity of T ↦ equilibriumMaxwellian ρ T`. -/
-theorem CoulombConcreteTheorem42_unique_T
+/-- The steady state is parameterized by an injective temperature T_eq.
+    Note: T_eq is uniquely determined *by the state f itself* via injectivity, but the overall
+    theorem classifies a family of steady states parameterized by T > 0 and B₀ ∈ ℝ³. -/
+theorem CoulombConcreteTheorem42_classify_T
     (f : Torus3 → (Fin 3 → ℝ) → ℝ) (E B : Torus3 → Fin 3 → ℝ) (ν ρ_ion : ℝ)
     (hν : 0 < ν) (hρ_ion : 0 < ρ_ion) (hf_pos : ∀ x v, 0 < f x v)
     (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
@@ -236,6 +241,6 @@ theorem CoulombConcreteTheorem42_unique_T
     CoulombConcreteTheorem42 f E B ν ρ_ion hν hρ_ion hf_pos hf_smooth_v hf_smooth_x hB_smooth
       hSchwartz hLogGrowth hGradBound hVlasov hAmpere hGauss hDivB
   exact ⟨T_eq, B₀, hT_pos, hf_eq, hE_zero, hB_const,
-    fun T' hT' h_eq => equilibriumMaxwellian_T_unique ρ_ion T' T_eq hρ_ion hT' hT_pos h_eq⟩
+    fun T' hT' h_eq => equilibriumMaxwellian_T_injective ρ_ion T' T_eq hρ_ion hT' hT_pos h_eq⟩
 
 end VML

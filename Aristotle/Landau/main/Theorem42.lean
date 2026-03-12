@@ -116,6 +116,11 @@ structure VelocityDecayConditions {X : Type*} [FlatTorus3 X]
     hold for distribution functions with sufficient velocity-space decay
     (e.g., Schwartz class or sub-Gaussian tails).
 
+    *Note on Physical Rigor:* This theorem addresses the classic non-relativistic formulation
+    over $v \in \mathbb{R}^3$. As with all non-relativistic kinetic theory over an unbounded
+    velocity space, this formally admits unphysical superluminal velocities ($|v| > c$).
+    A strictly correct physical model would require replacing $v$ with momentum $p$.
+
     Reference: H-theorem-formal.pdf, Theorem 42. -/
 theorem Theorem42
     -- === Spatial domain (abstract flat 3-torus) ===

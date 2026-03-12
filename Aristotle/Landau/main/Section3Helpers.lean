@@ -18,6 +18,12 @@ open Matrix Finset BigOperators Real MeasureTheory
 
 noncomputable section
 
+set_option linter.unusedVariables false
+set_option linter.unusedSimpArgs false
+set_option linter.style.multiGoal false
+set_option linter.style.show false
+set_option linter.unnecessarySeqFocus false
+
 namespace VML
 
 /-- Flux factoring: f(w)∇f(v) - f(v)∇f(w) = f(v)f(w)(∇logf(v) - ∇logf(w)). -/

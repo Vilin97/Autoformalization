@@ -33,7 +33,7 @@ namespace VML
     (i)   f = ρ_ion/(2πT∞)^{3/2} exp(-|v|²/(2T∞))  (global Maxwellian, zero drift)
     (ii)  E = 0
     (iii) B = B∞ (spatially constant)
-    (iv)  T∞ > 0 uniquely determined by conservation laws
+    (iv)  T∞ > 0 is a constant parameter characterizing the steady-state family
 
     Proof assembles:
     Step 1: f is local Maxwellian (Corollary 2, via H-theorem chain)
@@ -438,7 +438,7 @@ noncomputable def VMLInput.toSteadyState (p : VMLInput X) : VMLSteadyState X whe
     (i)   f = ρ_ion/(2πT∞)^{3/2} exp(-|v|²/(2T∞))  (global Maxwellian, zero drift)
     (ii)  E = 0
     (iii) B = B∞ (spatially constant)
-    (iv)  T∞ > 0 uniquely determined by conservation laws -/
+    (iv)  T∞ > 0 is a constant parameter characterizing the steady-state family -/
 theorem main_from_physics (p : VMLInput X) :
     ∃ eq : VMLEquilibrium,
     (∀ x v, p.f x v = equilibriumMaxwellian p.ρ_ion eq.T v) ∧
