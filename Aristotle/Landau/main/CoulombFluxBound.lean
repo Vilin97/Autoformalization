@@ -117,7 +117,7 @@ lemma flux_times_log_integrable_coulomb
                   smul_eq_mul, mul_assoc, mul_comm (‖v - w‖⁻¹)]
                 ring
               exact h_uj_int.norm.congr (Filter.Eventually.of_forall fun w => by
-                show ‖‖v - w‖⁻¹ * u w j‖ = ‖v - w‖⁻¹ * |u w j|
+                change ‖‖v - w‖⁻¹ * u w j‖ = ‖v - w‖⁻¹ * |u w j|
                 rw [norm_mul, Real.norm_of_nonneg (inv_nonneg.mpr (norm_nonneg _)),
                   Real.norm_eq_abs]))
             (Filter.Eventually.of_forall h_pw)
@@ -128,7 +128,7 @@ lemma flux_times_log_integrable_coulomb
             (inv_norm_schwartz_integrable (f x) hf_decay
               (hf_smooth_v x).continuous.aestronglyMeasurable v).norm.congr
               (Filter.Eventually.of_forall fun w => by
-                show ‖‖v - w‖⁻¹ * f x w‖ = ‖v - w‖⁻¹ * |f x w|
+                change ‖‖v - w‖⁻¹ * f x w‖ = ‖v - w‖⁻¹ * |f x w|
                 rw [norm_mul, Real.norm_of_nonneg (inv_nonneg.mpr (norm_nonneg _)),
                   Real.norm_eq_abs])
           have h_dj_abs : ∀ j : Fin 3,
@@ -139,7 +139,7 @@ lemma flux_times_log_integrable_coulomb
               (((hf_smooth_v x).continuous_fderiv le_top).clm_apply
                 continuous_const).aestronglyMeasurable v).norm.congr
               (Filter.Eventually.of_forall fun w => by
-                show ‖‖v - w‖⁻¹ * fderiv ℝ (f x) w (Pi.single j 1)‖ =
+                change ‖‖v - w‖⁻¹ * fderiv ℝ (f x) w (Pi.single j 1)‖ =
                   ‖v - w‖⁻¹ * |vGrad (f x) w j|
                 rw [norm_mul, Real.norm_of_nonneg (inv_nonneg.mpr (norm_nonneg _)),
                   Real.norm_eq_abs]; rfl)
@@ -305,14 +305,14 @@ lemma coulomb_flux_component_bound
     (inv_norm_schwartz_integrable g hg_decay
       hg_smooth.continuous.aestronglyMeasurable v).norm.congr
       (Filter.Eventually.of_forall fun w => by
-        show ‖‖v - w‖⁻¹ * g w‖ = ‖v - w‖⁻¹ * |g w|
+        change ‖‖v - w‖⁻¹ * g w‖ = ‖v - w‖⁻¹ * |g w|
         rw [norm_mul, Real.norm_of_nonneg (inv_nonneg.mpr (norm_nonneg _)), Real.norm_eq_abs])
   have h_dj_abs : ∀ j : Fin 3, ∀ v,
       Integrable (fun w => ‖v - w‖⁻¹ * |vGrad g w j|) := fun j v =>
     (inv_norm_schwartz_integrable _ (hdg_decay j)
       ((hg_smooth.continuous_fderiv le_top).clm_apply continuous_const).aestronglyMeasurable
       v).norm.congr (Filter.Eventually.of_forall fun w => by
-        show ‖‖v - w‖⁻¹ * fderiv ℝ g w (Pi.single j 1)‖ = ‖v - w‖⁻¹ * |vGrad g w j|
+        change ‖‖v - w‖⁻¹ * fderiv ℝ g w (Pi.single j 1)‖ = ‖v - w‖⁻¹ * |vGrad g w j|
         rw [norm_mul, Real.norm_of_nonneg (inv_nonneg.mpr (norm_nonneg _)),
           Real.norm_eq_abs]; rfl)
   -- Cg ≥ 0 from the gradient bound (|∂_j g| ≤ Cg * poly * g, all nonneg)

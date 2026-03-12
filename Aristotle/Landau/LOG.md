@@ -1,5 +1,18 @@
 # Log
 
+## 2026-03-12 UTC — Babysit cycle 117: Linter warning cleanup, roundtrip uniqueness
+
+### Changes
+- **CoulombPSDHelpers.lean**: Replaced 2 `show` → `change`, removed unused simp arg `sub_eq_zero`, replaced `simpa` → `simp`, fixed 2 long lines (>100 chars).
+- **CoulombFluxBound.lean**: Replaced 5 `show` → `change`.
+- **TorusIntegration.lean**: Replaced 3 deprecated `integral_mul_left` → `integral_const_mul`, removed unused simp args (`Set.pi_inter_compl`, `Fin.insertNth`, `ContinuousLinearMap.pi_apply`, `Finset.sum_ite_eq'`), added `maxHeartbeats` comment. Restructured `measure_torus_eq_map` to avoid multi-goal warnings.
+- **NewtonianPotential.lean**: Moved `maxHeartbeats` comment to linter-expected position.
+- **CoulombFluxConv.lean**: Removed unused parameter `hM` from `inv_norm_bounded_integrable`.
+- **CoulombNonvacuous.lean**: Strengthened `CoulombConcreteTheorem42_roundtrip` to include temperature uniqueness (critique issue 8e).
+- **MEMORY.md**: Fixed CoulombFluxDiff line count (250 → 320).
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 116: Simp cleanup, long line fixes, round-trip theorem
 
 ### Changes

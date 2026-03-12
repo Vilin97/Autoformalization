@@ -1,4 +1,4 @@
-# Adversarial Critique -- 2026-03-12 UTC (Cycle 116, Hostile Review)
+# Adversarial Critique -- 2026-03-12 UTC (Cycle 117, Hostile Review)
 
 ## Verdict: CONDITIONAL ACCEPT
 
@@ -7,45 +7,45 @@
 ## 0. CI Status
 
 `lean-action@v1` (lake build) on commit 230054f: **SUCCESS** (run 22981560306).
+Commit f43e39c (cycle 116): CI run 22982420111 **in progress** at time of writing. Local `lake build` passes. Previous CI passed.
 
-`lean_verify` on `VML.CoulombConcreteTheorem42`: propext, Classical.choice, Quot.sound. **Clean.**
-`lean_verify` on `VML.CoulombConcreteTheorem42_unique_T`: same. **Clean.**
-`lean_verify` on `VML.CoulombConcreteTheorem42_nonvacuous`: same. **Clean.**
+`lean_verify` on all 4 main theorems — only standard axioms:
+- `VML.CoulombConcreteTheorem42`: propext, Classical.choice, Quot.sound. **Clean.**
+- `VML.CoulombConcreteTheorem42_unique_T`: same. **Clean.**
+- `VML.CoulombConcreteTheorem42_nonvacuous`: same. **Clean.**
+- `VML.CoulombConcreteTheorem42_roundtrip`: same. **Clean.**
 
-`Aristotle.lean` imports both `CoulombConcreteTheorem42` and `CoulombNonvacuous`. Default build covers both. **Fixed** from cycle 115.
+`Aristotle.lean` imports both `CoulombConcreteTheorem42` and `CoulombNonvacuous`. Default build covers all 4 theorems.
 
 ---
 
 ## 1. Sorry's
 
-**0 sorry's** across 32 files (10,147 lines). The only occurrences of "sorry" are in documentation comments. No `admit`, `native_decide`, `unsafe`, `implemented_by`, `extern`, or `opaque` found.
+**0 sorry's** across 32 files (10,188 lines). The only occurrences of "sorry" are in documentation comments. No `admit`, `native_decide`, `unsafe`, `implemented_by`, `extern`, or `opaque` found.
 
 ---
 
 ## 2. Hidden Axioms
 
-All three main theorems verified with only standard axioms (propext, Classical.choice, Quot.sound). No non-standard axioms. **Sound.**
+All four main theorems verified with only standard axioms (propext, Classical.choice, Quot.sound). No non-standard axioms. No `set_option linter.all false` anywhere. **Sound.**
 
 ---
 
 ## 3. Circularity
 
-Import DAG remains acyclic. `CoulombNonvacuous.lean` is now in the default build target (Aristotle.lean). No circular imports. **Sound.**
+Import DAG remains acyclic. `CoulombNonvacuous.lean` imports `CoulombConcreteTheorem42` (needed for the round-trip theorem). No circular imports. **Sound.**
 
 ---
 
 ## 4. Hypothesis Audit
 
-Same as cycle 115. All 13 hypotheses are necessary and independent. Counterexamples for independence of hGradBound and hLogGrowth are documented. **Sound.**
+Same as cycle 116. All 13 hypotheses are necessary and independent. Counterexamples for independence of hGradBound and hLogGrowth are documented in the docstring. **Sound.**
 
 ---
 
 ## 5. Mathematical Correctness
 
-**Sound.** No changes to the abstract proof chain. Two new lemmas in CoulombNonvacuous.lean are mathematically correct:
-
-- `integral_coord_mul_equilibriumMaxwellian_eq_zero`: Uses `integral_neg_eq_self` to show ∫ vᵢ * eM(v) dv = 0 by odd symmetry. Correct.
-- `integral_equilibriumMaxwellian`: Uses Fubini (`integral_fintype_prod_eq_prod`) + `integral_gaussian` to show ∫ eM(v) dv = ρ. The algebra is verified by Lean. Correct.
+**Sound.** No changes to the abstract proof chain since cycle 116. The new `CoulombConcreteTheorem42_roundtrip` is a trivial composition of `_nonvacuous` + `CoulombConcreteTheorem42`. No new mathematical content.
 
 ---
 
@@ -57,54 +57,69 @@ Same as cycle 115. All 13 hypotheses are necessary and independent. Counterexamp
 - `NewtonianPotential.lean:86` — `set_option maxHeartbeats 800000 in`
 - `TorusIntegration.lean:85` — `set_option maxHeartbeats 400000 in`
 
-**ISSUE (Low): 2 maxHeartbeats overrides remain.** The 800000 in NewtonianPotential is at the threshold. Both should be investigated for simplification.
+**ISSUE (Low): 2 maxHeartbeats overrides remain.** The 800000 in NewtonianPotential is at the threshold.
 
 ### 6b. Files over 500 lines
 
 | File | Lines |
 |------|-------|
 | Section3Helpers.lean | 613 |
-| CoulombFluxConv.lean | 540 |
+| CoulombFluxConv.lean | 560 |
+| CoulombNonvacuous.lean | 519 |
 | Defs.lean | 510 |
 
-CoulombFluxConv grew from ~373 to 540 lines during the Mathlib v4.24.0 fix. The `inv_norm_bounded_integrable` helper and the expanded `hasFDerivAt` proof added ~170 lines. Acceptable but approaching the boundary.
+CoulombNonvacuous grew from ~500 to 519 with the round-trip theorem addition. Four files now exceed 500 lines.
 
 ### 6c. Line length violations (> 100 chars)
 
 | File | Count |
 |------|-------|
-| CoulombFluxConv.lean | 10 |
 | CoulombPSDHelpers.lean | 2 |
-| CoulombNonvacuous.lean | 1 |
 | Section3Helpers.lean | 1 |
 
-**ISSUE (Low): 14 long lines across 4 files.** CoulombFluxConv accounts for 10 of them — these were introduced during the Mathlib v4.24.0 fix and should be reformatted.
+**Down from 14 to 3.** CoulombFluxConv and CoulombNonvacuous long lines were fixed in cycle 116.
 
-### 6d. Unused simp arguments
+**ISSUE (Low): 3 long lines remain across 2 files.**
 
-CoulombNonvacuous.lean has ~20 linter warnings for unused simp arguments (`fderiv_const`, `Function.comp`, `ContinuousLinearMap.sum_apply`, etc.) and 1 deprecated `Matrix.mulVec_smul_assoc`. These are cosmetic but noisy.
+### 6d. Linter warnings — widespread
 
-**ISSUE (Low): ~20 unused simp argument warnings in CoulombNonvacuous.lean.** Clean up by removing unused arguments from simp calls.
+Cycle 116 fixed CoulombNonvacuous.lean simp warnings and deprecated API. But **many other files have linter warnings** that were not reported in cycle 116's critique:
+
+| File | Warning Count | Types |
+|------|---------------|-------|
+| NewtonianPotential.lean | ~20+ | unused simp args, unused variables (`hf_smooth`), multi-goal tactics, `ring_nf` suggestions |
+| TorusIntegration.lean | ~8 | deprecated `integral_mul_left` (3x), unused simp args, multi-goal tactics |
+| CoulombPSDHelpers.lean | ~6 | `show` → `change`, unused simp args (`sub_eq_zero`, `hp_ne`) |
+| CoulombFluxBound.lean | ~5 | `show` → `change` |
+| CoulombFluxConv.lean | 2 | unused variable `hM`, `abel_nf` suggestion |
+| Section3Helpers.lean | ~4 | `ring_nf` suggestions |
+
+**ISSUE (Medium): ~45+ linter warnings across 6 files.** The cycle 116 cleanup only addressed CoulombNonvacuous — the other files were never checked. NewtonianPotential.lean alone has ~20+ warnings.
 
 ### 6e. Deprecated API usage
 
-CoulombNonvacuous.lean:447 uses `Matrix.mulVec_smul_assoc` which is deprecated in favor of `Matrix.mulVec_smul`.
+TorusIntegration.lean uses `MeasureTheory.integral_mul_left` (deprecated) at lines 349, 353, 357. Should use `MeasureTheory.integral_const_mul`.
 
-**ISSUE (Low): 1 deprecated Mathlib API usage in CoulombNonvacuous.lean:447.**
+**ISSUE (Low): 3 deprecated API usages in TorusIntegration.lean.**
 
 ---
 
 ## 7. Documentation Lies
 
-### 7a. Defs.lean:378 docstring
+### 7a. MEMORY.md line counts
 
-Line 378 now correctly states "hSpatialVelocityFubini requires joint integrability". **Fixed** from cycle 115.
+| File | MEMORY.md | Actual | Off by |
+|------|-----------|--------|--------|
+| CoulombFluxDiff.lean | ~250 | 320 | +70 (28%) |
+| CoulombConcreteTheorem42.lean | ~233 | 241 | +8 |
+| CoulombNonvacuous.lean | ~500 | 519 | +19 |
+| CoulombFluxConv.lean | ~550 | 560 | +10 |
 
-### 7b. MEMORY.md line counts
+**ISSUE (Low): CoulombFluxDiff line count is materially wrong (250 vs 320).** The others are within acceptable approximation range.
 
-MEMORY.md line counts are approximate and noted as such. However, CoulombNonvacuous is listed as "~351 lines" but is now 498. CoulombFluxConv is listed as "~373 lines" but is now 540.
+### 7b. MEMORY.md total line count
 
-**ISSUE (Low): MEMORY.md line counts for CoulombNonvacuous and CoulombFluxConv are stale.**
+MEMORY.md says "~10,150 lines". Actual: 10,188. Close enough.
 
 ---
 
@@ -112,46 +127,30 @@ MEMORY.md line counts are approximate and noted as such. However, CoulombNonvacu
 
 ### 8a. Weaken velocity smoothness from C∞ to C³ (Feasible)
 
-The abstract theorem requires only `ContDiff ℝ 3`. The concrete theorem uses `ContDiff ℝ ⊤` and downcasts via `.of_le le_top`. This is an honest design choice documented in the docstring, but the hypothesis COULD be weakened to `ContDiff ℝ 3` without changing any proof. This would make the theorem statement tighter. **Feasibility: 1 line change + verify.**
+The abstract theorem requires only `ContDiff ℝ 3`. The concrete theorem uses `ContDiff ℝ ⊤` and downcasts via `.of_le le_top`. Weakening to `ContDiff ℝ 3` would make the statement tighter without changing the proof substance. **Feasibility: change hypothesis + update `.of_le le_top` → `.of_le (by norm_num)` in all 12 Coulomb files. Medium effort due to breadth.**
 
-### 8b. CoulombNonvacuous should apply the main theorem (Medium)
+### 8b. ~~CoulombNonvacuous should apply main theorem~~ **FIXED** in cycle 116.
 
-`CoulombConcreteTheorem42_nonvacuous` proves all 13 hypotheses are simultaneously satisfiable but does NOT actually apply `CoulombConcreteTheorem42` to derive the conclusion. A stronger statement would be:
+`CoulombConcreteTheorem42_roundtrip` now demonstrates the full round-trip.
 
-```lean
-theorem CoulombConcreteTheorem42_nonvacuous' :
-    ∃ f E B ν ρ_ion, <all hypotheses> ∧
-    ∃ T_eq B₀, 0 < T_eq ∧ <conclusion holds>
-```
+### 8c. Extract Gaussian integral lemmas to a reusable module (Medium)
 
-This would demonstrate the full round-trip: hypotheses are satisfiable AND the conclusion holds. **Feasibility: ~10 lines, import CoulombConcreteTheorem42.**
+`integral_coord_mul_equilibriumMaxwellian_eq_zero` and `integral_equilibriumMaxwellian` are specific to `equilibriumMaxwellian` but the underlying techniques are general. A Mathlib-quality version would work for arbitrary product Gaussians on `Fin n → ℝ`.
 
-### 8c. Extract Gaussian integral lemmas to a reusable module (Low)
+### 8d. Extend kernel coverage beyond Coulomb (Medium-Hard)
 
-`integral_coord_mul_equilibriumMaxwellian_eq_zero` and `integral_equilibriumMaxwellian` are specific to `equilibriumMaxwellian` but the techniques (odd symmetry, Fubini factorization of product Gaussians) are general. Could be generalized to:
+Only Coulomb (Ψ = r⁻³) is instantiated. Maxwell molecules (Ψ = const) would be a quick win (~100 lines) demonstrating generality. Hard spheres (Ψ = r) would be more interesting.
 
-```lean
-lemma integral_coord_mul_gaussian_eq_zero (b : ℝ) (hb : 0 < b) (i : Fin n) :
-    ∫ v : Fin n → ℝ, v i * exp (-b * ‖v‖^2) = 0
-```
+### 8e. Strengthen uniqueness: unique equilibrium temperature for given density (Easy)
 
-**Feasibility: Medium. Would be a good Mathlib PR candidate.**
-
-### 8d. Extend kernel coverage beyond Coulomb (Hard)
-
-The abstract `Theorem42` works for any kernel satisfying `VelocityDecayConditions`. The concrete instantiation covers only Coulomb (Ψ(r) = r⁻³). Other physically relevant kernels:
-- Maxwell molecules: Ψ = const (trivial, all integrability conditions immediate)
-- Hard spheres: Ψ(r) = r (bounded, should be easier than Coulomb)
-- Soft potentials: Ψ(r) = r^γ for -3 < γ < 0
-
-Maxwell molecules would be a quick win (~100 lines). **Feasibility: Low effort for Maxwell, medium for hard spheres.**
+`CoulombConcreteTheorem42_unique_T` already proves T uniqueness, but `CoulombConcreteTheorem42_roundtrip` does NOT include uniqueness in its conclusion. Could strengthen roundtrip to also assert uniqueness. **Feasibility: ~5 lines.**
 
 ---
 
 ## 9. Mathlib Upstreamability
 
-1. **`integral_gaussian` factorization pattern** — the Fubini + `integral_fintype_prod_eq_prod` pattern for n-dimensional Gaussian integrals is reusable and not in Mathlib.
-2. **`inverse_poly_integrable`** (SchwartzDecayDefs.lean) — `(1+‖v‖)⁻ᴺ` integrability for N > dim.
+1. **n-dimensional Gaussian integral** — Fubini + `integral_fintype_prod_eq_prod` + `integral_gaussian` pattern. Not in Mathlib. Would need generalization from `Fin 3 → ℝ` to `Fin n → ℝ`.
+2. **`inverse_poly_integrable`** (SchwartzDecayDefs.lean) — `(1+‖v‖)⁻ᴺ` integrability for N > dim. General and useful.
 3. **`norm_fderiv_eq_iteratedFDeriv_one`** (IteratedDerivHelpers.lean) — fderiv/iteratedFDeriv relation.
 4. **Schwartz decay extraction lemmas** — `schwartz_pointwise_decay`, `schwartz_fderiv_component_decay`.
 
@@ -162,14 +161,15 @@ Maxwell molecules would be a quick win (~100 lines). **Feasibility: Low effort f
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | 6a | 2 maxHeartbeats overrides (800000 + 400000) | Low | Open |
-| 6c | 14 long lines across 4 files (10 in CoulombFluxConv) | Low | Open |
-| 6d | ~20 unused simp arg warnings in CoulombNonvacuous | Low | **NEW** |
-| 6e | 1 deprecated API (mulVec_smul_assoc) | Low | **NEW** |
-| 7b | MEMORY.md line counts stale for 2 files | Low | Open |
+| 6b | 4 files over 500 lines (Section3Helpers at 613) | Low | Open |
+| 6c | 3 long lines across 2 files | Low | Open |
+| 6d | ~45+ linter warnings across 6 files | Medium | **NEW** |
+| 6e | 3 deprecated `integral_mul_left` in TorusIntegration | Low | **NEW** |
+| 7a | CoulombFluxDiff line count wrong in MEMORY.md (250→320) | Low | **NEW** |
 | 8a | Hypothesis 4 could weaken to ContDiff ℝ 3 | Low | Open |
-| 8b | CoulombNonvacuous should apply main theorem | Low | Open |
-| 8c | Gaussian integral lemmas not generalized | Low | **NEW** |
+| 8c | Gaussian integral lemmas not generalized | Low | Open |
 | 8d | Only Coulomb kernel instantiated | Low | Open |
+| 8e | Roundtrip theorem lacks uniqueness | Low | **NEW** |
 | 9 | Mathlib PR candidates (4 lemmas) | Low | Open |
 
 ---
@@ -177,15 +177,12 @@ Maxwell molecules would be a quick win (~100 lines). **Feasibility: Low effort f
 ## Verdict: CONDITIONAL ACCEPT
 
 The formalization is mathematically sound, fully verified by the Lean 4 kernel:
-- **0 sorry's** across 32 files, 10,147 lines
-- **0 non-standard axioms** (verified by `lean_verify` on all 3 main theorems)
+- **0 sorry's** across 32 files, 10,188 lines
+- **0 non-standard axioms** (verified by `lean_verify` on all 4 main theorems)
 - **2 `maxHeartbeats` overrides** (400000 + 800000)
-- **CI passing** (lean-action succeeded on commit 230054f)
-- **CoulombNonvacuous in default build** (fixed from cycle 115)
+- **CI passing** (lean-action succeeded on commit 230054f; f43e39c in progress)
+- **Full round-trip** demonstrated (cycle 116 fix)
 
-All open issues are Low severity. None affects soundness. The main actionable items are:
-1. Clean up ~20 unused simp warnings in CoulombNonvacuous.lean
-2. Fix deprecated `mulVec_smul_assoc` → `mulVec_smul`
-3. Fix 14 long lines (mostly in CoulombFluxConv.lean)
+The main new finding is **~45+ linter warnings** across 6 files that were never addressed — cycle 116 only cleaned CoulombNonvacuous. NewtonianPotential.lean alone has ~20+ warnings including unused variables, unused simp args, and multi-goal tactic warnings.
 
-**Condition for full ACCEPT:** Fix items 1-3 above (cosmetic cleanup).
+**Condition for full ACCEPT:** Fix the ~45 linter warnings across the 6 affected files (issue 6d). The remaining issues are cosmetic or enhancement-level.

@@ -138,7 +138,7 @@ lemma tendsto_landau_quadratic_diag
               (G p.1 - G p.2)) ≤ L^2 * eucNorm (p.1 - p.2) := by
           filter_upwards [ h_bound ] with p hp using le_trans hp
             (by split_ifs <;>
-              simpa [ *, sq, mul_assoc, mul_comm, mul_left_comm ] using by ring_nf; norm_num)
+              simp [ *, sq, mul_assoc, mul_comm, mul_left_comm ])
         have h_cont : Continuous (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
             L ^ 2 * eucNorm (p.1 - p.2)) :=
           Continuous.mul continuous_const <| Real.continuous_sqrt.comp <|
@@ -162,7 +162,8 @@ lemma continuous_landau_quadratic
         have h_cont_away : ∀ p : (Fin 3 → ℝ) × (Fin 3 → ℝ), p.1 ≠ p.2 → ContinuousAt F p := by
           intro p hp_ne
           have h_cont_A : ContinuousAt (fun z => landauMatrix coulombKernel z) (p.1 - p.2) := by
-            show ContinuousAt (fun z => coulombKernel (eucNorm z) • innerLandauMatrix z) (p.1 - p.2)
+            change ContinuousAt
+              (fun z => coulombKernel (eucNorm z) • innerLandauMatrix z) (p.1 - p.2)
             apply ContinuousAt.smul
             · have h_cont_eucNorm : ContinuousAt (fun z => eucNorm z) (p.1 - p.2) := by
                 exact Continuous.continuousAt
@@ -170,7 +171,7 @@ lemma continuous_landau_quadratic
                     by exact Continuous.dotProduct continuous_id continuous_id)
               have h_pos : 0 < eucNorm (p.1 - p.2) := by
                 unfold eucNorm
-                unfold normSq; simp [ sub_eq_zero, hp_ne ]
+                unfold normSq; simp
                 simp_all [ dotProduct, Fin.sum_univ_three ]
                 exact not_le.mp fun h => hp_ne <| by
                   ext i; fin_cases i <;> nlinarith! [ sq_nonneg (p.1 0 - p.2 0),
@@ -189,7 +190,8 @@ lemma continuous_landau_quadratic
                 (show Continuous fun z : Fin 3 → ℝ => normSq z from
                   Continuous.dotProduct (continuous_id') (continuous_id') )
                 (continuous_const)
-                |>.sub <| Continuous.matrix_vecMulVec (continuous_id') (continuous_id')).continuousAt
+                |>.sub <|
+                  Continuous.matrix_vecMulVec (continuous_id') (continuous_id')).continuousAt
           have h_cont_G : ContinuousAt (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => G p.1 - G p.2) p := by
             exact ContinuousAt.sub
               (hG.continuous.continuousAt.comp continuousAt_fst)
@@ -204,7 +206,7 @@ lemma continuous_landau_quadratic
         by_cases hp : p.1 = p.2
         · have h_tendsto : Filter.Tendsto F (nhds (p.1, p.1)) (nhds 0) := by
             convert tendsto_landau_quadratic_diag G hG p.1 using 1
-          show ContinuousAt F p
+          change ContinuousAt F p
           have hpeq : p = (p.1, p.1) := Prod.ext rfl hp.symm
           rw [ContinuousAt, hpeq, show F (p.1, p.1) = 0 from by simp [F]]
           exact h_tendsto
@@ -367,7 +369,8 @@ lemma fubini_double_pointwise_bound
         · have hCg : 0 ≤ Cg := nonneg_of_mul_nonneg_left
             (le_trans (abs_nonneg _) (h_score v 0))
             (pow_pos (by linarith [norm_nonneg v]) _)
-          exact mul_nonneg (by linarith) (mul_nonneg hCg (pow_nonneg (by linarith [norm_nonneg v]) _))
+          exact mul_nonneg (by linarith)
+            (mul_nonneg hCg (pow_nonneg (by linarith [norm_nonneg v]) _))
         · next j _ =>
           simp only [Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
           have := norm_sub_le (f w * vGrad f v j) (f v * vGrad f w j)

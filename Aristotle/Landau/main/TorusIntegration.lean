@@ -56,14 +56,16 @@ lemma measure_torus_eq_map :
           · exact fun i ↦ sigmaFinite_of_locallyFinite
           · exact Continuous.aemeasurable (by continuity)
         · exact fun i => measurable_id.aemeasurable
-      erw [ MeasureTheory.Measure.pi_eq ] at h_volume_eq
-      convert h_volume_eq
+      suffices h_restrict : volume.restrict box3 =
+          MeasureTheory.Measure.pi (fun _ => volume.restrict (Set.Ioc 0 1)) by
+        rw [h_volume_eq, h_restrict]
+      erw [ MeasureTheory.Measure.pi_eq ]
       intro s hs; erw [ MeasureTheory.Measure.restrict_apply ]
       · erw [ show (Set.univ.pi s ∩ box3 : Set (Fin 3 → ℝ) ) =
             Set.pi Set.univ fun i => s i ∩ Set.Ioc 0 1 from ?_,
           MeasureTheory.Measure.pi_pi ]
-        simp [Set.pi_inter_compl]
-        unfold box3; exact Set.pi_inter_distrib.symm
+        · simp
+        · unfold box3; exact Set.pi_inter_distrib.symm
       · exact MeasurableSet.univ_pi hs
 
 /-- ∫ over T³ = ∫ over [0,1]³ of the periodic lift. -/
@@ -83,6 +85,7 @@ lemma integral_torus_eq_integral_box (g : Torus3 → ℝ) (hg : Continuous g) :
       · exact hg.aestronglyMeasurable
 
 set_option maxHeartbeats 400000 in
+-- Fubini decomposition + FTC on the box requires many case splits over Fin 3
 /-- ∫ ∂F/∂xᵢ over [0,1]³ = 0 for periodic F (FTC + periodicity). -/
 lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3)
     (hF : ContDiff ℝ 1 F) (hper : ∀ x, F (x + Pi.single i 1) = F x) :
@@ -167,7 +170,7 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
             (Set.Icc 0 1 ×ˢ Set.pi Set.univ (fun _ => Set.Icc 0 1)) := by
           refine hg.comp_continuousOn ?_
           refine Continuous.continuousOn ?_
-          fin_cases i <;> simp [ Fin.insertNth ]
+          fin_cases i <;> simp
           · exact continuous_pi_iff.mpr fun i => by
               fin_cases i <;>
               [ exact continuous_fst
@@ -207,7 +210,7 @@ lemma integral_derivative_periodic_zero (F : (Fin 3 → ℝ) → ℝ) (i : Fin 3
             · intro j; split_ifs <;> simp_all [ hasFDerivAt_iff_isLittleO_nhds_zero ]
               simp_all [ Fin.insertNth ]
               fin_cases i <;> fin_cases j <;> simp_all [ Fin.succAboveCases ]
-            · simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.pi_apply]
+            · simp only [ContinuousLinearMap.comp_apply]
               congr 1
               ext j
               simp [Pi.single_apply]
@@ -346,15 +349,15 @@ theorem torus_hCurlIntZero (F : Torus3 → Fin 3 → ℝ) (u : Fin 3 → ℝ)
   rw [key]
   have h₀ : ∫ x : Torus3, u 0 * (torusGradX (fun z => F z 2) x 1 -
       torusGradX (fun z => F z 1) x 2) = 0 := by
-    rw [integral_mul_left, integral_sub (hint 2 1) (hint 1 2),
+    rw [integral_const_mul, integral_sub (hint 2 1) (hint 1 2),
         hzero 2 1, hzero 1 2, sub_self, mul_zero]
   have h₁ : ∫ x : Torus3, u 1 * (torusGradX (fun z => F z 0) x 2 -
       torusGradX (fun z => F z 2) x 0) = 0 := by
-    rw [integral_mul_left, integral_sub (hint 0 2) (hint 2 0),
+    rw [integral_const_mul, integral_sub (hint 0 2) (hint 2 0),
         hzero 0 2, hzero 2 0, sub_self, mul_zero]
   have h₂ : ∫ x : Torus3, u 2 * (torusGradX (fun z => F z 1) x 0 -
       torusGradX (fun z => F z 0) x 1) = 0 := by
-    rw [integral_mul_left, integral_sub (hint 1 0) (hint 0 1),
+    rw [integral_const_mul, integral_sub (hint 1 0) (hint 0 1),
         hzero 1 0, hzero 0 1, sub_self, mul_zero]
   have hA := (hint 2 1).sub (hint 1 2) |>.const_mul (u 0)
   have hB := (hint 0 2).sub (hint 2 0) |>.const_mul (u 1)
@@ -420,7 +423,7 @@ theorem torus_hHarmonic_const (φ : Torus3 → ℝ)
   have hfderiv_zero : ∀ y, fderiv ℝ (periodicLift φ) y = 0 := by
     intro y; ext v
     have hv : v = ∑ i : Fin 3, v i • (Pi.single i (1 : ℝ) : Fin 3 → ℝ) := by
-      ext j; simp [Finset.sum_apply, Pi.single_apply, Finset.sum_ite_eq']
+      ext j; simp [Finset.sum_apply, Pi.single_apply]
     rw [hv, map_sum, ContinuousLinearMap.zero_apply]
     apply Finset.sum_eq_zero; intro i _
     rw [map_smul, smul_eq_mul, show (fderiv ℝ (periodicLift φ) y) (Pi.single i 1) =

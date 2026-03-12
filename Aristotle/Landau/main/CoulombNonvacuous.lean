@@ -498,7 +498,8 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
     Not only are the 13 hypotheses simultaneously satisfiable
     (`CoulombConcreteTheorem42_nonvacuous`), but applying the main theorem
     to the equilibrium Maxwellian witnesses produces the expected
-    conclusion: f is a global Maxwellian, E = 0, B = const.
+    conclusion: f is a global Maxwellian, E = 0, B = const, with unique
+    equilibrium temperature.
 
     This closes the loop: the theorem is non-vacuous AND the conclusion
     actually holds for a concrete physical configuration. -/
@@ -508,12 +509,19 @@ theorem CoulombConcreteTheorem42_roundtrip (ν T ρ_ion : ℝ)
     ∃ (T_eq : ℝ) (B₀ : Fin 3 → ℝ), 0 < T_eq ∧
     (∀ x v, f x v = equilibriumMaxwellian ρ_ion T_eq v) ∧
     (∀ x, E x = 0) ∧
-    (∀ x, B x = B₀) := by
+    (∀ x, B x = B₀) ∧
+    (∀ T', 0 < T' →
+      (∀ v, equilibriumMaxwellian ρ_ion T' v =
+        equilibriumMaxwellian ρ_ion T_eq v) →
+      T' = T_eq) := by
   obtain ⟨f, E, B, hf_pos, hf_sv, hf_sx, hB_s, hSch, hLog, hGrad,
          hVlasov, hAmpere, hGauss, hDivB⟩ :=
     CoulombConcreteTheorem42_nonvacuous ν T ρ_ion hν hT hρ_ion
-  exact ⟨f, E, B,
+  obtain ⟨T_eq, B₀, hT_pos, hf_eq, hE_zero, hB_const⟩ :=
     CoulombConcreteTheorem42 f E B ν ρ_ion hν hρ_ion hf_pos hf_sv hf_sx
-      hB_s hSch hLog hGrad hVlasov hAmpere hGauss hDivB⟩
+      hB_s hSch hLog hGrad hVlasov hAmpere hGauss hDivB
+  exact ⟨f, E, B, T_eq, B₀, hT_pos, hf_eq, hE_zero, hB_const,
+    fun T' hT' h_eq =>
+      equilibriumMaxwellian_T_unique ρ_ion T' T_eq hρ_ion hT' hT_pos h_eq⟩
 
 end VML
