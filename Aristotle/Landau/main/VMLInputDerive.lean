@@ -303,7 +303,7 @@ lemma VMLInput.hDensityConst (p : VMLInput X) : ∀ x, p.ρ x = p.ρ_ion := by
         rw [p.hMaxwellianForm x v, p.hc_const x, p.hb_const x, hb0]
         simp [dotProduct, Fin.sum_univ_three, normSq, Real.exp_add]
       simp_rw [this]
-      exact integral_mul_left _ _
+      exact integral_const_mul _ _
     -- Step 2: show log ρ(x) = a(x) + log C
     have hC_pos : 0 < C := by
       have h0 := p.hρ_pos p.x₀

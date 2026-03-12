@@ -17,7 +17,7 @@ namespace VML
 /-- Spatial gradient of f w.r.t. x is AEStronglyMeasurable in v, via difference quotient limits. -/
 lemma torusGradX_aestronglyMeasurable
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
-    (hf_smooth_v : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
     (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
     (x : Torus3) (i : Fin 3) :
     AEStronglyMeasurable
@@ -65,7 +65,7 @@ lemma torusGradX_aestronglyMeasurable
 lemma spatial_transport_integrable
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth_v : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
     (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
     (hSchwartz : UniformSchwartzDecay f)
     (hLogBound : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
@@ -126,7 +126,7 @@ lemma force_fderiv_log_component_integrable
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (E B : Torus3 → Fin 3 → ℝ)
     (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth : ∀ x, ContDiff ℝ 3 (f x))
     (hSchwartz : UniformSchwartzDecay f)
     (C_log : ℝ) (K_log : ℕ)
     (hLB : ∀ (x : Torus3) (v : Fin 3 → ℝ),
@@ -147,7 +147,7 @@ lemma force_fderiv_log_component_integrable
         exact (continuous_apply _ |>.mul continuous_const).sub
           (continuous_apply _ |>.mul continuous_const)
     have h2 : Continuous (fun v => fderiv ℝ (f x) v (Pi.single i 1)) :=
-      ((hf_smooth x).continuous_fderiv le_top).clm_apply continuous_const
+      ((hf_smooth x).continuous_fderiv (by norm_num)).clm_apply continuous_const
     have h3 : Continuous (fun v => Real.log (f x v)) :=
       (hf_smooth x).continuous.log (fun v => ne_of_gt (hf_pos x v))
     exact (h1.mul h2).mul h3
@@ -197,7 +197,7 @@ lemma force_transport_integrable_coulomb
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (E B : Torus3 → Fin 3 → ℝ)
     (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth : ∀ x, ContDiff ℝ 3 (f x))
     (hSchwartz : UniformSchwartzDecay f)
     (hLogBound : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
       |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log)
@@ -221,7 +221,7 @@ lemma force_ibp_f_dg_integrable_coulomb
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (E B : Torus3 → Fin 3 → ℝ)
     (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth : ∀ x, ContDiff ℝ 3 (f x))
     (hSchwartz : UniformSchwartzDecay f)
     (hLogBound : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
       |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log)
@@ -236,7 +236,7 @@ lemma force_ibp_f_dg_integrable_coulomb
       Real.log (f x v) * fderiv ℝ (f x) v (Pi.single i 1) := by
     intro v
     have hfx_hfd : HasFDerivAt (f x) (fderiv ℝ (f x) v) v :=
-      ((hf_smooth x).differentiable le_top).differentiableAt.hasFDerivAt
+      ((hf_smooth x).differentiable (by norm_num)).differentiableAt.hasFDerivAt
     have hlog_hfd : HasFDerivAt (fun w => Real.log (f x w))
         ((f x v)⁻¹ • fderiv ℝ (f x) v) v :=
       hfx_hfd.log (ne_of_gt (hf_pos x v))
@@ -268,7 +268,7 @@ lemma force_ibp_fg_integrable_coulomb
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (E B : Torus3 → Fin 3 → ℝ)
     (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth : ∀ x, ContDiff ℝ 3 (f x))
     (hSchwartz : UniformSchwartzDecay f)
     (hLogBound : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
       |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log)

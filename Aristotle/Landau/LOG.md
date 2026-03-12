@@ -1,5 +1,16 @@
 # Log
 
+## 2026-03-12 UTC — Babysit cycle 119: ContDiff weakening + linter fixes
+
+### Changes
+- **ContDiff ℝ ⊤ → ContDiff ℝ 3**: Weakened velocity smoothness hypothesis from C∞ to C³ across 13 Coulomb files. The abstract theorem only needs C³; the concrete theorem no longer over-assumes. 16 remaining `ContDiff ℝ ⊤` are for spatial smoothness (intentionally preserved).
+  - Files changed: CoulombConcreteTheorem42, CoulombKernel, SchwartzDecayDefs, CoulombForceTransport, CoulombFlux, CoulombFluxBound, CoulombFluxConv, CoulombFluxDiff, CoulombSpatialTransport, CoulombPSD, CoulombPSDHelpers, CoulombNonvacuous
+  - Internal helpers in CoulombFluxConv lowered to `ContDiff ℝ 2` where fderiv drops one order
+- **Linter fixes in 5 files**: Section4 (6 warnings: 3 show→change, 2 deprecated API, 1 unused var), Section7 (6: 4 unused simp args, 1 deprecated, 1 show→change), CoulombSpatialTransport (7: 5 show→change, 2 deprecated integral_mul_left→integral_const_mul), CoulombFlux (4: 2 show→change, 1 unused var, 1 unused tactic), VMLInputDerive (1: deprecated integral_mul_left→integral_const_mul)
+- **GaussianHelpers, Section3Helpers, Defs, TorusInstance, Theorem42**: Linter fixes were attempted but lost (reverted). Deferred to cycle 120.
+
+### Sorry count: 0
+
 ## 2026-03-12 UTC — Babysit cycle 118: Last long line fix, CI re-run
 
 ### Changes

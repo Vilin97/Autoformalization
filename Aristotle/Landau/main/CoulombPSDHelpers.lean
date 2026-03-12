@@ -219,7 +219,7 @@ lemma continuous_landau_quadratic
 lemma psd_continuous_coulomb
     (f : (Fin 3 → ℝ) → ℝ)
     (hf_pos : ∀ v, 0 < f v)
-    (hf_smooth : ContDiff ℝ ⊤ f) :
+    (hf_smooth : ContDiff ℝ 3 f) :
     Continuous (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
       PSDIntegrand coulombKernel f p.1 p.2) := by
   simp only [PSDIntegrand]
@@ -228,7 +228,7 @@ lemma psd_continuous_coulomb
       (hf_smooth.continuous.comp continuous_fst)
       (hf_smooth.continuous.comp continuous_snd) ) ?_
   set G := fun v => fderiv ℝ (Real.log ∘ f) v
-  have h_log_smooth : ContDiff ℝ ⊤ (Real.log ∘ f) := by
+  have h_log_smooth : ContDiff ℝ 3 (Real.log ∘ f) := by
     exact ContDiff.log hf_smooth fun v => ne_of_gt <| hf_pos v
   have h_G_smooth : ContDiff ℝ 1 G := by
     apply_rules [ ContDiff.fderiv, h_log_smooth ]
@@ -381,7 +381,7 @@ lemma fubini_double_pointwise_bound
 /-- The Fubini double integrand (score · Landau matrix · flux) is
     AEStronglyMeasurable on the product space (Fin 3 → ℝ) × (Fin 3 → ℝ). -/
 lemma fubini_double_aestronglyMeasurable
-    {f : (Fin 3 → ℝ) → ℝ} (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f) :
+    {f : (Fin 3 → ℝ) → ℝ} (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ 3 f) :
     AEStronglyMeasurable (fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) =>
       dotProduct (vGrad (Real.log ∘ f) p.1)
         (mulVec (landauMatrix coulombKernel (p.1 - p.2))
@@ -393,7 +393,7 @@ lemma fubini_double_aestronglyMeasurable
   apply Measurable.mul
   · -- score component: v ↦ fderiv ℝ (log ∘ f) v (Pi.single i 1) composed with fst
     exact ((ContDiff.continuous_fderiv
-      (hf_smooth.log (fun v => ne_of_gt (hf_pos v))) le_top).clm_apply
+      (hf_smooth.log (fun v => ne_of_gt (hf_pos v))) (by norm_num)).clm_apply
       continuous_const).comp continuous_fst |>.measurable
   · apply Finset.measurable_sum
     intro j _
@@ -422,9 +422,9 @@ lemma fubini_double_aestronglyMeasurable
     · -- flux component: continuous hence measurable
       exact (Continuous.sub
         ((hf_smooth.continuous.comp continuous_snd).mul
-          ((hf_smooth.continuous_fderiv le_top).comp continuous_fst |>.clm_apply continuous_const))
+          ((hf_smooth.continuous_fderiv (by norm_num)).comp continuous_fst |>.clm_apply continuous_const))
         ((hf_smooth.continuous.comp continuous_fst).mul
-          ((hf_smooth.continuous_fderiv le_top).comp continuous_snd |>.clm_apply continuous_const))
+          ((hf_smooth.continuous_fderiv (by norm_num)).comp continuous_snd |>.clm_apply continuous_const))
         ).measurable
 
 end VML

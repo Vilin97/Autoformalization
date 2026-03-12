@@ -14,6 +14,10 @@ name = "mathlib"
 scope = "leanprover-community"
 rev = "v4.24.0"
 
+[[require]]
+name = "doc-gen4"
+scope = "leanprover"
+rev = "v4.24.0"
 
 [[lean_lib]]
 name = "Aristotle"

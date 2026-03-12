@@ -21,8 +21,8 @@ namespace VML
 /-- The Landau collision flux is integrable for the Coulomb kernel. -/
 lemma landau_flux_integrable_coulomb
     (f : (Fin 3 → ℝ) → ℝ)
-    (hf_pos : ∀ v, 0 < f v)
-    (hf_smooth : ContDiff ℝ ⊤ f)
+    (_hf_pos : ∀ v, 0 < f v)
+    (hf_smooth : ContDiff ℝ 3 f)
     (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ (v : Fin 3 → ℝ),
       ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
     (v : Fin 3 → ℝ) :
@@ -55,14 +55,14 @@ lemma landau_flux_integrable_coulomb
                   by simp [Pi.norm_single]
               generalize_proofs at *
               erw [iteratedFDeriv_succ_eq_comp_left]; norm_num [fderiv_deriv]
-              erw [iteratedFDeriv_zero_eq_comp]; norm_num [fderiv_deriv]
+              erw [iteratedFDeriv_zero_eq_comp]
               erw [fderiv_comp] <;> norm_num [hf_smooth.contDiffAt.differentiableAt]
               · erw [LinearIsometryEquiv.fderiv]; norm_num [fderiv_deriv]
                 erw [ContinuousLinearMap.norm_def]; norm_num [ContinuousLinearMap.opNorm]
                 ring; exact this
               · exact (LinearIsometryEquiv.differentiable _) _
             exact le_trans (mul_le_mul_of_nonneg_right h_deriv_bound (by positivity)) (hC w)
-          · exact ((hf_smooth.continuous_fderiv le_top).eval_const
+          · exact ((hf_smooth.continuous_fderiv (by norm_num)).eval_const
               (Pi.single j 1)).aestronglyMeasurable
       convert h_int.1.mul_const ((vGrad f v) j) |>.sub (h_int.2.const_mul (f v)) using 2
       simp [Pi.smul_apply, Pi.sub_apply, smul_eq_mul]; ring
@@ -85,7 +85,7 @@ lemma landau_flux_integrable_coulomb
       · exact AEStronglyMeasurable.sub
           (Continuous.aestronglyMeasurable (hf_smooth.continuous.mul continuous_const))
           (AEStronglyMeasurable.mul aestronglyMeasurable_const
-            ((hf_smooth.continuous_fderiv le_top).eval_const (Pi.single j 1)).aestronglyMeasurable)
+            ((hf_smooth.continuous_fderiv (by norm_num)).eval_const (Pi.single j 1)).aestronglyMeasurable)
     · filter_upwards [] with w
       by_cases hw : v - w = 0 <;> simp_all
       · simp_all [sub_eq_zero, landauMatrix, innerLandauMatrix, normSq, vecMulVec,
@@ -124,7 +124,7 @@ lemma schwartz_partial_decay
     Uses joint measurability on the product space + integral_prod_right'. -/
 lemma flux_component_aestronglyMeasurable
     (φ : (Fin 3 → ℝ) → ℝ)
-    (hφ_smooth : ContDiff ℝ ⊤ φ)
+    (hφ_smooth : ContDiff ℝ 3 φ)
     (hFlux : ∀ v, Integrable (fun w => mulVec (landauMatrix coulombKernel (v - w))
       (φ w • vGrad φ v - φ v • vGrad φ w)))
     (i : Fin 3) :
@@ -140,10 +140,10 @@ lemma flux_component_aestronglyMeasurable
   let g : (Fin 3 → ℝ) × (Fin 3 → ℝ) → ℝ :=
     fun p => (mulVec (landauMatrix coulombKernel (p.1 - p.2))
       (φ p.2 • vGrad φ p.1 - φ p.1 • vGrad φ p.2)) i
-  show AEStronglyMeasurable (fun v => ∫ w, g (v, w)) volume
+  change AEStronglyMeasurable (fun v => ∫ w, g (v, w)) volume
   apply AEStronglyMeasurable.integral_prod_right'
   apply Measurable.aestronglyMeasurable
-  show Measurable g
+  change Measurable g
   simp only [g, mulVec, dotProduct]
   apply Finset.measurable_sum
   intro j _
@@ -175,7 +175,7 @@ lemma flux_component_aestronglyMeasurable
               ((continuous_apply j).comp (continuous_fst.sub continuous_snd))
   · -- The vector part is continuous
     have hf_cont := hφ_smooth.continuous
-    have hdf_cont := hφ_smooth.continuous_fderiv le_top
+    have hdf_cont := hφ_smooth.continuous_fderiv (by norm_num)
     apply Continuous.measurable
     apply Continuous.sub
     · exact (hf_cont.comp continuous_snd).mul

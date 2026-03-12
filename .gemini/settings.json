@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "lean-lsp-mcp": {
+      "command": "/home/vilin/.local/bin/uvx",
+      "args": [
+        "lean-lsp-mcp"
+      ]
+    }
+  }
+}

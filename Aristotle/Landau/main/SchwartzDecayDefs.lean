@@ -57,7 +57,7 @@ lemma inverse_poly_integrable (C : ℝ) :
 
 /-- Schwartz decay implies integrability. -/
 lemma UniformSchwartzDecay.integrable {f : Torus3 → (Fin 3 → ℝ) → ℝ}
-    (hS : UniformSchwartzDecay f) (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hS : UniformSchwartzDecay f) (hf_smooth : ∀ x, ContDiff ℝ 3 (f x))
     (x : Torus3) : Integrable (f x) := by
   obtain ⟨C, hC_pos, hbound⟩ := hS.hDecay (k := 0) 4 (by omega)
   have hint := inverse_poly_integrable C
@@ -75,7 +75,7 @@ lemma UniformSchwartzDecay.integrable {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     If f(x,·) decays faster than any polynomial, then (1+‖v‖)^M * |f(x,v)| is integrable
     for any M. -/
 lemma UniformSchwartzDecay.integrable_poly_mul {f : Torus3 → (Fin 3 → ℝ) → ℝ}
-    (hS : UniformSchwartzDecay f) (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hS : UniformSchwartzDecay f) (hf_smooth : ∀ x, ContDiff ℝ 3 (f x))
     (x : Torus3) (M : ℕ) :
     Integrable (fun v => (1 + ‖v‖) ^ M * f x v) := by
   obtain ⟨C, hC_pos, hbound⟩ := hS.hDecay (k := 0) (M + 4) (by omega)
@@ -160,14 +160,14 @@ lemma schwartz_fderiv_component_decay
     Uses chain rule: ∂_i(log∘f) = (∂_if)/f, combined with |∂_if| ≤ Cg*(1+‖u‖)^Kg*f. -/
 lemma score_bound_of_grad_bound
     {f : (Fin 3 → ℝ) → ℝ}
-    (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
+    (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ 3 f)
     {Cg : ℝ} {Kg : ℕ}
     (hGrad : ∀ v i, |fderiv ℝ f v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f v) :
     ∀ u i, |vGrad (Real.log ∘ f) u i| ≤ Cg * (1 + ‖u‖) ^ Kg := by
   intro u i; simp only [vGrad]
   have hfu := hf_pos u
   rw [show Real.log ∘ f = fun u => Real.log (f u) from rfl,
-      fderiv.log (hf_smooth.differentiable le_top).differentiableAt (ne_of_gt hfu)]
+      fderiv.log (hf_smooth.differentiable (by norm_num)).differentiableAt (ne_of_gt hfu)]
   simp only [ContinuousLinearMap.smul_apply, smul_eq_mul, abs_mul,
     abs_of_pos (inv_pos.mpr hfu)]
   rw [inv_mul_le_iff₀ hfu]; linarith [hGrad u i]
