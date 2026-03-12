@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-12 UTC — Babysit cycle 118: Last long line fix, CI re-run
+
+### Changes
+- **Section3Helpers.lean**: Fixed last remaining long line (>100 chars) — broke at natural point.
+- **CI**: Re-ran failed CI (elan infrastructure error, not code issue). Previous commit f43e39c passed CI.
+- **Critique**: Updated to cycle 118. CoulombPSD.lean reported clean on re-check (earlier agent report was inaccurate).
+- **Strengthen**: Investigated ContDiff ℝ ⊤ → ContDiff ℝ 3 weakening — 71 occurrences across 16 files, too large for one cycle. Deferred to backlog.
+
+### Sorry count: 0
+
 ## 2026-03-12 UTC — Babysit cycle 117: Linter warning cleanup, roundtrip uniqueness
 
 ### Changes
