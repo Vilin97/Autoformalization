@@ -24,12 +24,15 @@ jobs:
 
       - name: Build documentation
         uses: leanprover-community/docgen-action@v1
+        with:
+          deploy: false
+          build-page: false
 
       - name: Upload documentation artifact
         uses: actions/upload-artifact@v4
         with:
           name: docs
-          path: .lake/build/doc
+          path: docbuild/.lake/build/doc
 
   build_blueprint:
     runs-on: ubuntu-latest
