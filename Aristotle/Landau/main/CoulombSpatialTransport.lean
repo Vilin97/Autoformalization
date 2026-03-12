@@ -19,7 +19,7 @@ namespace VML
 lemma gradX_stronglyMeasurable_v
     (f : Torus3 → (Fin 3 → ℝ) → ℝ)
     (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
-    (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
+    (hf_smooth_x : ∀ v, ContDiff ℝ 2 (periodicLift (fun x => f x v)))
     (x : Torus3) (i : Fin 3) :
     StronglyMeasurable (fun v => FlatTorus3.gradX (fun y => f y v) x i) := by
   -- Unfold to torusGradX on concrete torus
@@ -38,7 +38,7 @@ lemma gradX_stronglyMeasurable_v
   intro v
   set F := periodicLift (fun y => f y v)
   have hF_diff : DifferentiableAt ℝ F x₀ :=
-    (hf_smooth_x v).differentiable le_top |>.differentiableAt
+    (hf_smooth_x v).differentiable (by decide) |>.differentiableAt
   have hg : HasDerivAt (fun t : ℝ => x₀ + t • ei) ei 0 := by
     simpa using ((hasDerivAt_id (0 : ℝ)).smul_const ei).const_add x₀
   have h_eq : x₀ + (0 : ℝ) • ei = x₀ := by simp
@@ -64,7 +64,7 @@ lemma spatial_transport_joint_integrable
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (hf_pos : ∀ x v, 0 < f x v)
     (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
-    (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
+    (hf_smooth_x : ∀ v, ContDiff ℝ 2 (periodicLift (fun x => f x v)))
     (hSchwartz : UniformSchwartzDecay f)
     (hLogBound : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
       |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log) :
@@ -244,7 +244,7 @@ lemma spatial_transport_continuous
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (hf_pos : ∀ x v, 0 < f x v)
     (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
-    (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
+    (hf_smooth_x : ∀ v, ContDiff ℝ 2 (periodicLift (fun x => f x v)))
     (hSchwartz : UniformSchwartzDecay f)
     (hLogBound : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
       |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log) :
@@ -363,7 +363,7 @@ lemma entropy_dissipation_continuous_coulomb
     (ν : ℝ) (hν : 0 < ν)
     (hf_pos : ∀ x v, 0 < f x v)
     (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
-    (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
+    (hf_smooth_x : ∀ v, ContDiff ℝ 2 (periodicLift (fun x => f x v)))
     (hSchwartz : UniformSchwartzDecay f)
     (hLogBound : ∃ (C : ℝ) (K : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
       |Real.log (f x v)| ≤ C * (1 + ‖v‖) ^ K)
