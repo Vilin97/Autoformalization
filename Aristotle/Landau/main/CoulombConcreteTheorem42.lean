@@ -69,7 +69,7 @@ theorem CoulombConcreteTheorem42
     (hρ_ion : 0 < ρ_ion)                        -- (2)
     (hf_pos : ∀ x v, 0 < f x v)                -- (3)
     -- === Smoothness ===
-    (hf_smooth_v : ∀ x, ContDiff ℝ ⊤ (f x))                             -- (4)
+    (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))                             -- (4)
     (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))   -- (5)
     (hB_smooth : ∀ i, ContDiff ℝ ⊤ (periodicLift (fun x => B x i)))     -- (6)
     -- === Schwartz-class velocity decay, uniform in x ===
@@ -202,7 +202,7 @@ theorem CoulombConcreteTheorem42
         hSchwartz hLogBound hVlasov
   }
   exact Theorem42 f E B coulombKernel ν ρ_ion
-    hν hρ_ion coulombKernel_pos hf_pos (fun x => (hf_smooth_v x).of_le le_top)
+    hν hρ_ion coulombKernel_pos hf_pos (fun x => (hf_smooth_v x).of_le (by norm_num))
     (hSchwartz.integrable hf_smooth_v)
     hAmpere hGauss hDivB hB_smooth hVlasov hf_smooth_x hDecay
 
@@ -212,7 +212,7 @@ theorem CoulombConcreteTheorem42
 theorem CoulombConcreteTheorem42_unique_T
     (f : Torus3 → (Fin 3 → ℝ) → ℝ) (E B : Torus3 → Fin 3 → ℝ) (ν ρ_ion : ℝ)
     (hν : 0 < ν) (hρ_ion : 0 < ρ_ion) (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth_v : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
     (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
     (hB_smooth : ∀ i, ContDiff ℝ ⊤ (periodicLift (fun x => B x i)))
     (hSchwartz : UniformSchwartzDecay f)

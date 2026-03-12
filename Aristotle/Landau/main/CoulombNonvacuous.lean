@@ -338,7 +338,7 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
     (hν : 0 < ν) (hT : 0 < T) (hρ_ion : 0 < ρ_ion) :
     ∃ (f : Torus3 → (Fin 3 → ℝ) → ℝ) (E B : Torus3 → Fin 3 → ℝ),
     (∀ x v, 0 < f x v) ∧                                                  -- (3)
-    (∀ x, ContDiff ℝ ⊤ (f x)) ∧                                           -- (4)
+    (∀ x, ContDiff ℝ 3 (f x)) ∧                                           -- (4)
     (∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v))) ∧                 -- (5)
     (∀ i, ContDiff ℝ ⊤ (periodicLift (fun x => B x i))) ∧                 -- (6)
     UniformSchwartzDecay f ∧                                                -- (7)

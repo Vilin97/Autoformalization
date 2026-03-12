@@ -83,7 +83,7 @@ lemma schwartz_log_bound
 lemma schwartz_norm_pow_integrable
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth : ∀ x, ContDiff ℝ 3 (f x))
     (hSchwartz : UniformSchwartzDecay f)
     (x : Torus3) (k : ℕ) :
     Integrable (fun v => ‖v‖ ^ k * |f x v|) := by

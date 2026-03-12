@@ -17,7 +17,7 @@ namespace VML
     Uses element-wise Coulomb matrix bound |A_{ij}| ≤ ‖z‖⁻¹ combined with
     polynomial score bound and Newtonian potential of Schwartz functions. -/
 lemma psd_inner_integrable_coulomb
-    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
+    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ 3 f)
     (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 →
       ∃ C > 0, ∀ v,
         ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
@@ -55,7 +55,7 @@ lemma psd_inner_integrable_coulomb
 /-- PSD integrand is integrable for Coulomb kernel (outer integral).
     Uses pointwise bound + Newtonian uniform bounds + Schwartz decay. -/
 lemma psd_outer_integrable_coulomb
-    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
+    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ 3 f)
     (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 →
       ∃ C > 0, ∀ v,
         ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
@@ -163,7 +163,7 @@ lemma psd_outer_integrable_coulomb
     - Norm integral bound from PSD pointwise bound + Newtonian uniform bounds -/
 lemma fubini_double_integrable_coulomb
     (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v)
-    (hf_smooth : ContDiff ℝ ⊤ f)
+    (hf_smooth : ContDiff ℝ 3 f)
     (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 →
       ∃ C > 0, ∀ v,
         ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
@@ -227,7 +227,7 @@ lemma fubini_double_integrable_coulomb
     have hMj : ∀ j, ∃ M > 0, ∀ v,
         ∫ w, ‖v - w‖⁻¹ * |fderiv ℝ f w (Pi.single j 1)| ≤ M :=
       fun j => newtonian_schwartz_uniform_bound _ (hdg_decay j)
-        ((hf_smooth.continuous_fderiv le_top).clm_apply continuous_const).aestronglyMeasurable
+        ((hf_smooth.continuous_fderiv (by norm_num)).clm_apply continuous_const).aestronglyMeasurable
     obtain ⟨Md₀, hMd₀, hMd₀b⟩ := hMj 0
     obtain ⟨Md₁, hMd₁, hMd₁b⟩ := hMj 1
     obtain ⟨Md₂, hMd₂, hMd₂b⟩ := hMj 2
@@ -242,7 +242,7 @@ lemma fubini_double_integrable_coulomb
     have h_dj_abs : ∀ j : Fin 3, ∀ v,
         Integrable (fun w => ‖v - w‖⁻¹ * |vGrad f w j|) := fun j v =>
       (inv_norm_schwartz_integrable _ (hdg_decay j)
-        ((hf_smooth.continuous_fderiv le_top).clm_apply
+        ((hf_smooth.continuous_fderiv (by norm_num)).clm_apply
           continuous_const).aestronglyMeasurable
         v).norm.congr (Filter.Eventually.of_forall fun w => by
         simp only []

@@ -18,7 +18,7 @@ namespace VML
 lemma flux_times_log_integrable_coulomb
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth_v : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
     (hSchwartz : UniformSchwartzDecay f)
     (hLogBound : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
       |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log)
@@ -44,7 +44,7 @@ lemma flux_times_log_integrable_coulomb
       ∫ w, ‖v - w‖⁻¹ * |fderiv ℝ (f x) w (Pi.single j 1)| ≤ M := by
     intro j
     exact newtonian_schwartz_uniform_bound _ (hdf_decay j)
-      ((hf_smooth_v x).continuous_fderiv le_top |>.eval_const (Pi.single j 1)).aestronglyMeasurable
+      ((hf_smooth_v x).continuous_fderiv (by norm_num) |>.eval_const (Pi.single j 1)).aestronglyMeasurable
   obtain ⟨M₁, hM₁, hM₁b⟩ := hMj 0
   obtain ⟨M₂, hM₂, hM₂b⟩ := hMj 1
   obtain ⟨M₃, hM₃, hM₃b⟩ := hMj 2
@@ -109,7 +109,7 @@ lemma flux_times_log_integrable_coulomb
                   (hf_smooth_v x).continuous.aestronglyMeasurable v
                 have h_dj := inv_norm_schwartz_integrable
                   (fun w => fderiv ℝ (f x) w (Pi.single j 1)) (hdf_decay j)
-                  (((hf_smooth_v x).continuous_fderiv le_top).clm_apply
+                  (((hf_smooth_v x).continuous_fderiv (by norm_num)).clm_apply
                     continuous_const).aestronglyMeasurable v
                 convert h_f.mul_const (vGrad (f x) v j) |>.sub
                   (h_dj.const_mul (f x v)) using 1
@@ -136,7 +136,7 @@ lemma flux_times_log_integrable_coulomb
             intro j
             exact (inv_norm_schwartz_integrable
               (fun w => fderiv ℝ (f x) w (Pi.single j 1)) (hdf_decay j)
-              (((hf_smooth_v x).continuous_fderiv le_top).clm_apply
+              (((hf_smooth_v x).continuous_fderiv (by norm_num)).clm_apply
                 continuous_const).aestronglyMeasurable v).norm.congr
               (Filter.Eventually.of_forall fun w => by
                 change ‖‖v - w‖⁻¹ * fderiv ℝ (f x) w (Pi.single j 1)‖ =
@@ -272,7 +272,7 @@ lemma flux_times_log_integrable_coulomb
 lemma coulomb_flux_component_bound
     (g : (Fin 3 → ℝ) → ℝ)
     (hg_pos : ∀ v, 0 < g v)
-    (hg_smooth : ContDiff ℝ ⊤ g)
+    (hg_smooth : ContDiff ℝ 3 g)
     (hg_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
       ‖iteratedFDeriv ℝ k g v‖ * (1 + ‖v‖) ^ N ≤ C)
     {Cg : ℝ} {Kg : ℕ}
@@ -291,7 +291,7 @@ lemma coulomb_flux_component_bound
   have hMj : ∀ j, ∃ M > 0, ∀ v,
       ∫ w, ‖v - w‖⁻¹ * |fderiv ℝ g w (Pi.single j 1)| ≤ M :=
     fun j => newtonian_schwartz_uniform_bound _ (hdg_decay j)
-      ((hg_smooth.continuous_fderiv le_top).clm_apply continuous_const).aestronglyMeasurable
+      ((hg_smooth.continuous_fderiv (by norm_num)).clm_apply continuous_const).aestronglyMeasurable
   obtain ⟨M₁, hM₁, hM₁b⟩ := hMj 0
   obtain ⟨M₂, hM₂, hM₂b⟩ := hMj 1
   obtain ⟨M₃, hM₃, hM₃b⟩ := hMj 2
@@ -310,7 +310,7 @@ lemma coulomb_flux_component_bound
   have h_dj_abs : ∀ j : Fin 3, ∀ v,
       Integrable (fun w => ‖v - w‖⁻¹ * |vGrad g w j|) := fun j v =>
     (inv_norm_schwartz_integrable _ (hdg_decay j)
-      ((hg_smooth.continuous_fderiv le_top).clm_apply continuous_const).aestronglyMeasurable
+      ((hg_smooth.continuous_fderiv (by norm_num)).clm_apply continuous_const).aestronglyMeasurable
       v).norm.congr (Filter.Eventually.of_forall fun w => by
         change ‖‖v - w‖⁻¹ * fderiv ℝ g w (Pi.single j 1)‖ = ‖v - w‖⁻¹ * |vGrad g w j|
         rw [norm_mul, Real.norm_of_nonneg (inv_nonneg.mpr (norm_nonneg _)),
@@ -423,7 +423,7 @@ lemma coulomb_flux_component_bound
     score_bound_of_grad_bound (|score_i| ≤ Cg*(1+‖v‖)^Kg), giving a
     Cf*Cg*(1+‖v‖)^{2Kg}*f(v) dominator which is integrable by Schwartz decay. -/
 lemma coulomb_ibp_f_dg_integrable
-    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
+    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ 3 f)
     (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
       ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
     {Cg : ℝ} {Kg : ℕ}
@@ -447,7 +447,7 @@ lemma coulomb_ibp_f_dg_integrable
   · exact AEStronglyMeasurable.mul
       (flux_component_aestronglyMeasurable f hf_smooth
         (fun v => landau_flux_integrable_coulomb f hf_pos hf_smooth hf_schwartz v) i)
-      ((ContDiff.log hf_smooth (fun v => ne_of_gt (hf_pos v))).continuous_fderiv le_top
+      ((ContDiff.log hf_smooth (fun v => ne_of_gt (hf_pos v))).continuous_fderiv (by norm_num)
         |>.clm_apply continuous_const).aestronglyMeasurable
   · filter_upwards with v
     rw [Real.norm_eq_abs, abs_mul]

@@ -18,12 +18,12 @@ namespace VML
     (since `f(x,·)` is smooth for each torus point), and the fderiv is their pointwise limit. -/
 lemma gradX_stronglyMeasurable_v
     (f : Torus3 → (Fin 3 → ℝ) → ℝ)
-    (hf_smooth_v : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
     (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
     (x : Torus3) (i : Fin 3) :
     StronglyMeasurable (fun v => FlatTorus3.gradX (fun y => f y v) x i) := by
   -- Unfold to torusGradX on concrete torus
-  show StronglyMeasurable (fun v => torusGradX (fun y => f y v) x i)
+  change StronglyMeasurable (fun v => torusGradX (fun y => f y v) x i)
   unfold torusGradX
   set x₀ := (torusMk_surjective x).choose
   set ei := (Pi.single i (1 : ℝ) : Fin 3 → ℝ)
@@ -63,7 +63,7 @@ lemma gradX_stronglyMeasurable_v
 lemma spatial_transport_joint_integrable
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth_v : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
     (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
     (hSchwartz : UniformSchwartzDecay f)
     (hLogBound : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
@@ -218,7 +218,7 @@ lemma spatial_transport_joint_integrable
         (fun x => (spatial_transport_integrable hf_pos hf_smooth_v hf_smooth_x hSchwartz
           ⟨C_log, K_log, hLB⟩ x).norm.aestronglyMeasurable)
         (fun x => Filter.Eventually.of_forall fun v => by
-          show ‖‖g x v‖‖ ≤ C_total / (1 + ‖v‖) ^ 4
+          change ‖‖g x v‖‖ ≤ C_total / (1 + ‖v‖) ^ 4
           rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _), Real.norm_eq_abs]
           exact h_bound x v)
         (inverse_poly_integrable C_total)
@@ -231,10 +231,10 @@ lemma spatial_transport_joint_integrable
             · exact Filter.Eventually.of_forall (fun v => norm_nonneg _)
             · exact inverse_poly_integrable C_total
             · exact Filter.Eventually.of_forall (fun v => by
-                show ‖g x v‖ ≤ C_total / (1 + ‖v‖) ^ 4
+                change ‖g x v‖ ≤ C_total / (1 + ‖v‖) ^ 4
                 rw [Real.norm_eq_abs]; exact h_bound x v)
         _ = C_total * ∫ v, (1 + ‖v‖)⁻¹ ^ 4 := by
-            simp_rw [div_eq_mul_inv, inv_pow]; exact integral_mul_left _ _
+            simp_rw [div_eq_mul_inv, inv_pow]; exact integral_const_mul _ _
 
 
 /-- The parametric integral `x ↦ ∫ v, v ⬝ᵥ gradX(f)(x) * log(f(x,v))` is continuous
@@ -243,7 +243,7 @@ lemma spatial_transport_joint_integrable
 lemma spatial_transport_continuous
     {f : Torus3 → (Fin 3 → ℝ) → ℝ}
     (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth_v : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
     (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
     (hSchwartz : UniformSchwartzDecay f)
     (hLogBound : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
@@ -335,11 +335,11 @@ lemma spatial_transport_continuous
     (fun x => (spatial_transport_integrable hf_pos hf_smooth_v hf_smooth_x hSchwartz
       ⟨C_log, K_log, hLB⟩ x).aestronglyMeasurable)
     (fun x => Filter.Eventually.of_forall fun v => by
-      show ‖g x v‖ ≤ C_total / (1 + ‖v‖) ^ 4
+      change ‖g x v‖ ≤ C_total / (1 + ‖v‖) ^ 4
       rw [Real.norm_eq_abs]; exact h_bound x v)
     (inverse_poly_integrable C_total)
     (Filter.Eventually.of_forall fun v => by
-      show Continuous (fun x => g x v)
+      change Continuous (fun x => g x v)
       have hcont_f : Continuous (fun x => f x v) :=
         FlatTorus3.hDiff_continuous _ (hf_smooth_x v)
       have hcont_log : Continuous (fun x => Real.log (f x v)) :=
@@ -362,7 +362,7 @@ lemma entropy_dissipation_continuous_coulomb
     (E B : Torus3 → Fin 3 → ℝ)
     (ν : ℝ) (hν : 0 < ν)
     (hf_pos : ∀ x v, 0 < f x v)
-    (hf_smooth_v : ∀ x, ContDiff ℝ ⊤ (f x))
+    (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
     (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
     (hSchwartz : UniformSchwartzDecay f)
     (hLogBound : ∃ (C : ℝ) (K : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
@@ -383,7 +383,7 @@ lemma entropy_dissipation_continuous_coulomb
       ∫ v, v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v) := by
     intro x
     unfold entropyDissipation
-    rw [← integral_mul_left]
+    rw [← integral_const_mul]
     have hrw : (fun v => ν * (LandauOperator coulombKernel (f x) v * Real.log (f x v))) =
         (fun v => v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v) +
           (E x + cross v (B x)) ⬝ᵥ vGrad (f x) v * Real.log (f x v)) := by
@@ -395,7 +395,7 @@ lemma entropy_dissipation_continuous_coulomb
           v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x := rfl
       rw [this]; ring
     rw [hrw, integral_add (hST_int x) (hFT_int x)]
-    rw [force_transport_zero (f x) (E x) (B x) (hf_pos x) ((hf_smooth_v x).of_le le_top)
+    rw [force_transport_zero (f x) (E x) (B x) (hf_pos x) ((hf_smooth_v x).of_le (by norm_num))
       ((hSchwartz.integrable hf_smooth_v) x)
       (fun i => force_ibp_f_dg_integrable_coulomb E B hf_pos hf_smooth_v hSchwartz hLB' x i)
       (fun i => force_ibp_fg_integrable_coulomb E B hf_pos hf_smooth_v hSchwartz hLB' x i)]

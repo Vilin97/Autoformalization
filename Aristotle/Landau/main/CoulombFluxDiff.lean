@@ -45,7 +45,7 @@ private lemma aestronglyMeasurable_fderiv_apply
     Since the flux decomposes into convolutions of Coulomb entries with Schwartz functions,
     its derivatives inherit Schwartz decay via coulomb_entry_conv_deriv_decay. -/
 lemma coulomb_flux_deriv_schwartz_decay
-    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
+    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ 3 f)
     (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 →
       ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
     (i : Fin 3) (N : ℕ) :
@@ -58,15 +58,15 @@ lemma coulomb_flux_deriv_schwartz_decay
   -- Lift hf_schwartz to the ∀ N {k}, k ≤ 1 form needed by conv lemmas
   have hf_schwartz_le1 : ∀ (N : ℕ) {k : ℕ}, k ≤ 1 → ∃ C > 0, ∀ v,
       ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C :=
-    fun N k hk => hf_schwartz N (le_trans hk (by norm_num))
+    fun N k hk => hf_schwartz N (le_trans hk (by linarith))
   have hK_fderiv_bdd : ∀ j, ∃ C > 0, ∀ v,
       ‖fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * f w) v‖ ≤ C :=
-    fun j => coulomb_entry_conv_deriv_bounded f hf_smooth hf_schwartz_le1 i j
+    fun j => coulomb_entry_conv_deriv_bounded f (hf_smooth.of_le (by decide)) hf_schwartz_le1 i j
   have hL_fderiv_bdd : ∀ j, ∃ C > 0, ∀ v,
       ‖fderiv ℝ (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j *
         fderiv ℝ f w (Pi.single j 1)) v‖ ≤ C :=
-    fun j => coulomb_entry_conv_deriv_bounded _ (hf_smooth.fderiv_right le_top |>.clm_apply
-      contDiff_const) (fun N {k} (hk : k ≤ 1) => hdf_schwartz j N (show k + 1 ≤ 2 by omega)) i j
+    fun j => coulomb_entry_conv_deriv_bounded _ (hf_smooth.fderiv_right (by decide) |>.clm_apply
+      contDiff_const) (fun N {k} (hk : k ≤ 1) => hdf_schwartz j N (by exact_mod_cast (by omega : k + 1 ≤ 2))) i j
   -- Replace flux with K/L decomposition
   have h_fn_eq : (fun v => (∫ w, mulVec (landauMatrix coulombKernel (v - w))
       (f w • vGrad f v - f v • vGrad f w)) i) =
@@ -80,15 +80,18 @@ lemma coulomb_flux_deriv_schwartz_decay
   -- Differentiability of components
   have hK_diff : ∀ j, Differentiable ℝ
       (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j * f w) :=
-    fun j => coulomb_entry_conv_differentiable f hf_smooth hf_schwartz_le1 i j
+    fun j => coulomb_entry_conv_differentiable f (hf_smooth.of_le (by decide)) hf_schwartz_le1 i j
   have hL_diff : ∀ j, Differentiable ℝ
       (fun v => ∫ w, landauMatrix coulombKernel (v - w) i j *
         fderiv ℝ f w (Pi.single j 1)) :=
-    fun j => coulomb_entry_conv_differentiable _ (hf_smooth.fderiv_right le_top |>.clm_apply
-      contDiff_const) (fun N {k} (hk : k ≤ 1) => hdf_schwartz j N (show k + 1 ≤ 2 by omega)) i j
-  have ha_diff : ∀ j, Differentiable ℝ (fun v => fderiv ℝ f v (Pi.single j 1)) :=
-    fun j => ((hf_smooth.fderiv_right le_top).clm_apply contDiff_const).differentiable le_top
-  have hf_diff := hf_smooth.differentiable le_top
+    fun j => coulomb_entry_conv_differentiable _ (hf_smooth.fderiv_right (by exact_mod_cast (by omega : 2 + 1 ≤ 3)) |>.clm_apply
+      contDiff_const) (fun N {k} (hk : k ≤ 1) => hdf_schwartz j N (by exact_mod_cast (by omega : k + 1 ≤ 2))) i j
+  have ha_diff : ∀ j, Differentiable ℝ (fun v => fderiv ℝ f v (Pi.single j 1)) := by
+    intro j
+    have h_cont_diff_df : ContDiff ℝ 1 (fun v => fderiv ℝ f v (Pi.single j 1)) :=
+      (hf_smooth.fderiv_right (by exact_mod_cast (by omega : 1 + 1 ≤ 3))).clm_apply contDiff_const
+    exact h_cont_diff_df.differentiable (by decide)
+  have hf_diff := hf_smooth.differentiable (by decide)
   -- Schwartz decay facts: f and ∂_j f bounded, their fderiv decays
   have hf_decay := schwartz_pointwise_decay hf_schwartz
   -- K_j and L_j uniformly bounded via coulomb_entry_conv_uniform_bound
@@ -100,7 +103,7 @@ lemma coulomb_flux_deriv_schwartz_decay
   have hL_bdd : ∀ j, ∃ ML > 0, ∀ v, |∫ w, landauMatrix coulombKernel (v - w) i j *
       fderiv ℝ f w (Pi.single j 1)| ≤ ML :=
     fun j => coulomb_entry_conv_uniform_bound (hdf_decay_abs j)
-      ((ContDiff.continuous (n := ⊤) ((hf_smooth.fderiv_right le_top).clm_apply
+      ((ContDiff.continuous (n := 2) ((hf_smooth.fderiv_right (by exact_mod_cast (by omega : 2 + 1 ≤ 3))).clm_apply
         (contDiff_const (c := (Pi.single j 1 : Fin 3 → ℝ))))).aestronglyMeasurable) i j
   -- f is bounded
   obtain ⟨Mf, hMf_pos, hMf⟩ := hf_decay 0
@@ -111,7 +114,7 @@ lemma coulomb_flux_deriv_schwartz_decay
     exact ⟨C, fun v => by simpa using h v⟩
   obtain ⟨Mdf, hMdf⟩ := hdf_sup 0  -- use as proxy; bound for all j by taking max
   -- fderiv(f) Schwartz decay: ‖fderiv f v‖ * (1+‖v‖)^N ≤ Cf
-  obtain ⟨Cf, hCf_pos, hCf⟩ := hf_schwartz N (show 1 ≤ 2 by norm_num)
+  obtain ⟨Cf, hCf_pos, hCf⟩ := hf_schwartz N (k := 1) (by decide)
   -- fderiv(∂_j f) Schwartz decay
   -- Per-component fderiv decay: for each j, bound ‖fderiv(∂_j f * K_j - f * L_j)(v)‖ * (1+‖v‖)^N
   -- by product rule: ≤ |∂_j f(v)| * ‖fderiv(K_j)(v)‖ + |K_j(v)| * ‖fderiv(∂_j f)(v)‖
@@ -265,7 +268,7 @@ lemma coulomb_flux_deriv_schwartz_decay
 /-- The product fderiv(flux_i)(v) * log(f(v)) is integrable for the Coulomb kernel.
     Uses Schwartz decay of the flux derivative and polynomial growth of log(f). -/
 lemma coulomb_ibp_df_g_integrable
-    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
+    (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ 3 f)
     (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 →
       ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
     (hLogBound : ∃ C K, ∀ v, |Real.log (f v)| ≤ C * (1 + ‖v‖) ^ K)

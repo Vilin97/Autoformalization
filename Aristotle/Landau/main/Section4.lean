@@ -66,15 +66,15 @@ private lemma lorentz_hasFDerivAt_components (E_val B_val : Fin 3 → ℝ) (v : 
       ((B_val 1 • ContinuousLinearMap.proj 0 - B_val 0 • ContinuousLinearMap.proj 1 :
         (Fin 3 → ℝ) →L[ℝ] ℝ)) v := by
   refine ⟨?_, ?_, ?_⟩ <;> apply HasFDerivAt.const_add
-  · show HasFDerivAt (fun w => cross w B_val 0) _ v
+  · change HasFDerivAt (fun w => cross w B_val 0) _ v
     unfold cross; simp only [Matrix.cons_val_zero]
     exact (hasFDerivAt_proj_mul_const 1 (B_val 2) v).sub
       (hasFDerivAt_proj_mul_const 2 (B_val 1) v)
-  · show HasFDerivAt (fun w => cross w B_val 1) _ v
+  · change HasFDerivAt (fun w => cross w B_val 1) _ v
     unfold cross; simp only [Matrix.cons_val_one]
     exact (hasFDerivAt_proj_mul_const 2 (B_val 0) v).sub
       (hasFDerivAt_proj_mul_const 0 (B_val 2) v)
-  · show HasFDerivAt (fun w => cross w B_val 2) _ v
+  · change HasFDerivAt (fun w => cross w B_val 2) _ v
     unfold cross; simp only [Matrix.cons_val_two]
     exact (hasFDerivAt_proj_mul_const 0 (B_val 1) v).sub
       (hasFDerivAt_proj_mul_const 1 (B_val 0) v)
@@ -146,7 +146,7 @@ lemma force_transport_zero
     (g : (Fin 3 → ℝ) → ℝ) (E_val B_val : Fin 3 → ℝ)
     (hg_pos : ∀ v, 0 < g v)
     (hg_smooth : ContDiff ℝ 3 g)
-    (hg_int : Integrable g)
+    (_hg_int : Integrable g)
     (h_int_f_dg : ∀ i, Integrable (fun v =>
       (E_val + cross v B_val) i *
         fderiv ℝ (fun w => g w * Real.log (g w) - g w) v (Pi.single i 1)))
@@ -269,14 +269,14 @@ lemma transport_entropy_from_vlasov
   -- ν * ∫D = ∫(ν * D) via integral_mul_left
   have h_comm : ν * (∫ x, entropyDissipation Ψ (f x)) =
       ∫ x, ν * entropyDissipation Ψ (f x) := by
-    rw [← integral_mul_left]
+    rw [← integral_const_mul]
   rw [h_comm]
   -- For each x: ν * D(f x) = ∫_v (v · ∇_x f) * log f (force transport = 0)
   have h_key : ∀ x, ν * entropyDissipation Ψ (f x) =
       ∫ v, v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v) := by
     intro x
     unfold entropyDissipation
-    rw [← integral_mul_left]
+    rw [← integral_const_mul]
     have hrw : (fun v => ν * (LandauOperator Ψ (f x) v * Real.log (f x v))) =
         (fun v => v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x * Real.log (f x v) +
           (E x + cross v (B x)) ⬝ᵥ vGrad (f x) v * Real.log (f x v)) := by

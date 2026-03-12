@@ -90,8 +90,7 @@ lemma continuous_attains_min {X : Type*} [TopologicalSpace X] [CompactSpace X] [
 private lemma dot_cross_self_zero (v B : Fin 3 → ℝ) :
     dotProduct v (cross v B) = 0 := by
   unfold dotProduct cross
-  simp [Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
-    Matrix.head_fin_const]
+  simp [Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one]
   ring
 
 lemma poisson_boltzmann_from_vlasov
@@ -125,7 +124,7 @@ lemma poisson_boltzmann_from_vlasov
     have ha₀_eq : a₀ = fun x => Real.log (f x 0) := by
       ext x
       have h := ha₀ x 0
-      simp [normSq, Fin.sum_univ_three] at h
+      simp [normSq] at h
       have : a₀ x = Real.log (Real.exp (a₀ x)) := (Real.log_exp _).symm
       rw [this, h]
     rw [ha₀_eq]
@@ -170,7 +169,7 @@ lemma poisson_boltzmann_from_vlasov
     -- Show v · [gradX(a₀) + 2c₀ E] = 0 for all v
     suffices hzero : FlatTorus3.gradX a₀ x + (2 * c₀) • E x = 0 by
       ext i; have hi := congr_fun hzero i
-      simp [Pi.add_apply, Pi.smul_apply, smul_eq_mul, Pi.zero_apply] at hi ⊢; linarith
+      simp [Pi.add_apply, Pi.smul_apply, smul_eq_mul] at hi ⊢; linarith
     exact (poly_linear_extraction _ 0 (fun v => by
       -- Transport: f(x,v) · [v · gradX(a₀) + 2c₀(E+v×B)·v] = 0, f > 0, (v×B)·v = 0
       have ht := hTransport x v
@@ -201,7 +200,7 @@ lemma poisson_boltzmann_from_vlasov
     have hρ_eq : ∀ y, ρ y = Real.exp (a₀ y) * C := by
       intro y; rw [_hρ_def y]
       simp_rw [ha₀ y, Real.exp_add]
-      exact MeasureTheory.integral_mul_left _ _
+      exact MeasureTheory.integral_const_mul _ _
     have hρ_pos : ∀ y, 0 < ρ y := fun y => by
       rw [_hρ_def y]; exact density_positive_of_integral (f y) (_hf_pos y) (_hf_int y)
     intro x
@@ -213,7 +212,7 @@ lemma poisson_boltzmann_from_vlasov
       · exact absurd hexp_neg (not_lt_of_gt (Real.exp_pos _))
     -- log(ρ(y)) = a₀(y) + log(C) for all y
     have hlog_eq : Real.log ∘ ρ = fun y => a₀ y + Real.log C := funext (fun y => by
-      show Real.log (ρ y) = a₀ y + Real.log C
+      change Real.log (ρ y) = a₀ y + Real.log C
       rw [hρ_eq y, Real.log_mul (ne_of_gt (Real.exp_pos _)) (ne_of_gt hC_pos), Real.log_exp])
     -- gradX(log ∘ ρ) = gradX(a₀ + const) = gradX(a₀) by hGradAddConst
     rw [hlog_eq, FlatTorus3.hGradAddConst _ ha₀_diff]
