@@ -3,6 +3,8 @@ import Aristotle.Landau.main.FlatTorus3Lemmas
 import Aristotle.Landau.main.Section3
 
 /-!
+set_option linter.style.longLine false
+
 # Transport Constraints (Section 4)
 
 Derives that steady states are local Maxwellians: from the transport equation

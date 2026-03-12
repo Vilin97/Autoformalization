@@ -2,6 +2,8 @@ import Aristotle.Landau.main.NewtonianPotential
 import Mathlib.MeasureTheory.SpecificCodomains.Pi
 
 /-!
+set_option linter.style.longLine false
+
 # Flux Integrability and Measurability Helpers for Coulomb
 
 Proves integrability of the Landau collision flux, Schwartz partial decay,
@@ -59,7 +61,7 @@ lemma landau_flux_integrable_coulomb
               erw [fderiv_comp] <;> norm_num [hf_smooth.contDiffAt.differentiableAt]
               · erw [LinearIsometryEquiv.fderiv]; norm_num [fderiv_deriv]
                 erw [ContinuousLinearMap.norm_def]; norm_num [ContinuousLinearMap.opNorm]
-                ring; exact this
+                ring_nf; exact this
               · exact (LinearIsometryEquiv.differentiable _) _
             exact le_trans (mul_le_mul_of_nonneg_right h_deriv_bound (by positivity)) (hC w)
           · exact ((hf_smooth.continuous_fderiv (by norm_num)).eval_const

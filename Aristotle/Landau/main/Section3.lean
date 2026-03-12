@@ -141,11 +141,11 @@ theorem fubini_symmetrization_logf (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
       dotProduct (vGrad (Real.log ∘ f) p.1)
         (mulVec (landauMatrix Ψ (p.1 - p.2))
           (f p.2 • vGrad f p.1 - f p.1 • vGrad f p.2))))
-    (h_int_inner : ∀ v, Integrable (fun w =>
+    (_ : ∀ v, Integrable (fun w =>
       dotProduct (vGrad (Real.log ∘ f) v)
         (mulVec (landauMatrix Ψ (v - w))
           (f w • vGrad f v - f v • vGrad f w))))
-    (h_int_outer : Integrable (fun v => ∫ w,
+    (_ : Integrable (fun v => ∫ w,
       dotProduct (vGrad (Real.log ∘ f) v)
         (mulVec (landauMatrix Ψ (v - w))
           (f w • vGrad f v - f v • vGrad f w)))) :
@@ -187,7 +187,7 @@ theorem fubini_symmetrization_logf (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
       convert this.comp_measurable measurable_swap using 1
     convert h_swap_int.neg using 1
     ext p
-    simp only [Pi.neg_apply, neg_neg]
+    simp only [Pi.neg_apply]
     rw [landauMatrix_sub_comm]
     simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_three,
       Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
@@ -204,7 +204,7 @@ theorem fubini_symmetrization_logf (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
           landauMatrix Ψ (v - w) *ᵥ (f w • vGrad f v - f v • vGrad f w)) := by
     convert MeasureTheory.integral_sub h_int_double h_integrable_swap using 1
     · erw [MeasureTheory.integral_prod]
-      · simp [sub_mul, dotProduct_sub]
+      · simp []
       · exact Integrable.sub h_int_double h_integrable_swap
     · erw [MeasureTheory.integral_prod, MeasureTheory.integral_prod]
       · exact h_integrable_swap

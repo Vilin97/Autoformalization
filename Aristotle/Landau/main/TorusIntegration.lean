@@ -1,6 +1,8 @@
 import Aristotle.Landau.main.TorusDefs
 
 /-!
+set_option linter.style.longLine false
+
 # Torus Integration Lemmas
 
 Box integral machinery, integration by parts on T³, curl integral vanishing,

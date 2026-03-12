@@ -140,7 +140,7 @@ lemma force_fderiv_log_component_integrable
   · -- AEStronglyMeasurable: each factor is continuous in v
     refine Continuous.aestronglyMeasurable ?_
     have h1 : Continuous (fun v => (E x + cross v (B x)) i) := by
-      show Continuous (fun v => E x i + (cross v (B x)) i)
+      change Continuous (fun v => E x i + (cross v (B x)) i)
       apply Continuous.add continuous_const
       unfold cross
       fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one] <;>
@@ -282,7 +282,7 @@ lemma force_ibp_fg_integrable_coulomb
   · -- AEStronglyMeasurable: force term * entropy density is continuous in v
     refine Continuous.aestronglyMeasurable ?_
     have h1 : Continuous (fun v => (E x + cross v (B x)) i) := by
-      show Continuous (fun v => E x i + (cross v (B x)) i)
+      change Continuous (fun v => E x i + (cross v (B x)) i)
       apply Continuous.add continuous_const
       unfold cross
       fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one] <;>

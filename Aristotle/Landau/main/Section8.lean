@@ -2,6 +2,8 @@ import Aristotle.Landau.main.VMLStructures
 import Aristotle.Landau.main.Section6
 
 /-!
+set_option linter.style.longLine false
+
 # Magnetic Field and Final Assembly (Section 8)
 
 Proves the magnetic field is spatially constant (from curl B = 0 and div B = 0),

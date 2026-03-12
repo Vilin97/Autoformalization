@@ -1,6 +1,8 @@
 import Aristotle.Landau.main.CoulombFlux
 
 /-!
+set_option linter.style.longLine false
+
 # Flux Component Bounds and Flux × Log Integrability for Coulomb
 
 Proves:

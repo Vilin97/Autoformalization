@@ -1,6 +1,8 @@
 import Aristotle.Landau.main.CoulombPSDHelpers
 
 /-!
+set_option linter.style.longLine false
+
 # PSD Integrability and Fubini Symmetrization for Coulomb
 
 Inner and outer integrability of the PSD integrand, and the Fubini

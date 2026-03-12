@@ -1,6 +1,8 @@
 import Aristotle.Landau.main.CoulombFluxConv
 
 /-\!
+set_option linter.style.longLine false
+
 # Flux Derivative Decay and IBP Integrability for Coulomb
 
 Proves the Coulomb flux derivative has Schwartz-class decay (from the convolution

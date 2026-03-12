@@ -39,7 +39,7 @@ lemma analysis_fluxFactor
     intro v
     ext i
     by_cases H : DifferentiableAt ℝ f v <;> simp_all [VML.vGrad, fderiv_deriv]
-    ring
+    ring_nf
     · erw [ fderiv_comp ] <;> norm_num [ H, ne_of_gt (hf_pos v) ]; ring
     · rw [ fderiv_zero_of_not_differentiableAt ]
       · rw [ fderiv_zero_of_not_differentiableAt H ] ; norm_num
@@ -147,7 +147,7 @@ lemma poly_cubic_extraction
       t^2 * (∑ i, ∑ j, (v i) * (v j) * (K i j)) +
       t * (v ⬝ᵥ d_lin) + C = 0 := by
     convert h_poly_zero using 2
-    ring
+    ring_nf
     simp [ Fin.sum_univ_three ]
     ring
   have h_coeff_zero : v ⬝ᵥ d_c * (v ⬝ᵥ v) = 0 := by
@@ -166,7 +166,7 @@ lemma poly_killing_extraction
   have h_diff : ∑ k, ∑ l, (if k = i then 1 else 0) * (if l = j then 1 else 0) * K k l +
       ∑ k, ∑ l, (if k = j then 1 else 0) * (if l = i then 1 else 0) * K k l = 0 := by
     convert h (fun x => if x = i then 1 else if x = j then 1 else 0) using 1
-    simp [Fin.sum_univ_three]; ring
+    simp [Fin.sum_univ_three]; ring_nf
     fin_cases i <;> fin_cases j <;> simp
     all_goals
       have := h (fun i => if i = 0 then 1 else 0)
@@ -328,7 +328,7 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
       intro w; exact (by
       rw [show w = ∑ i, Pi.single i (w i) by ext i; simp]
       simp [Finset.sum_apply, Pi.single_apply]
-      ring
+      ring_nf
       exact Finset.sum_congr rfl fun i _ => by
         rw [← map_smul]; congr; ext j
         fin_cases i <;> fin_cases j <;>
@@ -358,7 +358,7 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
         intro v i j k
         rw [fderiv_clm_apply, fderiv_clm_apply]
         simp [hg_smooth.contDiffAt.differentiableAt]
-        ring
+        ring_nf
         · apply_rules [ContDiffAt.isSymmSndFDerivAt]
           exacts [hg_smooth.contDiffAt, by norm_num [minSmoothness]]
         · exact h_diff_fderiv.differentiable le_rfl v
@@ -440,7 +440,7 @@ lemma parallel_curl_free_affine (g : (Fin 3 → ℝ) → (Fin 3 → ℝ))
   intro v
   rw [h_ftc v]
   norm_num [hc₀]
-  ring
+  ring_nf
 
 /-- Gap 7: Antiderivative of an affine gradient.
     If ∇h(v) = b + 2c₀ v, then h(v) = h(0) + b · v + c₀|v|².
@@ -507,10 +507,10 @@ lemma maxwellian_landau_flux_zero (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
     ext i
     rw [fderiv_exp]
     norm_num [dotProduct, Fin.sum_univ_three]
-    ring
+    ring_nf
     · unfold VML.normSq
       norm_num [Fin.sum_univ_three, dotProduct]
-      ring
+      ring_nf
       erw [HasFDerivAt.fderiv
         (HasFDerivAt.add
           (HasFDerivAt.add
@@ -538,8 +538,8 @@ lemma maxwellian_landau_flux_zero (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
             (hasFDerivAt_apply _ _ |> HasFDerivAt.pow <| 2)
             (hasFDerivAt_const _ _)))]
       norm_num
-      ring
-      fin_cases i <;> norm_num <;> ring!
+      ring_nf
+      fin_cases i <;> norm_num <;> ring_nf!
       · simp
       · simp
       · simp
@@ -555,10 +555,10 @@ lemma maxwellian_landau_flux_zero (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
     (landauMatrix_mulVec_self Ψ (v - w)) using 1
   ext
   norm_num
-  ring!
+  ring_nf!
   · simp [mul_assoc, mul_comm, mul_left_comm,
       Finset.mul_sum _ _ _, Matrix.mulVec, dotProduct]
-    ring!
+    ring_nf!
   · norm_num [Algebra.smul_def]
 
 /-- Maxwellians are in the nullspace of the Landau operator: Q(f,f) = 0.

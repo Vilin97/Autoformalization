@@ -1,6 +1,8 @@
 import Aristotle.Landau.main.Defs
 
 /-!
+set_option linter.style.longLine false
+
 # Derived Lemmas for the FlatTorus3 Typeclass
 
 Lemmas derived from the `FlatTorus3` axioms: spatial multiplication, gradient vanishing,

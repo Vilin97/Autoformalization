@@ -1,11 +1,18 @@
 import Aristotle.Landau.main.VMLInputDerive
 
 /-!
+set_option linter.style.longLine false
+
 # Abstract Theorem 4.2: Steady State Implies Maxwellian
 
 States and proves the main abstract result: any smooth steady state of the
 Vlasov-Maxwell-Landau system satisfying `VelocityDecayConditions` is a global
 Maxwellian with E = 0 and B = const.
+
+**Physical Context (Non-Relativistic Limit):** 
+Note that this formalization assumes a strictly non-relativistic framework where 
+velocities $v \in \mathbb{R}^3$ are unbounded. This admits superluminal particles, 
+but is the standard mathematical setting for the classical Landau equation.
 -/
 
 open Matrix Finset BigOperators Real MeasureTheory
@@ -187,7 +194,7 @@ theorem Theorem42
     FlatTorus3.maxwellian_params_isSpatiallySmooth f hf_pos (fun v => (hDiff_fv v).of_le (by decide))
   -- Derive continuity of ρ = ∫ f(·,v) dv via dominated convergence
   have hρ_cont : Continuous ρ := by
-    show Continuous (fun x => ∫ v, f x v)
+    change Continuous (fun x => ∫ v, f x v)
     obtain ⟨g, hg_int, hg_bound⟩ := hDecay.hf_velocity_dominated
     exact continuous_of_dominated
       (fun x => (hf_smooth x).continuous.aestronglyMeasurable)

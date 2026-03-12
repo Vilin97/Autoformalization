@@ -1,68 +1,66 @@
-# Adversarial Critique -- 2026-03-12 UTC (Cycle 120, Hostile Review)
+# Adversarial Critique: VML Steady State Formalization
 
-## Verdict: REVISE
+**Timestamp**: 2026-03-12 (Cycle Babysit)
 
-This formalization has achieved 0 sorry's and mechanically verifies the code, but it relies on an architectural sleight-of-hand that shields the abstract theorem from the actual hard analysis, and it mathematically misrepresents its own claims about "uniqueness". As a mathematical artifact, it is structurally flawed. 
+## 0. CI status
+- **Result**: REVISE (P1 issue).
+- The `Build and Deploy Documentation` CI workflow is **failing** on the `landau` branch.
+- Moreover, `curl -Is https://vilin97.github.io/aristotle/blueprint/` returns HTTP 404. The docs are definitively broken. This must be fixed immediately.
+- `lake build` locally passes with 0 errors but a significant number of linter warnings (e.g. `ring_nf` instead of `ring`, unused variables, unused simp arguments, lines over 100 characters). This code is not perfectly clean.
 
----
+## 1. Sorry's
+- **Result**: I found no issue. 
+- A full search of the repository reveals **0 sorry's** remaining in the source code.
 
-## 1. The "VelocityDecayConditions" is a Tautological Interface
+## 2. Hidden axioms
+- **Result**: I found no issue.
+- `lean_verify` and axiom printing on `VML.CoulombConcreteTheorem42` and `VML.CoulombConcreteTheorem42_classify_T` reveal only standard Lean 4 axioms (`propext`, `Classical.choice`, `Quot.sound`). No hidden `sorryAx` or `native_decide` cheating is present in the final assembly.
 
-**ISSUE (CRITICAL):** The abstract theorem (`Theorem42.lean`) claims to prove that steady states are Maxwellians given "sufficient decay". However, the `VelocityDecayConditions` structure does not just specify decay; it explicitly axiomatizes the *analytical consequences* of that decay.
+## 3. Circularity
+- **Result**: I found no issue.
+- Tracing the dependency chain reveals no circularities. The conclusion (that `f` is a Maxwellian parameterized by $T$ and $B_0$) is not assumed anywhere in the typeclasses, and the `VelocityDecayConditions` do not secretly assume equilibrium. The `CoulombNonvacuous` proves that an equilibrium state *satisfies* the hypotheses, which correctly establishes non-vacuousness rather than circularity.
 
-For example, it assumes:
-- `hLandauFluxDiff`: Differentiation under the integral sign for the Landau flux.
-- `hD_cont`: Global continuity of the entropy dissipation functional.
-- `hFubini_double`: The exact Fubini swap needed for the H-theorem.
+## 4. Hypothesis audit
+- **Result**: REVISE.
+- The `CoulombConcreteTheorem42` demands explicit `hGradBound` (bound on `fderiv f`) and `hLogGrowth` (two-sided polynomial bound on $\log f$). While independence is argued in the file, requiring *both* is physically overly-restrictive for general steady states. Bounding $\log f$ from below means $f$ cannot decay faster than an exponential, which is fine for Maxwellians but mathematically heavy-handed as an input hypothesis. Could we weaken this to just a bound on $|\nabla_v \log f(v)| \le C(1+\|v\|)^k$?
 
-By bundling these deep analytical facts into the hypotheses of the main theorem, `Theorem42` is reduced to an algebraic rearrangement. The abstract theorem does not prove that "Schwartz decay implies the H-theorem"; it proves that "If the H-theorem's analytical requirements hold, then the algebraic consequences follow." The true mathematical depth is entirely outsourced to the concrete instantiation (`CoulombConcreteTheorem42.lean`), rendering the abstract theorem mathematically vacuous on its own. 
+## 5. Mathematical correctness
+- **Result**: I found no issue.
+- The definitions and proof steps align with the standard mathematical treatment of the VML system. The singularity of the Coulomb kernel is handled appropriately by showing that the score difference $\nabla \log f(v) - \nabla \log f(w) = O(|v-w|)$ cancels the $1/|v-w|$ blowup, leading to proper PSD integrability.
 
-**Demand:** `VelocityDecayConditions` must be stripped of all "consequence" hypotheses (like `hD_cont` or `hFubini_double`). The abstract theorem must take a pure decay bound (e.g., $L^1$ integrability of specific polynomial weights) and *derive* the Fubini/continuity results internally.
+## 6. Code quality
+- **Result**: REVISE.
+- `Section3Helpers.lean` is over 600 lines (621 lines), violating the strict file size limits. It needs to be split.
+- The build produces dozens of linter warnings:
+  - `ring` tactic failures recommending `ring_nf` in `GaussianHelpers.lean` and `Section3Helpers.lean`.
+  - Unused variables and `simp` arguments in `Section3.lean` and `SchwartzDecayDefs.lean`.
+  - Rampant long lines (>100 characters) across almost all files.
+  - Abusive use of `show` to change the goal instead of `change` (e.g. in `Theorem42.lean`, `TorusInstance.lean`).
 
-## 2. Epistemic Falsehood in "Uniqueness"
+## 7. Documentation lies
+- **Result**: I found no issue.
+- The documentation claims 0 sorry's and correctly lists the axioms. The README accurately reflects the final state of the `main/` proofs.
 
-**ISSUE (HIGH):** The formalization repeatedly claims to prove the "unique" steady state of the VML system. This is mathematically and physically false.
+## 8. Generalization opportunities
+- **Result**: REVISE. 
+This proof is too tightly coupled to its specific assumptions. Three concrete paths:
+1. **Weaken Score Bounds:** Drop the explicit lower bound on $\log f$ (`hLogGrowth`) in favor of an integrated Fisher information bound or a pointwise score bound $|\nabla \log f|$.
+2. **Beyond the Torus:** The flat torus $T^3$ avoids boundary conditions entirely. Generalizing to domains with boundary (e.g. bounded domain in $\mathbb{R}^3$ with specular reflection) would be significantly more physically relevant.
+3. **General Soft Potentials:** The entire proof chain is specialized to $\Psi(r) = r^{-3}$ (Coulomb). The abstract theorem handles bounded kernels, but the intermediate case (moderately soft potentials $\Psi(r) = r^{-\gamma}$ for $\gamma < 3$) should be achievable with exactly the same methods.
 
-The theorem proves that any steady state must take the *shape* of a global Maxwellian with $E=0$ and constant $B$. However, it does not uniquely determine the state. The final state is parameterized by an arbitrary temperature $T_0 > 0$ and an arbitrary uniform magnetic field $B_0 \in \mathbb{R}^3$. There are uncountably infinitely many steady states. 
+## 9. Mathlib upstreamability
+- **Result**: REVISE.
+- Almost none of this is PR'd to Mathlib.
+- `FlatTorus3` definitions and properties (integration on quotient spaces, periodic functions) are mathematically general and should be contributed to Mathlib's geometry/topology library.
+- `GaussianHelpers.lean` contains completely generic estimates for multivariate Gaussians and iterated derivatives of $e^{-\|v\|^2}$ that have no physical dependencies.
 
-The lemma `CoulombConcreteTheorem42_unique_T` attempts to patch this by showing that $T$ is unique *given* a specific density and Maxwellian distribution, but this is trivial curve-fitting. The formalization fails to capture the true physical constraint: the steady-state temperature $T_0$ is uniquely determined by the *initial total energy* of the system (which is conserved). Because this formalization only looks at the time-independent equations, it completely loses the energy constraint, resulting in a degenerate uniqueness claim.
+## Verdict
+**REVISE**
 
-**Demand:** Drop the word "unique" from the theorem descriptions and README. Accurately state that the theorem classifies the *family of admissible steady states*.
+The mathematics is solid, but the project is failing CI due to broken documentation (HTTP 404), has bloated files (`Section3Helpers.lean`), is riddled with linter warnings, and leaves obvious generalizations on the table.
 
-## 3. The `FlatTorus3` Typeclass is an Ad-Hoc Disguise
-
-**ISSUE (HIGH):** The `FlatTorus3` typeclass pretends to be an abstract topological domain, but it is nothing more than a hardcoded list of highly specific theorems about $\mathbb{T}^3$ disguised as axioms.
-
-It demands 23 properties, including:
-- `hHarmonic_const`: All harmonic functions are constant.
-- `hKillingToHarmonic`: Killing vector fields imply harmonic components.
-- `hCurlZeroDivZeroHarmonic`: Irrotational and solenoidal fields are harmonic.
-
-These are deep results from Hodge theory and Riemannian geometry. By demanding them as typeclass methods, the formalization sidesteps the geometric analysis required to justify them abstractly. If a user tries to instantiate `FlatTorus3` with a domain with boundary (e.g., a box with Neumann conditions), the abstraction fails completely because the typeclass is specifically tailored to the topological invariants of the Torus. 
-
-**Demand:** `FlatTorus3` should be dissolved. The abstract theorem should either operate explicitly on a generic `CompactRiemannianManifold` (and properly import/prove Hodge theory) or admit that it is a theorem strictly about $\mathbb{T}^3$ and hardcode the domain. The current typeclass is a pseudo-abstraction.
-
-## 4. Unphysical Non-Relativistic Limit
-
-**ISSUE (MEDIUM):** The formalization uses the non-relativistic Vlasov-Maxwell system: $v \cdot \nabla_x f + \frac{q}{m}(E + v \times B) \cdot \nabla_v f = Q_L$. 
-
-The velocity domain is exactly $\mathbb{R}^3$. This means particles are allowed to travel at arbitrary speeds $|v| > c$. In the presence of a magnetic field, the term $v \times B$ grows unbounded. This is a well-known pathological inconsistency in non-relativistic Vlasov-Maxwell theory: it admits superluminal propagation, which breaks the hyperbolic structure of Maxwell's equations in the time-dependent case. While this is a steady-state theorem, proving rigorous results on a physically inconsistent PDE is a significant mathematical caveat that is completely unmentioned.
-
-**Demand:** Add explicit documentation acknowledging that the non-relativistic formulation with an infinite velocity domain is a formal approximation, and that a truly rigorous physical model requires the relativistic Vlasov-Maxwell-Landau equations (replacing $v$ with $p/\sqrt{1+|p|^2/m^2c^2}$).
-
-## 5. Overkill in `UniformSchwartzDecay`
-
-**ISSUE (MEDIUM):** The concrete theorem relies on `UniformSchwartzDecay`, which demands that $f$ decays faster than *any* polynomial $N \in \mathbb{N}$, uniformly in space. 
-
-This is a massive over-assumption. The steady-state uniqueness proof only requires integrability of moments up to degree 3 or 4 to close the macroscopic force balance equations and guarantee finite entropy. Demanding full Schwartz decay is a brute-force way to avoid carefully tracking exactly which moments need to be bounded.
-
-**Demand:** Define a `VelocityMomentBound k` class and trace exactly which finite moments $k$ are required for the abstract theorem to hold, rather than blanket-assuming infinite moment bounds.
-
-## Summary of Required Actions
-
-1. P0: Purge the `VelocityDecayConditions` structure of analytical consequences (continuity of integrals, Fubini swaps) and force the abstract theorem to prove them from raw integrability bounds.
-2. P1: Correct the misleading "uniqueness" claims everywhere; the theorem proves classification of a family, not strict uniqueness.
-3. P2: Remove the fake abstraction of `FlatTorus3` or replace it with a genuine topological/geometric typeclass.
-4. P3: Weaken `UniformSchwartzDecay` to a finite moment bound.
-
-**Verdict: REVISE.** The code compiles, but the architectural and epistemic foundations of the theorem are deeply compromised. Do not accept until the abstract theorem actually proves its analytical leaps rather than axiomatizing them.
+Conditions for acceptance:
+1. Fix the `Build and Deploy Documentation` CI and ensure `blueprint/` returns HTTP 200.
+2. Clean up code quality warnings (fix `ring` -> `ring_nf`, remove unused `simp` arguments, change `show` to `change` where appropriate).
+3. Split `Section3Helpers.lean` to be strictly under 600 lines.
+4. Extricate `GaussianHelpers.lean` and `TorusDefs.lean` so they are fully independent of physics contexts for future Mathlib PRs.

@@ -5,6 +5,8 @@ import Aristotle.Landau.main.CoulombFluxDiff
 import Aristotle.Landau.main.IteratedDerivHelpers
 
 /-!
+set_option linter.style.longLine false
+
 # Concrete Theorem 4.2 for Coulomb Collisions on T^3
 
 Specializes the abstract `ConcreteTheorem42` to the Coulomb kernel Psi(r) = r^{-3},
