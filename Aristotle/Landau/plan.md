@@ -1,59 +1,43 @@
-# Plan -- Cycle 117 (updated)
+# Plan -- Cycle 118 (updated)
 
 ## Status summary
 
 - **Sorry count**: 0
-- **Files**: 32 files, 10,188 lines
-- **Build**: CI passing locally; commit f43e39c CI in progress
-- **Critique verdict**: CONDITIONAL ACCEPT (cycle 117)
-- **Condition for ACCEPT**: Fix ~45 linter warnings across 6 files
-- **maxHeartbeats overrides**: 2 (NewtonianPotential.lean:86 at 800000, TorusIntegration.lean:85 at 400000)
-- **Aristotle jobs**: 0 pending, all done/failed/abandoned
-- **Open issues**: 1 Medium (linter warnings), rest Low
+- **Files**: 32 files, 10,202 lines
+- **Build**: Local build passing; CI re-run in progress (elan infra issue)
+- **Critique verdict**: CONDITIONAL ACCEPT (cycle 118)
+- **Condition for ACCEPT**: Fix 12 linter warnings in CoulombPSD.lean
+- **maxHeartbeats overrides**: 2 (NewtonianPotential.lean:85 at 800000, TorusIntegration.lean:87 at 400000)
+- **Aristotle jobs**: 0 pending
+- **Open issues**: 1 Medium (CoulombPSD warnings), rest Low
 
 ## This cycle's work items
 
-### 1. Fix linter warnings in NewtonianPotential.lean (`/simplify`)
-- **What**: Critique issue 6d. ~20+ warnings: unused simp args, unused variables (`hf_smooth`), multi-goal tactics, `ring_nf` suggestions.
-- **Files**: `NewtonianPotential.lean`
-- **Approach**: Address each warning type systematically. Remove unused simp args, fix multi-goal tactics, replace `ring` with `ring_nf` where suggested.
+### 1. Fix linter warnings in CoulombPSD.lean (`/simplify`)
+- **What**: Critique issue 6d. 12 warnings: 7 unused simp args, 2 unused variables, 3 multi-goal tactics.
+- **Files**: `CoulombPSD.lean`
+- **Approach**: Remove unused simp args, prefix unused vars with `_`, fix multi-goal scoping.
 - **Risk**: Low. Cosmetic changes only.
 - **START IMMEDIATELY.**
 
-### 2. Fix linter warnings in TorusIntegration.lean (`/simplify`)
-- **What**: Critique issues 6d + 6e. ~8 warnings including 3 deprecated `integral_mul_left` → `integral_const_mul`, unused simp args, multi-goal tactics.
-- **Files**: `TorusIntegration.lean`
-- **Approach**: Replace deprecated API, remove unused simp args.
-- **Risk**: Low.
-
-### 3. Fix linter warnings in CoulombPSDHelpers.lean, CoulombFluxBound.lean (`/simplify`)
-- **What**: Critique issue 6d. ~11 warnings: `show` → `change`, unused simp args, long lines.
-- **Files**: `CoulombPSDHelpers.lean`, `CoulombFluxBound.lean`
-- **Approach**: Replace `show` with `change`, remove unused simp args, fix 2 long lines.
-- **Risk**: Low.
-
-### 4. Fix CoulombFluxDiff line count in MEMORY.md (`/simplify`)
-- **What**: Critique issue 7a. MEMORY.md says ~250, actual is 320.
-- **Files**: MEMORY.md
-- **Approach**: Update the line count.
+### 2. Fix long line in Section3Helpers.lean (`/simplify`)
+- **What**: Critique issue 6c. 1 line over 100 chars.
+- **Files**: `Section3Helpers.lean`
+- **Approach**: Break at natural point.
 - **Risk**: None.
 
-### 5. Strengthen roundtrip with uniqueness (`/strengthen`)
-- **What**: Critique issue 8e. `CoulombConcreteTheorem42_roundtrip` doesn't include T_eq uniqueness. `_unique_T` already proves this separately.
-- **Files**: `CoulombNonvacuous.lean`
-- **Approach**: Add uniqueness assertion to roundtrip conclusion, using `_unique_T` or `equilibriumMaxwellian_T_unique`.
-- **Risk**: Low. ~5 lines.
+### 3. Weaken ContDiff ℝ ⊤ → ContDiff ℝ 3 (`/strengthen`)
+- **What**: Critique issue 8a. The abstract theorem only needs C³ but the concrete uses C∞.
+- **Files**: `CoulombConcreteTheorem42.lean` + 12 Coulomb files
+- **Approach**: Change hypothesis 4, update `.of_le le_top` → `.of_le (by norm_num)`. Medium effort.
+- **Risk**: Medium. Touches many files but the change is mechanical.
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
-| 2 maxHeartbeats overrides (800000 + 400000) | Code quality | Critique 6a. Investigate for simplification. |
-| Section3Helpers.lean 613 lines | Code quality | Just over 500-line guideline; tightly coupled. |
-| Weaken ContDiff ℝ ⊤ → ContDiff ℝ 3 | Strengthen | Critique 8a. Touches all 12 Coulomb files. |
-| Gaussian integral lemmas not generalized | Strengthen | Critique 8c. Could extract to reusable module. |
+| 2 maxHeartbeats overrides (800000 + 400000) | Code quality | Critique 6a. |
+| Section3Helpers.lean 613 lines | Code quality | Just over guideline. |
+| Gaussian integral lemmas not generalized | Strengthen | Critique 8c. |
 | Maxwell molecules kernel instance | Feature | Easy win ~100 lines. |
-| Dimension generalization (Fin n) | Feature | Hard; 3D-specific throughout. |
-| Mathlib PR candidates (4 lemmas) | Upstream | inverse_poly_integrable, schwartz_pointwise_decay, etc. |
-| CoulombFluxConv unused variable `hM` | Code quality | Line 27; pre-existing. |
-| Section3Helpers `ring_nf` suggestions | Code quality | ~4 info-level suggestions. |
+| Mathlib PR candidates (4 lemmas) | Upstream | |

@@ -60,7 +60,9 @@ lemma analysis_scalarFactor
         (mulVec (landauMatrix Ψ (v - w))
           (vGrad (Real.log ∘ f) v - vGrad (Real.log ∘ f) w)) := by
   -- Proved by Aristotle (Harmonic)
-  intro v w; simp only [dotProduct, Matrix.mulVec, Pi.smul_apply, smul_eq_mul, Fin.sum_univ_three]; ring
+  intro v w
+  simp only [dotProduct, Matrix.mulVec, Pi.smul_apply, smul_eq_mul,
+    Fin.sum_univ_three]; ring
 
 /-- Nonneg double integral zero → pointwise zero. -/
 lemma analysis_nonneg_dbl_zero
