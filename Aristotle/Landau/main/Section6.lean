@@ -33,7 +33,7 @@ theorem bulk_velocity_zero {X : Type*} [FlatTorus3 X] (ss : VMLSteadyState X) :
     ss.b₀ = 0 := by
   -- Step 1: ∫ b₀ · curlX B dx = 0 (by hCurlIntZero)
   have h1 : FlatTorus3.spatialIntegral (fun x => dotProduct ss.b₀ (FlatTorus3.curlX ss.B x)) = 0 :=
-    FlatTorus3.hCurlIntZero ss.B ss.b₀ ss.hDiff_B
+    FlatTorus3.hCurlIntZero ss.B ss.b₀ (fun i => (ss.hDiff_B i).of_le (by decide))
   -- Step 2: b₀ · curlX B x = b₀ · (ρ x • b₀) = ρ x * |b₀|²
   have h2 : ∀ x, dotProduct ss.b₀ (FlatTorus3.curlX ss.B x) = ss.ρ x * normSq ss.b₀ := by
     intro x

@@ -52,7 +52,7 @@ structure VMLSteadyState (X : Type*) [FlatTorus3 X] where
   hGauss : ∀ x, FlatTorus3.divX E x = ρ x - ρ_ion
   hDivB : ∀ x, FlatTorus3.divX B x = 0
   -- Spatial differentiability for B (needed for harmonic → constant)
-  hDiff_B : ∀ i, FlatTorus3.IsSpatiallyDiff (fun y => B y i)
+  hDiff_B : ∀ i, FlatTorus3.IsSpatiallySmooth 2 (fun y => B y i)
   -- === H-theorem chain results (Sections 3-4 of tex) ===
   a_loc : X → ℝ
   b_loc : X → (Fin 3 → ℝ)
@@ -134,9 +134,9 @@ structure VMLInput (X : Type*) [FlatTorus3 X] where
   hGauss : ∀ x, FlatTorus3.divX E x = ρ x - ρ_ion
   hDivB : ∀ x, FlatTorus3.divX B x = 0
   -- Spatial differentiability for f(·,v): each slice f(·,v) is spatially C¹
-  hDiff_fv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => f x v)
+  hDiff_fv : ∀ v, FlatTorus3.IsSpatiallySmooth 2 (fun x => f x v)
   -- Spatial differentiability for B components
-  hDiff_B : ∀ i, FlatTorus3.IsSpatiallyDiff (fun y => B y i)
+  hDiff_B : ∀ i, FlatTorus3.IsSpatiallySmooth 2 (fun y => B y i)
   -- === Derived from H-theorem chain ===
   hD_zero : ∀ x, entropyDissipation Ψ (f x) = 0
   hScoreForm : ∀ x, entropyDissipation Ψ (f x) =
@@ -149,14 +149,14 @@ structure VMLInput (X : Type*) [FlatTorus3 X] where
   -- Maxwellian parameters are spatially differentiable (follows from f being smooth)
   hDiff_maxwellian : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
     (∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) →
-    FlatTorus3.IsSpatiallyDiff a ∧
-    (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) ∧
-    FlatTorus3.IsSpatiallyDiff c
+    FlatTorus3.IsSpatiallySmooth 2 a ∧
+    (∀ j, FlatTorus3.IsSpatiallySmooth 2 (fun y => b y j)) ∧
+    FlatTorus3.IsSpatiallySmooth 2 c
   -- Note: hDiff_B_C2 and hDiff_maxwellian_C2 are now DERIVED via FlatTorus3.hDiff_grad.
   hPolynomialIdentity : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
-    FlatTorus3.IsSpatiallyDiff a →
-    (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) →
-    FlatTorus3.IsSpatiallyDiff c →
+    FlatTorus3.IsSpatiallySmooth 2 a →
+    (∀ j, FlatTorus3.IsSpatiallySmooth 2 (fun y => b y j)) →
+    FlatTorus3.IsSpatiallySmooth 2 c →
     (∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) →
     ∀ x v,
       dotProduct v (FlatTorus3.gradX c x) * normSq v +

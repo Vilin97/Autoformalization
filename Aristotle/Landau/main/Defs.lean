@@ -371,7 +371,7 @@ lemma vecMulVec_self_mulVec (z w : Fin 3 → ℝ) :
     holds for all functions: `fderiv(c * f) = c * fderiv(f)` is true even for
     non-differentiable f (both sides are 0 by definition).
 
-    The chain rule axiom (hGradChainExp) requires IsSpatiallyDiff φ: without it,
+    The chain rule axiom (hGradChainExp) requires IsSpatiallySmooth ⊤ φ: without it,
     on the concrete torus both sides collapse to 0 via fderiv's junk value, making
     the axiom vacuously true rather than expressing a genuine chain rule.
 
@@ -390,8 +390,8 @@ lemma vecMulVec_self_mulVec (z w : Fin 3 → ℝ) :
       hSpatialPos, hSpatialNonnegZero
     - Flat geometry (2): hKillingToHarmonic, hCurlZeroDivZeroHarmonic
     - Abstract measure (3): hSpatialVelocityFubini, hSpatialAdd, hGradIntegrable
-    - Differentiability predicate + closure (7): IsSpatiallyDiff, hDiff_const, hDiff_add,
-      hDiff_smul, hDiff_log, hDiff_continuous, hDiff_grad
+    - Differentiability predicate + closure (7): IsSpatiallySmooth ⊤, hDiff_const ⊤, hDiff_add ⊤,
+      hDiff_smul ⊤, hDiff_log ⊤, hDiff_continuous ⊤, hDiff_grad ⊤
 
     Derived lemmas (in `FlatTorus3Lemmas.lean`):
     - hGradChainLog, hGradIntZero, hLaplacianMinNonneg, hSpatialMul, etc. -/
@@ -413,69 +413,54 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
   hSpatialNonnegZero : ∀ g : X → ℝ, Continuous g →
     (∀ x, 0 ≤ g x) → ∫ x, g x = 0 → ∀ x, g x = 0
   -- Spatial differentiability predicate (abstract; on the concrete torus,
-  -- this is ContDiff ℝ 1 (periodicLift f), i.e. the periodic lift is C¹)
-  IsSpatiallyDiff : (X → ℝ) → Prop
-  hDiff_const : ∀ c, IsSpatiallyDiff (fun _ : X => c)
-  hDiff_add : ∀ f g, IsSpatiallyDiff f → IsSpatiallyDiff g →
-    IsSpatiallyDiff (fun x => f x + g x)
-  hDiff_smul : ∀ c f, IsSpatiallyDiff f → IsSpatiallyDiff (fun x => c * f x)
-  -- Closure under log (for positive functions): if f is C¹ and f > 0, then log∘f is C¹
-  hDiff_log : ∀ f, IsSpatiallyDiff f → (∀ x, 0 < f x) → IsSpatiallyDiff (Real.log ∘ f)
+  -- this is ContDiff ℝ n (periodicLift f), i.e. the periodic lift is Cⁿ)
+  IsSpatiallySmooth : ℕ∞ → (X → ℝ) → Prop
+  hDiff_of_le : ∀ {n m} f, m ≤ n → IsSpatiallySmooth n f → IsSpatiallySmooth m f
+  hDiff_const : ∀ n c, IsSpatiallySmooth n (fun _ : X => c)
+  hDiff_add : ∀ n f g, IsSpatiallySmooth n f → IsSpatiallySmooth n g →
+    IsSpatiallySmooth n (fun x => f x + g x)
+  hDiff_smul : ∀ n c f, IsSpatiallySmooth n f → IsSpatiallySmooth n (fun x => c * f x)
+  -- Closure under log (for positive functions)
+  hDiff_log : ∀ n f, IsSpatiallySmooth n f → (∀ x, 0 < f x) → IsSpatiallySmooth n (Real.log ∘ f)
   -- Spatially differentiable functions are continuous.
-  -- On the concrete torus: ContDiff ℝ ⊤ (periodicLift f) → Continuous f.
-  hDiff_continuous : ∀ f, IsSpatiallyDiff f → Continuous f
-  -- Gradient closure: if f is spatially differentiable, so is each component of its gradient.
-  -- On the concrete torus: requires IsSpatiallyDiff = ContDiff ℝ ⊤ (smooth)
-  -- then ContDiff.fderiv_right gives ContDiff ℝ ⊤ for the fderiv,
-  -- and clm_apply gives the component.
-  hDiff_grad : ∀ (f : X → ℝ) (i : Fin 3), IsSpatiallyDiff f →
-    IsSpatiallyDiff (fun x => gradX f x i)
+  hDiff_continuous : ∀ n f, IsSpatiallySmooth (n + 1) f → Continuous f
+  -- Gradient closure: if f is Cⁿ⁺¹, its gradient is Cⁿ.
+  hDiff_grad : ∀ (n : ℕ∞) (f : X → ℝ) (i : Fin 3), IsSpatiallySmooth (n + 1) f →
+    IsSpatiallySmooth n (fun x => gradX f x i)
   -- Curl integral vanishes (Stokes theorem for 2-forms)
-  -- Requires IsSpatiallyDiff for each component of F: without differentiability,
-  -- curlX uses fderiv (which is 0 at non-differentiable points), and the integral
-  -- of the resulting "gradient" over the torus is not guaranteed to be 0.
   hCurlIntZero : ∀ (F : X → Fin 3 → ℝ) (u : Fin 3 → ℝ),
-    (∀ j, IsSpatiallyDiff (fun x => F x j)) →
+    (∀ j, IsSpatiallySmooth 1 (fun x => F x j)) →
     ∫ x, dotProduct u (curlX F x) = 0
   -- Harmonic functions on compact manifold are constant (Hodge theory)
-  -- Requires IsSpatiallyDiff because without it, gradX returns 0 for
-  -- non-differentiable functions, making the hypothesis vacuously true.
-  hHarmonic_const : ∀ φ : X → ℝ, IsSpatiallyDiff φ →
+  hHarmonic_const : ∀ φ : X → ℝ, IsSpatiallySmooth 2 φ →
     (∀ x, divX (gradX φ) x = 0) → ∀ x y, φ x = φ y
   -- Second derivative test: Laplacian ≤ 0 at a maximum
-  -- Requires IsSpatiallyDiff: without it, gradX uses junk fderiv values,
-  -- making the statement false for non-differentiable functions.
-  hLaplacianMaxNonpos : ∀ (φ : X → ℝ) (x₀ : X), IsSpatiallyDiff φ →
+  hLaplacianMaxNonpos : ∀ (φ : X → ℝ) (x₀ : X), IsSpatiallySmooth 2 φ →
     (∀ x, φ x ≤ φ x₀) → divX (gradX φ) x₀ ≤ 0
   -- Linearity of gradient: gradX(f + g) = gradX(f) + gradX(g) for differentiable f, g
-  hGradAdd : ∀ (f g : X → ℝ), IsSpatiallyDiff f → IsSpatiallyDiff g →
+  hGradAdd : ∀ (f g : X → ℝ), IsSpatiallySmooth 1 f → IsSpatiallySmooth 1 g →
     ∀ x, gradX (fun y => f y + g y) x = gradX f x + gradX g x
   -- Scalar multiplication: gradX(c · f) = c · gradX(f) for constant c
   hGradScalarMul : ∀ (c : ℝ) (f : X → ℝ),
     ∀ x, gradX (fun y => c * f y) x = c • gradX f x
   -- Chain rule for exp: gradX(exp ∘ φ) = exp(φ) · gradX(φ)
-  -- Requires IsSpatiallyDiff φ: without it, on the concrete torus both sides
-  -- collapse to 0 via fderiv's junk value, making the axiom vacuously true.
-  hGradChainExp : ∀ (φ : X → ℝ), IsSpatiallyDiff φ →
+  hGradChainExp : ∀ (φ : X → ℝ), IsSpatiallySmooth 1 φ →
     ∀ x i, gradX (fun y => Real.exp (φ y)) x i = Real.exp (φ x) * gradX φ x i
   -- Killing fields have harmonic components (flatness of the metric).
-  -- Requires C¹ regularity of b_j and C² regularity of gradient components.
   hKillingToHarmonic : ∀ (b : X → Fin 3 → ℝ),
-    (∀ j, IsSpatiallyDiff (fun y => b y j)) →
-    (∀ j i, IsSpatiallyDiff (fun x => gradX (fun y => b y j) x i)) →
+    (∀ j, IsSpatiallySmooth 1 (fun y => b y j)) →
+    (∀ j i, IsSpatiallySmooth 1 (fun x => gradX (fun y => b y j) x i)) →
     (∀ x i j, gradX (fun y => b y j) x i + gradX (fun y => b y i) x j = 0) →
     ∀ j : Fin 3, ∀ x, divX (gradX (fun y => b y j)) x = 0
   -- Irrotational + solenoidal vector field has harmonic components.
-  -- Requires C¹ regularity of F_i and C² regularity of gradient components.
   hCurlZeroDivZeroHarmonic : ∀ F : X → (Fin 3 → ℝ),
-    (∀ i, IsSpatiallyDiff (fun y => F y i)) →
-    (∀ i j, IsSpatiallyDiff (fun x => gradX (fun y => F y i) x j)) →
+    (∀ i, IsSpatiallySmooth 1 (fun y => F y i)) →
+    (∀ i j, IsSpatiallySmooth 1 (fun x => gradX (fun y => F y i) x j)) →
     (∀ x, curlX F x = 0) → (∀ x, divX F x = 0) →
     ∀ i, ∀ x, divX (gradX (fun y => F y i)) x = 0
   -- Integration by parts on the torus: ∫ φ · (∇ψ)ᵢ = -∫ ψ · (∇φ)ᵢ
-  -- Requires spatial differentiability of both φ and ψ.
   hIBP_spatial : ∀ (φ ψ : X → ℝ) (i : Fin 3),
-    IsSpatiallyDiff φ → IsSpatiallyDiff ψ →
+    IsSpatiallySmooth 1 φ → IsSpatiallySmooth 1 ψ →
     (∫ x, φ x * gradX ψ x i) = -(∫ x, ψ x * gradX φ x i)
   -- Fubini: swap spatial integral (over compact X) with velocity integral (over ℝ³)
   hSpatialVelocityFubini : ∀ (F : X → (Fin 3 → ℝ) → ℝ),
@@ -486,8 +471,7 @@ class FlatTorus3 (X : Type*) extends MeasureSpace X, TopologicalSpace X where
   hSpatialAdd : ∀ (g₁ g₂ : X → ℝ), MeasureTheory.Integrable g₁ → MeasureTheory.Integrable g₂ →
     (∫ x, (g₁ x + g₂ x)) = (∫ x, g₁ x) + ∫ x, g₂ x
   -- Gradient components of spatially differentiable functions are integrable
-  -- (on the concrete torus: C¹ gradient → continuous → integrable on compact domain)
-  hGradIntegrable : ∀ (g : X → ℝ), IsSpatiallyDiff g →
+  hGradIntegrable : ∀ (g : X → ℝ), IsSpatiallySmooth 1 g →
     ∀ i, MeasureTheory.Integrable (fun x => gradX g x i)
 
 namespace FlatTorus3

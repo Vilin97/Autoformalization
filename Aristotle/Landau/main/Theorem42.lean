@@ -140,7 +140,7 @@ theorem Theorem42
     -- Solenoidal constraint: ∇·B = 0
     (hDivB : ∀ x, FlatTorus3.divX B x = 0)
     -- B is spatially differentiable (each component)
-    (hDiff_B : ∀ i, FlatTorus3.IsSpatiallyDiff (fun y => B y i))
+    (hDiff_B : ∀ i, FlatTorus3.IsSpatiallySmooth 2 (fun y => B y i))
     -- === Steady-state Vlasov equation ===
     -- v · ∇ₓf + (E + v×B) · ∇ᵥf = ν Q(f,f)
     (hVlasov : ∀ x v,
@@ -150,12 +150,12 @@ theorem Theorem42
     -- === Spatial differentiability ===
     -- f(·,v) is spatially differentiable for each fixed v.
     -- This is automatic for smooth distribution functions.
-    -- log f(·,v) is derived from hDiff_fv + hf_pos + FlatTorus3.hDiff_log.
-    (hDiff_fv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => f x v))
+    -- log f(·,v) is derived from hDiff_fv + hf_pos + FlatTorus3.hDiff_log ⊤.
+    (hDiff_fv : ∀ v, FlatTorus3.IsSpatiallySmooth 2 (fun x => f x v))
     -- If f = exp(a + b·v + c|v|²), then a, b, c are spatially differentiable.
-    -- Derived from hDiff_fv + hf_pos + FlatTorus3.hDiff_log
+    -- Derived from hDiff_fv + hf_pos + FlatTorus3.hDiff_log ⊤
     -- (via maxwellian_params_isSpatiallyDiff).
-    -- C² regularity (hDiff_B_C2, hDiff_maxwellian_C2) derived via FlatTorus3.hDiff_grad.
+    -- C² regularity (hDiff_B_C2, hDiff_maxwellian_C2) derived via FlatTorus3.hDiff_grad ⊤.
     -- === Velocity-space decay conditions ===
     (hDecay : VelocityDecayConditions Ψ f E B) :
     -- === Conclusion ===
@@ -169,17 +169,17 @@ theorem Theorem42
   -- Step 0: Derive mathematical consequences of the Vlasov equation.
   have hρ_pos : ∀ x, 0 < ρ x := fun x =>
     density_positive_of_integral (f x) (hf_pos x) (hf_int x)
-  -- Derive spatial differentiability of log f(·,v) from hDiff_fv + hf_pos + hDiff_log
-  have hDiff_logfv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => Real.log (f x v)) := fun v =>
-    FlatTorus3.hDiff_log (fun x => f x v) (hDiff_fv v) (fun x => hf_pos x v)
+  -- Derive spatial differentiability of log f(·,v) from hDiff_fv + hf_pos + hDiff_log ⊤
+  have hDiff_logfv : ∀ v, FlatTorus3.IsSpatiallySmooth 2 (fun x => Real.log (f x v)) := fun v =>
+    FlatTorus3.hDiff_log 2 (fun x => f x v) ((hDiff_fv v).of_le (by decide)) (fun x => hf_pos x v)
   -- Derive that Maxwellian parameters a, b, c are spatially differentiable
   -- (from evaluating log f at v = 0, eⱼ, 2e₀ and using closure properties)
   have hDiff_maxwellian : ∀ (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ),
       (∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) →
-      FlatTorus3.IsSpatiallyDiff a ∧
-      (∀ j, FlatTorus3.IsSpatiallyDiff (fun y => b y j)) ∧
-      FlatTorus3.IsSpatiallyDiff c :=
-    fun a b c hform => FlatTorus3.maxwellian_params_isSpatiallyDiff f hf_pos hDiff_fv a b c hform
+      FlatTorus3.IsSpatiallySmooth 2 a ∧
+      (∀ j, FlatTorus3.IsSpatiallySmooth 2 (fun y => b y j)) ∧
+      FlatTorus3.IsSpatiallySmooth 2 c :=
+    FlatTorus3.maxwellian_params_isSpatiallySmooth f hf_pos (fun v => (hDiff_fv v).of_le (by decide))
   -- Derive continuity of ρ = ∫ f(·,v) dv via dominated convergence
   have hρ_cont : Continuous ρ := by
     show Continuous (fun x => ∫ v, f x v)
@@ -189,7 +189,7 @@ theorem Theorem42
       (fun x => .of_forall fun v => by
         rw [Real.norm_eq_abs, abs_of_pos (hf_pos x v)]; exact hg_bound x v)
       hg_int
-      (.of_forall fun v => FlatTorus3.hDiff_continuous _ (hDiff_fv v))
+      (.of_forall fun v => FlatTorus3.hDiff_continuous 1 _ (hDiff_fv v))
   have hTransportEntropy : (∫ x, entropyDissipation Ψ (f x)) = 0 :=
     transport_entropy_from_vlasov f E B Ψ ν hν hf_pos hf_smooth hf_int hDiff_fv hDiff_logfv
       hVlasov hDecay.hSpatialTransport_int hDecay.hForceTransport_int

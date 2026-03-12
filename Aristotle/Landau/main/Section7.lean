@@ -104,7 +104,7 @@ lemma poisson_boltzmann_from_vlasov
     (_hΨ : ∀ r, 0 < Ψ r)
     (_hρ_def : ∀ x, ρ x = ∫ v, f x v)
     (_hGauss : ∀ x, FlatTorus3.divX E x = ρ x - ρ_ion)
-    (_hDiff_fv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => f x v))
+    (_hDiff_fv : ∀ v, FlatTorus3.IsSpatiallySmooth 2 (fun x => f x v))
     (_hVlasov : ∀ x v,
       dotProduct v (FlatTorus3.gradX (fun y => f y v) x) +
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
@@ -119,8 +119,8 @@ lemma poisson_boltzmann_from_vlasov
   let a₀ : X → ℝ := fun x => (hform x).choose
   have ha₀ : ∀ x v, f x v = Real.exp (a₀ x + c₀ * normSq v) :=
     fun x => (hform x).choose_spec
-  -- a₀ is spatially differentiable: a₀(x) = log(f(x,0)) and f(·,0) is IsSpatiallyDiff
-  have ha₀_diff : FlatTorus3.IsSpatiallyDiff a₀ := by
+  -- a₀ is spatially differentiable: a₀(x) = log(f(x,0)) and f(·,0) is IsSpatiallySmooth ⊤
+  have ha₀_diff : FlatTorus3.IsSpatiallySmooth 2 a₀ := by
     have ha₀_eq : a₀ = fun x => Real.log (f x 0) := by
       ext x
       have h := ha₀ x 0
@@ -128,7 +128,7 @@ lemma poisson_boltzmann_from_vlasov
       have : a₀ x = Real.log (Real.exp (a₀ x)) := (Real.log_exp _).symm
       rw [this, h]
     rw [ha₀_eq]
-    exact FlatTorus3.hDiff_log _ (_hDiff_fv 0) (fun x => _hf_pos x 0)
+    exact FlatTorus3.hDiff_log 2 _ (_hDiff_fv 0) (fun x => _hf_pos x 0)
   -- Isotropic form with b=0 for nullspace_sufficiency
   have ha₀_b0 : ∀ x v, f x v =
       Real.exp (a₀ x + dotProduct 0 v + c₀ * normSq v) := fun x v => by
@@ -160,8 +160,8 @@ lemma poisson_boltzmann_from_vlasov
     have hf_eq : (fun y => f y v) = (fun y => Real.exp (a₀ y + c₀ * normSq v)) :=
       funext (fun y => ha₀ y v)
     rw [hf_eq,
-        FlatTorus3.hGradChainExp _ (FlatTorus3.hDiff_add _ _ ha₀_diff (FlatTorus3.hDiff_const _)),
-        FlatTorus3.hGradAddConst _ ha₀_diff]
+        FlatTorus3.hGradChainExp _ (FlatTorus3.hDiff_add 1 _ _ (FlatTorus3.hDiff_of_le _ (by decide) ha₀_diff) (FlatTorus3.hDiff_const 1 _)),
+        FlatTorus3.hGradAddConst _ (FlatTorus3.hDiff_of_le _ (by decide) ha₀_diff)]
     simp [ha₀ x v]
   -- Step 5: Force balance: gradX(a₀) = -(2c₀) E
   have hForce : ∀ x, FlatTorus3.gradX a₀ x = (-2 * c₀) • E x := by
@@ -215,7 +215,7 @@ lemma poisson_boltzmann_from_vlasov
       change Real.log (ρ y) = a₀ y + Real.log C
       rw [hρ_eq y, Real.log_mul (ne_of_gt (Real.exp_pos _)) (ne_of_gt hC_pos), Real.log_exp])
     -- gradX(log ∘ ρ) = gradX(a₀ + const) = gradX(a₀) by hGradAddConst
-    rw [hlog_eq, FlatTorus3.hGradAddConst _ ha₀_diff]
+    rw [hlog_eq, FlatTorus3.hGradAddConst _ (FlatTorus3.hDiff_of_le _ (by decide) ha₀_diff)]
   -- Step 7: Apply poisson_boltzmann_algebraic
   exact poisson_boltzmann_algebraic FlatTorus3.gradX FlatTorus3.divX E ρ ρ_ion
     a₀ c₀ hc₀ hForce hGradLogRho _hGauss FlatTorus3.hDivLinear

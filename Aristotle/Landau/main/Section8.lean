@@ -35,15 +35,15 @@ theorem magnetic_field_constant {X : Type*} [FlatTorus3 X] (ss : VMLSteadyState 
     rw [ss.hAmpere]
     exact hJ_zero x
   -- Step 3: Each component is harmonic
-  -- Derive C² condition for B from hDiff_grad + C¹ differentiability of B components
-  have hDiff_B_C2 : ∀ i j, FlatTorus3.IsSpatiallyDiff (fun x =>
+  -- Derive C² condition for B from hDiff_grad ⊤ + C¹ differentiability of B components
+  have hDiff_B_C2 : ∀ i j, FlatTorus3.IsSpatiallySmooth 1 (fun x =>
       FlatTorus3.gradX (fun y => ss.B y i) x j) :=
-    fun i j => FlatTorus3.hDiff_grad (fun y => ss.B y i) j (ss.hDiff_B i)
+    fun i j => FlatTorus3.hDiff_grad 1 (fun y => ss.B y i) j (ss.hDiff_B i)
   have hBi_harmonic :=
-    FlatTorus3.hCurlZeroDivZeroHarmonic ss.B ss.hDiff_B hDiff_B_C2 hcurl_zero ss.hDivB
+    FlatTorus3.hCurlZeroDivZeroHarmonic ss.B (fun i => FlatTorus3.IsSpatiallySmooth.of_le (ss.hDiff_B i) (by decide)) (fun i j => FlatTorus3.IsSpatiallySmooth.of_le (hDiff_B_C2 i j) (by decide)) hcurl_zero ss.hDivB
   -- Step 4: Each component is constant
   have hBi_const : ∀ i, ∀ x y, ss.B x i = ss.B y i := by
-    intro i; exact FlatTorus3.hHarmonic_const (fun y => ss.B y i) (ss.hDiff_B i) (hBi_harmonic i)
+    intro i; exact FlatTorus3.hHarmonic_const (fun y => ss.B y i) (FlatTorus3.IsSpatiallySmooth.of_le (ss.hDiff_B i) (by decide)) (hBi_harmonic i)
   -- Extract the constant value from x₀
   exact ⟨fun i => ss.B ss.x₀ i, fun x => funext (fun i => hBi_const i x ss.x₀)⟩
 
