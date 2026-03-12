@@ -24,7 +24,58 @@ namespace VML
 lemma fderiv_equilibriumMaxwellian (ρ T : ℝ) (hT : 0 < T) (v : Fin 3 → ℝ) (i : Fin 3) :
     fderiv ℝ (equilibriumMaxwellian ρ T) v (Pi.single i 1) =
     -(v i / T) * equilibriumMaxwellian ρ T v := by
-  simp [equilibriumMaxwellian, normSq, dotProduct]; ring
+  have hq_smooth : ContDiff ℝ ⊤ (fun w : Fin 3 → ℝ => -(normSq w) / (2 * T)) :=
+    contDiff_negNormSq_div T
+  have hq_diff : Differentiable ℝ (fun w : Fin 3 → ℝ => -(normSq w) / (2 * T)) :=
+    hq_smooth.differentiable le_top
+  -- eM = pf • (exp ∘ q)
+  have heM_eq : equilibriumMaxwellian ρ T =
+      (ρ / (2 * π * T) ^ ((3:ℝ)/2)) •
+      (Real.exp ∘ (fun w : Fin 3 → ℝ => -(normSq w) / (2 * T))) := by
+    ext w; simp [equilibriumMaxwellian, Pi.smul_apply, smul_eq_mul]
+  rw [heM_eq]
+  set pf := ρ / (2 * π * T) ^ ((3:ℝ)/2)
+  set q : (Fin 3 → ℝ) → ℝ := fun w => -(normSq w) / (2 * T)
+  set expq : (Fin 3 → ℝ) → ℝ := Real.exp ∘ q
+  -- fderiv (pf • expq) = pf • fderiv expq
+  have hexpq_diff : DifferentiableAt ℝ expq v :=
+    (Real.differentiable_exp.comp hq_diff).differentiableAt
+  rw [show (pf • expq : (Fin 3 → ℝ) → ℝ) = fun w => pf * expq w from by
+    ext w; simp [Pi.smul_apply, smul_eq_mul]]
+  rw [fderiv_const_mul hexpq_diff pf, ContinuousLinearMap.smul_apply, smul_eq_mul]
+  -- fderiv expq = exp(q v) • fderiv q by chain rule
+  rw [show expq = fun w => Real.exp (q w) from rfl,
+    fderiv_exp_comp_always q v, ContinuousLinearMap.smul_apply, smul_eq_mul]
+  -- Compute fderiv of q at v applied to e_i
+  have h_comp_diff : ∀ j : Fin 3, DifferentiableAt ℝ (fun w : Fin 3 → ℝ => w j * w j) v :=
+    fun j => (differentiableAt_apply j v).mul (differentiableAt_apply j v)
+  have h_sum_diff : DifferentiableAt ℝ (fun w : Fin 3 → ℝ => ∑ j : Fin 3, w j * w j) v :=
+    DifferentiableAt.fun_sum fun j _ => h_comp_diff j
+  -- q = fun w => (-1/(2*T)) * normSq w, so fderiv q = (-1/(2T)) • fderiv normSq
+  have hq_eq : q = fun w => (-1/(2*T)) * (normSq w) := by
+    ext w; simp only [q]; unfold normSq dotProduct; ring
+  rw [hq_eq, fderiv_const_mul (by unfold normSq dotProduct; exact h_sum_diff) (-1/(2*T)),
+    ContinuousLinearMap.smul_apply, smul_eq_mul]
+  unfold normSq dotProduct
+  rw [fderiv_fun_sum (fun j _ => h_comp_diff j), ContinuousLinearMap.sum_apply]
+  -- Each fderiv (w_j * w_j) at v applied to e_i = 2 * v j * δ_{ij}
+  have hfderiv_sq : ∀ j : Fin 3,
+      (fderiv ℝ (fun w : Fin 3 → ℝ => w j * w j) v) (Pi.single i 1) =
+      2 * v j * if j = i then 1 else 0 := by
+    intro j
+    have hd1 : DifferentiableAt ℝ (fun w : Fin 3 → ℝ => w j) v :=
+      differentiableAt_apply j v
+    have hd_proj : fderiv ℝ (fun w : Fin 3 → ℝ => w j) v (Pi.single i 1) =
+        if j = i then 1 else 0 := by
+      rw [show (fun w : Fin 3 → ℝ => w j) = (ContinuousLinearMap.proj j : (Fin 3 → ℝ) →L[ℝ] ℝ) from rfl,
+        ContinuousLinearMap.fderiv]
+      simp [ContinuousLinearMap.proj_apply, Pi.single_apply]
+    rw [fderiv_fun_mul hd1 hd1]
+    simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul, hd_proj]
+    ring
+  simp only [ContinuousLinearMap.sum_apply, hfderiv_sq, Fin.sum_univ_three,
+    Function.comp_apply, equilibriumMaxwellian, normSq, dotProduct]
+  fin_cases i <;> simp <;> ring
 
 /-- Exponential decay lower bound for equilibrium Maxwellian:
     exp(-C(1+‖v‖)²) ≤ eM(v) for suitable C. Uses normSq v ≤ 3(1+‖v‖)² (sup norm). -/
@@ -58,9 +109,14 @@ private lemma equilibriumMaxwellian_exp_lower_bound (ρ T : ℝ) (hρ : 0 < ρ) 
       (by nlinarith [le_max_right (0:ℝ) (-Real.log pf), le_mul_of_one_le_right hM_nn h_s1])
   -- exp(-3s/(2T)) ≤ exp(-normSq/(2T)): from normSq ≤ 3s
   · apply Real.exp_le_exp.mpr
-    linarith [div_le_div_of_nonneg_right h_normSq (show (0:ℝ) ≤ 2 * T by linarith)]
+    have hT2 : (0 : ℝ) < 2 * T := by linarith
+    have h_div : normSq v / (2 * T) ≤ 3 * (1 + ‖v‖) ^ 2 / (2 * T) :=
+      div_le_div_of_nonneg_right h_normSq hT2.le
+    have : -(3 * (1 + ‖v‖) ^ 2 / (2 * T)) = -(3 * (1 + ‖v‖) ^ 2) / (2 * T) := by ring
+    rw [this]
+    exact div_le_div_of_nonneg_right (neg_le_neg h_normSq) hT2.le
   · exact Real.exp_nonneg _
-  · exact Real.exp_nonneg _
+  · exact hpf.le
 
 /-- Bound x^M * exp(-ax) ≤ M!/a^M via the Taylor expansion of exp. -/
 private lemma pow_mul_exp_neg_le (M : ℕ) (a : ℝ) (ha : 0 < a) (x : ℝ) (hx : 0 ≤ x) :
@@ -194,14 +250,69 @@ lemma equilibriumMaxwellian_schwartz_decay (ρ T : ℝ) (hρ : 0 < ρ) (hT : 0 <
 lemma equilibriumMaxwellian_log_bound (ρ T : ℝ) (hρ : 0 < ρ) (hT : 0 < T) :
     ∃ (C_log : ℝ) (K_log : ℕ), ∀ v : Fin 3 → ℝ,
     |Real.log (equilibriumMaxwellian ρ T v)| ≤ C_log * (1 + ‖v‖) ^ K_log := by
-  exact schwartz_log_bound (fun _ v => equilibriumMaxwellian_pos ρ T hρ hT v)
-    ⟨⟨fun N hk => (equilibriumMaxwellian_schwartz_decay ρ T hρ hT N _).imp
+  obtain ⟨C_log, K_log, hbound⟩ := schwartz_log_bound
+    (fun _ v => equilibriumMaxwellian_pos ρ T hρ hT v)
+    ⟨fun N {k} _ => (equilibriumMaxwellian_schwartz_decay ρ T hρ hT N k).imp
       fun C hC => ⟨hC.1, fun _ v => hC.2 v⟩,
      fun N i => ⟨1, one_pos, fun x v => by
-      simp only [torusGradX, periodicLift, Function.comp]
-      simp [fderiv_const, ContinuousLinearMap.zero_apply, mul_comm]⟩⟩⟩
+      simp only [torusGradX, periodicLift]
+      have : (fun y => equilibriumMaxwellian ρ T v) ∘ torusMk =
+          fun _ => equilibriumMaxwellian ρ T v := by ext; rfl
+      rw [this]; simp [fderiv_const]⟩⟩
     ((equilibriumMaxwellian_exp_lower_bound ρ T hρ hT).imp
       fun C hC => hC.imp fun K hCK => fun _ => hCK)
+  exact ⟨C_log, K_log, fun v => hbound default v⟩
+
+/-- Integral of vᵢ * equilibriumMaxwellian is 0 by odd symmetry. -/
+lemma integral_coord_mul_equilibriumMaxwellian_eq_zero (ρ T : ℝ) (i : Fin 3) :
+    ∫ v : Fin 3 → ℝ, v i * equilibriumMaxwellian ρ T v = 0 := by
+  have h_odd : ∀ v : Fin 3 → ℝ, (-v) i * equilibriumMaxwellian ρ T (-v) =
+      -(v i * equilibriumMaxwellian ρ T v) := by
+    intro v; simp [Pi.neg_apply, equilibriumMaxwellian, normSq, dotProduct]
+  have h_neg : (fun v : Fin 3 → ℝ => (-v) i * equilibriumMaxwellian ρ T (-v)) =
+      (fun v => -(v i * equilibriumMaxwellian ρ T v)) := funext h_odd
+  have h := MeasureTheory.integral_neg_eq_self
+    (fun v : Fin 3 → ℝ => v i * equilibriumMaxwellian ρ T v)
+    (μ := MeasureTheory.MeasureSpace.volume)
+  rw [h_neg, MeasureTheory.integral_neg] at h
+  linarith
+
+/-- The integral of the equilibrium Maxwellian equals the density ρ:
+    ∫ ρ/(2πT)^{3/2} exp(-|v|²/(2T)) dv = ρ.
+    Proof: factor exp as product of 1D Gaussians, apply Fubini, then
+    integral_gaussian gives √(2πT) per coordinate, so the product is (2πT)^{3/2}
+    which cancels the prefactor. -/
+lemma integral_equilibriumMaxwellian (ρ T : ℝ) (hT : 0 < T) :
+    ∫ v : Fin 3 → ℝ, equilibriumMaxwellian ρ T v = ρ := by
+  unfold equilibriumMaxwellian
+  rw [integral_const_mul]
+  -- Factor the exponential as a product
+  have h_factor : (fun v : Fin 3 → ℝ => exp (-(normSq v) / (2 * T))) =
+      (fun v => ∏ i : Fin 3, exp (-(1/(2*T)) * (v i)^2)) := by
+    ext v; rw [← exp_sum]; congr 1
+    simp only [normSq, dotProduct, Fin.sum_univ_three, sq]; ring
+  rw [h_factor]
+  -- Apply Fubini: ∫ ∏ fᵢ(vᵢ) = ∏ ∫ fᵢ
+  have h_fubini : ∫ v : Fin 3 → ℝ, ∏ i : Fin 3, exp (-(1/(2*T)) * (v i)^2) =
+      ∏ i : Fin 3, ∫ x : ℝ, exp (-(1/(2*T)) * x^2) := by
+    erw [← MeasureTheory.integral_fintype_prod_eq_prod]; rfl
+  rw [h_fubini]
+  -- Each 1D integral: ∫ exp(-bx²) = √(π/b) with b = 1/(2T)
+  have h_gauss : ∫ x : ℝ, exp (-(1/(2*T)) * x^2) = sqrt (π / (1/(2*T))) :=
+    integral_gaussian _
+  simp only [Fin.prod_univ_three, h_gauss]
+  -- Simplify π / (1/(2T)) = 2πT
+  have h_simp : π / (1/(2*T)) = 2 * π * T := by field_simp
+  rw [h_simp]
+  -- √(2πT)³ = (2πT)^(3/2)
+  have h2piT_pos : (0:ℝ) < 2 * π * T := by positivity
+  have h_sqrt_cube : sqrt (2 * π * T) * sqrt (2 * π * T) * sqrt (2 * π * T) =
+      (2 * π * T) ^ ((3:ℝ)/2) := by
+    rw [show (3:ℝ)/2 = 1/2 + 1/2 + 1/2 from by ring]
+    rw [rpow_add h2piT_pos, rpow_add h2piT_pos]
+    simp [sqrt_eq_rpow]
+  rw [h_sqrt_cube]
+  exact div_mul_cancel₀ ρ (ne_of_gt (rpow_pos_of_pos h2piT_pos _))
 
 /-- **Non-vacuousness of CoulombConcreteTheorem42.**
 
@@ -265,15 +376,17 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
   -- (7) hSchwartz: Gaussian is UniformSchwartzDecay
   · constructor
     · -- hDecay: ‖iteratedFDeriv ℝ k eM v‖ * (1+‖v‖)^N ≤ C
-      intro N hk
+      intro N k hk_le
       obtain ⟨C, hC, hbound⟩ :=
-        equilibriumMaxwellian_schwartz_decay ρ_ion T hρ_ion hT N _
+        equilibriumMaxwellian_schwartz_decay ρ_ion T hρ_ion hT N k
       exact ⟨C, hC, fun _ v => hbound v⟩
     · -- hGradDecay: spatial gradient of constant function is 0
       intro N i
       refine ⟨1, one_pos, fun x v => ?_⟩
-      simp only [torusGradX, periodicLift, Function.comp]
-      simp [fderiv_const, ContinuousLinearMap.zero_apply, mul_comm]
+      simp only [torusGradX, periodicLift]
+      have : (fun y => equilibriumMaxwellian ρ_ion T v) ∘ torusMk =
+          fun _ => equilibriumMaxwellian ρ_ion T v := by ext; rfl
+      rw [this]; simp [fderiv_const]
   -- (8) hLogGrowth: polynomial log growth
   · obtain ⟨C_log, K_log, hLB⟩ := equilibriumMaxwellian_log_bound ρ_ion T hρ_ion hT
     exact ⟨C_log, K_log, fun _ => hLB⟩
@@ -281,25 +394,32 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
   · refine ⟨1 / T, 1, fun _ v i => ?_⟩
     rw [fderiv_equilibriumMaxwellian ρ_ion T hT v i]
     have hpos := equilibriumMaxwellian_pos ρ_ion T hρ_ion hT v
-    rw [abs_neg, abs_mul, abs_div, abs_of_pos hT, abs_of_pos hpos, pow_one]
+    rw [abs_mul, abs_neg, abs_div, abs_of_pos hT, abs_of_pos hpos, pow_one]
     have hvi : |v i| ≤ 1 + ‖v‖ :=
-      le_trans (norm_le_pi_norm v i) (le_add_of_nonneg_left one_nonneg)
+      le_trans (norm_le_pi_norm v i) (le_add_of_nonneg_left (by norm_num))
     calc |v i| / T * equilibriumMaxwellian ρ_ion T v
         ≤ (1 + ‖v‖) / T * equilibriumMaxwellian ρ_ion T v := by
           apply mul_le_mul_of_nonneg_right
-          · exact div_le_div_of_nonneg_right hvi hT
+          · exact div_le_div_of_nonneg_right hvi hT.le
           · exact hpos.le
       _ = 1 / T * (1 + ‖v‖) * equilibriumMaxwellian ρ_ion T v := by ring
   -- (10) hVlasov: Vlasov equation (Maxwellian in kernel of Landau operator)
   · intro x v
-    -- LHS: spatial gradient of constant is 0, E=B=0 so force term is 0
-    simp only [torusGradX, periodicLift, Function.comp, Pi.zero_apply]
-    simp only [fderiv_const, ContinuousLinearMap.zero_apply, dotProduct_zero, cross,
-      mul_zero, sub_zero, zero_mul, sub_self, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, zero_add]
-    -- RHS: LandauOperator eM v = 0 because integrand vanishes
+    -- Spatial gradient of constant is 0
+    have hgrad_zero : ∀ i : Fin 3,
+        torusGradX (fun y => equilibriumMaxwellian ρ_ion T v) x i = 0 := by
+      intro i; simp only [torusGradX, periodicLift]
+      have : (fun y => equilibriumMaxwellian ρ_ion T v) ∘ torusMk =
+          fun _ => equilibriumMaxwellian ρ_ion T v := by ext; rfl
+      rw [this]; simp [fderiv_const]
+    -- LandauOperator eM v = 0 because integrand vanishes
     suffices h : LandauOperator coulombKernel (equilibriumMaxwellian ρ_ion T) v = 0 by
-      simp [h]
+      have hd : v ⬝ᵥ (fun i => torusGradX (fun y =>
+          equilibriumMaxwellian ρ_ion T v) x i) = 0 := by
+        simp only [dotProduct, hgrad_zero, mul_zero, Finset.sum_const_zero]
+      simp only [hd, h, mul_zero, zero_add]
+      unfold cross; simp [dotProduct, vGrad, Fin.sum_univ_three, mul_zero,
+        sub_zero, zero_mul, sub_self]
     -- The integrand is 0 for all w: A(v-w) · (eM(w)·∇eM(v) - eM(v)·∇eM(w)) = 0
     -- because the vector argument is proportional to (v-w) and A(z)·z = 0
     unfold LandauOperator vDiv
@@ -336,16 +456,43 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
   -- (11) hAmpere: Ampere's law (curl 0 = ∫ vᵢ eM dv)
   · intro x
     ext i
-    simp only [torusCurlX, periodicLift, Function.comp, Pi.zero_apply,
-      fderiv_const, ContinuousLinearMap.zero_apply, sub_self]
-    fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+    simp only [torusCurlX, periodicLift, Pi.zero_apply]
+    -- fderiv of (fun z => 0) ∘ torusMk = fderiv of constant = 0
+    have hzero : ∀ (j : Fin 3) (p : Fin 3 → ℝ),
+        fderiv ℝ (fun y => ((fun _ : Torus3 => (0 : ℝ)) ∘ torusMk) y) p (Pi.single j 1) = 0 := by
+      intro j p
+      have : ((fun _ : Torus3 => (0 : ℝ)) ∘ torusMk) = fun _ => (0 : ℝ) := by ext; rfl
+      rw [show (fun y => ((fun _ : Torus3 => (0 : ℝ)) ∘ torusMk) y) =
+          (fun _ => (0 : ℝ)) from by ext; rfl]
+      simp [fderiv_const]
+    simp only [hzero, sub_self]
+    -- ∫ vᵢ * eM = 0 by odd symmetry of Gaussian
+    have hint := integral_coord_mul_equilibriumMaxwellian_eq_zero ρ_ion T i
+    fin_cases i <;> simp_all [Matrix.cons_val_zero, Matrix.cons_val_one]
   -- (12) hGauss: Gauss's law
   · intro x
-    simp [torusDivX, periodicLift, Function.comp, Pi.zero_apply,
-      fderiv_const, ContinuousLinearMap.zero_apply]
+    simp only [torusDivX, periodicLift]
+    -- Each summand: fderiv of (fun z => 0 i) ∘ torusMk = 0
+    have hzero : ∀ j : Fin 3,
+        fderiv ℝ (fun y => ((fun z : Torus3 => (0 : Fin 3 → ℝ) j) ∘ torusMk) y)
+          (torusMk_surjective x).choose (Pi.single j 1) = 0 := by
+      intro j
+      rw [show (fun y => ((fun z : Torus3 => (0 : Fin 3 → ℝ) j) ∘ torusMk) y) =
+          (fun _ => (0 : ℝ)) from by ext; simp]
+      simp [fderiv_const]
+    simp only [hzero, Finset.sum_const_zero]
+    -- ∫ eM(v) dv = ρ_ion (Gaussian normalization)
+    linarith [integral_equilibriumMaxwellian ρ_ion T hT]
   -- (13) hDivB: divergence of B = 0
   · intro x
-    simp only [torusDivX, periodicLift, Function.comp, Pi.zero_apply]
-    simp [fderiv_const, ContinuousLinearMap.zero_apply]
+    simp only [torusDivX, periodicLift]
+    have hzero : ∀ j : Fin 3,
+        fderiv ℝ (fun y => ((fun z : Torus3 => (0 : Fin 3 → ℝ) j) ∘ torusMk) y)
+          (torusMk_surjective x).choose (Pi.single j 1) = 0 := by
+      intro j
+      rw [show (fun y => ((fun z : Torus3 => (0 : Fin 3 → ℝ) j) ∘ torusMk) y) =
+          (fun _ => (0 : ℝ)) from by ext; simp]
+      simp [fderiv_const]
+    simp only [hzero, Finset.sum_const_zero]
 
 end VML
