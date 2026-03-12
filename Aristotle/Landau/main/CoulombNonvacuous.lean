@@ -67,14 +67,14 @@ lemma fderiv_equilibriumMaxwellian (ρ T : ℝ) (hT : 0 < T) (v : Fin 3 → ℝ)
       differentiableAt_apply j v
     have hd_proj : fderiv ℝ (fun w : Fin 3 → ℝ => w j) v (Pi.single i 1) =
         if j = i then 1 else 0 := by
-      rw [show (fun w : Fin 3 → ℝ => w j) = (ContinuousLinearMap.proj j : (Fin 3 → ℝ) →L[ℝ] ℝ) from rfl,
+      rw [show (fun w : Fin 3 → ℝ => w j) =
+        (ContinuousLinearMap.proj j : (Fin 3 → ℝ) →L[ℝ] ℝ) from rfl,
         ContinuousLinearMap.fderiv]
       simp [ContinuousLinearMap.proj_apply, Pi.single_apply]
     rw [fderiv_fun_mul hd1 hd1]
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul, hd_proj]
     ring
-  simp only [ContinuousLinearMap.sum_apply, hfderiv_sq, Fin.sum_univ_three,
-    Function.comp_apply, equilibriumMaxwellian, normSq, dotProduct]
+  simp only [hfderiv_sq, Fin.sum_univ_three]
   fin_cases i <;> simp <;> ring
 
 /-- Exponential decay lower bound for equilibrium Maxwellian:
@@ -258,7 +258,7 @@ lemma equilibriumMaxwellian_log_bound (ρ T : ℝ) (hρ : 0 < ρ) (hT : 0 < T) :
       simp only [torusGradX, periodicLift]
       have : (fun y => equilibriumMaxwellian ρ T v) ∘ torusMk =
           fun _ => equilibriumMaxwellian ρ T v := by ext; rfl
-      rw [this]; simp [fderiv_const]⟩⟩
+      rw [this]; simp⟩⟩
     ((equilibriumMaxwellian_exp_lower_bound ρ T hρ hT).imp
       fun C hC => hC.imp fun K hCK => fun _ => hCK)
   exact ⟨C_log, K_log, fun v => hbound default v⟩
@@ -367,11 +367,11 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
       (contDiff_apply ℝ ℝ i).mul (contDiff_apply ℝ ℝ i)
   -- (5) hf_smooth_x: periodicLift of constant is C^∞
   · intro v
-    simp only [periodicLift, Function.comp]
+    simp only [periodicLift]
     exact contDiff_const
   -- (6) hB_smooth: periodicLift of zero is C^∞
   · intro i
-    simp only [periodicLift, Function.comp, Pi.zero_apply]
+    simp only [periodicLift, Pi.zero_apply]
     exact contDiff_const
   -- (7) hSchwartz: Gaussian is UniformSchwartzDecay
   · constructor
@@ -386,7 +386,7 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
       simp only [torusGradX, periodicLift]
       have : (fun y => equilibriumMaxwellian ρ_ion T v) ∘ torusMk =
           fun _ => equilibriumMaxwellian ρ_ion T v := by ext; rfl
-      rw [this]; simp [fderiv_const]
+      rw [this]; simp
   -- (8) hLogGrowth: polynomial log growth
   · obtain ⟨C_log, K_log, hLB⟩ := equilibriumMaxwellian_log_bound ρ_ion T hρ_ion hT
     exact ⟨C_log, K_log, fun _ => hLB⟩
@@ -411,7 +411,7 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
       intro i; simp only [torusGradX, periodicLift]
       have : (fun y => equilibriumMaxwellian ρ_ion T v) ∘ torusMk =
           fun _ => equilibriumMaxwellian ρ_ion T v := by ext; rfl
-      rw [this]; simp [fderiv_const]
+      rw [this]; simp
     -- LandauOperator eM v = 0 because integrand vanishes
     suffices h : LandauOperator coulombKernel (equilibriumMaxwellian ρ_ion T) v = 0 by
       have hd : v ⬝ᵥ (fun i => torusGradX (fun y =>
@@ -419,11 +419,10 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
         simp only [dotProduct, hgrad_zero, mul_zero, Finset.sum_const_zero]
       simp only [hd, h, mul_zero, zero_add]
       unfold cross; simp [dotProduct, vGrad, Fin.sum_univ_three, mul_zero,
-        sub_zero, zero_mul, sub_self]
+        zero_mul, sub_self]
     -- The integrand is 0 for all w: A(v-w) · (eM(w)·∇eM(v) - eM(v)·∇eM(w)) = 0
     -- because the vector argument is proportional to (v-w) and A(z)·z = 0
     unfold LandauOperator vDiv
-    simp only [Pi.single_eq_same]
     -- Show the flux function is identically 0
     have hflux_zero : ∀ v', (∫ w, mulVec (landauMatrix coulombKernel (v' - w))
         (equilibriumMaxwellian ρ_ion T w • vGrad (equilibriumMaxwellian ρ_ion T) v' -
@@ -444,15 +443,14 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
             fderiv_equilibriumMaxwellian ρ_ion T hT v' i,
             fderiv_equilibriumMaxwellian ρ_ion T hT w i]
           ring
-        rw [hbracket, Matrix.mulVec_smul_assoc, landauMatrix_mulVec_self, smul_zero]
+        rw [hbracket, Matrix.mulVec_smul, landauMatrix_mulVec_self, smul_zero]
       simp [h_integrand]
     -- vDiv of zero function = 0
     have : ∀ i, fderiv ℝ (fun w => (0 : Fin 3 → ℝ) i) v (Pi.single i 1) = 0 := by
-      intro i; simp [fderiv_const]
+      intro i; simp
     conv => arg 2; rw [show (0:ℝ) = ν * 0 from by ring]
-    congr 1
     simp only [hflux_zero]
-    simp [fderiv_const, ContinuousLinearMap.zero_apply]
+    simp [ContinuousLinearMap.zero_apply]
   -- (11) hAmpere: Ampere's law (curl 0 = ∫ vᵢ eM dv)
   · intro x
     ext i
@@ -464,7 +462,7 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
       have : ((fun _ : Torus3 => (0 : ℝ)) ∘ torusMk) = fun _ => (0 : ℝ) := by ext; rfl
       rw [show (fun y => ((fun _ : Torus3 => (0 : ℝ)) ∘ torusMk) y) =
           (fun _ => (0 : ℝ)) from by ext; rfl]
-      simp [fderiv_const]
+      simp
     simp only [hzero, sub_self]
     -- ∫ vᵢ * eM = 0 by odd symmetry of Gaussian
     have hint := integral_coord_mul_equilibriumMaxwellian_eq_zero ρ_ion T i
@@ -479,7 +477,7 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
       intro j
       rw [show (fun y => ((fun z : Torus3 => (0 : Fin 3 → ℝ) j) ∘ torusMk) y) =
           (fun _ => (0 : ℝ)) from by ext; simp]
-      simp [fderiv_const]
+      simp
     simp only [hzero, Finset.sum_const_zero]
     -- ∫ eM(v) dv = ρ_ion (Gaussian normalization)
     linarith [integral_equilibriumMaxwellian ρ_ion T hT]
@@ -492,7 +490,30 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
       intro j
       rw [show (fun y => ((fun z : Torus3 => (0 : Fin 3 → ℝ) j) ∘ torusMk) y) =
           (fun _ => (0 : ℝ)) from by ext; simp]
-      simp [fderiv_const]
+      simp
     simp only [hzero, Finset.sum_const_zero]
+
+/-- **Full round-trip for CoulombConcreteTheorem42.**
+
+    Not only are the 13 hypotheses simultaneously satisfiable
+    (`CoulombConcreteTheorem42_nonvacuous`), but applying the main theorem
+    to the equilibrium Maxwellian witnesses produces the expected
+    conclusion: f is a global Maxwellian, E = 0, B = const.
+
+    This closes the loop: the theorem is non-vacuous AND the conclusion
+    actually holds for a concrete physical configuration. -/
+theorem CoulombConcreteTheorem42_roundtrip (ν T ρ_ion : ℝ)
+    (hν : 0 < ν) (hT : 0 < T) (hρ_ion : 0 < ρ_ion) :
+    ∃ (f : Torus3 → (Fin 3 → ℝ) → ℝ) (E B : Torus3 → Fin 3 → ℝ),
+    ∃ (T_eq : ℝ) (B₀ : Fin 3 → ℝ), 0 < T_eq ∧
+    (∀ x v, f x v = equilibriumMaxwellian ρ_ion T_eq v) ∧
+    (∀ x, E x = 0) ∧
+    (∀ x, B x = B₀) := by
+  obtain ⟨f, E, B, hf_pos, hf_sv, hf_sx, hB_s, hSch, hLog, hGrad,
+         hVlasov, hAmpere, hGauss, hDivB⟩ :=
+    CoulombConcreteTheorem42_nonvacuous ν T ρ_ion hν hT hρ_ion
+  exact ⟨f, E, B,
+    CoulombConcreteTheorem42 f E B ν ρ_ion hν hρ_ion hf_pos hf_sv hf_sx
+      hB_s hSch hLog hGrad hVlasov hAmpere hGauss hDivB⟩
 
 end VML

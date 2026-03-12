@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-11 UTC — Babysit cycle 116: Simp cleanup, long line fixes, round-trip theorem
+
+### Changes
+- **CoulombNonvacuous.lean**: Removed ~18 unused simp arguments and replaced deprecated `Matrix.mulVec_smul_assoc` → `Matrix.mulVec_smul` (critique issues 6d, 6e).
+- **CoulombFluxConv.lean**: Fixed 10 long lines (>100 chars) by breaking at natural points (critique issue 6c).
+- **CoulombNonvacuous.lean**: Added `CoulombConcreteTheorem42_roundtrip` theorem — applies `CoulombConcreteTheorem42` to the equilibrium Maxwellian witnesses, demonstrating the full round-trip: hypotheses are satisfiable AND the conclusion holds (critique issue 8b). Verified with `lean_verify`: only standard axioms (propext, Classical.choice, Quot.sound).
+- **MEMORY.md**: Updated line counts for CoulombNonvacuous (~500), CoulombFluxConv (~550), CoulombPSD (~462), total (~10,150). Fixed stale maxHeartbeats claim.
+
+### Sorry count: 0
+
 ## 2026-03-11 UTC — Babysit cycle 115: Add CoulombNonvacuous to build target, clean up dead parameters
 
 ### Changes

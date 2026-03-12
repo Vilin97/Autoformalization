@@ -70,7 +70,8 @@ private lemma inv_norm_bounded_integrable
     `ContinuousLinearMap.iteratedFDeriv_comp_left` + `norm_iteratedFDeriv_fderiv`. -/
 lemma schwartz_fderiv_component_schwartz
     (f : (Fin 3 → ℝ) → ℝ) (hf_smooth : ContDiff ℝ ⊤ f)
-    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
+    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 →
+      ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
     (j : Fin 3) (N : ℕ) {k : ℕ} (hk : k + 1 ≤ 2) :
     ∃ C > 0, ∀ v : Fin 3 → ℝ,
       ‖iteratedFDeriv ℝ k (fun w => fderiv ℝ f w (Pi.single j 1)) v‖ *
@@ -136,7 +137,10 @@ private lemma coulomb_entry_conv_hasFDerivAt_aux
   -- Extract |g| decay (k=0) for coulomb_entry_schwartz_integrable
   have hg_decay : ∀ N : ℕ, ∃ C > 0, ∀ v, |g v| * (1 + ‖v‖) ^ N ≤ C := by
     intro N; obtain ⟨C, hC, hb⟩ := hg_schwartz N (k := 0) (by norm_num)
-    exact ⟨C, hC, fun v => by have := hb v; simp only [norm_iteratedFDeriv_zero, Real.norm_eq_abs] at this; exact this⟩
+    exact ⟨C, hC, fun v => by
+      have := hb v
+      simp only [norm_iteratedFDeriv_zero, Real.norm_eq_abs] at this
+      exact this⟩
   -- Schwartz decay of ‖fderiv g‖ (k=1)
   have hfderiv_decay : ∀ N : ℕ, ∃ C > 0, ∀ w,
       ‖fderiv ℝ g w‖ * (1 + ‖w‖) ^ N ≤ C := by
@@ -295,7 +299,8 @@ lemma coulomb_entry_conv_deriv_bounded
   -- Uniform bound on convolution via newtonian_schwartz_uniform_bound
   obtain ⟨M, hM_pos, hM⟩ := newtonian_schwartz_uniform_bound
     (fun w => ‖fderiv ℝ g w‖) hfderiv_abs_decay
-    ((ContDiff.continuous (n := ⊤) (hg_smooth.fderiv_right (m := ⊤) le_top)).norm.aestronglyMeasurable)
+    ((ContDiff.continuous (n := ⊤)
+      (hg_smooth.fderiv_right (m := ⊤) le_top)).norm.aestronglyMeasurable)
   refine ⟨M + 1, by linarith, fun v => ?_⟩
   -- The fderiv in u-coordinates equals ∫ A(u) • fderiv(g)(v-u)
   -- We use HasFDerivAt.fderiv to get the concrete representation
@@ -322,7 +327,8 @@ lemma coulomb_entry_conv_deriv_bounded
         have h_dom : Integrable (fun u => ‖u‖⁻¹ * ‖fderiv ℝ g (v - u)‖) := by
           have := (inv_norm_schwartz_integrable (fun w => ‖fderiv ℝ g w‖)
             hfderiv_abs_decay
-            (ContDiff.continuous (n := ⊤) (hg_smooth.fderiv_right le_top)).norm.aestronglyMeasurable v)
+            (ContDiff.continuous (n := ⊤)
+              (hg_smooth.fderiv_right le_top)).norm.aestronglyMeasurable v)
           exact this.comp_sub_left v |>.congr (ae_of_all _ fun u => by
             change ‖v - (v - u)‖⁻¹ * ‖fderiv ℝ g (v - u)‖ = ‖u‖⁻¹ * ‖fderiv ℝ g (v - u)‖
             congr 2; congr 1; abel)
@@ -352,7 +358,8 @@ lemma coulomb_entry_conv_deriv_bounded
     Then flux_i is differentiable by product/sum rules. -/
 lemma coulomb_flux_differentiable
     (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
-    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
+    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 →
+      ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
     (i : Fin 3) :
     Differentiable ℝ (fun v =>
       (∫ w, mulVec (landauMatrix coulombKernel (v - w))
@@ -360,7 +367,10 @@ lemma coulomb_flux_differentiable
   -- Extract k=0 decay for coulomb_entry_schwartz_integrable
   have hf_decay : ∀ N : ℕ, ∃ C > 0, ∀ v, |f v| * (1 + ‖v‖) ^ N ≤ C := by
     intro N; obtain ⟨C, hC, hb⟩ := hf_schwartz N (k := 0) (by norm_num)
-    exact ⟨C, hC, fun v => by have := hb v; simp only [norm_iteratedFDeriv_zero, Real.norm_eq_abs] at this; exact this⟩
+    exact ⟨C, hC, fun v => by
+      have := hb v
+      simp only [norm_iteratedFDeriv_zero, Real.norm_eq_abs] at this
+      exact this⟩
   -- Lift hf_schwartz to the ∀ N {k}, k ≤ 1 form needed by coulomb_entry_conv_differentiable
   have hf_schwartz_le1 : ∀ (N : ℕ) {k : ℕ}, k ≤ 1 → ∃ C > 0, ∀ v,
       ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C :=
@@ -402,7 +412,10 @@ lemma coulomb_flux_differentiable
   have hdf_decay : ∀ j, ∀ N : ℕ, ∃ C > 0, ∀ v,
       |fderiv ℝ f v (Pi.single j 1)| * (1 + ‖v‖) ^ N ≤ C := by
     intro jj N; obtain ⟨C, hC, hb⟩ := hdf_schwartz jj N (k := 0) (by norm_num)
-    exact ⟨C, hC, fun v => by have := hb v; simp only [norm_iteratedFDeriv_zero, Real.norm_eq_abs] at this; exact this⟩
+    exact ⟨C, hC, fun v => by
+      have := hb v
+      simp only [norm_iteratedFDeriv_zero, Real.norm_eq_abs] at this
+      exact this⟩
   have h_Adf : ∀ v j, Integrable (fun w => landauMatrix coulombKernel (v - w) i j *
       fderiv ℝ f w (Pi.single j 1)) :=
     fun v j => coulomb_entry_schwartz_integrable _ (hf_smooth.fderiv_right le_top |>.clm_apply
@@ -452,7 +465,8 @@ lemma coulomb_flux_differentiable
     where K_j(v) = ∫ A_{ij}(v-w) f(w) dw and L_j(v) = ∫ A_{ij}(v-w) ∂_j f(w) dw. -/
 lemma coulomb_flux_eq_decomposed
     (f : (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ v, 0 < f v) (hf_smooth : ContDiff ℝ ⊤ f)
-    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
+    (hf_schwartz : ∀ (N : ℕ) {k : ℕ}, k ≤ 2 →
+      ∃ C > 0, ∀ v, ‖iteratedFDeriv ℝ k f v‖ * (1 + ‖v‖) ^ N ≤ C)
     (i : Fin 3) (v : Fin 3 → ℝ) :
     (∫ w, mulVec (landauMatrix coulombKernel (v - w))
       (f w • vGrad f v - f v • vGrad f w)) i =
@@ -464,12 +478,18 @@ lemma coulomb_flux_eq_decomposed
   -- Extract k=0 decay
   have hf_decay : ∀ N : ℕ, ∃ C > 0, ∀ v, |f v| * (1 + ‖v‖) ^ N ≤ C := by
     intro N; obtain ⟨C, hC, hb⟩ := hf_schwartz N (k := 0) (by norm_num)
-    exact ⟨C, hC, fun v => by have := hb v; simp only [norm_iteratedFDeriv_zero, Real.norm_eq_abs] at this; exact this⟩
+    exact ⟨C, hC, fun v => by
+      have := hb v
+      simp only [norm_iteratedFDeriv_zero, Real.norm_eq_abs] at this
+      exact this⟩
   have hdf_schwartz := fun j => schwartz_fderiv_component_schwartz f hf_smooth hf_schwartz j
   have hdf_decay : ∀ j, ∀ N : ℕ, ∃ C > 0, ∀ v,
       |fderiv ℝ f v (Pi.single j 1)| * (1 + ‖v‖) ^ N ≤ C := by
     intro jj N; obtain ⟨C, hC, hb⟩ := hdf_schwartz jj N (k := 0) (by norm_num)
-    exact ⟨C, hC, fun v => by have := hb v; simp only [norm_iteratedFDeriv_zero, Real.norm_eq_abs] at this; exact this⟩
+    exact ⟨C, hC, fun v => by
+      have := hb v
+      simp only [norm_iteratedFDeriv_zero, Real.norm_eq_abs] at this
+      exact this⟩
   have h_Af : ∀ j, Integrable (fun w => landauMatrix coulombKernel (v - w) i j * f w) :=
     fun j => coulomb_entry_schwartz_integrable f hf_smooth hf_decay v i j
   have h_Adf : ∀ j, Integrable (fun w => landauMatrix coulombKernel (v - w) i j *
