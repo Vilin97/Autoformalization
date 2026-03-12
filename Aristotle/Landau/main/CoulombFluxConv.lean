@@ -24,7 +24,7 @@ private lemma landauMatrix_coulombKernel_zero (i j : Fin 3) :
     Far from v: ‖v-w‖⁻¹ ≤ 1, so the product ≤ |g w| which is integrable. -/
 private lemma inv_norm_bounded_integrable
     {g : (Fin 3 → ℝ) → ℝ} {M : ℝ}
-    (hg_bounded : ∀ w, |g w| ≤ M) (hM : 0 < M)
+    (hg_bounded : ∀ w, |g w| ≤ M)
     (hg_int : Integrable g)
     (hg_meas : AEStronglyMeasurable g volume)
     (v : Fin 3 → ℝ) :
@@ -233,7 +233,7 @@ private lemma coulomb_entry_conv_hasFDerivAt_aux
     have h_bound_meas : AEStronglyMeasurable (fun w : Fin 3 → ℝ => D / (1 + ‖w‖) ^ 4) volume :=
       ((continuous_const.div ((continuous_const.add continuous_norm).pow 4)
         (fun w => by positivity)).measurable).aestronglyMeasurable
-    have h_w_int := inv_norm_bounded_integrable h_bound_fun hD_pos h_bound_int h_bound_meas v₀
+    have h_w_int := inv_norm_bounded_integrable h_bound_fun h_bound_int h_bound_meas v₀
     -- h_w_int : Integrable (fun w => ‖v₀ - w‖⁻¹ * (D / (1+‖w‖)^4))
     -- Substitute u = v₀ - w to get the u-coordinate form
     exact (h_w_int.comp_sub_left v₀).congr (ae_of_all _ fun u => by

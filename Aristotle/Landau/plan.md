@@ -1,57 +1,59 @@
-# Plan -- Cycle 116 (updated)
+# Plan -- Cycle 117 (updated)
 
 ## Status summary
 
 - **Sorry count**: 0
-- **Files**: 32 files, 10,147 lines
-- **Build**: CI passing (lean-action succeeded on commit 230054f)
-- **Critique verdict**: CONDITIONAL ACCEPT (cycle 116)
-- **Condition for ACCEPT**: Fix ~20 unused simp warnings, 1 deprecated API, 14 long lines
+- **Files**: 32 files, 10,188 lines
+- **Build**: CI passing locally; commit f43e39c CI in progress
+- **Critique verdict**: CONDITIONAL ACCEPT (cycle 117)
+- **Condition for ACCEPT**: Fix ~45 linter warnings across 6 files
 - **maxHeartbeats overrides**: 2 (NewtonianPotential.lean:86 at 800000, TorusIntegration.lean:85 at 400000)
 - **Aristotle jobs**: 0 pending, all done/failed/abandoned
-- **Open issues**: All Low severity (cosmetic cleanup)
+- **Open issues**: 1 Medium (linter warnings), rest Low
 
 ## This cycle's work items
 
-### 1. Clean up unused simp warnings in CoulombNonvacuous.lean (`/simplify`)
-- **What**: Critique issue 6d. ~20 linter warnings for unused simp arguments (`fderiv_const`, `Function.comp`, `ContinuousLinearMap.sum_apply`, etc.). These were introduced during the Mathlib v4.24.0 fix — the agent's rewrites left stale simp arguments.
-- **Files**: `CoulombNonvacuous.lean`
-- **Approach**: Remove unused arguments from simp calls. Verify each change doesn't break the proof.
-- **Risk**: Low. Removing unused simp args cannot change proof semantics.
+### 1. Fix linter warnings in NewtonianPotential.lean (`/simplify`)
+- **What**: Critique issue 6d. ~20+ warnings: unused simp args, unused variables (`hf_smooth`), multi-goal tactics, `ring_nf` suggestions.
+- **Files**: `NewtonianPotential.lean`
+- **Approach**: Address each warning type systematically. Remove unused simp args, fix multi-goal tactics, replace `ring` with `ring_nf` where suggested.
+- **Risk**: Low. Cosmetic changes only.
 - **START IMMEDIATELY.**
 
-### 2. Fix deprecated API usage (`/simplify`)
-- **What**: Critique issue 6e. `Matrix.mulVec_smul_assoc` at CoulombNonvacuous.lean:447 is deprecated → use `Matrix.mulVec_smul`.
-- **Files**: `CoulombNonvacuous.lean`
-- **Approach**: Replace `mulVec_smul_assoc` with `mulVec_smul`. The types differ slightly — verify with lean_goal.
-- **Risk**: Low. Mathlib provides the replacement.
+### 2. Fix linter warnings in TorusIntegration.lean (`/simplify`)
+- **What**: Critique issues 6d + 6e. ~8 warnings including 3 deprecated `integral_mul_left` → `integral_const_mul`, unused simp args, multi-goal tactics.
+- **Files**: `TorusIntegration.lean`
+- **Approach**: Replace deprecated API, remove unused simp args.
+- **Risk**: Low.
 
-### 3. Fix long lines in CoulombFluxConv.lean (`/simplify`)
-- **What**: Critique issue 6c. 10 lines over 100 chars in CoulombFluxConv.lean, introduced during Mathlib v4.24.0 fix.
-- **Files**: `CoulombFluxConv.lean`
-- **Approach**: Break long lines at natural points (after commas, before `→`, etc.).
-- **Risk**: None. Formatting only.
+### 3. Fix linter warnings in CoulombPSDHelpers.lean, CoulombFluxBound.lean (`/simplify`)
+- **What**: Critique issue 6d. ~11 warnings: `show` → `change`, unused simp args, long lines.
+- **Files**: `CoulombPSDHelpers.lean`, `CoulombFluxBound.lean`
+- **Approach**: Replace `show` with `change`, remove unused simp args, fix 2 long lines.
+- **Risk**: Low.
 
-### 4. Update MEMORY.md line counts (`/simplify`)
-- **What**: Critique issue 7b. CoulombNonvacuous listed as ~351 lines (actual: 498), CoulombFluxConv as ~373 (actual: 540).
+### 4. Fix CoulombFluxDiff line count in MEMORY.md (`/simplify`)
+- **What**: Critique issue 7a. MEMORY.md says ~250, actual is 320.
 - **Files**: MEMORY.md
-- **Approach**: Update line counts for the 2 stale entries.
+- **Approach**: Update the line count.
 - **Risk**: None.
 
-### 5. Weaken hypothesis 4 from ContDiff ℝ ⊤ to ContDiff ℝ 3 (`/strengthen`)
-- **What**: Critique issue 8a. The abstract theorem only needs C³. The concrete theorem uses C∞ and downcasts. Tightening this makes the theorem statement more honest.
-- **Files**: `CoulombConcreteTheorem42.lean` (line 72)
-- **Approach**: Change `ContDiff ℝ ⊤` to `ContDiff ℝ 3` in hypothesis 4. Verify the proof still works (it uses `.of_le le_top` to downcast, which would become `.of_le (by norm_num)`).
-- **Risk**: Low-Medium. Need to verify all 19 VelocityDecayConditions fields still compile. The Schwartz decay implies C∞ anyway so all integrability arguments go through.
+### 5. Strengthen roundtrip with uniqueness (`/strengthen`)
+- **What**: Critique issue 8e. `CoulombConcreteTheorem42_roundtrip` doesn't include T_eq uniqueness. `_unique_T` already proves this separately.
+- **Files**: `CoulombNonvacuous.lean`
+- **Approach**: Add uniqueness assertion to roundtrip conclusion, using `_unique_T` or `equilibriumMaxwellian_T_unique`.
+- **Risk**: Low. ~5 lines.
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
-| CoulombNonvacuous should apply main theorem | Strengthen | Critique 8b. Proves hypotheses satisfiable but doesn't produce equilibrium conclusion. |
 | 2 maxHeartbeats overrides (800000 + 400000) | Code quality | Critique 6a. Investigate for simplification. |
 | Section3Helpers.lean 613 lines | Code quality | Just over 500-line guideline; tightly coupled. |
+| Weaken ContDiff ℝ ⊤ → ContDiff ℝ 3 | Strengthen | Critique 8a. Touches all 12 Coulomb files. |
 | Gaussian integral lemmas not generalized | Strengthen | Critique 8c. Could extract to reusable module. |
-| Dimension generalization (Fin n) | Feature | Hard; 3D-specific throughout. |
 | Maxwell molecules kernel instance | Feature | Easy win ~100 lines. |
+| Dimension generalization (Fin n) | Feature | Hard; 3D-specific throughout. |
 | Mathlib PR candidates (4 lemmas) | Upstream | inverse_poly_integrable, schwartz_pointwise_decay, etc. |
+| CoulombFluxConv unused variable `hM` | Code quality | Line 27; pre-existing. |
+| Section3Helpers `ring_nf` suggestions | Code quality | ~4 info-level suggestions. |
