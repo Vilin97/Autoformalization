@@ -14,6 +14,7 @@
 blueprint/web/
 blueprint/print/
 blueprint/lean_decls
+blueprint/env/
 *.paux
 
 # Claude Code sandbox artifacts
