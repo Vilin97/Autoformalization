@@ -1,255 +1,159 @@
-# Adversarial Critique -- 2026-03-11 UTC (Cycle 115, Hostile Review)
+# Adversarial Critique -- 2026-03-12 UTC (Cycle 116, Hostile Review)
 
 ## Verdict: CONDITIONAL ACCEPT
 
 ---
 
-## 0. Errors
+## 0. CI Status
 
-`lake build Aristotle.Landau.main.CoulombConcreteTheorem42` -- **clean, 0 errors.**
+`lean-action@v1` (lake build) on commit 230054f: **SUCCESS** (run 22981560306).
 
-`lean_verify` on `VML.CoulombConcreteTheorem42`: **0 axioms, 0 warnings.**
-`lean_verify` on `VML.CoulombConcreteTheorem42_unique_T`: **0 axioms, 0 warnings.**
+`lean_verify` on `VML.CoulombConcreteTheorem42`: propext, Classical.choice, Quot.sound. **Clean.**
+`lean_verify` on `VML.CoulombConcreteTheorem42_unique_T`: same. **Clean.**
+`lean_verify` on `VML.CoulombConcreteTheorem42_nonvacuous`: same. **Clean.**
 
-`lake env lean` on all 32 files individually: **0 errors, 0 warnings.**
-
-**However: `CoulombNonvacuous.lean` is NOT included in the default build target.** The root `Aristotle.lean` only imports `CoulombConcreteTheorem42`. Running `lake build` does not compile the nonvacuousness theorem. It must be built explicitly with `lake build Aristotle.Landau.main.CoulombNonvacuous`. Verified: it does compile cleanly when explicitly requested.
-
-**ISSUE (Medium): The nonvacuousness theorem is not part of the default build.** Add `import Aristotle.Landau.main.CoulombNonvacuous` to `Aristotle.lean` so that `lake build` verifies the full claim.
+`Aristotle.lean` imports both `CoulombConcreteTheorem42` and `CoulombNonvacuous`. Default build covers both. **Fixed** from cycle 115.
 
 ---
 
 ## 1. Sorry's
 
-**0 sorry's** across all 32 files (9,599 lines). The only occurrences of "sorry" are in documentation comments (CoulombNonvacuous.lean:212, TorusInstance.lean:355,464). No `admit`, `native_decide`, `unsafe`, `implemented_by`, `extern`, or `opaque` found. No `decide` calls anywhere.
+**0 sorry's** across 32 files (10,147 lines). The only occurrences of "sorry" are in documentation comments. No `admit`, `native_decide`, `unsafe`, `implemented_by`, `extern`, or `opaque` found.
 
 ---
 
 ## 2. Hidden Axioms
 
-`lean_verify` confirms **0 non-standard axioms** on both `VML.CoulombConcreteTheorem42` and `VML.CoulombConcreteTheorem42_unique_T`. The proofs depend only on the standard Lean 4 axioms (propext, Quot.sound, Classical.choice) inherited from Mathlib.
-
-No `axiom` declarations in user code. The word "axiom" appears only in documentation comments (Defs.lean lines 373-376, 457-458) explaining design choices for FlatTorus3 fields.
-
-No `synthInstance.maxHeartbeats` overrides anywhere.
+All three main theorems verified with only standard axioms (propext, Classical.choice, Quot.sound). No non-standard axioms. **Sound.**
 
 ---
 
 ## 3. Circularity
 
-The import DAG is acyclic. The 32 files decompose into two clean layers:
-
-**Abstract layer** (kernel-independent):
-```
-Defs -> VelocityDecayInstance (standalone helper)
-     -> FlatTorus3Lemmas -> Section2, Section3Helpers -> Section3 -> Section4, Section5
-     -> VMLStructures -> Section6, Section7, Section8
-     -> VMLInputDerive -> Theorem42
-```
-
-**Concrete layer** (Coulomb + Torus):
-```
-Defs -> TorusDefs -> TorusIntegration -> TorusInstance
-Theorem42, TorusInstance -> SchwartzDecayDefs -> CoulombKernel -> GaussianHelpers
-CoulombKernel -> CoulombSpatialTransport, CoulombFlux, CoulombFluxBound,
-                 CoulombFluxConv, CoulombFluxDiff, CoulombForceTransport,
-                 NewtonianPotential, CoulombPSDHelpers, CoulombPSD
-All Coulomb files -> CoulombConcreteTheorem42
-IteratedDerivHelpers -> CoulombNonvacuous (ISOLATED -- not imported by anything)
-```
-
-**Note:** `CoulombNonvacuous.lean` imports only `IteratedDerivHelpers` and is NOT imported by any other file. It is a standalone verification. No file imports `CoulombConcreteTheorem42` to use the nonvacuousness theorem in further proofs. This is architecturally correct (nonvacuousness is a meta-theorem) but means a build regression in it would go unnoticed.
-
-No circular imports. **Sound.**
+Import DAG remains acyclic. `CoulombNonvacuous.lean` is now in the default build target (Aristotle.lean). No circular imports. **Sound.**
 
 ---
 
 ## 4. Hypothesis Audit
 
-### 4a. FlatTorus3 typeclass (23 property fields)
-
-All 23 fields proved in `TorusInstance.lean` for `Torus3 = Fin 3 -> AddCircle 1`.
-
-- **hSpatialVelocityFubini (Defs.lean:481-484):** The abstract signature takes only joint integrability `Integrable (Function.uncurry F) (volume.prod volume)`. The concrete helper `torus_hSpatialVelocityFubini` (TorusDefs.lean:258) still carries an extra `(hF : forall x, Integrable (F x))` argument that is unused in the proof body (line 262: `exact integral_integral_swap hF_joint`). The concrete instance (TorusInstance.lean:439-441) correctly only passes joint integrability. **Sound but the TorusDefs helper has a dead parameter.**
-
-- **IsSpatiallyDiff := ContDiff R top (periodicLift f)**: Stronger than needed (C-infinity vs C2). Deliberate design choice for `hDiff_grad` closure. Not a correctness issue.
-
-All 23 fields: **VERIFIED SOUND**.
-
-### 4b. VelocityDecayConditions (19 fields)
-
-All 19 fields proved in `CoulombConcreteTheorem42.lean` for Coulomb. Each is non-trivially exercised in the abstract proof chain.
+Same as cycle 115. All 13 hypotheses are necessary and independent. Counterexamples for independence of hGradBound and hLogGrowth are documented. **Sound.**
 
 ---
 
-## 5. Hypothesis Audit of the Main Theorem
+## 5. Mathematical Correctness
 
-`CoulombConcreteTheorem42` takes 13 hypotheses. Re-examined from scratch:
+**Sound.** No changes to the abstract proof chain. Two new lemmas in CoulombNonvacuous.lean are mathematically correct:
 
-| # | Name | Type | Necessary? | Notes |
-|---|------|------|------------|-------|
-| 1 | hnu | 0 < nu | Yes | Factors out in transport entropy equation |
-| 2 | hrho_ion | 0 < rho_ion | Yes | Gaussian normalization |
-| 3 | hf_pos | forall x v, 0 < f x v | Yes | log f well-defined, score form |
-| 4 | hf_smooth_v | forall x, ContDiff R top (f x) | Yes* | Stronger than C3 needed by abstract chain |
-| 5 | hf_smooth_x | forall v, ContDiff R top (periodicLift (...)) | Yes* | Matches IsSpatiallyDiff = C-infinity |
-| 6 | hB_smooth | forall i, ContDiff R top (periodicLift (...)) | Yes* | Matches IsSpatiallyDiff = C-infinity |
-| 7 | hSchwartz | UniformSchwartzDecay f | Yes | All integrability conditions |
-| 8 | hLogGrowth | poly log growth | Yes | Flux x log integrability |
-| 9 | hGradBound | poly score bound | Yes | PSD integrability for Coulomb |
-| 10 | hVlasov | Vlasov equation | Yes | Core PDE |
-| 11 | hAmpere | Ampere's law | Yes | curl B = J |
-| 12 | hGauss | Gauss's law | Yes | div E = rho - rho_ion |
-| 13 | hDivB | div B = 0 | Yes | Solenoidal constraint |
-
-**(*) Smoothness strength:** The concrete theorem requires `ContDiff R top` for velocity regularity (hypothesis 4) but the abstract `Theorem42` only needs `ContDiff R 3`. The coercion at line 205 (`.of_le le_top`) explicitly downcasts. The Coulomb-specific integrability lemmas derive higher regularity from `hSchwartz` (which implies C-infinity), not from `hf_smooth_v`. So `ContDiff R 3` would suffice. This is documented in the theorem's docstring and is an honest design choice.
-
-**Independence of hypotheses 7-9:** The docstring (lines 37-58) provides explicit counterexamples for independence of hGradBound from hSchwartz+hLogGrowth, and of hLogGrowth from hSchwartz. **Verified: documentation is accurate.**
+- `integral_coord_mul_equilibriumMaxwellian_eq_zero`: Uses `integral_neg_eq_self` to show ∫ vᵢ * eM(v) dv = 0 by odd symmetry. Correct.
+- `integral_equilibriumMaxwellian`: Uses Fubini (`integral_fintype_prod_eq_prod`) + `integral_gaussian` to show ∫ eM(v) dv = ρ. The algebra is verified by Lean. Correct.
 
 ---
 
-## 6. Mathematical Correctness
+## 6. Code Quality
 
-### 6a. Proof chain
+### 6a. maxHeartbeats overrides
 
-The proof follows the standard Desvillettes-Villani-Guo structure:
-1. H-theorem: D(f) <= 0 (Landau matrix PSD)
-2. Transport entropy: integral of D = 0 on T^3 (Vlasov + IBP)
-3. D(f) = 0 at each x (nonneg continuous function with zero integral on compact domain)
-4. D = 0 => local Maxwellian (PSD equality => parallel scores => affine gradient => log-quadratic)
-5. Polynomial matching (temperature constant, Killing equation, force balance)
-6. Drift = 0 (Ampere + Stokes on T^3)
-7. Density constant (Poisson-Boltzmann + maximum principle)
-8. E = 0 (force balance + grad a = 0)
-9. B constant (curl = 0, div = 0, harmonic on T^3)
+**2 remaining:**
+- `NewtonianPotential.lean:86` — `set_option maxHeartbeats 800000 in`
+- `TorusIntegration.lean:85` — `set_option maxHeartbeats 400000 in`
 
-Each step is correctly implemented. **Sound.**
+**ISSUE (Low): 2 maxHeartbeats overrides remain.** The 800000 in NewtonianPotential is at the threshold. Both should be investigated for simplification.
 
-### 6b. Coulomb kernel definition
-
-`coulombKernel r = if r <= 0 then 1 else r ^ (-3 : R)`.
-
-Extension to r <= 0 is irrelevant: `landauMatrix Psi z` includes the factor `(|z|^2 I - zz^T)` which is zero at z = 0. Setting Psi(0) = 1 ensures global positivity (`coulombKernel_pos`). **Sound.**
-
-### 6c. Fubini symmetrization
-
-`fubini_symmetrization_logf` (Section3.lean) correctly implements the I1 - I2 = 2*I1 identity via Fubini swap + `landauMatrix_sub_comm` + flux antisymmetry. **Sound.**
-
-### 6d. Nonvacuousness
-
-`CoulombConcreteTheorem42_nonvacuous` (CoulombNonvacuous.lean:226) constructs f = equilibriumMaxwellian, E = 0, B = 0 and verifies all 13 hypotheses. Key non-trivial verifications:
-- (7) Schwartz decay via Faa di Bruno + polynomial-times-Gaussian bounds
-- (9) Gradient bound from `fderiv_equilibriumMaxwellian`: `|partial_i eM| = |v_i/T| * eM <= (1+||v||)/T * eM`
-- (10) Vlasov: integrand vanishes by `landauMatrix_mulVec_self` (projection annihilation A(z)z = 0)
-- (11) Ampere: curl(0) = 0 = integral(v_i * eM) (odd integrand against symmetric measure)
-
-All verified by Lean kernel. **Sound.**
-
-### 6e. Unique temperature
-
-`CoulombConcreteTheorem42_unique_T` (line 212) extends the main theorem with T-uniqueness via `equilibriumMaxwellian_T_unique`, which uses rpow injectivity. **Sound.**
-
----
-
-## 7. Code Quality
-
-### 7a. maxHeartbeats overrides
-
-**1 remaining.** `TorusIntegration.lean:85` has `set_option maxHeartbeats 400000 in` on `integral_derivative_periodic_zero`. The previous critique (cycle 114) incorrectly claimed "0 remaining" and "Verified fixed" -- this was a LIE. The override persists.
-
-**ISSUE (Low): 1 maxHeartbeats override at TorusIntegration.lean:85 (400000).** The previous critique falsely claimed this was fixed.
-
-### 7b. `simp +decide` and `aesop` usage
-
-0 remaining for both. Verified by grep. **Clean.**
-
-### 7c. Files over 500 lines
+### 6b. Files over 500 lines
 
 | File | Lines |
 |------|-------|
 | Section3Helpers.lean | 613 |
+| CoulombFluxConv.lean | 540 |
 | Defs.lean | 510 |
-| TorusInstance.lean | 491 |
-| GaussianHelpers.lean | 474 |
-| CoulombFluxBound.lean | 465 |
 
-Section3Helpers.lean at 613 lines is the largest. Contains tightly coupled analytical lemmas. Acceptable.
+CoulombFluxConv grew from ~373 to 540 lines during the Mathlib v4.24.0 fix. The `inv_norm_bounded_integrable` helper and the expanded `hasFDerivAt` proof added ~170 lines. Acceptable but approaching the boundary.
 
-### 7d. Line length violations (> 100 chars)
+### 6c. Line length violations (> 100 chars)
 
 | File | Count |
 |------|-------|
-| CoulombFluxConv.lean | 3 |
-| CoulombFluxDiff.lean | 3 |
+| CoulombFluxConv.lean | 10 |
 | CoulombPSDHelpers.lean | 2 |
-| CoulombPSD.lean | 3 |
+| CoulombNonvacuous.lean | 1 |
 | Section3Helpers.lean | 1 |
 
-The previous critique (cycle 114) incorrectly claimed Defs.lean:98 exceeds 100 chars. Verified: it does not. But 5 other files have long lines (12 total violations). Trivial.
+**ISSUE (Low): 14 long lines across 4 files.** CoulombFluxConv accounts for 10 of them — these were introduced during the Mathlib v4.24.0 fix and should be reformatted.
+
+### 6d. Unused simp arguments
+
+CoulombNonvacuous.lean has ~20 linter warnings for unused simp arguments (`fderiv_const`, `Function.comp`, `ContinuousLinearMap.sum_apply`, etc.) and 1 deprecated `Matrix.mulVec_smul_assoc`. These are cosmetic but noisy.
+
+**ISSUE (Low): ~20 unused simp argument warnings in CoulombNonvacuous.lean.** Clean up by removing unused arguments from simp calls.
+
+### 6e. Deprecated API usage
+
+CoulombNonvacuous.lean:447 uses `Matrix.mulVec_smul_assoc` which is deprecated in favor of `Matrix.mulVec_smul`.
+
+**ISSUE (Low): 1 deprecated Mathlib API usage in CoulombNonvacuous.lean:447.**
 
 ---
 
-## 8. Documentation Lies
+## 7. Documentation Lies
 
-### 8a. Defs.lean docstring: hSpatialVelocityFubini claim is FALSE
+### 7a. Defs.lean:378 docstring
 
-Line 378 says: "hSpatialVelocityFubini is stated without explicit integrability hypothesis at the abstract level".
+Line 378 now correctly states "hSpatialVelocityFubini requires joint integrability". **Fixed** from cycle 115.
 
-This is **false**. The actual definition (lines 481-484) takes `MeasureTheory.Integrable (Function.uncurry F) (volume.prod ...)` as an explicit hypothesis. The docstring is stale from a previous version of the code.
+### 7b. MEMORY.md line counts
 
-**ISSUE (Low): Defs.lean:378 docstring is factually incorrect about hSpatialVelocityFubini.**
+MEMORY.md line counts are approximate and noted as such. However, CoulombNonvacuous is listed as "~351 lines" but is now 498. CoulombFluxConv is listed as "~373 lines" but is now 540.
 
-### 8b. Previous critique (cycle 114) lies
-
-The previous critique contained at least 2 false claims:
-
-1. **Section 7a:** Claimed "0 remaining" maxHeartbeats overrides and "Verified fixed". FALSE: `TorusIntegration.lean:85` has `set_option maxHeartbeats 400000 in`. Still present.
-
-2. **Section 7f:** Claimed "Line 98 of Defs.lean still exceeds the 100-character soft limit". FALSE: line 98 is within 100 chars. The actual long-line violations are in 5 other files.
-
-3. **Section 9b:** Claimed the abstract hSpatialVelocityFubini has "unused first argument `(forall x, Integrable (F x))`". FALSE: the abstract definition (Defs.lean:481) does NOT have this argument. Only the concrete helper `torus_hSpatialVelocityFubini` (TorusDefs.lean:258) has it. The abstract axiom was correctly simplified.
-
-**ISSUE (Low): Previous critique was unreliable. Three factual claims were wrong.**
-
-### 8c. MEMORY.md is severely stale
-
-Persists from cycle 112:
-- Line counts are 3-4x off (e.g., "CoulombFlux.lean (~597 lines)" vs actual 186)
-- Lists 7 Coulomb files vs actual 12
-- Says "22 files, ~8,700 lines" vs actual 32 files, 9,599 lines
-
-**ISSUE (Low): MEMORY.md project statistics are stale.**
+**ISSUE (Low): MEMORY.md line counts for CoulombNonvacuous and CoulombFluxConv are stale.**
 
 ---
 
-## 9. Generalization Opportunities
+## 8. Generalization Opportunities
 
-### 9a. Weaken velocity smoothness from C-infinity to C3
+### 8a. Weaken velocity smoothness from C∞ to C³ (Feasible)
 
-The abstract theorem requires only `ContDiff R 3`. The concrete theorem uses `ContDiff R top` and downcasts. Could be weakened without changing proofs. Minor tightening.
+The abstract theorem requires only `ContDiff ℝ 3`. The concrete theorem uses `ContDiff ℝ ⊤` and downcasts via `.of_le le_top`. This is an honest design choice documented in the docstring, but the hypothesis COULD be weakened to `ContDiff ℝ 3` without changing any proof. This would make the theorem statement tighter. **Feasibility: 1 line change + verify.**
 
-### 9b. Dead parameter in torus_hSpatialVelocityFubini
+### 8b. CoulombNonvacuous should apply the main theorem (Medium)
 
-`torus_hSpatialVelocityFubini` (TorusDefs.lean:258) takes `hF : forall x, Integrable (F x)` but only uses `hF_joint` in the proof body. The parameter should be removed.
+`CoulombConcreteTheorem42_nonvacuous` proves all 13 hypotheses are simultaneously satisfiable but does NOT actually apply `CoulombConcreteTheorem42` to derive the conclusion. A stronger statement would be:
 
-### 9c. Dimension generalization to Fin n (HARD)
+```lean
+theorem CoulombConcreteTheorem42_nonvacuous' :
+    ∃ f E B ν ρ_ion, <all hypotheses> ∧
+    ∃ T_eq B₀, 0 < T_eq ∧ <conclusion holds>
+```
 
-Everything hardcoded to `Fin 3`. Cross product, Killing equation, Coulomb kernel all 3D-specific.
+This would demonstrate the full round-trip: hypotheses are satisfiable AND the conclusion holds. **Feasibility: ~10 lines, import CoulombConcreteTheorem42.**
 
-### 9d. CoulombNonvacuous should import the concrete theorem
+### 8c. Extract Gaussian integral lemmas to a reusable module (Low)
 
-Currently `CoulombNonvacuous.lean` proves the 13 hypotheses are satisfiable but does NOT apply `CoulombConcreteTheorem42` to get the conclusion. It merely proves each hypothesis separately. A stronger nonvacuousness result would import the main theorem and show it applies, producing the actual equilibrium. This would also ensure the nonvacuousness proof and the main theorem stay in sync.
+`integral_coord_mul_equilibriumMaxwellian_eq_zero` and `integral_equilibriumMaxwellian` are specific to `equilibriumMaxwellian` but the techniques (odd symmetry, Fubini factorization of product Gaussians) are general. Could be generalized to:
+
+```lean
+lemma integral_coord_mul_gaussian_eq_zero (b : ℝ) (hb : 0 < b) (i : Fin n) :
+    ∫ v : Fin n → ℝ, v i * exp (-b * ‖v‖^2) = 0
+```
+
+**Feasibility: Medium. Would be a good Mathlib PR candidate.**
+
+### 8d. Extend kernel coverage beyond Coulomb (Hard)
+
+The abstract `Theorem42` works for any kernel satisfying `VelocityDecayConditions`. The concrete instantiation covers only Coulomb (Ψ(r) = r⁻³). Other physically relevant kernels:
+- Maxwell molecules: Ψ = const (trivial, all integrability conditions immediate)
+- Hard spheres: Ψ(r) = r (bounded, should be easier than Coulomb)
+- Soft potentials: Ψ(r) = r^γ for -3 < γ < 0
+
+Maxwell molecules would be a quick win (~100 lines). **Feasibility: Low effort for Maxwell, medium for hard spheres.**
 
 ---
 
-## 10. Mathlib Upstreamability
+## 9. Mathlib Upstreamability
 
-Candidates:
-1. **`inverse_poly_integrable`** (SchwartzDecayDefs.lean) -- generalize to Fin n, exponent > n
-2. **`schwartz_pointwise_decay`**, **`schwartz_fderiv_component_decay`** (SchwartzDecayDefs.lean) -- Schwartz decay extraction
-3. **`lorentz_component_bound`** (VelocityDecayInstance.lean) -- Lorentz force bound, clean self-contained lemma
-4. **`norm_fderiv_eq_iteratedFDeriv_one`** (IteratedDerivHelpers.lean) -- fderiv/iteratedFDeriv relation
-5. **`poly_mul_gaussian_le`** (CoulombNonvacuous.lean) -- polynomial times Gaussian bound
+1. **`integral_gaussian` factorization pattern** — the Fubini + `integral_fintype_prod_eq_prod` pattern for n-dimensional Gaussian integrals is reusable and not in Mathlib.
+2. **`inverse_poly_integrable`** (SchwartzDecayDefs.lean) — `(1+‖v‖)⁻ᴺ` integrability for N > dim.
+3. **`norm_fderiv_eq_iteratedFDeriv_one`** (IteratedDerivHelpers.lean) — fderiv/iteratedFDeriv relation.
+4. **Schwartz decay extraction lemmas** — `schwartz_pointwise_decay`, `schwartz_fderiv_component_decay`.
 
 ---
 
@@ -257,31 +161,31 @@ Candidates:
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 0 | CoulombNonvacuous not in default build target | Medium | **NEW** |
-| 7a | 1 maxHeartbeats override at TorusIntegration.lean:85 | Low | Open (previous critique lied about fix) |
-| 7d | 12 long lines across 5 files | Low | Open |
-| 8a | Defs.lean:378 docstring false re: hSpatialVelocityFubini | Low | **NEW** |
-| 8b | Previous critique had 3 factual errors | Low | **NEW** |
-| 8c | MEMORY.md project statistics stale | Low | Open (persists from cycle 112) |
-| 9a | Hypothesis 4 could weaken to ContDiff R 3 | Low | Open |
-| 9b | Dead parameter in torus_hSpatialVelocityFubini | Low | Open |
-| 9c | Dimension generalization to Fin n | Low | Deferred (hard) |
-| 9d | CoulombNonvacuous should import main theorem | Low | Open |
-| 10 | Mathlib PR candidates (5 lemmas) | Low | Open |
+| 6a | 2 maxHeartbeats overrides (800000 + 400000) | Low | Open |
+| 6c | 14 long lines across 4 files (10 in CoulombFluxConv) | Low | Open |
+| 6d | ~20 unused simp arg warnings in CoulombNonvacuous | Low | **NEW** |
+| 6e | 1 deprecated API (mulVec_smul_assoc) | Low | **NEW** |
+| 7b | MEMORY.md line counts stale for 2 files | Low | Open |
+| 8a | Hypothesis 4 could weaken to ContDiff ℝ 3 | Low | Open |
+| 8b | CoulombNonvacuous should apply main theorem | Low | Open |
+| 8c | Gaussian integral lemmas not generalized | Low | **NEW** |
+| 8d | Only Coulomb kernel instantiated | Low | Open |
+| 9 | Mathlib PR candidates (4 lemmas) | Low | Open |
 
 ---
 
 ## Verdict: CONDITIONAL ACCEPT
 
-The formalization is mathematically sound, fully verified by the Lean 4 kernel with:
-- **0 sorry's** across 32 files, 9,599 lines
-- **0 non-standard axioms** (verified by `lean_verify`)
-- **1 `maxHeartbeats` override** (TorusIntegration.lean:85, 400000)
-- **0 `simp +decide`**, **0 `aesop`**, **0 `decide`**
-- **0 build errors/warnings** on all files (via `lake env lean`)
+The formalization is mathematically sound, fully verified by the Lean 4 kernel:
+- **0 sorry's** across 32 files, 10,147 lines
+- **0 non-standard axioms** (verified by `lean_verify` on all 3 main theorems)
+- **2 `maxHeartbeats` overrides** (400000 + 800000)
+- **CI passing** (lean-action succeeded on commit 230054f)
+- **CoulombNonvacuous in default build** (fixed from cycle 115)
 
-The proof chain correctly implements the Desvillettes-Villani-Guo steady-state characterization for the Vlasov-Maxwell-Landau system with Coulomb collisions. All 13 hypotheses are genuinely independent and necessary. The nonvacuousness theorem confirms joint satisfiability.
+All open issues are Low severity. None affects soundness. The main actionable items are:
+1. Clean up ~20 unused simp warnings in CoulombNonvacuous.lean
+2. Fix deprecated `mulVec_smul_assoc` → `mulVec_smul`
+3. Fix 14 long lines (mostly in CoulombFluxConv.lean)
 
-**Condition for full ACCEPT:** Add `CoulombNonvacuous` to the default build target (`Aristotle.lean`). The nonvacuousness claim is a key part of the formalization's value -- proving hypotheses are non-vacuous -- and should not silently regress. This is a one-line fix.
-
-The remaining issues are low severity: 1 maxHeartbeats override, stale documentation, minor hypothesis tightening. None affects soundness.
+**Condition for full ACCEPT:** Fix items 1-3 above (cosmetic cleanup).

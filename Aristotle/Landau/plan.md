@@ -1,73 +1,57 @@
-# Plan -- Cycle 116
+# Plan -- Cycle 116 (updated)
 
 ## Status summary
 
 - **Sorry count**: 0
-- **Files**: 32 files, 9,599 lines
-- **Build**: Clean (`lake env lean` on all 32 files: 0 errors, 0 warnings)
-- **Critique verdict**: CONDITIONAL ACCEPT (cycle 115)
-- **Condition for ACCEPT**: Add CoulombNonvacuous to default build target
-- **maxHeartbeats overrides**: 1 (TorusIntegration.lean:85, 400000)
-- **`simp +decide` / `aesop` / `decide`**: 0
-- **Working tree**: 4 modified files (CoulombFlux, CoulombFluxDiff, CoulombPSD, LandauMatrixDerivBound), state.md untracked
-- **Open issues**: 1 medium (build target), 3 low (dead parameter, stale docstring, maxHeartbeats)
+- **Files**: 32 files, 10,147 lines
+- **Build**: CI passing (lean-action succeeded on commit 230054f)
+- **Critique verdict**: CONDITIONAL ACCEPT (cycle 116)
+- **Condition for ACCEPT**: Fix ~20 unused simp warnings, 1 deprecated API, 14 long lines
+- **maxHeartbeats overrides**: 2 (NewtonianPotential.lean:86 at 800000, TorusIntegration.lean:85 at 400000)
+- **Aristotle jobs**: 0 pending, all done/failed/abandoned
+- **Open issues**: All Low severity (cosmetic cleanup)
 
 ## This cycle's work items
 
-### 1. Add CoulombNonvacuous to default build target (`/simplify`)
-- **What**: Critique issue 0 (Medium). `CoulombNonvacuous.lean` compiles cleanly but is not imported by `Aristotle.lean`, so `lake build` never verifies it. This is the sole condition for upgrading the critique verdict from CONDITIONAL ACCEPT to ACCEPT.
-- **File**: `/home/vilin/aristotle/Aristotle.lean`
-- **Approach**: Add `import Aristotle.Landau.main.CoulombNonvacuous` as a second line. Verify with `lake build`.
-- **Risk**: None. One-line addition.
-- **Resolves**: Critique issue 0 (Medium). Satisfies the ACCEPT condition.
+### 1. Clean up unused simp warnings in CoulombNonvacuous.lean (`/simplify`)
+- **What**: Critique issue 6d. ~20 linter warnings for unused simp arguments (`fderiv_const`, `Function.comp`, `ContinuousLinearMap.sum_apply`, etc.). These were introduced during the Mathlib v4.24.0 fix — the agent's rewrites left stale simp arguments.
+- **Files**: `CoulombNonvacuous.lean`
+- **Approach**: Remove unused arguments from simp calls. Verify each change doesn't break the proof.
+- **Risk**: Low. Removing unused simp args cannot change proof semantics.
 - **START IMMEDIATELY.**
 
-### 2. Remove dead parameter from `torus_hSpatialVelocityFubini` (`/simplify`)
-- **What**: Critique issue 9b. The concrete helper `torus_hSpatialVelocityFubini` (TorusDefs.lean:258) takes `(hF : forall x, Integrable (F x))` but the proof body (line 262) only uses `hF_joint`. The abstract `hSpatialVelocityFubini` in Defs.lean:481 already does NOT have this parameter -- the dead parameter is only in the concrete helper.
-- **File**: `/home/vilin/aristotle/Aristotle/Landau/main/TorusDefs.lean` (line 258-262)
-- **Approach**:
-  1. Remove the `(hF : forall x, Integrable (F x))` argument from `torus_hSpatialVelocityFubini`.
-  2. Check callers: `TorusInstance.lean` passes this helper to the `hSpatialVelocityFubini` field. Since the abstract field already lacks this parameter, the instance proof may use `fun F hF_joint => torus_hSpatialVelocityFubini F hF_joint` -- removing the dead parameter should simplify the instance proof, not break it.
-  3. Verify with `lake env lean` on TorusDefs.lean and TorusInstance.lean.
-- **Risk**: Low. The abstract interface is unchanged; only the concrete helper loses an unused argument.
-- **Resolves**: Critique issue 9b.
+### 2. Fix deprecated API usage (`/simplify`)
+- **What**: Critique issue 6e. `Matrix.mulVec_smul_assoc` at CoulombNonvacuous.lean:447 is deprecated → use `Matrix.mulVec_smul`.
+- **Files**: `CoulombNonvacuous.lean`
+- **Approach**: Replace `mulVec_smul_assoc` with `mulVec_smul`. The types differ slightly — verify with lean_goal.
+- **Risk**: Low. Mathlib provides the replacement.
 
-### 3. Fix stale docstring in Defs.lean (`/simplify`)
-- **What**: Critique issue 8a. Defs.lean:378 says "hSpatialVelocityFubini is stated without explicit integrability hypothesis at the abstract level" -- this is false. The actual definition (lines 481-484) takes `Integrable (Function.uncurry F)` as an explicit hypothesis.
-- **File**: `/home/vilin/aristotle/Aristotle/Landau/main/Defs.lean` (line 378-379)
-- **Approach**: Rewrite the sentence to accurately describe the current state: hSpatialVelocityFubini takes joint integrability of `uncurry F` as its hypothesis.
-- **Risk**: None. Pure documentation fix.
-- **Resolves**: Critique issue 8a.
+### 3. Fix long lines in CoulombFluxConv.lean (`/simplify`)
+- **What**: Critique issue 6c. 10 lines over 100 chars in CoulombFluxConv.lean, introduced during Mathlib v4.24.0 fix.
+- **Files**: `CoulombFluxConv.lean`
+- **Approach**: Break long lines at natural points (after commas, before `→`, etc.).
+- **Risk**: None. Formatting only.
 
-### 4. Attempt to eliminate maxHeartbeats 400000 in TorusIntegration.lean (`/simplify`)
-- **What**: Critique issue 7a. The sole remaining `maxHeartbeats` override is on `integral_derivative_periodic_zero` (TorusIntegration.lean:85). This is a Fubini-based FTC argument over the 3D box. The critique notes this "may be hard to eliminate."
-- **File**: `/home/vilin/aristotle/Aristotle/Landau/main/TorusIntegration.lean` (line 85)
-- **Approach**:
-  1. Profile the proof with `/profile` to find the expensive tactic.
-  2. Try targeted strategies: replace `simp` with explicit rewrites, add type annotations to reduce unification, break out intermediate `have` steps.
-  3. If the heartbeats drop below 200000, remove the override. If not, leave it and note in backlog.
-- **Risk**: Medium. The override is 2x default (400000 vs 200000). The proof involves nested Fubini decomposition over `Fin 3 -> R` which is inherently expensive for the elaborator.
-- **Resolves**: Critique issue 7a (if successful).
+### 4. Update MEMORY.md line counts (`/simplify`)
+- **What**: Critique issue 7b. CoulombNonvacuous listed as ~351 lines (actual: 498), CoulombFluxConv as ~373 (actual: 540).
+- **Files**: MEMORY.md
+- **Approach**: Update line counts for the 2 stale entries.
+- **Risk**: None.
 
-### 5. Update MEMORY.md project statistics (`/simplify`)
-- **What**: Critique issue 8c. MEMORY.md says "22 files, ~8,700 lines" but actual is 32 files, 9,599 lines. The Coulomb file inventory lists 7 files but there are 12. Individual line counts are stale (reflecting the pre-split structure).
-- **File**: `/home/vilin/.claude/projects/-home-vilin-aristotle/memory/MEMORY.md`
-- **Approach**: Update all file counts, line counts, and the Coulomb file inventory to match current `wc -l` output. Update sorry status to say "32 files, ~9,600 lines".
-- **Risk**: None. Pure documentation.
-- **Resolves**: Critique issue 8c.
-
-### 6. Run critique cycle 116
-- **What**: After completing items 1-5, run `/critique` to verify all issues are resolved. The target is ACCEPT with 0 conditions.
+### 5. Weaken hypothesis 4 from ContDiff ℝ ⊤ to ContDiff ℝ 3 (`/strengthen`)
+- **What**: Critique issue 8a. The abstract theorem only needs C³. The concrete theorem uses C∞ and downcasts. Tightening this makes the theorem statement more honest.
+- **Files**: `CoulombConcreteTheorem42.lean` (line 72)
+- **Approach**: Change `ContDiff ℝ ⊤` to `ContDiff ℝ 3` in hypothesis 4. Verify the proof still works (it uses `.of_le le_top` to downcast, which would become `.of_le (by norm_num)`).
+- **Risk**: Low-Medium. Need to verify all 19 VelocityDecayConditions fields still compile. The Schwartz decay implies C∞ anyway so all integrability arguments go through.
 
 ## Backlog
 
 | Issue | Category | Notes |
 |-------|----------|-------|
-| Weaken hypothesis 4 from `ContDiff R top` to `ContDiff R 3` | Strengthen | Critique 9a. Low priority: does not affect soundness, and `hSchwartz` implies C-infinity anyway. |
-| CoulombNonvacuous should import main theorem and apply it | Strengthen | Critique 9d. Currently proves hypotheses satisfiable but doesn't produce the equilibrium conclusion. |
-| Section3Helpers.lean 613 lines | Code quality | Just over 500-line guideline; contents are tightly coupled, splitting would be artificial. |
-| 12 long lines across 5 files | Code quality | Critique 7d. Trivial formatting. |
-| Dimension generalization (Fin n) | Feature | Hard; 3D is hard-coded everywhere (cross product, Killing equation, Coulomb kernel). |
-| Multi-species | Feature | Hard; requires coupling multiple distribution functions and cross-species entropy estimates. |
-| Mathlib PR candidates (5 lemmas) | Upstream | `inverse_poly_integrable`, `schwartz_pointwise_decay`, `schwartz_fderiv_component_decay`, `norm_fderiv_eq_iteratedFDeriv_one`, `poly_mul_gaussian_le`. |
-| IsMaxwellian API | Mathematical | Add `IsMaxwellian.unique` or `IsMaxwellian.integrable`. Nice-to-have. |
+| CoulombNonvacuous should apply main theorem | Strengthen | Critique 8b. Proves hypotheses satisfiable but doesn't produce equilibrium conclusion. |
+| 2 maxHeartbeats overrides (800000 + 400000) | Code quality | Critique 6a. Investigate for simplification. |
+| Section3Helpers.lean 613 lines | Code quality | Just over 500-line guideline; tightly coupled. |
+| Gaussian integral lemmas not generalized | Strengthen | Critique 8c. Could extract to reusable module. |
+| Dimension generalization (Fin n) | Feature | Hard; 3D-specific throughout. |
+| Maxwell molecules kernel instance | Feature | Easy win ~100 lines. |
+| Mathlib PR candidates (4 lemmas) | Upstream | inverse_poly_integrable, schwartz_pointwise_decay, etc. |
