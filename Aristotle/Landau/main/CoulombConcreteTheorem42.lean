@@ -70,8 +70,8 @@ theorem CoulombConcreteTheorem42
     (hf_pos : ∀ x v, 0 < f x v)                -- (3)
     -- === Smoothness ===
     (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))                             -- (4)
-    (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))   -- (5)
-    (hB_smooth : ∀ i, ContDiff ℝ ⊤ (periodicLift (fun x => B x i)))     -- (6)
+    (hf_smooth_x : ∀ v, ContDiff ℝ 2 (periodicLift (fun x => f x v)))   -- (5)
+    (hB_smooth : ∀ i, ContDiff ℝ 2 (periodicLift (fun x => B x i)))     -- (6)
     -- === Schwartz-class velocity decay, uniform in x ===
     (hSchwartz : UniformSchwartzDecay f)         -- (7)
     (hLogGrowth : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
@@ -213,8 +213,8 @@ theorem CoulombConcreteTheorem42_unique_T
     (f : Torus3 → (Fin 3 → ℝ) → ℝ) (E B : Torus3 → Fin 3 → ℝ) (ν ρ_ion : ℝ)
     (hν : 0 < ν) (hρ_ion : 0 < ρ_ion) (hf_pos : ∀ x v, 0 < f x v)
     (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))
-    (hf_smooth_x : ∀ v, ContDiff ℝ ⊤ (periodicLift (fun x => f x v)))
-    (hB_smooth : ∀ i, ContDiff ℝ ⊤ (periodicLift (fun x => B x i)))
+    (hf_smooth_x : ∀ v, ContDiff ℝ 2 (periodicLift (fun x => f x v)))
+    (hB_smooth : ∀ i, ContDiff ℝ 2 (periodicLift (fun x => B x i)))
     (hSchwartz : UniformSchwartzDecay f)
     (hLogGrowth : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
       |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log)
