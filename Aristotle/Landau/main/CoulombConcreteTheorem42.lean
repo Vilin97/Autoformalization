@@ -101,8 +101,8 @@ theorem CoulombConcreteTheorem42
   have hLogBound := hLogGrowth
   -- Schwartz decay specialized to each x (used in many fields below)
   have hSchwartz_x : ∀ x, ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
-      ‖iteratedFDeriv ℝ k (f x) v‖ * (1 + ‖v‖) ^ N ≤ C := fun x N hk =>
-    (hSchwartz.hDecay N hk).imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩
+      ‖iteratedFDeriv ℝ k (f x) v‖ * (1 + ‖v‖) ^ N ≤ C := fun x =>
+    fun N {k} hk => (hSchwartz.hDecay N hk).imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩
   -- Extract gradient bound components (used in multiple fields)
   obtain ⟨Cg, Kg, hCg⟩ := hGradBound
   -- Flux × score integrability (used for hLandauIBP_f_dg and hFubini_outer)
@@ -186,7 +186,7 @@ theorem CoulombConcreteTheorem42
       exact (hcont_grad.mul hcont_log).integrable_of_hasCompactSupport
         (HasCompactSupport.of_compactSpace _)
     hf_velocity_dominated := by
-      obtain ⟨C, hC_pos, hbound⟩ := hSchwartz.hDecay 4 (by omega)
+      obtain ⟨C, hC_pos, hbound⟩ := hSchwartz.hDecay 4 (k := 0) (by norm_num)
       refine ⟨fun v => C / (1 + ‖v‖) ^ 4, inverse_poly_integrable C, fun x v => ?_⟩
       have hb := hbound x v
       simp at hb
