@@ -371,7 +371,7 @@ theorem torus_hCurlIntZero (F : Torus3 → Fin 3 → ℝ) (u : Fin 3 → ℝ)
 
 /-- Harmonic → constant on T³. Energy method using IBP. -/
 theorem torus_hHarmonic_const (φ : Torus3 → ℝ)
-    (hd : ContDiff ℝ ⊤ (periodicLift φ))
+    (hd : ContDiff ℝ 2 (periodicLift φ))
     (hharmonic : ∀ x, torusDivX (torusGradX φ) x = 0) :
     ∀ x y, φ x = φ y := by
   -- Smoothness of gradient components (C¹ suffices for IBP)
@@ -381,13 +381,13 @@ theorem torus_hHarmonic_const (φ : Torus3 → ℝ)
   have hgrad_c1 : ∀ i, ContDiff ℝ 1 (periodicLift (fun x => torusGradX φ x i)) := by
     intro i
     rw [hgrad_pl]
-    exact ((hd.fderiv_right le_top).clm_apply contDiff_const).of_le le_top
+    exact ((hd.fderiv_right (show (1 : WithTop ℕ∞) + 1 ≤ 2 by decide)).clm_apply contDiff_const).of_le le_rfl
   have hφ_cont : Continuous φ :=
-    isOpenQuotientMap_torusMk.isQuotientMap.continuous_iff.mpr hd.continuous
+    isOpenQuotientMap_torusMk.isQuotientMap.continuous_iff.mpr (hd.of_le (show 0 ≤ 2 by decide)).continuous
   -- IBP: ∫ (∂φ/∂xᵢ)² = -∫ φ·∂²φ/∂xᵢ²
   have hIBP_i : ∀ i, ∫ x : Torus3, torusGradX φ x i * torusGradX φ x i =
       -(∫ x : Torus3, φ x * torusGradX (fun y => torusGradX φ y i) x i) :=
-    fun i => torus_hIBP_spatial (fun y => torusGradX φ y i) φ i (hgrad_c1 i) (hd.of_le le_top)
+    fun i => torus_hIBP_spatial (fun y => torusGradX φ y i) φ i (hgrad_c1 i) (hd.of_le (show 1 ≤ 2 by decide))
   -- Each φ * ∂²φ/∂xᵢ² is integrable (continuous on compact)
   have hint : ∀ i, Integrable (fun x : Torus3 =>
       φ x * torusGradX (fun y => torusGradX φ y i) x i) :=
@@ -411,7 +411,7 @@ theorem torus_hHarmonic_const (φ : Torus3 → ℝ)
   -- ∂φ/∂xᵢ = 0 everywhere (nonneg continuous, integral = 0, compact space)
   have hgrad_zero : ∀ i x, torusGradX φ x i = 0 := by
     intro i x
-    have hcont := continuous_torusGradX φ i (hd.of_le le_top)
+    have hcont := continuous_torusGradX φ i (hd.of_le (by decide))
     have hae : (fun x => torusGradX φ x i * torusGradX φ x i) =ᵐ[volume] 0 :=
       (integral_eq_zero_iff_of_nonneg (fun x => mul_self_nonneg _)
         ((hcont.mul hcont).integrable_of_hasCompactSupport
@@ -433,7 +433,7 @@ theorem torus_hHarmonic_const (φ : Torus3 → ℝ)
   intro x y
   obtain ⟨x₀, hx⟩ := torusMk_surjective x
   obtain ⟨y₀, hy⟩ := torusMk_surjective y
-  have := is_const_of_fderiv_eq_zero (hd.differentiable le_top) hfderiv_zero x₀ y₀
+  have := is_const_of_fderiv_eq_zero (hd.differentiable (by decide)) hfderiv_zero x₀ y₀
   rw [← hx, ← hy]; exact this
 
 end

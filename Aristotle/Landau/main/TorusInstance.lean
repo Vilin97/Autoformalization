@@ -372,46 +372,41 @@ instance : VML.FlatTorus3 Torus3 where
   hGradConst := torus_hGradConst
   hSpatialPos := fun g hcont hpos => torus_hSpatialPos g hpos hcont
   hSpatialNonnegZero := fun g hcont hnn hint => torus_hSpatialNonnegZero g hnn hint hcont
-  IsSpatiallyDiff := fun f => ContDiff ℝ ⊤ (periodicLift f)
-  hDiff_const := fun c => by
-    show ContDiff ℝ ⊤ (periodicLift (fun _ => c))
+  IsSpatiallySmooth := fun n f => ContDiff ℝ n (periodicLift f)
+  hDiff_of_le := fun {n m} f hle hf => hf.of_le (by exact_mod_cast hle)
+  hDiff_const := fun n c => by
+    show ContDiff ℝ n (periodicLift (fun _ => c))
     have : periodicLift (fun _ : Torus3 => c) = fun _ => c := by ext y; simp [periodicLift]
     rw [this]; exact contDiff_const
-  hDiff_add := fun f g hf hg => by
-    show ContDiff ℝ ⊤ (periodicLift (fun x => f x + g x))
+  hDiff_add := fun n f g hf hg => by
+    show ContDiff ℝ n (periodicLift (fun x => f x + g x))
     have : periodicLift (fun x => f x + g x) = fun y => periodicLift f y + periodicLift g y := by
       ext y; simp [periodicLift]
     rw [this]; exact hf.add hg
-  hDiff_smul := fun c f hf => by
-    show ContDiff ℝ ⊤ (periodicLift (fun x => c * f x))
+  hDiff_smul := fun n c f hf => by
+    show ContDiff ℝ n (periodicLift (fun x => c * f x))
     have : periodicLift (fun x => c * f x) = fun y => c * periodicLift f y := by
       ext y; simp [periodicLift]
     rw [this]; exact hf.const_smul c
-  hDiff_log := fun f hf hpos => by
-    show ContDiff ℝ ⊤ (periodicLift (Real.log ∘ f))
+  hDiff_log := fun n f hf hpos => by
+    show ContDiff ℝ n (periodicLift (Real.log ∘ f))
     have hlift : periodicLift (Real.log ∘ f) = Real.log ∘ periodicLift f := rfl
     rw [hlift]
     exact hf.log (fun y => ne_of_gt (hpos (torusMk y)))
-  hDiff_continuous := fun f hf => by
-    -- hf : ContDiff ℝ ⊤ (periodicLift f), so periodicLift f is continuous
-    -- periodicLift f = f ∘ torusMk, and torusMk is a quotient map
-    -- Therefore f is continuous by the quotient map property
+  hDiff_continuous := fun n f hf => by
     rw [isOpenQuotientMap_torusMk.isQuotientMap.continuous_iff]
-    show Continuous (periodicLift f)
     exact hf.continuous
-  hDiff_grad := fun f i hf => by
-    -- periodicLift (fun x => gradX f x i) = fun y => fderiv ℝ (periodicLift f) y (Pi.single i 1)
-    show ContDiff ℝ ⊤ (periodicLift (fun x => torusGradX f x i))
+  hDiff_grad := fun n f i hf => by
+    show ContDiff ℝ n (periodicLift (fun x => torusGradX f x i))
     have heq : periodicLift (fun x => torusGradX f x i) =
         fun y => fderiv ℝ (periodicLift f) y (Pi.single i 1) :=
       funext (fun y => periodicLift_torusGradX f i y)
     rw [heq]
-    -- ContDiff ℝ ⊤ (periodicLift f) → ContDiff ℝ ⊤ (fderiv) → apply to Pi.single i 1
-    exact (hf.fderiv_right le_top).clm_apply contDiff_const
-  hCurlIntZero := fun F u hF => torus_hCurlIntZero F u (fun j => (hF j).of_le le_top)
+    exact (hf.fderiv_right le_rfl).clm_apply contDiff_const
+  hCurlIntZero := fun F u hF => torus_hCurlIntZero F u (fun j => (hF j).of_le (by decide))
   hHarmonic_const := fun φ hd => torus_hHarmonic_const φ hd
-  hLaplacianMaxNonpos := fun φ x₀ hd => torus_hLaplacianMaxNonpos φ x₀ (hd.of_le le_top)
-  hGradAdd := fun f g hf hg => torus_hGradAdd' f g (hf.of_le le_top) (hg.of_le le_top)
+  hLaplacianMaxNonpos := fun φ x₀ hd => torus_hLaplacianMaxNonpos φ x₀ (hd.of_le (by decide))
+  hGradAdd := fun f g hf hg => torus_hGradAdd' f g (hf.of_le (by decide)) (hg.of_le (by decide))
   hGradScalarMul := by
     intro c f x
     ext i
@@ -430,12 +425,12 @@ instance : VML.FlatTorus3 Torus3 where
     show Real.exp (periodicLift φ _) * _ = Real.exp (φ x) * _
     simp [periodicLift, hx₀]
   hKillingToHarmonic := fun b hb_C1 hb_C2 hKilling =>
-    torus_hKillingToHarmonic b (fun j => (hb_C1 j).of_le le_top)
-      (fun j i => (hb_C2 j i).of_le le_top) hKilling
+    torus_hKillingToHarmonic b (fun j => (hb_C1 j).of_le (by decide))
+      (fun j i => (hb_C2 j i).of_le (by decide)) hKilling
   hCurlZeroDivZeroHarmonic := fun F hF_C1 hF_C2 hcurl hdiv =>
-    torus_hCurlZeroDivZeroHarmonic F (fun i => (hF_C1 i).of_le le_top)
-      (fun i j => (hF_C2 i j).of_le le_top) hcurl hdiv
-  hIBP_spatial := fun φ ψ i hφ hψ => torus_hIBP_spatial φ ψ i (hφ.of_le le_top) (hψ.of_le le_top)
+    torus_hCurlZeroDivZeroHarmonic F (fun i => (hF_C1 i).of_le (by decide))
+      (fun i j => (hF_C2 i j).of_le (by decide)) hcurl hdiv
+  hIBP_spatial := fun φ ψ i hφ hψ => torus_hIBP_spatial φ ψ i (hφ.of_le (by decide)) (hψ.of_le (by decide))
   hSpatialVelocityFubini := by
     intro F hF_joint
     exact integral_integral_swap hF_joint
@@ -445,7 +440,7 @@ instance : VML.FlatTorus3 Torus3 where
     have h_cont : Continuous (fun x : Torus3 => torusGradX g x i) := by
       have hH_cont : Continuous
           (fun y : Fin 3 → ℝ => fderiv ℝ (periodicLift g) y (Pi.single i 1)) :=
-        (hg.continuous_fderiv le_top).clm_apply continuous_const
+        (hg.continuous_fderiv (by decide)).clm_apply continuous_const
       have heq : (fun x : Torus3 => torusGradX g x i) ∘ torusMk =
           fun y => fderiv ℝ (periodicLift g) y (Pi.single i 1) :=
         funext (fun y => periodicLift_torusGradX g i y)
@@ -471,8 +466,8 @@ instance : VML.FlatTorus3 Torus3 where
 - hSpatialVelocityFubini: with joint integrability
 - hSpatialAdd: with integrability hypotheses, via integral_add
 - hGradIntegrable: proved via IsOpenQuotientMap.piMap
-- IsSpatiallyDiff := ContDiff ℝ ⊤ ∘ periodicLift (smooth)
-- hDiff_const, hDiff_add, hDiff_smul, hDiff_log, hDiff_grad: closure properties, all proved
+- IsSpatiallySmooth ⊤ := ContDiff ℝ ⊤ ∘ periodicLift (smooth)
+- hDiff_const ⊤, hDiff_add ⊤, hDiff_smul ⊤, hDiff_log ⊤, hDiff_grad ⊤: closure properties, all proved
 - hCurlIntZero: forwarded to torus_hCurlIntZero (proved)
 - hHarmonic_const: forwarded to torus_hHarmonic_const (proved, energy method)
 - hIBP_spatial: forwarded to torus_hIBP_spatial (proved)

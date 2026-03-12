@@ -194,15 +194,15 @@ lemma force_transport_zero
 private lemma spatial_transport_log_zero {X : Type*} [FlatTorus3 X]
     (f : X → (Fin 3 → ℝ) → ℝ) (hf_pos : ∀ x v, 0 < f x v)
     (v : Fin 3 → ℝ)
-    (hDiff_fv : FlatTorus3.IsSpatiallyDiff (fun x => f x v))
-    (hDiff_logfv : FlatTorus3.IsSpatiallyDiff (fun x => Real.log (f x v)))
+    (hDiff_fv : FlatTorus3.IsSpatiallySmooth 2 (fun x => f x v))
+    (hDiff_logfv : FlatTorus3.IsSpatiallySmooth 2 (fun x => Real.log (f x v)))
     (i : Fin 3) :
     (∫ x, FlatTorus3.gradX (fun y => f y v) x i * Real.log (f x v)) = 0 := by
   have h_ibp := FlatTorus3.hIBP_spatial (fun x => f x v) (fun x => Real.log (f x v)) i
-    hDiff_fv hDiff_logfv
+    (hDiff_fv.of_le (by decide)) (hDiff_logfv.of_le (by decide))
   have h_chain : ∀ x, FlatTorus3.gradX (fun y => Real.log (f y v)) x i =
       (1 / f x v) * FlatTorus3.gradX (fun y => f y v) x i :=
-    fun x => FlatTorus3.hGradChainLog (fun y => f y v) hDiff_fv (fun x => hf_pos x v) x i
+    fun x => FlatTorus3.hGradChainLog (fun y => f y v) (hDiff_fv.of_le (by decide)) (fun x => hf_pos x v) x i
   have h_lhs : (∫ x, f x v * FlatTorus3.gradX (fun y => Real.log (f y v)) x i) =
       ∫ x, FlatTorus3.gradX (fun y => f y v) x i := by
     congr 1
@@ -212,7 +212,7 @@ private lemma spatial_transport_log_zero {X : Type*} [FlatTorus3 X]
     field_simp
   rw [h_lhs] at h_ibp
   have h_grad_int : (∫ x, FlatTorus3.gradX (fun y => f y v) x i) = 0 := by
-    have := FlatTorus3.hGradIntZero (fun y => f y v) hDiff_fv (Pi.single i 1)
+    have := FlatTorus3.hGradIntZero (fun y => f y v) (hDiff_fv.of_le (by decide)) (Pi.single i 1)
     simp [dotProduct, Fin.sum_univ_three] at this
     fin_cases i <;> simp_all [Pi.single, Function.update]
   rw [h_grad_int] at h_ibp
@@ -236,8 +236,8 @@ lemma transport_entropy_from_vlasov
     (hf_smooth : ∀ x, ContDiff ℝ 3 (f x))
     (hf_int : ∀ x, Integrable (f x))
     -- Spatial differentiability of f(·,v) and log f(·,v)
-    (hDiff_fv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => f x v))
-    (hDiff_logfv : ∀ v, FlatTorus3.IsSpatiallyDiff (fun x => Real.log (f x v)))
+    (hDiff_fv : ∀ v, FlatTorus3.IsSpatiallySmooth 2 (fun x => f x v))
+    (hDiff_logfv : ∀ v, FlatTorus3.IsSpatiallySmooth 2 (fun x => Real.log (f x v)))
     (hVlasov : ∀ x v,
       dotProduct v (FlatTorus3.gradX (fun y => f y v) x) +
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) =

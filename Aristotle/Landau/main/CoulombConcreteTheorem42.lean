@@ -179,10 +179,10 @@ theorem CoulombConcreteTheorem42
       spatial_transport_joint_integrable hf_pos hf_smooth_v hf_smooth_x hSchwartz hLogBound
     hSpatTransComp := by
       intro v i
-      have hDiff_fv : FlatTorus3.IsSpatiallyDiff (fun x => f x v) := hf_smooth_x v
-      have hcont_grad := FlatTorus3.hDiff_continuous _ (FlatTorus3.hDiff_grad _ i hDiff_fv)
-      have hcont_log := FlatTorus3.hDiff_continuous _
-        (FlatTorus3.hDiff_log _ hDiff_fv (fun x => hf_pos x v))
+      have hDiff_fv : FlatTorus3.IsSpatiallySmooth 2 (fun x => f x v) := (hf_smooth_x v).of_le (by decide)
+      have hcont_grad := FlatTorus3.hDiff_continuous 0 _ (FlatTorus3.hDiff_grad 1 _ i hDiff_fv)
+      have hcont_log := FlatTorus3.hDiff_continuous 1 _
+        (FlatTorus3.hDiff_log 2 _ hDiff_fv (fun x => hf_pos x v))
       exact (hcont_grad.mul hcont_log).integrable_of_hasCompactSupport
         (HasCompactSupport.of_compactSpace _)
     hf_velocity_dominated := by
@@ -202,9 +202,9 @@ theorem CoulombConcreteTheorem42
         hSchwartz hLogBound hVlasov
   }
   exact Theorem42 f E B coulombKernel ν ρ_ion
-    hν hρ_ion coulombKernel_pos hf_pos (fun x => (hf_smooth_v x).of_le (by norm_num))
+    hν hρ_ion coulombKernel_pos hf_pos (fun x => (hf_smooth_v x).of_le (by exact_mod_cast (by decide : 2 + 1 ≤ 3)))
     (hSchwartz.integrable hf_smooth_v)
-    hAmpere hGauss hDivB hB_smooth hVlasov hf_smooth_x hDecay
+    hAmpere hGauss hDivB (fun i => (hB_smooth i).of_le (by decide)) hVlasov (fun v => (hf_smooth_x v).of_le (by decide)) hDecay
 
 /-- The equilibrium temperature T_eq is unique: any two temperatures giving the
     same Maxwellian with the same density must be equal. This follows from
