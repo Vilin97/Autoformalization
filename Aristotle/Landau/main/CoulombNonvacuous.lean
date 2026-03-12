@@ -15,6 +15,8 @@ Also provides helper lemmas about the equilibrium Maxwellian:
 open MeasureTheory Matrix Finset BigOperators Real
 
 noncomputable section
+
+set_option linter.unusedVariables false
 namespace VML
 
 /-- The directional derivative of the equilibrium Maxwellian:
@@ -522,6 +524,6 @@ theorem CoulombConcreteTheorem42_roundtrip (ν T ρ_ion : ℝ)
       hB_s hSch hLog hGrad hVlasov hAmpere hGauss hDivB
   exact ⟨f, E, B, T_eq, B₀, hT_pos, hf_eq, hE_zero, hB_const,
     fun T' hT' h_eq =>
-      equilibriumMaxwellian_T_unique ρ_ion T' T_eq hρ_ion hT' hT_pos h_eq⟩
+      equilibriumMaxwellian_T_injective ρ_ion T' T_eq hρ_ion hT' hT_pos h_eq⟩
 
 end VML

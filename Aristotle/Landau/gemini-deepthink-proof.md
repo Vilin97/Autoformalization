@@ -1,4 +1,4 @@
-Here is the precise, mathematically rigorous formulation and detailed proof of the steady-state uniqueness theorem for the non-electrostatic **Vlasov-Maxwell-Landau (VML)** system.
+Here is the precise, mathematically rigorous formulation and detailed proof of the steady-state classification theorem for the non-electrostatic **Vlasov-Maxwell-Landau (VML)** system.
 
 To ensure there is absolutely no mathematical hand-waving, we explicitly state the topology of the domain, the functional spaces, and the exact asymptotic tail bounds on the distribution function. These strict conditions are mandatory to rigorously justify integration by parts in unbounded phase space, the absolute convergence of fluid moments, and the well-posedness of the entropy dissipation functional.
 
@@ -61,13 +61,13 @@ $$ f(x,v) + |\nabla_x f(x,v)| + |\nabla_v f(x,v)| + |\nabla_v^2 f(x,v)| \le c_1 
 
 #### **3. Statement of the Theorem**
 
-Under hypotheses (H1)–(H4), the **unique** steady-state solution to the Vlasov-Maxwell-Landau system is the spatially uniform, zero-drift global Maxwellian:
+Under hypotheses (H1)–(H4), any steady-state solution to the Vlasov-Maxwell-Landau system takes the form of a spatially uniform, zero-drift global Maxwellian:
 
 
 $$ f(x,v) = n_{bg} \left( \frac{m}{2\pi k_B T_0} \right)^{3/2} \exp\left( - \frac{m|v|^2}{2 k_B T_0} \right) $$
 
 
-for some constant temperature $T_0 > 0$. Concurrently, the macroscopic fields are uniquely restricted to:
+for some constant temperature $T_0 > 0$. Concurrently, the macroscopic fields are restricted to:
 
 
 $$ E(x) \equiv 0, \quad B(x) \equiv B_0 $$

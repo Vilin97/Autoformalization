@@ -1,5 +1,15 @@
 # Log
 
+## 2026-03-12 UTC — Babysit cycle 120: Adversarial critique, spatial smoothness weakened
+
+### Changes
+- **Spatial smoothness C^∞ → C²**: Weakened the `FlatTorus3` abstraction from `IsSpatiallyDiff` to a parameterized `IsSpatiallySmooth : ℕ∞ → (X → ℝ) → Prop`. This removed the artificial topological C^∞ constraint on the abstract theorem and the Coulomb concrete theorem, matching the true physical constraints of the macroscopic parameters (a, b, c).
+- **Epistemic correction on "uniqueness"**: Replaced mathematically false "uniqueness" claims with "classification" language across the codebase, `Theorem42.lean`, `CoulombConcreteTheorem42.lean`, `README.md`, and the deepthink proof markdown. The theorems correctly show that the steady states are parameterized by $T_0 > 0$ and a constant magnetic field $B_0 \in \mathbb{R}^3$, where $T_0$ is injective for a given $f$ but not universally "unique" without an initial energy constraint.
+- **Linter suppression cleanup**: Suppressed cosmetic `unusedVariables` and `unusedSimpArgs` linters in `GaussianHelpers.lean` and `Section3Helpers.lean` that were triggering thousands of noisy warnings and causing build issues with automatic fixing tools.
+- **Non-relativistic disclaimer**: Added formal disclaimers to `Theorem42`, `CoulombConcreteTheorem42`, and `README.md` acknowledging the physical inconsistency of the non-relativistic $v \in \mathbb{R}^3$ assumption regarding superluminal propagation.
+
+### Sorry count: 0
+
 ## 2026-03-12 UTC — Babysit cycle 119: ContDiff weakening + linter fixes
 
 ### Changes
