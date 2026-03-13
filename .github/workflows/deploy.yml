@@ -62,7 +62,7 @@ jobs:
           path: blueprint/web
 
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/landau'
     needs: [build_docs, build_blueprint]
     runs-on: ubuntu-latest
     environment:
