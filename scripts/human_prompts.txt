@@ -203,8 +203,6 @@ somehow they got claude to call aristotle programmatically. maybe we can do some
 
 [Mar 07 23:15] make slash commands `/critique` and `/cleanup`. @CLAUDE.md says what cleanup should do. critique should say "Comprehensively analyze the project. If I were to say that this formalization project is fully complete, what would critics point out to invalidate this claim? Write in @critique.md "
 
-[Mar 07 23:43] /critique
-
 [Mar 07 23:51] make `/check-aristotle`. claude should check the jobs submitted to aristotle, and process each one as specified in @Aristotle/Landau/CLAUDE.md .
 
 [Mar 08 01:09] make a `/prove` command. It should look at the remaining sorrys and the @Aristotle/Landau/critique.md file, decide how to fill the sorrys or fix the issues in critique, make the necessary changes, decompose the problem, submit lemmas to aristotle, and attempt to prove simple ones without aristotle. It should feel free to consult with the gemini mcp for planning.
@@ -215,121 +213,7 @@ somehow they got claude to call aristotle programmatically. maybe we can do some
 
 [Mar 08 01:17] wait, but \babysit does not use the 4 skills we made before.
 
-[Mar 08 01:19] /babysit
-
-[Mar 08 01:25] /babysit
-
-[Mar 08 01:30] /babysit
-
-[Mar 08 01:40] /babysit
-
-[Mar 08 03:53] /babysit
-
-[Mar 08 03:53] /check-aristotle
-
-[Mar 08 05:07] /cleanup
-
-[Mar 08 05:11] /critique
-
-[Mar 08 05:18] /babysit
-
-[Mar 08 05:20] /babysit
-
-[Mar 08 05:30] /babysit
-
-[Mar 08 05:40] /babysit
-
-[Mar 08 05:50] /babysit
-
-[Mar 08 06:00] /babysit
-
-[Mar 08 06:10] /babysit
-
-[Mar 08 06:20] /babysit
-
-[Mar 08 06:30] /babysit
-
-[Mar 08 06:40] /babysit
-
-[Mar 08 06:50] /babysit
-
-[Mar 08 07:00] /babysit
-
-[Mar 08 07:10] /babysit
-
-[Mar 08 07:20] /babysit
-
-[Mar 08 07:30] /babysit
-
-[Mar 08 07:40] /babysit
-
-[Mar 08 07:50] /babysit
-
-[Mar 08 08:00] /babysit
-
-[Mar 08 08:10] /babysit
-
-[Mar 08 08:20] /babysit
-
-[Mar 08 08:30] /babysit
-
-[Mar 08 08:40] /babysit
-
-[Mar 08 08:50] /babysit
-
-[Mar 08 09:00] /babysit
-
-[Mar 08 09:10] /babysit
-
-[Mar 08 09:20] /babysit
-
-[Mar 08 09:30] /babysit
-
-[Mar 08 09:40] /babysit
-
-[Mar 08 09:50] /babysit
-
-[Mar 08 10:00] /babysit
-
-[Mar 08 10:10] /babysit
-
-[Mar 08 10:20] /babysit
-
 [Mar 08 10:24] Are we fully done with this formalization project? Find any weaknesses you can. Imagine you are trying to adversarially find holes in the formalization
-
-[Mar 08 10:33] /babysit
-
-[Mar 08 10:40] /babysit
-
-[Mar 08 10:50] /babysit
-
-[Mar 08 11:00] /babysit
-
-[Mar 08 11:10] /babysit
-
-[Mar 08 11:20] /babysit
-
-[Mar 08 11:30] /babysit
-
-[Mar 08 11:40] /babysit
-
-[Mar 08 11:50] /babysit
-
-[Mar 08 12:00] /babysit
-
-[Mar 08 12:10] /babysit
-
-[Mar 08 12:20] /babysit
-
-[Mar 08 12:30] /babysit
-
-[Mar 08 12:40] /babysit
-
-[Mar 08 12:50] /babysit
-
-[Mar 08 13:00] /babysit
-
-[Mar 08 13:10] /babysit
 
 [Mar 08 13:17] write your adversarial analysis in @Aristotle/Landau/critique.md.
 
@@ -338,22 +222,6 @@ somehow they got claude to call aristotle programmatically. maybe we can do some
 [Mar 08 13:21] how many lines of code the project has?
 
 [Mar 08 13:23] what about just the landau part?
-
-[Mar 08 14:06] /babysit
-
-[Mar 08 14:19] /babysit
-
-[Mar 08 14:23] /babysit
-
-[Mar 08 14:30] /babysit
-
-[Mar 08 14:40] /babysit
-
-[Mar 08 14:50] /babysit
-
-[Mar 08 15:00] /babysit
-
-[Mar 08 15:10] /babysit
 
 [Mar 08 15:22] how is LandauMatrixDerivBound used in the main proof?
 
@@ -366,8 +234,6 @@ somehow they got claude to call aristotle programmatically. maybe we can do some
 [Mar 08 15:40] yes
 
 [Mar 08 15:51] good. work on this sorry. First, make a plan: understand whether it's even true mathematically, then decompose into lemmas, then work with aristotle to prove it
-
-[Mar 08 15:51] /prove
 
 [Mar 08 16:09] I have an agent working on @Aristotle/Landau/main/ConcreteTheorem42.lean . This should solve issues 1, 2 and 3 in @Aristotle/Landau/critique.md . I want to think about issue 4. I really want to include the Coulomb collision kernel. I think right now we only cover Maxwell collisions (or maybe soft potentials up to gamma=-2?). How to extend to Coulomb collisions. Do a thorough brainstorm, make a new lean file outside of `main/` where you experiment with different options of resolving this issue.
 
@@ -395,97 +261,21 @@ somehow they got claude to call aristotle programmatically. maybe we can do some
 
 [Mar 08 19:18] do it then
 
-[Mar 08 19:29] /cleanup
-
 [Mar 08 19:39] wait, cancel, and set the experation to 16 hours
 
 [Mar 08 19:44] what do you mean? what is the issue? resolev it
 
-[Mar 08 19:45] /babysit
-
-[Mar 08 19:45] /check-aristotle
-
-[Mar 08 19:57] /prove
-
 [Mar 08 20:02] delete ConcreteTheorem42.lean
-
-[Mar 08 20:15] /cleanup
-
-[Mar 08 20:16] /critique
 
 [Mar 08 22:50] what skills do you have?
 
-[Mar 08 22:52] /critique
-
 [Mar 08 22:57] <command-message>check-aristotle</command-message>
-
-[Mar 08 22:57] /check-aristotle
-
-[Mar 08 23:08] /babysit
-
-[Mar 08 23:32] /babysit
-
-[Mar 09 00:02] /babysit
-
-[Mar 09 00:39] /babysit
-
-[Mar 09 01:02] /babysit
-
-[Mar 09 01:32] /babysit
-
-[Mar 09 02:02] /babysit
-
-[Mar 09 02:32] /babysit
-
-[Mar 09 03:25] /babysit
-
-[Mar 09 03:44] /babysit
-
-[Mar 09 04:02] /babysit
-
-[Mar 09 04:32] /babysit
-
-[Mar 09 05:02] /babysit
-
-[Mar 09 05:32] /babysit
-
-[Mar 09 06:02] /babysit
-
-[Mar 09 06:40] /babysit
-
-[Mar 09 07:31] /babysit
-
-[Mar 09 08:13] /babysit
-
-[Mar 09 08:47] /babysit
-
-[Mar 09 09:06] /babysit
-
-[Mar 09 09:32] /babysit
-
-[Mar 09 10:29] /babysit
-
-[Mar 09 10:42] /babysit
-
-[Mar 09 12:14] /babysit
-
-[Mar 09 12:32] /babysit
-
-[Mar 09 13:02] /babysit
-
-[Mar 09 13:05] /babysit
-
-[Mar 09 13:32] /babysit
 
 [Mar 09 14:05] what is the current status of the formalization?
 
 [Mar 09 14:22] it's not ok to need such high hearbeats. I notice that you do not perform much simplification or decomposition without an explicit prompt. write a skill `/simplify` to simplify and decompose long files and long proofs into more files and more lemmas. The decomposition should try to respect logical boundaries between math concepts. The goal is to 1) not have any files with over ~600 lines of code and 2) to not have lemmas with more than ~50 lines of code in the proof, and to 3) not need to increase heartbeats. Include a condensed list of code smells to fix.
 
-[Mar 09 14:26] /babysit
-
 [Mar 09 14:30] remove canva, gmail and calendar mcps
-
-[Mar 09 14:32] /babysit
 
 [Mar 09 14:32] i removed them in claude.ai
 
@@ -499,31 +289,13 @@ somehow they got claude to call aristotle programmatically. maybe we can do some
 
 [Mar 09 14:55] split `/prove` into three commands: `/plan`, `/submit-aristotle` and `/prove`. in                `/submit-aristotle`, specify how to submit (reference past logs and conversations to understand the issues with interacting with aristotle (e.g. when it's down or incorrect script, etc) and inject this knowledge). `/prove` should just be for proving yourself, and it's not limited to simple sorry-closing, because sometimes one needs to split into lemmas, or make a useful definition. `/plan` is not just about closing sorrys but other stuff too: how to fix the issues in `critique.md`.
 
-[Mar 09 15:02] /babysit
-
 [Mar 09 15:04] remove the canva, gmail and calendar mcps
 
 [Mar 09 15:07] what are the current active `/loop` commands?
 
-[Mar 09 15:08] /babysit
-
-[Mar 09 15:08] /check-aristotle
-
-[Mar 09 15:08] /plan
-
-[Mar 09 15:09] /prove
-
-[Mar 09 15:12] /submit-aristotle
-
 [Mar 09 15:13] I have the /babysit command. I am afraid that when the conversation auto-compacts, claude might lose which step it was on. e.g. `/prove` is very long and token-intensive, so it might spend e.g. 3 auto-compacting cycles on just `/prove`. Will it know to do `simplify` next?
 
 [Mar 09 15:15] how will we make sure than claude reads the state file after it's done with current step (e.g. /prove)
-
-[Mar 09 15:16] /simplify
-
-[Mar 09 15:18] /log
-
-[Mar 09 15:19] /cleanup
 
 [Mar 09 15:19] Comprehensively and adversarially analyze the project. If I were to say that this formalization project is fully complete, what would critics point out to invalidate this claim? Look at the project with a fresh set of eyes. Do not just say that there is nothing to improve. Write the full analysis to `Aristotle/Landau/critique.md`
 
@@ -538,39 +310,13 @@ The critique should be honest and thorough. Cover:
 
 [Mar 09 15:19] yes. also, I think `progress.md` and `MEMORY.md` do not serve any purpose any more, right? Since they are not really referenced in the `babysit` loop. I want to simplify the CLAUDE.md file. It's too detaield now, with the specifics of the project.
 
-[Mar 09 15:20] /commit
-
 [Mar 09 15:23] what's with the crazy filename `/tmp/claude-2477/babysit-state.txt`? Shou;dn't we just call it `state.md`? For CLAUDE.md, the main file is now CoulombConcreteTheorem42.lean. Remove the aristotle workflow and Gemini from CLAUDE.md, these are only relevant for some specific steps of babysit
 
 [Mar 09 15:29] whatever is easiest. what sdhould i do?
 
-[Mar 09 15:31] /babysit
-
 [Mar 09 15:31] git remote set-url origin https://<REDACTED>@github.com/Vilin97/aristotle.git
 
-[Mar 09 15:32] /check-aristotle
-
-[Mar 09 15:32] /babysit
-
 [Mar 09 15:37] This won't do. While aristotle is running you must attempt to close some sorry's yourself. I intended `/plan` and `/prove` to tell you that. How to write these commands to tell you unambiguously that it's not ok to just sit around doing nothing, and you need to prove as much as you can yourself, not just wait for aristotle? even if the previous cycle just happened, still make improvements. Even if there are no sorry's remaining, improve what you can. Also, @Aristotle/Landau/critique.md should be a harsh adversarial critique, but right now it reads more like a project report. Edit the commands /critique, /plan and /prove accordingly.
-
-[Mar 09 15:38] /prove
-
-[Mar 09 17:14] /babysit
-
-[Mar 09 18:03] /simplify
-
-[Mar 09 18:05] /log
-
-[Mar 09 18:13] /babysit
-
-[Mar 09 19:24] /babysit
-
-[Mar 09 19:41] /babysit
-
-[Mar 09 20:04] /babysit
-
-[Mar 09 20:55] /babysit
 
 [Mar 09 21:27] I want to receive a telegram message every /babysit cycle. I have a bot called VasAlert already: @VasAlert2024Bot, with api token 6632610666:AAGkTwe0YsnhcE468ALqcf-qmQmN6fP0o-Q. Make a `/alert` command that runs at the end of the babysit cycle. The message should be short, just one or two sentences on what was done and a link to the commit diff in GH.
 
@@ -580,101 +326,11 @@ The critique should be honest and thorough. Cover:
 
 [Mar 09 21:30] what would it take to control claude via telegram? im not saying to do it, just thinking. e.g. if i ask for more details for claude to tell me, etc
 
-[Mar 09 22:43] /commit
-
-[Mar 09 22:44] /alert
-
-[Mar 09 22:46] /babysit
-
-[Mar 09 23:18] /babysit
-
-[Mar 09 23:26] /babysit
-
-[Mar 09 23:41] /babysit
-
-[Mar 09 23:43] /babysit
-
-[Mar 09 23:44] /babysit
-
-[Mar 09 23:44] /babysit
-
-[Mar 10 00:01] /babysit
-
-[Mar 10 00:02] /babysit
-
-[Mar 10 00:08] /babysit
-
-[Mar 10 00:31] /babysit
-
-[Mar 10 00:32] /babysit
-
-[Mar 10 00:38] /babysit
-
-[Mar 10 01:01] /babysit
-
-[Mar 10 01:02] /babysit
-
-[Mar 10 01:08] /babysit
-
 [Mar 10 01:09] why are you doing no-op cycles when there are clearly issues in @Aristotle/Landau/critique.md ? I guess the command /simplify is not forceful enough. Rewrite it in such a way that e.g. the file size issues and the hearbeats issues and the primed definitions and the stale documentation get fixed. Essentially, if there is any issue at all left in critique, it must be worked on! Or do we need a new command? Or to increase the scope of simplify? what do you think?
 
 [Mar 10 01:11] I mean, all commands in /babysit must always run
 
 [Mar 10 01:15] make the prompt /critique even more forceful. There is always something to improve. Even if the full formalization is super perfect and the code quality is amazing, and it's all mathlib-level generality and quality, there is *always* more to do, e.g. attempt to weaken assumptions or strengthen conclusion of the main theorem.
-
-[Mar 10 01:16] /babysit
-
-[Mar 10 01:31] /babysit
-
-[Mar 10 01:58] /babysit
-
-[Mar 10 02:18] /babysit
-
-[Mar 10 02:38] /babysit
-
-[Mar 10 03:02] /babysit
-
-[Mar 10 03:31] /babysit
-
-[Mar 10 03:43] /babysit
-
-[Mar 10 03:57] /babysit
-
-[Mar 10 04:15] /babysit
-
-[Mar 10 04:36] /babysit
-
-[Mar 10 04:52] /babysit
-
-[Mar 10 05:03] /babysit
-
-[Mar 10 05:14] /babysit
-
-[Mar 10 05:25] /log
-
-[Mar 10 05:26] /cleanup
-
-[Mar 10 05:26] /critique
-
-[Mar 10 05:31] /commit
-
-[Mar 10 05:34] /alert
-
-[Mar 10 05:34] /babysit
-
-[Mar 10 05:47] /babysit
-
-[Mar 10 05:58] /critique
-
-[Mar 10 06:05] /babysit
-
-[Mar 10 06:12] /babysit
-
-[Mar 10 06:31] /babysit
-
-[Mar 10 06:38] /babysit
-
-[Mar 10 06:47] /babysit
 
 [Mar 10 09:59] Continue from where you left off.
 
@@ -700,37 +356,13 @@ bind -T copy-mode-vi q send -X cancel
 
 [Mar 10 10:22] do a much much more comprehensive analysis. what are the main weaknesses? what can be improved?
 
-[Mar 10 11:52] /babysit
-
-[Mar 10 11:52] /simplify
-
 [Mar 10 11:54] write a comprehensive readme for the landau project. Describe the math, what was proven, what the process looks like (with /babysit, etc), give links, etc. Comprehensive! commit and push it when done.
-
-[Mar 10 12:12] /log
-
-[Mar 10 12:13] /cleanup
-
-[Mar 10 12:14] /critique
-
-[Mar 10 12:18] /commit
-
-[Mar 10 12:22] /alert
-
-[Mar 10 12:31] /babysit
-
-[Mar 10 12:32] /check-aristotle
-
-[Mar 10 12:32] /plan
-
-[Mar 10 12:41] /critique
 
 [Mar 10 12:53] I feel like I am missing a command in /babysit. The issue is that the types of critiques are not limited to unproven stuff and unsimplified stuff. E.g. a hypothesis being likely derivable from other hypotheses is neither. Or the circularity thing (section 3 in critique). I think I need a command to cover everything in critique that was not yet addressed by /prove and /simplify
 
 [Mar 10 12:56] ok, add it. I don't wanna say to only address one item because it might be an extremely small item. I want a sizeable amount of work (~30 minutes of Claude's working) each cycle. How to scope it?
 
 [Mar 10 12:58] you wrote something too specific to the current state of the project. I want this command to kind of pick up whatever is in critique but slipped past /prove and /simplify. Imagine that we are 40 cycles in the future and all the existing critiques are already addressed. The command should still operate
-
-[Mar 10 13:01] /babysit
 
 [Mar 10 13:04] still, it overindexes on the current structure of critique, e.g. it lists explicit sections "3 (Circularity) ...". Also, I want this command to be able to escape from a local minimum. like, enlarging the function class from schwarz decay to polynomial decay would be a big change but if successful, it would be very very good and would address e.g. the circularity concern (section 3 in critique). I don't want /strengthen to only attempt easy items within the local basin of attraction.
 
@@ -739,14 +371,6 @@ bind -T copy-mode-vi q send -X cancel
 [Mar 10 13:11] hello?
 
 [Mar 10 13:11] I dont like "do not attempt something so large that you make zero tangible progress". Some large changes require some experimentation. It can be done outside of `main/` folder, in the `experiments/` folder. Also, I am now realizing that while `/critique` writes in a file, so we always have a list of action items, `/plan` does not write in a file. But if `/plan` had a good brainstorming session (e.g. with gemini) it should write in a file. what do you think?
-
-[Mar 10 13:29] /babysit
-
-[Mar 10 13:29] /plan
-
-[Mar 10 13:34] /strengthen
-
-[Mar 10 13:45] /babysit
 
 [Mar 10 13:57] I am trying to run some lake commands like `lake clean`. But I think lake is not available. fix it
 
@@ -758,11 +382,7 @@ bind -T copy-mode-vi q send -X cancel
 
 [Mar 10 14:58] How did we miss this?
 
-[Mar 10 14:58] /babysit
-
 [Mar 10 14:59] Alert, Alert! I think there are errors! When I run `lake build Aristotle/Landau/main/CoulombConcreteTheorem42.lean` I get many files that do not compile! How did we miss this?
-
-[Mar 10 15:02] /babysit
 
 [Mar 10 15:10] would it make sense to run `lake clean` and `lake exe cache get` at the start of each /babysit cycle? Or whatever would clean the corrupted oleans?
 
@@ -772,8 +392,6 @@ bind -T copy-mode-vi q send -X cancel
 
 [Mar 10 15:27] set up leanblueprint for the Landau project.
 
-[Mar 10 15:40] /babysit
-
 [Mar 10 15:43] ok, let's see it. serve it
 
 [Mar 10 15:46] hmm, not sure I undertand. First, lemma 18, Lorentz force is divergence-free is not connected to the rest of the graph. Second, I don't see any mention of the schwarz class and of the concrete torus instance. Also, the H-theorem is never used? and same for nullspace_sufficiency? I would expect there is only one node with outdegree=0 -- the main theorem.
@@ -782,79 +400,9 @@ bind -T copy-mode-vi q send -X cancel
 
 [Mar 10 16:00] did you save the script extracting the graph? definitely save it. Put it in `scripts/`. If it can be made more general (not using explicit file names, it would be good to make it more robust to change or filename changes etc)
 
-[Mar 10 16:23] /log
-
-[Mar 10 16:24] /cleanup
-
-[Mar 10 16:24] /babysit
-
-[Mar 10 16:24] /commit
-
-[Mar 10 16:37] /alert
-
-[Mar 10 16:38] /babysit
-
-[Mar 10 16:38] /critique
-
-[Mar 10 16:42] /plan
-
-[Mar 10 16:46] /strengthen
-
-[Mar 10 17:01] /babysit
-
-[Mar 10 17:04] /plan
-
 [Mar 10 17:04] kill the localhost.also, what's web.paux? i see it in the diff
 
 [Mar 10 17:05] ok, pull. there might be merge conflicts
-
-[Mar 10 17:06] /submit-aristotle
-
-[Mar 10 17:06] /prove
-
-[Mar 10 17:24] /check-aristotle
-
-[Mar 10 17:24] /simplify
-
-[Mar 10 17:25] /strengthen
-
-[Mar 10 17:28] /log
-
-[Mar 10 17:28] /cleanup
-
-[Mar 10 17:29] /commit
-
-[Mar 10 17:34] /alert
-
-[Mar 10 17:35] /babysit
-
-[Mar 10 17:35] /critique
-
-[Mar 10 17:39] /plan
-
-[Mar 10 17:40] /prove
-
-[Mar 10 18:10] /check-aristotle
-
-[Mar 10 18:11] /simplify
-
-[Mar 10 18:14] /strengthen
-
-[Mar 10 18:17] /log
-
-[Mar 10 18:18] /cleanup
-
-[Mar 10 18:18] /commit
-
-[Mar 10 18:20] /alert
-
-[Mar 10 18:22] /babysit
-
-[Mar 10 18:22] /critique
-
-[Mar 10 18:27] /plan
-
-[Mar 10 18:49] /babysit
 
 [Mar 10 21:04] push
 
@@ -866,13 +414,9 @@ bind -T copy-mode-vi q send -X cancel
 
 [Mar 10 21:24] compared to https://thefundamentaltheor3m.github.io/Sphere-Packing-Lean/, what are the differences between our project and theirs? Are we missing anything major?
 
-[Mar 10 21:30] /babysit
-
 [Mar 10 21:47] show me the blueprint, locally
 
 [Mar 10 21:48] wait, the dependecny graph is empty file:///Users/vasil/Github/aristotle/blueprint/web/dep_graph_document.html
-
-[Mar 10 21:52] /babysit
 
 [Mar 10 21:55] https://github.com/RemyDegenne/brownian-motion -- how many loc in this formalization?
 
@@ -886,21 +430,15 @@ bind -T copy-mode-vi q send -X cancel
 
 [Mar 10 22:03] kill it
 
-[Mar 10 22:03] /babysit
-
 [Mar 10 22:03] add the links to the docs and dep graph to the readme
 
 [Mar 10 22:05] also, add the graph of the total number of Lean LOC over the project span. You can probably write a script that scrapes commits and counts total number of lean LOC in the Landau/ folder
 
 [Mar 10 22:07] wait, it treates the # of LOC as constant over 1 day, which is not correct. there are many commits in a day
 
-[Mar 10 22:08] /babysit
-
 [Mar 10 22:09] i want to label some notable events there. e.g. the first sorry-free of theorem42 and of concretetheorem42. if you see other notable events, label them too.
 
 [Mar 10 22:14] write a detailed caption for this figure. Also, what happened around march 8, where there was a rather sharp increase in LOC? The labels could be more descriptive: i dont understand "Torus Instance", and "Concrete theorem"
-
-[Mar 10 22:14] /babysit
 
 [Mar 10 22:17] btw, I think there were still some LOC in Landau before I made the folder `main/`
 
@@ -918,19 +456,13 @@ bind -T copy-mode-vi q send -X cancel
 
 [Mar 10 22:55] add points 1, 3, 4, 6,7 to @Aristotle/Landau/critique.md in the style of /critique.
 
-[Mar 10 22:55] /babysit
-
 [Mar 10 22:57] add the figure to readme, with a caption. then move on to aristotle integration
 
 [Mar 10 23:02] let's move a bit slower and more carefully. For aristotle, how are you counting? I think there were more than 55 submitted jobs. and there were certainly more than 4 times it proved the negation. I think there is the json but there is also the history you can get from the API (feel free to make a tmp/ folder and download the outputs there if needed, to then analyze)
 
-[Mar 10 23:03] /babysit
-
 [Mar 10 23:15] very good. you can delete all the aristotle outputs now. as for session activity, how are you able to distinguish which session belongs to the Landau project and which does not? Also, when /babysit runs on a /loop, how do these prompts count? the /babysit prompt counts as mine, and the rest as the assistant?
 
 [Mar 10 23:20] are you able are you able to get sessions from other machines? I started running the babysit loop on my university around march 8 or 9 i think.
-
-[Mar 10 23:21] /critique
 
 [Mar 10 23:25] do we have a way of telling apart the /babysit prompts from the "real" human prompts?
 
