@@ -36,7 +36,7 @@ jobs:
           packagesDir = "../.lake/packages"
 
           [[require]]
-          name = "Aristotle"
+          name = "aristotle"
           path = "../"
 
           [[require]]
@@ -46,7 +46,7 @@ jobs:
           EOF
           cd docbuild
           git remote set-url origin https://github.com/Vilin97/aristotle.git || true
-          MATHLIB_NO_CACHE_ON_UPDATE=1 lake update Aristotle
+          MATHLIB_NO_CACHE_ON_UPDATE=1 lake update aristotle
           lake build Aristotle:docs
 
       - name: Upload documentation artifact
