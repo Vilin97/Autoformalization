@@ -330,8 +330,7 @@ lemma integral_equilibriumMaxwellian (ρ T : ℝ) (hT : 0 < T) :
     - (5) hf_smooth_x: f is spatially constant ⇒ periodicLift is constant ⇒ C^∞  ✓
     - (6) hB_smooth: B = 0, same argument as (5)  ✓
     - (7) hSchwartz: Gaussian is Schwartz class via Faà di Bruno + poly×Gaussian bound  ✓
-    - (8) hLogGrowth: |log(eM(v))| = |log(pf) - normSq(v)/(2T)| ≤ C*(1+‖v‖)²  ✓
-    - (9) hGradBound: ∂eM/∂vᵢ = -(vᵢ/T)·eM, bound |vᵢ| ≤ 1+‖v‖  ✓
+    - (8) hGradBound: ∂eM/∂vᵢ = -(vᵢ/T)·eM, bound |vᵢ| ≤ 1+‖v‖  ✓
     - (10) hVlasov: A(z)·z = 0 (projection annihilation) ⇒ integrand vanishes  ✓
     - (11) hAmpere: ∇×0 = 0, ∫ vᵢ eM dv = 0 by odd symmetry  ✓
     - (12) hGauss: ∇·0 = 0 = ∫eM - ρ_ion (simp closes)  ✓
@@ -344,7 +343,6 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
     (∀ v, ContDiff ℝ 2 (periodicLift (fun x => f x v))) ∧                 -- (5)
     (∀ i, ContDiff ℝ 2 (periodicLift (fun x => B x i))) ∧                 -- (6)
     UniformSchwartzDecay f ∧                                                -- (7)
-    (∃ C_log K_log, ∀ x v, |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log) ∧ -- (8)
     (∃ Cg Kg, ∀ x v i,
       |fderiv ℝ (f x) v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f x v) ∧ -- (9)
     (∀ x v, dotProduct v (torusGradX (fun y => f y v) x) +
@@ -356,7 +354,7 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
   refine ⟨fun _ => equilibriumMaxwellian ρ_ion T,
          fun _ => 0, fun _ => 0,
          fun _ v => equilibriumMaxwellian_pos ρ_ion T hρ_ion hT v,  -- (3) ✓
-         ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+         ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   -- (4) hf_smooth_v: equilibriumMaxwellian is C^∞
   · intro _
     unfold equilibriumMaxwellian
@@ -389,10 +387,7 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
       have : (fun y => equilibriumMaxwellian ρ_ion T v) ∘ torusMk =
           fun _ => equilibriumMaxwellian ρ_ion T v := by ext; rfl
       rw [this]; simp
-  -- (8) hLogGrowth: polynomial log growth
-  · obtain ⟨C_log, K_log, hLB⟩ := equilibriumMaxwellian_log_bound ρ_ion T hρ_ion hT
-    exact ⟨C_log, K_log, fun _ => hLB⟩
-  -- (9) hGradBound: |∂eM/∂vᵢ| = |vᵢ/T| · eM ≤ (1+‖v‖)/T · eM
+  -- (8) hGradBound: |∂eM/∂vᵢ| = |vᵢ/T| · eM ≤ (1+‖v‖)/T · eM
   · refine ⟨1 / T, 1, fun _ v i => ?_⟩
     rw [fderiv_equilibriumMaxwellian ρ_ion T hT v i]
     have hpos := equilibriumMaxwellian_pos ρ_ion T hρ_ion hT v
@@ -516,12 +511,12 @@ theorem CoulombConcreteTheorem42_roundtrip (ν T ρ_ion : ℝ)
       (∀ v, equilibriumMaxwellian ρ_ion T' v =
         equilibriumMaxwellian ρ_ion T_eq v) →
       T' = T_eq) := by
-  obtain ⟨f, E, B, hf_pos, hf_sv, hf_sx, hB_s, hSch, hLog, hGrad,
+  obtain ⟨f, E, B, hf_pos, hf_sv, hf_sx, hB_s, hSch, hGrad,
          hVlasov, hAmpere, hGauss, hDivB⟩ :=
     CoulombConcreteTheorem42_nonvacuous ν T ρ_ion hν hT hρ_ion
   obtain ⟨T_eq, B₀, hT_pos, hf_eq, hE_zero, hB_const⟩ :=
     CoulombConcreteTheorem42 f E B ν ρ_ion hν hρ_ion hf_pos hf_sv hf_sx
-      hB_s hSch hLog hGrad hVlasov hAmpere hGauss hDivB
+      hB_s hSch hGrad hVlasov hAmpere hGauss hDivB
   exact ⟨f, E, B, T_eq, B₀, hT_pos, hf_eq, hE_zero, hB_const,
     fun T' hT' h_eq =>
       equilibriumMaxwellian_T_injective ρ_ion T' T_eq hρ_ion hT' hT_pos h_eq⟩

@@ -3,6 +3,7 @@ import Aristotle.Landau.main.CoulombFluxBound
 import Aristotle.Landau.main.CoulombPSD
 import Aristotle.Landau.main.CoulombFluxDiff
 import Aristotle.Landau.main.IteratedDerivHelpers
+import Aristotle.Landau.main.LogBoundHelpers
 
 /-!
 set_option linter.style.longLine false
@@ -81,8 +82,6 @@ theorem CoulombConcreteTheorem42
     (hB_smooth : ∀ i, ContDiff ℝ 2 (periodicLift (fun x => B x i)))     -- (6)
     -- === Schwartz-class velocity decay, uniform in x ===
     (hSchwartz : UniformSchwartzDecay f)         -- (7)
-    (hLogGrowth : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
-      |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log) -- (8)
     -- === Polynomial score bound (independent of hSchwartz + hLogGrowth) ===
     -- This is NOT derivable from hSchwartz + hLogGrowth: the ratio |∂f|/f can grow
     -- super-polynomially even for Schwartz f with polynomial log growth.
@@ -104,14 +103,14 @@ theorem CoulombConcreteTheorem42
     (∀ x v, f x v = equilibriumMaxwellian ρ_ion T_eq v) ∧
     (∀ x, E x = 0) ∧
     (∀ x, B x = B₀) := by
-  -- Log growth bound (used by many fields)
-  have hLogBound := hLogGrowth
+  -- Extract gradient bound components (used in multiple fields)
+  obtain ⟨Cg, Kg, hCg⟩ := hGradBound
+  -- Log growth bound (derived from hGradBound via MVT)
+  have hLogBound := log_bound_from_grad f hf_pos hf_smooth_v hf_smooth_x Cg Kg hCg
   -- Schwartz decay specialized to each x (used in many fields below)
   have hSchwartz_x : ∀ x, ∀ (N : ℕ) {k : ℕ}, k ≤ 2 → ∃ C > 0, ∀ v,
       ‖iteratedFDeriv ℝ k (f x) v‖ * (1 + ‖v‖) ^ N ≤ C := fun x =>
     fun N {k} hk => (hSchwartz.hDecay N hk).imp fun C hC => ⟨hC.1, fun v => hC.2 x v⟩
-  -- Extract gradient bound components (used in multiple fields)
-  obtain ⟨Cg, Kg, hCg⟩ := hGradBound
   -- Flux × score integrability (used for hLandauIBP_f_dg and hFubini_outer)
   have hIBP_f_dg : ∀ x i, Integrable (fun v =>
       (∫ w, mulVec (landauMatrix coulombKernel (v - w))
@@ -223,8 +222,6 @@ theorem CoulombConcreteTheorem42_classify_T
     (hf_smooth_x : ∀ v, ContDiff ℝ 2 (periodicLift (fun x => f x v)))
     (hB_smooth : ∀ i, ContDiff ℝ 2 (periodicLift (fun x => B x i)))
     (hSchwartz : UniformSchwartzDecay f)
-    (hLogGrowth : ∃ (C_log : ℝ) (K_log : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ),
-      |Real.log (f x v)| ≤ C_log * (1 + ‖v‖) ^ K_log)
     (hGradBound : ∃ (Cg : ℝ) (Kg : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ) (i : Fin 3),
       |fderiv ℝ (f x) v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f x v)
     (hVlasov : ∀ x v,
@@ -241,7 +238,7 @@ theorem CoulombConcreteTheorem42_classify_T
       T' = T_eq) := by
   obtain ⟨T_eq, B₀, hT_pos, hf_eq, hE_zero, hB_const⟩ :=
     CoulombConcreteTheorem42 f E B ν ρ_ion hν hρ_ion hf_pos hf_smooth_v hf_smooth_x hB_smooth
-      hSchwartz hLogGrowth hGradBound hVlasov hAmpere hGauss hDivB
+      hSchwartz hGradBound hVlasov hAmpere hGauss hDivB
   exact ⟨T_eq, B₀, hT_pos, hf_eq, hE_zero, hB_const,
     fun T' hT' h_eq => equilibriumMaxwellian_T_injective ρ_ion T' T_eq hρ_ion hT' hT_pos h_eq⟩
 
