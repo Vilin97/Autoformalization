@@ -13,7 +13,7 @@ SESSION_DIRS = [
     os.path.expanduser("~/.claude/projects/-home-vilin-aristotle/"),
     "/tmp/americano-sessions/",  # from university machine
 ]
-OUT_PNG = os.path.join(REPO, "scripts", "tool_use.png")
+OUT_PNG = os.path.join(REPO, "artifacts", "tool_use.png")
 
 PT = timezone(timedelta(hours=-7))  # Pacific Time
 CUTOFF_DATE = datetime(2026, 3, 12, tzinfo=PT).date()  # exclude Mar 12+

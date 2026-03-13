@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT_PNG = os.path.join(REPO, "scripts", "sorry_history.png")
+OUT_PNG = os.path.join(REPO, "artifacts", "sorry_history.png")
 LANDAU_DIR = "Aristotle/Landau"
 PDT = timezone(timedelta(hours=-7))
 

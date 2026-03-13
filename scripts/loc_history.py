@@ -9,8 +9,8 @@ from datetime import datetime
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LANDAU_DIR = "Aristotle/Landau"
 OUT_CSV = os.path.join(REPO, "scripts", "loc_history.csv")
-OUT_PNG = os.path.join(REPO, "scripts", "loc_history.png")
-OUT_BREAKDOWN_PNG = os.path.join(REPO, "scripts", "loc_breakdown.png")
+OUT_PNG = os.path.join(REPO, "artifacts", "loc_history.png")
+OUT_BREAKDOWN_PNG = os.path.join(REPO, "artifacts", "loc_breakdown.png")
 
 # Notable events: (commit_hash_prefix, label, vertical_offset)
 EVENTS = [

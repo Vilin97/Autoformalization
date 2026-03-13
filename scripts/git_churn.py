@@ -17,7 +17,7 @@ PT = timezone(timedelta(hours=-7))  # PDT
 REPO = Path(__file__).resolve().parent.parent
 TARGET_DIR = "Aristotle/Landau/"
 EXCLUDE_DIRS = {"Aristotle/Landau/aristotle-in/", "Aristotle/Landau/aristotle-out/"}
-OUT_PNG = REPO / "scripts" / "git_churn.png"
+OUT_PNG = REPO / "artifacts" / "git_churn.png"
 
 
 def parse_git_log():
