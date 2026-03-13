@@ -120,8 +120,11 @@ structure VelocityDecayConditions {X : Type*} [FlatTorus3 X]
     (iii) The magnetic field is spatially constant.
 
     The velocity-space decay conditions (bundled in `VelocityDecayConditions`)
-    hold for distribution functions with sufficient velocity-space decay
-    (e.g., Schwartz class or sub-Gaussian tails).
+    require not only sufficient upper-bound velocity-space decay (e.g., Schwartz class),
+    but importantly also a matching LOWER bound. The polynomial score bound (`hGradBound`)
+    actively excludes functions with faster-than-exponential decay (like $e^{-e^{\|v\|}}$),
+    even though they are Schwartz class. The conditions effectively restrict the
+    domain to near-Maxwellian or stretched-exponential states.
 
     *Note on Physical Rigor:* This theorem addresses the classic non-relativistic formulation
     over $v \in \mathbb{R}^3$. As with all non-relativistic kinetic theory over an unbounded

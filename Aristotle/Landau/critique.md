@@ -1,66 +1,54 @@
-# Adversarial Critique: VML Steady State Formalization
-
-**Timestamp**: 2026-03-12 (Cycle Babysit)
+# Adversarial Critique of VML Landau Formalization
+Timestamp: 2026-03-12T10:00:00Z
 
 ## 0. CI status
-- **Result**: REVISE (P1 issue).
-- The `Build and Deploy Documentation` CI workflow is **failing** on the `landau` branch.
-- Moreover, `curl -Is https://vilin97.github.io/aristotle/blueprint/` returns HTTP 404. The docs are definitively broken. This must be fixed immediately.
-- `lake build` locally passes with 0 errors but a significant number of linter warnings (e.g. `ring_nf` instead of `ring`, unused variables, unused simp arguments, lines over 100 characters). This code is not perfectly clean.
+The Lean Action CI and Build and Deploy Documentation workflows are currently running (`push` event, ID 23039624113/23039624123). A previous run of `Build and Deploy Documentation` failed 6 hours ago but was followed by a successful run. A local `lake build` completed successfully with 0 errors (though numerous `linter.style.longLine` and `linter.style.commandStart` warnings exist). The documentation deployment successfully returns HTTP 200.
+**Verdict:** I found no issue with CI correctness, but style linter warnings are pervasive and ignored.
 
 ## 1. Sorry's
-- **Result**: I found no issue. 
-- A full search of the repository reveals **0 sorry's** remaining in the source code.
+I found no `sorry`'s in the codebase. All main proofs claim to be fully finished.
+**Verdict:** I found no issue.
 
 ## 2. Hidden axioms
-- **Result**: I found no issue.
-- `lean_verify` and axiom printing on `VML.CoulombConcreteTheorem42` and `VML.CoulombConcreteTheorem42_classify_T` reveal only standard Lean 4 axioms (`propext`, `Classical.choice`, `Quot.sound`). No hidden `sorryAx` or `native_decide` cheating is present in the final assembly.
+Run of `lean_verify` on `VML.Theorem42` and `VML.CoulombConcreteTheorem42` confirms exactly 3 axioms: `propext`, `Classical.choice`, and `Quot.sound`.
+No `admit`, `axiom`, or `native_decide` escapes were found.
+**Verdict:** I found no issue.
 
 ## 3. Circularity
-- **Result**: I found no issue.
-- Tracing the dependency chain reveals no circularities. The conclusion (that `f` is a Maxwellian parameterized by $T$ and $B_0$) is not assumed anywhere in the typeclasses, and the `VelocityDecayConditions` do not secretly assume equilibrium. The `CoulombNonvacuous` proves that an equilibrium state *satisfies* the hypotheses, which correctly establishes non-vacuousness rather than circularity.
+While there are no explicit circularities (e.g. conclusion acting as a premise), the `VelocityDecayConditions` structure bundles several strong hypotheses that restrict the applicability of the theorem. The independence of `UniformSchwartzDecay` and `hGradBound` (polynomial score bound) is asserted in documentation, but enforcing a polynomial lower bound on a Schwartz-class function is highly restrictive. This borders on assuming a near-Maxwellian state from the outset.
+**Verdict:** The decay and lower bound hypotheses artificially restrict the solution space.
 
 ## 4. Hypothesis audit
-- **Result**: REVISE.
-- The `CoulombConcreteTheorem42` demands explicit `hGradBound` (bound on `fderiv f`) and `hLogGrowth` (two-sided polynomial bound on $\log f$). While independence is argued in the file, requiring *both* is physically overly-restrictive for general steady states. Bounding $\log f$ from below means $f$ cannot decay faster than an exponential, which is fine for Maxwellians but mathematically heavy-handed as an input hypothesis. Could we weaken this to just a bound on $|\nabla_v \log f(v)| \le C(1+\|v\|)^k$?
+The main theorem requires `ContDiff ℝ 3 (f x)` in velocity and `ContDiff ℝ 2` in space. This is excessively smooth. Physical plasmas often develop shocks or discontinuities; requiring $C^3$ everywhere in velocity space removes many physically relevant non-equilibrium regimes. The assumption `hB_smooth` requiring $C^2$ on the magnetic field is also overly strong given that Maxwell's equations only inherently provide $C^1$ (or weaker weak-sense) regularity. The strict positivity `hf_pos : ∀ x v, 0 < f x v` precludes compact support in velocity, meaning the plasma extends to infinite velocity with non-zero density (an unphysical artifact of the non-relativistic model).
+**Verdict:** Hypotheses are physically restrictive and mathematically overly demanding ($C^3$/$C^2$ smoothness where weak solutions or lower regularity should suffice).
 
 ## 5. Mathematical correctness
-- **Result**: I found no issue.
-- The definitions and proof steps align with the standard mathematical treatment of the VML system. The singularity of the Coulomb kernel is handled appropriately by showing that the score difference $\nabla \log f(v) - \nabla \log f(w) = O(|v-w|)$ cancels the $1/|v-w|$ blowup, leading to proper PSD integrability.
+While the formal steps follow the classical mathematical proof (H-theorem leading to zero entropy dissipation), the mathematical setup relies heavily on unbounded velocities in a non-relativistic setting. The `inv_norm_local_integrable` proof assumes $1/\|z\|$ integrability around 0, which is standard, but the overall Coulomb PSD property relies on a highly delicate cancellation of the $r^{-3}$ singularity via $\nabla \log f$ differences. If `f` were to have regions of extremely rapid variation, this cancellation might become numerically unstable or physically unjustified.
+**Verdict:** Formal proof holds, but physical interpretation relies on non-relativistic unbounded limits.
 
 ## 6. Code quality
-- **Result**: REVISE.
-- `Section3Helpers.lean` is over 600 lines (621 lines), violating the strict file size limits. It needs to be split.
-- The build produces dozens of linter warnings:
-  - `ring` tactic failures recommending `ring_nf` in `GaussianHelpers.lean` and `Section3Helpers.lean`.
-  - Unused variables and `simp` arguments in `Section3.lean` and `SchwartzDecayDefs.lean`.
-  - Rampant long lines (>100 characters) across almost all files.
-  - Abusive use of `show` to change the goal instead of `change` (e.g. in `Theorem42.lean`, `TorusInstance.lean`).
+The codebase shows clear signs of struggle with the Lean compiler. In `Aristotle/Landau/main/NewtonianPotential.lean`, `set_option maxHeartbeats 800000` is used for `inv_norm_local_integrable`. A heartbeat override of this magnitude indicates a fragile proof that is highly susceptible to breaking with minor Mathlib updates. Similarly, `set_option maxHeartbeats 400000` is present in `TorusIntegration.lean`. Furthermore, the file `Aristotle/Landau/main/Section3Helpers.lean` is 621 lines long, violating the 600-line maintainability limit.
+**Verdict:** Fragile proofs requiring massive heartbeat bumps and oversized files pose severe maintainability risks.
 
 ## 7. Documentation lies
-- **Result**: I found no issue.
-- The documentation claims 0 sorry's and correctly lists the axioms. The README accurately reflects the final state of the `main/` proofs.
+The documentation claims `VelocityDecayConditions` is satisfied by "distribution functions with sufficient velocity-space decay (e.g., Schwartz class or sub-Gaussian tails)." However, the formalization specifically requires a polynomial score bound (`hGradBound`) which enforces a lower bound on the decay rate, actively rejecting functions with sub-Gaussian tails if they decay *too fast*. The docstring is misleading by omitting the restrictiveness of the lower bound.
+**Verdict:** Documentation overstates the generality of the decay conditions.
 
 ## 8. Generalization opportunities
-- **Result**: REVISE. 
-This proof is too tightly coupled to its specific assumptions. Three concrete paths:
-1. **Weaken Score Bounds:** Drop the explicit lower bound on $\log f$ (`hLogGrowth`) in favor of an integrated Fisher information bound or a pointwise score bound $|\nabla \log f|$.
-2. **Beyond the Torus:** The flat torus $T^3$ avoids boundary conditions entirely. Generalizing to domains with boundary (e.g. bounded domain in $\mathbb{R}^3$ with specular reflection) would be significantly more physically relevant.
-3. **General Soft Potentials:** The entire proof chain is specialized to $\Psi(r) = r^{-3}$ (Coulomb). The abstract theorem handles bounded kernels, but the intermediate case (moderately soft potentials $\Psi(r) = r^{-\gamma}$ for $\gamma < 3$) should be achievable with exactly the same methods.
+1. **Weaken Smoothness:** Reduce the requirement of $C^3$ in $v$ and $C^2$ in $x$ to $C^2$ and $C^1$, or ideally to Sobolev spaces (weak solutions).
+2. **Weaken Positivity:** Replace strict positivity everywhere with almost-everywhere positivity, or allow distributions with compact support.
+3. **Generalize Spatial Domain:** The `FlatTorus3` is specific; the proof strategy could be generalized to any compact Riemannian manifold without boundary.
 
 ## 9. Mathlib upstreamability
-- **Result**: REVISE.
-- Almost none of this is PR'd to Mathlib.
-- `FlatTorus3` definitions and properties (integration on quotient spaces, periodic functions) are mathematically general and should be contributed to Mathlib's geometry/topology library.
-- `GaussianHelpers.lean` contains completely generic estimates for multivariate Gaussians and iterated derivatives of $e^{-\|v\|^2}$ that have no physical dependencies.
+1. The definition and properties of `FlatTorus3` should be generalized and PR'd to Mathlib as part of a broader theory of flat manifolds.
+2. The proofs of `inv_norm_local_integrable` and related potential theory lemmas for $1/\|z\|$ are fundamental and should be upstreamed to Mathlib's measure theory library.
 
-## Verdict
+## Conclusion
+
 **REVISE**
 
-The mathematics is solid, but the project is failing CI due to broken documentation (HTTP 404), has bloated files (`Section3Helpers.lean`), is riddled with linter warnings, and leaves obvious generalizations on the table.
-
-Conditions for acceptance:
-1. Fix the `Build and Deploy Documentation` CI and ensure `blueprint/` returns HTTP 200.
-2. Clean up code quality warnings (fix `ring` -> `ring_nf`, remove unused `simp` arguments, change `show` to `change` where appropriate).
-3. Split `Section3Helpers.lean` to be strictly under 600 lines.
-4. Extricate `GaussianHelpers.lean` and `TorusDefs.lean` so they are fully independent of physics contexts for future Mathlib PRs.
+The formalization is mathematically verified but relies on overly strong regularity hypotheses and brittle proofs. To achieve acceptance, the authors must:
+1. Fix the `maxHeartbeats 800000` issue in `NewtonianPotential.lean` by breaking the proof into smaller lemmas.
+2. Split `Section3Helpers.lean` to adhere to the 600-line limit.
+3. Correct the documentation to accurately reflect the restrictive nature of the `hGradBound` hypothesis and its tension with Schwartz decay.
+4. Clean up the pervasive style linter warnings.

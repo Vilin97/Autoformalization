@@ -1,17 +1,17 @@
-# Plan -- Cycle 121 (Adversarial Focus)
+# Plan -- Cycle 122 (Adversarial Focus)
 
 ## Status summary
 
 - **Sorry count**: 0
-- **Files**: 32 files, 10,221 lines
-- **Build**: Local build passing (with linter warnings)
+- **Files**: 32 files
+- **Build**: Local build passing (with style linter warnings)
 - **Critique verdict**: REVISE
 - **Open issues**:
-  - **P0**: `Build and Deploy Documentation` CI is failing, `blueprint/` returns HTTP 404.
+  - **P1**: Code quality: `NewtonianPotential.lean` uses `set_option maxHeartbeats 800000`.
   - **P1**: Code quality: `Section3Helpers.lean` exceeds 600 lines (621 lines).
-  - **P2**: Code quality: Dozens of linter warnings (e.g. `ring_nf` instead of `ring`, unused variables, unused simp args, long lines).
-  - **P2**: Epistemic: `hLogGrowth` in `CoulombConcreteTheorem42` demands explicit lower bounds on $\log f$, which is overly restrictive.
-  - **P3**: Mathlib upstreamability: `GaussianHelpers.lean` and `TorusDefs.lean` are generic and should be prepped for Mathlib.
+  - **P2**: Code quality: Dozens of style linter warnings (`linter.style.longLine`).
+  - **P2**: Epistemic/Documentation: `hGradBound` forces a lower bound on decay, making it overly restrictive compared to what the docs claim for Schwartz class.
+  - **P3**: Mathlib upstreamability: `GaussianHelpers.lean`, `TorusDefs.lean`, and `inv_norm_local_integrable`.
 
 ## Active multi-cycle strategies
 
@@ -23,26 +23,26 @@
 
 ## This cycle's work items
 
-### 1. Fix Documentation CI (`/simplify` / `/cleanup`)
-- **What**: The blueprint deployment CI is failing and returning 404.
-- **Files**: `.github/workflows/deploy.yml` or docgen configurations.
-- **Approach**: Investigate the exact failure in the GH Actions logs for the doc build, and fix the pathing or python environment issues causing it.
+### 1. Fix `maxHeartbeats` in `NewtonianPotential.lean` (`/simplify`)
+- **What**: Reduce the 800,000 heartbeats required for `inv_norm_local_integrable`.
+- **Files**: `NewtonianPotential.lean`
+- **Approach**: Break the proof of `inv_norm_local_integrable` into smaller sub-lemmas.
 - **START IMMEDIATELY.**
 
-### 2. Clean up Linter Warnings (`/simplify`)
-- **What**: Resolve build warnings to improve code cleanliness.
-- **Files**: `GaussianHelpers.lean`, `Section3Helpers.lean`, `Section3.lean`, `SchwartzDecayDefs.lean`, `Theorem42.lean`, `TorusInstance.lean`
-- **Approach**: Replace `ring` with `ring_nf`, drop unused `simp` arguments, replace `show` with `change` where the goal state changes.
-
-### 3. Split `Section3Helpers.lean` (`/simplify`)
+### 2. Split `Section3Helpers.lean` (`/simplify`)
 - **What**: File is 621 lines, which violates the <600 lines limit.
 - **Files**: `Section3Helpers.lean`
 - **Approach**: Move independent algebraic or analytic lemmas into a new file `Section3Helpers2.lean` or into `GaussianHelpers.lean` if appropriate.
 
-### 4. Investigate `hLogGrowth` Weakening (`/strengthen`)
-- **What**: The hypothesis restricts the steady state solutions excessively.
-- **Files**: `CoulombConcreteTheorem42.lean`, `Theorem42.lean`
-- **Approach**: See if `hLogGrowth` can be replaced with a gradient bound $|\nabla_v \log f(v)| \le C(1+\|v\|)^k$.
+### 3. Clean up Linter Warnings (`/simplify`)
+- **What**: Resolve build warnings to improve code cleanliness (especially `linter.style.longLine`).
+- **Files**: `FlatTorus3Lemmas.lean`, `Section4.lean`, `Section5.lean`, `Section7.lean`, `Section8.lean`, `VMLInputDerive.lean`, `Theorem42.lean`, `TorusIntegration.lean`, `TorusInstance.lean`, `CoulombSpatialTransport.lean`, `CoulombFlux.lean`, `CoulombFluxBound.lean`, `CoulombPSDHelpers.lean`, `CoulombPSD.lean`, `CoulombFluxConv.lean`, `CoulombFluxDiff.lean`, `LogBoundHelpers.lean`, `CoulombConcreteTheorem42.lean`.
+- **Approach**: Break long lines, fix missing spaces, adjust command starts.
+
+### 4. Correct Documentation for `hGradBound` (`/strengthen`)
+- **What**: The docs claim Schwartz class or sub-Gaussian tails are sufficient, but `hGradBound` forces a lower bound that contradicts this.
+- **Files**: `CoulombConcreteTheorem42.lean`
+- **Approach**: Update the docstring to accurately reflect the restrictiveness of the polynomial lower bound assumption, or explicitly mention that this excludes standard Schwartz functions with faster-than-exponential decay.
 
 ## Backlog
 
