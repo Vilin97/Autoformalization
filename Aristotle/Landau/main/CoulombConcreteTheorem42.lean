@@ -57,13 +57,12 @@ namespace VML
     (e.g. Maxwell molecules with Ψ = const), the abstract `Theorem42` applies
     without any score bound hypothesis.
 
-    **Independence of hLogGrowth from hSchwartz:** Schwartz decay (hypothesis 7)
-    only provides an *upper* bound on f, giving log f(x,v) ≤ log C − N·log(1+‖v‖),
-    but does NOT bound −log f from above. The logarithmic growth bound (hypothesis 8)
-    additionally requires a *lower* bound on f, i.e., f cannot decay faster than
-    exp(−poly(‖v‖)). Counterexample: f(v) = exp(−exp(‖v‖)) is Schwartz (faster
-    than any polynomial decay) but |log f(v)| = exp(‖v‖) violates polynomial log
-    growth. The two hypotheses together give two-sided polynomial control on log f.
+    **Restrictiveness of hGradBound:** The polynomial score bound (hypothesis 9)
+    forces a strict lower bound on the decay rate of $f$. It actively excludes
+    many standard Schwartz class functions, such as those with faster-than-exponential
+    decay (e.g., $f(v) = \exp(-\exp(\|v\|))$), because their logarithmic gradient
+    grows too fast. Thus, while the theorem covers Maxwellians, it strictly
+    prohibits solutions that vanish too rapidly at infinity.
 
     **Scope:** Single species, non-relativistic, 3D flat torus, Coulomb kernel
     (Ψ(r) = r⁻³). Assumes existence of a smooth positive steady-state solution. -/

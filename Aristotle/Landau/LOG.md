@@ -1,3 +1,13 @@
+## 2026-03-12 UTC — Babysit cycle 122: Fix maxHeartbeats and Section3Helpers length, document restrictiveness
+
+### Changes
+- **Fixed maxHeartbeats**: Successfully eliminated `set_option maxHeartbeats 800000` from `NewtonianPotential.lean` by splitting the 130-line `inv_norm_local_integrable` proof into smaller lemmas (`inv_norm_lintegral_punctured_finite` and `inv_norm_punctured_integrable`), greatly improving maintainability.
+- **Split Section3Helpers.lean**: Addressed the file length critique by splitting `Section3Helpers.lean` (which exceeded 600 lines). Moved the concluding Maxwellian lemmas (`maxwellian_landau_flux_zero`, `IsMaxwellian.landauOperator_eq_zero`, `D_zero_implies_maxwellian`) into a new file `Section3Helpers2.lean`.
+- **Linter Cleanup**: Resolved multiple formatting issues in `LogBoundHelpers.lean`, `NewtonianPotential.lean`, and `Section3Helpers2.lean`.
+- **Documentation**: Updated docstrings in `CoulombConcreteTheorem42.lean` and `Theorem42.lean` to make it explicit that the polynomial lower bound on the score (`hGradBound`) is a strict constraint that actively excludes standard Schwartz-class functions with faster-than-exponential decay (e.g., $e^{-e^{\|v\|}}$).
+
+### Sorry count: 0
+
 ## 2026-03-12 UTC — Babysit cycle 121: CI Docs Fix, Linter Cleanup, Physical Context
 
 ### Changes

@@ -82,7 +82,77 @@ lemma coulomb_landauMatrix_entry_le_pi (z : Fin 3 → ℝ) (i j : Fin 3)
   exact le_trans h (inv_anti₀ (norm_pos_iff.mpr hz) (pi_norm_le_eucNorm z))
 
 
-set_option maxHeartbeats 800000 in
+lemma inv_norm_summable_series (R : ℝ) (hR : 0 < R) :
+    Summable (fun k : ℕ => (2^(-k-1 : ℝ) * R)⁻¹ * (2^(-k : ℝ) * R)^3) := by
+  norm_num [ Real.rpow_sub ]
+  ring_nf
+  norm_num [ hR.ne' ]
+  norm_num [ pow_mul', mul_assoc, hR.ne' ]
+  norm_num only [ ← mul_assoc, ← mul_pow ]
+  ring_nf
+  norm_num [ hR.ne' ]
+  exact Summable.mul_right _
+    (Summable.mul_left _
+      (summable_geometric_of_lt_one (by norm_num) (by norm_num)))
+
+lemma inv_norm_ball_volume (R : ℝ) (hR : 0 < R) (k : ℕ) :
+    (MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) (2^(-k : ℝ) * R))).toReal =
+    (2^(-k : ℝ) * R)^3 * (MeasureTheory.volume (Metric.closedBall (0 : Fin 3 → ℝ) 1)).toReal := by
+  rw [ MeasureTheory.Measure.addHaar_closedBall ]
+  norm_num
+  ring_nf
+  · positivity
+  · positivity
+
+lemma inv_norm_lintegral_bounded (R : ℝ) (hR : 0 < R) (k : ℕ) :
+    ∫⁻ (z : Fin 3 → ℝ) in
+      Metric.closedBall 0 (2^(-k : ℝ) * R) \
+      Metric.closedBall 0 (2^(-k-1 : ℝ) * R),
+      ENNReal.ofReal (‖z‖⁻¹) ≤
+    ENNReal.ofReal ((2^(-k-1 : ℝ) * R)⁻¹ *
+      (MeasureTheory.volume
+        (Metric.closedBall (0 : Fin 3 → ℝ)
+          (2^(-k : ℝ) * R))).toReal) := by
+  have h_bounded : ∀ z : Fin 3 → ℝ,
+      z ∈ Metric.closedBall 0 (2^(-k : ℝ) * R) \
+        Metric.closedBall 0 (2^(-k-1 : ℝ) * R) →
+      ‖z‖⁻¹ ≤ (2^(-k-1 : ℝ) * R)⁻¹ := by
+    simp +zetaDelta at *
+    intro z hz₁ hz₂
+    rw [ ← mul_inv ]
+    gcongr
+    norm_num [ Real.rpow_sub ] at *
+    linarith
+  have h_const_bound :
+      ∫⁻ (z : Fin 3 → ℝ) in
+        Metric.closedBall 0 (2^(-k : ℝ) * R) \
+        Metric.closedBall 0 (2^(-k-1 : ℝ) * R),
+        ENNReal.ofReal (‖z‖⁻¹) ≤
+      ∫⁻ (_z : Fin 3 → ℝ) in
+        Metric.closedBall 0 (2^(-k : ℝ) * R) \
+        Metric.closedBall 0 (2^(-k-1 : ℝ) * R),
+        ENNReal.ofReal ((2 ^ (-(k : ℝ) - 1) * R)⁻¹) :=
+    MeasureTheory.lintegral_mono_ae (by
+      filter_upwards [MeasureTheory.ae_restrict_mem <|
+        measurableSet_closedBall.diff
+          measurableSet_closedBall]
+        with z hz using
+        ENNReal.ofReal_le_ofReal <|
+          h_bounded z hz)
+  refine le_trans h_const_bound ?_
+  simp +zetaDelta at *
+  rw [ ENNReal.ofReal_mul (by positivity) ]
+  rw [ ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_mul (by positivity) ]
+  gcongr
+  calc volume (Metric.closedBall 0 ((2 ^ k) ⁻¹ * R) \
+        Metric.closedBall 0 (2 ^ (-(k : ℝ) - 1) * R))
+      ≤ volume (Metric.closedBall (0 : Fin 3 → ℝ) ((2 ^ k) ⁻¹ * R)) :=
+        MeasureTheory.measure_mono Set.diff_subset
+    _ ≤ ENNReal.ofReal (volume (Metric.closedBall (0 : Fin 3 → ℝ)
+        ((2 ^ k) ⁻¹ * R))).toReal := by
+        rw [ ENNReal.ofReal_toReal ]
+        exact ne_of_lt (isCompact_closedBall _ _ |> IsCompact.measure_lt_top)
+
 -- lintegral_iUnion + ENNReal arithmetic requires extended unification
 /-- ‖·‖⁻¹ is locally integrable in ℝ³. Proved by Aristotle (job 3dc1b4dc).
     Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun> -/
@@ -156,80 +226,9 @@ lemma inv_norm_local_integrable (R : ℝ) (hR : 0 < R) :
               exact pow_le_pow_of_le_one
                 (by norm_num) (by norm_num)
                 (by linarith)]
-      have h_bounded : ∀ k : ℕ,
-          ∫⁻ (z : Fin 3 → ℝ) in
-            Metric.closedBall 0 (2^(-k : ℝ) * R) \
-            Metric.closedBall 0 (2^(-k-1 : ℝ) * R),
-            ENNReal.ofReal (‖z‖⁻¹) ≤
-          ENNReal.ofReal ((2^(-k-1 : ℝ) * R)⁻¹ *
-            (MeasureTheory.volume
-              (Metric.closedBall (0 : Fin 3 → ℝ)
-                (2^(-k : ℝ) * R))).toReal) := by
-        intro k
-        have h_bounded : ∀ z : Fin 3 → ℝ,
-            z ∈ Metric.closedBall 0 (2^(-k : ℝ) * R) \
-              Metric.closedBall 0 (2^(-k-1 : ℝ) * R) →
-            ‖z‖⁻¹ ≤ (2^(-k-1 : ℝ) * R)⁻¹ := by
-          simp +zetaDelta at *
-          intro z hz₁ hz₂
-          rw [ ← mul_inv ]
-          gcongr
-          norm_num [ Real.rpow_sub ] at *
-          linarith
-        have h_const_bound :
-            ∫⁻ (z : Fin 3 → ℝ) in
-              Metric.closedBall 0 (2^(-k : ℝ) * R) \
-              Metric.closedBall 0 (2^(-k-1 : ℝ) * R),
-              ENNReal.ofReal (‖z‖⁻¹) ≤
-            ∫⁻ (_z : Fin 3 → ℝ) in
-              Metric.closedBall 0 (2^(-k : ℝ) * R) \
-              Metric.closedBall 0 (2^(-k-1 : ℝ) * R),
-              ENNReal.ofReal ((2 ^ (-(k : ℝ) - 1) * R)⁻¹) :=
-          MeasureTheory.lintegral_mono_ae (by
-            filter_upwards [MeasureTheory.ae_restrict_mem <|
-              measurableSet_closedBall.diff
-                measurableSet_closedBall]
-              with z hz using
-              ENNReal.ofReal_le_ofReal <|
-                h_bounded z hz)
-        refine le_trans h_const_bound ?_
-        simp +zetaDelta at *
-        rw [ ENNReal.ofReal_mul (by positivity) ]
-        rw [ ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_mul (by positivity) ]
-        gcongr
-        calc volume (Metric.closedBall 0 ((2 ^ k) ⁻¹ * R) \
-              Metric.closedBall 0 (2 ^ (-(k : ℝ) - 1) * R))
-            ≤ volume (Metric.closedBall (0 : Fin 3 → ℝ) ((2 ^ k) ⁻¹ * R)) :=
-              MeasureTheory.measure_mono Set.diff_subset
-          _ ≤ ENNReal.ofReal (volume (Metric.closedBall (0 : Fin 3 → ℝ)
-              ((2 ^ k) ⁻¹ * R))).toReal := by
-              rw [ ENNReal.ofReal_toReal ]
-              exact ne_of_lt (isCompact_closedBall _ _ |> IsCompact.measure_lt_top)
-      have h_volume : ∀ k : ℕ,
-          (MeasureTheory.volume
-            (Metric.closedBall (0 : Fin 3 → ℝ)
-              (2^(-k : ℝ) * R))).toReal =
-          (2^(-k : ℝ) * R)^3 *
-            (MeasureTheory.volume
-              (Metric.closedBall
-                (0 : Fin 3 → ℝ) 1)).toReal := by
-        intro k
-        rw [ MeasureTheory.Measure.addHaar_closedBall ]
-        norm_num
-        ring_nf
-        · positivity
-        · positivity
-      have h_series : Summable (fun k : ℕ => (2^(-k-1 : ℝ) * R)⁻¹ * (2^(-k : ℝ) * R)^3) := by
-        norm_num [ Real.rpow_sub ]
-        ring_nf
-        norm_num [ hR.ne' ]
-        norm_num [ pow_mul', mul_assoc, hR.ne' ]
-        norm_num only [ ← mul_assoc, ← mul_pow ]
-        ring_nf
-        norm_num [ hR.ne' ]
-        exact Summable.mul_right _
-          (Summable.mul_left _
-            (summable_geometric_of_lt_one (by norm_num) (by norm_num)))
+      have h_bounded := inv_norm_lintegral_bounded R hR
+      have h_volume := inv_norm_ball_volume R hR
+      have h_series := inv_norm_summable_series R hR
       refine lt_of_le_of_lt h_integrable <| lt_of_le_of_lt (ENNReal.tsum_le_tsum h_bounded) ?_
       rw [ ← ENNReal.ofReal_tsum_of_nonneg ] <;> norm_num [ h_volume ]
       · exact fun k => by positivity
