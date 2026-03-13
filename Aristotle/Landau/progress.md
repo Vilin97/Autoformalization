@@ -1,7 +1,7 @@
 # Formalization Progress: Global Steady State of the VML System
 
 **Files**: `Aristotle/Landau/main/*.lean` (21 files, ~7,900 lines)
-**Blueprint**: `Aristotle/Landau/H-theorem-formal.tex` (Sections 1--10)
+**Blueprint**: `artifacts/H-theorem-formal.tex` (Sections 1--10)
 **Status**: 0 errors, 0 sorry's. Fully verified by Lean 4 kernel.
 
 Last updated: 2026-03-10

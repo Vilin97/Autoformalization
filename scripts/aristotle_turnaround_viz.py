@@ -14,7 +14,7 @@ from datetime import timedelta
 from aristotlelib import Project
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT_PNG = os.path.join(REPO, "scripts", "aristotle_turnaround.png")
+OUT_PNG = os.path.join(REPO, "artifacts", "aristotle_turnaround.png")
 
 LANDAU_KEYWORDS = [
     "landau", "section", "coulomb", "torus", "schwartz", "velocity",

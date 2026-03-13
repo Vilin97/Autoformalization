@@ -13,7 +13,7 @@ SESSION_DIRS = [
     os.path.expanduser("~/.claude/projects/-Users-vasil-Github-aristotle/"),
     "/tmp/americano-sessions/",  # from university machine
 ]
-OUT_PNG = os.path.join(REPO, "scripts", "session_activity.png")
+OUT_PNG = os.path.join(REPO, "artifacts", "session_activity.png")
 
 PT = timezone(timedelta(hours=-7))  # PDT (March = daylight saving)
 

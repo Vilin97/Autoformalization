@@ -1,17 +1,7 @@
--- Import all project modules that build successfully.
--- If new modules are added, add them here.
-import Aristotle.Landau.main.Defs
-import Aristotle.Landau.main.Section2
--- import Aristotle.Landau.main.Section3        -- via Section3Helpers (build issue)
-import Aristotle.Landau.main.Section4
-import Aristotle.Landau.main.Section5
-import Aristotle.Landau.main.Section6
-import Aristotle.Landau.main.Section7
-import Aristotle.Landau.main.Section8
-import Aristotle.Landau.main.VMLInputDerive
-import Aristotle.Landau.main.Theorem42
--- import Aristotle.Landau.main.VelocityDecayInstance  -- depends on Section3Helpers
--- import Aristotle.Landau.main.SchwartzDecayDefs      -- depends on Section3Helpers
+-- Import all project modules via the top-level build targets.
+-- These transitively pull in all 34 files in main/.
+import Aristotle.Landau.main.CoulombConcreteTheorem42
+import Aristotle.Landau.main.CoulombNonvacuous
 
 /-!
 # Declaration dependency graph extractor

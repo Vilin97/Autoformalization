@@ -16,7 +16,7 @@ from datetime import datetime, timedelta, timezone
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECTS_FILE = os.path.join(REPO, "Aristotle", "Landau", "aristotle-out", "landau_projects.json")
 SOLUTIONS_FILE = os.path.join(REPO, "Aristotle", "Landau", "aristotle-out", "solution_analysis.json")
-OUT_PNG = os.path.join(REPO, "scripts", "aristotle_outcomes.png")
+OUT_PNG = os.path.join(REPO, "artifacts", "aristotle_outcomes.png")
 
 PT = timezone(timedelta(hours=-7))
 
