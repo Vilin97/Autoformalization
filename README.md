@@ -9,7 +9,7 @@ A complete formalization of the characterization of smooth steady-state solution
 ## Contents
 
 - [The Mathematics](#the-mathematics) — [Physical System](#the-physical-system) | [Main Theorem](#the-main-theorem) | [Hypotheses](#hypotheses) | [Proof Architecture](#proof-architecture)
-- [Development Process](#development-process) — [Narrative](#narrative) | [Session Activity](#session-activity) | [Token Usage](#token-usage) | [Babysit Loop](#the-babysit-loop) | [Aristotle Integration](#aristotle-integration) | [LOC Over Time](#lines-of-code-over-time) | [Git Churn](#git-churn) | [Sorry Elimination](#sorry-elimination)
+- [Development Process](#development-process) — [Narrative](#narrative) | [Session Activity](#session-activity) | [Token Usage](#token-usage) | [Babysit Loop](#the-babysit-loop) | [Aristotle Integration](#aristotle-integration) | [LOC Over Time](#lines-of-code-over-time) | [Git Churn](#git-churn) | [Sorry Elimination](#sorry-elimination) | [Tool Usage](#tool-usage)
 - [Technical Stack](#technical-stack)
 
 | Metric | Value |
@@ -26,6 +26,7 @@ A complete formalization of the characterization of smooth steady-state solution
 | Interactive human prompts | 836 |
 | `/babysit` invocations | 161 |
 | Assistant turns | 27,200+ |
+| Tool calls | 17,334 |
 | Tokens consumed | 2.8 billion |
 | Estimated API cost | ~$6,300 |
 | Aristotle ATP submissions | 220 (111 proved, 28 disproved) |
@@ -266,6 +267,12 @@ Key Aristotle-proved results include:
 ![Sorry count over time](scripts/sorry_history.png)
 
 **Figure: Number of `sorry`'s in `main/` over time (85 commits).** The sorry count follows a characteristic "sawtooth" pattern: sorry's accumulate as new proof scaffolding is written, then are eliminated through proving campaigns. Key events: (1) **Peak 25** (Mar 2): the abstract proof chain (Sections 2–9) stated with gaps. (2) **Monolithic split** (Mar 3–4): first wave of Aristotle proofs drops count from 25→7. (3) **TorusInstance** (Mar 5 evening): +13 sorry's for the 22 torus axioms, quickly resolved. (4) **First 0 sorry's** (Mar 7): the abstract theorem is fully proved — all sorry's in the main proof chain are closed. (5) **CoulombConcrete added** (Mar 8 evening): +35 sorry's for all Coulomb integrability/continuity conditions needed to instantiate the abstract theorem on the physical kernel Ψ(r) = r⁻³. (6) **Coulomb proved** (Mar 9 evening): 35→0 sprint via Aristotle submissions + manual proving. (7) **Non-vacuousness** (Mar 10): brief +1 from adding a satisfiability theorem, immediately resolved to **0 sorry's (final)**.
+
+### Tool Usage
+
+![Tool usage](scripts/tool_use.png)
+
+**Figure: Claude Code tool calls across 17,334 invocations over 12 days (Feb 28 – Mar 11).** Left: total calls by category. The core editing loop dominates — Bash (3,975), Read (3,416), Edit (2,495), Grep (1,701), Write (900) — reflecting the read-heavy, iterative nature of formal verification. Lean LSP tools (3,194 combined) provided real-time feedback: diagnostic messages (1,181), code execution (529), goal inspection (426), local search (353), and Mathlib search via LeanSearch (252) and Loogle (202). Aristotle submissions (226) represent lemmas extracted and sent to the cloud prover. Right: daily breakdown by tool category, showing the ramp-up from exploratory work (Feb 28 – Mar 2) through peak activity (Mar 6–10) when both machines ran `/babysit` loops concurrently, driving 2,000–3,500 tool calls per day.
 
 ## Technical Stack
 
