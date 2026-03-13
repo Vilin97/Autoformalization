@@ -20,6 +20,8 @@ EVENTS = [
     ("20d0f4b0fe", "Main theorem:\n0 sorry\u2019s", 40),
     ("96f389e62f", "Dead code removal\n(\u22123K lines)", 40),
     ("46b87fbc43", "Non-vacuousness\ncomplete", -70),
+    ("5b62d21624", "Relax C\u221e \u2192 finite\norder differentiability", -70),
+    ("62610d06ee", "Derive log growth\nbound via MVT", 40),
 ]
 
 # File categories for the breakdown chart.
