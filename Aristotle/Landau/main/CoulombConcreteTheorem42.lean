@@ -35,15 +35,15 @@ namespace VML
     at r = 0 but the formalization handles this via the PSD continuity condition
     in VelocityDecayConditions (the singularity cancels in the quadratic form).
 
-    **Hypotheses** (13 total):
+    **Hypotheses** (12 total):
     - 2 physical parameters (ν > 0, ρ_ion > 0)
     - 1 strict positivity (f > 0)
     - 3 smoothness (f smooth in v and x, B smooth)
-    - 3 decay (Schwartz in v; stretched-exponential lower bound; polynomial score)
+    - 2 decay (uniform C² velocity decay; polynomial score bound)
     - 4 equations (Vlasov, Ampère, Gauss, div B = 0)
 
-    **Independence note:** Hypothesis 9 (hGradBound, polynomial score bound) is
-    NOT derivable from hypotheses 7-8 alone. The ratio |∂f|/f equals
+    **Independence note:** The polynomial score bound (hGradBound) is
+    NOT derivable from the Schwartz decay alone. The ratio |∂f|/f equals
     |∂f| * exp(C(1+‖v‖)^K) in the worst case, which grows super-polynomially
     for K ≥ 1. Counterexample: f(v) = exp(-|v|²)(2 + sin(exp(⟨v⟩))) is Schwartz
     with stretched-exponential lower bound, but |∂f|/f grows like exp(⟨v⟩).
@@ -57,7 +57,7 @@ namespace VML
     (e.g. Maxwell molecules with Ψ = const), the abstract `Theorem42` applies
     without any score bound hypothesis.
 
-    **Restrictiveness of hGradBound:** The polynomial score bound (hypothesis 9)
+    **Restrictiveness of hGradBound:** The polynomial score bound
     forces a strict lower bound on the decay rate of $f$. It actively excludes
     many standard Schwartz class functions, such as those with faster-than-exponential
     decay (e.g., $f(v) = \exp(-\exp(\|v\|))$), because their logarithmic gradient
@@ -79,23 +79,23 @@ theorem CoulombConcreteTheorem42
     (hf_smooth_v : ∀ x, ContDiff ℝ 3 (f x))                             -- (4)
     (hf_smooth_x : ∀ v, ContDiff ℝ 2 (periodicLift (fun x => f x v)))   -- (5)
     (hB_smooth : ∀ i, ContDiff ℝ 2 (periodicLift (fun x => B x i)))     -- (6)
-    -- === Schwartz-class velocity decay, uniform in x ===
+    -- === Uniform C² velocity decay ===
     (hSchwartz : UniformSchwartzDecay f)         -- (7)
-    -- === Polynomial score bound (independent of hSchwartz + hLogGrowth) ===
-    -- This is NOT derivable from hSchwartz + hLogGrowth: the ratio |∂f|/f can grow
-    -- super-polynomially even for Schwartz f with polynomial log growth.
+    -- === Polynomial score bound (independent of hSchwartz) ===
+    -- This is NOT derivable from hSchwartz alone: the ratio |∂f|/f can grow
+    -- super-polynomially even for Schwartz f.
     -- Satisfied by Maxwellians and physically reasonable perturbations.
     (hGradBound : ∃ (Cg : ℝ) (Kg : ℕ), ∀ (x : Torus3) (v : Fin 3 → ℝ) (i : Fin 3),
-      |fderiv ℝ (f x) v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f x v) -- (9)
+      |fderiv ℝ (f x) v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f x v) -- (8)
     -- === Steady-state Vlasov equation with Coulomb kernel ===
     (hVlasov : ∀ x v,
       dotProduct v (torusGradX (fun y => f y v) x) +
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
-      ν * LandauOperator coulombKernel (f x) v)  -- (10)
+      ν * LandauOperator coulombKernel (f x) v)  -- (9)
     -- === Steady-state Maxwell equations ===
-    (hAmpere : ∀ x, torusCurlX B x = fun i => ∫ v, v i * f x v)       -- (11)
-    (hGauss : ∀ x, torusDivX E x = (∫ v, f x v) - ρ_ion)              -- (12)
-    (hDivB : ∀ x, torusDivX B x = 0)             -- (13)
+    (hAmpere : ∀ x, torusCurlX B x = fun i => ∫ v, v i * f x v)       -- (10)
+    (hGauss : ∀ x, torusDivX E x = (∫ v, f x v) - ρ_ion)              -- (11)
+    (hDivB : ∀ x, torusDivX B x = 0)             -- (12)
     :
     -- === Conclusion ===
     ∃ (T_eq : ℝ) (B₀ : Fin 3 → ℝ), 0 < T_eq ∧
@@ -184,7 +184,8 @@ theorem CoulombConcreteTheorem42
       spatial_transport_joint_integrable hf_pos hf_smooth_v hf_smooth_x hSchwartz hLogBound
     hSpatTransComp := by
       intro v i
-      have hDiff_fv : FlatTorus3.IsSpatiallySmooth 2 (fun x => f x v) := (hf_smooth_x v).of_le (by decide)
+      have hDiff_fv : FlatTorus3.IsSpatiallySmooth 2 (fun x => f x v) :=
+        (hf_smooth_x v).of_le (by decide)
       have hcont_grad := FlatTorus3.hDiff_continuous 0 _ (FlatTorus3.hDiff_grad 1 _ i hDiff_fv)
       have hcont_log := FlatTorus3.hDiff_continuous 1 _
         (FlatTorus3.hDiff_log 2 _ hDiff_fv (fun x => hf_pos x v))
@@ -207,9 +208,15 @@ theorem CoulombConcreteTheorem42
         hSchwartz hLogBound hVlasov
   }
   exact Theorem42 f E B coulombKernel ν ρ_ion
-    hν hρ_ion coulombKernel_pos hf_pos (fun x => (hf_smooth_v x).of_le (by exact_mod_cast (by decide : 2 + 1 ≤ 3)))
+    hν hρ_ion coulombKernel_pos hf_pos
+    (fun x => (hf_smooth_v x).of_le
+      (by exact_mod_cast (by decide : 2 + 1 ≤ 3)))
     (hSchwartz.integrable hf_smooth_v)
-    hAmpere hGauss hDivB (fun i => (hB_smooth i).of_le (by decide)) hVlasov (fun v => (hf_smooth_x v).of_le (by decide)) hDecay
+    hAmpere hGauss hDivB
+    (fun i => (hB_smooth i).of_le (by decide))
+    hVlasov
+    (fun v => (hf_smooth_x v).of_le (by decide))
+    hDecay
 
 /-- The steady state is parameterized by an injective temperature T_eq.
     Note: T_eq is uniquely determined *by the state f itself* via injectivity, but the overall

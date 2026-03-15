@@ -1,52 +1,76 @@
-# Plan -- Cycle 122 (Adversarial Focus)
+# Plan -- Cycle 123
 
 ## Status summary
 
 - **Sorry count**: 0
-- **Files**: 32 files
-- **Build**: Local build passing (with style linter warnings)
-- **Critique verdict**: REVISE
-- **Open issues**:
-  - **P1**: Code quality: `NewtonianPotential.lean` uses `set_option maxHeartbeats 800000`.
-  - **P1**: Code quality: `Section3Helpers.lean` exceeds 600 lines (621 lines).
-  - **P2**: Code quality: Dozens of style linter warnings (`linter.style.longLine`).
-  - **P2**: Epistemic/Documentation: `hGradBound` forces a lower bound on decay, making it overly restrictive compared to what the docs claim for Schwartz class.
-  - **P3**: Mathlib upstreamability: `GaussianHelpers.lean`, `TorusDefs.lean`, and `inv_norm_local_integrable`.
+- **Files**: 34 files in `main/`
+- **Build**: Passing, 0 errors, 47 linter warnings
+- **Critique verdict**: CONDITIONAL ACCEPT
+- **Key wins since last cycle**: `maxHeartbeats 800000` in NewtonianPotential.lean fixed; Section3Helpers.lean split (now 493 lines, under 600 limit); hGradBound docstring updated with restrictiveness warning.
+
+## Open issues from critique
+
+| Priority | Issue | Source |
+|----------|-------|--------|
+| P1 | MEMORY.md has false claims (Section9.lean, VelocityDecayInstance instances, nonvacuous sorry count) | critique §7 |
+| P1 | `hLogGrowth` ghost reference in CoulombConcreteTheorem42.lean docstring line 84 | critique §7 |
+| P2 | Hypothesis numbering gap (missing #8) in CoulombConcreteTheorem42.lean docstring | critique §7 |
+| P2 | 5-linter suppressions in GaussianHelpers.lean and Section3Helpers.lean | critique §6 |
+| P2 | `maxHeartbeats 400000` in TorusIntegration.lean:89 | critique §6 |
+| P2 | `Section3Helpers2.lean` has 3 multiGoal warnings at lines 72-74 | critique §6 |
+| P3 | 17 files suppress `linter.style.longLine` globally | critique §6 |
+| P3 | Rename `UniformSchwartzDecay` to reflect actual k≤2 scope | critique §4 |
+| P3 | Add bounded-kernel instance (Ψ = const) to show hGradBound is Coulomb-specific | critique §8 |
 
 ## Active multi-cycle strategies
 
-### Purge `VelocityDecayConditions` of analytical consequences
-- This requires structurally breaking down `Theorem42` to accept base integrability bounds and prove the Fubini/continuity theorems internally, likely requiring thousands of lines of new analysis. Will require careful staging across multiple cycles.
+### Documentation accuracy
+- MEMORY.md is severely outdated. Must be reconciled with actual codebase. This is a P1 blocking issue.
 
-### Generalize beyond Torus and Coulomb Kernel
-- Generalize to domains with boundaries (e.g. bounded domain with specular reflection) and moderately soft potentials ($\gamma < 3$).
+### Code quality hygiene
+- Systematically remove linter suppressions by fixing underlying issues. 17 files suppress longLine; 2 files suppress 5 linters each.
 
 ## This cycle's work items
 
-### 1. Fix `maxHeartbeats` in `NewtonianPotential.lean` (`/simplify`)
-- **What**: Reduce the 800,000 heartbeats required for `inv_norm_local_integrable`.
-- **Files**: `NewtonianPotential.lean`
-- **Approach**: Break the proof of `inv_norm_local_integrable` into smaller sub-lemmas.
+### 1. Fix documentation lies (`/simplify`)
+- **What**: Fix the `hLogGrowth` ghost reference (line 84-85) and hypothesis numbering gap in `CoulombConcreteTheorem42.lean` docstring.
+- **Files**: `CoulombConcreteTheorem42.lean`
+- **Approach**: Remove `hLogGrowth` reference, renumber hypotheses to be contiguous (1-12 or keep 1-13 with clear note).
 - **START IMMEDIATELY.**
 
-### 2. Split `Section3Helpers.lean` (`/simplify`)
-- **What**: File is 621 lines, which violates the <600 lines limit.
+### 2. Fix MEMORY.md (`/simplify`)
+- **What**: Remove false claims about Section9.lean, VelocityDecayInstance.lean (3 instances), CoulombNonvacuous sorry count.
+- **Files**: `MEMORY.md` (in `.claude/projects/`)
+- **Approach**: Update to reflect current file contents.
+
+### 3. Fix multiGoal warnings in Section3Helpers2.lean (`/simplify`)
+- **What**: 3 multiGoal warnings at lines 72-74.
+- **Files**: `Section3Helpers2.lean`
+- **Approach**: Add `<;>` or restructure tactics to avoid multi-goal state.
+
+### 4. Remove linter suppressions from GaussianHelpers.lean (`/simplify`)
+- **What**: File suppresses 5 linters globally. Fix the underlying issues.
+- **Files**: `GaussianHelpers.lean`
+- **Approach**: Add explicit `_` for unused variables, remove `show` where not needed, focus `simp` args, fix multi-goal patterns.
+
+### 5. Remove linter suppressions from Section3Helpers.lean (`/simplify`)
+- **What**: File suppresses 5 linters globally. Fix the underlying issues.
 - **Files**: `Section3Helpers.lean`
-- **Approach**: Move independent algebraic or analytic lemmas into a new file `Section3Helpers2.lean` or into `GaussianHelpers.lean` if appropriate.
+- **Approach**: Same as item 4.
 
-### 3. Clean up Linter Warnings (`/simplify`)
-- **What**: Resolve build warnings to improve code cleanliness (especially `linter.style.longLine`).
-- **Files**: `FlatTorus3Lemmas.lean`, `Section4.lean`, `Section5.lean`, `Section7.lean`, `Section8.lean`, `VMLInputDerive.lean`, `Theorem42.lean`, `TorusIntegration.lean`, `TorusInstance.lean`, `CoulombSpatialTransport.lean`, `CoulombFlux.lean`, `CoulombFluxBound.lean`, `CoulombPSDHelpers.lean`, `CoulombPSD.lean`, `CoulombFluxConv.lean`, `CoulombFluxDiff.lean`, `LogBoundHelpers.lean`, `CoulombConcreteTheorem42.lean`.
-- **Approach**: Break long lines, fix missing spaces, adjust command starts.
-
-### 4. Correct Documentation for `hGradBound` (`/strengthen`)
-- **What**: The docs claim Schwartz class or sub-Gaussian tails are sufficient, but `hGradBound` forces a lower bound that contradicts this.
-- **Files**: `CoulombConcreteTheorem42.lean`
-- **Approach**: Update the docstring to accurately reflect the restrictiveness of the polynomial lower bound assumption, or explicitly mention that this excludes standard Schwartz functions with faster-than-exponential decay.
+### 6. Fix long lines in files WITHOUT linter suppression (`/simplify`)
+- **What**: Files that DON'T suppress longLine but still have warnings: `FlatTorus3Lemmas.lean:143`, `Section4.lean:207`, `Section5.lean:140-149`, `Section7.lean:165`, `Section8.lean:45,48`, `VMLInputDerive.lean:126`, `Theorem42.lean:197`, `TorusIntegration.lean:386-392`, `TorusInstance.lean:435,472`, `CoulombSpatialTransport.lean:173,212,351`, `LogBoundHelpers.lean:119-120`.
+- **Files**: Multiple (listed above)
+- **Approach**: Break lines at operators or introduce intermediate `have` bindings.
 
 ## Backlog
 
-| Issue | Category | Notes |
+| Issue | Priority | Notes |
 |-------|----------|-------|
-| Mathlib upstreaming | P3 | Extricate `GaussianHelpers.lean` and `TorusDefs.lean`. |
-| Document Non-Relativistic Limit | P4 | Document superluminal velocities in the VML formulation. |
+| Reduce `maxHeartbeats 400000` in TorusIntegration.lean | P2 | May require decomposing the proof |
+| Remove `linter.unusedVariables false` from CoulombNonvacuous.lean | P2 | Fix unused variable warnings |
+| Rename `UniformSchwartzDecay` to `UniformC2Decay` | P3 | Misleading name |
+| Add bounded-kernel instance (Ψ = const) | P3 | Would demonstrate Theorem42 generality |
+| Weaken C³ to C² in velocity | P3 | Needs careful Clairaut rework |
+| Mathlib upstreaming candidates | P3 | `integrable_one_add_norm_pow_mul`, IBP on AddCircle, `landauMatrix_mulVec_self` |
+| Generalize beyond T³ | P4 | Major architectural change |

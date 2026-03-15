@@ -170,7 +170,9 @@ lemma spatial_transport_joint_integrable
         hcont_f.log (fun x => ne_of_gt (hf_pos x v))
       have hcont_grad : ∀ i, Continuous (fun x =>
           FlatTorus3.gradX (fun y => f y v) x i) :=
-        fun i => FlatTorus3.hDiff_continuous 0 _ (FlatTorus3.hDiff_grad 1 _ i ((hf_smooth_x v).of_le (by decide)))
+        fun i => FlatTorus3.hDiff_continuous 0 _
+          (FlatTorus3.hDiff_grad 1 _ i
+            ((hf_smooth_x v).of_le (by decide)))
       have hcont_dot : Continuous (fun x =>
           v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x) := by
         simp only [dotProduct, Fin.sum_univ_three]
@@ -209,7 +211,9 @@ lemma spatial_transport_joint_integrable
           hcont_f.log (fun x => ne_of_gt (hf_pos x v))
         have hcont_grad : ∀ i, Continuous (fun x =>
             FlatTorus3.gradX (fun y => f y v) x i) :=
-          fun i => FlatTorus3.hDiff_continuous 0 _ (FlatTorus3.hDiff_grad 1 _ i ((hf_smooth_x v).of_le (by decide)))
+          fun i => FlatTorus3.hDiff_continuous 0 _
+            (FlatTorus3.hDiff_grad 1 _ i
+              ((hf_smooth_x v).of_le (by decide)))
         have hcont_dot : Continuous (fun x =>
             v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x) := by
           simp only [dotProduct, Fin.sum_univ_three]
@@ -348,7 +352,9 @@ lemma spatial_transport_continuous
         hcont_f.log (fun x => ne_of_gt (hf_pos x v))
       have hcont_grad : ∀ i, Continuous (fun x =>
           FlatTorus3.gradX (fun y => f y v) x i) :=
-        fun i => FlatTorus3.hDiff_continuous 0 _ (FlatTorus3.hDiff_grad 1 _ i ((hf_smooth_x v).of_le (by decide)))
+        fun i => FlatTorus3.hDiff_continuous 0 _
+          (FlatTorus3.hDiff_grad 1 _ i
+            ((hf_smooth_x v).of_le (by decide)))
       have hcont_dot : Continuous (fun x =>
           v ⬝ᵥ FlatTorus3.gradX (fun y => f y v) x) := by
         simp only [dotProduct, Fin.sum_univ_three]

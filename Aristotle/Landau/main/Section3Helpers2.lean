@@ -69,10 +69,10 @@ lemma maxwellian_landau_flux_zero (Ψ : ℝ → ℝ) (f : (Fin 3 → ℝ) → �
     (fun x : Fin 3 → ℝ =>
       f w • f v • c₀ • (2 : ℝ) • x)
     (landauMatrix_mulVec_self Ψ (v - w)) using 1
-  ext
-  norm_num
-  ring_nf!
-  · simp [mul_assoc, mul_comm, mul_left_comm,
+  · ext
+    norm_num
+    ring_nf!
+    simp [mul_assoc, mul_comm, mul_left_comm,
       Finset.mul_sum _ _ _, Matrix.mulVec, dotProduct]
     ring_nf!
   · norm_num [Algebra.smul_def]

@@ -194,7 +194,8 @@ theorem Theorem42
       FlatTorus3.IsSpatiallySmooth 2 a ∧
       (∀ j, FlatTorus3.IsSpatiallySmooth 2 (fun y => b y j)) ∧
       FlatTorus3.IsSpatiallySmooth 2 c :=
-    FlatTorus3.maxwellian_params_isSpatiallySmooth f hf_pos (fun v => (hDiff_fv v).of_le (by decide))
+    FlatTorus3.maxwellian_params_isSpatiallySmooth f hf_pos
+      (fun v => (hDiff_fv v).of_le (by decide))
   -- Derive continuity of ρ = ∫ f(·,v) dv via dominated convergence
   have hρ_cont : Continuous ρ := by
     change Continuous (fun x => ∫ v, f x v)
