@@ -162,7 +162,10 @@ lemma poisson_boltzmann_from_vlasov
     have hf_eq : (fun y => f y v) = (fun y => Real.exp (a₀ y + c₀ * normSq v)) :=
       funext (fun y => ha₀ y v)
     rw [hf_eq,
-        FlatTorus3.hGradChainExp _ (FlatTorus3.hDiff_add 1 _ _ (FlatTorus3.hDiff_of_le _ (by decide) ha₀_diff) (FlatTorus3.hDiff_const 1 _)),
+        FlatTorus3.hGradChainExp _
+          (FlatTorus3.hDiff_add 1 _ _
+            (FlatTorus3.hDiff_of_le _ (by decide) ha₀_diff)
+            (FlatTorus3.hDiff_const 1 _)),
         FlatTorus3.hGradAddConst _ (FlatTorus3.hDiff_of_le _ (by decide) ha₀_diff)]
     simp [ha₀ x v]
   -- Step 5: Force balance: gradX(a₀) = -(2c₀) E

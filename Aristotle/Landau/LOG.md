@@ -1,3 +1,27 @@
+## 2026-03-15 UTC — Babysit cycle 123: Documentation fixes, linter cleanup, Maxwell molecules theorem
+
+### Changes
+- **Documentation fixes (P1)**:
+  - Fixed `hLogGrowth` ghost reference in `CoulombConcreteTheorem42.lean` docstring (removed non-existent hypothesis name).
+  - Fixed hypothesis numbering gap: renumbered from (1)-(7),(9)-(13) to contiguous (1)-(12).
+  - Updated numbering in `CoulombNonvacuous.lean` to match.
+  - Rewrote MEMORY.md to remove false claims: Section9.lean (doesn't exist), VelocityDecayInstance 3 instances (only has `lorentz_component_bound`), CoulombNonvacuous sorry count (was 0, not 2).
+
+- **Linter cleanup**:
+  - Fixed multiGoal warnings in `Section3Helpers2.lean` by properly focusing calc goals.
+  - Fixed `commandStart` and long-line warnings in `LogBoundHelpers.lean` by extracting helper lemma and restructuring calc blocks.
+  - Fixed long lines in `CoulombConcreteTheorem42.lean`.
+  - Reduced total build warnings from 47 to 19.
+
+- **Maxwell Molecules theorem (strengthen)**:
+  - Created `MaxwellMoleculesTheorem42.lean` — demonstrates `Theorem42` applies to bounded kernels (Ψ = 1) with only 11 hypotheses (vs 12 for Coulomb).
+  - Key point: NO `hGradBound` (polynomial score bound) needed for bounded kernels, directly addressing the circularity concern from critique §3.
+  - Contains `maxwellKernel`, `maxwellKernel_pos`, `maxwellKernel_bounded` (proved), plus `maxwell_landauMatrix_entry_bound` and `MaxwellMoleculesTheorem42` (sorry'd — for future `/prove` cycles).
+
+### Sorry count: 2 (both in new MaxwellMoleculesTheorem42.lean, none in existing files)
+- `maxwell_landauMatrix_entry_bound`: |A(z)_{ij}| ≤ 2‖z‖² for Maxwell kernel
+- `MaxwellMoleculesTheorem42`: main theorem body (needs VelocityDecayConditions construction)
+
 ## 2026-03-12 UTC — Babysit cycle 122: Fix maxHeartbeats and Section3Helpers length, document restrictiveness
 
 ### Changes

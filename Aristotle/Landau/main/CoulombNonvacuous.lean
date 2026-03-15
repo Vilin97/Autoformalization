@@ -331,10 +331,10 @@ lemma integral_equilibriumMaxwellian (ρ T : ℝ) (hT : 0 < T) :
     - (6) hB_smooth: B = 0, same argument as (5)  ✓
     - (7) hSchwartz: Gaussian is Schwartz class via Faà di Bruno + poly×Gaussian bound  ✓
     - (8) hGradBound: ∂eM/∂vᵢ = -(vᵢ/T)·eM, bound |vᵢ| ≤ 1+‖v‖  ✓
-    - (10) hVlasov: A(z)·z = 0 (projection annihilation) ⇒ integrand vanishes  ✓
-    - (11) hAmpere: ∇×0 = 0, ∫ vᵢ eM dv = 0 by odd symmetry  ✓
-    - (12) hGauss: ∇·0 = 0 = ∫eM - ρ_ion (simp closes)  ✓
-    - (13) hDivB: ∇·0 = 0  ✓ -/
+    - (9) hVlasov: A(z)·z = 0 (projection annihilation) ⇒ integrand vanishes  ✓
+    - (10) hAmpere: ∇×0 = 0, ∫ vᵢ eM dv = 0 by odd symmetry  ✓
+    - (11) hGauss: ∇·0 = 0 = ∫eM - ρ_ion (simp closes)  ✓
+    - (12) hDivB: ∇·0 = 0  ✓ -/
 theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
     (hν : 0 < ν) (hT : 0 < T) (hρ_ion : 0 < ρ_ion) :
     ∃ (f : Torus3 → (Fin 3 → ℝ) → ℝ) (E B : Torus3 → Fin 3 → ℝ),
@@ -344,13 +344,13 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
     (∀ i, ContDiff ℝ 2 (periodicLift (fun x => B x i))) ∧                 -- (6)
     UniformSchwartzDecay f ∧                                                -- (7)
     (∃ Cg Kg, ∀ x v i,
-      |fderiv ℝ (f x) v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f x v) ∧ -- (9)
+      |fderiv ℝ (f x) v (Pi.single i 1)| ≤ Cg * (1 + ‖v‖) ^ Kg * f x v) ∧ -- (8)
     (∀ x v, dotProduct v (torusGradX (fun y => f y v) x) +
       dotProduct (E x + cross v (B x)) (vGrad (f x) v) =
-      ν * LandauOperator coulombKernel (f x) v) ∧                         -- (10)
-    (∀ x, torusCurlX B x = fun i => ∫ v, v i * f x v) ∧                  -- (11)
-    (∀ x, torusDivX E x = (∫ v, f x v) - ρ_ion) ∧                        -- (12)
-    (∀ x, torusDivX B x = 0) := by                                        -- (13)
+      ν * LandauOperator coulombKernel (f x) v) ∧                         -- (9)
+    (∀ x, torusCurlX B x = fun i => ∫ v, v i * f x v) ∧                  -- (10)
+    (∀ x, torusDivX E x = (∫ v, f x v) - ρ_ion) ∧                        -- (11)
+    (∀ x, torusDivX B x = 0) := by                                        -- (12)
   refine ⟨fun _ => equilibriumMaxwellian ρ_ion T,
          fun _ => 0, fun _ => 0,
          fun _ v => equilibriumMaxwellian_pos ρ_ion T hρ_ion hT v,  -- (3) ✓
@@ -400,7 +400,7 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
           · exact div_le_div_of_nonneg_right hvi hT.le
           · exact hpos.le
       _ = 1 / T * (1 + ‖v‖) * equilibriumMaxwellian ρ_ion T v := by ring
-  -- (10) hVlasov: Vlasov equation (Maxwellian in kernel of Landau operator)
+  -- (9) hVlasov: Vlasov equation (Maxwellian in kernel of Landau operator)
   · intro x v
     -- Spatial gradient of constant is 0
     have hgrad_zero : ∀ i : Fin 3,
@@ -448,7 +448,7 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
     conv => arg 2; rw [show (0:ℝ) = ν * 0 from by ring]
     simp only [hflux_zero]
     simp [ContinuousLinearMap.zero_apply]
-  -- (11) hAmpere: Ampere's law (curl 0 = ∫ vᵢ eM dv)
+  -- (10) hAmpere: Ampere's law (curl 0 = ∫ vᵢ eM dv)
   · intro x
     ext i
     simp only [torusCurlX, periodicLift, Pi.zero_apply]
@@ -464,7 +464,7 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
     -- ∫ vᵢ * eM = 0 by odd symmetry of Gaussian
     have hint := integral_coord_mul_equilibriumMaxwellian_eq_zero ρ_ion T i
     fin_cases i <;> simp_all [Matrix.cons_val_zero, Matrix.cons_val_one]
-  -- (12) hGauss: Gauss's law
+  -- (11) hGauss: Gauss's law
   · intro x
     simp only [torusDivX, periodicLift]
     -- Each summand: fderiv of (fun z => 0 i) ∘ torusMk = 0
@@ -478,7 +478,7 @@ theorem CoulombConcreteTheorem42_nonvacuous (ν T ρ_ion : ℝ)
     simp only [hzero, Finset.sum_const_zero]
     -- ∫ eM(v) dv = ρ_ion (Gaussian normalization)
     linarith [integral_equilibriumMaxwellian ρ_ion T hT]
-  -- (13) hDivB: divergence of B = 0
+  -- (12) hDivB: divergence of B = 0
   · intro x
     simp only [torusDivX, periodicLift]
     have hzero : ∀ j : Fin 3,

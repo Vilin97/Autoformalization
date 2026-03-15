@@ -383,13 +383,18 @@ theorem torus_hHarmonic_const (φ : Torus3 → ℝ)
   have hgrad_c1 : ∀ i, ContDiff ℝ 1 (periodicLift (fun x => torusGradX φ x i)) := by
     intro i
     rw [hgrad_pl]
-    exact ((hd.fderiv_right (show (1 : WithTop ℕ∞) + 1 ≤ 2 by decide)).clm_apply contDiff_const).of_le le_rfl
+    exact ((hd.fderiv_right
+      (show (1 : WithTop ℕ∞) + 1 ≤ 2 by decide)).clm_apply
+      contDiff_const).of_le le_rfl
   have hφ_cont : Continuous φ :=
-    isOpenQuotientMap_torusMk.isQuotientMap.continuous_iff.mpr (hd.of_le (show 0 ≤ 2 by decide)).continuous
+    isOpenQuotientMap_torusMk.isQuotientMap.continuous_iff.mpr
+      (hd.of_le (show 0 ≤ 2 by decide)).continuous
   -- IBP: ∫ (∂φ/∂xᵢ)² = -∫ φ·∂²φ/∂xᵢ²
   have hIBP_i : ∀ i, ∫ x : Torus3, torusGradX φ x i * torusGradX φ x i =
       -(∫ x : Torus3, φ x * torusGradX (fun y => torusGradX φ y i) x i) :=
-    fun i => torus_hIBP_spatial (fun y => torusGradX φ y i) φ i (hgrad_c1 i) (hd.of_le (show 1 ≤ 2 by decide))
+    fun i => torus_hIBP_spatial (fun y => torusGradX φ y i)
+      φ i (hgrad_c1 i)
+      (hd.of_le (show 1 ≤ 2 by decide))
   -- Each φ * ∂²φ/∂xᵢ² is integrable (continuous on compact)
   have hint : ∀ i, Integrable (fun x : Torus3 =>
       φ x * torusGradX (fun y => torusGradX φ y i) x i) :=

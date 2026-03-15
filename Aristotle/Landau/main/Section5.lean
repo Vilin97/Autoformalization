@@ -137,16 +137,30 @@ lemma polynomial_identity_from_vlasov
     -- Decompose gradX(a + b·v + c|v|²) using linearity
     rw [show (fun y => a y + dotProduct (b y) v + c y * normSq v) =
         (fun y => a y + (dotProduct (b y) v + c y * normSq v)) from funext (fun y => by ring)]
-    rw [FlatTorus3.hGradAdd _ _ (FlatTorus3.hDiff_of_le _ (by decide) ha) (FlatTorus3.hDiff_of_le _ (by decide) (FlatTorus3.hDiff_add 2 _ _ hbv hcv))]
-    rw [FlatTorus3.hGradAdd _ _ (FlatTorus3.hDiff_of_le _ (by decide) hbv) (FlatTorus3.hDiff_of_le _ (by decide) hcv)]
+    rw [FlatTorus3.hGradAdd _ _
+      (FlatTorus3.hDiff_of_le _ (by decide) ha)
+      (FlatTorus3.hDiff_of_le _ (by decide)
+        (FlatTorus3.hDiff_add 2 _ _ hbv hcv))]
+    rw [FlatTorus3.hGradAdd _ _
+      (FlatTorus3.hDiff_of_le _ (by decide) hbv)
+      (FlatTorus3.hDiff_of_le _ (by decide) hcv)]
     rw [show (fun y => c y * normSq v) = (fun y => normSq v * c y) from funext (fun y => by ring)]
     rw [FlatTorus3.hGradScalarMul]
     rw [show (fun y => dotProduct (b y) v) =
         (fun y => v 0 * b y 0 + (v 1 * b y 1 + v 2 * b y 2))
         from funext (fun y => by simp [dotProduct, Fin.sum_univ_three]; ring)]
-    rw [FlatTorus3.hGradAdd _ _ (FlatTorus3.hDiff_of_le _ (by decide) (FlatTorus3.hDiff_smul 2 _ _ (hb 0)))
-      (FlatTorus3.hDiff_of_le _ (by decide) (FlatTorus3.hDiff_add 2 _ _ (FlatTorus3.hDiff_smul 2 _ _ (hb 1)) (FlatTorus3.hDiff_smul 2 _ _ (hb 2))))]
-    rw [FlatTorus3.hGradAdd _ _ (FlatTorus3.hDiff_of_le _ (by decide) (FlatTorus3.hDiff_smul 2 _ _ (hb 1))) (FlatTorus3.hDiff_of_le _ (by decide) (FlatTorus3.hDiff_smul 2 _ _ (hb 2)))]
+    rw [FlatTorus3.hGradAdd _ _
+      (FlatTorus3.hDiff_of_le _ (by decide)
+        (FlatTorus3.hDiff_smul 2 _ _ (hb 0)))
+      (FlatTorus3.hDiff_of_le _ (by decide)
+        (FlatTorus3.hDiff_add 2 _ _
+          (FlatTorus3.hDiff_smul 2 _ _ (hb 1))
+          (FlatTorus3.hDiff_smul 2 _ _ (hb 2))))]
+    rw [FlatTorus3.hGradAdd _ _
+      (FlatTorus3.hDiff_of_le _ (by decide)
+        (FlatTorus3.hDiff_smul 2 _ _ (hb 1)))
+      (FlatTorus3.hDiff_of_le _ (by decide)
+        (FlatTorus3.hDiff_smul 2 _ _ (hb 2)))]
     rw [FlatTorus3.hGradScalarMul (v 0) (fun y => b y 0)]
     rw [FlatTorus3.hGradScalarMul (v 1) (fun y => b y 1)]
     rw [FlatTorus3.hGradScalarMul (v 2) (fun y => b y 2)]

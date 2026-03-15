@@ -432,7 +432,9 @@ instance : VML.FlatTorus3 Torus3 where
   hCurlZeroDivZeroHarmonic := fun F hF_C1 hF_C2 hcurl hdiv =>
     torus_hCurlZeroDivZeroHarmonic F (fun i => (hF_C1 i).of_le (by decide))
       (fun i j => (hF_C2 i j).of_le (by decide)) hcurl hdiv
-  hIBP_spatial := fun φ ψ i hφ hψ => torus_hIBP_spatial φ ψ i (hφ.of_le (by decide)) (hψ.of_le (by decide))
+  hIBP_spatial := fun φ ψ i hφ hψ =>
+    torus_hIBP_spatial φ ψ i
+      (hφ.of_le (by decide)) (hψ.of_le (by decide))
   hSpatialVelocityFubini := by
     intro F hF_joint
     exact integral_integral_swap hF_joint
@@ -469,7 +471,8 @@ instance : VML.FlatTorus3 Torus3 where
 - hSpatialAdd: with integrability hypotheses, via integral_add
 - hGradIntegrable: proved via IsOpenQuotientMap.piMap
 - IsSpatiallySmooth ⊤ := ContDiff ℝ ⊤ ∘ periodicLift (smooth)
-- hDiff_const ⊤, hDiff_add ⊤, hDiff_smul ⊤, hDiff_log ⊤, hDiff_grad ⊤: closure properties, all proved
+- hDiff_const ⊤, hDiff_add ⊤, hDiff_smul ⊤, hDiff_log ⊤,
+  hDiff_grad ⊤: closure properties, all proved
 - hCurlIntZero: forwarded to torus_hCurlIntZero (proved)
 - hHarmonic_const: forwarded to torus_hHarmonic_const (proved, energy method)
 - hIBP_spatial: forwarded to torus_hIBP_spatial (proved)

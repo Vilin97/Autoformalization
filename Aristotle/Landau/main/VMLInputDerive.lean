@@ -123,7 +123,9 @@ noncomputable def VMLInput.c₀ (p : VMLInput X) : ℝ := p.c_loc p.x₀
 lemma VMLInput.hc₀_neg (p : VMLInput X) : p.c₀ < 0 := p.hc_neg p.x₀
 
 lemma VMLInput.hc_const (p : VMLInput X) : ∀ x, p.c_loc x = p.c₀ :=
-  fun x => FlatTorus3.hGradZeroConst p.c_loc (p.hDiff_abc.2.2.of_le (by decide)) p.hc_const_grad x p.x₀
+  fun x => FlatTorus3.hGradZeroConst p.c_loc
+    (p.hDiff_abc.2.2.of_le (by decide))
+    p.hc_const_grad x p.x₀
 
 /-- The O(|v|²) Killing equation from the polynomial identity. -/
 lemma VMLInput.hKilling (p : VMLInput X) :

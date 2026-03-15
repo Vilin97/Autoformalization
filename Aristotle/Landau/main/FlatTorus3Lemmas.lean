@@ -140,7 +140,9 @@ lemma maxwellian_params_isSpatiallySmooth
     (hDiff_fv : ∀ v, IsSpatiallySmooth n (fun x => f x v))
     (a : X → ℝ) (b : X → Fin 3 → ℝ) (c : X → ℝ)
     (hform : ∀ x v, f x v = Real.exp (a x + dotProduct (b x) v + c x * normSq v)) :
-    IsSpatiallySmooth n a ∧ (∀ j, IsSpatiallySmooth n (fun x => b x j)) ∧ IsSpatiallySmooth n c := by
+    IsSpatiallySmooth n a ∧
+    (∀ j, IsSpatiallySmooth n (fun x => b x j)) ∧
+    IsSpatiallySmooth n c := by
   -- log f(x, v) = a x + b x · v + c x * |v|² for all x, v
   have hDiff_lf : ∀ v, IsSpatiallySmooth n (fun x => Real.log (f x v)) := fun v =>
     hDiff_log n _ (hDiff_fv v) (fun x => hf_pos x v)

@@ -116,8 +116,12 @@ lemma log_f_zero_bound (f : Torus3 → (Fin 3 → ℝ) → ℝ)
           _ ≤ |Real.log (f x_max 0)| := le_abs_self _
           _ ≤ max |Real.log (f x_min 0)| |Real.log (f x_max 0)| := le_max_right _ _
     apply le_trans h3
-    have h_max_le : max |Real.log (f x_min 0)| |Real.log (f x_max 0)| ≤ |Real.log (f x_min 0)| + |Real.log (f x_max 0)| := max_le_add_of_nonneg (abs_nonneg _) (abs_nonneg _)
-    calc max |Real.log (f x_min 0)| |Real.log (f x_max 0)| ≤ |Real.log (f x_min 0)| + |Real.log (f x_max 0)| := h_max_le
+    have h_max_le : max |Real.log (f x_min 0)| |Real.log (f x_max 0)| ≤
+        |Real.log (f x_min 0)| + |Real.log (f x_max 0)| :=
+      max_le_add_of_nonneg (abs_nonneg _) (abs_nonneg _)
+    calc max |Real.log (f x_min 0)| |Real.log (f x_max 0)|
+        ≤ |Real.log (f x_min 0)| + |Real.log (f x_max 0)| :=
+          h_max_le
       _ ≤ |Real.log (f x_min 0)| + |Real.log (f x_max 0)| + 1 := by linarith
 
 lemma log_bound_from_grad (f : Torus3 → (Fin 3 → ℝ) → ℝ)
@@ -167,17 +171,17 @@ lemma log_bound_from_grad (f : Torus3 → (Fin 3 → ℝ) → ℝ)
       _ = Cg' * (1 + ‖w‖) ^ Kg := by
         rw [inv_mul_cancel₀ hw_pos.ne', one_mul]
   have h_mvt := mvt_test (fun v => log (f x v)) hg_diff Cg' Kg (by positivity) h_fderiv v
+  have hpow : (1 : ℝ) ≤ (1 + ‖v‖) ^ (Kg + 1) := by
+    calc (1 : ℝ) = 1 ^ (Kg + 1) := by ring
+      _ ≤ (1 + ‖v‖) ^ (Kg + 1) := by
+        gcongr; exact le_add_of_nonneg_right (norm_nonneg v)
   calc
-    |log (f x v)| ≤ |log (f x 0)| + Cg' * (1 + ‖v‖) ^ (Kg + 1) := h_mvt
-    _ ≤ C0 + Cg' * (1 + ‖v‖) ^ (Kg + 1) := by gcongr; exact hC0 x
-    _ ≤ C0 * (1 + ‖v‖) ^ (Kg + 1) + Cg' * (1 + ‖v‖) ^ (Kg + 1) := by
-      gcongr
-      have h1 : (1 : ℝ) ≤ 1 + ‖v‖ := le_add_of_nonneg_right (norm_nonneg v)
-      have h2 : (1 : ℝ) ≤ (1 + ‖v‖) ^ (Kg + 1) := by
-        calc
-          (1 : ℝ) = 1 ^ (Kg + 1) := by ring
-          _ ≤ (1 + ‖v‖) ^ (Kg + 1) := by gcongr
-      calc
-        C0 = C0 * 1 := by ring
-        _ ≤ C0 * (1 + ‖v‖) ^ (Kg + 1) := by gcongr
+    |log (f x v)|
+      ≤ |log (f x 0)| + Cg' * (1 + ‖v‖) ^ (Kg + 1) :=
+        h_mvt
+    _ ≤ C0 + Cg' * (1 + ‖v‖) ^ (Kg + 1) := by
+        gcongr; exact hC0 x
+    _ ≤ C0 * (1 + ‖v‖) ^ (Kg + 1) +
+        Cg' * (1 + ‖v‖) ^ (Kg + 1) := by
+        gcongr; nlinarith [hpow]
     _ = (C0 + Cg') * (1 + ‖v‖) ^ (Kg + 1) := by ring
