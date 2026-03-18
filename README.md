@@ -19,7 +19,7 @@ A complete formalization of the Vlasov-Maxwell-Landau steady-state theorem on th
 | Status | ✅ Fully Verified (0 sorry's) |
 | Lean 4 Code | 10,445 lines |
 | Development Time | 10 days (Mar 1–10, 2026) |
-| Human Prompts | 836 |
+| Human Prompts | 229 |
 | Assistant Turns | 27,200+ |
 | Tokens Consumed | 2.8 Billion |
 | API Cost | ~$6,300 |
