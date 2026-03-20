@@ -4,7 +4,7 @@
   <img src="artifacts/clawristotle.png" alt="Clawristotle" width="400">
 </p>
 
-[![Lean Action CI](https://github.com/Vilin97/Clawristotle/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/Vilin97/Clawristotle/actions/workflows/lean_action_ci.yml) [![Documentation](https://img.shields.io/badge/docs-blueprint-blue)](https://vilin97.github.io/Clawristotle/blueprint/) [![Dependency Graph](https://img.shields.io/badge/docs-dep_graph-blue)](https://vilin97.github.io/Clawristotle/blueprint/dep_graph_document.html)
+[![Lean Action CI](https://github.com/Vilin97/Clawristotle/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/Vilin97/Clawristotle/actions/workflows/lean_action_ci.yml) [![Documentation](https://img.shields.io/badge/docs-blueprint-blue)](https://vilin97.github.io/Clawristotle/blueprint/) [![Dependency Graph](https://img.shields.io/badge/docs-dep_graph-blue)](https://vilin97.github.io/Clawristotle/blueprint/dep_graph_document.html) [![Paper](https://img.shields.io/badge/HF-Paper-yellow)](https://huggingface.co/papers/2603.15929) [![Logs](https://img.shields.io/badge/HF-Agent_Logs-yellow)](https://huggingface.co/datasets/Vilin97/Clawristotle-Logs)
 
 > This README focuses on the autonomous agent system. For the detailed mathematical and technical report, see [TECHNICAL_REPORT.md](TECHNICAL_REPORT.md).
 
