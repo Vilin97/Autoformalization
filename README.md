@@ -85,6 +85,11 @@ This is a rigidity result fundamental to plasma physics, formalized here in full
 - Agents: Claude Code, Gemini
 - Prover: Aristotle (Harmonic)
 
+## 📄 Resources
+
+- [Technical Report](https://huggingface.co/papers/2603.15929)
+- [Agent Logs Dataset](https://huggingface.co/datasets/Vilin97/Clawristotle-Logs)
+
 ## 📄 License
 
 This work is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
