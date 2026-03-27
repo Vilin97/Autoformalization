@@ -85,3 +85,12 @@ theorem topologicalKrullDim_nonneg_of_irreducible {X : Type u} [TopologicalSpace
     [IrreducibleSpace X] : topologicalKrullDim X ≥ 0 := by
   rw [topologicalKrullDim, ge_iff_le, Order.krullDim_nonneg_iff]
   exact ⟨⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩⟩
+
+/-- On an irreducible space, a proper closed subset has strictly smaller Krull dimension.
+    Every irreducible closed subset of Y is also one of X, but X itself is not in Y.
+    This means every chain in IrreducibleCloseds(Y) can be extended by X in
+    IrreducibleCloseds(X), giving dim(Y) < dim(X). -/
+theorem topologicalKrullDim_lt_of_isIrreducible_of_isClosed {X : Type u} [TopologicalSpace X]
+    [IrreducibleSpace X] {Y : Set X} (hY : IsClosed Y) (hne : Y ≠ Set.univ) :
+    topologicalKrullDim Y < topologicalKrullDim X := by
+  sorry
