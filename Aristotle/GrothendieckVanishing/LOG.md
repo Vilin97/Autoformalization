@@ -1,5 +1,22 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-27T20:15Z — Cycle 3: Submit constantSheafFlasque + documentation
+
+**Sorry count: 3 mathematical + 1 axiom (unchanged)**
+
+### Accomplished
+- Submitted `constantSheaf_flasque_of_irreducible` to Aristotle (`5175616d`)
+- Added callback sufficiency documentation to `ClosedOpenDecomposition.lean`
+- Investigated empty space vanishing via `HasProjectiveDimensionLT` (identified approach but not yet completed)
+
+### Aristotle status
+- `fca6885d`: ClosedOpenDecomposition — **39%** (up from 21%)
+- `bc3176de`: IrreducibleStep — **30%** (up from 15%)
+- `5175616d`: ConstantSheafFlasque — 1% (new)
+
+### Remaining sorry's
+Same as cycle 2 — no sorry's closed this cycle.
+
 ## 2026-03-27T19:15Z — Cycle 2: Decompose IrreducibleStep
 
 **Sorry count: 3 mathematical + 1 axiom (FlasqueVanishing)**
