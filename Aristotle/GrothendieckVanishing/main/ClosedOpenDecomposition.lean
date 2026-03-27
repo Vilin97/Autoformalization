@@ -11,6 +11,16 @@
   - Lemma 2.10: H^i(X, F̄_Y) ≅ H^i(Y, F|_Y)
   - Induction on the number of irreducible components
 
+  Note on the callback signature: `ih_irred` only provides vanishing for
+  *irreducible* Y. This is sufficient because the inner induction on the
+  number of irreducible components can be done inside this proof:
+  - For each irreducible component Y_i: vanishing comes from `ih_irred`
+    (Y_i is irreducible with dim Y_i ≤ dim X)
+  - For cl(X \ Y_i): this has fewer components, so the inner induction
+    applies. At each step, we only need vanishing on the irreducible
+    components of cl(X \ Y_i), which are again supplied by `ih_irred`.
+  - The empty space case (no components): Sheaf.H is trivially subsingleton.
+
   SORRY — requires extension-by-zero infrastructure not yet in Mathlib.
 -/
 import Aristotle.GrothendieckVanishing.main.Setup

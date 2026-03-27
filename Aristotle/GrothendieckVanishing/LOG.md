@@ -1,5 +1,28 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-27T19:15Z — Cycle 2: Decompose IrreducibleStep
+
+**Sorry count: 3 mathematical + 1 axiom (FlasqueVanishing)**
+(sorry count increased from 2 to 3 by decomposition — this is progress)
+
+### Accomplished
+- Decomposed `IrreducibleStep.lean` from 1 opaque sorry into 3 named sub-lemmas:
+  - `constantSheaf_flasque_of_irreducible` (sorry) — Z has epi restrictions on irreducible X
+  - `constantSheaf_cohomology_vanishing` (**proved**) — H^{n+1}(X, Z) = 0, from flasque + FlasqueVanishing
+  - `grothendieck_vanishing_irreducible_pos` (sorry) — main step with detailed proof sketch
+- Added callback sufficiency documentation to `ClosedOpenDecomposition.lean`
+- Added Prop 2.9 placeholder (`cohomology_direct_limit_noetherian`)
+
+### Aristotle status
+- `fca6885d`: ClosedOpenDecomposition — 21%
+- `bc3176de`: IrreducibleStep — 15%
+
+### Remaining sorry's
+1. `ClosedOpenDecomposition.lean` — `grothendieck_vanishing_of_irreducible` (reduce to irreducible)
+2. `IrreducibleStep.lean:29` — `constantSheaf_flasque_of_irreducible` (Z flasque on irreducible)
+3. `IrreducibleStep.lean:63` — `grothendieck_vanishing_irreducible_pos` (irreducible dim ≥ 1)
+4. `Setup.lean:38` — `FlasqueVanishing` (axiom, do not prove)
+
 ## 2026-03-27T18:55Z — Cycle 1: Initial build + babysit
 
 **Sorry count: 2 mathematical + 1 axiom (FlasqueVanishing)**

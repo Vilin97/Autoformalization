@@ -1,53 +1,39 @@
 # Work Plan — Grothendieck Vanishing
-**Date**: 2026-03-27T18:50:00Z
+**Date**: 2026-03-27T19:05:00Z (Cycle 2)
 
 ## Status Summary
 
-- **Files**: 7 Lean files, 331 total lines
-- **Sorry's**: 2 mathematical (ClosedOpenDecomposition, IrreducibleStep) + 1 intentional axiom (FlasqueVanishing)
-- **Build**: passes locally, CI stale (not pushed yet)
-- **Aristotle**: 2 jobs submitted (`fca6885d`, `bc3176de`), not tracked in jobs file
-- **Proved**: dim 0 base case, induction skeleton, Auxiliary.lean helpers
+- **Files**: 7 Lean files, ~330 lines
+- **Sorry's**: 2 mathematical + 1 axiom (unchanged from cycle 1)
+- **Build**: passes, pushed as `a993c3f`
+- **Aristotle**: 2 jobs in progress (fca6885d at 16%, bc3176de at 8%)
+- **Done from cycle 1**: jobs tracked, docs fixed, code reorganized
 
 ## Active Multi-Cycle Strategies
 
-1. **Fill the two sorry's** — the core objective. Both are submitted to Aristotle but Aristotle is unreliable for this level of complexity (needs Mathlib infrastructure not yet available: extension by zero, Prop 2.9). Parallel manual work is essential.
-
-2. **Validate the `grothendieck_vanishing_of_irreducible` callback** — critique flagged that the callback may be too weak. Must verify or fix before the sorry can be filled.
+1. **Fill the two sorry's** — Aristotle working on both. Manual decomposition needed in parallel.
+2. **Callback validation** — Confirmed in cycle 1 that callback IS sufficient (inner induction lives inside the sorry'd proof). Document with comment.
 
 ## This Cycle's Work Items
 
-### 1. [P0] Fix critique issue #1: Validate/fix `grothendieck_vanishing_of_irreducible` callback (`/prove`)
+### 1. [P1] Prove vanishing for empty space (`/prove`)
 
-The callback `ih_irred` only provides vanishing for irreducible Y. But Hartshorne's inner induction on components needs vanishing for the closure of X \ Y₁, which is NOT irreducible.
+When X is empty, `Sheaf.H F n` should be trivially subsingleton. Add this as a standalone lemma in `Auxiliary.lean` and use it as an early exit in `grothendieck_vanishing_aux`. This closes critique issue #5.
 
-**Analysis**: The sorry'd proof of `grothendieck_vanishing_of_irreducible` must handle the inner induction on components INTERNALLY. This is possible because:
-- For irreducible component Y₁ of X: vanishing on Y₁ comes from `ih_irred` (Y₁ is irreducible, dim Y₁ ≤ dim X)
-- For cl(X \ Y₁): need vanishing, but cl(X \ Y₁) has fewer components than X
-- The inner induction can recursively decompose cl(X \ Y₁) into its components (each irreducible, dim ≤ dim X) and apply `ih_irred`
+### 2. [P1] Decompose `grothendieck_vanishing_irreducible_pos` into sub-lemmas (`/prove`)
 
-So the callback IS sufficient — the inner induction lives inside the sorry'd proof. **No signature change needed.** But we should add a comment documenting this reasoning.
+Extract named sub-lemmas from IrreducibleStep.lean:
+- `constantSheaf_flasque_of_irreducible`: constant sheaf Z on irreducible space has epi restrictions — attempt to prove
+- `cohomology_direct_limit_noetherian` (Prop 2.9): sorry, statement only
+- `constantSheaf_vanishing_of_irreducible`: vanishing for Z itself — follows from flasque + FlasqueVanishing
 
-### 2. [P1] Track Aristotle jobs in `aristotle-jobs.json` (`/prove`)
+### 3. [P2] Add comment documenting callback sufficiency (`/prove`)
 
-Update the jobs file with the two submitted jobs so `/check-aristotle` can find them.
-
-### 3. [P1] Handle empty space case explicitly (`/prove`)
-
-Add a lemma handling the case where X is empty. When X = ∅, `Sheaf.H F n` should be subsingleton trivially (the constant sheaf on ∅ is zero, Ext from zero is zero). This could be proved directly or added as an explicit case in `grothendieck_vanishing_aux`.
-
-### 4. [P2] Fix documentation: "PROVED" → "ASSEMBLED" in main.lean (`/prove`)
-
-Minor wording fix.
-
-### 5. [P3] Move `topologicalKrullDim_nonneg_of_irreducible` to Auxiliary.lean (`/prove`)
-
-Better code organization.
+Add a comment in ClosedOpenDecomposition.lean explaining why the callback only needs irreducible Y.
 
 ## Backlog
 
-- **Decompose `grothendieck_vanishing_irreducible_pos`** into sub-lemmas: constant sheaf flasque, Prop 2.9 statement, Z_U SES. Each can be proved or sorry'd independently.
-- **Prove constant sheaf on irreducible space is flasque** — this is a concrete, provable sub-lemma.
-- **Blueprint 404** — likely not configured for this project; ignore unless user asks.
-- **Coarse `import Mathlib`** — low priority, not blocking.
-- **Unbundle `TopCat`** — significant refactor, defer.
+- Prove constant sheaf flasque on irreducible space (hard — needs sheafification internals)
+- Blueprint 404 — not blocking
+- Coarse imports — not blocking
+- Unbundle TopCat — defer
