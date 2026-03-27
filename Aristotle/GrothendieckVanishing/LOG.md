@@ -1,5 +1,41 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-27T23:00Z — Cycle 5b: Integrate Aristotle results
+
+**Sorry count: 3 mathematical + 1 axiom**
+
+### Major progress from Aristotle integration
+- **Aristotle API recovered** — the 500 errors were transient, not expiration
+- Downloaded and integrated results from 2 completed Aristotle jobs
+- **Newly proved** (sorry-free modulo FlasqueVanishing axiom):
+  - `sheaf_isZero_of_isEmpty`: all sheaves on empty space are zero objects
+  - `sheaf_H_subsingleton_of_isEmpty'`: empty space cohomology vanishes
+  - `subsingleton_ext_of_ses`: abstract LES vanishing from Ext exact sequences
+  - `grothendieck_vanishing_of_irreducible`: empty + irreducible cases fully handled
+  - `constantSheaf_cohomology_vanishing`: H^n(X, Z) = 0 for n ≥ 1 on irreducible X
+
+### Remaining sorry's (3 + axiom)
+1. `ClosedOpenDecomposition.lean:106` — `sheaf_H_subsingleton_of_reducible`
+   Needs: extension by zero (j_! functor), Lemma 2.10 (H^i(X, i_*G) ≅ H^i(Y, G))
+2. `IrreducibleStep.lean:58` — `constantSheaf_flasque_of_irreducible` (nonempty case)
+   Needs: concrete characterization of sheafified sections on connected opens
+3. `IrreducibleStep.lean:83` — `grothendieck_reduction`
+   Needs: Prop 2.9 (cohomology commutes with filtered colimits) + extension by zero
+
+### Analysis: why these sorry's are hard
+All three require Mathlib infrastructure that does NOT exist:
+- **Extension by zero functors** (j_! for open inclusion, j_* for closed inclusion)
+- **Prop 2.9** (cohomology commutes with filtered direct limits on Noetherian spaces)
+- **Concrete sheafification** (connection between constantSheaf and LocallyConstant)
+
+These are not proof difficulties — they are MISSING DEFINITIONS and THEOREMS in Mathlib.
+Building this infrastructure is a multi-week project (likely multiple Mathlib PRs).
+
+### Aristotle status
+- `fca6885d`: ClosedOpenDecomposition — COMPLETE_WITH_ERRORS (integrated)
+- `bc3176de`: IrreducibleStep — COMPLETE_WITH_ERRORS (integrated)
+- `5175616d`: ConstantSheafFlasque — IN_PROGRESS (38%)
+
 ## 2026-03-27T22:00Z — Cycle 5: Partial constantSheaf proof + Aristotle expired
 
 **Sorry count: 3 mathematical + 1 axiom (unchanged)**
