@@ -1,2 +1,1 @@
-import Aristotle.Landau.main.CoulombConcreteTheorem42
-import Aristotle.Landau.main.CoulombNonvacuous
+import Aristotle.Basic
