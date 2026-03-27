@@ -1,5 +1,27 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-27T21:15Z — Cycle 4: Prove empty space vanishing
+
+**Sorry count: 3 mathematical + 1 axiom (unchanged)**
+
+### Accomplished
+- **PROVED `sheaf_H_subsingleton_of_isEmpty`** — sorry-free! On empty TopCat, all sheaf
+  cohomology is subsingleton. Uses: IsZero of constant sheaf (all sheaves zero on empty
+  space) → HasProjectiveDimensionLT 0 → Ext subsingleton.
+  Axioms: [propext, Classical.choice, Quot.sound] — NO sorryAx.
+- Added to `GrothendieckVanishing.lean`
+
+### Aristotle status
+- `fca6885d`: ClosedOpenDecomposition — **55%**
+- `bc3176de`: IrreducibleStep — **37%**
+- `5175616d`: ConstantSheafFlasque — **15%**
+
+### Remaining sorry's (unchanged)
+1. `ClosedOpenDecomposition.lean` — `grothendieck_vanishing_of_irreducible`
+2. `IrreducibleStep.lean:29` — `constantSheaf_flasque_of_irreducible`
+3. `IrreducibleStep.lean:63` — `grothendieck_vanishing_irreducible_pos`
+4. `Setup.lean:38` — `FlasqueVanishing` (axiom)
+
 ## 2026-03-27T20:15Z — Cycle 3: Submit constantSheafFlasque + documentation
 
 **Sorry count: 3 mathematical + 1 axiom (unchanged)**

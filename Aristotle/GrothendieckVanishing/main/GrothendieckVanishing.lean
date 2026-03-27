@@ -16,7 +16,31 @@ import Aristotle.GrothendieckVanishing.main.IrreducibleStep
 
 universe u
 
-open CategoryTheory TopologicalSpace Order
+open CategoryTheory TopologicalSpace Order Limits
+
+/-! ## Empty space vanishing -/
+
+set_option synthInstance.maxHeartbeats 80000 in
+/-- On an empty topological space, all sheaf cohomology is trivially subsingleton.
+    The constant sheaf Z is zero (all sheaves on the empty space are zero),
+    so Ext(Z, F, n) = Ext(0, F, n) is subsingleton by projective dimension. -/
+theorem sheaf_H_subsingleton_of_isEmpty (X : TopCat.{u}) [IsEmpty X]
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (n : ℕ) :
+    Subsingleton (Sheaf.H F n) := by
+  unfold Sheaf.H
+  set J := Opens.grothendieckTopology (X : Type u)
+  set Z_sheaf := (constantSheaf J AddCommGrpCat.{u}).obj (AddCommGrpCat.of (ULift ℤ))
+  have hZ : IsZero Z_sheaf := by
+    rw [IsZero.iff_id_eq_zero]
+    apply Sheaf.hom_ext; apply NatTrans.ext; funext ⟨U⟩
+    have hcov : ⊥ ∈ J U := fun x _ => IsEmpty.elim ‹_› x
+    have hterm := Sheaf.isTerminalOfBotCover Z_sheaf U hcov
+    have hzero : IsZero (Z_sheaf.val.obj (Opposite.op U)) := by
+      rw [IsZero.iff_id_eq_zero]; exact hterm.hom_ext _ _
+    exact hzero.eq_of_src _ _
+  exact (hZ.hasProjectiveDimensionLT_zero).subsingleton _ 0 n (Nat.zero_le n) F
+
+/-! ## Main induction -/
 
 /-- The core induction step: vanishing at dimension d, given vanishing at all d' < d.
 
