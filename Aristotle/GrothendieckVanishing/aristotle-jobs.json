@@ -1,4 +1,19 @@
 {
-  "jobs": [],
+  "jobs": [
+    {
+      "id": "fca6885d-c95f-4d10-90cb-4cb7e4ec9981",
+      "submission": "aristotle-in/ClosedOpenDecomposition.lean",
+      "output": "aristotle-out/ClosedOpenDecomposition_aristotle.lean",
+      "target": "grothendieck_vanishing_of_irreducible",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": "bc3176de-3228-43ed-902e-e04f7d7eb739",
+      "submission": "aristotle-in/IrreducibleStep.lean",
+      "output": "aristotle-out/IrreducibleStep_aristotle.lean",
+      "target": "grothendieck_vanishing_irreducible_pos",
+      "status": "IN_PROGRESS"
+    }
+  ],
   "completed": []
 }
