@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - landau
   workflow_dispatch:
 
 permissions:
@@ -55,39 +54,9 @@ jobs:
           name: docs
           path: docbuild/.lake/build/doc
 
-  build_blueprint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout project
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Build blueprint
-        uses: xu-cheng/texlive-action@v2
-        with:
-          docker_image: ghcr.io/xu-cheng/texlive-full:20231201
-          run: |
-            export PIP_BREAK_SYSTEM_PACKAGES=1
-            apk update
-            apk add --update py3-pip git pkgconfig graphviz graphviz-dev gcc musl-dev
-            git config --global --add safe.directory $GITHUB_WORKSPACE
-            python3 -m venv env
-            source env/bin/activate
-            pip install --upgrade pip requests wheel
-            CFLAGS="-I/usr/include/graphviz" LDFLAGS="-L/usr/lib/graphviz" pip install pygraphviz
-            pip install leanblueprint
-            leanblueprint web
-
-      - name: Upload blueprint artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: blueprint
-          path: blueprint/web
-
   deploy:
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/landau'
-    needs: [build_docs, build_blueprint]
+    if: github.ref == 'refs/heads/main'
+    needs: [build_docs]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -102,18 +71,9 @@ jobs:
           name: docs
           path: _site/docs
 
-      - name: Download blueprint artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: blueprint
-          path: _site/blueprint
-
       - name: Prepare site
         run: |
-          if [ -f home_page/index.md ]; then
-            # Simple conversion of index.md to index.html if possible, or just use a redirect
-            # For now, let's just create a basic index.html that links to both
-            cat > _site/index.html <<EOF
+          cat > _site/index.html <<EOF
           <!DOCTYPE html>
           <html>
           <head>
@@ -125,17 +85,15 @@ jobs:
             </style>
           </head>
           <body>
-            <h1>Global Steady State of the Vlasov-Maxwell-Landau System</h1>
-            <p>This project formalizes the main result (Theorem 42) of Guo & Strain, characterizing the global steady state of the Vlasov-Maxwell-Landau system on a flat 3-torus.</p>
+            <h1>Aristotle Project</h1>
+            <p>Formal mathematics in Lean 4.</p>
             <ul>
-              <li><a href="blueprint/">Blueprint</a> -- dependency graph and formalization status</li>
               <li><a href="docs/">Lean Documentation</a> -- API documentation</li>
               <li><a href="https://github.com/Vilin97/aristotle">GitHub repository</a></li>
             </ul>
           </body>
           </html>
           EOF
-          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
