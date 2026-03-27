@@ -1,5 +1,24 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-27T22:00Z — Cycle 5: Partial constantSheaf proof + Aristotle expired
+
+**Sorry count: 3 mathematical + 1 axiom (unchanged)**
+
+### Accomplished
+- Partially proved `constantSheaf_flasque_of_irreducible`: the U = ⊥ (empty) case is now
+  proved using `epi_of_isTerminal_tgt`. Only the nonempty case remains sorry'd.
+- Added import of Auxiliary to IrreducibleStep for the `epi_of_isTerminal_tgt` helper.
+
+### Aristotle status
+- **All 3 jobs expired** (API returning 500). Marked as expired in aristotle-jobs.json.
+- Will resubmit when API recovers.
+
+### Remaining sorry's
+1. `ClosedOpenDecomposition.lean` — `grothendieck_vanishing_of_irreducible`
+2. `IrreducibleStep.lean:52` — `constantSheaf_flasque_of_irreducible` (nonempty case only)
+3. `IrreducibleStep.lean:83` — `grothendieck_vanishing_irreducible_pos`
+4. `Setup.lean:38` — `FlasqueVanishing` (axiom)
+
 ## 2026-03-27T21:15Z — Cycle 4: Prove empty space vanishing
 
 **Sorry count: 3 mathematical + 1 axiom (unchanged)**

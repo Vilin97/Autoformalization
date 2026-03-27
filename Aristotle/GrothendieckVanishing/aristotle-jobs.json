@@ -5,21 +5,24 @@
       "submission": "aristotle-in/ClosedOpenDecomposition.lean",
       "output": "aristotle-out/ClosedOpenDecomposition_aristotle.lean",
       "target": "grothendieck_vanishing_of_irreducible",
-      "status": "IN_PROGRESS"
+      "status": "expired",
+      "note": "500 error on status check 2026-03-27T22:00Z, was at 55%"
     },
     {
       "id": "bc3176de-3228-43ed-902e-e04f7d7eb739",
       "submission": "aristotle-in/IrreducibleStep.lean",
       "output": "aristotle-out/IrreducibleStep_aristotle.lean",
       "target": "grothendieck_vanishing_irreducible_pos",
-      "status": "IN_PROGRESS"
+      "status": "expired",
+      "note": "500 error on status check 2026-03-27T22:00Z, was at 37%"
     },
     {
       "id": "5175616d-acd5-4900-b576-7778018f6e24",
       "submission": "aristotle-in/ConstantSheafFlasque.lean",
       "output": "aristotle-out/ConstantSheafFlasque_aristotle.lean",
       "target": "constantSheaf_flasque_of_irreducible",
-      "status": "QUEUED"
+      "status": "expired",
+      "note": "500 error on status check 2026-03-27T22:00Z, was at 15%"
     }
   ],
   "completed": []
