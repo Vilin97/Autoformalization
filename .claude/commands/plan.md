@@ -1,4 +1,4 @@
-Analyze the current state and produce a prioritized work plan. Write it to `Aristotle/Landau/plan.md`.
+Analyze the current state and produce a prioritized work plan. Write it to `plan.md` inside the active project directory (the subdirectory of `Aristotle/` that contains `main/`, e.g. `Aristotle/GrothendieckVanishing/plan.md`).
 
 **CRITICAL RULE: The plan MUST contain at least one actionable item that you can execute RIGHT NOW.** "Waiting for Aristotle" is not a plan. If all sorry's are submitted to Aristotle, then:
 - Work on the sorry's yourself IN PARALLEL with Aristotle. Aristotle might fail. You are the backup.
@@ -12,10 +12,11 @@ Analyze the current state and produce a prioritized work plan. Write it to `Aris
 
 ### 1. Gather state
 
-- Read `Aristotle/Landau/critique.md` for known issues.
-- Read `Aristotle/Landau/plan.md` if it exists — build on previous plans, don't start from scratch. Drop items that are done. Keep multi-cycle strategies that are still in progress.
-- Grep for `sorry` across `Aristotle/Landau/main/*.lean` to find remaining gaps.
-- Check `Aristotle/Landau/aristotle-jobs.json` for pending/failed jobs.
+- Find the active project directory: the subdirectory of `Aristotle/` that contains `main/` (e.g. `Aristotle/GrothendieckVanishing/`). All paths below are relative to this directory.
+- Read `critique.md` for known issues.
+- Read `plan.md` if it exists — build on previous plans, don't start from scratch. Drop items that are done. Keep multi-cycle strategies that are still in progress.
+- Grep for `sorry` across `main/*.lean` to find remaining gaps.
+- Check `aristotle-jobs.json` for pending/failed jobs.
 - Scan for code smells: files over 600 lines, proofs over 50 lines, `maxHeartbeats` above 800000.
 
 ### 2. Classify issues
@@ -48,7 +49,7 @@ Consider whether any ambitious structural change could resolve multiple issues a
 
 ### 5. Write the plan
 
-Write the plan to `Aristotle/Landau/plan.md`. Structure:
+Write the plan to `plan.md` inside the active project directory. Structure:
 
 - **Status summary**: sorry count, file count, top-level health
 - **Active multi-cycle strategies**: ongoing efforts that span multiple babysit cycles (keep from previous plan if still relevant)

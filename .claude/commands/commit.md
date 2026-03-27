@@ -14,7 +14,7 @@ Steps:
 
    If no `.lean` files were modified, run `lake build` as a basic sanity check.
 
-2. Stage all changed files in `Aristotle/Landau/` and `.claude/commands/`. Do NOT stage:
+2. Stage all changed files in the active project directory (e.g. `Aristotle/GrothendieckVanishing/`), `.claude/commands/`, and `tools/`. Do NOT stage:
    - `.env` or other secrets
    - Large binary files
    - Files in `.claude/` other than commands

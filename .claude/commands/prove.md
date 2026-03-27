@@ -25,8 +25,9 @@ This command does NOT cover:
 
 ### 1. Pick a target
 
-- Read `Aristotle/Landau/critique.md` for priorities.
-- Grep for `sorry` in `Aristotle/Landau/main/*.lean`.
+- Find the active project directory: the subdirectory of `Aristotle/` that contains `main/` (e.g. `Aristotle/GrothendieckVanishing/`). All paths below are relative to this directory.
+- Read `critique.md` for priorities.
+- Grep for `sorry` in `main/*.lean`.
 - Pick the highest-priority sorry that is feasible to prove directly.
 - **If all sorry's are hard: pick the hardest one and decompose it.** Do not skip this step.
 
@@ -75,4 +76,4 @@ If a sorry can't be proved directly in ~15 minutes:
 
 ## Reference
 
-See `Aristotle/Landau/CLAUDE.md` for proof style guidelines.
+See the project's `CLAUDE.md` for proof style guidelines, if it exists.

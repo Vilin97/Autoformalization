@@ -4,11 +4,15 @@ Prepare and submit lemmas to Aristotle for automated proving.
 
 Accepts an optional argument: a comma-separated list of sorry names or file paths to submit. If no argument is given, check for ready-to-submit files in `aristotle-in/` and submit them.
 
+## Finding the project directory
+
+The current project lives under `Aristotle/` — look for the subdirectory that contains `main/` and `aristotle-in/` (e.g. `Aristotle/GrothendieckVanishing/`). All paths below are relative to that project directory.
+
 ## Pre-submission checklist
 
 For each lemma to submit:
 
-1. **File format**: Must be a standalone `.lean` file in `Aristotle/Landau/aristotle-in/` with:
+1. **File format**: Must be a standalone `.lean` file in `aristotle-in/` with:
    - `import Mathlib` at the top (self-contained, no project imports)
    - Exactly ONE sorry'd lemma (the target)
    - All dependencies either proved inline or `admit`ted (NEVER use `axiom`)
@@ -24,25 +28,34 @@ For each lemma to submit:
 
 ## Submission
 
-Submit using the tracking script (handles job ID recording automatically):
+Use the Aristotle MCP tools directly:
 
-```bash
-cd /home/vilin/aristotle && source .env && python3.10 Aristotle/Landau/check-aristotle.py submit aristotle-in/NAME.lean
+```
+mcp__aristotle__submit_file(file_path="/absolute/path/to/aristotle-in/NAME.lean", prompt="Fill in the sorries")
 ```
 
-**IMPORTANT: Use `python3.10`, NOT `python`.** The default `python` is 3.7, which is too old for `aristotlelib`.
+For submitting the entire project directory:
+```
+mcp__aristotle__submit_directory(project_dir="/absolute/path/to/project", prompt="Fill in the sorries")
+```
+
+After submission, record the job in `aristotle-jobs.json`:
+```json
+{
+  "id": "<project-id from MCP response>",
+  "submission": "aristotle-in/NAME.lean",
+  "output": "aristotle-out/NAME_aristotle.lean",
+  "target": "NAME"
+}
+```
 
 ## Handling failures
 
-### API is down (httpx.ReadTimeout, connection refused, curl returns 000)
+### API is down (httpx.ReadTimeout, connection refused)
 - Report that the API is unreachable.
 - Keep the input file in `aristotle-in/` for later resubmission.
 - Do NOT retry in a loop — just report and move on.
 - Consider proving the lemma directly instead (see `/prove`).
-
-### Submission script errors
-- "Could not find project ID in output" — the `aristotle` CLI may not be installed or the API key in `.env` may be invalid. Check with `which aristotle` and verify `.env` exists.
-- Python import errors — ensure `aristotlelib` is installed under python3.10: `python3.10 -m pip install aristotlelib`.
 
 ### Job completed but Aristotle returned sorry
 - The lemma was too hard for Aristotle. Decompose it into smaller sub-lemmas and resubmit each.
@@ -61,5 +74,5 @@ cd /home/vilin/aristotle && source .env && python3.10 Aristotle/Landau/check-ari
 
 ## Post-submission
 
-- Verify the job ID was recorded in `Aristotle/Landau/aristotle-jobs.json`.
+- Verify the job ID was recorded in `aristotle-jobs.json`.
 - Report what was submitted and the job ID.
