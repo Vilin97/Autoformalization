@@ -4,82 +4,86 @@
   Hartshorne III.2.7, Steps 3–5: For an irreducible Noetherian space X of
   dimension d ≥ 1, reduce H^n(X, F) = 0 for n > d to lower-dimensional spaces.
 
-  Decomposed into sub-lemmas:
-  1. constantSheaf_flasque_of_irreducible: Z is flasque on irreducible X
-  2. constantSheaf_cohomology_vanishing: H^{n+1}(X, Z) = 0 (from 1 + FlasqueVanishing)
-  3. cohomology_direct_limit_noetherian: Prop 2.9 (sorry — deferred)
-  4. grothendieck_vanishing_irreducible_pos: main step (uses 2, 3, and IH)
+  Key results:
+  - subsingleton_ext_of_ses: PROVED — abstract LES vanishing from Ext exact sequences
+  - constantSheaf_flasque_of_irreducible: sorry (nonempty case needs sheafification)
+  - constantSheaf_cohomology_vanishing: proved from flasque + FlasqueVanishing
+  - grothendieck_vanishing_irreducible_pos: sorry (needs Prop 2.9 + extension by zero)
 
-  SORRY — requires Proposition 2.9 (direct limits) and extension-by-zero.
+  Based on Aristotle output (bc3176de) + manual work.
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.Auxiliary
 
 universe u
 
-open CategoryTheory TopologicalSpace
+open CategoryTheory TopologicalSpace Abelian
+
+/-! ## Abstract LES vanishing lemma -/
+
+/-- Given a short exact sequence `0 → X₁ → X₂ → X₃ → 0`, if `Ext(Z, X₃, n) = 0`
+    and `Ext(Z, X₂, n+1) = 0`, then `Ext(Z, X₁, n+1) = 0`.
+    This follows from the covariant long exact sequence in Ext. -/
+theorem subsingleton_ext_of_ses {C : Type*} [Category C] [Abelian C] [HasExt C]
+    {S : ShortComplex C} (hS : S.ShortExact) (Z : C) (n : ℕ)
+    (h₃ : Subsingleton (Ext Z S.X₃ n))
+    (h₂ : Subsingleton (Ext Z S.X₂ (n + 1))) :
+    Subsingleton (Ext Z S.X₁ (n + 1)) := by
+  constructor
+  intro a b
+  have h_a_f : a.comp (Ext.mk₀ S.f) rfl = 0 := Subsingleton.elim _ _
+  have h_b_f : b.comp (Ext.mk₀ S.f) rfl = 0 := Subsingleton.elim _ _
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ Z hS a h_a_f rfl
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ Z hS b h_b_f rfl
+  rw [← hc, ← hd, Subsingleton.elim c d]
+
+/-! ## Constant sheaf flasqueness -/
 
 /-- On an irreducible space, the constant sheaf Z has epi restriction maps (is flasque).
 
-    On an irreducible space, any two nonempty opens intersect. The constant sheaf
-    (sheafification of the constant presheaf with value Z) assigns Z to every
-    nonempty connected open, with identity restriction maps. Since every nonempty
-    open in an irreducible space is connected, all restriction maps are identity = epi.
-
-    SORRY — requires working with the sheafification construction.
-
-    Proof sketch:
-    Case U = ⊥: target F(V) → F(⊥) is epi because F(⊥) is terminal (zero).
-    Case U nonempty: U and V are both nonempty connected opens (irreducible ⟹ connected).
-      The sheafification of the constant presheaf has F(W) ≅ A for nonempty connected W,
-      with identity restriction maps. Hence F(V) → F(U) is identity = epi. -/
+    The U = ⊥ case is proved; the nonempty case requires sheafification internals. -/
 theorem constantSheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
     {U V : Opens X} (i : U ⟶ V) :
     Epi (((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
       (AddCommGrpCat.of (ULift ℤ))).val.map i.op) := by
-  -- Split on whether U is empty
   by_cases hU : (U : Set X) = ∅
   · -- U = ∅: F(V) → F(∅) is epi because F(∅) is terminal (zero)
     have : U = ⊥ := Opens.ext (by simpa using hU)
     subst this
-    have hterm := Sheaf.isTerminalOfBotCover
-      ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-        (AddCommGrpCat.of (ULift ℤ))) ⊥
-      (fun x hx => (Opens.mem_bot.mp hx).elim)
-    exact epi_of_isTerminal_tgt hterm _
-  · -- U nonempty: needs sheafification argument (sorry)
-    -- Both U and V are nonempty connected opens on irreducible X.
-    -- The constant sheaf has F(W) ≅ A for such W, with identity restrictions.
+    have hcov : ⊥ ∈ (Opens.grothendieckTopology X) ⊥ :=
+      fun x hx => (Opens.mem_bot.mp hx).elim
+    exact epi_of_isTerminal_tgt (Sheaf.isTerminalOfBotCover _ ⊥ hcov) _
+  · -- U nonempty: needs sheafification argument
     admit
 
 /-- The constant sheaf Z on an irreducible Noetherian space has vanishing
-    higher cohomology. Follows from `constantSheaf_flasque_of_irreducible`
-    and `FlasqueVanishing`. -/
+    higher cohomology. Follows from flasque + FlasqueVanishing. -/
 theorem constantSheaf_cohomology_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X] (n : ℕ) :
     Subsingleton (Sheaf.H ((constantSheaf (Opens.grothendieckTopology X)
       AddCommGrpCat.{u}).obj (AddCommGrpCat.of (ULift ℤ))) (n + 1)) :=
   FlasqueVanishing X _ (fun i => constantSheaf_flasque_of_irreducible X i) n
 
-/-- Proposition 2.9 (Hartshorne): On a Noetherian topological space, sheaf
-    cohomology commutes with filtered direct limits.
+/-! ## Main reduction (Steps 3-5) -/
 
-    More precisely: if (F_α) is a direct system of sheaves, then
-    H^i(X, lim→ F_α) ≅ lim→ H^i(X, F_α).
-
-    SORRY — major theorem, deferred. -/
-theorem cohomology_direct_limit_noetherian : True := trivial
--- Placeholder: the actual statement requires formalizing direct systems of sheaves,
--- which is substantial. For now, we record this as a known dependency.
+/-- Hartshorne Steps 3-5: reduction from arbitrary sheaves to lower-dimensional spaces.
+    Uses Prop 2.9 (direct limits), Z_U SES, and FlasqueVanishing.
+    SORRY — needs extension by zero + Prop 2.9 infrastructure. -/
+private theorem grothendieck_reduction
+    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
+    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+      (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      topologicalKrullDim Y < topologicalKrullDim X →
+      n > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G n)) :
+    Subsingleton (Sheaf.H F n) := by
+  sorry
 
 /-- For an irreducible Noetherian space X of positive dimension, vanishing
-    of H^n for n > dim X follows from vanishing on all lower-dimensional spaces.
-
-    Uses Prop 2.9, the Z_U → Z → Z_Y sequence, FlasqueVanishing, and
-    the fact that the constant sheaf on an irreducible space is flasque.
-
-    Hartshorne Steps 3–5. -/
+    of H^n for n > dim X follows from vanishing on all lower-dimensional spaces. -/
 theorem grothendieck_vanishing_irreducible_pos
     (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X] [IrreducibleSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
@@ -90,15 +94,5 @@ theorem grothendieck_vanishing_irreducible_pos
       topologicalKrullDim Y < topologicalKrullDim X →
       n > topologicalKrullDim Y →
       Subsingleton (Sheaf.H G n)) :
-    Subsingleton (Sheaf.H F n) := by
-  -- Proof sketch (Hartshorne Steps 3-5):
-  -- Step 3: By Prop 2.9 (cohomology_direct_limit_noetherian), reduce to
-  --   finitely generated subsheaves F_α.
-  -- Step 4: By induction on #generators, reduce to F generated by single
-  --   section s ∈ F(U). Then F is a quotient of Z_U with kernel R supported
-  --   on a closed set of dim < dim X. By LES + ih, reduce to Z_U.
-  -- Step 5: For Z_U, use SES 0 → Z_U → Z → Z_Y → 0 where Y = X \ U.
-  --   Z is flasque (constantSheaf_flasque_of_irreducible) so H^n(Z) = 0
-  --   by constantSheaf_cohomology_vanishing. Z_Y supported on Y with
-  --   dim Y < dim X, so H^n(Z_Y) = 0 by ih. By LES, H^n(Z_U) = 0.
-  admit
+    Subsingleton (Sheaf.H F n) :=
+  grothendieck_reduction X n hn hpos F ih

@@ -5,38 +5,114 @@
   holds for all irreducible Noetherian spaces (of appropriate dimension),
   then vanishing holds for X.
 
-  The proof (to be filled in) uses:
-  - Extension by zero: for Y ⊆ X closed and U = X \ Y open,
-    there is a short exact sequence 0 → F̄_U → F → F̄_Y → 0
-  - Lemma 2.10: H^i(X, F̄_Y) ≅ H^i(Y, F|_Y)
-  - Induction on the number of irreducible components
+  Proved cases:
+  - Empty X: all sheaves are zero → Ext vanishes (sorry-free)
+  - Irreducible X: apply ih_irred directly (sorry-free)
+  - Reducible X: SORRY — needs extension by zero + Lemma 2.10
 
-  Note on the callback signature: `ih_irred` only provides vanishing for
-  *irreducible* Y. This is sufficient because the inner induction on the
-  number of irreducible components can be done inside this proof:
-  - For each irreducible component Y_i: vanishing comes from `ih_irred`
-    (Y_i is irreducible with dim Y_i ≤ dim X)
-  - For cl(X \ Y_i): this has fewer components, so the inner induction
-    applies. At each step, we only need vanishing on the irreducible
-    components of cl(X \ Y_i), which are again supplied by `ih_irred`.
-  - The empty space case (no components): Sheaf.H is trivially subsingleton.
-
-  SORRY — requires extension-by-zero infrastructure not yet in Mathlib.
+  Based on Aristotle output (fca6885d).
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
+import Aristotle.GrothendieckVanishing.main.Auxiliary
 
 universe u
 
-open CategoryTheory TopologicalSpace
+open CategoryTheory TopologicalSpace Limits
+
+set_option synthInstance.maxHeartbeats 80000
+
+/-! ## Helper lemmas -/
+
+/-- For the empty presieve, the sheaf condition forces the presheaf value to be subsingleton. -/
+private lemma subsingleton_of_isSheafFor_empty
+    {C : Type*} [Category C] {U : C} {P : Cᵒᵖ ⥤ Type*}
+    (h : Presieve.IsSheafFor P (⊥ : Presieve U)) :
+    Subsingleton (P.obj (Opposite.op U)) := by
+  constructor; intro a b
+  have hemp : Presieve.FamilyOfElements P (⊥ : Presieve U) := fun _ _ hf => absurd hf id
+  obtain ⟨t, _, huniq⟩ := h hemp (fun _ _ _ _ _ _ _ hf => absurd hf id)
+  exact (huniq a (fun _ _ hf => absurd hf id)).trans
+    (huniq b (fun _ _ hf => absurd hf id)).symm
+
+/-- If End(G) is subsingleton then G is trivial (id = 0 forces all elements to be 0). -/
+private lemma addCommGrpCat_subsingleton_of_end_subsingleton
+    (G : AddCommGrpCat.{u}) (h : Subsingleton (G ⟶ G)) :
+    Subsingleton G := by
+  have : ∀ (g : G), g = 0 := by
+    intro g
+    have := AddCommGrpCat.ext_iff.mp (Subsingleton.elim (𝟙 G : G ⟶ G) 0) g
+    simp at this; exact this
+  exact ⟨fun a b => (this a).trans (this b).symm⟩
+
+/-! ## Empty space vanishing -/
+
+/-- On the empty space, every sheaf of abelian groups is a zero object.
+    The empty sieve covers every open (vacuously), forcing all presheaf values
+    to be trivial, so F is zero. -/
+theorem sheaf_isZero_of_isEmpty (X : TopCat.{u}) [hE : IsEmpty X]
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
+    IsZero F := by
+  have hom_sub : ∀ (E : AddCommGrpCat.{u}) (U : Opens X),
+      Subsingleton (E ⟶ F.val.obj (Opposite.op U)) := by
+    intro E U
+    have hmem : (⊥ : Sieve U) ∈ Opens.grothendieckTopology X U := by
+      rw [Opens.grothendieckTopology]; intro x; exact IsEmpty.elim hE x
+    have hsf := (F.cond E) (⊥ : Sieve U) hmem
+    rw [show (⊥ : Sieve U).arrows = ⊥ from rfl] at hsf
+    exact subsingleton_of_isSheafFor_empty hsf
+  have val_sub : ∀ (U : Opens X), Subsingleton (F.val.obj (Opposite.op U)) :=
+    fun U => addCommGrpCat_subsingleton_of_end_subsingleton _ (hom_sub _ U)
+  have val_isZero : ∀ (U : (Opens X)ᵒᵖ), IsZero (F.val.obj U) := by
+    intro ⟨U⟩; exact @AddCommGrpCat.isZero_of_subsingleton _ (val_sub U)
+  apply IsZero.mk
+  · intro G; exact ⟨{
+      default := 0
+      uniq := fun f => by
+        apply Sheaf.Hom.ext; apply NatTrans.ext; funext U
+        exact (val_isZero U).eq_zero_of_src (f.val.app U) }⟩
+  · intro G; exact ⟨{
+      default := 0
+      uniq := fun f => by
+        apply Sheaf.Hom.ext; apply NatTrans.ext; funext U
+        exact (val_isZero U).eq_zero_of_tgt (f.val.app U) }⟩
+
+/-- On the empty space, sheaf cohomology is trivially subsingleton. -/
+theorem sheaf_H_subsingleton_of_isEmpty'
+    (X : TopCat.{u}) [IsEmpty X]
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (n : ℕ) : Subsingleton (Sheaf.H F n) := by
+  unfold Sheaf.H
+  have hZ := sheaf_isZero_of_isEmpty X
+    ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+      (AddCommGrpCat.of (ULift ℤ)))
+  have := hZ.hasProjectiveDimensionLT_zero
+  exact HasProjectiveDimensionLT.subsingleton _ 0 n (Nat.zero_le n) F
+
+/-! ## Reducible case (sorry) -/
+
+/-- The reducible case requires extension by zero infrastructure not in Mathlib.
+    See Hartshorne Step 1: induction on number of irreducible components
+    via the closed/open SES and Lemma 2.10. -/
+private theorem sheaf_H_subsingleton_of_reducible
+    (X : TopCat.{u}) [NoetherianSpace X]
+    (n : ℕ) (hn : n > topologicalKrullDim X)
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (hNotIrred : ¬ IrreducibleSpace X) [Nonempty X]
+    (ih_irred : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+      [IrreducibleSpace Y] (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      topologicalKrullDim Y ≤ topologicalKrullDim X →
+      n > topologicalKrullDim Y → Subsingleton (Sheaf.H G n)) :
+    Subsingleton (Sheaf.H F n) := by
+  sorry
+
+/-! ## Main theorem -/
 
 /-- Reduction from general Noetherian spaces to irreducible ones.
 
-    If vanishing holds for all irreducible Noetherian spaces Y with
-    dim Y ≤ dim X and n > dim Y, then it holds for X.
-
-    Hartshorne Step 1: decompose X by irreducible components, use the closed/open
-    exact sequence and Lemma 2.10 to reduce to each component.
-    The irreducible spaces Y that appear all have dim Y ≤ dim X. -/
+    Handles three cases:
+    1. **Empty X**: All sheaves are zero → Ext vanishes (proved)
+    2. **Irreducible X**: Apply ih_irred directly (proved)
+    3. **Reducible X**: Sorry — needs extension by zero + Lemma 2.10 -/
 theorem grothendieck_vanishing_of_irreducible
     (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
@@ -46,4 +122,9 @@ theorem grothendieck_vanishing_of_irreducible
       topologicalKrullDim Y ≤ topologicalKrullDim X →
       n > topologicalKrullDim Y → Subsingleton (Sheaf.H G n)) :
     Subsingleton (Sheaf.H F n) := by
-  admit
+  by_cases hEmpty : IsEmpty X
+  · exact sheaf_H_subsingleton_of_isEmpty' X F n
+  · rw [not_isEmpty_iff] at hEmpty
+    by_cases hIrred : IrreducibleSpace X
+    · exact @ih_irred X _ hIrred F le_rfl hn
+    · exact sheaf_H_subsingleton_of_reducible X n hn F hIrred ih_irred
