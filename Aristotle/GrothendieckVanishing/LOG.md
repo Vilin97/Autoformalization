@@ -1,5 +1,28 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-27T23:15Z — Cycle 6: Dimension inequality + resubmit
+
+**Sorry count: 4 mathematical + 1 axiom (1 new helper lemma)**
+
+### Accomplished
+- Added `topologicalKrullDim_lt_of_isIrreducible_of_isClosed` (sorry) to Auxiliary.lean:
+  proper closed subset of irreducible space has strictly smaller dimension.
+  Needed for Step 5 of Hartshorne's proof.
+- Submitted to Aristotle (`72e670ee`)
+- Analyzed MV approach for reducible case — confirmed it doesn't work
+  (open complements don't cover X when components overlap)
+
+### Aristotle status
+- `5175616d`: ConstantSheafFlasque — 41%
+- `72e670ee`: DimStrictInequality — QUEUED (new)
+
+### Remaining sorry's (4 + axiom)
+1. `Auxiliary.lean` — `topologicalKrullDim_lt_of_isIrreducible_of_isClosed` (new, submitted)
+2. `ClosedOpenDecomposition.lean:106` — `sheaf_H_subsingleton_of_reducible`
+3. `IrreducibleStep.lean:58` — `constantSheaf_flasque_of_irreducible` (nonempty case)
+4. `IrreducibleStep.lean:83` — `grothendieck_reduction`
+5. `Setup.lean:38` — `FlasqueVanishing` (axiom)
+
 ## 2026-03-27T23:00Z — Cycle 5b: Integrate Aristotle results
 
 **Sorry count: 3 mathematical + 1 axiom**
