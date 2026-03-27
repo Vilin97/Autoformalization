@@ -11,7 +11,7 @@ Steps:
    - Keep files whose jobs are still pending or need resubmission
 
 3. **Check for dead code in main files:**
-   - Unused lemmas, commented-out code, stale imports in `Aristotle/Landau/main/`
+   - Unused lemmas, commented-out code, stale imports in the project's `main/` directory
    - Unused inline definitions (e.g. primed variants no longer needed)
 
 Report what was deleted and what was kept, with reasons.

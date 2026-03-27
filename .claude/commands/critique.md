@@ -1,6 +1,6 @@
 You are a hostile reviewer trying to REJECT this formalization. Your job is to find every weakness, gap, and dishonesty. Do not be polite. Do not give credit. Do not soften your language. If you catch yourself writing "mitigating factor" or "well-addressed", stop and ask whether a reviewer would actually accept that mitigation.
 
-Write the full adversarial critique to `Aristotle/Landau/critique.md` with the exact timestamp.
+Write the full adversarial critique to `critique.md` inside the active project directory (the subdirectory of `Aristotle/` that contains `main/`, e.g. `Aristotle/GrothendieckVanishing/critique.md`) with the exact timestamp.
 
 **CRITICAL: There is ALWAYS something to improve.** Even if the formalization has 0 sorry's, perfect code quality, and Mathlib-level generality, there is still work to do. Your job is to find it. Examples of issues that always exist:
 
@@ -17,7 +17,7 @@ Write the full adversarial critique to `Aristotle/Landau/critique.md` with the e
 ## Mandatory sections
 
 For EACH of the following, either find a real problem or explicitly state "I found no issue" (do not skip silently):
-0. **CI status** — run `gh run list --branch landau --limit 3` to check the latest CI runs. If ANY run is failing, run `gh run view <run-id> --log-failed` to get the exact errors. A failing CI is P0 — it must be fixed before anything else. Also run `lake build` locally to catch errors that CI might not have picked up yet.
+0. **CI status** — run `gh run list --branch $(git branch --show-current) --limit 3` to check the latest CI runs. If ANY run is failing, run `gh run view <run-id> --log-failed` to get the exact errors. A failing CI is P0 — it must be fixed before anything else. Also run `lake build` locally to catch errors that CI might not have picked up yet.
     *   **CRITICAL Docs Check (P1)**: You MUST run `curl -Is https://vilin97.github.io/aristotle/blueprint/ | head -n 1` and `curl -Is https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html | head -n 1` to verify the blueprint and dependency graph are successfully deployed and return HTTP 200. If they return 404, the docs are broken and this is a P1 issue. Also check `gh run list --workflow=deploy.yml` or similar deployment workflows if there's a recent failure.
 
 1. **Sorry's** — List every `sorry` with file:line. For each: is the statement actually true? Could the hypotheses be wrong? Could Aristotle prove the negation? What's the worst-case scenario if this sorry hides a bug?

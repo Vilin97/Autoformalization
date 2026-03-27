@@ -4,9 +4,11 @@ Systematically fix code quality issues identified in `critique.md` and in the co
 
 ## Phase 1: Read critique.md and identify open issues
 
-Read `Aristotle/Landau/critique.md`. Extract every issue that is NOT marked as ~~strikethrough~~ or **FIXED**. These are your work items.
+Find the active project directory: the subdirectory of `Aristotle/` that contains `main/` (e.g. `Aristotle/GrothendieckVanishing/`). All paths below are relative to this directory.
 
-Also scan `Aristotle/Landau/main/*.lean` for:
+Read `critique.md`. Extract every issue that is NOT marked as ~~strikethrough~~ or **FIXED**. These are your work items.
+
+Also scan `main/*.lean` for:
 - Files over 600 lines (`wc -l`)
 - `set_option maxHeartbeats` above 800000
 - Proofs over 50 lines
@@ -87,4 +89,4 @@ Pick the highest-priority item you can make progress on. If the top item is bloc
 
 ## Reference
 
-See `Aristotle/Landau/CLAUDE.md` for project conventions.
+See the project's `CLAUDE.md` for project conventions, if it exists.

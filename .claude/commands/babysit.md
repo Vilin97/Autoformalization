@@ -16,12 +16,10 @@ Before each step, write the current step number and name to `state.md`. After co
 
 1. `/critique` — Adversarial analysis of current state
 2. `/plan` — Assess current state and produce prioritized work plan
-3. `/submit-aristotle` — Submit hard lemmas to Aristotle (if any ready)
+3. `/submit-aristotle` — Submit hard lemmas to Aristotle
 4. `/prove` — Close sorry's directly (decompose into sub-lemmas as needed)
 5. `/check-aristotle` — Fetch and integrate completed Aristotle proofs
-6. `/simplify` — Fix code quality issues from critique.md. Must fix at least one issue per cycle if any remain open.
-7. `/strengthen` — Improve mathematical content: weaken hypotheses, strengthen conclusions, resolve epistemic issues from critique.md. Must make meaningful progress each cycle.
-8. `/log` — Record what changed
-9. `/cleanup` — Delete stale files and dead code
-10. `/commit` — Commit and push all changes
-11. `/alert` — Send Telegram notification with summary and commit link
+6. `/log` — Record what changed
+7. `/cleanup` — Delete stale files and dead code
+8. `/commit` — Commit and push all changes
+9. `/alert` — Send Telegram notification with summary and commit link

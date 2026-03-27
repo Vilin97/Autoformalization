@@ -1,4 +1,4 @@
-Write what was done since the last timestamp in `Aristotle/Landau/LOG.md`.
+Write what was done since the last timestamp in `LOG.md` inside the active project directory (the subdirectory of `Aristotle/` that contains `main/`, e.g. `Aristotle/GrothendieckVanishing/LOG.md`).
 
 Rules:
 - Entries are in reverse chronological order (newest first).
