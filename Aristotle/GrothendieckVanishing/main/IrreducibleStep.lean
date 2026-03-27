@@ -13,6 +13,7 @@
   SORRY — requires Proposition 2.9 (direct limits) and extension-by-zero.
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
+import Aristotle.GrothendieckVanishing.main.Auxiliary
 
 universe u
 
@@ -25,13 +26,32 @@ open CategoryTheory TopologicalSpace
     nonempty connected open, with identity restriction maps. Since every nonempty
     open in an irreducible space is connected, all restriction maps are identity = epi.
 
-    SORRY — requires working with the sheafification construction. -/
+    SORRY — requires working with the sheafification construction.
+
+    Proof sketch:
+    Case U = ⊥: target F(V) → F(⊥) is epi because F(⊥) is terminal (zero).
+    Case U nonempty: U and V are both nonempty connected opens (irreducible ⟹ connected).
+      The sheafification of the constant presheaf has F(W) ≅ A for nonempty connected W,
+      with identity restriction maps. Hence F(V) → F(U) is identity = epi. -/
 theorem constantSheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
     {U V : Opens X} (i : U ⟶ V) :
     Epi (((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
       (AddCommGrpCat.of (ULift ℤ))).val.map i.op) := by
-  admit
+  -- Split on whether U is empty
+  by_cases hU : (U : Set X) = ∅
+  · -- U = ∅: F(V) → F(∅) is epi because F(∅) is terminal (zero)
+    have : U = ⊥ := Opens.ext (by simpa using hU)
+    subst this
+    have hterm := Sheaf.isTerminalOfBotCover
+      ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+        (AddCommGrpCat.of (ULift ℤ))) ⊥
+      (fun x hx => (Opens.mem_bot.mp hx).elim)
+    exact epi_of_isTerminal_tgt hterm _
+  · -- U nonempty: needs sheafification argument (sorry)
+    -- Both U and V are nonempty connected opens on irreducible X.
+    -- The constant sheaf has F(W) ≅ A for such W, with identity restrictions.
+    admit
 
 /-- The constant sheaf Z on an irreducible Noetherian space has vanishing
     higher cohomology. Follows from `constantSheaf_flasque_of_irreducible`
