@@ -39,3 +39,5 @@ config
 .mcp.json
 .ripgreprc
 .vscode
+logs/*.log
+logs/*.lock
