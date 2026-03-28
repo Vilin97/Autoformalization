@@ -78,6 +78,13 @@ theorem opens_eq_bot_or_top_of_irreducibleSpace_dim_zero
   · left
     exact Opens.ext (Set.not_nonempty_iff_eq_empty.mp hne)
 
+/-- Every nonempty open subset of an irreducible space is irreducible. -/
+theorem isIrreducible_of_nonempty_open {X : Type u} [TopologicalSpace X]
+    [IrreducibleSpace X] (W : Opens X) (hW : (W : Set X).Nonempty) :
+    IsIrreducible (W : Set X) :=
+  (IrreducibleSpace.isIrreducible_univ X).isPreirreducible.subset_irreducible
+    hW W.isOpen le_rfl (Set.subset_univ _)
+
 /-! ## Dimension helpers -/
 
 /-- On an irreducible space, the topological Krull dimension is ≥ 0. -/
