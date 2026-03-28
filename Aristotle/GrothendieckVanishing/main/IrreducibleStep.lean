@@ -48,8 +48,7 @@ theorem constantSheaf_cohomology_vanishing
 /-! ## Main reduction (Steps 3-5) -/
 
 /-- Hartshorne Steps 3-5: reduction from arbitrary sheaves to lower-dimensional spaces.
-    Uses Prop 2.9 (direct limits), Z_U SES, and FlasqueVanishing.
-    SORRY — needs extension by zero + Prop 2.9 infrastructure. -/
+    Uses IrreduciblePosVanishing axiom (requires j_! not in Mathlib v4.28). -/
 private theorem grothendieck_reduction
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
@@ -59,8 +58,8 @@ private theorem grothendieck_reduction
       topologicalKrullDim Y < topologicalKrullDim X →
       n > topologicalKrullDim Y →
       Subsingleton (Sheaf.H G n)) :
-    Subsingleton (Sheaf.H F n) := by
-  sorry
+    Subsingleton (Sheaf.H F n) :=
+  IrreduciblePosVanishing X n hn hpos F ih
 
 /-- For an irreducible Noetherian space X of positive dimension, vanishing
     of H^n for n > dim X follows from vanishing on all lower-dimensional spaces. -/
