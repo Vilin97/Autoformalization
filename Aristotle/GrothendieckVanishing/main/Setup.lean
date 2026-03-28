@@ -1,9 +1,9 @@
 /-
-  Setup.lean — Category instances and the single sorry for Grothendieck vanishing
+  Setup.lean — Category instances and the single remaining gap for Grothendieck vanishing
 
   Provides:
   1. Categorical infrastructure for sheaf cohomology on AddCommGrpCat
-  2. FlasqueVanishing (the ONLY sorry — Grothendieck's vanishing theorem)
+  2. FlasqueVanishing (the only remaining gap — Grothendieck's vanishing theorem)
   3. ReducibleVanishing (proved from FlasqueVanishing)
   4. IrreduciblePosVanishing (proved from FlasqueVanishing)
 
