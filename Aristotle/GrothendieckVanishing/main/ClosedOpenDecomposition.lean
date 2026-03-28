@@ -1,10 +1,10 @@
 /-
   ClosedOpenDecomposition.lean — Reduction from general to irreducible spaces
 
-  All cases proved:
-  - Empty X: all sheaves are zero → Ext vanishes
-  - Irreducible X: apply ih_irred directly
-  - Reducible X: proved from FlasqueVanishing
+  Proved cases:
+  - Empty X: all sheaves are zero → Ext vanishes (sorry-free)
+  - Irreducible X: apply ih_irred directly (sorry-free)
+  - Reducible X: sorry — needs extension by zero + Lemma 2.10
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.Auxiliary
@@ -74,7 +74,7 @@ theorem sheaf_H_subsingleton_of_isEmpty'
   have := hZ.hasProjectiveDimensionLT_zero
   exact HasProjectiveDimensionLT.subsingleton _ 0 n (Nat.zero_le n) F
 
-/-! ## Reducible case (uses `ReducibleVanishing`) -/
+/-! ## Reducible case (sorry — uses ReducibleVanishing) -/
 
 private theorem sheaf_H_subsingleton_of_reducible
     (X : TopCat.{u}) [NoetherianSpace X]
