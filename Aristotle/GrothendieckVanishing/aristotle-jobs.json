@@ -1,21 +1,5 @@
 {
-  "jobs": [
-    {
-      "id": "5175616d-acd5-4900-b576-7778018f6e24",
-      "submission": "aristotle-in/ConstantSheafFlasque.lean",
-      "output": "aristotle-out/ConstantSheafFlasque_aristotle.lean",
-      "target": "constantSheaf_flasque_of_irreducible",
-      "status": "IN_PROGRESS",
-      "note": "at 41% as of 2026-03-27T23:08Z"
-    },
-    {
-      "id": "72e670ee-fb8c-482c-ab1b-50229457f4f9",
-      "submission": "aristotle-in/DimStrictInequality.lean",
-      "output": "aristotle-out/DimStrictInequality_aristotle.lean",
-      "target": "topologicalKrullDim_lt_of_isIrreducible_of_isClosed",
-      "status": "QUEUED"
-    }
-  ],
+  "jobs": [],
   "completed": [
     {
       "id": "fca6885d-c95f-4d10-90cb-4cb7e4ec9981",
@@ -28,6 +12,18 @@
       "target": "grothendieck_vanishing_irreducible_pos",
       "status": "COMPLETE_WITH_ERRORS",
       "note": "Integrated: subsingleton_ext_of_ses proved, rest still sorry"
+    },
+    {
+      "id": "5175616d-acd5-4900-b576-7778018f6e24",
+      "target": "constantSheaf_flasque_of_irreducible",
+      "status": "COMPLETE_WITH_ERRORS",
+      "note": "Architecture correct but sheafification blocked"
+    },
+    {
+      "id": "72e670ee-fb8c-482c-ab1b-50229457f4f9",
+      "target": "topologicalKrullDim_lt_of_isIrreducible_of_isClosed",
+      "status": "COMPLETE",
+      "note": "FULLY PROVED — sorry-free! Integrated into Auxiliary.lean"
     }
   ]
 }

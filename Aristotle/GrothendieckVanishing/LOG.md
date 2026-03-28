@@ -1,5 +1,28 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-28T03:10Z — Cycle 10: DIM INEQUALITY PROVED (Aristotle success!)
+
+**Sorry count: 3 mathematical + 1 axiom (down from 4!)**
+
+### Major achievement
+- **`topologicalKrullDim_lt_of_isIrreducible_of_isClosed` — FULLY PROVED!**
+  Aristotle (72e670ee) produced a complete, sorry-free proof.
+  Axioms: [propext, Classical.choice, Quot.sound] — NO sorryAx.
+
+  Key insight from Aristotle: original statement was FALSE for infinite-dim Y.
+  Corrected to add `hfin : topologicalKrullDim Y < ⊤` hypothesis.
+
+  Also proved unconditional `topologicalKrullDim_add_one_le` (dim Y + 1 ≤ dim X).
+
+  Proof uses: IrreducibleCloseds.map, height_add_one_le, height_le_height_apply_of_strictMono,
+  ENat.iSup_add, and careful WithBot ℕ∞ arithmetic.
+
+### Remaining sorry's (3 + axiom)
+1. `ClosedOpenDecomposition.lean:106` — `sheaf_H_subsingleton_of_reducible` (extension by zero)
+2. `IrreducibleStep.lean:58` — `constantSheaf_flasque_of_irreducible` (sheafification)
+3. `IrreducibleStep.lean:83` — `grothendieck_reduction` (Prop 2.9 + extension by zero)
+4. `Setup.lean:38` — `FlasqueVanishing` (axiom)
+
 ## 2026-03-28T02:10Z — Cycle 9: ConstantSheafFlasque Aristotle complete + isIrreducible helper
 
 **Sorry count: 4 mathematical + 1 axiom (unchanged)**
