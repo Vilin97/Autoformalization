@@ -74,3 +74,43 @@ noncomputable def freeAbSheafTopIsoConstantSheaf
       (yoneda.obj (⊤_ C) ⋙ AddCommGrpCat.free) ≅
     (constantSheaf J AddCommGrpCat.{u}).obj (AddCommGrpCat.of (ULift.{u} ℤ)) :=
   (presheafToSheaf J AddCommGrpCat.{u}).mapIso yonedaTopFreeIsoConst
+
+/-! ## Ext transport along isomorphisms -/
+
+/-- Transport Ext along an isomorphism: Ext(B, F, n) ≃+ Ext(A, F, n) when A ≅ B.
+    Uses the `extFunctor` bifunctor from Mathlib. -/
+noncomputable def extAddEquivOfIso {D : Type*} [Category D] [Abelian D] [HasExt D]
+    {A B F : D} (f : A ≅ B) (n : ℕ) :
+    Abelian.Ext B F n ≃+ Abelian.Ext A F n where
+  toFun := AddCommGrpCat.Hom.hom (((Abelian.extFunctor n).mapIso f.op).app F).hom
+  invFun := AddCommGrpCat.Hom.hom (((Abelian.extFunctor n).mapIso f.op).app F).inv
+  left_inv x := by
+    change (AddCommGrpCat.Hom.hom
+      ((((Abelian.extFunctor n).mapIso f.op).app F).hom ≫
+       (((Abelian.extFunctor n).mapIso f.op).app F).inv)) x = x
+    rw [(((Abelian.extFunctor n).mapIso f.op).app F).hom_inv_id]; rfl
+  right_inv x := by
+    change (AddCommGrpCat.Hom.hom
+      ((((Abelian.extFunctor n).mapIso f.op).app F).inv ≫
+       (((Abelian.extFunctor n).mapIso f.op).app F).hom)) x = x
+    rw [(((Abelian.extFunctor n).mapIso f.op).app F).inv_hom_id]; rfl
+  map_add' := map_add _
+
+/-! ## H'(⊤) ≅ H -/
+
+/-- **H'(⊤, F, n) ≅ H(F, n)**: the cohomology presheaf at the terminal object
+    equals global sheaf cohomology.
+
+    This resolves the TODO in Mathlib's SheafCohomology/Basic.lean.
+
+    Chain: freeAbSheafTopIsoConstantSheaf (sheaf iso) → extAddEquivOfIso (Ext transport)
+    gives Ext(freeAbSheaf(yoneda ⊤), F, n) ≃+ Ext(constantSheaf Z, F, n)
+    i.e., H'(⊤, F, n) ≃+ H(F, n). -/
+noncomputable def cohomologyPresheafTopEquiv
+    [HasSheafify J AddCommGrpCat.{u}]
+    [HasExt (Sheaf J AddCommGrpCat.{u})]
+    (F : Sheaf J AddCommGrpCat.{u}) (n : ℕ) :
+    Abelian.Ext ((presheafToSheaf J AddCommGrpCat.{u}).obj
+      (yoneda.obj (⊤_ C) ⋙ AddCommGrpCat.free)) F n ≃+
+    Sheaf.H F n :=
+  (extAddEquivOfIso freeAbSheafTopIsoConstantSheaf n).symm
