@@ -38,7 +38,6 @@ instance (X : TopCat.{u}) : Abelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
 instance (X : TopCat.{u}) : IsGrothendieckAbelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   inferInstanceAs (IsGrothendieckAbelian (CategoryTheory.Sheaf _ _))
 
-set_option synthInstance.maxHeartbeats 80000 in
 /-- **Grothendieck's vanishing theorem** — the single unproved statement in this project.
 
     For a Noetherian topological space X of dimension d, and any sheaf F
@@ -55,27 +54,25 @@ theorem FlasqueVanishing (X : TopCat.{u}) [NoetherianSpace X]
     Subsingleton (Sheaf.H F n) := by
   sorry
 
-set_option synthInstance.maxHeartbeats 80000 in
 /-- Reducible case: follows immediately from FlasqueVanishing. -/
 theorem ReducibleVanishing
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (hNotIrred : ¬ IrreducibleSpace X) [Nonempty X]
-    (ih_irred : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+    (_hNotIrred : ¬ IrreducibleSpace X) [Nonempty X]
+    (_ih_irred : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
       [IrreducibleSpace Y] (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y ≤ topologicalKrullDim X →
       n > topologicalKrullDim Y → Subsingleton (Sheaf.H G n)) :
     Subsingleton (Sheaf.H F n) :=
   FlasqueVanishing X F n hn
 
-set_option synthInstance.maxHeartbeats 80000 in
 /-- Irreducible positive-dim case: follows immediately from FlasqueVanishing. -/
 theorem IrreduciblePosVanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
+    (n : ℕ) (hn : n > topologicalKrullDim X) (_hpos : topologicalKrullDim X > 0)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+    (_ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
       (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y < topologicalKrullDim X →
       n > topologicalKrullDim Y →
