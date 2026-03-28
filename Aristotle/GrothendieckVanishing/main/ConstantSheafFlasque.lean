@@ -19,7 +19,19 @@ import Aristotle.GrothendieckVanishing.main.Auxiliary
 
 universe u
 
-open CategoryTheory TopologicalSpace Limits Opposite GrothendieckTopology.Plus
+open CategoryTheory TopologicalSpace Limits Opposite GrothendieckTopology GrothendieckTopology.Plus
+
+set_option maxHeartbeats 800000 in
+/-- plusObj(P)(⊥) is subsingleton for any presheaf P.
+    By Plus.sep (separation): the empty sieve covers ⊥, and two elements that agree
+    on all arrows of the empty sieve (vacuously) must be equal. -/
+theorem plusObj_bot_subsingleton {X : Type u} [TopologicalSpace X]
+    (P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}) :
+    Subsingleton (ToType (((Opens.grothendieckTopology X).plusObj P).obj (op ⊥))) := by
+  constructor; intro x y
+  have hcov : (⊥ : Sieve (⊥ : Opens X)) ∈ (Opens.grothendieckTopology X) ⊥ :=
+    fun p hp => (Opens.mem_bot.mp hp).elim
+  exact Plus.sep P ⟨⊥, hcov⟩ x y (fun ⟨_, _, hf⟩ => absurd hf id)
 
 set_option maxHeartbeats 800000 in
 /-- toPlus is injective at nonempty opens for the constant presheaf. -/
