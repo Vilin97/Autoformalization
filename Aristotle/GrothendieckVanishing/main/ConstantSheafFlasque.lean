@@ -105,7 +105,36 @@ private lemma toPlus_naturality_const
     ((opensGT X).toPlus (constPresheaf X)).app (op V) ≫
       ((opensGT X).plusObj (constPresheaf X)).map i.op from nat, rhs]
 
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 800000 in
+/-- Key lemma extracted from toPlus_surjective_of_firstPlus: preimages at different
+    arrows agree because of irreducibility (intersection is nonempty). -/
+private theorem toPlus_firstPlus_key
+    {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
+    {U : Opens X} (S : (opensGT X).Cover U) (x : Meq ((opensGT X).plusObj (constPresheaf X)) S)
+    (I₀ : S.Arrow) (hI₀ : (I₀.Y : Set X).Nonempty)
+    (a : (constPresheaf X).obj (op U))
+    (ha : ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op I₀.Y)) a = x I₀)
+    (I : S.Arrow) (hI : (I.Y : Set X).Nonempty) :
+    x I = ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map I.f.op)
+      (ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a) := by
+  obtain ⟨b, hb⟩ := toPlus_surjective_of_const I.Y hI (x I)
+  have hZne : ((I₀.Y ⊓ I.Y : Opens X) : Set X).Nonempty :=
+    nonempty_preirreducible_inter I₀.Y.isOpen I.Y.isOpen hI₀ hI
+  let R : S.Relation := Cover.Relation.mk' (fst := I₀) (snd := I)
+    ⟨I₀.Y ⊓ I.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩
+  have hcond := x.condition R
+  change ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map
+      (homOfLE inf_le_left).op) (x I₀) =
+    ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map
+      (homOfLE inf_le_right).op) (x I) at hcond
+  rw [← ha, ← hb] at hcond
+  rw [← toPlus_naturality_const (homOfLE (inf_le_left (a := I₀.Y) (b := I.Y))) a,
+      ← toPlus_naturality_const (homOfLE (inf_le_right (a := I₀.Y) (b := I.Y))) b] at hcond
+  have hab : a = b := toPlus_injective_of_const _ hZne a b hcond
+  rw [← hb, ← hab]
+  exact toPlus_naturality_const I.f a
+
+set_option maxHeartbeats 800000 in
 private theorem toPlus_surjective_of_firstPlus
     {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
     (U : Opens X) (hU : (U : Set X).Nonempty) :
@@ -115,34 +144,13 @@ private theorem toPlus_surjective_of_firstPlus
   obtain ⟨S, x, hx⟩ := exists_rep y
   obtain ⟨I₀, hI₀⟩ := cover_nonempty_arrow U hU S
   obtain ⟨a, ha⟩ := toPlus_surjective_of_const I₀.Y hI₀ (x I₀)
-  let z : ((opensGT X).plusObj (constPresheaf X)).obj (op U) :=
-    ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a
-  have key : ∀ I : S.Arrow, (I.Y : Set X).Nonempty →
-      x I = ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map I.f.op) z := by
-    intro I hI
-    obtain ⟨b, hb⟩ := toPlus_surjective_of_const I.Y hI (x I)
-    have hZne : ((I₀.Y ⊓ I.Y : Opens X) : Set X).Nonempty :=
-      nonempty_preirreducible_inter I₀.Y.isOpen I.Y.isOpen hI₀ hI
-    let R : S.Relation := Cover.Relation.mk' (fst := I₀) (snd := I)
-      ⟨I₀.Y ⊓ I.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩
-    have hcond := x.condition R
-    change ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map
-        (homOfLE inf_le_left).op) (x I₀) =
-      ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map
-        (homOfLE inf_le_right).op) (x I) at hcond
-    rw [← ha, ← hb] at hcond
-    rw [← toPlus_naturality_const (homOfLE (inf_le_left (a := I₀.Y) (b := I.Y))) a,
-        ← toPlus_naturality_const (homOfLE (inf_le_right (a := I₀.Y) (b := I.Y))) b] at hcond
-    have hab : a = b := toPlus_injective_of_const _ hZne a b hcond
-    rw [← hb, ← hab]
-    exact toPlus_naturality_const I.f a
-  use z
+  use ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a
   rw [hx, toPlus_eq_mk, eq_mk_iff_exists]
   refine ⟨S, homOfLE le_top, 𝟙 S, ?_⟩
   apply Meq.ext; intro I
   simp only [Meq.refine, Meq.mk]
   by_cases hI : (I.Y : Set X).Nonempty
-  · exact (key I hI).symm
+  · exact (toPlus_firstPlus_key S x I₀ hI₀ a ha I hI).symm
   · rw [Set.not_nonempty_iff_eq_empty] at hI
     have hIbot : I.Y = ⊥ := Opens.ext (by simpa using hI)
     have hsub : Subsingleton (ToType (((opensGT X).plusObj (constPresheaf X)).obj (op I.Y))) := by
