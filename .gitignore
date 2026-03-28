@@ -41,3 +41,4 @@ config
 .vscode
 logs/*.log
 logs/*.lock
+*codex-local
