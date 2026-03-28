@@ -164,10 +164,72 @@ theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
   haveI : Epi S.g := hS.epi_g
   have hls : Sheaf.IsLocallySurjective S.g :=
     (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} S.g).mpr inferInstance
-  -- Step 2: The bottom element (V = ⊥, t = 0) is a partial lift
-  -- because g(0) = 0 = s|_⊥ (F(⊥) is terminal/zero for any sheaf F).
-  -- Step 3: Apply Zorn via the sheaf gluing axiom.
-  -- For simplicity, we use a direct argument with zorn_le₀.
+  -- Step 2: Define the set of partial lifts and apply Zorn.
+  -- A partial lift is an open V ≤ U with a section t ∈ X₂(V) such that g(t) = s|_V.
+  -- We encode this as a set of (V : Opens X) with the appropriate structure.
+  -- For the Zorn argument, we consider the set P of opens V ≤ U
+  -- that admit a lift, and show it has a maximal element equal to U.
+  -- We use a sigma type encoding.
+  let res (W V : Opens X) (h : W ≤ V)
+      (x : S.X₂.val.obj (op V)) : S.X₂.val.obj (op W) :=
+    ConcreteCategory.hom (S.X₂.val.map (homOfLE h).op) x
+  let res₁ (W V : Opens X) (h : W ≤ V)
+      (x : S.X₁.val.obj (op V)) : S.X₁.val.obj (op W) :=
+    ConcreteCategory.hom (S.X₁.val.map (homOfLE h).op) x
+  let res₃ (W V : Opens X) (h : W ≤ V)
+      (x : S.X₃.val.obj (op V)) : S.X₃.val.obj (op W) :=
+    ConcreteCategory.hom (S.X₃.val.map (homOfLE h).op) x
+  -- The set P of triples (V, t, proof) encoding partial lifts
+  -- For Zorn, we use zorn_le₀ on a set of elements of a sigma type.
+  -- Define the type of partial lifts:
+  let PLift := { p : Σ (V : Opens X), S.X₂.val.obj (op V) //
+    ∃ h : p.1 ≤ U, ConcreteCategory.hom (S.g.val.app (op p.1)) p.2 = res₃ p.1 U h s }
+  -- Define the order: p ≤ q iff p.V ≤ q.V and q.t|_p.V = p.t
+  -- We embed this into a preorder.
+  -- For simplicity, let's avoid defining a custom preorder and instead work directly.
+  -- Alternative approach: work with the set of opens V ≤ U that admit a lift,
+  -- paired with a choice of lift.
+  -- Actually, let me use a simpler encoding. I'll use the imageSieve approach.
+  -- The imageSieve of S.g.val at s covers U (by local surjectivity).
+  -- For each x ∈ U, there exists W_x ∋ x and t_x ∈ X₂(W_x) with g(t_x) = s|_{W_x}.
+  -- But we need a GLOBAL lift, not just local ones.
+  -- The Zorn argument patches local lifts using flasqueness of X₁.
+  -- Let me use a contradiction argument instead:
+  -- Assume g_U is not surjective, i.e., s ∉ im(g_U).
+  -- Apply Zorn to get a maximal partial lift (V₀, t₀) with V₀ ≤ U.
+  -- Show V₀ = U to get a contradiction.
+  -- If V₀ ≠ U, then ∃ x ∈ U \ V₀.
+  -- By local surjectivity, ∃ W ∋ x, W ≤ U, and t' ∈ X₂(W) with g(t') = s|_W.
+  -- On V₀ ⊓ W: g(t₀|_{V₀⊓W} - t'|_{V₀⊓W}) = 0 (both map to s|_{V₀⊓W}).
+  -- By exactness: ∃ a ∈ X₁(V₀ ⊓ W) with f(a) = t₀|_{V₀⊓W} - t'|_{V₀⊓W}.
+  -- By flasqueness: ∃ â ∈ X₁(W) with â|_{V₀⊓W} = a.
+  -- Set t'' = t' + f(â) ∈ X₂(W). Then g(t'') = s|_W (since g∘f = 0).
+  -- And t''|_{V₀⊓W} = t'|_{V₀⊓W} + f(a) = t₀|_{V₀⊓W}.
+  -- So t₀ and t'' glue to a section on V₀ ⊔ W, contradicting maximality of V₀.
+  -- Implement this using `by_contra` and constructing the extended lift.
+  -- Actually, to avoid the complexity of Zorn's lemma in Lean, let me use a
+  -- different approach: directly construct the global section using transfinite
+  -- induction or the sheaf gluing condition.
+  -- For now, let me implement the Zorn approach properly.
+  -- Step 2a: Show the imageSieve of g.val at s restricted to U covers U.
+  -- From hls : IsLocallySurjective S.g, we get that for each s' : X₃(V),
+  -- the imageSieve of g.val at s' is a covering sieve on V.
+  -- Step 2b: The restriction of s to any V ≤ U is res₃ V U hle s.
+  -- For each x ∈ U, the imageSieve gives a neighborhood W of x (in U)
+  -- and a section t_W ∈ X₂(W) with g(t_W) = s|_W.
+  -- Step 2c: Apply Zorn to find the maximal such W.
+  -- Let me now write a cleaner version.
+  -- Use the approach: suffices to show for V₀ maximal, V₀ = U.
+  -- For this, assume V₀ < U, find x ∈ U \ V₀, extend V₀ to V₀ ⊔ W for some W ∋ x.
+  -- For the Zorn part, I need to define a partial order and verify the chain condition.
+  -- Let me use `zorn_le₀` on a set encoding.
+  -- Actually, let me try a cleaner approach: since the proof is very long,
+  -- let me use `by_contra` and derive the surjectivity from the imageSieve covering.
+  -- Approach: show that the set {V ≤ U | ∃ t, g(t) = s|_V} contains U.
+  -- By Zorn (if chains have upper bounds), it has a maximal element V₀.
+  -- V₀ = U because otherwise we can extend it.
+  -- For the chain upper bound: use sheaf gluing.
+  -- For the extension: use local surjectivity + exactness + flasqueness.
   sorry
 
 /-- **Quotient preserves flasqueness** (Nugent, PR #35790).
