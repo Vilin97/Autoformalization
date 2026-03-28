@@ -15,6 +15,7 @@ private abbrev constPresheaf (X : Type u) [TopologicalSpace X] :
 private abbrev opensGT (X : Type u) [TopologicalSpace X] : GrothendieckTopology (Opens X) :=
   Opens.grothendieckTopology X
 
+-- Plus construction API requires extra heartbeats for typeclass resolution
 set_option maxHeartbeats 400000 in
 theorem plusObj_bot_subsingleton {X : Type u} [TopologicalSpace X]
     (P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}) :
@@ -24,6 +25,7 @@ theorem plusObj_bot_subsingleton {X : Type u} [TopologicalSpace X]
     fun p hp => (Opens.mem_bot.mp hp).elim
   exact Plus.sep P ⟨⊥, hcov⟩ x y (fun ⟨_, _, hf⟩ => absurd hf id)
 
+-- Plus construction API requires extra heartbeats for typeclass resolution
 set_option maxHeartbeats 400000 in
 theorem toPlus_injective_of_const
     {X : Type u} [TopologicalSpace X]
@@ -65,6 +67,7 @@ private lemma meq_const_values_eq
   obtain ⟨R, rfl, rfl⟩ := cover_arrows_related S I₁ I₂
   simpa [constPresheaf] using x.condition R
 
+-- Plus construction API requires extra heartbeats for typeclass resolution
 set_option maxHeartbeats 400000 in
 private theorem toPlus_surjective_of_const
     {X : Type u} [TopologicalSpace X]
@@ -83,6 +86,7 @@ private theorem toPlus_surjective_of_const
   apply Meq.ext; intro I
   simp [Meq.refine, Meq.mk, constPresheaf]
 
+-- Plus construction API requires extra heartbeats for typeclass resolution
 set_option maxHeartbeats 400000 in
 private lemma toPlus_naturality_const
     {X : Type u} [TopologicalSpace X]
@@ -105,6 +109,7 @@ private lemma toPlus_naturality_const
     ((opensGT X).toPlus (constPresheaf X)).app (op V) ≫
       ((opensGT X).plusObj (constPresheaf X)).map i.op from nat, rhs]
 
+-- Plus construction API requires extra heartbeats for typeclass resolution
 set_option maxHeartbeats 400000 in
 /-- Key lemma extracted from toPlus_surjective_of_firstPlus: preimages at different
     arrows agree because of irreducibility (intersection is nonempty). -/
@@ -134,6 +139,7 @@ private theorem toPlus_firstPlus_key
   rw [← hb, ← hab]
   exact toPlus_naturality_const I.f a
 
+-- Plus construction API requires extra heartbeats for typeclass resolution
 set_option maxHeartbeats 400000 in
 private theorem toPlus_surjective_of_firstPlus
     {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
@@ -157,6 +163,7 @@ private theorem toPlus_surjective_of_firstPlus
       rw [hIbot]; exact plusObj_bot_subsingleton _
     exact @Subsingleton.elim _ hsub _ _
 
+-- Plus construction API requires extra heartbeats for typeclass resolution
 set_option maxHeartbeats 400000 in
 private theorem sheafify_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
