@@ -1,5 +1,17 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-28T04:10Z — Cycle 11: Resubmit remaining sorry's
+
+**Sorry count: 3 mathematical + 1 axiom (unchanged)**
+
+### Accomplished
+- Resubmitted 2 jobs to Aristotle with better decomposition:
+  - `b29fab4f`: ReducibleCase (sheaf_H_subsingleton_of_reducible)
+  - `55ef4f62`: IrreducibleStep (constantSheaf_flasque + grothendieck_reduction)
+- Investigated epi ↔ surjective via Preadditive.epi_iff_surjective
+- Confirmed: remaining sorry's are all blocked on missing Mathlib infrastructure
+  (extension by zero, Prop 2.9, concrete sheafification characterization)
+
 ## 2026-03-28T03:10Z — Cycle 10: DIM INEQUALITY PROVED (Aristotle success!)
 
 **Sorry count: 3 mathematical + 1 axiom (down from 4!)**

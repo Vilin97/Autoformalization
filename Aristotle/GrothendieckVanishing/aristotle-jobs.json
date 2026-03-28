@@ -1,29 +1,42 @@
 {
-  "jobs": [],
+  "jobs": [
+    {
+      "id": "b29fab4f-f3a0-4476-bf85-2c84ae1cee32",
+      "submission": "aristotle-in/ReducibleCase.lean",
+      "target": "sheaf_H_subsingleton_of_reducible",
+      "status": "QUEUED"
+    },
+    {
+      "id": "55ef4f62-a91c-4ed4-b80b-47aea6843b85",
+      "submission": "aristotle-in/IrreducibleStep.lean",
+      "target": "constantSheaf_flasque + grothendieck_reduction",
+      "status": "QUEUED"
+    }
+  ],
   "completed": [
+    {
+      "id": "72e670ee-fb8c-482c-ab1b-50229457f4f9",
+      "target": "topologicalKrullDim_lt_of_isIrreducible_of_isClosed",
+      "status": "COMPLETE",
+      "note": "FULLY PROVED — integrated into Auxiliary.lean"
+    },
     {
       "id": "fca6885d-c95f-4d10-90cb-4cb7e4ec9981",
       "target": "grothendieck_vanishing_of_irreducible",
       "status": "COMPLETE_WITH_ERRORS",
-      "note": "Integrated: empty + irreducible cases proved, reducible case still sorry"
+      "note": "Integrated: empty + irreducible cases proved"
     },
     {
       "id": "bc3176de-3228-43ed-902e-e04f7d7eb739",
       "target": "grothendieck_vanishing_irreducible_pos",
       "status": "COMPLETE_WITH_ERRORS",
-      "note": "Integrated: subsingleton_ext_of_ses proved, rest still sorry"
+      "note": "Integrated: subsingleton_ext_of_ses proved"
     },
     {
       "id": "5175616d-acd5-4900-b576-7778018f6e24",
       "target": "constantSheaf_flasque_of_irreducible",
       "status": "COMPLETE_WITH_ERRORS",
       "note": "Architecture correct but sheafification blocked"
-    },
-    {
-      "id": "72e670ee-fb8c-482c-ab1b-50229457f4f9",
-      "target": "topologicalKrullDim_lt_of_isIrreducible_of_isClosed",
-      "status": "COMPLETE",
-      "note": "FULLY PROVED — sorry-free! Integrated into Auxiliary.lean"
     }
   ]
 }
