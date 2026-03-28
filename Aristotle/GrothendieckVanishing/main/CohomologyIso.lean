@@ -52,7 +52,7 @@ private noncomputable def yonedaTopFreeComponentIso (U : Cᵒᵖ) :
     inv_hom_id := by ext x; simp [e]
   }
 
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 -- NatIso.ofComponents needs extra heartbeats for the naturality verification
 /-- The presheaf `yoneda.obj ⊤ ⋙ AddCommGrpCat.free` is naturally isomorphic to the
     constant presheaf with value `ULift ℤ`. Both assign ℤ (up to ULift) to every

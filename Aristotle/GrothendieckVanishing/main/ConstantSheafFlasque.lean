@@ -105,7 +105,7 @@ private lemma toPlus_naturality_const
     ((opensGT X).toPlus (constPresheaf X)).app (op V) ≫
       ((opensGT X).plusObj (constPresheaf X)).map i.op from nat, rhs]
 
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 /-- Key lemma extracted from toPlus_surjective_of_firstPlus: preimages at different
     arrows agree because of irreducibility (intersection is nonempty). -/
 private theorem toPlus_firstPlus_key
@@ -134,7 +134,7 @@ private theorem toPlus_firstPlus_key
   rw [← hb, ← hab]
   exact toPlus_naturality_const I.f a
 
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 private theorem toPlus_surjective_of_firstPlus
     {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
     (U : Opens X) (hU : (U : Set X).Nonempty) :
@@ -157,7 +157,7 @@ private theorem toPlus_surjective_of_firstPlus
       rw [hIbot]; exact plusObj_bot_subsingleton _
     exact @Subsingleton.elim _ hsub _ _
 
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 private theorem sheafify_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
     {U V : Opens X} (i : U ⟶ V) :
