@@ -11,6 +11,18 @@
       "submission": "aristotle-in/IrreducibleStep.lean",
       "target": "constantSheaf_flasque + grothendieck_reduction",
       "status": "QUEUED"
+    },
+    {
+      "id": "17b9bce9-6064-4af8-82d6-68001d389b92",
+      "submission": "aristotle-in/ToSheafifySurjective.lean",
+      "target": "toPlus_surjective_of_irreducible_const",
+      "status": "QUEUED"
+    },
+    {
+      "id": "a60dddad-99f2-440a-a54a-3d135f8052b1",
+      "submission": "aristotle-in/MeqConstant.lean",
+      "target": "meq_const_of_irreducible",
+      "status": "QUEUED"
     }
   ],
   "completed": [
@@ -18,13 +30,13 @@
       "id": "72e670ee-fb8c-482c-ab1b-50229457f4f9",
       "target": "topologicalKrullDim_lt_of_isIrreducible_of_isClosed",
       "status": "COMPLETE",
-      "note": "FULLY PROVED — integrated into Auxiliary.lean"
+      "note": "FULLY PROVED — integrated"
     },
     {
       "id": "fca6885d-c95f-4d10-90cb-4cb7e4ec9981",
       "target": "grothendieck_vanishing_of_irreducible",
       "status": "COMPLETE_WITH_ERRORS",
-      "note": "Integrated: empty + irreducible cases proved"
+      "note": "Integrated: empty + irreducible proved"
     },
     {
       "id": "bc3176de-3228-43ed-902e-e04f7d7eb739",
