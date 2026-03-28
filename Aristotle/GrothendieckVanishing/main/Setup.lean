@@ -623,16 +623,10 @@ theorem epi_unit_of_closedImmersion
   rw [TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
   intro x
   by_cases hxZ : (x : X) ∈ Z
-  · -- x ∈ Z: stalk map is surjective (it's an iso via stalkPushforward_iso_of_isInducing)
-    -- stalkPushforward is an iso for inducing maps. The composition η_stalk ≫ stalkPushforward
-    -- equals the pullback stalk iso. So η_stalk is an iso → surjective.
-    have h_inducing : Topology.IsInducing (ConcreteCategory.hom i) :=
-      Topology.IsInducing.subtypeVal
-    haveI := TopCat.Presheaf.stalkPushforward.stalkPushforward_iso_of_isInducing
-      AddCommGrpCat.{u} h_inducing
-      ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F).val ⟨x, hxZ⟩
-    -- Need: η_stalk ≫ stalkPushforward = pullbackStalkIso (compatibility)
-    -- Then η_stalk = pullbackStalkIso ≫ stalkPushforward⁻¹ = iso → surjective
+  · -- x ∈ Z: stalk map is surjective
+    -- The unit η_stalk composed with stalkPushforward (which is an iso for inducing maps)
+    -- gives the pullback stalk comparison (also an iso). So η_stalk is surjective.
+    -- For now, sorry — requires adjunction-stalk compatibility.
     sorry
   · -- x ∉ Z: target stalk is 0 (pushforward has zero stalk outside closed Z)
     -- Show stalk is IsZero by showing all colimit injections (germs) are 0.
