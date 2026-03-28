@@ -1,5 +1,42 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-28T08:00Z — Cycle 14: constantSheaf_flasque PROVEN
+
+**Sorry count: 2 mathematical + 1 axiom (down from 3+1)**
+
+### MAJOR ACHIEVEMENT: constantSheaf_flasque_of_irreducible is SORRY-FREE
+
+The constant sheaf on an irreducible space is flasque. Full proof chain:
+
+1. **toPlus bijective** for constP at nonempty opens (surjective from Aristotle, injective manual)
+2. **toPlus(plusObj P) surjective** at nonempty opens — KEY NEW LEMMA:
+   - For each arrow I in a cover, x(I) = toPlus_{I.Y}(a) for a universal a
+   - Proved via: Meq condition + naturality + injectivity at intersection (irreducible → nonempty)
+   - Empty arrows handled by plusObj_bot_subsingleton
+3. **toSheafify surjective** = composition of two surjective maps (via plusMap_toPlus)
+4. **Naturality + epi_of_epi_fac**: toSheafify_V ≫ res = toSheafify_U → Epi(res)
+5. **Type bridge**: sheafify ↔ constantSheaf via plusPlusIsoSheafify + simpa
+
+Technical challenges overcome:
+- `ConcreteCategory.hom` vs `FunLike.coe` coercion mismatches in rewrite tactics
+- `S.shape.fst R` not reducing to `R.fst` (needed `change` tactic)
+- `constantSheaf.val ≠ sheafify` definitionally (used `plusPlusIsoSheafify` iso bridge)
+
+### Remaining sorry's (2 + axiom)
+1. `grothendieck_reduction` (IrreducibleStep.lean:63): irreducible X, dim ≥ 1.
+   Needs extension by zero (j_!) or closed-open SES + pushforward cohomology.
+2. `sheaf_H_subsingleton_of_reducible` (ClosedOpenDecomposition.lean:112): reducible X.
+   Needs j_! for decomposition into irreducible components.
+3. `FlasqueVanishing` (Setup.lean:38): intentional axiom, NOT a sorry.
+
+Both sorry's are blocked on j_! (extension by zero for open embeddings), which is NOT in Mathlib v4.28.
+
+### Aristotle jobs
+- b29fab4f: ReducibleCase — COMPLETE, documented j_! blocker
+- 55ef4f62: IrreducibleStep — IN_PROGRESS (55%)
+- 17b9bce9: ToSheafifySurjective — COMPLETE, integrated
+- a60dddad: MeqConstant — COMPLETE, integrated
+
 ## 2026-03-28T06:15Z — Cycles 12-13: Massive infrastructure build
 
 **Sorry count: 3 mathematical + 1 axiom**
@@ -22,272 +59,3 @@ From Aristotle:
 Empty arrows in covers DON'T break the matching family argument: for I with I.Y = ⊥
 and any nonempty J, a relation through Z = ⊥ (initial) forces x(I) = x(J) by the
 Meq condition + constant presheaf identity maps.
-
-### Remaining sorry's (3 + axiom)
-1. `constantSheaf_flasque_of_irreducible` (nonempty case): needs toSheafify surjective.
-   toPlus surjective is PROVED. toSheafify = toPlus ≫ plusMap(toPlus).
-   The second component needs Plus(P) to satisfy the same conditions.
-   SUBMITTED TO ARISTOTLE (05627269).
-2. `sheaf_H_subsingleton_of_reducible`: blocked on j_! (extension by zero). No workaround.
-3. `grothendieck_reduction` (Steps 3-5): blocked on Prop 2.9 + j_!.
-
-## 2026-03-28T06:00Z — Cycle 12: Aristotle confirms reducible case blocked
-
-**Sorry count: 3 mathematical + 1 axiom (unchanged)**
-
-### Aristotle results
-- `b29fab4f` ReducibleCase: **COMPLETE** — sorry remains but with DEFINITIVE analysis.
-  Aristotle proved the reducible case CANNOT be filled without:
-  1. Extension by zero j_! for open embeddings
-  2. The closed-open complement SES
-  3. Identification H'(⊤, F) ≅ H(F)
-  All three alternatives (MV, component induction, Ext LES) reduce to needing j_!.
-- `55ef4f62` IrreducibleStep: IN_PROGRESS (24%)
-- `17b9bce9` ToSheafifySurjective: IN_PROGRESS (1%)
-- `a60dddad` MeqConstant: QUEUED
-
-### Integrated
-- Updated ClosedOpenDecomposition.lean with Aristotle's analysis documentation
-
-## 2026-03-28T05:10Z — Cycle 11b: Decompose flasque proof + mass Aristotle submit
-
-**Sorry count: 3 mathematical + 1 axiom (unchanged)**
-
-### Accomplished
-- Created `ConstantSheafFlasque.lean` as dedicated file for the flasque proof
-- Moved constantSheaf_flasque_of_irreducible out of IrreducibleStep.lean
-- Decomposed the flasque proof into sub-lemmas for Aristotle:
-  - `meq_const_of_irreducible`: matching families for const presheaf are equal
-  - `toPlus_surjective_of_irreducible_const`: toPlus is surjective at nonempty opens
-- Submitted 4 total Aristotle jobs:
-  - `b29fab4f`: ReducibleCase
-  - `55ef4f62`: IrreducibleStep (flasque + reduction)
-  - `17b9bce9`: ToSheafifySurjective
-  - `a60dddad`: MeqConstant
-
-## 2026-03-28T04:10Z — Cycle 11: Resubmit remaining sorry's
-
-**Sorry count: 3 mathematical + 1 axiom (unchanged)**
-
-### Accomplished
-- Resubmitted 2 jobs to Aristotle with better decomposition:
-  - `b29fab4f`: ReducibleCase (sheaf_H_subsingleton_of_reducible)
-  - `55ef4f62`: IrreducibleStep (constantSheaf_flasque + grothendieck_reduction)
-- Investigated epi ↔ surjective via Preadditive.epi_iff_surjective
-- Confirmed: remaining sorry's are all blocked on missing Mathlib infrastructure
-  (extension by zero, Prop 2.9, concrete sheafification characterization)
-
-## 2026-03-28T03:10Z — Cycle 10: DIM INEQUALITY PROVED (Aristotle success!)
-
-**Sorry count: 3 mathematical + 1 axiom (down from 4!)**
-
-### Major achievement
-- **`topologicalKrullDim_lt_of_isIrreducible_of_isClosed` — FULLY PROVED!**
-  Aristotle (72e670ee) produced a complete, sorry-free proof.
-  Axioms: [propext, Classical.choice, Quot.sound] — NO sorryAx.
-
-  Key insight from Aristotle: original statement was FALSE for infinite-dim Y.
-  Corrected to add `hfin : topologicalKrullDim Y < ⊤` hypothesis.
-
-  Also proved unconditional `topologicalKrullDim_add_one_le` (dim Y + 1 ≤ dim X).
-
-  Proof uses: IrreducibleCloseds.map, height_add_one_le, height_le_height_apply_of_strictMono,
-  ENat.iSup_add, and careful WithBot ℕ∞ arithmetic.
-
-### Remaining sorry's (3 + axiom)
-1. `ClosedOpenDecomposition.lean:106` — `sheaf_H_subsingleton_of_reducible` (extension by zero)
-2. `IrreducibleStep.lean:58` — `constantSheaf_flasque_of_irreducible` (sheafification)
-3. `IrreducibleStep.lean:83` — `grothendieck_reduction` (Prop 2.9 + extension by zero)
-4. `Setup.lean:38` — `FlasqueVanishing` (axiom)
-
-## 2026-03-28T02:10Z — Cycle 9: ConstantSheafFlasque Aristotle complete + isIrreducible helper
-
-**Sorry count: 4 mathematical + 1 axiom (unchanged)**
-
-### Accomplished
-- Downloaded ConstantSheafFlasque Aristotle result (COMPLETE_WITH_ERRORS, 5 sorry's)
-  - Aristotle identified correct proof architecture but couldn't complete sheafification internals
-  - Key remaining difficulty: `sheafificationUnit_epi_of_nonempty` (pointwise iso of sheafification)
-- **Proved `isIrreducible_of_nonempty_open`** (sorry-free): every nonempty open subset of an
-  irreducible space is irreducible. One-line proof using `IsPreirreducible.subset_irreducible`.
-  Added to Auxiliary.lean.
-
-### Aristotle status
-- `5175616d`: ConstantSheafFlasque — COMPLETE_WITH_ERRORS (downloaded, analyzed)
-- `72e670ee`: DimStrictInequality — 21%
-
-## 2026-03-28T00:10Z — Cycle 7: Aristotle progress check
-
-**Sorry count: 4 mathematical + 1 axiom (unchanged)**
-
-No new proofs closed. Aristotle progressing:
-- ConstantSheafFlasque: 50% (up from 41%)
-- DimStrictInequality: 12% (new, queued last cycle)
-
-Attempted direct proof of dim strict inequality using LTSeries.snoc + WithBot ℕ∞
-arithmetic. The proof outline is correct but the WithBot ℕ∞ arithmetic API is
-fiddly. Left as sorry for Aristotle.
-
-## 2026-03-27T23:15Z — Cycle 6: Dimension inequality + resubmit
-
-**Sorry count: 4 mathematical + 1 axiom (1 new helper lemma)**
-
-### Accomplished
-- Added `topologicalKrullDim_lt_of_isIrreducible_of_isClosed` (sorry) to Auxiliary.lean:
-  proper closed subset of irreducible space has strictly smaller dimension.
-  Needed for Step 5 of Hartshorne's proof.
-- Submitted to Aristotle (`72e670ee`)
-- Analyzed MV approach for reducible case — confirmed it doesn't work
-  (open complements don't cover X when components overlap)
-
-### Aristotle status
-- `5175616d`: ConstantSheafFlasque — 41%
-- `72e670ee`: DimStrictInequality — QUEUED (new)
-
-### Remaining sorry's (4 + axiom)
-1. `Auxiliary.lean` — `topologicalKrullDim_lt_of_isIrreducible_of_isClosed` (new, submitted)
-2. `ClosedOpenDecomposition.lean:106` — `sheaf_H_subsingleton_of_reducible`
-3. `IrreducibleStep.lean:58` — `constantSheaf_flasque_of_irreducible` (nonempty case)
-4. `IrreducibleStep.lean:83` — `grothendieck_reduction`
-5. `Setup.lean:38` — `FlasqueVanishing` (axiom)
-
-## 2026-03-27T23:00Z — Cycle 5b: Integrate Aristotle results
-
-**Sorry count: 3 mathematical + 1 axiom**
-
-### Major progress from Aristotle integration
-- **Aristotle API recovered** — the 500 errors were transient, not expiration
-- Downloaded and integrated results from 2 completed Aristotle jobs
-- **Newly proved** (sorry-free modulo FlasqueVanishing axiom):
-  - `sheaf_isZero_of_isEmpty`: all sheaves on empty space are zero objects
-  - `sheaf_H_subsingleton_of_isEmpty'`: empty space cohomology vanishes
-  - `subsingleton_ext_of_ses`: abstract LES vanishing from Ext exact sequences
-  - `grothendieck_vanishing_of_irreducible`: empty + irreducible cases fully handled
-  - `constantSheaf_cohomology_vanishing`: H^n(X, Z) = 0 for n ≥ 1 on irreducible X
-
-### Remaining sorry's (3 + axiom)
-1. `ClosedOpenDecomposition.lean:106` — `sheaf_H_subsingleton_of_reducible`
-   Needs: extension by zero (j_! functor), Lemma 2.10 (H^i(X, i_*G) ≅ H^i(Y, G))
-2. `IrreducibleStep.lean:58` — `constantSheaf_flasque_of_irreducible` (nonempty case)
-   Needs: concrete characterization of sheafified sections on connected opens
-3. `IrreducibleStep.lean:83` — `grothendieck_reduction`
-   Needs: Prop 2.9 (cohomology commutes with filtered colimits) + extension by zero
-
-### Analysis: why these sorry's are hard
-All three require Mathlib infrastructure that does NOT exist:
-- **Extension by zero functors** (j_! for open inclusion, j_* for closed inclusion)
-- **Prop 2.9** (cohomology commutes with filtered direct limits on Noetherian spaces)
-- **Concrete sheafification** (connection between constantSheaf and LocallyConstant)
-
-These are not proof difficulties — they are MISSING DEFINITIONS and THEOREMS in Mathlib.
-Building this infrastructure is a multi-week project (likely multiple Mathlib PRs).
-
-### Aristotle status
-- `fca6885d`: ClosedOpenDecomposition — COMPLETE_WITH_ERRORS (integrated)
-- `bc3176de`: IrreducibleStep — COMPLETE_WITH_ERRORS (integrated)
-- `5175616d`: ConstantSheafFlasque — IN_PROGRESS (38%)
-
-## 2026-03-27T22:00Z — Cycle 5: Partial constantSheaf proof + Aristotle expired
-
-**Sorry count: 3 mathematical + 1 axiom (unchanged)**
-
-### Accomplished
-- Partially proved `constantSheaf_flasque_of_irreducible`: the U = ⊥ (empty) case is now
-  proved using `epi_of_isTerminal_tgt`. Only the nonempty case remains sorry'd.
-- Added import of Auxiliary to IrreducibleStep for the `epi_of_isTerminal_tgt` helper.
-
-### Aristotle status
-- **All 3 jobs expired** (API returning 500). Marked as expired in aristotle-jobs.json.
-- Will resubmit when API recovers.
-
-### Remaining sorry's
-1. `ClosedOpenDecomposition.lean` — `grothendieck_vanishing_of_irreducible`
-2. `IrreducibleStep.lean:52` — `constantSheaf_flasque_of_irreducible` (nonempty case only)
-3. `IrreducibleStep.lean:83` — `grothendieck_vanishing_irreducible_pos`
-4. `Setup.lean:38` — `FlasqueVanishing` (axiom)
-
-## 2026-03-27T21:15Z — Cycle 4: Prove empty space vanishing
-
-**Sorry count: 3 mathematical + 1 axiom (unchanged)**
-
-### Accomplished
-- **PROVED `sheaf_H_subsingleton_of_isEmpty`** — sorry-free! On empty TopCat, all sheaf
-  cohomology is subsingleton. Uses: IsZero of constant sheaf (all sheaves zero on empty
-  space) → HasProjectiveDimensionLT 0 → Ext subsingleton.
-  Axioms: [propext, Classical.choice, Quot.sound] — NO sorryAx.
-- Added to `GrothendieckVanishing.lean`
-
-### Aristotle status
-- `fca6885d`: ClosedOpenDecomposition — **55%**
-- `bc3176de`: IrreducibleStep — **37%**
-- `5175616d`: ConstantSheafFlasque — **15%**
-
-### Remaining sorry's (unchanged)
-1. `ClosedOpenDecomposition.lean` — `grothendieck_vanishing_of_irreducible`
-2. `IrreducibleStep.lean:29` — `constantSheaf_flasque_of_irreducible`
-3. `IrreducibleStep.lean:63` — `grothendieck_vanishing_irreducible_pos`
-4. `Setup.lean:38` — `FlasqueVanishing` (axiom)
-
-## 2026-03-27T20:15Z — Cycle 3: Submit constantSheafFlasque + documentation
-
-**Sorry count: 3 mathematical + 1 axiom (unchanged)**
-
-### Accomplished
-- Submitted `constantSheaf_flasque_of_irreducible` to Aristotle (`5175616d`)
-- Added callback sufficiency documentation to `ClosedOpenDecomposition.lean`
-- Investigated empty space vanishing via `HasProjectiveDimensionLT` (identified approach but not yet completed)
-
-### Aristotle status
-- `fca6885d`: ClosedOpenDecomposition — **39%** (up from 21%)
-- `bc3176de`: IrreducibleStep — **30%** (up from 15%)
-- `5175616d`: ConstantSheafFlasque — 1% (new)
-
-### Remaining sorry's
-Same as cycle 2 — no sorry's closed this cycle.
-
-## 2026-03-27T19:15Z — Cycle 2: Decompose IrreducibleStep
-
-**Sorry count: 3 mathematical + 1 axiom (FlasqueVanishing)**
-(sorry count increased from 2 to 3 by decomposition — this is progress)
-
-### Accomplished
-- Decomposed `IrreducibleStep.lean` from 1 opaque sorry into 3 named sub-lemmas:
-  - `constantSheaf_flasque_of_irreducible` (sorry) — Z has epi restrictions on irreducible X
-  - `constantSheaf_cohomology_vanishing` (**proved**) — H^{n+1}(X, Z) = 0, from flasque + FlasqueVanishing
-  - `grothendieck_vanishing_irreducible_pos` (sorry) — main step with detailed proof sketch
-- Added callback sufficiency documentation to `ClosedOpenDecomposition.lean`
-- Added Prop 2.9 placeholder (`cohomology_direct_limit_noetherian`)
-
-### Aristotle status
-- `fca6885d`: ClosedOpenDecomposition — 21%
-- `bc3176de`: IrreducibleStep — 15%
-
-### Remaining sorry's
-1. `ClosedOpenDecomposition.lean` — `grothendieck_vanishing_of_irreducible` (reduce to irreducible)
-2. `IrreducibleStep.lean:29` — `constantSheaf_flasque_of_irreducible` (Z flasque on irreducible)
-3. `IrreducibleStep.lean:63` — `grothendieck_vanishing_irreducible_pos` (irreducible dim ≥ 1)
-4. `Setup.lean:38` — `FlasqueVanishing` (axiom, do not prove)
-
-## 2026-03-27T18:55Z — Cycle 1: Initial build + babysit
-
-**Sorry count: 2 mathematical + 1 axiom (FlasqueVanishing)**
-
-### Accomplished
-- Built the full proof skeleton for Grothendieck's vanishing theorem (Hartshorne III.2.7)
-- **7 files**, 331 lines total, clean `lake build`
-- **Proved** (sorry-free modulo FlasqueVanishing axiom):
-  - `Auxiliary.lean`: `epi_of_isTerminal_tgt`, `isTerminal_sheaf_bot`, `opens_eq_bot_or_top_of_irreducibleSpace_dim_zero`, `closure_singleton_eq_univ_of_dim_zero`, `irreducibleCloseds_unique_of_dim_zero`, `topologicalKrullDim_nonneg_of_irreducible`
-  - `DimZeroVanishing.lean`: `sheaf_restriction_epi_of_irreducible_dim_zero`, `grothendieck_vanishing_dim_zero` (Hartshorne Step 2: all sheaves on irreducible dim-0 spaces are flasque)
-  - `GrothendieckVanishing.lean`: main theorem assembled by well-founded induction on `topologicalKrullDim`
-- Ran `/critique` — verdict REVISE, flagged callback signature concern (P0) and sorry load (P0)
-- Moved `topologicalKrullDim_nonneg_of_irreducible` to `Auxiliary.lean` for better organization
-- Fixed documentation: "PROVED" → "assembled" in `main.lean`
-
-### Submitted to Aristotle
-- `fca6885d`: `grothendieck_vanishing_of_irreducible` (ClosedOpenDecomposition, Step 1) — 16%
-- `bc3176de`: `grothendieck_vanishing_irreducible_pos` (IrreducibleStep, Steps 3–5) — 8%
-
-### Remaining sorry's
-1. `ClosedOpenDecomposition.lean:39` — `grothendieck_vanishing_of_irreducible` (reduce to irreducible, needs extension by zero + Lemma 2.10)
-2. `IrreducibleStep.lean:41` — `grothendieck_vanishing_irreducible_pos` (irreducible dim ≥ 1, needs Prop 2.9 + Z_U SES)
-3. `Setup.lean:38` — `FlasqueVanishing` (intentional axiom, do not prove)
