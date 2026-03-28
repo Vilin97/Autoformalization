@@ -18,6 +18,12 @@
       "submission": "aristotle-in/isFlasque_of_injective.lean",
       "output": "aristotle-out/isFlasque_of_injective_aristotle.lean",
       "target": "isFlasque_of_injective (indicator sheaf construction)"
+    },
+    {
+      "id": "71c69301-6b9c-46e0-8f8e-995c37f21f62",
+      "submission": "aristotle-in/epi_unit_of_closedImmersion.lean",
+      "output": "aristotle-out/epi_unit_of_closedImmersion_aristotle.lean",
+      "target": "epi_unit_of_closedImmersion (stalk computation)"
     }
   ],
   "canceled": [
