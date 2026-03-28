@@ -1,39 +1,37 @@
 # Work Plan — Grothendieck Vanishing
-**Date**: 2026-03-27T19:05:00Z (Cycle 2)
+
+**Updated**: 2026-03-28T08:20Z
 
 ## Status Summary
 
-- **Files**: 7 Lean files, ~330 lines
-- **Sorry's**: 2 mathematical + 1 axiom (unchanged from cycle 1)
-- **Build**: passes, pushed as `a993c3f`
-- **Aristotle**: 2 jobs in progress (fca6885d at 16%, bc3176de at 8%)
-- **Done from cycle 1**: jobs tracked, docs fixed, code reorganized
-
-## Active Multi-Cycle Strategies
-
-1. **Fill the two sorry's** — Aristotle working on both. Manual decomposition needed in parallel.
-2. **Callback validation** — Confirmed in cycle 1 that callback IS sufficient (inner induction lives inside the sorry'd proof). Document with comment.
+- **Sorry count**: 3 (`admit`s in Setup.lean — must convert to `sorry`)
+- **Files**: 9 in `main/`, all compiling
+- **Aristotle jobs**: 6 in progress (flasque_injective at 5%, FlasqueVanishing at 12%, PlusObjIsSheaf at 48%, IrreducibleStep at 56%)
+- **CI**: Latest run in progress, previous 2 passed
 
 ## This Cycle's Work Items
 
-### 1. [P1] Prove vanishing for empty space (`/prove`)
+### 1. (P0) Convert `admit` → `sorry` in Setup.lean [/prove]
+User mandates no axioms/admits. Convert all 3 admits to sorry. Fix docstrings.
 
-When X is empty, `Sheaf.H F n` should be trivially subsingleton. Add this as a standalone lemma in `Auxiliary.lean` and use it as an early exit in `grothendieck_vanishing_aux`. This closes critique issue #5.
+### 2. (P2) Fix all stale documentation [/prove]
+Update docstrings in Setup.lean, main.lean, GrothendieckVanishing.lean, IrreducibleStep.lean to replace "axiom" with "sorry" and remove "DO NOT PROVE" instructions.
 
-### 2. [P1] Decompose `grothendieck_vanishing_irreducible_pos` into sub-lemmas (`/prove`)
+### 3. (P1) Work on `flasque_injective` [/prove]
+Bredon's theorem: flasque → injective in sheaf category. Aristotle job 99a8a5d6 at 5%.
+**Strategy**: Try to prove directly using `injective_iff_subsingleton_ext_one`. If a flasque sheaf F has `Ext¹(Y, F) = 0` for all Y, then F is injective. This might be provable via the abstract Ext LES + flasque = Γ-acyclic approach.
 
-Extract named sub-lemmas from IrreducibleStep.lean:
-- `constantSheaf_flasque_of_irreducible`: constant sheaf Z on irreducible space has epi restrictions — attempt to prove
-- `cohomology_direct_limit_noetherian` (Prop 2.9): sorry, statement only
-- `constantSheaf_vanishing_of_irreducible`: vanishing for Z itself — follows from flasque + FlasqueVanishing
+### 4. Check Aristotle jobs [/check-aristotle]
+6 jobs in progress. Priority: 55ef4f62 (IrreducibleStep, 56%) and 62f9f40c (PlusObjIsSheaf, 48%).
 
-### 3. [P2] Add comment documenting callback sufficiency (`/prove`)
+## Active Multi-Cycle Strategies
 
-Add a comment in ClosedOpenDecomposition.lean explaining why the callback only needs irreducible Y.
+1. **Prove flasque_injective**: Hard Zorn argument OR injective_iff_subsingleton_ext_one approach. Aristotle backup.
+2. **Build j_! infrastructure**: Needed for ReducibleVanishing and IrreduciblePosVanishing. No Aristotle job for this yet — consider decomposing and submitting.
+3. **Reduce heartbeats**: toPlus_surjective_of_firstPlus at 1600000 needs decomposition.
 
 ## Backlog
 
-- Prove constant sheaf flasque on irreducible space (hard — needs sheafification internals)
-- Blueprint 404 — not blocking
-- Coarse imports — not blocking
-- Unbundle TopCat — defer
+- Generalize constantSheaf_flasque from ULift ℤ to arbitrary A
+- PR CohomologyIso and subsingleton_ext_of_ses to Mathlib
+- Generalize from AddCommGrpCat to ModuleCat R
