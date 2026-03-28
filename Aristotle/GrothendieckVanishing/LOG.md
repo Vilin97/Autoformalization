@@ -1,5 +1,21 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-28T02:10Z — Cycle 9: ConstantSheafFlasque Aristotle complete + isIrreducible helper
+
+**Sorry count: 4 mathematical + 1 axiom (unchanged)**
+
+### Accomplished
+- Downloaded ConstantSheafFlasque Aristotle result (COMPLETE_WITH_ERRORS, 5 sorry's)
+  - Aristotle identified correct proof architecture but couldn't complete sheafification internals
+  - Key remaining difficulty: `sheafificationUnit_epi_of_nonempty` (pointwise iso of sheafification)
+- **Proved `isIrreducible_of_nonempty_open`** (sorry-free): every nonempty open subset of an
+  irreducible space is irreducible. One-line proof using `IsPreirreducible.subset_irreducible`.
+  Added to Auxiliary.lean.
+
+### Aristotle status
+- `5175616d`: ConstantSheafFlasque — COMPLETE_WITH_ERRORS (downloaded, analyzed)
+- `72e670ee`: DimStrictInequality — 21%
+
 ## 2026-03-28T00:10Z — Cycle 7: Aristotle progress check
 
 **Sorry count: 4 mathematical + 1 axiom (unchanged)**
