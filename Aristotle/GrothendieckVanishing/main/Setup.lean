@@ -626,7 +626,36 @@ theorem epi_unit_of_closedImmersion
   · -- x ∈ Z: stalk map is surjective (it's an iso via stalkPushforward_iso_of_isInducing)
     sorry
   · -- x ∉ Z: target stalk is 0 (pushforward has zero stalk outside closed Z)
-    sorry
+    -- Show stalk is IsZero by showing all colimit injections (germs) are 0.
+    -- Each germ_V factors through V' = V ∩ (X\Z) where the source is 0.
+    let D := (OpenNhds.inclusion x).op ⋙
+      ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
+        ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F)).val
+    have hstalk_zero : IsZero (colimit D) := by
+      rw [IsZero.iff_id_eq_zero]
+      apply colimit.hom_ext; intro ⟨⟨V, hxV⟩⟩
+      simp only [comp_zero, Category.comp_id]
+      let Zc : Opens X := ⟨Zᶜ, hZ.isOpen_compl⟩
+      let V'_nhd : OpenNhds x := ⟨V ⊓ Zc, ⟨hxV, hxZ⟩⟩
+      rw [show colimit.ι D (op ⟨V, hxV⟩) =
+        D.map (homOfLE (show V'_nhd.1 ≤ V from inf_le_left) : V'_nhd ⟶ ⟨V, hxV⟩).op ≫
+          colimit.ι D (op V'_nhd) from (colimit.w D _).symm]
+      suffices IsZero (D.obj (op V'_nhd)) by
+        rw [this.eq_zero_of_src (colimit.ι D (op V'_nhd)), comp_zero]
+      change IsZero (((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F).val.obj
+        (op ((Opens.map i).obj V'_nhd.1)))
+      have : (Opens.map i).obj V'_nhd.1 = ⊥ := by
+        apply le_antisymm
+        · intro ⟨y, hy⟩ hmem
+          simp only [Opens.map, Opens.mem_mk] at hmem
+          exact absurd hy (hmem.2 ·)
+        · exact bot_le
+      rw [this]
+      exact (isTerminal_sheaf_bot _).isZero
+    -- The stalk is IsZero → surjective
+    intro b; refine ⟨0, ?_⟩; simp only [map_zero]
+    have hsub := AddCommGrpCat.subsingleton_of_isZero hstalk_zero
+    exact (@Subsingleton.elim _ hsub b 0).symm
 
 -- Short exact sequence from closed immersion.
 -- Uses epi_unit_of_closedImmersion to form 0 → ker(η) → F → i_*(i^*F) → 0.
