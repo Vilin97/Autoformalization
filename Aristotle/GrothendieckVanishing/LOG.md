@@ -1,5 +1,17 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-28T00:10Z — Cycle 7: Aristotle progress check
+
+**Sorry count: 4 mathematical + 1 axiom (unchanged)**
+
+No new proofs closed. Aristotle progressing:
+- ConstantSheafFlasque: 50% (up from 41%)
+- DimStrictInequality: 12% (new, queued last cycle)
+
+Attempted direct proof of dim strict inequality using LTSeries.snoc + WithBot ℕ∞
+arithmetic. The proof outline is correct but the WithBot ℕ∞ arithmetic API is
+fiddly. Left as sorry for Aristotle.
+
 ## 2026-03-27T23:15Z — Cycle 6: Dimension inequality + resubmit
 
 **Sorry count: 4 mathematical + 1 axiom (1 new helper lemma)**
