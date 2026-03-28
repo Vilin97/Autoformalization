@@ -74,7 +74,7 @@ theorem sheaf_H_subsingleton_of_isEmpty'
   have := hZ.hasProjectiveDimensionLT_zero
   exact HasProjectiveDimensionLT.subsingleton _ 0 n (Nat.zero_le n) F
 
-/-! ## Reducible case (sorry — uses ReducibleVanishing) -/
+/-! ## Reducible case (uses `ReducibleVanishing`) -/
 
 private theorem sheaf_H_subsingleton_of_reducible
     (X : TopCat.{u}) [NoetherianSpace X]

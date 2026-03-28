@@ -4,11 +4,11 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  Single sorry: FlasqueVanishing (= Grothendieck vanishing itself)
+  Single remaining gap: FlasqueVanishing (= Grothendieck vanishing itself)
   All other theorems are fully proved.
 
   File structure:
-  - Setup.lean: category instances + FlasqueVanishing (single sorry)
+  - Setup.lean: category instances + FlasqueVanishing (single remaining gap)
   - Auxiliary.lean: topology/dimension helpers
   - ConstantSheafFlasque.lean: PROVED — constant sheaf on irreducible space is flasque
   - CohomologyIso.lean: PROVED — H'(⊤, F) ≅ H(F)
