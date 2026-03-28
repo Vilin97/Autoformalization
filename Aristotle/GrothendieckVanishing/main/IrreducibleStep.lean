@@ -6,9 +6,9 @@
 
   Key results:
   - subsingleton_ext_of_ses: PROVED — abstract LES vanishing from Ext exact sequences
-  - constantSheaf_flasque_of_irreducible: sorry (nonempty case needs sheafification)
+  - constantSheaf_flasque_of_irreducible: PROVED (sorry-free)
   - constantSheaf_cohomology_vanishing: proved from flasque + FlasqueVanishing
-  - grothendieck_vanishing_irreducible_pos: sorry (needs Prop 2.9 + extension by zero)
+  - grothendieck_vanishing_irreducible_pos: uses IrreduciblePosVanishing axiom
 
   Based on Aristotle output (bc3176de) + manual work.
 -/

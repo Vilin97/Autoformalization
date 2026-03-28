@@ -19,8 +19,6 @@ universe u
 
 open CategoryTheory TopologicalSpace Limits
 
-set_option synthInstance.maxHeartbeats 80000
-
 /-! ## Helper lemmas -/
 
 /-- For the empty presieve, the sheaf condition forces the presheaf value to be subsingleton. -/
@@ -88,15 +86,15 @@ theorem sheaf_H_subsingleton_of_isEmpty'
   have := hZ.hasProjectiveDimensionLT_zero
   exact HasProjectiveDimensionLT.subsingleton _ 0 n (Nat.zero_le n) F
 
-/-! ## Reducible case (sorry — blocked on missing Mathlib infrastructure)
+/-! ## Reducible case (axiom — uses ReducibleVanishing)
 
     The standard proof (Hartshorne) needs:
-    1. Extension by zero `j_!` for open embeddings (NOT in Mathlib)
+    1. Extension by zero `j_!` for open embeddings (NOT in Mathlib v4.28)
     2. The closed-open complement SES: 0 → j_!(F|_U) → F → i_*(F|_Z) → 0
-    3. Identification H'(⊤, F) ≅ H(F) (TODO in Mathlib)
+    3. Identification H'(⊤, F) ≅ H(F) (proved in CohomologyIso.lean)
 
     Alternatives (Mayer-Vietoris, component induction, Ext LES) all
-    reduce to needing j_! or H' ≅ H. See Aristotle analysis b29fab4f. -/
+    reduce to needing j_!. See Aristotle analysis b29fab4f. -/
 
 /-- Uses ReducibleVanishing axiom (requires j_! not in Mathlib v4.28). -/
 private theorem sheaf_H_subsingleton_of_reducible
