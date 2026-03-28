@@ -36,6 +36,12 @@
       "submission": "aristotle-in/PushforwardHVanishing.lean",
       "output": "aristotle-out/PushforwardHVanishing_aristotle.lean",
       "target": "PushforwardHVanishing (Ext identity + Γ equality)"
+    },
+    {
+      "id": "6c9faa89-db61-41c5-a2af-cd6ba712116e",
+      "submission": "aristotle-in/epi_app_detailed.lean",
+      "output": "aristotle-out/epi_app_detailed_aristotle.lean",
+      "target": "epi_app_of_shortExact_flasque (Zorn with admitted helpers)"
     }
   ],
   "canceled": [
