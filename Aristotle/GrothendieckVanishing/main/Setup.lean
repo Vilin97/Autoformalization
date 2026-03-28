@@ -248,7 +248,21 @@ theorem PushforwardHVanishing
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G) n) := by
   sorry
 
+-- The adjunction unit F → i_*(i^*F) is epi for closed immersions.
+-- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).
+-- Requires: stalkPushforward_iso_of_isInducing + stalk of i_*G = 0 outside Z.
+set_option synthInstance.maxHeartbeats 80000 in
+theorem epi_unit_of_closedImmersion
+    {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
+    [NoetherianSpace X]
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
+    let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
+    let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
+    Epi (adj.unit.app F) := by
+  sorry
+
 -- Short exact sequence from closed immersion.
+-- Uses epi_unit_of_closedImmersion to form 0 → ker(η) → F → i_*(i^*F) → 0.
 set_option synthInstance.maxHeartbeats 80000 in
 theorem ClosedImmersionSES
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
@@ -260,7 +274,16 @@ theorem ClosedImmersionSES
       S.ShortExact ∧ S.X₂ = F ∧
       S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
         ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F) := by
-  sorry
+  intro Y i
+  have hE := epi_unit_of_closedImmersion Z hZ F
+  let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
+  let η := adj.unit.app F
+  haveI : Epi η := hE
+  exact ⟨ShortComplex.mk (kernel.ι η) η (kernel.condition η),
+    ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η))
+      inferInstance inferInstance,
+    rfl, rfl⟩
 
 /-! ## Main vanishing theorems -/
 
