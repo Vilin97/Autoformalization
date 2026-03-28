@@ -220,3 +220,20 @@ theorem covering_sieve_top_has_id {X : Type u} [TopologicalSpace X] [Irreducible
     · rfl
   subst hVtop
   rwa [show f = 𝟙 ⊤ from Subsingleton.elim _ _] at hfS
+
+/-! ## Epi → surjective at ⊤ on dim 0 irreducible -/
+
+set_option maxHeartbeats 400000 in
+/-- On a dim 0 irreducible nonempty space, an epi sheaf morphism is surjective at ⊤.
+    Proof: epi ↔ IsLocallySurjective → imageSieve covers ⊤ → id ∈ imageSieve → surjective. -/
+theorem epi_app_top_surjective {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
+    (hdim : topologicalKrullDim X ≤ 0) [Nonempty X]
+    {F G : Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}} (φ : F ⟶ G) [Epi φ] :
+    Function.Surjective (ConcreteCategory.hom (φ.val.app (Opposite.op ⊤))) := by
+  have hls : Sheaf.IsLocallySurjective φ :=
+    (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} φ).mpr inferInstance
+  intro s
+  have hmem := hls.imageSieve_mem (U := ⊤) s
+  have hid := covering_sieve_top_has_id hdim _ hmem
+  obtain ⟨t, ht⟩ := hid
+  exact ⟨t, by simpa using ht⟩
