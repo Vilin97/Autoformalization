@@ -29,6 +29,23 @@ theorem subsingleton_ext_of_ses {C : Type*} [Category C] [Abelian C] [HasExt C]
   obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ Z hS b h_b_f rfl
   rw [← hc, ← hd, Subsingleton.elim c d]
 
+/-- Given a short exact sequence `0 → X₁ → X₂ → X₃ → 0`, if `Ext(Z, X₁, n) = 0`
+    and `Ext(Z, X₃, n) = 0`, then `Ext(Z, X₂, n) = 0`.
+    This is the "middle term" version of `subsingleton_ext_of_ses`. -/
+theorem subsingleton_ext_of_ses_middle {C : Type*} [Category C] [Abelian C] [HasExt C]
+    {S : ShortComplex C} (hS : S.ShortExact) (Z : C) (n : ℕ)
+    (h₁ : Subsingleton (Ext Z S.X₁ n))
+    (h₃ : Subsingleton (Ext Z S.X₃ n)) :
+    Subsingleton (Ext Z S.X₂ n) := by
+  constructor
+  intro a b
+  have h₃' : Subsingleton (Ext Z S.X₃ (n + 0)) := (add_zero n) ▸ h₃
+  have ha : a.comp (Ext.mk₀ S.g) (add_zero n) = 0 := Subsingleton.elim _ _
+  have hb : b.comp (Ext.mk₀ S.g) (add_zero n) = 0 := Subsingleton.elim _ _
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ Z hS a ha
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ Z hS b hb
+  rw [← hc, ← hd, Subsingleton.elim c d]
+
 /-- The constant sheaf on an irreducible space has vanishing higher cohomology. -/
 theorem constantSheaf_cohomology_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X] (n : ℕ) :
