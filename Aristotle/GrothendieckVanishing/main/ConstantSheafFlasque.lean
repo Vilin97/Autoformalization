@@ -19,7 +19,29 @@ import Aristotle.GrothendieckVanishing.main.Auxiliary
 
 universe u
 
-open CategoryTheory TopologicalSpace Limits Opposite
+open CategoryTheory TopologicalSpace Limits Opposite GrothendieckTopology.Plus
+
+set_option maxHeartbeats 800000 in
+/-- toPlus is injective at nonempty opens for the constant presheaf. -/
+theorem toPlus_injective_of_const
+    {X : Type u} [TopologicalSpace X]
+    (U : Opens X) (hU : (U : Set X).Nonempty)
+    (a b : (Functor.const (Opens X)ᵒᵖ).obj (AddCommGrpCat.of (ULift.{u} ℤ)) |>.obj (op U))
+    (h : ConcreteCategory.hom ((Opens.grothendieckTopology X).toPlus
+        ((Functor.const (Opens X)ᵒᵖ).obj (AddCommGrpCat.of (ULift.{u} ℤ)))
+        |>.app (op U)) a =
+      ConcreteCategory.hom ((Opens.grothendieckTopology X).toPlus
+        ((Functor.const (Opens X)ᵒᵖ).obj (AddCommGrpCat.of (ULift.{u} ℤ)))
+        |>.app (op U)) b) :
+    a = b := by
+  rw [toPlus_eq_mk, toPlus_eq_mk] at h
+  rw [eq_mk_iff_exists] at h
+  obtain ⟨W, _, _, heq⟩ := h
+  obtain ⟨p, hp⟩ := hU
+  obtain ⟨V, f, hf, _⟩ := W.2 p hp
+  have := congr_fun (congr_arg Subtype.val heq) (⟨V, f, hf⟩ : W.Arrow)
+  simp only [Functor.const_obj_obj, Meq.refine, Meq.mk] at this
+  exact this
 
 /-- On an irreducible space, the constant sheaf has epi restriction maps (is flasque).
 
