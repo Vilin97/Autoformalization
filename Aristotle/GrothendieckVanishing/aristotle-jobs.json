@@ -4,8 +4,8 @@
       "id": "8d809cf1-6aeb-4ce2-8fa2-31c1ff394cb4",
       "submission": "aristotle-in/GrothendieckVanishingFull.lean",
       "target": "FlasqueVanishing (= Grothendieck vanishing)",
-      "status": "IN_PROGRESS (14%)",
-      "note": "Submitted with corrected approach (no flasque→injective, which is FALSE)"
+      "status": "COMPLETE",
+      "note": "Confirmed: j_! needed. Proved empty case, helper lemmas. Core sorry remains."
     }
   ],
   "canceled": [
