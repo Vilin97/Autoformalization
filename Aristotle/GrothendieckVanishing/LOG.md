@@ -1,5 +1,23 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-28T06:00Z — Cycle 12: Aristotle confirms reducible case blocked
+
+**Sorry count: 3 mathematical + 1 axiom (unchanged)**
+
+### Aristotle results
+- `b29fab4f` ReducibleCase: **COMPLETE** — sorry remains but with DEFINITIVE analysis.
+  Aristotle proved the reducible case CANNOT be filled without:
+  1. Extension by zero j_! for open embeddings
+  2. The closed-open complement SES
+  3. Identification H'(⊤, F) ≅ H(F)
+  All three alternatives (MV, component induction, Ext LES) reduce to needing j_!.
+- `55ef4f62` IrreducibleStep: IN_PROGRESS (24%)
+- `17b9bce9` ToSheafifySurjective: IN_PROGRESS (1%)
+- `a60dddad` MeqConstant: QUEUED
+
+### Integrated
+- Updated ClosedOpenDecomposition.lean with Aristotle's analysis documentation
+
 ## 2026-03-28T05:10Z — Cycle 11b: Decompose flasque proof + mass Aristotle submit
 
 **Sorry count: 3 mathematical + 1 axiom (unchanged)**
