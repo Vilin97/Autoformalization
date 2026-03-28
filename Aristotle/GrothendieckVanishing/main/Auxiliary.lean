@@ -237,3 +237,40 @@ theorem epi_app_top_surjective {X : Type u} [TopologicalSpace X] [IrreducibleSpa
   have hid := covering_sieve_top_has_id hdim _ hmem
   obtain ⟨t, ht⟩ := hid
   exact ⟨t, by simpa using ht⟩
+
+/-! ## Counterexample: flasque does NOT imply injective
+
+   On X = point, every sheaf is flasque (only restriction is F(X) → F(∅) = 0),
+   but ℤ is not injective in Ab (not divisible). So flasque ⟹ injective is FALSE.
+   The correct result is: flasque ⟹ Γ-acyclic (Bredon).
+   Proved by Aristotle (99a8a5d6). -/
+
+/-- Every group homomorphism ℚ →+ ℤ is zero (ℤ is not divisible). -/
+theorem addMonoidHom_rat_int_eq_zero (f : ℚ →+ ℤ) : f = 0 := by
+  ext q; simp only [AddMonoidHom.zero_apply]
+  by_contra hfq
+  have key : ∀ (n : ℕ) (hn : 0 < n), (n : ℤ) ∣ f q := by
+    intro n hn
+    exact ⟨f (q / n), by
+      have h1 : (n : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+      calc f q = f (n • (q / n)) := by congr 1; rw [nsmul_eq_mul]; field_simp
+        _ = n • f (q / n) := map_nsmul f n _
+        _ = n * f (q / n) := nsmul_eq_mul n _⟩
+  have h1 : (0 : ℤ) < |f q| := abs_pos.mpr hfq
+  have h2 := key (|f q|.toNat + 1) (by omega)
+  rw [show ((|f q|.toNat + 1 : ℕ) : ℤ) = |f q| + 1 from by omega] at h2
+  exact absurd (Int.le_of_dvd h1 ((dvd_abs _ _).mpr h2)) (by omega)
+
+/-- ℤ is not injective in AddCommGrpCat (counterexample to flasque → injective). -/
+theorem not_injective_int : ¬ Injective (AddCommGrpCat.of ℤ) := by
+  intro ⟨hext⟩
+  let inc : AddCommGrpCat.of ℤ ⟶ AddCommGrpCat.of ℚ :=
+    AddCommGrpCat.ofHom (Int.castRingHom ℚ).toAddMonoidHom
+  have hinc_mono : Mono inc := by
+    rw [AddCommGrpCat.mono_iff_injective]
+    intro a b hab; simp [inc, AddCommGrpCat.ofHom] at hab; exact_mod_cast hab
+  obtain ⟨h, hh⟩ := @hext _ _ (𝟙 (AddCommGrpCat.of ℤ)) inc hinc_mono
+  have h_zero : ConcreteCategory.hom h = 0 :=
+    addMonoidHom_rat_int_eq_zero (ConcreteCategory.hom h)
+  have h1 : (ConcreteCategory.hom (inc ≫ h)) (1 : ℤ) = (1 : ℤ) := by rw [hh]; rfl
+  simp [AddCommGrpCat.hom_comp, h_zero] at h1
