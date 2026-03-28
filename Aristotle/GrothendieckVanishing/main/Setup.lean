@@ -56,17 +56,118 @@ statement that can be attacked independently.
 def IsFlasqueSheaf {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X) : Prop :=
   ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op)
 
-/-- **Zorn argument** (Nugent, PR #35790, `epi_of_shortExact`).
-    In a SES `0 -> F' -> G -> H -> 0` with `F'` flasque, the map `G(U) -> H(U)` is epi.
+/-! ### Helper: sections functor and evaluated exactness -/
 
-    Proof sketch: given `s : H(U)`, consider the poset of pairs `(V, t)` where `V <= U`
-    is open and `t : G(V)` maps to `s|_V`. By Zorn (using the sheaf gluing axiom for
-    chains), there is a maximal such pair. Local surjectivity of `G -> H` (from epi)
-    plus flasqueness of `F'` (to patch the difference) show the maximal `V` must be `U`. -/
+/-- The sections-at-V functor: Sheaf → AddCommGrpCat. -/
+private noncomputable def sectionsAt {X : TopCat.{u}} (V : Opens X) :
+    TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
+  sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)
+
+-- Typeclass resolution for the composite functor needs extra heartbeats.
+set_option maxHeartbeats 800000 in
+private noncomputable instance sectionsAt_preservesZeroMorphisms
+    {X : TopCat.{u}} (V : Opens X) :
+    (sectionsAt (X := X) V).PreservesZeroMorphisms :=
+  inferInstanceAs
+    ((sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)).PreservesZeroMorphisms)
+
+-- The sections functor preserves left homology of a SES with mono f:
+-- it preserves the kernel of g (limit-preserving) and the coimage of f
+-- (f is mono ⟹ the coimage map is an iso, whose cokernel is trivially preserved).
+set_option maxHeartbeats 1600000 in
+private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact) (V : Opens X) :
+    (sectionsAt V).PreservesLeftHomologyOf S := by
+  constructor; intro h; constructor
+  · -- sectionsAt V preserves the kernel of S.g (it preserves all limits)
+    show PreservesLimit _ (sheafToPresheaf _ _ ⋙ _)
+    infer_instance
+  · -- sectionsAt V preserves the cokernel of h.f'
+    -- Since S is exact with mono f, h.f' is an iso (epi + mono),
+    -- so its cokernel is 0, which is trivially preserved.
+    haveI : Mono S.f := hS.mono_f
+    haveI : Mono h.f' := by
+      constructor; intro Z a b hab
+      have : a ≫ S.f = b ≫ S.f := by
+        rw [← h.f'_i, ← Category.assoc, hab, Category.assoc]
+      exact (cancel_mono S.f).mp this
+    haveI : Epi h.f' := hS.exact.epi_f' h
+    haveI : IsIso h.f' := isIso_of_mono_of_epi h.f'
+    haveI hz1 : IsZero (cokernel h.f') := isZero_cokernel_of_epi h.f'
+    haveI hz2 : IsZero
+        ((sectionsAt (X := X) V).obj (cokernel h.f')) :=
+      Functor.map_isZero _ hz1
+    haveI hz3 : IsZero
+        (cokernel ((sectionsAt (X := X) V).map h.f')) :=
+      isZero_cokernel_of_epi _
+    -- cokernelComparison : cokernel(F(f')) ⟶ F(cokernel(f'))
+    -- Both sides are zero, so it's an iso.
+    haveI : IsIso
+        (cokernelComparison h.f' (sectionsAt (X := X) V)) :=
+      ⟨⟨hz2.to_ _, hz3.eq_of_src _ _, hz2.eq_of_src _ _⟩⟩
+    exact PreservesCokernel.of_iso_comparison _ _
+
+-- For a SES of sheaves, the evaluated sequence at V is exact:
+-- if g_V(x) = 0, then x is in the image of f_V.
+set_option maxHeartbeats 1600000 in
+private lemma sections_exact_of_shortExact {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact) (V : Opens X)
+    (x : S.X₂.val.obj (op V))
+    (hx : ConcreteCategory.hom (S.g.val.app (op V)) x = 0) :
+    ∃ a : S.X₁.val.obj (op V),
+      ConcreteCategory.hom (S.f.val.app (op V)) a = x := by
+  have hexact : (S.map (sectionsAt V)).Exact := by
+    haveI := sectionsAt_preservesLeftHomologyOf hS V
+    exact hS.exact.map_of_preservesLeftHomologyOf (sectionsAt V)
+  exact (ShortComplex.ab_exact_iff _).mp hexact x hx
+
+/-! ### Zero condition and mono for the evaluated short complex -/
+
+private lemma eval_comp_zero {X : TopCat.{u}}
+    (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)) (V : Opens X) :
+    S.f.val.app (op V) ≫ S.g.val.app (op V) = 0 := by
+  have h1 : S.f.val.app (op V) ≫ S.g.val.app (op V) =
+      (S.f.val ≫ S.g.val).app (op V) := by simp
+  rw [h1]; change (S.f ≫ S.g).val.app (op V) = 0; rw [S.zero]; aesop_cat
+
+set_option maxHeartbeats 400000 in
+private lemma mono_f_app {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact) (V : Opens X) :
+    Mono (S.f.val.app (op V)) := by
+  haveI : Mono S.f := hS.mono_f
+  haveI : Mono S.f.val := by
+    change Mono ((sheafToPresheaf _ _).map S.f); infer_instance
+  exact (NatTrans.mono_iff_mono_app S.f.val).mp ‹_› (op V)
+
+-- Zorn argument (Nugent, PR #35790, epi_of_shortExact).
+-- In a SES 0 -> F' -> G -> H -> 0 with F' flasque, the map G(U) -> H(U) is epi.
+set_option maxHeartbeats 6400000 in
 theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁) (U : Opens X) :
     Epi (S.g.val.app (op U)) := by
+  -- Reduce to surjectivity
+  rw [AddCommGrpCat.epi_iff_surjective]
+  intro s
+  -- Use Zorn's lemma on the set of partial lifts (V, t) with V ≤ U and g(t) = s|_V.
+  -- We encode this as a set of opens V ≤ U that admit a lift, with auxiliary data.
+  -- Define the set P of pairs (V, t) where V ≤ U and g(t) = s|_V.
+  -- Use a Sigma type: Σ (V : Opens X), S.X₂.val.obj (op V)
+  -- with the property V ≤ U and g(t) = s|_V.
+  -- Order: (V₁, t₁) ≤ (V₂, t₂) iff V₁ ≤ V₂ and t₂|_{V₁} = t₁.
+  -- We need s to have a global preimage. Applying Zorn gives a maximal partial lift.
+  -- Then we show the maximal V must equal U.
+  -- Step 1: Get locally surjective from epi
+  haveI : Epi S.g := hS.epi_g
+  have hls : Sheaf.IsLocallySurjective S.g :=
+    (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} S.g).mpr inferInstance
+  -- Step 2: The bottom element (V = ⊥, t = 0) is a partial lift
+  -- because g(0) = 0 = s|_⊥ (F(⊥) is terminal/zero for any sheaf F).
+  -- Step 3: Apply Zorn via the sheaf gluing axiom.
+  -- For simplicity, we use a direct argument with zorn_le₀.
   sorry
 
 /-- **Quotient preserves flasqueness** (Nugent, PR #35790).
