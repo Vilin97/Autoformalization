@@ -606,6 +606,8 @@ theorem PushforwardHVanishing
 -- The adjunction unit F → i_*(i^*F) is epi for closed immersions.
 -- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).
 -- Requires: stalkPushforward_iso_of_isInducing + stalk of i_*G = 0 outside Z.
+-- epi via surjective on stalks
+set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 80000 in
 theorem epi_unit_of_closedImmersion
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
@@ -614,7 +616,17 @@ theorem epi_unit_of_closedImmersion
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
     let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
     Epi (adj.unit.app F) := by
-  sorry
+  intro i adj
+  rw [← (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} (adj.unit.app F))]
+  rw [show Sheaf.IsLocallySurjective (adj.unit.app F) =
+    TopCat.Presheaf.IsLocallySurjective (adj.unit.app F).val from rfl]
+  rw [TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
+  intro x
+  by_cases hxZ : (x : X) ∈ Z
+  · -- x ∈ Z: stalk map is surjective (it's an iso via stalkPushforward_iso_of_isInducing)
+    sorry
+  · -- x ∉ Z: target stalk is 0 (pushforward has zero stalk outside closed Z)
+    sorry
 
 -- Short exact sequence from closed immersion.
 -- Uses epi_unit_of_closedImmersion to form 0 → ker(η) → F → i_*(i^*F) → 0.
