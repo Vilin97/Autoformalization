@@ -56,105 +56,6 @@ statement that can be attacked independently.
 def IsFlasqueSheaf {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X) : Prop :=
   ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op)
 
-/-! ### Helper: sections functor and evaluated exactness -/
-
-/-- The sections-at-V functor: Sheaf → AddCommGrpCat. -/
-private noncomputable def sectionsAt {X : TopCat.{u}} (V : Opens X) :
-    TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
-  sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)
-
-/-- The sections functor preserves left homology of a SES with mono f.
-    This is the key abstract fact: for a SES of sheaves, the evaluated
-    sequence 0 → X₁(V) → X₂(V) → X₃(V) is exact (left exactness). -/
-private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (V : Opens X) :
-    (sectionsAt V).PreservesLeftHomologyOf S := by
-  constructor; intro h; constructor
-  · exact compPreservesLimit _ _
-  · haveI : Mono S.f := hS.mono_f
-    haveI : Mono h.f' := by
-      rw [mono_iff_cancel_zero]; intro Z a ha
-      have : a ≫ S.f = 0 := by rw [← h.f'_i]; simp [reassoc_of% ha]
-      exact (mono_iff_cancel_zero.mp inferInstance) Z a this
-    haveI : Epi h.f' := h.epi_f'_of_isZero_H (h.exact_iff.mp hS.exact)
-    haveI : IsIso h.f' := isIso_of_mono_of_epi h.f'
-    haveI hz1 : IsZero (cokernel h.f') := isZero_cokernel_of_epi h.f'
-    haveI hz2 : IsZero ((sectionsAt (X := X) V).obj (cokernel h.f')) :=
-      Functor.map_isZero _ hz1
-    haveI hz3 : IsZero (cokernel ((sectionsAt (X := X) V).map h.f')) :=
-      isZero_cokernel_of_epi _
-    haveI : IsIso (cokernelComparison h.f' (sectionsAt (X := X) V)) :=
-      ⟨⟨hz3.to_ _, hz3.eq_of_src _ _, hz2.eq_of_src _ _⟩⟩
-    exact PreservesCokernel.of_iso_comparison _ _
-
-/-- For a SES of sheaves, the evaluated sequence at V is exact:
-    if g_V(x) = 0, then x is in the image of f_V. -/
-private lemma sections_exact_of_shortExact {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (V : Opens X)
-    (x : S.X₂.val.obj (op V))
-    (hx : ConcreteCategory.hom (S.g.val.app (op V)) x = 0) :
-    ∃ a : S.X₁.val.obj (op V),
-      ConcreteCategory.hom (S.f.val.app (op V)) a = x := by
-  have hexact : (S.map (sectionsAt V)).Exact := by
-    haveI := sectionsAt_preservesLeftHomologyOf hS V
-    exact hS.exact.map_of_preservesLeftHomologyOf (sectionsAt V)
-  exact (ShortComplex.ab_exact_iff _).mp hexact x hx
-
-/-! ### Zero condition for the evaluated short complex -/
-
-private lemma eval_comp_zero {X : TopCat.{u}}
-    (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)) (V : Opens X) :
-    S.f.val.app (op V) ≫ S.g.val.app (op V) = 0 := by
-  have h1 : S.f.val.app (op V) ≫ S.g.val.app (op V) =
-      (S.f.val ≫ S.g.val).app (op V) := by simp
-  rw [h1]; change (S.f ≫ S.g).val.app (op V) = 0; rw [S.zero]; aesop_cat
-
-/-! ### Mono of f on sections -/
-
-set_option maxHeartbeats 400000 in
-private lemma mono_f_app {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (V : Opens X) :
-    Mono (S.f.val.app (op V)) := by
-  haveI : Mono S.f := hS.mono_f
-  haveI : Mono S.f.val := by
-    change Mono ((sheafToPresheaf _ _).map S.f); infer_instance
-  exact (NatTrans.mono_iff_mono_app S.f.val).mp ‹_› (op V)
-
-/-! ### The Zorn argument -/
-
-/-- A partial lift of s along g: an open V ≤ U with a section t : X₂(V)
-    mapping to s|_V under g. -/
-private structure PartialLift {X : TopCat.{u}}
-    (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X))
-    (U : Opens X) (s : S.X₃.val.obj (op U)) where
-  V : Opens X
-  hle : V ≤ U
-  t : S.X₂.val.obj (op V)
-  ht : ConcreteCategory.hom (S.g.val.app (op V)) t =
-       ConcreteCategory.hom (S.X₃.val.map (homOfLE hle).op) s
-
-private instance {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    {U : Opens X} {s : S.X₃.val.obj (op U)} :
-    LE (PartialLift S U s) where
-  le p q := ∃ h : p.V ≤ q.V,
-    ConcreteCategory.hom (S.X₂.val.map (homOfLE h).op) q.t = p.t
-
-private instance {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    {U : Opens X} {s : S.X₃.val.obj (op U)} :
-    Preorder (PartialLift S U s) where
-  le_refl p := ⟨le_refl p.V, by
-    have : (homOfLE (le_refl p.V)).op = 𝟙 (op p.V) := rfl
-    simp [this]⟩
-  le_trans p q r ⟨h₁, ht₁⟩ ⟨h₂, ht₂⟩ := ⟨le_trans h₁ h₂, by
-    have : (homOfLE (le_trans h₁ h₂)).op = (homOfLE h₂).op ≫ (homOfLE h₁).op := rfl
-    simp only [this, Functor.map_comp, AddCommGrpCat.hom_comp,
-      AddMonoidHom.coe_comp, Function.comp_apply, ht₂, ht₁]⟩
-
 /-- **Zorn argument** (Nugent, PR #35790, `epi_of_shortExact`).
     In a SES `0 -> F' -> G -> H -> 0` with `F'` flasque, the map `G(U) -> H(U)` is epi.
 
@@ -162,7 +63,6 @@ private instance {X : TopCat.{u}}
     is open and `t : G(V)` maps to `s|_V`. By Zorn (using the sheaf gluing axiom for
     chains), there is a maximal such pair. Local surjectivity of `G -> H` (from epi)
     plus flasqueness of `F'` (to patch the difference) show the maximal `V` must be `U`. -/
-set_option maxHeartbeats 800000 in
 theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁) (U : Opens X) :
