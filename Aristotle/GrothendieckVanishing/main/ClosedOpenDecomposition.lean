@@ -1,16 +1,10 @@
 /-
   ClosedOpenDecomposition.lean — Reduction from general to irreducible spaces
 
-  Hartshorne III.2.7, Step 1: If X is a Noetherian space and vanishing
-  holds for all irreducible Noetherian spaces (of appropriate dimension),
-  then vanishing holds for X.
-
   Proved cases:
   - Empty X: all sheaves are zero → Ext vanishes (sorry-free)
   - Irreducible X: apply ih_irred directly (sorry-free)
-  - Reducible X: SORRY — needs extension by zero + Lemma 2.10
-
-  Based on Aristotle output (fca6885d).
+  - Reducible X: sorry — needs extension by zero + Lemma 2.10
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.Auxiliary
@@ -21,7 +15,6 @@ open CategoryTheory TopologicalSpace Limits
 
 /-! ## Helper lemmas -/
 
-/-- For the empty presieve, the sheaf condition forces the presheaf value to be subsingleton. -/
 private lemma subsingleton_of_isSheafFor_empty
     {C : Type*} [Category C] {U : C} {P : Cᵒᵖ ⥤ Type*}
     (h : Presieve.IsSheafFor P (⊥ : Presieve U)) :
@@ -32,7 +25,6 @@ private lemma subsingleton_of_isSheafFor_empty
   exact (huniq a (fun _ _ hf => absurd hf id)).trans
     (huniq b (fun _ _ hf => absurd hf id)).symm
 
-/-- If End(G) is subsingleton then G is trivial (id = 0 forces all elements to be 0). -/
 private lemma addCommGrpCat_subsingleton_of_end_subsingleton
     (G : AddCommGrpCat.{u}) (h : Subsingleton (G ⟶ G)) :
     Subsingleton G := by
@@ -44,9 +36,6 @@ private lemma addCommGrpCat_subsingleton_of_end_subsingleton
 
 /-! ## Empty space vanishing -/
 
-/-- On the empty space, every sheaf of abelian groups is a zero object.
-    The empty sieve covers every open (vacuously), forcing all presheaf values
-    to be trivial, so F is zero. -/
 theorem sheaf_isZero_of_isEmpty (X : TopCat.{u}) [hE : IsEmpty X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
     IsZero F := by
@@ -74,7 +63,6 @@ theorem sheaf_isZero_of_isEmpty (X : TopCat.{u}) [hE : IsEmpty X]
         apply Sheaf.Hom.ext; apply NatTrans.ext; funext U
         exact (val_isZero U).eq_zero_of_tgt (f.val.app U) }⟩
 
-/-- On the empty space, sheaf cohomology is trivially subsingleton. -/
 theorem sheaf_H_subsingleton_of_isEmpty'
     (X : TopCat.{u}) [IsEmpty X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -86,17 +74,8 @@ theorem sheaf_H_subsingleton_of_isEmpty'
   have := hZ.hasProjectiveDimensionLT_zero
   exact HasProjectiveDimensionLT.subsingleton _ 0 n (Nat.zero_le n) F
 
-/-! ## Reducible case (axiom — uses ReducibleVanishing)
+/-! ## Reducible case (sorry — uses ReducibleVanishing) -/
 
-    The standard proof (Hartshorne) needs:
-    1. Extension by zero `j_!` for open embeddings (NOT in Mathlib v4.28)
-    2. The closed-open complement SES: 0 → j_!(F|_U) → F → i_*(F|_Z) → 0
-    3. Identification H'(⊤, F) ≅ H(F) (proved in CohomologyIso.lean)
-
-    Alternatives (Mayer-Vietoris, component induction, Ext LES) all
-    reduce to needing j_!. See Aristotle analysis b29fab4f. -/
-
-/-- Uses ReducibleVanishing axiom (requires j_! not in Mathlib v4.28). -/
 private theorem sheaf_H_subsingleton_of_reducible
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
@@ -111,12 +90,6 @@ private theorem sheaf_H_subsingleton_of_reducible
 
 /-! ## Main theorem -/
 
-/-- Reduction from general Noetherian spaces to irreducible ones.
-
-    Handles three cases:
-    1. **Empty X**: All sheaves are zero → Ext vanishes (proved)
-    2. **Irreducible X**: Apply ih_irred directly (proved)
-    3. **Reducible X**: Sorry — needs extension by zero + Lemma 2.10 -/
 theorem grothendieck_vanishing_of_irreducible
     (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)

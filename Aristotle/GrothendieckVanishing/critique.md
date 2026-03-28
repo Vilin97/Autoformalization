@@ -1,80 +1,68 @@
 # Adversarial Critique — Grothendieck Vanishing Formalization
 
-**Timestamp**: 2026-03-28T08:15Z
+**Timestamp**: 2026-03-28T08:20Z
 **Reviewer verdict**: REVISE
 
 ---
 
 ## 0. CI Status
 
-Two CI runs in progress at time of review; the most recent successful run passed. `lake build` locally produces **zero errors** but many warnings (see Code Quality). Blueprint and dep graph both return HTTP 200.
+Latest CI run (23681059730) in progress. Previous two runs passed. `lake build` not yet verified this cycle. Blueprint and dep graph both return HTTP 200.
 
-**Issue (P2)**: `set_option synthInstance.maxHeartbeats 80000` in Setup.lean:37 and ClosedOpenDecomposition.lean:22 triggers "Unscoped option ... is not allowed" warnings. These will likely become errors in a future Mathlib bump.
+**Issue (P1)**: `admit` used instead of `sorry` in Setup.lean:44, 75, 95. User explicitly mandates: "NEVER make an axiom. Any statement you can't prove immediately needs to be a sorry." Convert all `admit` to `sorry`.
+
+**Issue (P2)**: `set_option synthInstance.maxHeartbeats 80000` in Setup.lean:37,46,57,77 uses unscoped form. Will become errors in future Mathlib bumps.
 
 ---
 
 ## 1. Sorry's / Admits
 
-Three `admit`s in `Setup.lean`, zero `sorry`s elsewhere. All three flow into `GrothendieckVanishing` (verified: `lean_verify` returns `sorryAx`).
+3 `admit`s in `Setup.lean`, 0 `sorry`s elsewhere. All three flow into `GrothendieckVanishing`.
 
 | Axiom | File:Line | Statement true? | Risk |
 |---|---|---|---|
-| `FlasqueVanishing` | Setup.lean:46 | Yes (standard) | Low — provable via Godement resolution when Mathlib has it |
-| `ReducibleVanishing` | Setup.lean:65 | Yes (standard, needs j\_!) | **Medium** — the statement encodes the full reducible case. If the closed-open SES has a subtle formulation error (e.g. wrong universe, wrong notion of restriction), this axiom hides it. |
-| `IrreduciblePosVanishing` | Setup.lean:84 | Yes (Hartshorne Steps 3-5) | **Medium** — same concern: the IH in the axiom signature expects `∀ Y [NoetherianSpace Y] G ...` without `[IrreducibleSpace Y]`. If the actual proof needs the IH applied to reducible Y, this is fine; but the claim "needs j\_!" is predicated on a specific proof strategy. Alternative strategies (generic stalk, skyscraper sheaf) might not need the exact same IH shape. |
+| `flasque_injective` | Setup.lean:44 | Yes (Bredon's theorem) | **Medium** — requires Zorn's lemma argument on partial extensions. Aristotle job 99a8a5d6 at 5%. |
+| `ReducibleVanishing` | Setup.lean:75 | Yes (standard, needs j\_!) | **High** — needs extension by zero infrastructure. No Aristotle job currently targeting this. |
+| `IrreduciblePosVanishing` | Setup.lean:95 | Yes (Hartshorne Steps 3-5) | **High** — needs j\_! or closed-open SES. No Aristotle job targeting this. |
 
-**Worst-case scenario**: `ReducibleVanishing` and `IrreduciblePosVanishing` are effectively `sorry`'d full-strength lemmas whose STATEMENTS might be subtly wrong (e.g., missing a finiteness condition on dim X, or needing the IH to quantify over a different collection of spaces). Because the axioms are `admit`'d, Lean's kernel cannot catch such errors.
+**Critical**: All 3 must be converted from `admit` to `sorry` per user instruction.
 
 ---
 
 ## 2. Hidden Axioms
 
-`lean_verify GrothendieckVanishing` returns: `propext, sorryAx, Classical.choice, Quot.sound`.
+The `admit` keyword in Lean 4 introduces `sorryAx` but suppresses the warning. This hides the incompleteness. Converting to `sorry` will make the gaps visible.
 
-- `sorryAx` is present — the theorem is NOT fully proven.
-- `constantSheaf_flasque_of_irreducible` is clean: `propext, Classical.choice, Quot.sound` only.
-- `constantSheaf_cohomology_vanishing` inherits `sorryAx` from `FlasqueVanishing`.
-- `grothendieck_vanishing_dim_zero` inherits `sorryAx` from `FlasqueVanishing`.
-
-**Issue (P1)**: The main theorem depends on `sorryAx`. Any claim of "proof complete" must be qualified as "structurally complete modulo 3 axioms".
+- `constantSheaf_flasque_of_irreducible` is clean (sorry-free).
+- `FlasqueVanishing` depends on `flasque_injective` (admit).
+- `ReducibleVanishing` and `IrreduciblePosVanishing` are directly admit'd.
 
 ---
 
 ## 3. Circularity
 
-I found no circularity in the proof structure. The induction on `WithBot ℕ∞` via `WellFounded.induction` is correct. The IH in `grothendieck_vanishing_aux` quantifies over `d' < d`, and the callback correctly passes `lt_of_lt_of_le hlt (hd ▸ hle)` to prove the strict inequality. The dim 0 case does not invoke the IH. The axioms do not use the conclusion as input.
+No circularity found. The induction on `WithBot ℕ∞` via `WellFounded.induction` is correct. The IH in `grothendieck_vanishing_aux` quantifies over `d' < d`.
 
-However: `ReducibleVanishing` takes `ih_irred` quantified over irreducible Y with `dim Y ≤ dim X` (not `<`). This means the axiom's internal proof would need to reduce to STRICTLY lower dimension or use a different induction (e.g., on component count). The `≤` vs `<` is intentional (the main induction handles the `<` part), but a reviewer who only reads the axiom statement might question it.
+`ReducibleVanishing` takes `ih_irred` with `dim Y ≤ dim X` (not `<`). This is intentional — the outer induction handles the strict decrease.
 
 ---
 
 ## 4. Hypothesis Audit
 
-Main theorem:
-```
-GrothendieckVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    [NoetherianSpace X] (n : ℕ) (h : n > topologicalKrullDim X) :
-    Subsingleton (Sheaf.H F n)
-```
-
 | Hypothesis | Necessary? | Could weaken? |
 |---|---|---|
 | `TopCat.{u}` | Necessary (Mathlib API) | Could generalize to any site |
-| `AddCommGrpCat.{u}` | Necessary for this formulation | Could generalize to any Grothendieck abelian category |
-| `[NoetherianSpace X]` | **Necessary** | No — the theorem fails without Noetherian |
-| `n : ℕ` | Sufficient | `n = 0` gives trivially true statement. Could use `n + 1` to avoid vacuous cases |
-| `n > topologicalKrullDim X` | Correct | If `dim X = ⊤`, hypothesis is vacuously false — correct but subtle |
-| `Subsingleton (Sheaf.H F n)` | Correct formulation of "= 0" | Could strengthen to `IsZero` |
-
-**Issue (P3)**: The theorem is stated for `AddCommGrpCat` only. Hartshorne's result applies to sheaves of abelian groups on any ringed space.
+| `AddCommGrpCat.{u}` | Necessary | Could generalize to any Grothendieck abelian |
+| `[NoetherianSpace X]` | **Necessary** | No |
+| `n : ℕ` | Sufficient | Could use `n + 1` to avoid vacuous `n = 0` |
+| `n > topologicalKrullDim X` | Correct | dim X = ⊤ makes hypothesis vacuously false — correct |
+| `Subsingleton (Sheaf.H F n)` | Correct | Could strengthen to `IsZero` |
 
 ---
 
 ## 5. Mathematical Correctness
 
-The proof structure faithfully follows Hartshorne III.2.7. I found no divergence.
-
-**Issue (P2)**: `constantSheaf_flasque_of_irreducible` only shows the constant sheaf with value `ULift ℤ` is flasque. It does NOT show the constant sheaf with an arbitrary abelian group value is flasque. This suffices for the theorem but the name is misleading.
+The proof structure faithfully follows Hartshorne III.2.7. No divergence found.
 
 ---
 
@@ -82,35 +70,39 @@ The proof structure faithfully follows Hartshorne III.2.7. I found no divergence
 
 | Issue | Severity | Location |
 |---|---|---|
-| `maxHeartbeats 1600000` | **P1** | ConstantSheafFlasque.lean:108 — 4x default. Decompose. |
-| Unscoped `synthInstance.maxHeartbeats 80000` | **P1** | Setup.lean:37, ClosedOpenDecomposition.lean:22 |
-| Unused simp argument | P3 | ConstantSheafFlasque.lean:97 |
-| `simp` instead of `simp only` | P3 | Multiple locations |
-| `change` for Meq API mismatch | P2 | ConstantSheafFlasque.lean:129-132 — fragile |
+| `admit` instead of `sorry` | **P0** | Setup.lean:44,75,95 |
+| `maxHeartbeats 1600000` | **P1** | ConstantSheafFlasque.lean:108 — 4× default |
+| Unscoped `synthInstance.maxHeartbeats 80000` | **P2** | Setup.lean:37,46,57,77 |
+| `maxHeartbeats 800000` | P3 | ConstantSheafFlasque.lean:152, CohomologyIso.lean:55 |
+| `maxHeartbeats 400000` | P3 | ConstantSheafFlasque.lean:18,27,68,86 |
+| Stale docstrings | P2 | See §7 |
 
 ---
 
 ## 7. Documentation Lies
 
-**8 stale documentation claims** — every docstring mentioning "sorry" when the code now uses axioms or is proved:
-
-1. IrreducibleStep.lean:9 — "constantSheaf_flasque_of_irreducible: sorry" (PROVED)
-2. IrreducibleStep.lean:11 — "grothendieck_vanishing_irreducible_pos: sorry" (uses axiom)
-3. GrothendieckVanishing.lean:10 — "IrreducibleStep: sorry"
-4. GrothendieckVanishing.lean:11 — "ClosedOpenDecomposition: sorry"
-5. GrothendieckVanishing.lean:25 — "Combines ClosedOpenDecomposition (sorry)"
-6. ClosedOpenDecomposition.lean:91-95 — "sorry — blocked" + stale H'≅H claim
-7. main.lean:12 — "SORRY — reduction to irreducible"
-8. main.lean:13 — "SORRY — irreducible dim ≥ 1"
+| Location | Claim | Reality |
+|---|---|---|
+| Setup.lean:2 | "axioms for Grothendieck vanishing" | Should say "sorry'd lemmas" per user instruction |
+| Setup.lean:40 | "DO NOT PROVE — use as axiom" | User says prove everything |
+| Setup.lean:64 | "DO NOT PROVE — use as axiom" | User says prove everything |
+| Setup.lean:84 | "DO NOT PROVE — use as axiom" | User says prove everything |
+| main.lean:8 | "FlasqueVanishing axiom" | FlasqueVanishing is proved (from flasque_injective) |
+| main.lean:11-12 | "axiom — reduction/irreducible" | Should say "sorry" |
+| main.lean:19 | "DO NOT PROVE FlasqueVanishing" | Contradicts user instruction |
+| GrothendieckVanishing.lean:10-11 | "axiom — needs j\_!" | Should say "sorry" |
+| GrothendieckVanishing.lean:25 | "Combines ... (axiom)" | Should say "(sorry)" |
+| IrreducibleStep.lean:11 | "uses IrreduciblePosVanishing axiom" | Should say "sorry" |
 
 ---
 
 ## 8. Generalization Opportunities
 
-1. **(Feasible)** Generalize `constantSheaf_flasque_of_irreducible` from `ULift ℤ` to any abelian group `A`.
-2. **(Moderate)** PR `subsingleton_ext_of_ses` and `CohomologyIso` to Mathlib.
-3. **(Hard)** Build j\_! to eliminate the 2 non-FlasqueVanishing axioms.
-4. **(Hard)** Generalize theorem from `AddCommGrpCat` to `ModuleCat R`.
+1. **(Feasible)** Generalize `constantSheaf_flasque_of_irreducible` from `ULift ℤ` to arbitrary abelian group A.
+2. **(Feasible)** PR `subsingleton_ext_of_ses` and `CohomologyIso` to Mathlib.
+3. **(Hard)** Build j\_! (extension by zero) to prove `ReducibleVanishing` and `IrreduciblePosVanishing`.
+4. **(Hard)** Prove `flasque_injective` (Bredon's theorem) via Zorn's lemma.
+5. **(Hard)** Generalize from `AddCommGrpCat` to `ModuleCat R`.
 
 ---
 
@@ -118,24 +110,21 @@ The proof structure faithfully follows Hartshorne III.2.7. I found no divergence
 
 | Candidate | Feasibility |
 |---|---|
-| `CohomologyIso.lean` (H'(⊤) ≅ H) — resolves explicit Mathlib TODO | **High** |
-| `subsingleton_ext_of_ses` — generic Ext LES vanishing | **High** |
-| `plusObj_bot_subsingleton` — generalize to arbitrary sites | Medium |
+| `CohomologyIso.lean` (H'(⊤) ≅ H) | **High** |
+| `subsingleton_ext_of_ses` | **High** |
+| `plusObj_bot_subsingleton` | Medium |
 | Dimension inequality lemmas in Auxiliary.lean | Medium |
 
 ---
 
 ## Verdict: REVISE
 
-### Conditions for CONDITIONAL ACCEPT:
+### Immediate actions (this cycle):
+1. Convert all 3 `admit`s to `sorry` (P0).
+2. Fix all stale documentation (P2).
+3. Check Aristotle jobs for completed proofs.
 
-1. Fix all 8 stale documentation claims (P1).
-2. Fix unscoped `synthInstance.maxHeartbeats` (P1). Use `set_option ... in` scoped form.
-3. Reduce `maxHeartbeats 1600000` (P1). Decompose `toPlus_surjective_of_firstPlus`.
-4. Remove unused simp argument at ConstantSheafFlasque.lean:97.
-5. Acknowledge axioms honestly in main.lean. Replace "SORRY" with "AXIOM (needs j\_!)".
-
-### Conditions for ACCEPT (no sorryAx):
-
-6. Build j\_! to eliminate `ReducibleVanishing` and `IrreduciblePosVanishing`.
-7. Prove `FlasqueVanishing`.
+### Next cycles:
+4. Prove `flasque_injective` (Bredon's theorem).
+5. Build j\_! infrastructure for ReducibleVanishing and IrreduciblePosVanishing.
+6. Reduce `maxHeartbeats 1600000`.
