@@ -1,5 +1,36 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-28T06:15Z — Cycles 12-13: Massive infrastructure build
+
+**Sorry count: 3 mathematical + 1 axiom**
+
+### MAJOR ACHIEVEMENTS (sorry-free infrastructure)
+Built by hand:
+- **yonedaTopFreeIsoConst**: natural iso yoneda.obj ⊤ ⋙ free ≅ const(ULift ℤ)
+- **freeAbSheafTopIsoConstantSheaf**: sheaf iso via presheafToSheaf.mapIso
+- **extAddEquivOfIso**: Ext transport along sheaf iso via extFunctor
+- **cohomologyPresheafTopEquiv**: H'(⊤, F, n) ≃+ H(F, n) — **RESOLVES MATHLIB TODO**
+- **isIrreducible_of_nonempty_open**: nonempty opens in irreducible space are irreducible
+
+From Aristotle:
+- **topologicalKrullDim_lt** + **topologicalKrullDim_add_one_le**: dim strict inequality
+- **meq_const_of_irreducible** / **meq_const_values_eq**: matching families constant
+- **toPlus_surjective**: toPlus surjective at nonempty opens on irreducible X
+- **cover_arrows_related**: all arrows in a cover are related (including empty!)
+
+### Key mathematical insight
+Empty arrows in covers DON'T break the matching family argument: for I with I.Y = ⊥
+and any nonempty J, a relation through Z = ⊥ (initial) forces x(I) = x(J) by the
+Meq condition + constant presheaf identity maps.
+
+### Remaining sorry's (3 + axiom)
+1. `constantSheaf_flasque_of_irreducible` (nonempty case): needs toSheafify surjective.
+   toPlus surjective is PROVED. toSheafify = toPlus ≫ plusMap(toPlus).
+   The second component needs Plus(P) to satisfy the same conditions.
+   SUBMITTED TO ARISTOTLE (05627269).
+2. `sheaf_H_subsingleton_of_reducible`: blocked on j_! (extension by zero). No workaround.
+3. `grothendieck_reduction` (Steps 3-5): blocked on Prop 2.9 + j_!.
+
 ## 2026-03-28T06:00Z — Cycle 12: Aristotle confirms reducible case blocked
 
 **Sorry count: 3 mathematical + 1 axiom (unchanged)**
