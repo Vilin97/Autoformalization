@@ -199,11 +199,78 @@ theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
   simp only [AddCommGrpCat.hom_comp] at this
   exact this.symm.trans (by simp [hx, hw])
 
-/-- **Injective sheaves are flasque** (Nugent, PR #35790, `of_injective`).
-    Uses injectivity to lift sections along the mono induced by an open inclusion. -/
+/-! ### Free abelian sheaf construction for injective → flasque (Aristotle 8f42abaa) -/
+
+noncomputable section FreeAbSheaf
+
+variable {X : TopCat.{u}}
+
+private def freeAbPresheaf (U : Opens X) : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} :=
+  yoneda.obj U ⋙ AddCommGrpCat.free
+
+private def freeAbSheaf (U : Opens X) : TopCat.Sheaf AddCommGrpCat.{u} X :=
+  (presheafToSheaf (Opens.grothendieckTopology (T := X)) AddCommGrpCat.{u}).obj
+    (freeAbPresheaf U)
+
+private def freeAbSheafMap {U V : Opens X} (i : U ⟶ V) : freeAbSheaf U ⟶ freeAbSheaf V :=
+  (presheafToSheaf (Opens.grothendieckTopology (T := X)) AddCommGrpCat.{u}).map
+    (Functor.whiskerRight (yoneda.map i) AddCommGrpCat.free)
+
+private def freeAbSheafHomEquiv (U : Opens X) (I : TopCat.Sheaf AddCommGrpCat.{u} X) :
+    (freeAbSheaf U ⟶ I) ≃ (forget AddCommGrpCat).obj (I.val.obj (op U)) :=
+  ((sheafificationAdjunction (Opens.grothendieckTopology (T := X)) AddCommGrpCat.{u}).homEquiv
+    (freeAbPresheaf U) I).trans <|
+  ((AddCommGrpCat.adj.whiskerRight _).homEquiv (yoneda.obj U)
+    (sheafToPresheaf _ _ |>.obj I)).trans <|
+  yonedaEquiv
+
+private lemma freeAbSheafHomEquiv_naturality {U V : Opens X} (i : U ⟶ V)
+    (I : TopCat.Sheaf AddCommGrpCat.{u} X) (f : freeAbSheaf V ⟶ I) :
+    freeAbSheafHomEquiv U I (freeAbSheafMap i ≫ f) =
+      (I.val.map i.op) (freeAbSheafHomEquiv V I f) := by
+  simp [freeAbSheafHomEquiv, freeAbSheafMap]
+  erw [Adjunction.homEquiv_naturality_left]
+  erw [Adjunction.homEquiv_naturality_left]
+  simp +decide [yonedaEquiv]
+  convert (NatTrans.naturality
+    ((Adjunction.whiskerRight (Opens X)ᵒᵖ AddCommGrpCat.adj).homEquiv
+      (yoneda.obj V) I.val
+      ((sheafificationAdjunction (Opens.grothendieckTopology X)
+        AddCommGrpCat).homEquiv (freeAbPresheaf V) I f))
+    i.op) using 1
+  constructor <;> intro h
+  · exact (NatTrans.naturality
+      ((Adjunction.whiskerRight (Opens X)ᵒᵖ AddCommGrpCat.adj).homEquiv
+        (yoneda.obj V) I.val
+        ((sheafificationAdjunction (Opens.grothendieckTopology X)
+          AddCommGrpCat).homEquiv (freeAbPresheaf V) I f)) i.op)
+  · convert congr_arg (fun g => g (𝟙 V)) h using 1
+
+set_option synthInstance.maxHeartbeats 40000 in
+private instance freeAbSheafMap_mono {U V : Opens X} (i : U ⟶ V) :
+    Mono (freeAbSheafMap i) := by
+  have : ∀ (F G : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}) (f : F ⟶ G),
+      Mono f → Mono ((presheafToSheaf (Opens.grothendieckTopology (T := X))
+        AddCommGrpCat).map f) :=
+    fun _ _ f _ => Functor.map_mono _ f
+  exact this _ _ _ (instMonoFunctorWhiskerRightOfPreservesMonomorphisms
+    (yoneda.map i) AddCommGrpCat.free)
+
+end FreeAbSheaf
+
+-- Injective sheaves are flasque (proved by Aristotle 8f42abaa).
+-- Uses free abelian sheaf + Yoneda identification + Injective.factors.
 theorem isFlasque_of_injective {X : TopCat.{u}}
     (I : TopCat.Sheaf AddCommGrpCat.{u} X) [Injective I] : IsFlasqueSheaf I := by
-  sorry
+  intro U V i
+  rw [AddCommGrpCat.epi_iff_surjective]
+  intro s
+  set g := (freeAbSheafHomEquiv U I).symm s
+  obtain ⟨h, hh⟩ : ∃ h : freeAbSheaf V ⟶ I, freeAbSheafMap i ≫ h = g :=
+    Injective.factors g (freeAbSheafMap i)
+  refine ⟨freeAbSheafHomEquiv V I h, ?_⟩
+  rw [← freeAbSheafHomEquiv_naturality i I h, hh]
+  simp [g]
 
 private lemma epi_of_natIso_epi {C D : Type*} [Category C] [Category D]
     {F G : C ⥤ D} (α : F ≅ G) {X Y : C} (f : X ⟶ Y)
