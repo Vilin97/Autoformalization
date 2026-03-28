@@ -6,6 +6,18 @@
       "target": "FlasqueVanishing (= Grothendieck vanishing)",
       "status": "COMPLETE",
       "note": "Confirmed: j_! needed. Proved empty case, helper lemmas. Core sorry remains."
+    },
+    {
+      "id": "b7262702-a30b-4da4-a54e-9bd2c0cd0c4a",
+      "submission": "aristotle-in/epi_app_of_shortExact_flasque.lean",
+      "output": "aristotle-out/epi_app_of_shortExact_flasque_aristotle.lean",
+      "target": "epi_app_of_shortExact_flasque (Zorn argument)"
+    },
+    {
+      "id": "8f42abaa-b9ce-4d1c-aa9a-96c45f33ee1c",
+      "submission": "aristotle-in/isFlasque_of_injective.lean",
+      "output": "aristotle-out/isFlasque_of_injective_aristotle.lean",
+      "target": "isFlasque_of_injective (indicator sheaf construction)"
     }
   ],
   "canceled": [
