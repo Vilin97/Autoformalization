@@ -88,11 +88,17 @@ theorem sheaf_H_subsingleton_of_isEmpty'
   have := hZ.hasProjectiveDimensionLT_zero
   exact HasProjectiveDimensionLT.subsingleton _ 0 n (Nat.zero_le n) F
 
-/-! ## Reducible case (sorry) -/
+/-! ## Reducible case (sorry — blocked on missing Mathlib infrastructure)
 
-/-- The reducible case requires extension by zero infrastructure not in Mathlib.
-    See Hartshorne Step 1: induction on number of irreducible components
-    via the closed/open SES and Lemma 2.10. -/
+    The standard proof (Hartshorne) needs:
+    1. Extension by zero `j_!` for open embeddings (NOT in Mathlib)
+    2. The closed-open complement SES: 0 → j_!(F|_U) → F → i_*(F|_Z) → 0
+    3. Identification H'(⊤, F) ≅ H(F) (TODO in Mathlib)
+
+    Alternatives (Mayer-Vietoris, component induction, Ext LES) all
+    reduce to needing j_! or H' ≅ H. See Aristotle analysis b29fab4f. -/
+
+/-- BLOCKED: requires j_! (extension by zero) not in Mathlib v4.28. -/
 private theorem sheaf_H_subsingleton_of_reducible
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
