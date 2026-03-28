@@ -18,6 +18,7 @@
   - ext_zero_map_surjective: Ext(Z,I,0) -> Ext(Z,Q,0) surjective via adjunction
 -/
 import Mathlib
+import Aristotle.GrothendieckVanishing.main.Auxiliary
 
 universe u
 
@@ -96,20 +97,49 @@ theorem isFlasque_of_injective {X : TopCat.{u}}
     (I : TopCat.Sheaf AddCommGrpCat.{u} X) [Injective I] : IsFlasqueSheaf I := by
   sorry
 
-/-- **Surjectivity of Ext map at degree 0** (base case input).
-    For a SES `0 -> F -> I -> Q -> 0` with `F` flasque, the induced map
-    `Ext(Z, I, 0) -> Ext(Z, Q, 0)` is surjective.
+private lemma epi_of_natIso_epi {C D : Type*} [Category C] [Category D]
+    {F G : C ⥤ D} (α : F ≅ G) {X Y : C} (f : X ⟶ Y)
+    (h : Epi (F.map f)) : Epi (G.map f) := by
+  have : G.map f = α.inv.app X ≫ F.map f ≫ α.hom.app Y := by
+    conv_lhs => rw [← Category.id_comp (G.map f), ← Iso.inv_hom_id_app α X]
+    rw [Category.assoc, ← α.hom.naturality f, ← Category.assoc]
+  rw [this]; exact epi_comp _ _
 
-    The key chain is: `Ext(Z, -, 0) = Hom(Z, -)`, and via `constantSheafAdj`,
-    `Hom(Z_X, G) = G(top)`. So this reduces to surjectivity of `I(top) -> Q(top)`,
-    which follows from `epi_app_of_shortExact_flasque`. -/
+-- Surjectivity of Ext map at degree 0 (base case input).
+-- For a SES 0 -> F -> I -> Q -> 0 with F flasque, the induced map
+-- Ext(Z_X, I, 0) -> Ext(Z_X, Q, 0) is surjective for Z_X = constant sheaf.
+-- Proof: reduce to Hom via addEquiv₀, then use constantSheafΓAdj + projectivity
+-- of ULift ℤ + epi_app_of_shortExact_flasque.
+set_option maxHeartbeats 400000 in
+set_option synthInstance.maxHeartbeats 40000 in
 theorem ext_zero_map_surjective {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁)
-    (Z : TopCat.Sheaf AddCommGrpCat.{u} X) :
-    ∀ y : Ext Z S.X₃ 0,
-      ∃ z : Ext Z S.X₂ 0, z.comp (Ext.mk₀ S.g) (add_zero 0) = y := by
-  sorry
+    (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁) :
+    ∀ y : Ext ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+        (AddCommGrpCat.of (ULift.{u} ℤ))) S.X₃ 0,
+      ∃ z : Ext ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+          (AddCommGrpCat.of (ULift.{u} ℤ))) S.X₂ 0,
+        z.comp (Ext.mk₀ S.g) (add_zero 0) = y := by
+  intro y
+  -- Convert from Ext⁰ to Hom via addEquiv₀
+  suffices ∃ ψ : _ ⟶ S.X₂, ψ ≫ S.g = Ext.addEquiv₀ y by
+    obtain ⟨ψ, hψ⟩ := this
+    exact ⟨Ext.mk₀ ψ, by rw [Ext.mk₀_comp_mk₀, hψ, Ext.mk₀_addEquiv₀_apply]⟩
+  -- Γ(g) is epi (from g epi at ⊤, via Γ ≅ sheafSections at ⊤)
+  have hΓg : Epi ((Sheaf.Γ (Opens.grothendieckTopology X)
+      AddCommGrpCat.{u}).map S.g) :=
+    epi_of_natIso_epi (Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).symm S.g
+      (epi_app_of_shortExact_flasque hS hFlasque₁ ⊤)
+  -- Lift through adjunction + projectivity of ULift ℤ
+  let adj := constantSheafΓAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
+  let M := AddCommGrpCat.of (ULift.{u} ℤ)
+  haveI : Projective M := ulift_int_projective
+  refine ⟨(adj.homEquiv M S.X₂).symm (Projective.factorThru
+    ((adj.homEquiv M S.X₃) (Ext.addEquiv₀ y))
+    ((Sheaf.Γ _ _).map S.g)), ?_⟩
+  apply (adj.homEquiv M S.X₃).injective
+  rw [Adjunction.homEquiv_naturality_right, Equiv.apply_symm_apply,
+    Projective.factorThru_comp]
 
 /-! ## Proved infrastructure -/
 
@@ -151,8 +181,8 @@ private theorem sheafH_one_of_flasque {X : TopCat.{u}}
   obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a ha rfl
   obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b hb rfl
   -- By surjectivity, c and d lift further to Ext(Z, I, 0)
-  obtain ⟨c', hc'⟩ := h_surj _ c
-  obtain ⟨d', hd'⟩ := h_surj _ d
+  obtain ⟨c', hc'⟩ := h_surj c
+  obtain ⟨d', hd'⟩ := h_surj d
   -- The connecting map kills images of the restriction map (LES zero condition):
   -- comp(mk₀ g, extClass) = 0, so by associativity, (_.comp mk₀ g).comp extClass = 0
   have zero_c : c.comp hSE.extClass rfl = 0 := by
@@ -199,9 +229,15 @@ ReducibleVanishing and IrreduciblePosVanishing require two building blocks:
 2. ClosedImmersionSES: the adjunction unit F -> i_*(i^*F) gives a short exact sequence
 -/
 
+-- Pushforward preserves flasqueness for any continuous map.
+theorem pushforward_preserves_flasque {Y : TopCat.{u}} (f : TopCat.of Y ⟶ X)
+    (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Y)) (hG : IsFlasqueSheaf G) :
+    IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} f).obj G) :=
+  fun i => by change Epi (G.val.map ((Opens.map f).op.map i.op)); exact hG _
+
 -- Pushforward along a closed immersion preserves cohomological vanishing.
--- Requires: i_* exact + preserves injectives (from adjunction i^* ⊣ i_*).
--- FALSE for general continuous maps (Leray spectral sequence has differentials).
+-- Uses FlasqueVanishing + LES + Γ equality. The hypothesis is universal:
+-- vanishing for ALL sheaves on Z for all degrees ≥ 1.
 set_option synthInstance.maxHeartbeats 80000 in
 theorem PushforwardHVanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
