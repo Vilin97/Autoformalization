@@ -24,6 +24,12 @@
       "submission": "aristotle-in/epi_unit_of_closedImmersion.lean",
       "output": "aristotle-out/epi_unit_of_closedImmersion_aristotle.lean",
       "target": "epi_unit_of_closedImmersion (stalk computation)"
+    },
+    {
+      "id": "f5497d68-3760-45d3-8352-4e7a79ba841d",
+      "submission": "main/Setup.lean (full file)",
+      "output": "aristotle-out/Setup_aristotle/",
+      "target": "epi_app_of_shortExact_flasque (full context submission)"
     }
   ],
   "canceled": [
