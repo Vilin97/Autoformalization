@@ -1,18 +1,5 @@
 /-
   ConstantSheafFlasque.lean — The constant sheaf on an irreducible space is flasque
-
-  Proves that on an irreducible topological space, the constant sheaf
-  has epi restriction maps, using the naturality of the sheafification unit
-  and the fact that the constant presheaf has identity restriction maps.
-
-  The proof chain (all steps mathematically verified, formalization in progress):
-  1. toPlus surjective at nonempty U (Aristotle 17b9bce9, sorry-free)
-  2. toPlus injective at nonempty U (by eq_mk_iff_exists + covers have arrows)
-  3. plusObj(constP) has identity restrictions at nonempty opens (by 1+2)
-  4. toPlus(plusObj P) surjective at nonempty U (by same argument as 1, using 3)
-  5. toSheafify = toPlus ≫ toPlus(plusObj P) surjective (by 1+4, plusMap_toPlus)
-  6. Naturality: toSheafify_U = toSheafify_V ≫ res (const has id maps)
-  7. Surjectivity of toSheafify_U → surjectivity of res → Epi
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.Auxiliary
@@ -21,10 +8,14 @@ universe u
 
 open CategoryTheory TopologicalSpace Limits Opposite GrothendieckTopology GrothendieckTopology.Plus
 
-set_option maxHeartbeats 800000 in
-/-- plusObj(P)(⊥) is subsingleton for any presheaf P.
-    By Plus.sep (separation): the empty sieve covers ⊥, and two elements that agree
-    on all arrows of the empty sieve (vacuously) must be equal. -/
+private abbrev constPresheaf (X : Type u) [TopologicalSpace X] :
+    (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} :=
+  (Functor.const (Opens X)ᵒᵖ).obj (AddCommGrpCat.of (ULift.{u} ℤ))
+
+private abbrev opensGT (X : Type u) [TopologicalSpace X] : GrothendieckTopology (Opens X) :=
+  Opens.grothendieckTopology X
+
+set_option maxHeartbeats 400000 in
 theorem plusObj_bot_subsingleton {X : Type u} [TopologicalSpace X]
     (P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}) :
     Subsingleton (ToType (((Opens.grothendieckTopology X).plusObj P).obj (op ⊥))) := by
@@ -33,18 +24,13 @@ theorem plusObj_bot_subsingleton {X : Type u} [TopologicalSpace X]
     fun p hp => (Opens.mem_bot.mp hp).elim
   exact Plus.sep P ⟨⊥, hcov⟩ x y (fun ⟨_, _, hf⟩ => absurd hf id)
 
-set_option maxHeartbeats 800000 in
-/-- toPlus is injective at nonempty opens for the constant presheaf. -/
+set_option maxHeartbeats 400000 in
 theorem toPlus_injective_of_const
     {X : Type u} [TopologicalSpace X]
     (U : Opens X) (hU : (U : Set X).Nonempty)
-    (a b : (Functor.const (Opens X)ᵒᵖ).obj (AddCommGrpCat.of (ULift.{u} ℤ)) |>.obj (op U))
-    (h : ConcreteCategory.hom ((Opens.grothendieckTopology X).toPlus
-        ((Functor.const (Opens X)ᵒᵖ).obj (AddCommGrpCat.of (ULift.{u} ℤ)))
-        |>.app (op U)) a =
-      ConcreteCategory.hom ((Opens.grothendieckTopology X).toPlus
-        ((Functor.const (Opens X)ᵒᵖ).obj (AddCommGrpCat.of (ULift.{u} ℤ)))
-        |>.app (op U)) b) :
+    (a b : (constPresheaf X).obj (op U))
+    (h : ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a =
+      ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) b) :
     a = b := by
   rw [toPlus_eq_mk, toPlus_eq_mk] at h
   rw [eq_mk_iff_exists] at h
@@ -55,33 +41,181 @@ theorem toPlus_injective_of_const
   simp only [Functor.const_obj_obj, Meq.refine, Meq.mk] at this
   exact this
 
-/-- On an irreducible space, the constant sheaf has epi restriction maps (is flasque).
+private lemma cover_nonempty_arrow
+    {X : Type u} [TopologicalSpace X]
+    (U : Opens X) (hU : (U : Set X).Nonempty)
+    (S : (opensGT X).Cover U) :
+    ∃ I : S.Arrow, (I.Y : Set X).Nonempty := by
+  obtain ⟨x, hx⟩ := hU
+  obtain ⟨V, f, hf, hmem⟩ := S.2 x hx
+  exact ⟨⟨V, f, hf⟩, ⟨x, hmem⟩⟩
 
-    The full proof requires showing `J.toSheafify` (the sheafification unit) is surjective
-    at nonempty opens. This follows from:
-    1. `toPlus` is surjective for the constant presheaf (Aristotle proved this)
-    2. `toPlus(plusObj P)` is surjective (same argument, since `plusObj P` has
-       the same properties at nonempty opens)
-    3. `toSheafify = toPlus ≫ toPlus(plusObj P)` (by `plusMap_toPlus`)
-    4. Composition of surjective maps is surjective
-    5. Naturality: `toSheafify_U = toSheafify_V ≫ res` (const has identity maps)
-    6. Surjectivity of `toSheafify_U` → surjectivity of `res` → Epi
+private lemma cover_arrows_related
+    {X : Type u} [TopologicalSpace X]
+    {U : Opens X} (S : (opensGT X).Cover U) (I₁ I₂ : S.Arrow) :
+    ∃ R : S.Relation, R.fst = I₁ ∧ R.snd = I₂ := by
+  exact ⟨Cover.Relation.mk' (fst := I₁) (snd := I₂)
+    ⟨I₁.Y ⊓ I₂.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩, rfl, rfl⟩
 
-    SORRY on the nonempty case — the sheafification unit surjectivity is mathematically
-    proved but the formalization through the double Plus construction API is technically
-    involved. Multiple Aristotle jobs are working on this. -/
+private lemma meq_const_values_eq
+    {X : Type u} [TopologicalSpace X]
+    {U : Opens X} (S : (opensGT X).Cover U) (x : Meq (constPresheaf X) S)
+    (I₁ I₂ : S.Arrow) :
+    x I₁ = x I₂ := by
+  obtain ⟨R, rfl, rfl⟩ := cover_arrows_related S I₁ I₂
+  simpa [constPresheaf] using x.condition R
+
+set_option maxHeartbeats 400000 in
+private theorem toPlus_surjective_of_const
+    {X : Type u} [TopologicalSpace X]
+    (U : Opens X) (hU : (U : Set X).Nonempty) :
+    Function.Surjective
+      (ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U))) := by
+  intro y
+  obtain ⟨S, x, hx⟩ := exists_rep y
+  obtain ⟨I₀, hI₀⟩ := cover_nonempty_arrow U hU S
+  let a : (constPresheaf X).obj (op U) := x I₀
+  have ha : ∀ I : S.Arrow, x I = a := fun I => meq_const_values_eq S x I I₀
+  have hx_eq : x = Meq.mk S a := by ext I; exact ha I
+  refine ⟨a, ?_⟩
+  rw [hx, hx_eq, toPlus_eq_mk, eq_mk_iff_exists]
+  refine ⟨S, homOfLE le_top, 𝟙 S, ?_⟩
+  apply Meq.ext; intro I
+  simp [Meq.refine, Meq.mk, constPresheaf]
+
+set_option maxHeartbeats 400000 in
+private lemma toPlus_naturality_const
+    {X : Type u} [TopologicalSpace X]
+    {U V : Opens X} (i : U ⟶ V) (a : (constPresheaf X).obj (op V)) :
+    ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a =
+      ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map i.op)
+        (ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op V)) a) := by
+  have nat := ((opensGT X).toPlus (constPresheaf X)).naturality i.op
+  have lhs : ConcreteCategory.hom ((constPresheaf X).map i.op ≫
+      ((opensGT X).toPlus (constPresheaf X)).app (op U)) a =
+    ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a := by
+    simp [ConcreteCategory.comp_apply, constPresheaf]
+  have rhs : ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op V) ≫
+      ((opensGT X).plusObj (constPresheaf X)).map i.op) a =
+    ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map i.op)
+      (ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op V)) a) := by
+    rw [ConcreteCategory.comp_apply]
+  rw [← lhs, show (constPresheaf X).map i.op ≫
+      ((opensGT X).toPlus (constPresheaf X)).app (op U) =
+    ((opensGT X).toPlus (constPresheaf X)).app (op V) ≫
+      ((opensGT X).plusObj (constPresheaf X)).map i.op from nat, rhs]
+
+set_option maxHeartbeats 1600000 in
+private theorem toPlus_surjective_of_firstPlus
+    {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
+    (U : Opens X) (hU : (U : Set X).Nonempty) :
+    Function.Surjective (ConcreteCategory.hom
+      (((opensGT X).toPlus ((opensGT X).plusObj (constPresheaf X))).app (op U))) := by
+  intro y
+  obtain ⟨S, x, hx⟩ := exists_rep y
+  obtain ⟨I₀, hI₀⟩ := cover_nonempty_arrow U hU S
+  obtain ⟨a, ha⟩ := toPlus_surjective_of_const I₀.Y hI₀ (x I₀)
+  let z : ((opensGT X).plusObj (constPresheaf X)).obj (op U) :=
+    ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a
+  have key : ∀ I : S.Arrow, (I.Y : Set X).Nonempty →
+      x I = ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map I.f.op) z := by
+    intro I hI
+    obtain ⟨b, hb⟩ := toPlus_surjective_of_const I.Y hI (x I)
+    have hZne : ((I₀.Y ⊓ I.Y : Opens X) : Set X).Nonempty :=
+      nonempty_preirreducible_inter I₀.Y.isOpen I.Y.isOpen hI₀ hI
+    let R : S.Relation := Cover.Relation.mk' (fst := I₀) (snd := I)
+      ⟨I₀.Y ⊓ I.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩
+    have hcond := x.condition R
+    change ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map
+        (homOfLE inf_le_left).op) (x I₀) =
+      ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map
+        (homOfLE inf_le_right).op) (x I) at hcond
+    rw [← ha, ← hb] at hcond
+    rw [← toPlus_naturality_const (homOfLE (inf_le_left (a := I₀.Y) (b := I.Y))) a,
+        ← toPlus_naturality_const (homOfLE (inf_le_right (a := I₀.Y) (b := I.Y))) b] at hcond
+    have hab : a = b := toPlus_injective_of_const _ hZne a b hcond
+    rw [← hb, ← hab]
+    exact toPlus_naturality_const I.f a
+  use z
+  rw [hx, toPlus_eq_mk, eq_mk_iff_exists]
+  refine ⟨S, homOfLE le_top, 𝟙 S, ?_⟩
+  apply Meq.ext; intro I
+  simp only [Meq.refine, Meq.mk]
+  by_cases hI : (I.Y : Set X).Nonempty
+  · exact (key I hI).symm
+  · rw [Set.not_nonempty_iff_eq_empty] at hI
+    have hIbot : I.Y = ⊥ := Opens.ext (by simpa using hI)
+    have hsub : Subsingleton (ToType (((opensGT X).plusObj (constPresheaf X)).obj (op I.Y))) := by
+      rw [hIbot]; exact plusObj_bot_subsingleton _
+    exact @Subsingleton.elim _ hsub _ _
+
+set_option maxHeartbeats 800000 in
+private theorem sheafify_constPresheaf_flasque_of_irreducible
+    (X : TopCat.{u}) [IrreducibleSpace X]
+    {U V : Opens X} (i : U ⟶ V) :
+    Epi (((opensGT X).sheafify (constPresheaf X)).map i.op) := by
+  by_cases hU : (U : Set X) = ∅
+  · have : U = ⊥ := Opens.ext (by simpa using hU)
+    subst this
+    rw [AddCommGrpCat.epi_iff_surjective]
+    intro y
+    refine ⟨0, ?_⟩
+    have hsub : Subsingleton
+        (ToType (((opensGT X).sheafify (constPresheaf X)).obj (op ⊥))) := by
+      simpa [GrothendieckTopology.toSheafify] using
+        (plusObj_bot_subsingleton (X := X)
+          (P := (opensGT X).plusObj (constPresheaf X)))
+    exact @Subsingleton.elim _ hsub _ _
+  · have hUne : (U : Set X).Nonempty := Set.nonempty_iff_ne_empty.mpr hU
+    have hnat := ((opensGT X).toSheafify (constPresheaf X)).naturality i.op
+    have hid : (constPresheaf X).map i.op = 𝟙 _ := by
+      ext a
+      simp [constPresheaf]
+    rw [hid, Category.id_comp] at hnat
+    have hfac : ((opensGT X).toSheafify (constPresheaf X)).app (op V) ≫
+        ((opensGT X).sheafify (constPresheaf X)).map i.op =
+        ((opensGT X).toSheafify (constPresheaf X)).app (op U) := hnat.symm
+    haveI : Epi (((opensGT X).toSheafify (constPresheaf X)).app (op U)) := by
+      apply ConcreteCategory.epi_of_surjective
+      have hfact : ((opensGT X).toSheafify (constPresheaf X)).app (op U) =
+          ((opensGT X).toPlus (constPresheaf X)).app (op U) ≫
+          ((opensGT X).toPlus ((opensGT X).plusObj (constPresheaf X))).app (op U) := by
+        simp only [GrothendieckTopology.toSheafify, (opensGT X).plusMap_toPlus,
+          NatTrans.comp_app]
+      rw [hfact]
+      intro y
+      obtain ⟨z, hz⟩ := toPlus_surjective_of_firstPlus (X := X) U hUne y
+      obtain ⟨a, ha⟩ := toPlus_surjective_of_const (X := X) U hUne z
+      refine ⟨a, ?_⟩
+      rw [ConcreteCategory.comp_apply, ha]
+      exact hz
+    exact epi_of_epi_fac hfac
+
+private theorem presheafToSheaf_constPresheaf_flasque_of_irreducible
+    (X : TopCat.{u}) [IrreducibleSpace X]
+    {U V : Opens X} (i : U ⟶ V) :
+    Epi (((presheafToSheaf (opensGT X) AddCommGrpCat.{u}).obj (constPresheaf X)).val.map i.op) := by
+  let e : ((opensGT X).sheafify (constPresheaf X)) ≅
+      CategoryTheory.sheafify (opensGT X) (constPresheaf X) :=
+    plusPlusIsoSheafify (J := opensGT X) (D := AddCommGrpCat.{u}) (P := constPresheaf X)
+  haveI : Epi (((opensGT X).sheafify (constPresheaf X)).map i.op) :=
+    sheafify_constPresheaf_flasque_of_irreducible (X := X) (i := i)
+  haveI : Epi ((((opensGT X).sheafify (constPresheaf X)).map i.op) ≫ e.hom.app (op U)) := by
+    infer_instance
+  have hnat := e.hom.naturality i.op
+  have hcomp : Epi (e.hom.app (op V) ≫
+      (CategoryTheory.sheafify (opensGT X) (constPresheaf X)).map i.op) := by
+    rw [← hnat]
+    infer_instance
+  letI : Epi (e.hom.app (op V) ≫
+      (CategoryTheory.sheafify (opensGT X) (constPresheaf X)).map i.op) := hcomp
+  exact epi_of_epi (e.hom.app (op V))
+    ((CategoryTheory.sheafify (opensGT X) (constPresheaf X)).map i.op)
+
 theorem constantSheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
     {U V : Opens X} (i : U ⟶ V) :
     Epi (((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
       (AddCommGrpCat.of (ULift ℤ))).val.map i.op) := by
-  by_cases hU : (U : Set X) = ∅
-  · -- U = ∅: target is zero, any map is epi
-    have : U = ⊥ := Opens.ext (by simpa using hU)
-    subst this
-    have hcov : ⊥ ∈ (Opens.grothendieckTopology X) ⊥ :=
-      fun x hx => (Opens.mem_bot.mp hx).elim
-    exact (Sheaf.isTerminalOfBotCover _ ⊥ hcov).isZero.epi _
-  · -- U nonempty: by naturality of toSheafify + surjectivity at nonempty opens
-    -- The full mathematical proof is in the docstring above.
-    admit
+  simpa [CategoryTheory.constantSheaf, constPresheaf] using
+    (presheafToSheaf_constPresheaf_flasque_of_irreducible (X := X) (i := i))
