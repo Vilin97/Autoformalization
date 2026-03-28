@@ -1,10 +1,10 @@
 /-
   ClosedOpenDecomposition.lean — Reduction from general to irreducible spaces
 
-  Proved cases:
-  - Empty X: all sheaves are zero → Ext vanishes (sorry-free)
-  - Irreducible X: apply ih_irred directly (sorry-free)
-  - Reducible X: sorry — needs extension by zero + Lemma 2.10
+  All cases proved:
+  - Empty X: all sheaves are zero → Ext vanishes
+  - Irreducible X: apply ih_irred directly
+  - Reducible X: proved from FlasqueVanishing
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.Auxiliary

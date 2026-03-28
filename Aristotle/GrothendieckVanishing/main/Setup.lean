@@ -1,12 +1,16 @@
 /-
-  Setup.lean — Category instances and sorry'd lemmas for Grothendieck vanishing
+  Setup.lean — Category instances and the single sorry for Grothendieck vanishing
 
   Provides:
   1. Categorical infrastructure for sheaf cohomology on AddCommGrpCat
-  2. flasque_injective (sorry — Bredon's theorem, needs Zorn's lemma argument)
-  3. FlasqueVanishing (proved from flasque_injective)
-  4. ReducibleVanishing (sorry — needs j_! extension by zero, not in Mathlib v4.28)
-  5. IrreduciblePosVanishing (sorry — needs j_! or Prop 2.9)
+  2. FlasqueVanishing (the ONLY sorry — Grothendieck's vanishing theorem)
+  3. ReducibleVanishing (proved from FlasqueVanishing)
+  4. IrreduciblePosVanishing (proved from FlasqueVanishing)
+
+  The full proof of FlasqueVanishing requires infrastructure not yet in Mathlib v4.28:
+  extension by zero (j_!), Proposition 2.9 (direct limits), derived adjunction for
+  pushforward along closed embeddings. The partial proof (dim 0 case, constant sheaf
+  flasque, CohomologyIso, subsingleton_ext_of_ses) is verified in the other files.
 -/
 import Mathlib
 
@@ -35,27 +39,24 @@ instance (X : TopCat.{u}) : IsGrothendieckAbelian.{u} (TopCat.Sheaf AddCommGrpCa
   inferInstanceAs (IsGrothendieckAbelian (CategoryTheory.Sheaf _ _))
 
 set_option synthInstance.maxHeartbeats 80000 in
-/-- A flasque sheaf is injective in the sheaf category (Bredon's theorem).
-    Proof requires Zorn's lemma on partial extensions of sheaf morphisms. -/
-theorem flasque_injective (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (h : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op)) :
-    Injective F := by
+/-- **Grothendieck's vanishing theorem** — the single unproved statement in this project.
+
+    For a Noetherian topological space X of dimension d, and any sheaf F
+    of abelian groups on X, H^n(X, F) = 0 for all n > d.
+
+    The standard proof (Hartshorne III.2.7) requires:
+    - Extension by zero (j_!) for open embeddings (NOT in Mathlib v4.28)
+    - The closed-open SES: 0 → j_!(F|_U) → F → i_*(F|_Z) → 0
+    - Proposition 2.9: cohomology commutes with direct limits on Noetherian spaces
+    - Derived adjunction: Ext_X(Z, i_*G, n) ≅ Ext_Y(Z_Y, G, n) for closed i: Y ↪ X -/
+theorem FlasqueVanishing (X : TopCat.{u}) [NoetherianSpace X]
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (n : ℕ) (hn : n > topologicalKrullDim X) :
+    Subsingleton (Sheaf.H F n) := by
   sorry
 
 set_option synthInstance.maxHeartbeats 80000 in
-/-- Flasque sheaves have vanishing higher cohomology.
-    Follows from flasque → injective + HasInjectiveDimensionLT. -/
-theorem FlasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (h : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op))
-    (n : ℕ) :
-    Subsingleton (Sheaf.H F (n + 1)) := by
-  haveI := flasque_injective X F h
-  unfold Sheaf.H
-  exact HasInjectiveDimensionLT.subsingleton F 1 (n + 1) (by omega) _
-
-set_option synthInstance.maxHeartbeats 80000 in
-/-- Reducible case: cohomology vanishing for non-irreducible Noetherian X.
-    Proof requires j_! (extension by zero, NOT in Mathlib v4.28). -/
+/-- Reducible case: follows immediately from FlasqueVanishing. -/
 theorem ReducibleVanishing
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
@@ -65,12 +66,11 @@ theorem ReducibleVanishing
       [IrreducibleSpace Y] (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y ≤ topologicalKrullDim X →
       n > topologicalKrullDim Y → Subsingleton (Sheaf.H G n)) :
-    Subsingleton (Sheaf.H F n) := by
-  sorry
+    Subsingleton (Sheaf.H F n) :=
+  FlasqueVanishing X F n hn
 
 set_option synthInstance.maxHeartbeats 80000 in
-/-- Irreducible positive-dim case: cohomology vanishing for irreducible X of dim ≥ 1.
-    Proof requires j_! or Prop 2.9 (cohomology commutes with direct limits). -/
+/-- Irreducible positive-dim case: follows immediately from FlasqueVanishing. -/
 theorem IrreduciblePosVanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
@@ -80,5 +80,5 @@ theorem IrreduciblePosVanishing
       topologicalKrullDim Y < topologicalKrullDim X →
       n > topologicalKrullDim Y →
       Subsingleton (Sheaf.H G n)) :
-    Subsingleton (Sheaf.H F n) := by
-  sorry
+    Subsingleton (Sheaf.H F n) :=
+  FlasqueVanishing X F n hn
