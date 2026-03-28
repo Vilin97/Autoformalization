@@ -30,6 +30,12 @@
       "submission": "main/Setup.lean (full file)",
       "output": "aristotle-out/Setup_aristotle/",
       "target": "epi_app_of_shortExact_flasque (full context submission)"
+    },
+    {
+      "id": "17ae0f8d-5889-4b90-baf1-aab43c191bd2",
+      "submission": "aristotle-in/PushforwardHVanishing.lean",
+      "output": "aristotle-out/PushforwardHVanishing_aristotle.lean",
+      "target": "PushforwardHVanishing (Ext identity + Γ equality)"
     }
   ],
   "canceled": [

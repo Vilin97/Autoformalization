@@ -142,39 +142,147 @@ private lemma mono_f_app {X : TopCat.{u}}
     change Mono ((sheafToPresheaf _ _).map S.f); infer_instance
   exact (NatTrans.mono_iff_mono_app S.f.val).mp ‹_› (op V)
 
--- Zorn argument (Nugent, PR #35790, epi_of_shortExact).
--- In a SES 0 -> F' -> G -> H -> 0 with F' flasque, the map G(U) -> H(U) is epi.
-set_option maxHeartbeats 6400000 in
+-- Extension preorder on partial lifts (V, t):
+-- (V₁,t₁) ≤ (V₂,t₂) iff V₁ ≤ V₂ and t₂|_{V₁} = t₁.
+private noncomputable instance sigmaPreorder {X : TopCat.{u}}
+    (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)) :
+    Preorder (Σ V : Opens X, S.X₂.val.obj (op V)) where
+  le p q := ∃ h : p.1 ≤ q.1,
+    ConcreteCategory.hom (S.X₂.val.map (homOfLE h).op) q.2 = p.2
+  le_refl p := ⟨le_refl _, by simp⟩
+  le_trans p q r := fun ⟨h₁, ht₁⟩ ⟨h₂, ht₂⟩ =>
+    ⟨le_trans h₁ h₂, by
+      have : (homOfLE (le_trans h₁ h₂)).op =
+          (homOfLE h₂).op ≫ (homOfLE h₁).op := rfl
+      simp only [this, Functor.map_comp, AddCommGrpCat.hom_comp,
+        AddMonoidHom.coe_comp, Function.comp_apply, ht₂, ht₁]⟩
+
+-- Zorn argument for surjectivity of sections (Nugent, PR #35790).
+-- Given s : X₃(U), the set P of pairs (V, t) with V ≤ U and g(t) = s|_V
+-- has a maximal element by Zorn. Local surjectivity + exactness + flasqueness
+-- show the maximal V must equal U.
+set_option maxHeartbeats 12800000 in
 theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁) (U : Opens X) :
     Epi (S.g.val.app (op U)) := by
-  -- Reduce to surjectivity via epi ↔ surjective in AddCommGrpCat
   rw [AddCommGrpCat.epi_iff_surjective]; intro s
-  -- Get locally surjective from epi (Sheaf.IsLocallySurjective)
   haveI : Epi S.g := hS.epi_g
   have hls : Sheaf.IsLocallySurjective S.g :=
     (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} S.g).mpr inferInstance
-  -- We prove: s has a preimage in X₂(U).
-  -- The imageSieve of g.val at s covers U (by local surjectivity).
-  -- For each x ∈ U, there is a neighborhood V_x and a local lift t_x.
-  -- We use Zorn to patch these into a global lift.
-  -- For brevity, we write `gV t` for `g_V(t)` etc.
-  -- Naturality: g_W(res t) = res(g_V(t)) and f_W(res a) = res(f_V(a))
-  -- g∘f = 0: g_V(f_V(a)) = 0 for all V, a
-  -- The Zorn set P: opens V ≤ U equipped with t ∈ X₂(V) and g(t)=s|_V.
-  -- The Zorn argument is formalized as follows:
-  -- 1. P is nonempty (⊥, 0)
-  -- 2. Chains in P have upper bounds (sheaf gluing for X₂)
-  -- 3. Maximal element (V₀, t₀) satisfies V₀ = U.
-  -- Instead of a full formal Zorn argument (which requires defining a preorder
-  -- on a Sigma type and proving the chain condition), we use the imageSieve
-  -- directly and reduce to the 1-step extension argument.
-  -- The key claim: if there exists V < U and t ∈ X₂(V) with g(t) = s|_V,
-  -- and x ∈ U \ V, then there exists V' with V < V' ≤ U and t' with g(t') = s|_{V'}.
-  -- Iterating (via Zorn), we eventually reach U.
-  -- For this proof, we use sorry for the Zorn infrastructure and prove the
-  -- extension step, which is the mathematical heart.
+  -- Zorn set P = {(V,t) | V ≤ U, g(t) = s|_V}
+  let P : Set (Σ V : Opens X, S.X₂.val.obj (op V)) := fun p =>
+    ∃ h : p.1 ≤ U,
+      ConcreteCategory.hom (S.g.val.app (op p.1)) p.2 =
+        ConcreteCategory.hom (S.X₃.val.map (homOfLE h).op) s
+  -- P is nonempty: (⊥, 0) ∈ P since X₃(⊥) is the zero group
+  have hbot :
+      (⟨⊥, 0⟩ : Σ V : Opens X, S.X₂.val.obj (op V)) ∈ P := by
+    refine ⟨bot_le, ?_⟩; dsimp [P]
+    have hz : IsZero (S.X₃.val.obj (op (⊥ : Opens X))) := by
+      rw [IsZero.iff_id_eq_zero]
+      exact (isTerminal_sheaf_bot S.X₃).hom_ext _ _
+    exact hz.eq _ _
+  -- Zorn gives a maximal element
+  obtain ⟨⟨V₀, t₀⟩, ⟨hV₀U, ht₀⟩, hmax⟩ :=
+      zorn_le₀ P (fun c hcP hchain => by
+    by_cases hc : c.Nonempty
+    · -- Chain upper bound via sheaf gluing for X₂.
+      -- The sections on chain elements are compatible (by the chain order)
+      -- and glue to a section on the union by the sheaf condition.
+      sorry
+    · exact ⟨⟨⊥, 0⟩, hbot, fun z hz => absurd ⟨z, hz⟩ hc⟩)
+  -- Show the maximal V₀ equals U
+  suffices hV₀eq : V₀ = U by
+    subst hV₀eq; exact ⟨t₀, by rw [ht₀]; simp⟩
+  by_contra hne; exfalso
+  have hlt : V₀ < U := lt_of_le_of_ne hV₀U hne
+  -- Pick x ∈ U \ V₀
+  obtain ⟨x, hxU, hxV₀⟩ := Set.not_subset.mp hlt.2
+  -- Local lift at x from the imageSieve
+  obtain ⟨W, iWU, ⟨t', ht'⟩, hxW⟩ :=
+    (hls.imageSieve_mem s) x hxU
+  have hWU : W ≤ U := leOfHom iWU
+  -- On V₀ ⊓ W: g(t₀|_{V₀⊓W} - t'|_{V₀⊓W}) = 0
+  have hdiff_ker :
+      ConcreteCategory.hom (S.g.val.app (op (V₀ ⊓ W)))
+        (ConcreteCategory.hom
+          (S.X₂.val.map (homOfLE inf_le_left).op) t₀ -
+         ConcreteCategory.hom
+          (S.X₂.val.map (homOfLE inf_le_right).op) t') =
+        0 := by
+    simp only [map_sub]
+    -- Naturality of g: g ∘ res = res ∘ g
+    have n1 : ConcreteCategory.hom
+        (S.X₂.val.map (homOfLE inf_le_left).op ≫
+          S.g.val.app (op (V₀ ⊓ W))) t₀ =
+      ConcreteCategory.hom
+        (S.g.val.app (op V₀) ≫
+          S.X₃.val.map (homOfLE inf_le_left).op) t₀ := by
+      change ConcreteCategory.hom (_ ≫ _) _ =
+        ConcreteCategory.hom (_ ≫ _) _
+      rw [S.g.val.naturality]
+    have n2 : ConcreteCategory.hom
+        (S.X₂.val.map (homOfLE inf_le_right).op ≫
+          S.g.val.app (op (V₀ ⊓ W))) t' =
+      ConcreteCategory.hom
+        (S.g.val.app (op W) ≫
+          S.X₃.val.map (homOfLE inf_le_right).op) t' := by
+      change ConcreteCategory.hom (_ ≫ _) _ =
+        ConcreteCategory.hom (_ ≫ _) _
+      rw [S.g.val.naturality]
+    simp [AddCommGrpCat.hom_comp] at n1 n2
+    rw [← n1, ht₀, ← n2, ht']
+    simp only [← AddCommGrpCat.hom_comp, ← Functor.map_comp,
+      sub_self]
+    congr 1; apply Subsingleton.elim
+  -- Exactness: ∃ a ∈ X₁(V₀⊓W), f(a) = t₀|_{V₀⊓W} - t'|_{V₀⊓W}
+  obtain ⟨a, ha⟩ :=
+    sections_exact_of_shortExact hS (V₀ ⊓ W) _ hdiff_ker
+  -- Flasqueness of X₁: extend a from V₀⊓W to W
+  have hfl :
+      Epi (S.X₁.val.map
+        (homOfLE inf_le_right : V₀ ⊓ W ⟶ W).op) :=
+    hFlasque₁ (homOfLE inf_le_right)
+  rw [AddCommGrpCat.epi_iff_surjective] at hfl
+  obtain ⟨ahat, hahat⟩ := hfl a
+  -- Patched section: t'' = t' + f_W(â)
+  set t'' :=
+    t' + ConcreteCategory.hom (S.f.val.app (op W)) ahat
+  -- g(t'') = s|_W (since g ∘ f = 0)
+  have ht'' : ∃ h : W ≤ U,
+      ConcreteCategory.hom (S.g.val.app (op W)) t'' =
+        ConcreteCategory.hom
+          (S.X₃.val.map (homOfLE h).op) s := by
+    refine ⟨hWU, ?_⟩; simp only [t'', map_add]
+    have : ConcreteCategory.hom
+        (S.f.val.app (op W) ≫ S.g.val.app (op W))
+        ahat = 0 := by
+      rw [eval_comp_zero]; simp
+    simp [AddCommGrpCat.hom_comp] at this
+    rw [this, add_zero, ht']
+    congr 1; apply Subsingleton.elim
+  -- t''|_{V₀⊓W} = t₀|_{V₀⊓W} (compatibility for gluing)
+  have ht''_compat :
+      ConcreteCategory.hom
+        (S.X₂.val.map (homOfLE inf_le_right).op) t'' =
+      ConcreteCategory.hom
+        (S.X₂.val.map (homOfLE inf_le_left).op) t₀ := by
+    simp only [t'', map_add]
+    have fnat : ConcreteCategory.hom
+        (S.X₁.val.map (homOfLE inf_le_right).op ≫
+          S.f.val.app (op (V₀ ⊓ W))) ahat =
+      ConcreteCategory.hom
+        (S.f.val.app (op W) ≫
+          S.X₂.val.map (homOfLE inf_le_right).op) ahat := by
+      change ConcreteCategory.hom (_ ≫ _) _ =
+        ConcreteCategory.hom (_ ≫ _) _
+      rw [S.f.val.naturality]
+    simp [AddCommGrpCat.hom_comp] at fnat
+    rw [fnat.symm, hahat, ha]; abel
+  -- The above shows we can extend (V₀, t₀) to (V₀ ⊔ W, t_new) ∈ P
+  -- by gluing t₀ and t'' via the sheaf condition, contradicting maximality.
+  -- The gluing uses TopCat.Sheaf.existsUnique_gluing with a Bool cover.
   sorry
 
 /-- **Quotient preserves flasqueness** (Nugent, PR #35790).
@@ -411,8 +519,9 @@ theorem pushforward_preserves_flasque {Y : TopCat.{u}} (f : TopCat.of Y ⟶ X)
   fun i => by change Epi (G.val.map ((Opens.map f).op.map i.op)); exact hG _
 
 -- Pushforward along a closed immersion preserves cohomological vanishing.
--- Uses FlasqueVanishing + LES + Γ equality. The hypothesis is universal:
--- vanishing for ALL sheaves on Z for all degrees ≥ 1.
+-- KEY: Γ_X(i_*G) = G(⊤_Z) by rfl, and i_* preserves flasqueness.
+-- The proof uses FlasqueVanishing + LES + Γ equality + induction on n.
+-- Requires: i_* is exact for closed immersions (sorry'd sub-lemma).
 set_option synthInstance.maxHeartbeats 80000 in
 theorem PushforwardHVanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
