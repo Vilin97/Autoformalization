@@ -190,3 +190,33 @@ theorem topologicalKrullDim_lt_of_isIrreducible_of_isClosed {X : Type u} [Topolo
     have : Nonempty (IrreducibleCloseds X) :=
       ⟨⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩⟩
     exact (WithBot.bot_lt_coe _).trans_le Order.krullDim_nonneg
+
+/-! ## Projective ULift ℤ in AddCommGrpCat -/
+
+/-- `ULift ℤ` is projective in `AddCommGrpCat` (via the equivalence with `ModuleCat ℤ`). -/
+noncomputable instance ulift_int_projective :
+    Projective (AddCommGrpCat.of (ULift.{u} ℤ)) := by
+  set e := (forget₂ (ModuleCat.{u} ℤ) AddCommGrpCat.{u}).asEquivalence with he
+  have : e.inverse.PreservesEpimorphisms := by
+    constructor; intro X Y f hf; exact e.symm.functor.map_epi f
+  have hp := e.toAdjunction.map_projective _
+    (inferInstance : Projective (ModuleCat.of ℤ (ULift.{u} ℤ)))
+  simp only [he, Functor.asEquivalence, ModuleCat.forget₂_obj] at hp
+  exact hp
+
+/-! ## Covering sieve lemma for dim 0 -/
+
+/-- On a dim 0 irreducible nonempty space, every covering sieve of ⊤ contains the identity.
+    This is because the only nonempty open is ⊤ itself. -/
+theorem covering_sieve_top_has_id {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
+    (hdim : topologicalKrullDim X ≤ 0) [Nonempty X]
+    (S : Sieve (⊤ : Opens X)) (hS : S ∈ Opens.grothendieckTopology X ⊤) :
+    S.arrows (𝟙 ⊤) := by
+  obtain ⟨x⟩ := ‹Nonempty X›
+  obtain ⟨V, f, hfS, hxV⟩ := hS x trivial
+  have hVtop : V = ⊤ := by
+    rcases opens_eq_bot_or_top_of_irreducibleSpace_dim_zero hdim V with rfl | rfl
+    · simp [Opens.coe_bot] at hxV
+    · rfl
+  subst hVtop
+  rwa [show f = 𝟙 ⊤ from Subsingleton.elim _ _] at hfS
