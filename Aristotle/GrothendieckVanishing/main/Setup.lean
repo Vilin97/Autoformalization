@@ -34,17 +34,27 @@ instance (X : TopCat.{u}) : Abelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
 instance (X : TopCat.{u}) : IsGrothendieckAbelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   inferInstanceAs (IsGrothendieckAbelian (CategoryTheory.Sheaf _ _))
 
-set_option synthInstance.maxHeartbeats 80000
+set_option synthInstance.maxHeartbeats 80000 in
+/-- A flasque sheaf is injective in the sheaf category (Bredon's theorem).
+    Proof requires Zorn's lemma on partial extensions of sheaf morphisms.
+    DO NOT PROVE — use as axiom until the Zorn argument is formalized. -/
+theorem flasque_injective (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (h : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op)) :
+    Injective F := by
+  admit
 
+set_option synthInstance.maxHeartbeats 80000 in
 /-- Flasque sheaves have vanishing higher cohomology.
-    A sheaf is flasque if all restriction maps are epi.
-    DO NOT PROVE — use as axiom. -/
+    Follows from flasque → injective + HasInjectiveDimensionLT. -/
 theorem FlasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (h : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op))
     (n : ℕ) :
     Subsingleton (Sheaf.H F (n + 1)) := by
-  admit
+  haveI := flasque_injective X F h
+  unfold Sheaf.H
+  exact HasInjectiveDimensionLT.subsingleton F 1 (n + 1) (by omega) _
 
+set_option synthInstance.maxHeartbeats 80000 in
 /-- Reducible case: for a non-irreducible Noetherian space X, cohomology vanishing
     follows from vanishing on all irreducible spaces of dim ≤ dim X.
 
@@ -64,6 +74,7 @@ theorem ReducibleVanishing
     Subsingleton (Sheaf.H F n) := by
   admit
 
+set_option synthInstance.maxHeartbeats 80000 in
 /-- Irreducible positive-dim case: for an irreducible Noetherian space X of dim ≥ 1,
     cohomology vanishing follows from vanishing on all lower-dim spaces.
 

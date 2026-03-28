@@ -7,8 +7,8 @@
 
   The proof assembles:
   - DimZeroVanishing: irreducible dim 0 case (proved)
-  - IrreducibleStep: irreducible dim ≥ 1 case (sorry — needs Prop 2.9)
-  - ClosedOpenDecomposition: reduction to irreducible (sorry — needs extension by zero)
+  - IrreducibleStep: irreducible dim ≥ 1 case (axiom — needs j_!)
+  - ClosedOpenDecomposition: reduction to irreducible (axiom — needs j_!)
 -/
 import Aristotle.GrothendieckVanishing.main.DimZeroVanishing
 import Aristotle.GrothendieckVanishing.main.ClosedOpenDecomposition
@@ -22,7 +22,7 @@ open CategoryTheory TopologicalSpace Order Limits
 
 /-- The core induction step: vanishing at dimension d, given vanishing at all d' < d.
 
-    Combines ClosedOpenDecomposition (sorry), DimZeroVanishing, and IrreducibleStep (sorry). -/
+    Combines ClosedOpenDecomposition (axiom), DimZeroVanishing, and IrreducibleStep (axiom). -/
 private theorem grothendieck_vanishing_aux (d : WithBot ℕ∞)
     (ih : ∀ d' < d, ∀ (X : TopCat.{u}) [NoetherianSpace X]
       (n : ℕ) (F : TopCat.Sheaf AddCommGrpCat.{u} X),

@@ -94,7 +94,7 @@ private lemma toPlus_naturality_const
   have lhs : ConcreteCategory.hom ((constPresheaf X).map i.op ≫
       ((opensGT X).toPlus (constPresheaf X)).app (op U)) a =
     ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a := by
-    simp [ConcreteCategory.comp_apply, constPresheaf]
+    simp
   have rhs : ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op V) ≫
       ((opensGT X).plusObj (constPresheaf X)).map i.op) a =
     ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map i.op)

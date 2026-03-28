@@ -8,9 +8,9 @@
   - Setup.lean: category instances + FlasqueVanishing axiom
   - Auxiliary.lean: topology/dimension helpers (irreducible dim 0 characterization)
   - DimZeroVanishing.lean: PROVED — irreducible dim 0 case
-  - ClosedOpenDecomposition.lean: SORRY — reduction to irreducible
-  - IrreducibleStep.lean: SORRY — irreducible dim ≥ 1 (needs Prop 2.9)
-  - GrothendieckVanishing.lean: assembled (modulo sorry's) — main theorem by induction
+  - ClosedOpenDecomposition.lean: axiom — reduction to irreducible (needs j_!)
+  - IrreducibleStep.lean: axiom — irreducible dim ≥ 1 (needs j_!)
+  - GrothendieckVanishing.lean: assembled (modulo axioms in Setup.lean) — main theorem by induction
 -/
 import Aristotle.GrothendieckVanishing.main.GrothendieckVanishing
 
