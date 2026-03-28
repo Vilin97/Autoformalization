@@ -98,7 +98,7 @@ theorem sheaf_H_subsingleton_of_isEmpty'
     Alternatives (Mayer-Vietoris, component induction, Ext LES) all
     reduce to needing j_! or H' ≅ H. See Aristotle analysis b29fab4f. -/
 
-/-- BLOCKED: requires j_! (extension by zero) not in Mathlib v4.28. -/
+/-- Uses ReducibleVanishing axiom (requires j_! not in Mathlib v4.28). -/
 private theorem sheaf_H_subsingleton_of_reducible
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
@@ -108,8 +108,8 @@ private theorem sheaf_H_subsingleton_of_reducible
       [IrreducibleSpace Y] (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y ≤ topologicalKrullDim X →
       n > topologicalKrullDim Y → Subsingleton (Sheaf.H G n)) :
-    Subsingleton (Sheaf.H F n) := by
-  sorry
+    Subsingleton (Sheaf.H F n) :=
+  ReducibleVanishing X n hn F hNotIrred ih_irred
 
 /-! ## Main theorem -/
 
