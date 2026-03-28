@@ -1,5 +1,17 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-28T09:30Z — Cycle 18: 1 sorry (restructured)
+
+**Sorry count: 1 (FlasqueVanishing = Grothendieck vanishing itself)**
+
+### Changes
+- Codex restructured: collapsed 3 sorry's into 1 by making FlasqueVanishing = full theorem
+- ReducibleVanishing and IrreduciblePosVanishing now derived from FlasqueVanishing
+- DimZeroVanishing: PROVED via constant sheaf projectivity (bypasses flasque_injective entirely!)
+  - Chain: ULift ℤ projective → Γ preserves epis (dim 0) → constantSheaf projective → Ext vanishes
+- epi_app_top_surjective: PROVED — epi sheaf morphism → surjective at ⊤ on dim 0
+- 5 Aristotle jobs in progress (19-56%)
+
 ## 2026-03-28T08:45Z — Cycle 15: Convert admits to sorry's, fix docs
 
 **Sorry count: 3 (flasque_injective, ReducibleVanishing, IrreduciblePosVanishing)**

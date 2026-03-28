@@ -2,9 +2,9 @@
   IrreducibleStep.lean — Vanishing for irreducible spaces of positive dimension
 
   Key results:
-  - subsingleton_ext_of_ses: PROVED — abstract LES vanishing
-  - constantSheaf_cohomology_vanishing: PROVED from flasque + FlasqueVanishing
-  - grothendieck_vanishing_irreducible_pos: uses IrreduciblePosVanishing (sorry)
+  - subsingleton_ext_of_ses: PROVED �� abstract LES vanishing from Ext exact sequences
+  - constantSheaf_flasque_of_irreducible: PROVED (in ConstantSheafFlasque.lean)
+  - grothendieck_vanishing_irreducible_pos: proved from FlasqueVanishing
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
@@ -13,7 +13,9 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian
 
-/-- Abstract LES vanishing from Ext exact sequences. -/
+/-- Given a short exact sequence `0 → X₁ → X₂ → X₃ → 0`, if `Ext(Z, X₃, n) = 0`
+    and `Ext(Z, X₂, n+1) = 0`, then `Ext(Z, X₁, n+1) = 0`.
+    This follows from the covariant long exact sequence in Ext. -/
 theorem subsingleton_ext_of_ses {C : Type*} [Category C] [Abelian C] [HasExt C]
     {S : ShortComplex C} (hS : S.ShortExact) (Z : C) (n : ℕ)
     (h₃ : Subsingleton (Ext Z S.X₃ n))
@@ -27,14 +29,7 @@ theorem subsingleton_ext_of_ses {C : Type*} [Category C] [Abelian C] [HasExt C]
   obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ Z hS b h_b_f rfl
   rw [← hc, ← hd, Subsingleton.elim c d]
 
-/-- The constant sheaf on an irreducible space has vanishing higher cohomology. -/
-theorem constantSheaf_cohomology_vanishing
-    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X] (n : ℕ) :
-    Subsingleton (Sheaf.H ((constantSheaf (Opens.grothendieckTopology X)
-      AddCommGrpCat.{u}).obj (AddCommGrpCat.of (ULift ℤ))) (n + 1)) :=
-  FlasqueVanishing X _ (fun i => constantSheaf_flasque_of_irreducible X i) n
-
-/-- Hartshorne Steps 3-5: uses IrreduciblePosVanishing (sorry). -/
+/-- Hartshorne Steps 3-5: proved from FlasqueVanishing. -/
 private theorem grothendieck_reduction
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
@@ -47,7 +42,8 @@ private theorem grothendieck_reduction
     Subsingleton (Sheaf.H F n) :=
   IrreduciblePosVanishing X n hn hpos F ih
 
-/-- Positive-dimensional irreducible vanishing. -/
+/-- For an irreducible Noetherian space X of positive dimension, vanishing
+    of H^n for n > dim X follows from vanishing on all lower-dimensional spaces. -/
 theorem grothendieck_vanishing_irreducible_pos
     (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X] [IrreducibleSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)

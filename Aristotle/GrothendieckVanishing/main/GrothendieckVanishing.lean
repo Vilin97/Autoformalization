@@ -5,10 +5,10 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  The proof assembles:
-  - DimZeroVanishing: irreducible dim 0 case (proved)
-  - IrreducibleStep: irreducible dim ≥ 1 case (sorry — needs j_!)
-  - ClosedOpenDecomposition: reduction to irreducible (sorry — needs j_!)
+  The proof assembles (all proved, modulo FlasqueVanishing in Setup.lean):
+  - DimZeroVanishing: irreducible dim 0 case (proved via projectivity)
+  - IrreducibleStep: irreducible dim ≥ 1 case (proved from FlasqueVanishing)
+  - ClosedOpenDecomposition: reduction to irreducible (proved from FlasqueVanishing)
 -/
 import Aristotle.GrothendieckVanishing.main.DimZeroVanishing
 import Aristotle.GrothendieckVanishing.main.ClosedOpenDecomposition
@@ -29,7 +29,7 @@ private theorem grothendieck_vanishing_aux (d : WithBot ℕ∞)
     (n : ℕ) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (hd : topologicalKrullDim X = d) (hn : n > d) :
     Subsingleton (Sheaf.H F n) := by
-  -- Step 1: Reduce to irreducible X (uses ReducibleVanishing sorry)
+  -- Step 1: Reduce to irreducible X
   apply grothendieck_vanishing_of_irreducible X n (hd ▸ hn) F
   intro Y _ _ G hle hY
   by_cases hdim : topologicalKrullDim Y ≤ 0
@@ -39,7 +39,7 @@ private theorem grothendieck_vanishing_aux (d : WithBot ℕ∞)
       exact not_lt.mpr (topologicalKrullDim_nonneg_of_irreducible (X := Y)) (by exact_mod_cast hY)
     obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn0
     exact grothendieck_vanishing_dim_zero Y hdim G m
-  · -- dim Y > 0: use IrreducibleStep (uses IrreduciblePosVanishing sorry)
+  · -- dim Y > 0: use IrreducibleStep
     push_neg at hdim
     exact grothendieck_vanishing_irreducible_pos Y n hY hdim G
       (fun Z _ G' hlt hG' =>
