@@ -1,5 +1,21 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-28T05:10Z — Cycle 11b: Decompose flasque proof + mass Aristotle submit
+
+**Sorry count: 3 mathematical + 1 axiom (unchanged)**
+
+### Accomplished
+- Created `ConstantSheafFlasque.lean` as dedicated file for the flasque proof
+- Moved constantSheaf_flasque_of_irreducible out of IrreducibleStep.lean
+- Decomposed the flasque proof into sub-lemmas for Aristotle:
+  - `meq_const_of_irreducible`: matching families for const presheaf are equal
+  - `toPlus_surjective_of_irreducible_const`: toPlus is surjective at nonempty opens
+- Submitted 4 total Aristotle jobs:
+  - `b29fab4f`: ReducibleCase
+  - `55ef4f62`: IrreducibleStep (flasque + reduction)
+  - `17b9bce9`: ToSheafifySurjective
+  - `a60dddad`: MeqConstant
+
 ## 2026-03-28T04:10Z — Cycle 11: Resubmit remaining sorry's
 
 **Sorry count: 3 mathematical + 1 axiom (unchanged)**

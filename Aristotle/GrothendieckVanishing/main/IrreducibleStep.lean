@@ -13,7 +13,7 @@
   Based on Aristotle output (bc3176de) + manual work.
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
-import Aristotle.GrothendieckVanishing.main.Auxiliary
+import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
 
 universe u
 
@@ -36,26 +36,6 @@ theorem subsingleton_ext_of_ses {C : Type*} [Category C] [Abelian C] [HasExt C]
   obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ Z hS a h_a_f rfl
   obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ Z hS b h_b_f rfl
   rw [← hc, ← hd, Subsingleton.elim c d]
-
-/-! ## Constant sheaf flasqueness -/
-
-/-- On an irreducible space, the constant sheaf Z has epi restriction maps (is flasque).
-
-    The U = ⊥ case is proved; the nonempty case requires sheafification internals. -/
-theorem constantSheaf_flasque_of_irreducible
-    (X : TopCat.{u}) [IrreducibleSpace X]
-    {U V : Opens X} (i : U ⟶ V) :
-    Epi (((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-      (AddCommGrpCat.of (ULift ℤ))).val.map i.op) := by
-  by_cases hU : (U : Set X) = ∅
-  · -- U = ∅: F(V) → F(∅) is epi because F(∅) is terminal (zero)
-    have : U = ⊥ := Opens.ext (by simpa using hU)
-    subst this
-    have hcov : ⊥ ∈ (Opens.grothendieckTopology X) ⊥ :=
-      fun x hx => (Opens.mem_bot.mp hx).elim
-    exact epi_of_isTerminal_tgt (Sheaf.isTerminalOfBotCover _ ⊥ hcov) _
-  · -- U nonempty: needs sheafification argument
-    admit
 
 /-- The constant sheaf Z on an irreducible Noetherian space has vanishing
     higher cohomology. Follows from flasque + FlasqueVanishing. -/
