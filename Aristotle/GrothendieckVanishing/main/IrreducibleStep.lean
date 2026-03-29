@@ -112,6 +112,12 @@ theorem constantSheaf_kernel_vanishing
     exact PushforwardHVanishing Z hZ _ m (@ih (TopCat.of Z) _ _ hZ_dim hm_Z)
   exact hS₂ ▸ subsingleton_ext_of_ses hSE _ m hPush_m (hS₂ ▸ hConst)
 
+/-- Key identity: `zeroOutsideInt ⊤ = constantSheaf Z_X` (definitional). -/
+theorem zeroOutsideInt_top_eq_constantSheaf (X : TopCat.{u}) :
+    TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X) =
+    (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+      (AddCommGrpCat.of (ULift ℤ)) := rfl
+
 /-- Hartshorne Steps 3-5: uses IrreduciblePosVanishing (sorry). -/
 private theorem grothendieck_reduction
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]

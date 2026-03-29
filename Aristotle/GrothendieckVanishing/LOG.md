@@ -18,9 +18,16 @@
 - CI runs for fixes + Step 5 in-progress.
 - Aristotle API still down (500).
 
+- **KEY DISCOVERY**: `zeroOutsideInt ⊤ = constantSheaf Z_X` by `rfl`! This means
+  `openHom(le_top) : zeroOutsideInt V → Z_X` is literally a mono into the constant sheaf.
+  The composite η ∘ openHom(le_top) = 0 (since W ≤ V → W ∩ Z = ∅ → target is 0),
+  so openHom factors through kernel(η), and the factoring map is an iso.
+  This connects `constantSheaf_kernel_vanishing` to `zeroOutsideInt V` vanishing.
+
 ### Status
-- CI: 2 runs in-progress (2178710, 2ab3391)
-- Sorry: 1 (unchanged, but Step 5 theorem is a key building block)
+- CI: 2178710 FAILED (same commit had both fixes but only included Subsingleton one).
+  2ab3391 and da0ba5b in-progress (should pass).
+- Sorry: 1 (unchanged, but Step 5 + rfl identity make the path to closure clearer)
 
 ## 2026-03-29T17:00Z — Babysit cycle: CI verification + Aristotle check
 
