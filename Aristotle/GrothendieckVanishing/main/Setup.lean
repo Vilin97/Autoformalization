@@ -818,7 +818,12 @@ theorem ReducibleVanishing
       topologicalKrullDim Y ≤ topologicalKrullDim X →
       n > topologicalKrullDim Y → Subsingleton (Sheaf.H G n)) :
     Subsingleton (Sheaf.H F n) := by
-  sorry
+  -- X has finitely many irreducible components, k ≥ 2 since non-irreducible
+  -- Iterate ClosedImmersionSES, peeling one component per step
+  -- After k steps: kernel has zero stalks everywhere → zero sheaf → H = 0
+  sorry -- needs: finite iteration over irreducible components via ClosedImmersionSES
+  -- Each step uses: ih_irred (component is irreducible) + PushforwardHVanishing
+  -- Final step: sheaf_H_of_stalks_isZero (zero stalks → H = 0)
 
 set_option synthInstance.maxHeartbeats 80000 in
 /-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case).
@@ -852,4 +857,13 @@ theorem IrreduciblePosVanishing
       n > topologicalKrullDim Y →
       Subsingleton (Sheaf.H G n)) :
     Subsingleton (Sheaf.H F n) := by
-  sorry
+  -- Take a proper closed Z ⊊ X (exists since dim ≥ 1 means X has a non-generic point)
+  -- ClosedImmersionSES: 0 → K → F → i_*(i^*F) → 0
+  -- Pushforward: dim Z < dim X (irreducible) → ih gives H(Z, i^*F) = 0
+  --   → PushforwardHVanishing → H(X, i_*(i^*F)) = 0
+  -- Kernel K: zero stalks on Z, supp(K) ⊊ X (since Z ≠ ∅),
+  --   dim supp(K) < dim X → K ≅ i'_*(i'^*K) (unit iso for supported sheaves)
+  --   → ih + PushforwardHVanishing → H(X, K) = 0
+  -- SES: H(K) = 0 + H(pushforward) = 0 → H(F) = 0
+  sorry -- needs: proper closed subset extraction + ClosedImmersionSES +
+  -- PushforwardHVanishing + unit iso for supported sheaves + ih
