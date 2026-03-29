@@ -1020,7 +1020,10 @@ theorem IrreduciblePosVanishing
     (show b.carrier ⊆ a.carrier from by rw [show a.carrier = Set.univ from h]; exact Set.subset_univ _))
   -- dim Z < dim X (Z is a proper closed subset of irreducible X)
   have hZ_dim : topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X := by
-    sorry -- dim of proper closed subset of irreducible space is strictly less
+    exact topologicalKrullDim_lt_of_isIrreducible_of_isClosed hZ_closed hZ_ne_univ
+      (lt_of_le_of_lt (topologicalKrullDim_subspace_le X Z)
+        (lt_of_lt_of_le (show topologicalKrullDim X < ⊤ from by
+          exact lt_of_lt_of_le hn le_top) le_top))
   -- n > dim Z (since n > dim X > dim Z)
   have hn_Z : ↑n > topologicalKrullDim (TopCat.of Z) := lt_trans hZ_dim hn
   -- Step 2: ClosedImmersionSES: 0 → K → F → i_*(i^*F) → 0
