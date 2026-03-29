@@ -42,3 +42,6 @@ config
 logs/*.log
 logs/*.lock
 *codex-local
+aristotle-in/
+aristotle-out/
+state.md
