@@ -74,6 +74,82 @@ theorem zeroOutsideInt_vanishing
       inferInstance inferInstance
   exact subsingleton_ext_of_ses hSE _ m hCoker (constantSheaf_cohomology_vanishing X m)
 
+/-- The presheaf stalk map of `zeroOutside_openHom` at `x ∈ V` is surjective:
+    any germ in `stalk(constZ, x)` can be lifted by restricting to `W ∩ V ≤ V`
+    where the presheaf map is `eqToHom` (identity). -/
+private theorem presheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V) :
+    Function.Surjective (ConcreteCategory.hom
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
+        (TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) (le_top : V ≤ ⊤)))) := by
+  intro g
+  obtain ⟨W, hxW, s, rfl⟩ := (TopCat.Presheaf.constZ.zeroOutside (⊤ : Opens X)).germ_exist x g
+  refine ⟨(TopCat.Presheaf.constZ.zeroOutside V).germ (W ⊓ V) x ⟨hxW, hx⟩
+    ((eqToHom (TopCat.Presheaf.zeroOutside_le (F := TopCat.Presheaf.constZ) inf_le_right).symm)
+    ((TopCat.Presheaf.constZ.zeroOutside ⊤).map (homOfLE inf_le_left).op s)), ?_⟩
+  rw [TopCat.Presheaf.stalkFunctor_map_germ_apply,
+    ← TopCat.Presheaf.germ_res_apply _ (homOfLE inf_le_left) s ⟨hxW, hx⟩]
+  congr 1
+  simp [TopCat.Presheaf.zeroOutside_openHom, inf_le_right,
+    TopCat.Presheaf.zeroOutside_le, TopCat.Presheaf.zeroOutside]
+
+/-- The sheaf stalk map of `openHom(le_top)` at `x ∈ V` is surjective.
+    Transfers presheaf stalk surjectivity via `toSheafify_naturality` and
+    the fact that `stalk(toSheafify)` is an isomorphism. -/
+set_option synthInstance.maxHeartbeats 200000 in
+private theorem sheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V) :
+    Function.Surjective (ConcreteCategory.hom
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
+        (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)).val)) := by
+  let J := Opens.grothendieckTopology (T := X)
+  let φ := TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) (le_top : V ≤ ⊤)
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  have hnat : T.map φ ≫ T.map (toSheafify J _) = T.map (toSheafify J _) ≫ T.map (sheafifyMap J φ) := by
+    rw [← T.map_comp, ← T.map_comp, toSheafify_naturality]
+  haveI : IsIso (T.map (toSheafify J (TopCat.Presheaf.constZ.zeroOutside V))) := inferInstance
+  haveI : IsIso (T.map (toSheafify J (TopCat.Presheaf.constZ.zeroOutside ⊤))) := inferInstance
+  intro g
+  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J _))).2 g
+  obtain ⟨p, hp⟩ := presheaf_stalk_surj V x hx q
+  exact ⟨ConcreteCategory.hom (T.map (toSheafify J _)) p, by
+    simp only [← ConcreteCategory.comp_apply, ← hnat, ConcreteCategory.comp_apply, hp]⟩
+
+/-- The cokernel of `openHom(le_top)` has zero stalks at points of `V`.
+    Uses: sheaf stalk surjectivity + section_ext + local surjectivity of `cokernel.π`
+    + `cokernel.condition`. -/
+set_option synthInstance.maxHeartbeats 200000 in
+set_option maxHeartbeats 1600000 in
+private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
+      (Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))).val) :
+    a = 0 := by
+  obtain ⟨W, hxW, t, rfl⟩ := (Limits.cokernel _).presheaf.germ_exist x a
+  rw [← TopCat.Presheaf.germ_res_apply _ (homOfLE inf_le_left) t ⟨hxW, hx⟩]
+  suffices h : (Limits.cokernel _).presheaf.map (homOfLE inf_le_left).op t = 0 by
+    rw [h]; exact map_zero _
+  apply TopCat.Presheaf.section_ext (Limits.cokernel _) (W ⊓ V) _ 0
+  intro y hy; simp only [map_zero]
+  have hls := (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u}
+    (Limits.cokernel.π _)).mpr (inferInstance : Epi (Limits.cokernel.π _))
+  rw [show Sheaf.IsLocallySurjective _ = TopCat.Presheaf.IsLocallySurjective _ from rfl,
+    TopCat.Presheaf.isLocallySurjective_iff] at hls
+  obtain ⟨W_y, iW_y, ⟨u_y, hu_y⟩, hy_W_y⟩ := hls (W ⊓ V)
+    ((Limits.cokernel _).presheaf.map (homOfLE inf_le_left).op t) y hy
+  obtain ⟨v_germ, hv⟩ := sheaf_stalk_surj V y hy.2
+    ((TopCat.Sheaf.zeroOutsideInt ⊤).presheaf.germ W_y y hy_W_y u_y)
+  obtain ⟨W'', hyW'', w, rfl⟩ := (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ_exist y v_germ
+  rw [TopCat.Presheaf.stalkFunctor_map_germ_apply] at hv
+  obtain ⟨W''', hW'''W'', hW'''W_y, hyW''', hfwu⟩ :=
+    (TopCat.Sheaf.zeroOutsideInt ⊤).presheaf.germ_eq y hyW'' hy_W_y _ _ hv
+  rw [← TopCat.Presheaf.germ_res_apply _ iW_y _ hy_W_y, hu_y,
+    ← TopCat.Presheaf.germ_res_apply _ (homOfLE hW'''W_y) u_y hyW''',
+    TopCat.Presheaf.stalkFunctor_map_germ_apply, ← hfwu,
+    show (Limits.cokernel.π _).val.app (op W''')
+      ((TopCat.Sheaf.zeroOutsideInt.openHom le_top).val.app (op W''') _) =
+      ConcreteCategory.hom (((TopCat.Sheaf.zeroOutsideInt.openHom le_top) ≫
+        Limits.cokernel.π _).val.app (op W''')) _ from by
+        simp [ConcreteCategory.comp_apply],
+    Limits.cokernel.condition]; simp
+
 /-- Cokernel of `openHom(le_top)` has vanishing cohomology on irreducible X.
     The cokernel C has zero stalks on V (since openHom is stalkwise iso there).
     Apply ClosedImmersionSES to C with `Y = Vᶜ`:
@@ -112,12 +188,23 @@ theorem cokernel_openHom_vanishing
     apply sheaf_isZero_of_zero_stalks X S'.X₁
     intro x a
     by_cases hx : (x : X) ∈ (V : Set X)
-    · -- x ∈ V: the presheaf stalk map of openHom is surjective at x ∈ V
-      -- (by restriction to W ∩ V where the presheaf map is eqToHom).
-      -- The sheaf stalk map = conjugation by sheafifyStalkIso, hence also surjective.
-      -- Surjective → stalk(cokernel) = cokernel(surjective stalk map) = 0.
-      -- K ↪ C has zero stalks since C has zero stalks on V.
-      sorry -- presheaf stalk surjectivity proved; needs sheafifyStalkIso transfer
+    · -- x ∈ V: cokernel has zero stalks on V.
+      -- The presheaf stalk map of openHom at x ∈ V is surjective (restriction to W∩V
+      -- where the presheaf map is eqToHom). The sheaf stalk map is surjective by
+      -- conjugation via sheafifyStalkIso. Then cokernel stalk = 0 by section_ext +
+      -- local surjectivity of cokernel.π + cokernel.condition.
+      -- K ↪ C (mono) and C_x = 0, so K_x = 0.
+      -- K ↪ cokernel(f) via S'.f (mono). Map a into stalk(cokernel(f), x).
+      -- stalk(cokernel(f), x) = 0, so the image of a is 0.
+      -- By injectivity of the stalk of S'.f (mono), a = 0.
+      let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+      have ha_img : ConcreteCategory.hom (T.map S'.f.val) a = 0 := by
+        rw [hS'₂] at *; exact cokernel_stalk_zero_V V x hx _
+      haveI : Mono S'.f := hS'E.mono_f
+      haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
+        (C := AddCommGrpCat.{u}) (X := X) x
+      haveI : Mono (T.map S'.f.val) := Functor.map_mono T S'.f.val
+      rwa [AddCommGrpCat.mono_iff_injective.mp inferInstance |>.eq_iff] at ha_img
     · -- x ∈ Vᶜ = Y: stalk map of η is iso by closedIncl_unit_stalk_isIso.
       -- kernel stalk at x = 0.
       have hxY : (x : X) ∈ Y := hx
