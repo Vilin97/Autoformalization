@@ -108,7 +108,23 @@ theorem cokernel_openHom_vanishing
   -- Kernel K of η_C has zero stalks everywhere → IsZero → vanishing
   -- On Vᶜ: stalk iso from closedIncl_unit_stalk_isIso → kernel stalk = 0
   -- On V: C has zero stalks (openHom stalkwise iso) → K ↪ C has zero stalks
-  have hK_zero : IsZero S'.X₁ := by sorry
+  have hK_zero : IsZero S'.X₁ := by
+    apply sheaf_isZero_of_zero_stalks X S'.X₁
+    intro x a
+    by_cases hx : (x : X) ∈ (V : Set X)
+    · -- x ∈ V: K ↪ C (mono), and C has zero stalks on V.
+      -- K_x ↪ C_x = 0, so K_x = 0.
+      -- Stalk(C, x) = 0 because openHom stalk map is iso at x ∈ V.
+      sorry -- needs: stalk(cokernel(openHom), x) = 0 for x ∈ V
+    · -- x ∈ Vᶜ = Y: stalk map of η is iso by closedIncl_unit_stalk_isIso.
+      -- kernel stalk at x = 0.
+      have hxY : (x : X) ∈ Y := hx
+      haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
+          (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
+            (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩ : TopCat.of Y ⟶ X)).unit.app
+            (Limits.cokernel f) |>.val) :=
+        closedIncl_unit_stalk_isIso hYcl (Limits.cokernel f) ⟨x, hxY⟩
+      exact stalk_zero_of_ses_g_iso hS'E x inferInstance a
   have hK_van : Subsingleton (Sheaf.H S'.X₁ n) :=
     subsingleton_sheafH_of_isZero' S'.X₁ hK_zero n
   have hP_van : Subsingleton (Sheaf.H S'.X₃ n) := by
