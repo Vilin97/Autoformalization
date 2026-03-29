@@ -694,7 +694,23 @@ theorem PushforwardHVanishing
       | succ m =>
         -- k = m+1 ≥ 1: from LES on Z, H(R, m+1) ≅ H(G', m+2)
         -- (since J injective → H(J, m+1) = 0 and H(J, m+2) = 0)
-        sorry -- from the LES on Z: H(R, k) ≅ H(G', k+1) for k ≥ 1
+        -- From the LES on Z: H(R, m+1) ≅ H(G', m+2) since J injective
+        -- The connecting map δ : H(R, m+1) → H(G', m+2) is injective
+        -- (kernel = image of g* : H(J, m+1) → H(R, m+1), which is 0 since J injective)
+        -- And H(G', m+2) is subsingleton → H(R, m+1) is subsingleton
+        constructor; intro c d
+        have hSE_Z := ip.shortExact_shortComplex
+        -- δ(c) = δ(d) since H(G', m+2) is subsingleton
+        have heq : c.comp hSE_Z.extClass rfl = d.comp hSE_Z.extClass rfl :=
+          @Subsingleton.elim _ hG' _ _
+        -- (c - d).comp(extClass) = 0 (from linearity of Ext.comp via Ext.postcomp)
+        have hker : (c - d).comp hSE_Z.extClass rfl = 0 := by
+          -- Ext.comp is additive in the first variable (via Ext.postcomp AddMonoidHom)
+          sorry
+        -- By exact₃: c - d is in image of g* from H(J, m+1) = 0
+        obtain ⟨e, he⟩ := Ext.covariant_sequence_exact₃ _ hSE_Z (c - d) rfl hker
+        rw [Ext.eq_zero_of_injective e, Ext.zero_comp] at he
+        exact sub_eq_zero.mp he.symm
     exact @Subsingleton.elim _ (ih_push ip.shortComplex.X₃ hR) c d
 
 -- The adjunction unit F → i_*(i^*F) is epi for closed immersions.
