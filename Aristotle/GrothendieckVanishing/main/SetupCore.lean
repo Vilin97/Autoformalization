@@ -780,7 +780,7 @@ private theorem pushforwardH1Vanishing
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') 1) := by
   intro i
   -- Pre-cache expensive typeclass instances to avoid repeated synthesis
-  haveI : Abelian.HasExt (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) := inferInstance
+  haveI : HasExt (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) := inferInstance
   haveI : IsGrothendieckAbelian (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) := inferInstance
   obtain ⟨ip⟩ := EnoughInjectives.presentation G'
   have hSE_Z := ip.shortExact_shortComplex
@@ -896,7 +896,7 @@ theorem PushforwardHVanishing
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G) n) := by
   intro i
   -- Pre-cache expensive typeclass instances for subspace Z
-  haveI : Abelian.HasExt (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) := inferInstance
+  haveI : HasExt (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) := inferInstance
   haveI : IsGrothendieckAbelian (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) := inferInstance
   -- Generalize over G and do induction on n
   -- (need the ih for all G' at lower degree, not just our specific G)
