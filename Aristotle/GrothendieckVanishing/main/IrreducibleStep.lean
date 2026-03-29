@@ -53,6 +53,27 @@ theorem constantSheaf_cohomology_vanishing
       AddCommGrpCat.{u}).obj (AddCommGrpCat.of (ULift ℤ))) (n + 1)) :=
   FlasqueVanishing X _ (fun i => constantSheaf_flasque_of_irreducible X i) n
 
+/-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology
+    on irreducible X with dim ≥ 1 when n > dim X.
+    Uses the SES `0 → zeroOutsideInt V → zeroOutsideInt ⊤ → cokernel → 0`
+    where `zeroOutsideInt ⊤ = Z_X` (constant sheaf, flasque on irreducible spaces).
+    The cokernel vanishing at degree `m = n-1` is assumed (from IH on the
+    closed complement `Vᶜ`). -/
+set_option synthInstance.maxHeartbeats 80000 in
+theorem zeroOutsideInt_vanishing
+    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
+    (V : Opens X) (m : ℕ)
+    (hCoker : Subsingleton (Sheaf.H (Limits.cokernel
+      (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))) m)) :
+    Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) (m + 1)) := by
+  let f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
+  let S := ShortComplex.mk f (Limits.cokernel.π f) (Limits.cokernel.condition f)
+  have hSE : S.ShortExact :=
+    ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_g_is_cokernel _ (Limits.cokernelIsCokernel _))
+      inferInstance inferInstance
+  exact subsingleton_ext_of_ses hSE _ m hCoker (constantSheaf_cohomology_vanishing X m)
+
 /-- Hartshorne Steps 3-5: uses IrreduciblePosVanishing (sorry). -/
 private theorem grothendieck_reduction
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
