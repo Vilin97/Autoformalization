@@ -770,7 +770,7 @@ theorem pushforward_preserves_flasque {Y : TopCat.{u}} (f : TopCat.of Y ⟶ X)
 -- Helper for PushforwardHVanishing degree 1 case.
 -- Isolated into its own declaration so the synthInstance budget is contained.
 set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 400000 in
+set_option synthInstance.maxHeartbeats 800000 in
 private theorem pushforwardH1Vanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
