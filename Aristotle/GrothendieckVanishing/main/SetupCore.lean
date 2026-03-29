@@ -829,7 +829,7 @@ theorem PushforwardHVanishing
         rw [hψ, Equiv.apply_symm_apply] at hfact
         change φ_hom = ψ_hom ≫ ip.shortComplex.g.val.app (op ⊤) at hfact
         refine ⟨ψ_hom (ULift.up 1), ?_⟩
-        have := congr_arg (· (ULift.up 1)) (AddCommGrpCat.ext_iff.mp hfact)
+        have := congr_arg (fun f => f (ULift.up 1)) (AddCommGrpCat.ext_iff.mp hfact)
         simp only [AddCommGrpCat.hom_comp, AddMonoidHom.coe_comp, Function.comp_apply] at this
         rw [← this]; simp [φ_hom, one_zsmul]
       -- Transfer epi to X: g_X(⊤) = g(⊤) since (Opens.map i).obj ⊤ = ⊤
