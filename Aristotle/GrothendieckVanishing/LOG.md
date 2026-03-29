@@ -1,5 +1,26 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-29T16:20Z — Babysit cycle: analysis + docfix + Aristotle jobs
+
+**Sorry count: 1 (IrreduciblePosVanishing at Setup.lean:95)**
+
+### Changes
+- Thorough analysis of IrreduciblePosVanishing: confirmed current support-based
+  approach is mathematically incorrect for irreducible X (kernel support = X).
+- Updated proofs.md with complete Hartshorne Steps 3-5 NL proof outline.
+- Fixed stale docstrings in main.lean, ClosedOpenDecomposition.lean.
+- Updated critique.md with fresh adversarial review.
+- Submitted 3 targeted Aristotle jobs for Step 5 sub-lemmas:
+  - 4e978c1c: SES construction (presheaf map + sheafification mono)
+  - 6eb803e4: H^n(X, Z_U) = 0 via SES + LES
+  - f3ae1cd9: Full IrreduciblePosVanishing v3 with Hartshorne hints
+
+### Status
+- ReducibleVanishing: PROVED (sorry-free)
+- PushforwardHVanishing: PROVED (all cases)
+- FlasqueVanishing: PROVED
+- IrreduciblePosVanishing: 1 sorry (needs Hartshorne Steps 3-5 infrastructure)
+
 ## 2026-03-28T09:30Z — Cycle 18: 1 sorry (restructured)
 
 **Sorry count: 1 (FlasqueVanishing = Grothendieck vanishing itself)**
