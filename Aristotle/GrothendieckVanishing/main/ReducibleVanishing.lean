@@ -12,7 +12,7 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
 /-! ## Helper lemmas -/
 
-private theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
+theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (hstalk : ∀ (x : X)
       (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F.val), a = 0) :
@@ -35,7 +35,7 @@ private theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
         apply Sheaf.Hom.ext; apply NatTrans.ext; funext U
         exact (val_isZero U).eq_zero_of_tgt (f.val.app U) }⟩
 
-private theorem subsingleton_sheafH_of_isZero' {X : TopCat.{u}}
+theorem subsingleton_sheafH_of_isZero' {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsZero F) (n : ℕ) :
     Subsingleton (Sheaf.H F n) := by
   constructor; intro a b
