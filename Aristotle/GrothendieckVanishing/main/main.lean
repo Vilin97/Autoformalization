@@ -4,20 +4,22 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  Sorry's:
-  1. FlasqueVanishing — flasque sheaves have vanishing higher cohomology
-  2. ReducibleVanishing — reduction from reducible to irreducible (needs j_!)
-  3. IrreduciblePosVanishing — irreducible dim ≥ 1 case (needs j_!)
+  Sorry's (1 remaining):
+  - IrreduciblePosVanishing (Setup.lean:95) — irreducible dim ≥ 1 case
+    Needs Hartshorne Steps 3-5 via zeroOutsideInt / direct limits.
 
   File structure:
-  - Setup.lean: category instances + 3 sorry'd theorems
-  - Auxiliary.lean: topology/dimension helpers + counterexample (flasque ≠ injective)
+  - SetupCore.lean: category instances, FlasqueVanishing (PROVED),
+    PushforwardHVanishing (PROVED), ClosedImmersionSES (PROVED)
+  - Setup.lean: ReducibleVanishing (PROVED), IrreduciblePosVanishing (1 sorry)
+  - Auxiliary.lean: topology/dimension helpers
   - ClosedImmersion.lean: PROVED — closed immersion counit/stalk infrastructure
   - ZeroOutside.lean: PROVED — zero-outside / extension-by-zero infrastructure
   - ConstantSheafFlasque.lean: PROVED — constant sheaf on irreducible space is flasque
   - CohomologyIso.lean: PROVED — H'(⊤, F) ≅ H(F)
   - DimZeroVanishing.lean: PROVED — irreducible dim 0 case
-  - ClosedOpenDecomposition.lean: PROVED — reduction to irreducible (modulo ReducibleVanishing)
+  - ReducibleVanishing.lean: PROVED — reducible case via Finset.induction
+  - ClosedOpenDecomposition.lean: PROVED — reduction to irreducible
   - IrreducibleStep.lean: PROVED — irreducible step (modulo IrreduciblePosVanishing)
   - GrothendieckVanishing.lean: PROVED — main theorem by well-founded induction
 -/

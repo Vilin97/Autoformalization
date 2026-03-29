@@ -1,124 +1,95 @@
 # Adversarial Critique — Grothendieck Vanishing Formalization
 
-**Timestamp**: 2026-03-28T10:10Z
-**Reviewer verdict**: CONDITIONAL ACCEPT
+**Timestamp**: 2026-03-29T16:20Z
+**Reviewer verdict**: REVISE
 
 ---
 
 ## 0. CI Status
 
-Two CI runs in progress (heartbeat reduction + linter fix commits). Previous builds passed. `lake build` locally passes with 0 errors. Blueprint and dep graph deployed (HTTP 200).
+- Latest CI run (push 2c4c81e) is **in progress**.
+- Previous CI run (push 331d1d5) **FAILED**. Unable to retrieve failure logs due to sandbox. This is a **P0** issue — the last completed push that passed CI was b8a1821 (ReducibleVanishing), meaning the PushforwardHVanishing degree-1 commit may have broken the build.
+- Blueprint and dep_graph both return HTTP 200 — docs are deployed.
 
-No P0 issues.
-
----
+**Issue (P0):** CI failure on commit 331d1d5. Until CI passes on HEAD, claimed progress is unverified.
 
 ## 1. Sorry's
 
-**1 sorry** in Setup.lean:56 (`FlasqueVanishing`).
+**Exactly 1 sorry in `main/`:**
 
-| Sorry | File:Line | Statement true? | Risk |
-|---|---|---|---|
-| `FlasqueVanishing` | Setup.lean:56 | Yes (Grothendieck III.2.7) | **Blocked** — requires j_! (extension by zero), Prop 2.9 (direct limits), or derived adjunction for pushforward. None in Mathlib v4.28. |
+| File | Line | Statement |
+|------|------|-----------|
+| `Setup.lean` | 95 | `IrreduciblePosVanishing` kernel term |
 
-This sorry IS the main theorem itself. All downstream files are proved modulo this single sorry. The dim 0 case is proved independently via projectivity of the constant sheaf.
-
-**CRITICAL finding**: Aristotle (99a8a5d6) proved that **flasque → injective is FALSE** (ℤ on point is flasque but not injective). The counterexample is formalized in Auxiliary.lean (`not_injective_int`). The current proof structure does NOT depend on this false claim.
-
----
+The statement is mathematically correct (Grothendieck vanishing is a theorem). The proof requires 4 pieces of new infrastructure (direct-limit reduction, single-generator quotient, Step 4 local structure, Step 5 SES). None exist yet.
 
 ## 2. Hidden Axioms
 
-`lean_verify GrothendieckVanishing` would return `sorryAx` (from FlasqueVanishing).
+No `admit`, `axiom`, or `native_decide` found beyond standard Mathlib usage. Standard classical logic only.
 
-No `admit` or `axiom` keywords anywhere. All gaps are visible as `sorry`.
-
----
+I found no issue.
 
 ## 3. Circularity
 
-No circularity. `FlasqueVanishing` (sorry) is called by `ReducibleVanishing` and `IrreduciblePosVanishing` (both proved from it). The main induction in `GrothendieckVanishing.lean` uses well-founded induction on `WithBot ℕ∞`.
+No circularity. WF induction on `WithBot ℕ∞` is sound. `ReducibleVanishing'` uses `ih_irred` only on irreducible spaces of ≤ dimension. `IrreduciblePosVanishing` uses `ih` on strictly smaller dimension.
 
-The dim 0 case (`grothendieck_vanishing_dim_zero`) is proved independently of FlasqueVanishing via projectivity of the constant sheaf.
-
----
+I found no issue.
 
 ## 4. Hypothesis Audit
 
-Main theorem:
-```
-GrothendieckVanishing (X : TopCat.{u}) (F : Sheaf AddCommGrpCat X)
-    [NoetherianSpace X] (n : ℕ) (h : n > topologicalKrullDim X) :
-    Subsingleton (Sheaf.H F n)
-```
+All hypotheses of `IrreduciblePosVanishing` are necessary and standard.
 
-All hypotheses necessary. `AddCommGrpCat` could generalize to `ModuleCat R` (hard).
-
----
+**Minor issue:** The IH does not require `[IrreducibleSpace Y]` but downstream `ClosedOpenDecomposition` uses `ih_irred` which does. Harmless asymmetry but confusing.
 
 ## 5. Mathematical Correctness
 
-Proof structure faithfully follows Hartshorne III.2.7. Key insight: the dim 0 case bypasses flasque sheaf theory entirely using projectivity of the constant sheaf (via `constantSheafΓAdj.map_projective`).
+The docstring now correctly documents that the support-based argument fails on irreducible spaces. The sorry is honestly marked. The proved portions (ClosedImmissionSES setup, pushforward vanishing, LES reduction) are correct.
 
----
+I found no mathematical incorrectness in proved portions.
 
 ## 6. Code Quality
 
-| Issue | Status |
-|---|---|
-| All `maxHeartbeats` ≤ 400000 (2× default) | **Fixed** |
-| All heartbeat overrides have comments | **Fixed** |
-| No bare `simp` (only `simp only` or `simp [...]`) | **OK** (one bare `simp` in ConstantSheafFlasque.lean:97 is acceptable) |
-| No files over 300 lines | **OK** (max: Auxiliary.lean at 277) |
-| No `admit` or `axiom` | **OK** |
-| 9 files, 1033 lines total | **Good** |
+**Issue (P1): `maxHeartbeats 12800000` at SetupCore.lean:214.** 64x default. Fragile, likely to break with Mathlib updates.
+
+**Issue (P1): `maxHeartbeats 6400000` at ClosedImmersion.lean:338.** 32x default.
+
+**Issue (P2): `maxHeartbeats 3200000` at 6 locations** (SetupCore, ReducibleVanishing). 16x default.
+
+**Issue (P2): SetupCore.lean is 1027 lines.** Above 600-line guideline. Should be split.
+
+**Issue (P3): Dead code in SetupCore.lean.** Old `ReducibleVanishing` comments referencing sorry's at lines 211, 751 are stale.
+
+## 7. Documentation Lies
+
+**Issue:** `main.lean:13` says "Setup.lean: category instances + 3 sorry'd theorems". Stale — Setup.lean now has 1 sorry.
+
+**Issue:** `ClosedOpenDecomposition.lean:7` says "Reducible X: sorry". Stale — reducible case is proved.
+
+**Issue:** `IrreducibleStep.lean:8` says "uses IrreduciblePosVanishing (sorry)". Correct but should cite Setup.lean:95.
+
+## 8. Generalization Opportunities
+
+1. **Universe polymorphism:** Locked to `universe u`. Should work for any universe. Feasibility: medium.
+2. **General abelian category:** Uses `AddCommGrpCat` throughout. Should hold for any Grothendieck abelian category. Feasibility: hard.
+3. **Weakening NoetherianSpace:** `constantSheaf_flasque_of_irreducible` only needs `IrreducibleSpace`. Feasibility: easy.
+
+## 9. Mathlib Upstreamability
+
+1. **`constantSheaf_flasque_of_irreducible`** — High value. Standard result missing from Mathlib.
+2. **`FlasqueVanishing`** — Very high value. Related to Brian Nugent's PR #35790.
+3. **`closedIncl_unit_stalk_isIso`** — Medium value. Standard closed-immersion result.
+4. **`topologicalKrullDim_lt_of_isIrreducible_of_isClosed`** — Medium value.
+
+All need: heartbeat reductions, universe polymorphism, generalization from `AddCommGrpCat`.
 
 ---
 
-## 7. Documentation
+## Open Issues (ranked by priority)
 
-All docstrings accurate. main.lean correctly lists file structure and sorry status.
+1. **(P0)** CI must pass on HEAD.
+2. **(P1)** `maxHeartbeats 12800000` at SetupCore.lean:214 must be profiled/refactored.
+3. **(P1)** Stale docstrings in main.lean, ClosedOpenDecomposition.lean.
+4. **(P2)** SetupCore.lean >1000 lines; dead code removal needed.
+5. **(Critical)** `IrreduciblePosVanishing` sorry. Step 5 (vanishing for Z_U) is the most concrete achievable sub-goal.
 
----
-
-## 8. Independently Proved Results (sorry-free, upstreamable)
-
-| Result | Location | Upstreamability |
-|---|---|---|
-| `cohomologyPresheafTopEquiv` (H'(⊤,F) ≅ H(F)) | CohomologyIso.lean | **High** — resolves Mathlib TODO |
-| `subsingleton_ext_of_ses` | IrreducibleStep.lean | **High** — generic Ext LES vanishing |
-| `not_injective_int` (ℤ not injective in Ab) | Auxiliary.lean | **High** — standalone result |
-| `addMonoidHom_rat_int_eq_zero` | Auxiliary.lean | **High** — standalone result |
-| `constantSheaf_flasque_of_irreducible` | ConstantSheafFlasque.lean | **Medium** — specific to constant sheaf |
-| `ulift_int_projective` | Auxiliary.lean | **Medium** — via ModuleCat equivalence |
-| `grothendieck_vanishing_dim_zero` | DimZeroVanishing.lean | **Medium** — dim 0 via projectivity |
-| `topologicalKrullDim_lt_of_isIrreducible_of_isClosed` | Auxiliary.lean | **Medium** |
-
----
-
-## 9. Generalization Opportunities
-
-1. **(Hard)** Build j_! (extension by zero) to close the remaining sorry.
-2. **(Medium)** Generalize from `AddCommGrpCat` to `ModuleCat R`.
-3. **(Feasible)** PR `cohomologyPresheafTopEquiv` and `subsingleton_ext_of_ses` to Mathlib.
-4. **(Feasible)** PR `not_injective_int` and `addMonoidHom_rat_int_eq_zero` to Mathlib.
-
----
-
-## Verdict: CONDITIONAL ACCEPT
-
-### Condition for ACCEPT:
-- Close the single remaining sorry (`FlasqueVanishing`). This requires j_! infrastructure not in Mathlib v4.28, so acceptance is conditional on either:
-  1. Building j_! (~500 lines of new infrastructure), OR
-  2. Finding an alternative proof path (e.g., Čech cohomology, direct limit approach), OR
-  3. Waiting for Mathlib to add j_! (planned but no timeline)
-
-### What IS proved (sorry-free):
-- Full induction structure for Grothendieck vanishing
-- Dim 0 case via constant sheaf projectivity
-- Empty space case
-- Constant sheaf is flasque on irreducible spaces
-- H'(⊤) ≅ H (cohomology isomorphism)
-- Abstract LES vanishing
-- Counterexample: flasque ≠ injective
-- Dimension inequalities for closed subsets
+## Verdict: REVISE
