@@ -1,5 +1,25 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-29T17:00Z — Babysit cycle: CI verification + Aristotle check
+
+**Sorry count: 1 (IrreduciblePosVanishing at Setup.lean:95)**
+
+### Changes
+- CI run 23713895270 still in-progress for commit 029fae5.
+- Aristotle API returning 500/502 — cannot check 3 jobs (4e978c1c, 6eb803e4, f3ae1cd9).
+- Reviewed old Aristotle outputs (irr_pos_v1, irr_pos_v2): both sorry'd the key parts
+  (key_decomposition, constantSheafHVanishing). Not useful — we already have
+  constantSheaf_cohomology_vanishing proved.
+- Analyzed Step 5 approach: can prove kernel vanishing for constant sheaf via
+  subsingleton_ext_of_ses at shifted degree (n-1). This gives H^n(kernel(η_Z)) = 0
+  but only for F = Z_X, not arbitrary F. Full IrreduciblePosVanishing still requires
+  Steps 3-4 (direct limits + single-generator reduction).
+- Updated critique.md (verdict: REVISE, down from REJECT).
+
+### Status
+- CI: pending on 029fae5
+- Sorry: 1 (unchanged)
+
 ## 2026-03-29T16:50Z — Babysit cycle: P0 CI fix (commit refactoring)
 
 **Sorry count: 1 (IrreduciblePosVanishing at Setup.lean:95)**
