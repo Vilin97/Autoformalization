@@ -53,6 +53,65 @@ theorem constantSheaf_cohomology_vanishing
       AddCommGrpCat.{u}).obj (AddCommGrpCat.of (ULift ℤ))) (n + 1)) :=
   FlasqueVanishing X _ (fun i => constantSheaf_flasque_of_irreducible X i) n
 
+/-- **Step 5** (Hartshorne III.2.7): For an irreducible Noetherian space X with dim ≥ 1,
+    the kernel of the adjunction unit `Z_X → i_*(i^*Z_X)` has vanishing cohomology
+    above dim X. This uses:
+    1. `constantSheaf_cohomology_vanishing`: H^n(Z_X) = 0 for n ≥ 1 (flasque)
+    2. `PushforwardHVanishing` + IH: H^{n-1}(i_*(i^*Z_X)) = 0
+    3. `subsingleton_ext_of_ses` at shifted degree -/
+set_option synthInstance.maxHeartbeats 80000 in
+theorem constantSheaf_kernel_vanishing
+    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
+    (Z : Set X) (hZ : IsClosed Z) (hZ_ne : Z ≠ Set.univ)
+    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
+    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+      (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      topologicalKrullDim Y < topologicalKrullDim X →
+      n > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G n)) :
+    let Z_X := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+      (AddCommGrpCat.of (ULift ℤ))
+    ∀ (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)),
+      S.ShortExact → S.X₂ = Z_X →
+      S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+        (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩)).obj
+        ((TopCat.Sheaf.pullback AddCommGrpCat.{u}
+          (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩ : TopCat.of Z ⟶ X)).obj Z_X) →
+      Subsingleton (Sheaf.H S.X₁ n) := by
+  intro Z_X S hSE hS₂ hS₃
+  -- dim Z < dim X (Z is a proper closed subset of irreducible X)
+  have hZ_dim : topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X :=
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hZ hZ_ne
+      (lt_of_le_of_lt (topologicalKrullDim_subspace_le X Z)
+        (lt_of_lt_of_le (show topologicalKrullDim X < ⊤ from lt_of_lt_of_le hn le_top) le_top))
+  -- n > dim Z + 1 (since n > dim X ≥ dim Z + 1)
+  have hn_Z : ↑n > topologicalKrullDim (TopCat.of Z) := lt_trans hZ_dim hn
+  -- Pushforward of Z_Y vanishes at degree n
+  have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
+    rw [hS₃]
+    exact PushforwardHVanishing Z hZ _ n (@ih (TopCat.of Z) _ _ hZ_dim hn_Z)
+  -- Constant sheaf vanishes at degree n (n ≥ 2 since n > dim X ≥ 1)
+  -- We need n = m + 1 for some m ≥ 1, then constantSheaf_cohomology_vanishing gives H^{m+1} = 0
+  have hn_ge1 : n ≥ 1 := by
+    have := topologicalKrullDim_nonneg_of_irreducible (X := X)
+    omega
+  obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : n ≠ 0)
+  -- H^{m+1}(Z_X) = 0
+  have hConst : Subsingleton (Sheaf.H Z_X (m + 1)) :=
+    constantSheaf_cohomology_vanishing X m
+  -- Apply subsingleton_ext_of_ses at degree m:
+  -- h₃: Subsingleton(Ext(Z, X₃, m))   [pushforward vanishing at m]
+  -- h₂: Subsingleton(Ext(Z, X₂, m+1)) [constant sheaf vanishing at m+1]
+  -- → Subsingleton(Ext(Z, X₁, m+1))   [kernel vanishing at m+1 = n]
+  -- For h₃ at degree m: need m > dim Z (i.e., n - 1 > dim Z)
+  have hm_Z : ↑m > topologicalKrullDim (TopCat.of Z) := by
+    simp only [topologicalKrullDim, gt_iff_lt] at hn_Z ⊢
+    omega
+  have hPush_m : Subsingleton (Sheaf.H S.X₃ m) := by
+    rw [hS₃]
+    exact PushforwardHVanishing Z hZ _ m (@ih (TopCat.of Z) _ _ hZ_dim hm_Z)
+  exact hS₂ ▸ subsingleton_ext_of_ses hSE _ m hPush_m (hS₂ ▸ hConst)
+
 /-- Hartshorne Steps 3-5: uses IrreduciblePosVanishing (sorry). -/
 private theorem grothendieck_reduction
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
