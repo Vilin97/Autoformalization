@@ -5,10 +5,10 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  The proof assembles (all proved, modulo FlasqueVanishing in Setup.lean):
-  - DimZeroVanishing: irreducible dim 0 case (proved via projectivity)
-  - IrreducibleStep: irreducible dim ≥ 1 case (proved from FlasqueVanishing)
-  - ClosedOpenDecomposition: reduction to irreducible (proved from FlasqueVanishing)
+  The proof assembles (all proved, modulo IrreduciblePosVanishing sorry in Setup.lean):
+  - DimZeroVanishing: irreducible dim 0 case (PROVED via projectivity)
+  - IrreducibleStep: irreducible dim ≥ 1 case (uses IrreduciblePosVanishing)
+  - ClosedOpenDecomposition: reduction to irreducible (PROVED)
 -/
 import Aristotle.GrothendieckVanishing.main.DimZeroVanishing
 import Aristotle.GrothendieckVanishing.main.ClosedOpenDecomposition

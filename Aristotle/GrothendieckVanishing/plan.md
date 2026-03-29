@@ -1,46 +1,53 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-03-28T10:00Z
+**Updated**: 2026-03-29T16:50Z
 
 ## Status Summary
 
-- **Sorry count**: 1 (`FlasqueVanishing` in Setup.lean)
-- **Files**: 9 in `main/`, all compiling cleanly
-- **All other theorems**: fully proved (no sorry's)
+- **Sorry count**: 1 (`IrreduciblePosVanishing` at Setup.lean:95)
+- **Files**: 13 in `main/`, compiling locally but **CI BROKEN for 3 commits**
+- **Root cause of CI failure**: SetupCore.lean never committed, Setup.lean refactoring never staged
+- **Aristotle API**: returning 500 errors; 3 jobs submitted but status unknown
 
-## Architecture
+## Priority Actions (This Cycle)
 
-FlasqueVanishing (the single sorry) is the full Grothendieck vanishing statement:
-for Noetherian X, any sheaf F, and n > dim X, Sheaf.H F n = 0.
+### 1. (P0) Fix stale comments + commit the refactoring — FIX CI
+**Files**: SetupCore.lean (untracked), Setup.lean (modified), ReducibleVanishing.lean (modified)
+**Action**: Fix stale comments at SetupCore.lean:211,751, then stage all three files and commit.
+**Step**: `/cleanup` + `/commit`
 
-ReducibleVanishing and IrreduciblePosVanishing are trivial corollaries.
-DimZeroVanishing is proved independently via projectivity of the constant sheaf
-(bypasses FlasqueVanishing entirely).
+### 2. (P0) Verify build locally before committing
+**Action**: Run `lake env lean` on Setup.lean to confirm the refactored state compiles.
+**Step**: `/prove` (verification only)
 
-## What Would Be Needed to Prove FlasqueVanishing
+### 3. (P1) Attempt IrreduciblePosVanishing directly
+**File**: Setup.lean:95
+**Approach**: The sorry needs Hartshorne Steps 3-5. Rather than waiting for Aristotle:
+- The current proof already has: proper closed Z ⊊ X, dim Z < dim X, ClosedImmissionSES, pushforward vanishing.
+- The gap is: kernel vanishing (`hKer`). The kernel K has stalks zero on Z but support closure = X.
+- Direct approach: try to prove `hKer` by showing K admits a filtration by subsheaves of `zeroOutsideInt` type, each of which vanishes by the SES `0 → Z_U → Z_X → Z_Y → 0`.
+- This is hard and likely multi-cycle. Decompose into sub-lemmas.
+**Step**: `/prove`
 
-The full proof (Hartshorne III.2.7) requires infrastructure not yet in Mathlib v4.28:
+## Active Multi-Cycle Strategies
 
-1. **Extension by zero (j_!)** for open embeddings of sheaf categories
-2. **Proposition 2.9**: cohomology commutes with filtered colimits on Noetherian spaces
-3. **Derived adjunction**: Ext_X(Z, i_*G, n) ≅ Ext_Y(Z_Y, G, n) for closed i: Y ↪ X
-4. **The closed-open complement SES**: 0 → j_!(F|_U) → F → i_*(F|_Z) → 0
+### Strategy A: IrreduciblePosVanishing via Hartshorne Steps 3-5
+**Status**: 3 Aristotle jobs submitted (4e978c1c, 6eb803e4, f3ae1cd9), API returning 500s.
+**Parallel work**: Attempt direct proof decomposition:
+1. SES `0 → Z_U → Z_X → Z_Y → 0` (uses zeroOutsideInt infrastructure in ZeroOutside.lean)
+2. Z_X flasque vanishing (proved: constantSheaf_cohomology_vanishing)
+3. Z_Y vanishing by IH (pushforward from lower-dim space)
+4. Kernel of F → i_*i^*F reduces to quotients of Z_U (Hartshorne Steps 3-4)
 
-Any combination of these (plus the existing Ext LES in Mathlib) would close the sorry.
+### Strategy B: Heartbeat reduction (ongoing)
+**Target**: Reduce all `maxHeartbeats` to ≤ 800000.
+**Priority**: P1 for 12.8M and 6.4M; P2 for 3.2M locations.
+**Approach**: Profile with `lean_profile_proof`, extract intermediate lemmas, simplify tactic blocks.
 
-## Independently Proved Results (sorry-free)
+## Backlog
 
-- `HasSeparator AddCommGrpCat` — ULift ℤ is a separator
-- `constantSheaf_flasque_of_irreducible` — constant sheaf on irreducible space is flasque
-- `cohomologyPresheafTopEquiv` — H'(⊤, F) ≅ H(F) (resolves Mathlib TODO)
-- `subsingleton_ext_of_ses` — abstract LES vanishing from short exact sequences
-- `grothendieck_vanishing_dim_zero` — dim 0 case via projectivity (no FlasqueVanishing needed)
-- `sheaf_isZero_of_isEmpty` — sheaves on empty spaces are zero
-- `topologicalKrullDim_lt_of_isIrreducible_of_isClosed` — dimension inequality
-- `GrothendieckVanishing` — main theorem (well-founded induction assembling all pieces)
-
-## Backlog (nice-to-have)
-
-- PR `cohomologyPresheafTopEquiv` and `subsingleton_ext_of_ses` to Mathlib
-- Reduce heartbeats in ConstantSheafFlasque.lean (currently up to 1,600,000)
-- Generalize from AddCommGrpCat to ModuleCat R
+- Split SetupCore.lean (1027 lines) into smaller files (P2)
+- Universe polymorphism for main theorem (P3)
+- Generalize from AddCommGrpCat to ModuleCat R (P3)
+- PR `cohomologyPresheafTopEquiv` and `subsingleton_ext_of_ses` to Mathlib (P4)
+- Update GrothendieckVanishing.lean:8 docstring (P4)

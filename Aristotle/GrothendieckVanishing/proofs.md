@@ -4,7 +4,7 @@ This file is meant to guide the prover work on the *current* live development in
 `Aristotle/GrothendieckVanishing/main/`.
 
 It is based on:
-- the actual remaining `sorry`s in `main/Setup.lean`,
+- the actual remaining `sorry`s in `main/Setup.lean` after the `SetupCore` split,
 - Hartshorne III.2, especially Theorem 2.7 and the proof on textbook pages 210-211
   in `context/Hartshorne_3_2.pdf`,
 - the infrastructure already present in this repo, in particular
@@ -12,34 +12,23 @@ It is based on:
 
 ## Current Status
 
-As of the live source checked on 2026-03-29, the only actual `sorry`s in the
-main development are in `Setup.lean`:
+As of the live source checked on 2026-03-29, there is only **one** actual
+`sorry` left in the main development:
 
-1. `Setup.lean:1083`
-2. `Setup.lean:1103`
-3. `Setup.lean:1105`
-4. `Setup.lean:1185`
+1. `Setup.lean:95`
 
-There is **no remaining `sorry` in `PushforwardHVanishing`**.
-`FlasqueVanishing` is also no longer one of the live gaps in `Setup.lean`.
+The reducible-case duplicate that used to live in `Setup.lean` has been removed.
+The file split is now:
 
-The key point is that these four live `sorry`s do **not** all have the same
-mathematical weight:
+- `SetupCore.lean`: the shared core (`FlasqueVanishing`,
+  `PushforwardHVanishing`, `ClosedImmersionSES`, instances, etc.),
+- `ReducibleVanishing.lean`: the finished reducible-case proof,
+- `Setup.lean`: a thin wrapper that re-exports `ReducibleVanishing` and keeps
+  only the genuine remaining gap `IrreduciblePosVanishing`.
 
-- `1083`, `1103`, and `1105` are local obligations inside the reducible-case
-  proof in `Setup.lean`. They already have correct proofs in
-  `main/ReducibleVanishing.lean`.
-- `1185` is the genuine remaining hard theorem. The current comments in
-  `Setup.lean` try to finish it by a support argument using a closed immersion,
-  but that argument is not correct as stated. The right proof is Hartshorne's
-  Steps 3-5.
-
-So the honest situation is:
-
-- the reducible case is essentially finished already and should be copied or
-  refactored from `ReducibleVanishing'.lean`,
-- the irreducible positive-dimensional case still needs real mathematics and
-  new formal infrastructure.
+There is **no remaining `sorry` in `FlasqueVanishing`** or
+`PushforwardHVanishing`, and there are no longer any fake reducible-case
+`sorry`s in `Setup.lean`.
 
 ## Hartshorne's Proof Skeleton
 
@@ -70,9 +59,11 @@ The live formalization already has:
 
 What is still missing is the actual formal execution of Hartshorne's Steps 3-5.
 
-## The Three Reducible-Case `sorry`s
+## The Old Reducible-Case `sorry`s
 
-These three `sorry`s are routine. They are already solved in
+Historically, `Setup.lean` contained three local reducible-case `sorry`s.
+Those no longer exist in the live file, but it is still useful to record why
+they were routine and why the correct home for them is
 `main/ReducibleVanishing.lean`.
 
 ### 1. `Setup.lean:1083`

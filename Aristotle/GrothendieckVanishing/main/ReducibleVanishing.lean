@@ -4,7 +4,7 @@
   Fills in the sorry in Setup.lean for ReducibleVanishing by iterating
   ClosedImmersionSES over the finitely many irreducible components.
 -/
-import Aristotle.GrothendieckVanishing.main.Setup
+import Aristotle.GrothendieckVanishing.main.SetupCore
 
 universe u
 
