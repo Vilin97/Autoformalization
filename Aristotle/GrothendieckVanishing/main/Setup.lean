@@ -703,10 +703,10 @@ theorem PushforwardHVanishing
         -- δ(c) = δ(d) since H(G', m+2) is subsingleton
         have heq : c.comp hSE_Z.extClass rfl = d.comp hSE_Z.extClass rfl :=
           @Subsingleton.elim _ hG' _ _
-        -- (c - d).comp(extClass) = 0 (from linearity of Ext.comp via Ext.postcomp)
+        -- (c - d).comp(extClass) = 0 (Ext.comp is additive via Ext.postcomp)
         have hker : (c - d).comp hSE_Z.extClass rfl = 0 := by
-          -- Ext.comp is additive in the first variable (via Ext.postcomp AddMonoidHom)
-          sorry
+          change (Ext.postcomp hSE_Z.extClass _ rfl) (c - d) = 0
+          rw [map_sub, sub_eq_zero]; exact heq
         -- By exact₃: c - d is in image of g* from H(J, m+1) = 0
         obtain ⟨e, he⟩ := Ext.covariant_sequence_exact₃ _ hSE_Z (c - d) rfl hker
         rw [Ext.eq_zero_of_injective e, Ext.zero_comp] at he
