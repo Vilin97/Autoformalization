@@ -1,26 +1,17 @@
 # Adversarial Critique — Grothendieck Vanishing Formalization
 
-**Timestamp**: 2026-03-29T16:45Z
-**Reviewer verdict**: REJECT
+**Timestamp**: 2026-03-29T17:00Z
+**Reviewer verdict**: REVISE
 
 ---
 
 ## 0. CI Status
 
-**CRITICAL (P0): CI is FAILING on HEAD (50991de) and has been failing for 3+ consecutive commits.**
+**CI fix pushed (029fae5).** The Setup.lean→SetupCore.lean split was committed. CI run 23713895270 is in-progress.
 
-- Run 23713419603 (50991de): FAILED — heartbeat timeouts in Setup.lean:832,834,847,897,760; `PushforwardHVanishing` unknown constant at lines 1053,1141.
-- Run 23713299787 (2c4c81e): FAILED — identical errors.
-- Run 23703164612 (331d1d5): FAILED — identical errors.
-
-**Root cause**: The refactoring that split Setup.lean (1197 lines) into SetupCore.lean (1027 lines) + thin Setup.lean (108 lines) was **NEVER COMMITTED**. The local working tree has:
-- `Setup.lean`: modified (1167 lines deleted locally, never staged)
-- `SetupCore.lean`: untracked (new file, never `git add`-ed)
-- `ReducibleVanishing.lean`: modified (import changed from Setup to SetupCore, never staged)
-
-CI is building the old monolithic Setup.lean which has heartbeat timeouts and cascading failures. **Every claim of "PROVED" in LOG.md and main.lean for PushforwardHVanishing, FlasqueVanishing, ReducibleVanishing is unverifiable by CI.** The last passing CI was commit b8a1821 (ReducibleVanishing), making 3 consecutive CI failures.
-
-This is not a minor issue. This means the entire "1 sorry" claim is unverified by any independent build system. Only local builds (which use stale `.olean` caches) are passing.
+- Previous 3 runs FAILED because SetupCore.lean was never committed.
+- Fix: commit 029fae5 adds SetupCore.lean, thin Setup.lean, updated ReducibleVanishing.lean import.
+- **Status: PENDING** — must verify CI passes before downgrading this from P0.
 
 **Docs**: Blueprint (HTTP 200) and dep_graph (HTTP 200) are deployed.
 
@@ -85,7 +76,7 @@ I found no mathematical incorrectness in proved portions.
 
 ## 6. Code Quality
 
-**Issue (P0): Uncommitted critical files.** SetupCore.lean (1027 lines) is untracked. Setup.lean and ReducibleVanishing.lean have unstaged modifications. CI has been broken for 3 commits.
+**FIXED: Uncommitted critical files.** SetupCore.lean committed in 029fae5. CI pending.
 
 **Issue (P1): `maxHeartbeats 12800000` at SetupCore.lean:214.** 64x default. This is `epi_app_of_shortExact_flasque` (the Zorn argument). A Mathlib reviewer would reject this immediately.
 
@@ -141,14 +132,14 @@ All need: heartbeat reductions to ≤ 800K, universe polymorphism, generalizatio
 
 ## Open Issues (ranked by priority)
 
-1. **(P0)** SetupCore.lean, Setup.lean, ReducibleVanishing.lean changes MUST be committed. CI has been broken for 3 consecutive commits.
-2. **(P0)** CI must pass on HEAD after committing. Until then, all "PROVED" claims are unverified.
+1. ~~**(P0)** SetupCore.lean committed in 029fae5.~~
+2. **(P0)** CI must pass on 029fae5. Run 23713895270 is in-progress.
 3. **(P1)** `maxHeartbeats 12800000` at SetupCore.lean:214 must be profiled and refactored below 800000.
 4. **(P1)** `maxHeartbeats 6400000` at ClosedImmersion.lean:338 must be profiled and refactored.
 5. **(P2)** Stale comments at SetupCore.lean:211,751 must be updated.
 6. **(P2)** SetupCore.lean >1000 lines; should be split.
 7. **(Critical)** `IrreduciblePosVanishing` sorry. No infrastructure for Steps 3-5 exists yet.
 
-## Verdict: REJECT
+## Verdict: REVISE
 
-The formalization has 3 consecutive CI failures due to uncommitted critical files. The "1 sorry" state is unverifiable by any independent build. Even if the commits were fixed, the extreme heartbeat overrides (up to 64x default) make the code unmaintainable and un-upstreamable. Fix the CI, commit the files, and reduce heartbeats before resubmission.
+CI fix committed (029fae5), awaiting pass. 1 sorry remains. Extreme heartbeat overrides (up to 64x default) make the code un-upstreamable. Must verify CI passes and reduce heartbeats before acceptance.

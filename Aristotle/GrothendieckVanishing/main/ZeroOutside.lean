@@ -253,6 +253,43 @@ theorem epi_map_of_injective {X : TopCat.{u}} (I : Sheaf AddCommGrpCat.{u} X) [I
   change (zeroOutsideInt.openHom h ≫ f).val.app (op V) (zeroOutsideInt.generator V) = s
   rw [Injective.comp_factorThru, zeroOutsideInt.sHom_app_generator]
 
+/-- Indexing type for all local sections of a sheaf. -/
+abbrev SectionIndex {X : TopCat.{u}}
+    (F : Sheaf AddCommGrpCat.{u} X) :=
+  Σ U : Opens X, F.presheaf.obj (op U)
+
+/-- The canonical map from the coproduct of all `zeroOutsideInt U` indexed by local sections
+of `F` onto `F`. This is the formal Step 3A starting point for building finitely generated
+subsheaves via images of smaller subcoproducts. -/
+abbrev allSectionMap {X : TopCat.{u}}
+    (F : Sheaf AddCommGrpCat.{u} X)
+    [HasCoproduct (fun σ : SectionIndex F => zeroOutsideInt σ.1)] :
+    (∐ fun σ : SectionIndex F => zeroOutsideInt σ.1) ⟶ F :=
+  Sigma.desc (fun σ => zeroOutsideInt.sHom σ.2)
+
+set_option synthInstance.maxHeartbeats 200000 in
+instance allSectionMap_epi {X : TopCat.{u}}
+    (F : Sheaf AddCommGrpCat.{u} X)
+    [HasCoproduct (fun σ : SectionIndex F => zeroOutsideInt σ.1)] :
+    Epi (allSectionMap F) := by
+  letI : Balanced (CategoryTheory.Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    inferInstance
+  rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat]
+  change TopCat.Presheaf.IsLocallySurjective (allSectionMap F).val
+  rw [TopCat.Presheaf.isLocallySurjective_iff]
+  intro U t x hx
+  refine ⟨U, 𝟙 U, ?_, hx⟩
+  refine ⟨(Sigma.ι (fun σ : SectionIndex F => zeroOutsideInt σ.1) ⟨U, t⟩).val.app
+      (op U) (zeroOutsideInt.generator U), ?_⟩
+  change (((Sigma.ι (fun σ : SectionIndex F => zeroOutsideInt σ.1) ⟨U, t⟩) ≫
+      allSectionMap F).val.app (op U) (zeroOutsideInt.generator U)) =
+    TopCat.Presheaf.restrict t (𝟙 U)
+  rw [Sigma.ι_desc, zeroOutsideInt.sHom_app_generator]
+  change t = TopCat.Presheaf.restrict t (𝟙 U)
+  symm
+  change F.presheaf.map (𝟙 (Opposite.op U)) t = t
+  simp
+
 end Sheaf
 
 end TopCat
