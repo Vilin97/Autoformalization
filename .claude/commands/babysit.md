@@ -21,5 +21,6 @@ Before each step, write the current step number and name to `state.md`. After co
 5. `/check-aristotle` — Fetch and integrate completed Aristotle proofs
 6. `/log` — Record what changed
 7. `/cleanup` — Delete stale files and dead code
-8. `/commit` — Commit and push all changes
-9. `/alert` — Send Telegram notification with summary and commit link
+8. `/simplify` — Fix code quality issues from critique.md, especially focusing on efficiency. Must fix at least one issue per cycle if any remain open.
+9. `/commit` — Commit and push all changes
+10. `/alert` — Send Telegram notification with summary and commit link
