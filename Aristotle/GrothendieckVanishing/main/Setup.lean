@@ -936,7 +936,8 @@ theorem ClosedImmersionSES
 
 /-! ## Main vanishing theorems -/
 
-set_option synthInstance.maxHeartbeats 80000 in
+set_option maxHeartbeats 12800000 in
+set_option synthInstance.maxHeartbeats 160000 in
 /-- **Reducible vanishing** (Hartshorne III.2.7, reducible case).
     For a non-irreducible Noetherian space `X`, cohomology vanishing above the dimension
     follows from vanishing on all irreducible spaces of dim ≤ dim X.
@@ -961,13 +962,61 @@ theorem ReducibleVanishing
       topologicalKrullDim Y ≤ topologicalKrullDim X →
       n > topologicalKrullDim Y → Subsingleton (Sheaf.H G n)) :
     Subsingleton (Sheaf.H F n) := by
-  -- X has finitely many irreducible components, k ≥ 2 since non-irreducible
-  -- Iterate ClosedImmersionSES, peeling one component per step
-  -- After k steps: kernel has zero stalks everywhere → zero sheaf → H = 0
-  -- Finite iteration over irreducible components
-  -- Each step: ClosedImmersionSES + ih_irred + PushforwardHVanishing + subsingleton_ext_of_ses_middle
-  -- Final step: zero stalks → zero sheaf → H = 0
-  sorry
+  classical
+  have hfin := NoetherianSpace.finite_irreducibleComponents (α := X)
+  suffices ∀ (comps : Finset (Set X)),
+      (∀ Z ∈ comps, Z ∈ irreducibleComponents X) →
+      ∀ (G : TopCat.Sheaf AddCommGrpCat.{u} X),
+      (∀ (x : ↑X), x ∉ ⋃₀ (comps : Set (Set X)) →
+        IsZero ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj G.val)) →
+      Subsingleton (Sheaf.H G n) by
+    exact this hfin.toFinset
+      (fun Z hZ => by rwa [Set.Finite.mem_toFinset] at hZ) F
+      (fun x hx => by
+        exfalso; apply hx
+        rw [Set.Finite.coe_toFinset, sUnion_irreducibleComponents]; exact Set.mem_univ x)
+  intro comps
+  induction comps using Finset.induction_on with
+  | empty =>
+    intro _ G hG
+    -- G has zero stalks everywhere → H = 0
+    -- Use: all stalks zero → isIso (G → 0) → IsZero G → Ext = 0
+    sorry -- zero stalks → H = 0 (needs IsZero from stalk criterion)
+  | insert Z s hZ_notin ih =>
+    intro hcomp G hG_stalks
+    have hZ_irred := hcomp Z (Finset.mem_insert_self Z s)
+    have hZ_closed : IsClosed Z := isClosed_of_mem_irreducibleComponents Z hZ_irred
+    obtain ⟨S, hSE, hS₂, hS₃⟩ := ClosedImmersionSES Z hZ_closed G
+    have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
+      rw [hS₃]
+      haveI : IrreducibleSpace (TopCat.of Z) :=
+        (isIrreducible_iff_irreducibleSpace.mp hZ_irred.1 :)
+      exact PushforwardHVanishing Z hZ_closed _ n
+        (@ih_irred (TopCat.of Z) _ _ _
+          (topologicalKrullDim_subspace_le X Z)
+          (lt_of_le_of_lt (topologicalKrullDim_subspace_le X Z) hn))
+    have hK_stalks : ∀ (x : ↑X), x ∉ ⋃₀ (s : Set (Set X)) →
+        IsZero ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₁.val) := by
+      intro x hx_s
+      let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+      by_cases hxZ : x ∈ Z
+      · -- x ∈ Z: unit iso → f ≫ g = 0 → f stalk = 0 → source stalk = 0
+        sorry -- closedIncl_unit_stalk_isIso + mono + composition zero
+      · -- x ∉ Z ∧ x ∉ ⋃s → G stalk = 0 → K stalk = 0 (mono to zero)
+        sorry -- IsZero.of_mono from hG_stalks
+    have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
+      ih (fun Z' hZ' => hcomp Z' (Finset.mem_insert_of_mem hZ')) S.X₁ hK_stalks
+    rw [← hS₂]
+    let Z' := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+      (AddCommGrpCat.of (ULift ℤ))
+    constructor; intro a b
+    have ha : a.comp (Ext.mk₀ S.g) (add_zero n) = 0 :=
+      @Subsingleton.elim _ ((add_zero n) ▸ hPush) _ _
+    have hb : b.comp (Ext.mk₀ S.g) (add_zero n) = 0 :=
+      @Subsingleton.elim _ ((add_zero n) ▸ hPush) _ _
+    obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ Z' hSE a ha
+    obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ Z' hSE b hb
+    rw [← hc, ← hd, @Subsingleton.elim _ hKer c d]
 
 set_option synthInstance.maxHeartbeats 80000 in
 /-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case).
