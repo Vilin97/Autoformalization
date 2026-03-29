@@ -1009,5 +1009,39 @@ theorem IrreduciblePosVanishing
   --   dim supp(K) < dim X → K ≅ i'_*(i'^*K) (unit iso for supported sheaves)
   --   → ih + PushforwardHVanishing → H(X, K) = 0
   -- SES: H(K) = 0 + H(pushforward) = 0 → H(F) = 0
-  sorry -- needs: proper closed subset extraction + ClosedImmersionSES +
+  -- Step 1: Extract a proper closed subset Z ⊊ X (from dim ≥ 1)
+  simp only [topologicalKrullDim, gt_iff_lt] at hpos
+  rw [Order.krullDim_pos_iff] at hpos
+  obtain ⟨a, b, hab⟩ := hpos
+  -- a is an IrreducibleCloseds with a.carrier ⊊ X (since a < b ≤ univ)
+  set Z := a.carrier with hZ_def
+  have hZ_closed : IsClosed Z := a.isClosed'
+  have hZ_ne_univ : Z ≠ Set.univ := fun h => lt_irrefl a (lt_of_lt_of_le hab
+    (show b.carrier ⊆ a.carrier from by rw [show a.carrier = Set.univ from h]; exact Set.subset_univ _))
+  -- dim Z < dim X (Z is a proper closed subset of irreducible X)
+  have hZ_dim : topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X := by
+    sorry -- dim of proper closed subset of irreducible space is strictly less
+  -- n > dim Z (since n > dim X > dim Z)
+  have hn_Z : ↑n > topologicalKrullDim (TopCat.of Z) := lt_trans hZ_dim hn
+  -- Step 2: ClosedImmersionSES: 0 → K → F → i_*(i^*F) → 0
+  obtain ⟨S, hSE, hS₂, hS₃⟩ := ClosedImmersionSES Z hZ_closed F
+  -- Step 3: Pushforward vanishes
+  have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
+    rw [hS₃]
+    exact PushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ _ hZ_dim hn_Z)
+  -- Step 4-5: Kernel K has zero stalks on Z → supported on proper closed → vanishes
+  have hKer : Subsingleton (Sheaf.H S.X₁ n) := by
+    sorry -- needs: K supported on supp(K) ⊊ X, unit iso, ih + PushforwardHVanishing
+  -- Step 6: SES gives H(F) = 0 (subsingleton_ext_of_ses_middle inline)
+  rw [← hS₂]
+  let Z' := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+    (AddCommGrpCat.of (ULift ℤ))
+  constructor; intro a b
+  have ha : a.comp (Ext.mk₀ S.g) (add_zero n) = 0 :=
+    @Subsingleton.elim _ ((add_zero n) ▸ hPush) _ _
+  have hb : b.comp (Ext.mk₀ S.g) (add_zero n) = 0 :=
+    @Subsingleton.elim _ ((add_zero n) ▸ hPush) _ _
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ Z' hSE a ha
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ Z' hSE b hb
+  rw [← hc, ← hd, @Subsingleton.elim _ hKer c d]
   -- PushforwardHVanishing + unit iso for supported sheaves + ih
