@@ -19,6 +19,8 @@
 -/
 import Mathlib
 import Aristotle.GrothendieckVanishing.main.Auxiliary
+import Aristotle.GrothendieckVanishing.main.ClosedImmersion
+import Aristotle.GrothendieckVanishing.main.ZeroOutside
 
 universe u
 
@@ -43,6 +45,15 @@ instance (X : TopCat.{u}) : Abelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
 
 instance (X : TopCat.{u}) : IsGrothendieckAbelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   inferInstanceAs (IsGrothendieckAbelian (CategoryTheory.Sheaf _ _))
+
+instance {C : Type*} [Category C] {D : Type*} [Category D] [Preadditive D] :
+    (Functor.const Cᵒᵖ : D ⥤ Cᵒᵖ ⥤ D).Additive where
+
+instance {X : TopCat.{u}} :
+    (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive := by
+  show ((Functor.const (Opens X)ᵒᵖ) ⋙
+    presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive
+  infer_instance
 
 /-! ## Flasque sheaf sub-lemmas
 
@@ -497,6 +508,21 @@ theorem ext_zero_map_surjective {X : TopCat.{u}}
 
 /-! ## Proved infrastructure -/
 
+/-- `H F 0` is equivalent to sections on `⊤`. -/
+noncomputable def sheafH0EquivSections {X : TopCat.{u}}
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
+    Sheaf.H F 0 ≃+ F.val.obj (op ⊤) := by
+  refine AddEquiv.trans Ext.addEquiv₀ ?_
+  refine AddEquiv.trans ?_ (TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv _)
+  exact (constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat Limits.isTerminalTop).homAddEquiv _ F
+
+/-- Transport subsingletons across an additive equivalence. -/
+private theorem subsingleton_of_addEquiv {A B : Type*} [Add A] [Add B]
+    (e : A ≃+ B) [Subsingleton A] : Subsingleton B := by
+  constructor
+  intro x y
+  simpa using congrArg e (Subsingleton.elim (e.symm x) (e.symm y))
+
 /-- **Dimension shifting** via injective presentation.
     For `0 -> F -> I -> Q -> 0` with `I` injective, `Subsingleton (H Q n)`
     implies `Subsingleton (H F (n+1))`. Uses the covariant Ext LES:
@@ -601,7 +627,39 @@ theorem PushforwardHVanishing
     (h : Subsingleton (Sheaf.H G n)) :
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G) n) := by
-  sorry
+  intro i
+  cases n with
+  | zero =>
+    let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G
+    have hsec : Subsingleton (G.val.obj (op ⊤)) := by
+      let e := sheafH0EquivSections G
+      letI : Subsingleton (Sheaf.H G 0) := h
+      exact subsingleton_of_addEquiv e
+    have htop : ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ := by
+      ext x
+      simp [Opens.map]
+    have hobj : F'.val.obj (op ⊤) = G.val.obj (op ⊤) := by
+      change G.val.obj (op ((Opens.map i).obj ⊤)) = G.val.obj (op ⊤)
+      simpa [TopCat.Sheaf.pushforward, TopCat.Presheaf.pushforward, htop]
+    let e' := sheafH0EquivSections F'
+    let eTop : F'.val.obj (op ⊤) ≃+ G.val.obj (op ⊤) :=
+      AddEquiv.ofBijective
+        (AddCommGrpCat.Hom.hom (eqToHom hobj))
+        (by
+          constructor
+          · intro a b hab
+            simpa using hab
+          · intro b
+            refine ⟨(AddCommGrpCat.Hom.hom (eqToHom hobj.symm)) b, ?_⟩
+            cases hobj
+            rfl)
+    constructor
+    intro a b
+    apply e'.injective
+    apply eTop.injective
+    exact Subsingleton.elim _ _
+  | succ n =>
+      sorry
 
 -- The adjunction unit F → i_*(i^*F) is epi for closed immersions.
 -- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).
@@ -624,10 +682,23 @@ theorem epi_unit_of_closedImmersion
   intro x
   by_cases hxZ : (x : X) ∈ Z
   · -- x ∈ Z: stalk map is surjective
-    -- The unit η_stalk composed with stalkPushforward (which is an iso for inducing maps)
-    -- gives the pullback stalk comparison (also an iso). So η_stalk is surjective.
-    -- For now, sorry — requires adjunction-stalk compatibility.
-    sorry
+    let y : TopCat.of Z := ⟨x, hxZ⟩
+    change Function.Surjective
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} ((TopCat.closedIncl hZ) y)).map
+        ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} (TopCat.closedIncl hZ)).unit.app F).val)
+    haveI :
+        IsIso
+          ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} ((TopCat.closedIncl hZ) y)).map
+            ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
+              (TopCat.closedIncl hZ)).unit.app F).val) :=
+      TopCat.closedIncl_unit_stalk_isIso hZ F y
+    intro b
+    refine
+      ⟨inv
+          ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} ((TopCat.closedIncl hZ) y)).map
+            ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
+              (TopCat.closedIncl hZ)).unit.app F).val) b, ?_⟩
+    simp
   · -- x ∉ Z: target stalk is 0 (pushforward has zero stalk outside closed Z)
     -- Show stalk is IsZero by showing all colimit injections (germs) are 0.
     -- Each germ_V factors through V' = V ∩ (X\Z) where the source is 0.
