@@ -79,19 +79,6 @@ private theorem stalk_zero_of_ses_g_iso
   rw [AddCommGrpCat.mono_iff_injective] at this
   exact this (hfa_zero.trans (map_zero _).symm)
 
-private theorem subsingleton_ext_of_ses_middle''
-    {C : Type*} [Category C] [Abelian C] [HasExt C]
-    {S : ShortComplex C} (hS : S.ShortExact) (Z : C) (n : ℕ)
-    (h₁ : Subsingleton (Ext Z S.X₁ n))
-    (h₃ : Subsingleton (Ext Z S.X₃ n)) :
-    Subsingleton (Ext Z S.X₂ n) := by
-  constructor; intro a b
-  have ha : a.comp (Ext.mk₀ S.g) (add_zero n) = 0 := Subsingleton.elim _ _
-  have hb : b.comp (Ext.mk₀ S.g) (add_zero n) = 0 := Subsingleton.elim _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ Z hS a ha
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ Z hS b hb
-  rw [← hc, ← hd, Subsingleton.elim c d]
-
 /-! ## Main proof -/
 
 set_option maxHeartbeats 3200000 in
@@ -175,6 +162,4 @@ theorem ReducibleVanishing'
           Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f
         rw [AddCommGrpCat.mono_iff_injective] at this
         exact this ((hX₂_stalk _).trans (map_zero _).symm)
-    exact hX₂ ▸ subsingleton_ext_of_ses_middle'' hSE
-      ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-        (AddCommGrpCat.of (ULift ℤ))) n hker hpush
+    exact hX₂ ▸ subsingleton_sheafH_of_shortExact_middle hSE n hker hpush

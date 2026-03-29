@@ -1,17 +1,19 @@
 # Adversarial Critique — Grothendieck Vanishing Formalization
 
-**Timestamp**: 2026-03-29T17:00Z
+**Timestamp**: 2026-03-29T18:20Z
 **Reviewer verdict**: REVISE
 
 ---
 
 ## 0. CI Status
 
-**CI fix pushed (029fae5).** The Setup.lean→SetupCore.lean split was committed. CI run 23713895270 is in-progress.
+**Multiple CI fixes pushed.** 029fae5 (split), 78f7fe4 (congr_arg lambda), 2178710 (Subsingleton synthesis), 2ab3391 (Step 5).
 
-- Previous 3 runs FAILED because SetupCore.lean was never committed.
-- Fix: commit 029fae5 adds SetupCore.lean, thin Setup.lean, updated ReducibleVanishing.lean import.
-- **Status: PENDING** — must verify CI passes before downgrading this from P0.
+- 029fae5 and 78f7fe4 FAILED: Subsingleton synthesis issues in `subsingleton_sheafH_of_shortExact_middle`.
+- 2178710 fixes synthesis with explicit `@Subsingleton.elim`.
+- 2ab3391 adds `constantSheaf_kernel_vanishing` (Step 5).
+- CI runs for 2178710 and 2ab3391 are **in-progress**.
+- **Status: PENDING** — must verify CI passes.
 
 **Docs**: Blueprint (HTTP 200) and dep_graph (HTTP 200) are deployed.
 

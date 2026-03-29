@@ -1,5 +1,27 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-29T18:20Z — Babysit cycle: CI fixes + Step 5 theorem
+
+**Sorry count: 1 (IrreduciblePosVanishing at Setup.lean:95)**
+
+### Changes
+- Fixed CI build errors in SetupCore.lean:
+  - 78f7fe4: `congr_arg (· (ULift.up 1))` → explicit lambda
+  - 2178710: explicit `@Subsingleton.elim` instances in `subsingleton_sheafH_of_shortExact_middle`
+- **NEW THEOREM**: `constantSheaf_kernel_vanishing` (IrreducibleStep.lean) — Step 5 of Hartshorne.
+  Proves kernel of Z_X → i_*(i^*Z_X) has vanishing cohomology using flasque vanishing +
+  PushforwardHVanishing + subsingleton_ext_of_ses at shifted degree.
+- Discovered extensive Step 3B infrastructure in ZeroOutside.lean (500+ lines) and
+  FiniteGeneratorReduction.lean — `adjoinGeneratorShortComplex`, `familyGeneratedSheaf`,
+  `subsingleton_of_adjoinGenerator_of_zeroOutside`. The finite-generator induction framework
+  is essentially complete.
+- CI runs for fixes + Step 5 in-progress.
+- Aristotle API still down (500).
+
+### Status
+- CI: 2 runs in-progress (2178710, 2ab3391)
+- Sorry: 1 (unchanged, but Step 5 theorem is a key building block)
+
 ## 2026-03-29T17:00Z — Babysit cycle: CI verification + Aristotle check
 
 **Sorry count: 1 (IrreduciblePosVanishing at Setup.lean:95)**
