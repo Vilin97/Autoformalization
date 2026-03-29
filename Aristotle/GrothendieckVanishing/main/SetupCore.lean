@@ -690,7 +690,7 @@ private theorem surj_transfer_closedIncl {A B C D : AddCommGrpCat.{u}}
 -- Pushforward along closed immersion preserves ShortExact.
 -- Proof: Mono (right adjoint), Exact (left exact + mono f + preserves kernel),
 -- Epi (stalkwise: iso at points of Z via stalkPushforward, zero stalk outside Z).
-set_option synthInstance.maxHeartbeats 200000 in
+set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 3200000 in
 theorem closedIncl_pushforward_shortExact
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
@@ -769,7 +769,7 @@ theorem pushforward_preserves_flasque {Y : TopCat.{u}} (f : TopCat.of Y ⟶ X)
 -- The proof uses FlasqueVanishing + LES + Γ equality + induction on n.
 -- PROVED: i_* exactness handled via flasque preservation + LES induction.
 set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 200000 in
+set_option synthInstance.maxHeartbeats 400000 in
 theorem PushforwardHVanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
