@@ -1,404 +1,429 @@
-# Natural Language Proofs of Remaining Sorry's
+# Natural-Language Guide for the Remaining `sorry`s
 
-Following Hartshorne III, Section 2, Theorem 2.7 and its proof.
+This file is meant to guide the prover work on the *current* live development in
+`Aristotle/GrothendieckVanishing/main/`.
 
-## Overview
+It is based on:
+- the actual remaining `sorry`s in `main/Setup.lean`,
+- Hartshorne III.2, especially Theorem 2.7 and the proof on textbook pages 210-211
+  in `context/Hartshorne_3_2.pdf`,
+- the infrastructure already present in this repo, in particular
+  `ClosedImmersion.lean`, `ZeroOutside.lean`, and `ReducibleVanishing.lean`.
 
-**Theorem (Grothendieck Vanishing, Hartshorne III.2.7).** Let X be a Noetherian
-topological space of dimension n. Then for all sheaves F of abelian groups on X
-and all i > n, we have H^i(X, F) = 0.
+## Current Status
 
-The proof proceeds by induction on dim X. There are three cases:
-1. **Reducible case (Step 1):** Reduce to irreducible X via induction on the number of irreducible components.
-2. **Irreducible dim 0 (Step 2):** Γ is an exact functor, so all higher cohomology vanishes.
-3. **Irreducible dim ≥ 1 (Steps 3–5):** Use the constant sheaf Z_U and noetherian induction.
+As of the live source checked on 2026-03-29, the only actual `sorry`s in the
+main development are in `Setup.lean`:
 
-Cases 1 (modulo one sorry) and 2 are proved. Case 3 has one sorry. There are also
-sorry's in PushforwardHVanishing (degree 1) and ReducibleVanishing (stalk computation).
+1. `Setup.lean:1083`
+2. `Setup.lean:1103`
+3. `Setup.lean:1105`
+4. `Setup.lean:1185`
 
----
+There is **no remaining `sorry` in `PushforwardHVanishing`**.
+`FlasqueVanishing` is also no longer one of the live gaps in `Setup.lean`.
 
-## Sorry 1: `PushforwardHVanishing` degree 1 (Setup.lean:798)
+The key point is that these four live `sorry`s do **not** all have the same
+mathematical weight:
 
-**Statement.** Let i : Z ↪ X be a closed immersion of Noetherian spaces. If
-Subsingleton(H^1(Z, G)) then Subsingleton(H^1(X, i_*G)).
+- `1083`, `1103`, and `1105` are local obligations inside the reducible-case
+  proof in `Setup.lean`. They already have correct proofs in
+  `main/ReducibleVanishing.lean`.
+- `1185` is the genuine remaining hard theorem. The current comments in
+  `Setup.lean` try to finish it by a support argument using a closed immersion,
+  but that argument is not correct as stated. The right proof is Hartshorne's
+  Steps 3-5.
 
-**Context.** The n ≥ 2 case is proved by LES + FlasqueVanishing + dimension shift.
-The n = 0 case is proved by Γ comparison. Only n = 1 remains.
+So the honest situation is:
 
-**Proof (Hartshorne, Lemma 2.10 + Proposition 2.5).**
+- the reducible case is essentially finished already and should be copied or
+  refactored from `ReducibleVanishing'.lean`,
+- the irreducible positive-dimensional case still needs real mathematics and
+  new formal infrastructure.
 
-i_* is exact for closed immersions (already proved as `closedIncl_pushforward_shortExact`).
-The key insight is that since i_* is exact AND maps injectives to flasques (already proved),
-it maps injective resolutions to flasque resolutions.
+## Hartshorne's Proof Skeleton
 
-Take an injective resolution 0 → G → J → R → 0 on Z. Then:
-- 0 → i_*G → i_*J → i_*R → 0 is exact on X (by exactness of i_*).
-- i_*J is flasque (injective sheaves are flasque, and i_* preserves flasqueness for closed immersions — in fact i_*J is flasque because the restriction maps of J are surjective, and pulling back along i preserves this).
-- Since i_*J is flasque, H^1(X, i_*J) = 0 by FlasqueVanishing.
+The reference is Hartshorne, Chapter III, Section 2:
 
-From the long exact sequence on X:
-  Γ(i_*J) → Γ(i_*R) → H^1(X, i_*G) → H^1(X, i_*J) = 0
+- Proposition 2.5: flasque sheaves are acyclic.
+- Lemma 2.8: on a noetherian space, direct limits of flasque sheaves are flasque.
+- Proposition 2.9: on a noetherian space, cohomology commutes with direct limits.
+- Lemma 2.10: if `j : Y ↪ X` is a closed immersion, then `H^i(Y,F) = H^i(X,j_*F)`.
+- Theorem 2.7: if `dim X = n`, then `H^i(X,F)=0` for all `i > n`.
 
-So H^1(X, i_*G) = coker(Γ(X, i_*J) → Γ(X, i_*R)).
+Hartshorne proves Theorem 2.7 by three reductions:
 
-From the long exact sequence on Z:
-  Γ(Z, J) → Γ(Z, R) → H^1(Z, G) → H^1(Z, J) = 0
+1. Reducible `X`: peel off irreducible components one at a time.
+2. Irreducible `X` with `dim X = 0`: the only nonempty open is `X`, so global
+   sections are exact and higher cohomology vanishes.
+3. Irreducible `X` with `dim X > 0`: use finitely generated subsheaves,
+   reduce to a quotient of `Z_U`, then reduce subsheaves of `Z_U` to smaller
+   closed subsets.
 
-So H^1(Z, G) = coker(Γ(Z, J) → Γ(Z, R)).
+The live formalization already has:
 
-Now, Γ(X, i_*G) = G(i⁻¹(X)) = G(Z) = Γ(Z, G) by definition of pushforward.
-More precisely, (Opens.map i).obj ⊤ = ⊤, so Γ_X ∘ i_* = Γ_Z naturally.
+- the dimension-0 case,
+- the closed-immersion pushforward vanishing tool
+  `PushforwardHVanishing`,
+- the constant-sheaf flasque result on irreducible spaces,
+- `zeroOutsideInt U`, which is the formal stand-in for Hartshorne's `Z_U`.
 
-Therefore coker(Γ(X, i_*J) → Γ(X, i_*R)) = coker(Γ(Z, J) → Γ(Z, R)),
-and H^1(X, i_*G) ≅ H^1(Z, G). If the latter is a subsingleton, so is the former.
+What is still missing is the actual formal execution of Hartshorne's Steps 3-5.
 
-**Formalization approach.** Rather than comparing cokernels (which requires naturality
-of the Γ iso), use the existing LES machinery directly:
+## The Three Reducible-Case `sorry`s
 
-Since i_*J is flasque, H^1(X, i_*J) = 0. By the LES, any a ∈ H^1(X, i_*G) lifts to
-c ∈ H^0(X, i_*R) = H^0(Z, R). The map Γ(i_*J) → Γ(i_*R) factors through
-Γ(J) → Γ(R) (via the Γ equality). If H^1(Z, G) = 0 then Γ(J) → Γ(R) is surjective,
-hence Γ(i_*J) → Γ(i_*R) is surjective, hence H^1(X, i_*G) = 0.
+These three `sorry`s are routine. They are already solved in
+`main/ReducibleVanishing.lean`.
 
-Alternatively: the same LES argument used for n ≥ 2 works for n = 1 if we set m = -1.
-The pattern: "a lifts from H^n to H^{n-1} of the quotient, then
-Subsingleton(H^{n-1}(R)) by induction" — for n = 1 we need Subsingleton(H^0(R))
-which follows from H^1(G) = 0 + exactness of the Γ sequence (i.e., surjectivity of
-Γ(J) → Γ(R) follows from flasqueness of J). This is exactly what FlasqueVanishing proves
-at the base case.
+### 1. `Setup.lean:1083`
 
-In fact the simplest approach: for n = 1, use the *same* pattern as n ≥ 2.
-The pushed-forward SES 0 → i_*G → i_*J → i_*R → 0 is exact, i_*J is flasque,
-so H^1(i_*J) = 0. By LES, H^1(i_*G) injects into H^0(i_*R)/im(H^0(i_*J)).
-But H^0(i_*R) = Γ(R) and H^0(i_*J) = Γ(J), and Γ(J) → Γ(R) is surjective
-(from flasqueness of J + exactness of evaluated SES — this is epi_app_of_shortExact_flasque).
-So H^0(i_*R)/im(H^0(i_*J)) = 0, hence H^1(i_*G) = 0.
+This is the base case of the induction on the finite set of irreducible
+components:
 
-Wait — this doesn't use the hypothesis Subsingleton(H^1(G))! Let's reconsider.
-The pushed-forward SES approach gives H^1(i_*G) ≅ H^1(G) unconditionally?
-No — Γ(J) → Γ(R) surjective requires J flasque on Z (which it is, since injective → flasque).
-And the pushed-forward SES being exact requires i_* exact (proved).
+> if a sheaf `G` has zero stalks at every point of `X`, then `H^n(X,G)=0`.
 
-Actually: the LES on X from 0 → i_*G → i_*J → i_*R → 0 gives:
-  H^0(i_*J) → H^0(i_*R) → H^1(i_*G) → H^1(i_*J) = 0
+This is already proved in `ReducibleVanishing.lean` in two steps:
 
-The map H^0(i_*J) → H^0(i_*R) is Γ(i_*J) → Γ(i_*R) = Γ(J) → Γ(R).
-Is this surjective? Yes, because J is flasque on Z, the SES 0 → G → J → R → 0
-is exact on Z, and epi_app_of_shortExact_flasque gives Γ(J) → Γ(R) surjective
-(using flasqueness of G? No — flasqueness of X₁ = G, which we don't know!).
+1. `sheaf_isZero_of_zero_stalks`
+2. `subsingleton_sheafH_of_isZero'`
 
-Hmm, epi_app_of_shortExact_flasque needs *X₁* (= G) flasque, not X₂ (= J).
-So the "Γ(J) → Γ(R) surjective" is not immediate from our existing lemma.
+The natural-language proof is:
 
-**Correct approach:** The degree 1 case truly needs the hypothesis.
-From the LES on Z: Γ(J) → Γ(R) → H^1(G) → 0. So if H^1(G) = 0, then Γ(J) → Γ(R)
-is surjective. Via the Γ equality, Γ(i_*J) → Γ(i_*R) is surjective. From the LES on X:
-H^1(i_*G) = coker of a surjection = 0.
+- If every stalk of `G` is zero, then every section is locally zero.
+- By stalkwise extensionality for sheaves of abelian groups, every section over
+  every open set is zero.
+- Hence every object `G(U)` is a subsingleton, so `G` is the zero sheaf,
+  i.e. `IsZero G`.
+- Ext groups into an `IsZero` object are zero, hence `Sheaf.H G n` is a
+  subsingleton.
 
-**Formal plan:** Use Ext.covariant_sequence_exact₃ (the connecting map).
-For the SES 0 → i_*G → i_*J → i_*R → 0 with i_*J flasque:
-- Any a ∈ Ext(Z', i_*G, 1) maps to Ext(Z', i_*J, 1) = 0 (FlasqueVanishing).
-- By covariant_sequence_exact₃: a = δ(c) for some c ∈ Ext(Z', i_*R, 0).
-- Need: every c ∈ Ext(Z', i_*R, 0) is in the image of Ext(Z', i_*J, 0) → Ext(Z', i_*R, 0).
-  i.e., the map H^0(i_*J) → H^0(i_*R) is surjective in the Ext sense.
-  This is equivalent to epi_app at ⊤ (for Z' = constant sheaf), i.e., Γ(i_*J) → Γ(i_*R) surjective.
-  Use: Γ(i_*J) = Γ(J), Γ(i_*R) = Γ(R), and Subsingleton(H^1(G)) implies surjectivity.
+This is completely standard and already formalized. The right move is not to
+re-prove it again in `Setup.lean`, but to reuse or inline the finished proof
+from `ReducibleVanishing.lean`.
 
----
+### 2. `Setup.lean:1103`
 
-## Sorry 2: `ReducibleVanishing` base case (Setup.lean:984)
+This is the branch `x ∈ Z` inside the reducible case.
 
-**Statement.** If G has zero stalks everywhere (∀ x, G_x = 0), then H^n(X, G) = 0.
+The short exact sequence is
 
-**Proof.** A sheaf with all zero stalks is the zero sheaf (IsZero).
-For an IsZero object G, Ext(Z, G, n) = 0 for any Z and n.
+`0 → K → G → i_* i^* G → 0`
 
-This is already proved in ReducibleVanishing.lean as `sheaf_isZero_of_zero_stalks` +
-`subsingleton_sheafH_of_isZero'`. The sorry in Setup.lean is a *duplicate* —
-the ReducibleVanishing.lean file already contains the complete proof of
-ReducibleVanishing' which replaces the sorry'd ReducibleVanishing in Setup.lean.
+coming from the adjunction unit for the closed immersion `i : Z ↪ X`.
 
-**Formal plan:** The ReducibleVanishing' in ReducibleVanishing.lean handles this case
-correctly via `sheaf_isZero_of_zero_stalks` + `subsingleton_sheafH_of_isZero'`.
-The Setup.lean sorry can be replaced by delegating to ReducibleVanishing'.
-However, ReducibleVanishing' itself has one sorry (sorry 3 below).
-
----
-
-## Sorry 3: `ReducibleVanishing` stalk at x ∈ Z (ReducibleVanishing.lean:153 / Setup.lean:1004)
-
-**Statement.** In the SES 0 → K → F → i_*(i^*F) → 0 from ClosedImmersionSES, if x ∈ Z
-then the stalk K_x = 0.
+At a point `x ∈ Z`, the stalk map
 
-**Proof (Hartshorne, Step 1).**
-The map F → i_*(i^*F) is the adjunction unit η. At a point x ∈ Z, the stalk map
-η_x : F_x → (i_*(i^*F))_x is an isomorphism (this is `closedIncl_unit_stalk_isIso`,
-already proved). Since K = ker(η), and η_x is an iso (hence mono), K_x = 0.
-
-More precisely: K_x → F_x is mono (K → F is mono in the SES, and the stalk functor
-preserves monos). And F_x → (i_*i^*F)_x is an iso. The composition K_x → F_x → (i_*i^*F)_x
-is zero (since K → F → i_*i^*F is zero in the SES). Since the second map is an iso,
-the first map is zero. Since it is also mono, K_x = 0.
-
-This is exactly what `stalk_zero_of_ses_g_iso` proves in ReducibleVanishing.lean!
-The sorry bridges the fact that S.g from ClosedImmersionSES is definitionally equal
-to adj.unit.app G, and `closedIncl_unit_stalk_isIso` gives the iso on stalks.
-
-**Formal plan:** Provide the IsIso instance for the stalk of S.g at x ∈ Z.
-S.g = adj.unit.app G (by construction in ClosedImmersionSES).
-The stalk map T.map S.g.val = T.map (adj.unit.app G).val.
-By `closedIncl_unit_stalk_isIso`, T.map (adj.unit.app G).val is an iso at x ∈ Z.
-Then apply `stalk_zero_of_ses_g_iso`.
+`G_x → (i_* i^* G)_x`
 
----
-
-## Sorry 4: `ReducibleVanishing` stalk at x ∉ Z (Setup.lean:1006)
+is an isomorphism. This is exactly
+`TopCat.closedIncl_unit_stalk_isIso`.
 
-**Statement.** In the SES 0 → K → F → i_*(i^*F) → 0, if x ∉ Z and x ∉ ⋃s (so F_x = 0
-by hypothesis), then K_x = 0.
-
-**Proof.** K → F is mono. The stalk functor preserves monos. So K_x → F_x is mono.
-But F_x = 0 (by hypothesis hG_stalks). A mono from K_x to 0 forces K_x = 0.
-
-This is already proved in the `· else` branch of ReducibleVanishing.lean (lines 154–167).
-The sorry in Setup.lean:1006 is only in the *duplicate* proof in Setup.lean;
-ReducibleVanishing.lean handles this case.
-
----
+Therefore:
 
-## Sorry 5: `IrreduciblePosVanishing` kernel vanishing (Setup.lean:1086)
-
-**Statement.** For irreducible X with dim ≥ 1 and the SES 0 → K → F → i_*(i^*F) → 0
-where Z ⊊ X is a proper closed subset, show Subsingleton(H^n(X, K)).
-
-**Context.** K = ker(η : F → i_*i^*F). The kernel K has zero stalks on Z (by sorry 3),
-but supp(K) ⊆ X \ Z with closure(X \ Z) = X (since X is irreducible and Z ⊊ X).
-So we CANNOT transfer K to a smaller space and use the induction hypothesis.
-
-**Proof (Hartshorne, Steps 3–5).**
-
-Hartshorne's proof does NOT use the ClosedImmersionSES approach for the irreducible case.
-Instead, Steps 3–5 use the constant sheaf Z and subsheaves generated by sections:
-
-**Step 3.** Let X be irreducible of dimension n, and let F ∈ Ab(X). Let
-B = ∪_{U⊆X} F(U), and let A be the set of all finite subsets of B. For each α ∈ A,
-let F_α be the subsheaf of F generated by the sections in α. Then F = lim F_α
-(directed system). By Proposition 2.9 (cohomology commutes with direct limits on
-Noetherian spaces), H^i(X, F) = lim H^i(X, F_α). So it suffices to show
-H^i(X, F_α) = 0 for each F_α, i.e., reduce to the case where F is generated by
-finitely many sections over various open sets.
-
-**Step 4.** If F_α is generated by a single section s ∈ F(U), then F is a quotient
-of Z_U (the constant sheaf Z extended by zero from U). We have a surjection
-Z_U → F with kernel R. The SES 0 → R → Z_U → F → 0 gives:
-H^i(X, Z_U) → H^i(X, F) → H^{i+1}(X, R).
-Z is flasque on X (irreducible!), so H^i(X, Z) = 0 for i > 0.
-The sheaf R/Z_V is supported on (U − V)⁻ which has dim < n since X is irreducible.
-By Lemma 2.10 + induction, H^i(X, R/Z_V) = 0. So H^i(X, Z_U) = 0 for i > 0.
-By the LES, H^i(X, F) = 0 requires H^{i+1}(X, R) = 0. But R is also supported on
-a closed subset of dimension < n...
+- the composite `K_x → G_x → (i_* i^* G)_x` is zero because `K` is the kernel,
+- the second map is an isomorphism, hence in particular a monomorphism,
+- so `K_x → G_x` is zero,
+- but `K_x → G_x` is also mono because stalk functors preserve monos,
+- therefore `K_x = 0`.
 
-Actually, Hartshorne's argument is more subtle. Let me re-read Steps 3–5 carefully.
-
-**Step 3 (actual).** X irreducible of dimension n. F ∈ Ab(X). Let B = ∪ F(U),
-A = finite subsets of B. F_α = subsheaf generated by α. F = lim F_α.
-By 2.9, reduce to F generated by finitely many sections. By induction on #(α),
-reduce to F generated by a single section over some open U.
-
-**Step 4 (actual).** F generated by a single section s ∈ F(U). R = kernel of
-Z_U → F (where Z_U is the extension by zero of the constant sheaf Z on U).
-If R = 0, skip to Step 5. Otherwise, for each x ∈ U, R_x is a subgroup of
-Z = (Z_U)_x. If R_x = 0, skip. Otherwise, R_x ≅ d·Z for some d ≥ 1.
-There exists V ⊆ U open such that R|_V ≅ d·Z|_V as a subsheaf of Z_V.
-So R|_V/Z_V has support on (U − V)⁻, which has dimension < n.
-By 2.10 and induction: H^i(X, R|_V/Z_V) = 0 for i ≥ n. By the SES, need
-H^i(X, R) = 0 for i ≥ n... this uses vanishing for R and the quotient.
+The local formal helper for exactly this argument is already present:
 
-**Step 5 (actual).** Z_U for any open U ⊆ X. Let Y = X − U (closed).
-SES: 0 → Z_U → Z → Z_Y → 0. dim Y < dim X (since X irreducible), so
-H^i(X, Z_Y) = H^i(Y, Z) = 0 for i ≥ n by 2.10 + induction.
-Z is flasque (constant sheaf on irreducible space), so H^i(X, Z) = 0 for i > 0.
-By LES, H^i(X, Z_U) = 0 for i ≥ n.
+- `stalk_zero_of_ses_g_iso` in `ReducibleVanishing.lean`.
 
-**Key insight:** The Hartshorne proof for the irreducible case does NOT use
-the ClosedImmersionSES on F. It instead compares F to subsheaves generated by
-sections, ultimately reducing to Z_U via quotient maps, then uses flasqueness
-of the constant sheaf.
+So the correct implementation is just the existing proof pattern from
+`ReducibleVanishing'.lean`.
 
-**Our formalization approach:** We don't need to follow Hartshorne Steps 3–5 literally.
-Instead, we can use the existing infrastructure more directly.
+### 3. `Setup.lean:1105`
 
-**Alternative approach via noetherian induction on support.**
+This is the branch `x ∉ Z` and also outside the union of the remaining
+components.
 
-For irreducible X with dim ≥ 1 and SES 0 → K → F → i_*(i^*F) → 0 where Z ⊊ X:
-- K has zero stalks on Z (sorry 3).
-- The pushforward term vanishes by ih (already proved).
-- For K: K has zero stalks on Z, so K is "supported on X \ Z".
-  But we cannot directly transfer K to a subspace since X \ Z is open, not closed.
+The hypothesis of the outer induction gives `G_x = 0` there. Since
 
-Instead, apply the *same induction* again to K: pick any irreducible component
-Y of X with dim Y ≥ 1 (which exists since dim X ≥ 1). Form the SES
-0 → K' → K → j_*(j^*K) → 0 where j : Y ↪ X. The pushforward vanishes by ih.
-K' has zero stalks on Y ∪ Z... keep iterating.
+`K_x → G_x`
 
-But this doesn't terminate unless we can show supp(K') strictly decreases.
-The problem: K' = ker(K → j_*j^*K), and K already has zero stalks on Z but not
-necessarily on Y.
+is mono, and the target is zero, the source must be zero.
 
-**Simplest correct approach:** Rather than trying to show K vanishes from its
-support properties, observe that the theorem is stated with an induction hypothesis
-that applies to ALL spaces of strictly smaller dimension, not just subspaces.
+Again, this is already done in `ReducibleVanishing.lean`. The proof is:
 
-The ih says: for ANY Noetherian Y with dim Y < dim X, and any sheaf G on Y,
-H^n(Y, G) = 0 for n > dim Y (and hence n > dim X > dim Y).
+- convert the stalk of `G` into an `IsZero` object using the hypothesis,
+- use that the stalk functor preserves monos,
+- a monomorphism into a zero object forces the source to be zero.
 
-For the kernel K: K lives on X but has zero stalks on Z. The support of K is
-contained in X \ Z (which is open). But X \ Z itself, being an open subset of
-a Noetherian space, is Noetherian, and dim(X \ Z) < dim X? NO — for irreducible X,
-an open dense subset has the same dimension.
+So the three reducible-case `sorry`s are not mathematically open problems.
+They should be replaced by the existing proof in `ReducibleVanishing'.lean`,
+or the theorem in `Setup.lean` should simply delegate to that file.
 
-**Correct resolution:** The sorry should be filled by applying the IH differently.
-The formalization takes `ih` as: for ALL Y with dim Y < dim X, H^n(Y, G) = 0.
+## The Real Remaining Problem: `IrreduciblePosVanishing`
 
-For K with zero stalks on Z:
-Since K_x = 0 for x ∈ Z, K is supported on X \ Z. Since X is irreducible and
-Z is a proper closed subset, X \ Z is dense open — its dimension equals dim X.
-We cannot transfer K to a smaller space.
+The serious gap is `Setup.lean:1185`.
 
-However, we can iterate the SES decomposition. For each irreducible component
-of Z^c... but Z^c is open and could be complicated.
+The current comments in `Setup.lean` try to argue as follows:
 
-**Actually, the correct approach for our formalization** is to not use
-ClosedImmersionSES for the irreducible case at all. Instead, use the same
-approach as Hartshorne Steps 3–5:
+- choose a proper closed subset `Z ⊊ X`,
+- form `0 → K → F → i_* i^*F → 0`,
+- note that `K` has zero stalks on `Z`,
+- conclude that `supp(K) ⊊ X`,
+- then apply the induction hypothesis to `supp(K)`.
 
-1. Reduce to F generated by finitely many sections (via direct limits, Prop 2.9).
-2. Reduce to a single section by induction on the number of generators.
-3. A single-section sheaf is a quotient of Z_U.
-4. Show H^i(X, Z_U) = 0 for i > n using Z flasque + support argument.
-5. Show H^{i+1}(X, R) = 0 by induction on dim of support.
+This is **not correct**.
 
-This is mathematically correct but involves significant new infrastructure
-(extension by zero, direct limits of sheaves, etc.).
+### Why the Current Support Argument Fails
 
-**Pragmatic approach for formalization:** Use the fact that our ih applies to
-ALL spaces of smaller dimension. For K with zero stalks on Z:
+From `K_x = 0` for `x ∈ Z`, one only gets
 
-Since we have the SES 0 → K → F → i_*i^*F → 0:
-- H^n(X, i_*i^*F) = 0 (by PushforwardHVanishing + ih).
-- We need H^n(X, K) = 0.
-- From the SES: H^n(X, F) = 0 iff H^n(X, K) = 0 (since H^n of the pushforward is 0).
+`supp(K) ⊆ X \ Z`.
 
-So actually we need to prove H^n(X, K) = 0 to conclude H^n(X, F) = 0.
-The kernel K is strictly "smaller" than F in some sense, but we need a well-founded
-measure to induct on.
+But when `X` is irreducible and `Z ⊊ X` is closed, the open set `X \ Z` is
+typically dense and has the **same** dimension as `X`. So one cannot conclude:
 
-**Noetherian induction approach (our formalization):** The induction hypothesis ih
-gives vanishing for ALL spaces of strictly smaller dimension. For irreducible X
-with dim ≥ 1, we need to show H^n(X, F) = 0 for all F and n > dim X.
+- `supp(K)` is a proper closed subset of `X`, or
+- `dim supp(K) < dim X`.
 
-Take a proper closed Z ⊊ X (exists since dim ≥ 1). Form the SES.
-The pushforward vanishes. For the kernel K: K has zero stalks on Z.
+In fact, the closure of `supp(K)` may well be all of `X`.
 
-Now apply the *reducible case argument* to K! K has zero stalks on Z, so when
-we iterate ClosedImmersionSES over irreducible components, the component Z
-(or any component containing points of Z) contributes zero stalks. After removing
-all irreducible components from the support, K becomes zero.
+So this branch cannot be finished by "support of the kernel is smaller" alone.
+That is exactly why Hartshorne does **not** prove the irreducible case by the
+same closed-immersion kernel argument used in the reducible case.
 
-Actually, this doesn't quite work either because X might have only one irreducible
-component (itself, since X is irreducible).
+## Correct Proof of the Irreducible Positive-Dimensional Case
 
-**Final correct approach:** For irreducible X, the ReducibleVanishing doesn't
-apply (X is irreducible). We need a different argument for K.
+Here is the right argument, following Hartshorne III.2.7, Steps 3-5.
 
-The cleanest approach: apply the same `IrreduciblePosVanishing` recursively to K.
-K has zero stalks on Z. For K, form the SES with another proper closed Z' ⊊ X.
-The pushforward of K|_{Z'} vanishes by ih. The kernel K' = ker(K → i'_*(i'^*K))
-has zero stalks on Z ∪ Z'. Keep iterating with more closed subsets.
+To avoid clashing notation with the fixed Lean parameter `n`, write:
 
-Since X is Noetherian, the descending chain Z ⊇ Z ∩ Z' ⊇ ... stabilizes.
-But we need the *union* Z ∪ Z' ∪ ... to eventually be all of X.
+- `d := dim X`
+- `m` for the cohomological degree, with `m > d`
 
-Take Z' disjoint from Z? Not possible in general for irreducible X.
-Take Z' such that Z ∪ Z' = X? This means X is reducible, contradiction.
+The goal is: for irreducible noetherian `X` with `d > 0`,
+show `H^m(X,F)=0` for every sheaf `F`.
 
-**The issue is fundamental:** For irreducible X, you cannot cover X by proper closed
-subsets. The ClosedImmersionSES approach inherently fails for the kernel on
-irreducible spaces.
+### Step 3A: Reduce to finitely generated subsheaves
 
-**Hartshorne's solution:** Don't use ClosedImmersionSES on F at all for the
-irreducible case. Instead use the constant sheaf comparison (Steps 3–5).
+Let
 
-**For our formalization, the simplest fix:** The IrreduciblePosVanishing sorry
-should be replaced by a direct proof using:
-1. Constant sheaf Z on X is flasque (proved: `constantSheaf_flasque_of_irreducible`).
-2. H^i(X, Z) = 0 for i > 0 (proved: `constantSheaf_cohomology_vanishing`).
-3. For any F and any open U, there's a map Z_U → F or F → Z_U... not exactly.
+- `B := ⋃_{U open} F(U)`, the set of all local sections of `F`,
+- `A :=` the set of finite subsets of `B`.
 
-Actually, the key insight from Hartshorne is to use **noetherian induction on
-the set of closed subsets where F is non-zero**, not induction on dim X.
+For each finite subset `α ⊆ B`, let `F_α` be the subsheaf of `F` generated by
+the sections in `α`.
 
-**Our formalization already has the ih stated correctly:** it says for ALL Y with
-dim Y < dim X (not just subspaces). So the argument should be:
+Then:
 
-For irreducible X with dim ≥ 1, take proper closed Z ⊊ X with dim Z < dim X.
-SES: 0 → K → F → i_*i^*F → 0.
-- H^n(i_*i^*F) = 0: by PushforwardHVanishing + ih (dim Z < dim X).
-- H^n(K) = 0: K has zero stalks on Z. Now use **another SES** with a
-  *different* proper closed subset Z', getting 0 → K' → K → j_*j^*K → 0.
-  H^n(j_*j^*K) = 0 by PushforwardHVanishing + ih. K' has zero stalks on Z ∪ Z'.
+- the family `(F_α)` is directed under inclusion,
+- `F = colim F_α` as a sheaf,
+- by Hartshorne Proposition 2.9,
+  `H^m(X,F) ≅ colim H^m(X,F_α)`.
 
-  But this infinite regress needs to terminate. The support of the iterated
-  kernels shrinks: K has zero stalks on Z, K' has zero stalks on Z ∪ Z', etc.
+Therefore it is enough to prove vanishing for each `F_α`, i.e. for sheaves
+generated by finitely many sections.
 
-  **Key observation:** By noetherian induction (DCC on closed subsets), the
-  supports supp(K) ⊇ supp(K') ⊇ ... form a descending chain of closed sets,
-  which stabilizes. If it stabilizes at some non-empty W, then we need to show
-  H^n(X, K_final) = 0 where K_final has support exactly W.
+This is the first major missing formal ingredient. It requires the direct-limit
+machinery from Hartshorne 2.8-2.9, not just the current closed-immersion tools.
 
-  But W is a *proper* closed subset of X (since supp(K) ⊆ X \ Z ⊊ X?).
-  No — supp(K) could be all of X since X \ Z is dense.
+### Step 3B: Reduce from finitely many generators to one generator
 
-**I think the correct formalization approach for IrreduciblePosVanishing is:**
+Now assume `F` is generated by finitely many sections.
+Induct on the number of generators.
 
-Since the ih gives vanishing for ALL Y with dim Y < dim X, and the pushforward
-along closed immersions preserves vanishing (PushforwardHVanishing), we just
-need: for K with zero stalks on Z where Z is nonempty closed, H^n(X, K) = 0.
+If `α` is nonempty and `x ∈ α`, let `F_x` be the subsheaf generated by the single
+section `x`, and let `F'` be the subsheaf generated by `α \ {x}`.
+Then there is an exact sequence
 
-For this, iterate: apply ClosedImmersionSES with Z to K itself.
-0 → K₂ → K → i_*(i^*K) → 0.
-i^*K = K|_Z which has all zero stalks (since K_x = 0 for x ∈ Z), so i^*K = 0.
-Hence i_*(i^*K) = 0. So K₂ ≅ K. This is circular!
+`0 → F' → F → F/F' → 0`
 
-**The ClosedImmersionSES approach genuinely fails here.** We need Hartshorne's Steps 3–5.
+and `F/F'` is generated by the image of the single section `x`.
 
-**Alternative: use `subsingleton_ext_of_ses` with the constant sheaf.**
-For irreducible X, the constant sheaf A = Z has H^i(X, A) = 0 for i > 0.
-For any F, consider the map F → 0 (trivial) or use a different SES involving A.
+So by the long exact sequence, if one can prove vanishing for:
 
-Hartshorne constructs: for s ∈ F(U), a surjection Z_U → F_s where F_s is the
-subsheaf generated by s. The kernel R has support in a proper closed subset.
-Then induction + LES.
+- sheaves generated by fewer sections, and
+- sheaves generated by one section,
 
-**For our formalization, the pragmatic fix is to sorry this lemma and let Aristotle
-handle it, or implement a simplified version of Steps 3–5.**
+then one gets vanishing for `F`.
 
----
+Thus the problem reduces to the case where `F` is generated by a single section
+`s ∈ F(U)` on some open set `U`.
 
-## Summary of Sorry Status
+### Step 3C: A singly generated sheaf is a quotient of `Z_U`
 
-| # | Location | Statement | Status | Approach |
-|---|----------|-----------|--------|----------|
-| 1 | Setup.lean:798 | PushforwardHVanishing degree 1 | Aristotle 58% | LES + Γ equality + FlasqueVanishing |
-| 2 | Setup.lean:984 | ReducibleVanishing base (zero stalks → H=0) | Proved in ReducibleVanishing.lean | Delete duplicate |
-| 3 | ReducibleVanishing.lean:153 | Stalk at x ∈ Z is zero (kernel of unit iso) | Can prove | closedIncl_unit_stalk_isIso + stalk_zero_of_ses_g_iso |
-| 4 | Setup.lean:1006 | Stalk at x ∉ Z is zero (mono to zero) | Proved in ReducibleVanishing.lean | Delete duplicate |
-| 5 | Setup.lean:1086 | IrreduciblePosVanishing kernel | Aristotle 48% | Hartshorne Steps 3–5 (constant sheaf comparison) |
+Assume `F` is generated by one section `s ∈ F(U)`.
+Let `Z_U` denote the constant sheaf `Z` on `U`, extended by zero outside `U`.
 
-**Sorry's 2 and 4** are already resolved by ReducibleVanishing.lean — the sorry's
-in Setup.lean are in a *duplicate* proof that should be deleted.
+In this repo, the correct formal object is
 
-**Sorry 3** is a straightforward application of existing lemmas.
+- `TopCat.Sheaf.zeroOutsideInt U`.
 
-**Sorry's 1 and 5** are the substantive remaining work.
+The section `s` defines a morphism
+
+`Z_U → F`
+
+using the universal property of the sheaf generated by one local section. In the
+current repo, the obvious formal candidate is
+
+- `TopCat.Sheaf.zeroOutsideInt.sHom s`.
+
+If `F` is *the subsheaf generated by `s`*, then this map is an epimorphism.
+Let `R` be its kernel. Then we have an exact sequence
+
+`0 → R → Z_U → F → 0`.
+
+By the long exact sequence, to prove `H^m(X,F)=0` it is enough to prove:
+
+- `H^m(X,Z_U)=0`,
+- `H^m(X,R)=0`.
+
+This is exactly Hartshorne's reduction.
+
+### Step 4: Subsheaaves of `Z_U`
+
+Now let `R` be any subsheaf of `Z_U`.
+Hartshorne proves that vanishing for `R` can be reduced to vanishing for some
+smaller `Z_V`.
+
+There are two cases.
+
+#### Case 4.1: `R = 0`
+
+Then there is nothing to prove.
+
+#### Case 4.2: `R ≠ 0`
+
+For each `x ∈ U`, the stalk `R_x` is a subgroup of `Z`, so it has the form
+`d_x Z` for a unique integer `d_x ≥ 0`.
+
+Because `R ≠ 0`, there exists some stalk where `d_x > 0`.
+Let `d` be the least positive integer that occurs among the nonzero stalks.
+
+Hartshorne's claim is that there exists a nonempty open subset `V ⊆ U` such that
+
+`R|_V = d Z|_V`
+
+as a subsheaf of `Z|_V`.
+
+Intuitively:
+
+- pick `x ∈ U` with `R_x = dZ`,
+- choose a germ represented by a section equal to `d` at `x`,
+- because `d` was chosen minimal, after shrinking around `x` that section
+  generates the whole subsheaf `R` locally,
+- on that smaller open `V`, the subsheaf becomes the principal subgroup sheaf
+  `dZ`.
+
+Since multiplication by `d` is an isomorphism `Z_V ≅ dZ_V`, this yields
+
+`R_V ≅ Z_V`.
+
+Here `R_V` means Hartshorne's notation for `R` extended by zero from `V`;
+formally it is again a `zeroOutsideInt` construction on `V`.
+
+Then there is an exact sequence
+
+`0 → R_V → R → R / R_V → 0`.
+
+The quotient `R / R_V` is supported on the closed subset `closure(U \ V)`.
+Because `X` is irreducible and `V` is nonempty open, `closure(U \ V)` is a
+proper closed subset of `X`, hence has dimension `< d`.
+
+Now apply Hartshorne Lemma 2.10 plus the induction hypothesis:
+
+- any sheaf supported on that proper closed subset may be regarded as a
+  pushforward from the closed subspace,
+- therefore its `m`-th cohomology vanishes because `m > d > dim(closure(U \ V))`.
+
+In this repo, the weaker vanishing form of Lemma 2.10 is already available as
+`PushforwardHVanishing`, so one does not need the full isomorphism of cohomology
+groups here, only the vanishing transfer.
+
+Therefore `H^m(X, R / R_V)=0`.
+By the long exact sequence, to prove `H^m(X,R)=0` it is enough to prove
+`H^m(X,R_V)=0`, and since `R_V ≅ Z_V`, it is enough to prove
+`H^m(X,Z_V)=0`.
+
+So Step 4 reduces vanishing for arbitrary subsheaves of `Z_U` to Step 5.
+
+### Step 5: Vanishing for `Z_U`
+
+Now let `U ⊆ X` be open.
+We must prove `H^m(X,Z_U)=0`.
+
+If `U = ∅`, then `Z_U = 0`, so this is trivial.
+
+Assume `U ≠ ∅`. Let `Y := X \ U`, a proper closed subset of `X`.
+There is an exact sequence
+
+`0 → Z_U → Z → Z_Y → 0`
+
+where:
+
+- `Z` is the constant sheaf on `X`,
+- `Z_Y` is the extension by zero of the constant sheaf on the closed subset `Y`.
+
+Now:
+
+1. `dim Y < d` because `X` is irreducible and `Y` is a proper closed subset.
+2. `H^m(X,Z)=0` because the constant sheaf on an irreducible space is flasque,
+   and flasque sheaves are acyclic.
+3. `H^{m-1}(X,Z_Y)=0` because `m-1 > dim Y` and `Z_Y` is a pushforward from
+   the smaller closed space `Y`; this is exactly the place to use the
+   induction hypothesis plus `PushforwardHVanishing`.
+
+Therefore, from the long exact sequence,
+
+`H^m(X,Z_U)=0`.
+
+This completes Step 5, hence Step 4, hence the singly generated case, hence the
+finitely generated case, and finally the general case by Proposition 2.9.
+
+## What This Means for the Lean Work
+
+The mathematically correct plan is now clear.
+
+### What can be closed immediately
+
+The three reducible-case `sorry`s in `Setup.lean` should be replaced from
+`ReducibleVanishing.lean`. No new mathematics is needed there.
+
+### What still has to be built
+
+To finish `IrreduciblePosVanishing` honestly, the project still needs formal
+versions of the following ingredients.
+
+1. **Direct-limit reduction**
+   - a formal directed system of finitely generated subsheaves,
+   - a proof that the colimit is the original sheaf,
+   - the Hartshorne 2.8/2.9 commutation of cohomology with direct limits.
+
+2. **Single-generator quotient**
+   - define the subsheaf generated by one section,
+   - prove the canonical map `zeroOutsideInt U ⟶ F` is epi onto that subsheaf.
+
+3. **Step 4 local structure**
+   - for a nonzero subsheaf `R ⊆ Z_U`, construct the minimal positive integer `d`,
+   - show after shrinking to some nonempty `V ⊆ U`, one has `R|_V = dZ|_V`,
+   - conclude `R_V ≅ Z_V`.
+
+4. **Closed-support reduction**
+   - identify sheaves supported on a proper closed subset with pushforwards from
+     the closed subspace,
+   - use the already-proved `PushforwardHVanishing` to transfer vanishing from
+     the smaller closed space to `X`.
+
+The repo already contains useful pieces for this:
+
+- `ZeroOutside.lean` gives the formal `Z_U` object and its generator map.
+- `ClosedImmersion.lean` gives the closed-immersion counit/stalk comparison.
+- `PushforwardHVanishing` gives the vanishing form of Hartshorne 2.10.
+- `ConstantSheafFlasque.lean` gives acyclicity of the constant sheaf on an
+  irreducible space once `FlasqueVanishing` is available.
+
+## Bottom Line
+
+The current `proofs.md` should guide the provers as follows:
+
+- Do **not** spend time inventing new arguments for `Setup.lean:1083`,
+  `1103`, or `1105`. Those are already solved in `ReducibleVanishing.lean`.
+- Do **not** try to finish `IrreduciblePosVanishing` by the current
+  "kernel supported on a smaller closed subset" comments in `Setup.lean`;
+  that argument is not valid on an irreducible space.
+- The correct route is Hartshorne III.2.7, Steps 3-5, implemented using
+  `zeroOutsideInt`, direct limits, and closed-support pushforward vanishing.
