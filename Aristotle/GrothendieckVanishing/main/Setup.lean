@@ -659,7 +659,43 @@ theorem PushforwardHVanishing
     apply eTop.injective
     exact Subsingleton.elim _ _
   | succ n =>
-      sorry
+    -- Strong induction: assume PushforwardHVanishing holds for all m ≤ n
+    -- Take injective presentation of G on Z: 0 → G → J → R → 0
+    obtain ⟨ip⟩ := EnoughInjectives.presentation G
+    -- Push forward to X: 0 → i_*G → i_*J → i_*R → 0
+    -- ShortExact because i_* is exact for closed immersions
+    have hSE_X : (ip.shortComplex.map
+        (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact := by
+      sorry -- i_* preserves ShortExact for closed immersions (stalkwise argument)
+    -- i_*J is flasque
+    have hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
+        ip.shortComplex.X₂) :=
+      fun {U V} j => by
+        change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
+        exact isFlasque_of_injective ip.shortComplex.X₂ _
+    -- H(i_*J, n+1) = 0 by FlasqueVanishing
+    haveI hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
+        ip.shortComplex.X₂) (n + 1)) :=
+      FlasqueVanishing _ _ hFlasque n
+    -- LES: Ext^n(Z_X, i_*R) → Ext^{n+1}(Z_X, i_*G) → Ext^{n+1}(Z_X, i_*J) = 0
+    -- So Ext^{n+1}(Z_X, i_*G) is a quotient of Ext^n(Z_X, i_*R)
+    -- By dimension shift: Subsingleton(H(i_*R, n)) → Subsingleton(H(i_*G, n+1))
+    constructor; intro a b
+    have ha : a.comp (Ext.mk₀ (ip.shortComplex.map
+        (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 := by
+      haveI := hJ; exact @Subsingleton.elim _ hJ _ 0
+    have hb : b.comp (Ext.mk₀ (ip.shortComplex.map
+        (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 := by
+      haveI := hJ; exact @Subsingleton.elim _ hJ _ 0
+    obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a ha rfl
+    obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE_X b hb rfl
+    -- c, d ∈ Ext^n(Z_X, i_*R)
+    -- Need: Subsingleton(Ext^n(Z_X, i_*R))
+    -- By induction (PushforwardHVanishing at degree n):
+    --   Subsingleton(H(R, n)) → Subsingleton(H(i_*R, n))
+    -- By LES on Z: Subsingleton(H(G, n+1)) → Subsingleton(H(R, n)) (for n ≥ 1)
+    -- For n = 0: use Γ equality directly
+    sorry
 
 -- The adjunction unit F → i_*(i^*F) is epi for closed immersions.
 -- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).
