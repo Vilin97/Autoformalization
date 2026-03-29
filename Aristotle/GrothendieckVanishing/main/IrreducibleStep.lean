@@ -118,6 +118,28 @@ theorem zeroOutsideInt_top_eq_constantSheaf (X : TopCat.{u}) :
     (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
       (AddCommGrpCat.of (ULift ℤ)) := rfl
 
+/-- The composite `openHom(le_top) ≫ η = 0` where `η` is the adjunction unit for the
+    closed immersion `i : Y ↪ X` with `Y = Vᶜ`. This holds because the pullback
+    `i^*(zeroOutsideInt V)` is zero (all stalks at points of Y = Vᶜ are zero). -/
+set_option synthInstance.maxHeartbeats 400000 in
+set_option maxHeartbeats 3200000 in
+theorem openHom_comp_unit_eq_zero {X : TopCat.{u}} (V : Opens X) [NoetherianSpace X]
+    (Y : Set X) (hYcl : IsClosed Y) (hY : Y = (V : Set X)ᶜ) :
+    let Z_X := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+      (AddCommGrpCat.of (ULift ℤ))
+    let i : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
+    let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
+    let η := adj.unit.app Z_X
+    TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤) ≫ η = 0 := by
+  intro Z_X i adj η
+  -- By adjunction: openHom ≫ η = 0 iff the adjunct i^*(openHom) = 0.
+  -- The adjunct is zero because i^*(zeroOutsideInt V) = 0 (zero stalks on Y = Vᶜ).
+  rw [show (0 : TopCat.Sheaf.zeroOutsideInt V ⟶ (TopCat.Sheaf.pushforward _ i).obj _) =
+    (adj.homEquiv _ _).symm 0 from by simp]
+  congr 1
+  rw [← adj.homEquiv_naturality_left_symm]
+  simp only [map_zero]
+
 /-- Hartshorne Steps 3-5: uses IrreduciblePosVanishing (sorry). -/
 private theorem grothendieck_reduction
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
