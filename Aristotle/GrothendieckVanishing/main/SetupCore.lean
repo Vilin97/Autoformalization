@@ -516,6 +516,25 @@ private theorem subsingleton_of_addEquiv {A B : Type*} [Add A] [Add B]
   intro x y
   simpa using congrArg e (Subsingleton.elim (e.symm x) (e.symm y))
 
+/-- If `0 → X₁ → X₂ → X₃ → 0` is short exact and the outer cohomology groups in degree `n`
+are subsingletons, then the middle cohomology group in degree `n` is also a subsingleton. -/
+theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact) (n : ℕ)
+    (h₁ : Subsingleton (Sheaf.H S.X₁ n))
+    (h₃ : Subsingleton (Sheaf.H S.X₃ n)) :
+    Subsingleton (Sheaf.H S.X₂ n) := by
+  let Z := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+    (AddCommGrpCat.of (ULift ℤ))
+  constructor
+  intro a b
+  have h₃' : Subsingleton (Ext Z S.X₃ (n + 0)) := (add_zero n) ▸ h₃
+  have ha : a.comp (Ext.mk₀ S.g) (add_zero n) = 0 := @Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _
+  have hb : b.comp (Ext.mk₀ S.g) (add_zero n) = 0 := @Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ Z hS a ha
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ Z hS b hb
+  rw [← hc, ← hd, @Subsingleton.elim _ h₁ c d]
+
 /-- **Dimension shifting** via injective presentation.
     For `0 -> F -> I -> Q -> 0` with `I` injective, `Subsingleton (H Q n)`
     implies `Subsingleton (H F (n+1))`. Uses the covariant Ext LES:
