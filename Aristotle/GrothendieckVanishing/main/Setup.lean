@@ -686,11 +686,15 @@ theorem PushforwardHVanishing
     have hR : Subsingleton (Sheaf.H ip.shortComplex.X₃ k) := by
       cases k with
       | zero =>
-        -- k = 0: target is H(R, 0). From LES on Z: H(J,0) → H(R,0) → H(G',1) → 0
-        -- Since J is injective → flasque: H(J, 1) = 0
-        -- H(G', 1) = coker(...) — but we need H(R, 0) subsingleton.
-        -- Actually, this follows from the direct Γ comparison argument.
-        sorry -- H(R, 0) subsingleton from H(G', 1) subsingleton via Γ comparison
+        -- k = 0: H(R, 0) is NOT necessarily subsingleton from H(G', 1).
+        -- But we don't need it! For the outer goal H(i_*G', 1):
+        -- we can show c = d ∈ H(i_*R, 0) directly by using
+        -- ih_push at k=0: Subsingleton(H(R, 0)) → Subsingleton(H(i_*R, 0))
+        -- Since H(R, 0) = Γ(R) and we can't show it's subsingleton from H(G', 1),
+        -- we use a different strategy for k=0 at the outer level.
+        -- For now: sorry. The k=0 (degree 1) case needs the direct
+        -- H(i_*G', 1) = H(G', 1) comparison via the Γ natural isomorphism.
+        sorry
       | succ m =>
         -- k = m+1 ≥ 1: from LES on Z, H(R, m+1) ≅ H(G', m+2)
         -- (since J injective → H(J, m+1) = 0 and H(J, m+2) = 0)
