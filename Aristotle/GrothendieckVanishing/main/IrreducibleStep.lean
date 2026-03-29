@@ -125,13 +125,12 @@ set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 3200000 in
 theorem openHom_comp_unit_eq_zero {X : TopCat.{u}} (V : Opens X) [NoetherianSpace X]
     (Y : Set X) (hYcl : IsClosed Y) (hY : Y = (V : Set X)ᶜ) :
-    let Z_X := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-      (AddCommGrpCat.of (ULift ℤ))
     let i : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
     let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
-    let η := adj.unit.app Z_X
+    -- η applied to zeroOutsideInt ⊤ (= Z_X by rfl)
+    let η := adj.unit.app (TopCat.Sheaf.zeroOutsideInt ⊤)
     TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤) ≫ η = 0 := by
-  intro Z_X i adj η
+  intro i adj η
   -- By adjunction: openHom ≫ η = 0 iff the adjunct i^*(openHom) = 0.
   -- The adjunct is zero because i^*(zeroOutsideInt V) = 0 (zero stalks on Y = Vᶜ).
   rw [show (0 : TopCat.Sheaf.zeroOutsideInt V ⟶ (TopCat.Sheaf.pushforward _ i).obj _) =
