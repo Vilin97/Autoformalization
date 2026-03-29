@@ -651,71 +651,57 @@ theorem PushforwardHVanishing
     exact @Subsingleton.elim (F'.val.obj (op ⊤)) (hobj ▸ hsec) _ _
   | succ k ih_push =>
     intro G' hG'
-    -- Induction step: use pushed-forward injective presentation + FlasqueVanishing + LES
-    obtain ⟨ip⟩ := EnoughInjectives.presentation G'
-    -- Pushed-forward SES is ShortExact (i_* exact for closed immersions)
-    have hSE_X : (ip.shortComplex.map
-        (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact := by
-      sorry -- i_* preserves ShortExact for closed immersions
-    -- i_*J is flasque (injective → flasque → pushforward preserves flasque)
-    have hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-        ip.shortComplex.X₂) :=
-      fun {U V} j => by
-        change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
-        exact isFlasque_of_injective ip.shortComplex.X₂ _
-    -- FlasqueVanishing: H(i_*J, k+1) = 0
-    haveI hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-        ip.shortComplex.X₂) (k + 1)) :=
-      FlasqueVanishing _ _ hFlasque k
-    -- LES dimension shift: from ShortExact, since H(i_*J, k+1) = 0,
-    -- any element of H(i_*G', k+1) lifts to H(i_*R, k)
-    constructor; intro a b
-    have ha : a.comp (Ext.mk₀ (ip.shortComplex.map
-        (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 :=
-      @Subsingleton.elim _ hJ _ 0
-    have hb : b.comp (Ext.mk₀ (ip.shortComplex.map
-        (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 :=
-      @Subsingleton.elim _ hJ _ 0
-    obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a ha rfl
-    obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE_X b hb rfl
-    rw [← hc, ← hd]; congr 1
-    -- c, d ∈ H(i_*R, k). Need: Subsingleton(H(i_*R, k))
-    -- By ih_push: Subsingleton(H R k) → Subsingleton(H(i_*R, k))
-    -- By LES on Z: Subsingleton(H G' (k+1)) → Subsingleton(H R k) for k ≥ 1
-    -- For k = 0: use base case (Γ comparison)
-    have hR : Subsingleton (Sheaf.H ip.shortComplex.X₃ k) := by
-      cases k with
-      | zero =>
-        -- k = 0: H(R, 0) is NOT necessarily subsingleton from H(G', 1).
-        -- But we don't need it! For the outer goal H(i_*G', 1):
-        -- we can show c = d ∈ H(i_*R, 0) directly by using
-        -- ih_push at k=0: Subsingleton(H(R, 0)) → Subsingleton(H(i_*R, 0))
-        -- Since H(R, 0) = Γ(R) and we can't show it's subsingleton from H(G', 1),
-        -- we use a different strategy for k=0 at the outer level.
-        -- For now: sorry. The k=0 (degree 1) case needs the direct
-        -- H(i_*G', 1) = H(G', 1) comparison via the Γ natural isomorphism.
-        sorry
-      | succ m =>
-        -- k = m+1 ≥ 1: from LES on Z, H(R, m+1) ≅ H(G', m+2)
-        -- (since J injective → H(J, m+1) = 0 and H(J, m+2) = 0)
-        -- From the LES on Z: H(R, m+1) ≅ H(G', m+2) since J injective
-        -- The connecting map δ : H(R, m+1) → H(G', m+2) is injective
-        -- (kernel = image of g* : H(J, m+1) → H(R, m+1), which is 0 since J injective)
-        -- And H(G', m+2) is subsingleton → H(R, m+1) is subsingleton
+    -- Split: n=1 special case vs n≥2 general case
+    cases k with
+    | zero =>
+      -- n = 1: Subsingleton(H G' 1) → Subsingleton(H(i_*G') 1)
+      -- This needs the direct Γ comparison: H(i_*G', 1) = H(G', 1)
+      -- via the natural isomorphism Γ_X(i_*(-)) ≅ Γ_Z(-).
+      -- The key: cokernels of the same map Γ(J) → Γ(R) give the same Ext^1.
+      sorry -- degree 1 case: needs Γ natural iso or i_* exact
+    | succ m =>
+      -- n = m+2 ≥ 2: use pushed-forward injective presentation + FlasqueVanishing + LES
+      obtain ⟨ip⟩ := EnoughInjectives.presentation G'
+      -- Pushed-forward SES is ShortExact (i_* exact for closed immersions)
+      have hSE_X : (ip.shortComplex.map
+          (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact := by
+        sorry -- i_* preserves ShortExact for closed immersions
+      -- i_*J is flasque
+      have hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
+          ip.shortComplex.X₂) :=
+        fun {U V} j => by
+          change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
+          exact isFlasque_of_injective ip.shortComplex.X₂ _
+      -- FlasqueVanishing: H(i_*J, m+2) = 0
+      haveI hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
+          ip.shortComplex.X₂) (m + 2)) :=
+        FlasqueVanishing _ _ hFlasque (m + 1)
+      -- LES: every a ∈ H(i_*G', m+2) lifts to c ∈ H(i_*R, m+1)
+      constructor; intro a b
+      have ha : a.comp (Ext.mk₀ (ip.shortComplex.map
+          (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 :=
+        @Subsingleton.elim _ hJ _ 0
+      have hb : b.comp (Ext.mk₀ (ip.shortComplex.map
+          (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 :=
+        @Subsingleton.elim _ hJ _ 0
+      obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a ha rfl
+      obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE_X b hb rfl
+      rw [← hc, ← hd]; congr 1
+      -- c, d ∈ H(i_*R, m+1). Need: Subsingleton(H(i_*R, m+1))
+      -- By ih_push: Subsingleton(H(R, m+1)) → Subsingleton(H(i_*R, m+1))
+      -- By LES on Z: H(R, m+1) ≅ H(G', m+2) (since J injective, m+1 ≥ 1)
+      have hR : Subsingleton (Sheaf.H ip.shortComplex.X₃ (m + 1)) := by
         constructor; intro c d
         have hSE_Z := ip.shortExact_shortComplex
-        -- δ(c) = δ(d) since H(G', m+2) is subsingleton
         have heq : c.comp hSE_Z.extClass rfl = d.comp hSE_Z.extClass rfl :=
           @Subsingleton.elim _ hG' _ _
-        -- (c - d).comp(extClass) = 0 (Ext.comp is additive via Ext.postcomp)
         have hker : (c - d).comp hSE_Z.extClass rfl = 0 := by
           change (Ext.postcomp hSE_Z.extClass _ rfl) (c - d) = 0
           rw [map_sub, sub_eq_zero]; exact heq
-        -- By exact₃: c - d is in image of g* from H(J, m+1) = 0
         obtain ⟨e, he⟩ := Ext.covariant_sequence_exact₃ _ hSE_Z (c - d) rfl hker
         rw [Ext.eq_zero_of_injective e, Ext.zero_comp] at he
         exact sub_eq_zero.mp he.symm
-    exact @Subsingleton.elim _ (ih_push ip.shortComplex.X₃ hR) c d
+      exact @Subsingleton.elim _ (ih_push ip.shortComplex.X₃ hR) c d
 
 -- The adjunction unit F → i_*(i^*F) is epi for closed immersions.
 -- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).
