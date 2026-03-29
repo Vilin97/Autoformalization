@@ -8,6 +8,7 @@
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.Auxiliary
+import Aristotle.GrothendieckVanishing.main.ReducibleVanishing
 
 universe u
 
@@ -86,7 +87,7 @@ private theorem sheaf_H_subsingleton_of_reducible
       topologicalKrullDim Y ≤ topologicalKrullDim X →
       n > topologicalKrullDim Y → Subsingleton (Sheaf.H G n)) :
     Subsingleton (Sheaf.H F n) :=
-  ReducibleVanishing X n hn F hNotIrred ih_irred
+  ReducibleVanishing' X n hn F hNotIrred ih_irred
 
 /-! ## Main theorem -/
 
