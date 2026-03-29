@@ -30,6 +30,16 @@ There is **no remaining `sorry` in `FlasqueVanishing`** or
 `PushforwardHVanishing`, and there are no longer any fake reducible-case
 `sorry`s in `Setup.lean`.
 
+The live irreducible theorem is now split at the mathematically correct boundary:
+
+- `exists_closed_subset_lt_dim_of_irreducible_pos`
+- `irreduciblePos_pushforward_subsingleton`
+- `irreduciblePos_kernel_subsingleton`
+
+The first two are proved and isolate the part of Hartshorne Step 3 that is already
+formalized. The only remaining `sorry` is the last theorem, which is exactly the
+kernel term requiring Hartshorne Steps 3-5.
+
 ## Hartshorne's Proof Skeleton
 
 The reference is Hartshorne, Chapter III, Section 2:

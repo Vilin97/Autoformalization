@@ -23,6 +23,80 @@ theorem ReducibleVanishing
     Subsingleton (Sheaf.H F n) :=
   ReducibleVanishing' X n hn F hNotIrred ih_irred
 
+/-- On an irreducible noetherian space of positive Krull dimension, one can choose a proper
+closed subset `Z ⊊ X` of strictly smaller Krull dimension, and the ambient cohomological bound
+`n > dim X` automatically implies `n > dim Z`. This isolates the closed-subset selection used at
+the start of Hartshorne Step 3. -/
+theorem exists_closed_subset_lt_dim_of_irreducible_pos
+    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
+    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0) :
+    ∃ Z : Set X, IsClosed Z ∧ Z ≠ Set.univ ∧
+      topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X ∧
+      ↑n > topologicalKrullDim (TopCat.of Z) := by
+  simp only [topologicalKrullDim, gt_iff_lt] at hpos
+  rw [Order.krullDim_pos_iff] at hpos
+  obtain ⟨a, b, hab⟩ := hpos
+  have hZ_ne_univ : a.carrier ≠ Set.univ := by
+    intro h
+    exact lt_irrefl a (lt_of_lt_of_le hab
+      (show b.carrier ⊆ a.carrier from by
+        rw [show a.carrier = Set.univ from h]
+        exact Set.subset_univ _))
+  have hZ_dim : topologicalKrullDim (TopCat.of a.carrier) < topologicalKrullDim X := by
+    exact topologicalKrullDim_lt_of_isIrreducible_of_isClosed a.isClosed' hZ_ne_univ
+      (lt_of_le_of_lt (topologicalKrullDim_subspace_le X a.carrier)
+        (lt_of_lt_of_le (show topologicalKrullDim X < ⊤ from by
+          exact lt_of_lt_of_le hn le_top) le_top))
+  refine ⟨a.carrier, a.isClosed', hZ_ne_univ, hZ_dim, lt_trans hZ_dim hn⟩
+
+/-- In the irreducible positive-dimensional case, once a proper closed subset `Z` of smaller
+dimension has been chosen, the pushforward term `i_*(i^*F)` in the closed-immersion short exact
+sequence vanishes in degree `n` by the induction hypothesis on `Z`. -/
+theorem irreduciblePos_pushforward_subsingleton
+    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
+    (n : ℕ) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+      (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      topologicalKrullDim Y < topologicalKrullDim X →
+      n > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G n))
+    (Z : Set X) (hZ_closed : IsClosed Z)
+    (hZ_dim : topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X)
+    (hn_Z : ↑n > topologicalKrullDim (TopCat.of Z))
+    (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X))
+    (hS₃ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩)).obj
+        ((TopCat.Sheaf.pullback AddCommGrpCat.{u}
+          (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩)).obj F)) :
+    Subsingleton (Sheaf.H S.X₃ n) := by
+  rw [hS₃]
+  exact PushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ _ hZ_dim hn_Z)
+
+/-- Hartshorne III.2.7 Steps 3-5, isolated as the remaining kernel lemma. Starting from the
+closed-immersion short exact sequence `0 → K → F → i_*(i^*F) → 0` attached to a proper closed
+subset `Z ⊊ X`, this is the genuine missing argument: one must prove vanishing for the kernel
+term `K` via direct limits, finite-generator reduction, and the `zeroOutsideInt` analysis. -/
+theorem irreduciblePos_kernel_subsingleton
+    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
+    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+      (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      topologicalKrullDim Y < topologicalKrullDim X →
+      n > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G n))
+    (Z : Set X) (hZ_closed : IsClosed Z) (hZ_ne_univ : Z ≠ Set.univ)
+    (hZ_dim : topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X)
+    (hn_Z : ↑n > topologicalKrullDim (TopCat.of Z))
+    (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X))
+    (hSE : S.ShortExact) (hS₂ : S.X₂ = F)
+    (hS₃ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩)).obj
+        ((TopCat.Sheaf.pullback AddCommGrpCat.{u}
+          (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩)).obj F)) :
+    Subsingleton (Sheaf.H S.X₁ n) := by
+  sorry -- Hartshorne III.2.7 Steps 3-5 via zeroOutsideInt/direct limits
+
 set_option synthInstance.maxHeartbeats 80000 in
 /-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case).
     For an irreducible Noetherian space `X` of dim `d ≥ 1`, cohomology vanishing above
@@ -59,50 +133,13 @@ theorem IrreduciblePosVanishing
       n > topologicalKrullDim Y →
       Subsingleton (Sheaf.H G n)) :
     Subsingleton (Sheaf.H F n) := by
-  -- We can correctly set up the proper closed subset `Z ⊊ X` and kill the
-  -- pushforward term `i_*(i^*F)` using the induction hypothesis on `Z`.
-  -- What does *not* follow is that the kernel of `F → i_*(i^*F)` is supported
-  -- on a smaller closed subset; that would be false in general on irreducible
-  -- spaces because `X \ Z` can be dense. The actual remaining proof must switch
-  -- here to Hartshorne Steps 3-5 via singly generated subsheaves and `Z_U`.
-  -- Step 1: Extract a proper closed subset Z ⊊ X (from dim ≥ 1)
-  simp only [topologicalKrullDim, gt_iff_lt] at hpos
-  rw [Order.krullDim_pos_iff] at hpos
-  obtain ⟨a, b, hab⟩ := hpos
-  -- a is an IrreducibleCloseds with a.carrier ⊊ X (since a < b ≤ univ)
-  set Z := a.carrier with hZ_def
-  have hZ_closed : IsClosed Z := a.isClosed'
-  have hZ_ne_univ : Z ≠ Set.univ := fun h => lt_irrefl a (lt_of_lt_of_le hab
-    (show b.carrier ⊆ a.carrier from by rw [show a.carrier = Set.univ from h]; exact Set.subset_univ _))
-  -- dim Z < dim X (Z is a proper closed subset of irreducible X)
-  have hZ_dim : topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X := by
-    exact topologicalKrullDim_lt_of_isIrreducible_of_isClosed hZ_closed hZ_ne_univ
-      (lt_of_le_of_lt (topologicalKrullDim_subspace_le X Z)
-        (lt_of_lt_of_le (show topologicalKrullDim X < ⊤ from by
-          exact lt_of_lt_of_le hn le_top) le_top))
-  -- n > dim Z (since n > dim X > dim Z)
-  have hn_Z : ↑n > topologicalKrullDim (TopCat.of Z) := lt_trans hZ_dim hn
-  -- Step 2: ClosedImmersionSES: 0 → K → F → i_*(i^*F) → 0
+  obtain ⟨Z, hZ_closed, hZ_ne_univ, hZ_dim, hn_Z⟩ :=
+    exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos
   obtain ⟨S, hSE, hS₂, hS₃⟩ := ClosedImmersionSES Z hZ_closed F
-  -- Step 3: Pushforward vanishes
-  have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
-    rw [hS₃]
-    exact PushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ _ hZ_dim hn_Z)
-  -- The pushforward term is the only part of the closed-immersion reduction that
-  -- is currently justified. Finishing the kernel term requires the separate
-  -- Hartshorne Steps 3-5 argument, not the invalid support-shrinking shortcut.
-  have hKer : Subsingleton (Sheaf.H S.X₁ n) := by
-    sorry -- needs Hartshorne III.2.7 Steps 3-5 via zeroOutsideInt/direct limits
-  -- Step 6: SES gives H(F) = 0 (subsingleton_ext_of_ses_middle inline)
+  have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
+    irreduciblePos_pushforward_subsingleton X n F ih Z hZ_closed hZ_dim hn_Z S hS₃
+  have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
+    irreduciblePos_kernel_subsingleton X n hn hpos F ih Z hZ_closed hZ_ne_univ hZ_dim hn_Z
+      S hSE hS₂ hS₃
   rw [← hS₂]
-  let Z' := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-    (AddCommGrpCat.of (ULift ℤ))
-  constructor; intro a b
-  have ha : a.comp (Ext.mk₀ S.g) (add_zero n) = 0 :=
-    @Subsingleton.elim _ ((add_zero n) ▸ hPush) _ _
-  have hb : b.comp (Ext.mk₀ S.g) (add_zero n) = 0 :=
-    @Subsingleton.elim _ ((add_zero n) ▸ hPush) _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ Z' hSE a ha
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ Z' hSE b hb
-  rw [← hc, ← hd, @Subsingleton.elim _ hKer c d]
-  -- The remaining missing ingredient is the Hartshorne Steps 3-5 kernel analysis.
+  exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
