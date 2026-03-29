@@ -770,7 +770,7 @@ theorem pushforward_preserves_flasque {Y : TopCat.{u}} (f : TopCat.of Y ⟶ X)
 -- Helper for PushforwardHVanishing degree 1 case.
 -- Isolated into its own declaration so the synthInstance budget is contained.
 set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 800000 in
+set_option synthInstance.maxHeartbeats 400000 in
 private theorem pushforwardH1Vanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
@@ -779,6 +779,9 @@ private theorem pushforwardH1Vanishing
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') 1) := by
   intro i
+  -- Pre-cache expensive typeclass instances to avoid repeated synthesis
+  haveI : Abelian.HasExt (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) := inferInstance
+  haveI : IsGrothendieckAbelian (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) := inferInstance
   obtain ⟨ip⟩ := EnoughInjectives.presentation G'
   have hSE_Z := ip.shortExact_shortComplex
   have hSE_X : (ip.shortComplex.map
@@ -892,6 +895,9 @@ theorem PushforwardHVanishing
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G) n) := by
   intro i
+  -- Pre-cache expensive typeclass instances for subspace Z
+  haveI : Abelian.HasExt (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) := inferInstance
+  haveI : IsGrothendieckAbelian (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) := inferInstance
   -- Generalize over G and do induction on n
   -- (need the ih for all G' at lower degree, not just our specific G)
   suffices ∀ (m : ℕ) (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)),
