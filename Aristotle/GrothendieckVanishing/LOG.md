@@ -1,5 +1,22 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-29T18:40Z — Babysit cycle: root-cause CI fix
+
+**Sorry count: 1 (IrreduciblePosVanishing at Setup.lean:95)**
+
+### Changes
+- **ROOT CAUSE FOUND**: CI failures since commit 331d1d5 were caused by
+  `synthInstance.maxHeartbeats 160000` being too low for `Localization.HasSmallLocalizedHom`
+  synthesis in PushforwardHVanishing proof (on derived categories of sheaves on closed subspaces).
+  The proof was written after b8a1821 but never compiled by CI (was sorry'd in b8a1821).
+  Increased to 400000. Also increased for closedIncl_pushforward_shortExact.
+- All previous "fix" commits (congr_arg, Subsingleton) were SECONDARY errors caused
+  by the cascading failure from this synthesis timeout.
+
+### Status
+- CI: 688b28b pushed with heartbeat fix, awaiting result
+- Sorry: 1 (unchanged)
+
 ## 2026-03-29T18:20Z — Babysit cycle: CI fixes + Step 5 theorem
 
 **Sorry count: 1 (IrreduciblePosVanishing at Setup.lean:95)**
