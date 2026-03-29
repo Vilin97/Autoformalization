@@ -1034,7 +1034,13 @@ theorem IrreduciblePosVanishing
     exact PushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ _ hZ_dim hn_Z)
   -- Step 4-5: Kernel K has zero stalks on Z → supported on proper closed → vanishes
   have hKer : Subsingleton (Sheaf.H S.X₁ n) := by
-    sorry -- needs: K supported on supp(K) ⊊ X, unit iso, ih + PushforwardHVanishing
+    -- ISSUE: supp(K) = closure({x | stalk ≠ 0}) might equal X
+    -- (K zero on Z but X \ Z is dense for irreducible X)
+    -- The "transfer to smaller space" approach FAILS.
+    -- The correct Hartshorne approach: compare F to a constant (flasque) sheaf
+    -- with value F_η (generic stalk), whose kernel/cokernel ARE supported on
+    -- a proper closed subset. This requires constant sheaf comparison infrastructure.
+    sorry
   -- Step 6: SES gives H(F) = 0 (subsingleton_ext_of_ses_middle inline)
   rw [← hS₂]
   let Z' := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
