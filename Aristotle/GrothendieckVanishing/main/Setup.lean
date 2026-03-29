@@ -964,9 +964,10 @@ theorem ReducibleVanishing
   -- X has finitely many irreducible components, k ≥ 2 since non-irreducible
   -- Iterate ClosedImmersionSES, peeling one component per step
   -- After k steps: kernel has zero stalks everywhere → zero sheaf → H = 0
-  sorry -- needs: finite iteration over irreducible components via ClosedImmersionSES
-  -- Each step uses: ih_irred (component is irreducible) + PushforwardHVanishing
-  -- Final step: sheaf_H_of_stalks_isZero (zero stalks → H = 0)
+  -- Finite iteration over irreducible components
+  -- Each step: ClosedImmersionSES + ih_irred + PushforwardHVanishing + subsingleton_ext_of_ses_middle
+  -- Final step: zero stalks → zero sheaf → H = 0
+  sorry
 
 set_option synthInstance.maxHeartbeats 80000 in
 /-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case).
