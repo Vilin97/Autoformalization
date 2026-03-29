@@ -1,5 +1,27 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-29T16:50Z — Babysit cycle: P0 CI fix (commit refactoring)
+
+**Sorry count: 1 (IrreduciblePosVanishing at Setup.lean:95)**
+
+### Changes
+- **CRITICAL FIX**: Discovered that Setup.lean → SetupCore.lean split was never committed.
+  CI has been broken for 3 consecutive commits (331d1d5, 2c4c81e, 50991de).
+  Root cause: SetupCore.lean untracked, Setup.lean/ReducibleVanishing.lean modifications unstaged.
+- Fixed stale comments in SetupCore.lean:211 ("Two sorry's remain" → "PROVED")
+  and SetupCore.lean:751 ("sorry'd sub-lemma" → "PROVED").
+- Fixed stale docstring in GrothendieckVanishing.lean:8.
+- Updated critique.md (verdict: REJECT due to CI failure).
+- Updated plan.md with P0 commit action.
+- Aristotle API returning 502 — cannot check job status for 4e978c1c, 6eb803e4, f3ae1cd9.
+
+### Status
+- ReducibleVanishing: PROVED (sorry-free)
+- PushforwardHVanishing: PROVED (all cases)
+- FlasqueVanishing: PROVED
+- IrreduciblePosVanishing: 1 sorry (needs Hartshorne Steps 3-5 infrastructure)
+- **CI: BROKEN** — will be fixed by committing the refactoring
+
 ## 2026-03-29T16:20Z — Babysit cycle: analysis + docfix + Aristotle jobs
 
 **Sorry count: 1 (IrreduciblePosVanishing at Setup.lean:95)**
