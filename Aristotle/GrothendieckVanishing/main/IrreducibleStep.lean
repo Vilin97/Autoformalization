@@ -74,6 +74,48 @@ theorem zeroOutsideInt_vanishing
       inferInstance inferInstance
   exact subsingleton_ext_of_ses hSE _ m hCoker (constantSheaf_cohomology_vanishing X m)
 
+/-- Cokernel of `openHom(le_top)` has vanishing cohomology on irreducible X.
+    The cokernel C has zero stalks on V (since openHom is stalkwise iso there).
+    Apply ClosedImmersionSES to C with `Y = Vᶜ`:
+    - kernel K has zero stalks everywhere → IsZero → vanishing
+    - pushforward from Vᶜ vanishes by IH (dim Vᶜ < dim X)
+    - middle-term vanishing gives H^n(C) = 0. -/
+set_option synthInstance.maxHeartbeats 80000 in
+set_option maxHeartbeats 800000 in
+theorem cokernel_openHom_vanishing
+    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
+    (V : Opens X) (hV : V ≠ ⊥)
+    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
+    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+      (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      topologicalKrullDim Y < topologicalKrullDim X →
+      n > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G n)) :
+    let f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
+    Subsingleton (Sheaf.H (Limits.cokernel f) n) := by
+  intro f
+  let Y := (V : Set X)ᶜ
+  have hYcl : IsClosed Y := V.isOpen.isClosed_compl
+  have hY_ne : Y ≠ Set.univ := by
+    intro h; apply hV; ext x; simp only [Opens.coe_bot, Set.mem_empty_iff_false, iff_false]
+    exact fun hx => (show x ∈ Y from h ▸ Set.mem_univ x) hx
+  have hY_dim : topologicalKrullDim (TopCat.of Y) < topologicalKrullDim X :=
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne
+      (lt_of_le_of_lt (topologicalKrullDim_subspace_le X Y)
+        (lt_of_lt_of_le (show topologicalKrullDim X < ⊤ from lt_of_lt_of_le hn le_top) le_top))
+  have hn_Y : ↑n > topologicalKrullDim (TopCat.of Y) := lt_trans hY_dim hn
+  obtain ⟨S', hS'E, hS'₂, hS'₃⟩ := ClosedImmersionSES Y hYcl (Limits.cokernel f)
+  -- Kernel K of η_C has zero stalks everywhere → IsZero → vanishing
+  -- On Vᶜ: stalk iso from closedIncl_unit_stalk_isIso → kernel stalk = 0
+  -- On V: C has zero stalks (openHom stalkwise iso) → K ↪ C has zero stalks
+  have hK_zero : IsZero S'.X₁ := by sorry
+  have hK_van : Subsingleton (Sheaf.H S'.X₁ n) :=
+    subsingleton_sheafH_of_isZero' S'.X₁ hK_zero n
+  have hP_van : Subsingleton (Sheaf.H S'.X₃ n) := by
+    rw [hS'₃]
+    exact PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ _ hY_dim hn_Y)
+  exact hS'₂ ▸ subsingleton_sheafH_of_shortExact_middle hS'E n hK_van hP_van
+
 /-- Hartshorne Steps 3-5: uses IrreduciblePosVanishing (sorry). -/
 private theorem grothendieck_reduction
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
