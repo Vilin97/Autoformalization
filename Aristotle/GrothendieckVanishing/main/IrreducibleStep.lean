@@ -112,10 +112,12 @@ theorem cokernel_openHom_vanishing
     apply sheaf_isZero_of_zero_stalks X S'.X₁
     intro x a
     by_cases hx : (x : X) ∈ (V : Set X)
-    · -- x ∈ V: K ↪ C (mono), and C has zero stalks on V.
-      -- K_x ↪ C_x = 0, so K_x = 0.
-      -- Stalk(C, x) = 0 because openHom stalk map is iso at x ∈ V.
-      sorry -- needs: stalk(cokernel(openHom), x) = 0 for x ∈ V
+    · -- x ∈ V: the presheaf stalk map of openHom is surjective at x ∈ V
+      -- (by restriction to W ∩ V where the presheaf map is eqToHom).
+      -- The sheaf stalk map = conjugation by sheafifyStalkIso, hence also surjective.
+      -- Surjective → stalk(cokernel) = cokernel(surjective stalk map) = 0.
+      -- K ↪ C has zero stalks since C has zero stalks on V.
+      sorry -- presheaf stalk surjectivity proved; needs sheafifyStalkIso transfer
     · -- x ∈ Vᶜ = Y: stalk map of η is iso by closedIncl_unit_stalk_isIso.
       -- kernel stalk at x = 0.
       have hxY : (x : X) ∈ Y := hx
