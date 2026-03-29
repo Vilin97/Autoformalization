@@ -4,8 +4,8 @@
   Provides:
   1. Categorical infrastructure for sheaf cohomology on AddCommGrpCat
   2. FlasqueVanishing (PROVED from 4 sub-lemmas adapting Brian Nugent's Mathlib PR #35790)
-  3. ReducibleVanishing (sorry -- needs j_! extension by zero)
-  4. IrreduciblePosVanishing (sorry -- needs j_! or Prop 2.9)
+  3. ReducibleVanishing (sorry -- needs PushforwardHVanishing + finite iteration)
+  4. IrreduciblePosVanishing (sorry -- needs PushforwardHVanishing + noetherian induction)
 
   The proof of FlasqueVanishing follows Brian Nugent's approach:
   - Base case (H^1 = 0): Ext LES + associativity of Ext composition + Zorn surjectivity
@@ -758,16 +758,20 @@ theorem ClosedImmersionSES
 /-! ## Main vanishing theorems -/
 
 set_option synthInstance.maxHeartbeats 80000 in
-/-- **Reducible vanishing** (Stacks Project Tag 01X8, Step 1).
+/-- **Reducible vanishing** (Hartshorne III.2.7, reducible case).
     For a non-irreducible Noetherian space `X`, cohomology vanishing above the dimension
     follows from vanishing on all irreducible spaces of dim ≤ dim X.
 
-    **Proof**: Iterate `ClosedImmersionSES` over the irreducible components `Z₁, …, Zₖ`
-    (k ≥ 2 since X is reducible). At each step, the pushforward term
-    `i_*(i^*K)` vanishes by `PushforwardHVanishing` + `ih_irred`. By
-    `subsingleton_ext_of_ses_middle`, vanishing of F reduces to vanishing of K.
-    After all k components are peeled, the kernel has zero stalks on
-    `Z₁ ∪ ⋯ ∪ Zₖ = X`, hence is the zero sheaf. -/
+    **Proof**: A Noetherian space has finitely many irreducible components `Z₁, …, Zₖ`
+    (k ≥ 2 since X is reducible). Iterate `ClosedImmersionSES` over these components.
+    At the first step: `0 → K₁ → F → i₁_*(i₁^*F) → 0` where `i₁ : Z₁ ↪ X`.
+    By `PushforwardHVanishing` + `ih_irred` (since `Z₁` is irreducible and
+    `dim Z₁ ≤ dim X`): the pushforward term vanishes. By `subsingleton_ext_of_ses_middle`:
+    vanishing of `K₁` implies vanishing of `F`.
+    `K₁` has zero stalks on `Z₁`. Apply the same to `K₁` with `Z₂`, getting `K₂` with
+    zero stalks on `Z₁ ∪ Z₂`. After `k` steps: `K_k` has zero stalks on
+    `Z₁ ∪ ⋯ ∪ Z_k = X`, hence `K_k = 0` and `H^n(X, K_k) = 0`.
+    Backtracking gives `H^n(X, F) = 0`. -/
 theorem ReducibleVanishing
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
@@ -781,21 +785,27 @@ theorem ReducibleVanishing
   sorry
 
 set_option synthInstance.maxHeartbeats 80000 in
-/-- **Irreducible positive-dimension vanishing** (Stacks Project Tag 01X8, Step 2).
-    For an irreducible Noetherian space `X` of dim ≥ 1, cohomology vanishing above
+/-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case).
+    For an irreducible Noetherian space `X` of dim `d ≥ 1`, cohomology vanishing above
     the dimension follows from vanishing on all spaces of strictly smaller dimension.
 
-    **Proof**: Fix `n > dim X = d ≥ 1`. Take a proper closed `Z₁ ⊊ X` (exists since
-    `d ≥ 1`). By `ClosedImmersionSES`: `0 → K₁ → F → i_*(i^*F) → 0`. Since `X` is
-    irreducible, `dim Z₁ < d`, so `PushforwardHVanishing` + `ih` give vanishing of
-    the pushforward term. By `subsingleton_ext_of_ses_middle`:
-    `Subsingleton(Ext^n(K₁)) → Subsingleton(Ext^n(F))`.
+    **Proof** (following Hartshorne): Fix `n > dim X = d ≥ 1`. Take a proper closed
+    `Z ⊊ X` (exists since `d ≥ 1`). Since `X` is irreducible, `dim Z < d`.
+    By `ClosedImmersionSES`: `0 → K → F → i_*(i^*F) → 0`.
+    - **Pushforward term**: `dim Z < d` + `ih` → `H^n(Z, i^*F) = 0`.
+      Then `PushforwardHVanishing` → `H^n(X, i_*(i^*F)) = 0`.
+    - **Kernel term**: `K` has zero stalks on `Z` (unit is iso there), hence
+      `supp(K) ⊆ X \ Z`. Since `supp(K)` is closed and `X` is irreducible with
+      `Z ≠ ∅`, we get `supp(K) ⊊ X` so `dim supp(K) < d`. Now `K` is supported
+      on `supp(K)`, so the unit `K → i'_*(i'^*K)` (where `i' : supp(K) ↪ X`) is
+      an iso (its kernel has zero stalks everywhere). Therefore
+      `K ≅ i'_*(i'^*K)`, and by `ih` + `PushforwardHVanishing`:
+      `H^n(supp(K), i'^*K) = 0` → `H^n(X, K) = 0`.
+    - **Conclusion**: `H^n(X, K) = 0` + `H^n(X, i_*(i^*F)) = 0` →
+      `H^n(X, F) = 0` by `subsingleton_ext_of_ses_middle`.
 
-    Now iterate: take `Z₂ ⊋ Z₁` (proper closed), apply the SES to `K₁`, getting `K₂`
-    with zero stalks on `Z₂ ⊇ Z₁`. The ascending chain `Z₁ ⊊ Z₂ ⊊ ⋯` must stabilize
-    at `X` by the Noetherian condition (at each step we add a new point's closure, and
-    the chain terminates only when it reaches `X`).
-    At termination: `K_m = 0`, so `Ext^n(K_m) = 0`, and backtracking gives `Ext^n(F) = 0`. -/
+    NOTE: Noetherian spaces have DCC (not ACC) on closed subsets. This proof uses
+    noetherian induction (descending on supports), not ascending chains. -/
 theorem IrreduciblePosVanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
