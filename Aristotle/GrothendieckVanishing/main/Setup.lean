@@ -609,6 +609,143 @@ ReducibleVanishing and IrreduciblePosVanishing require two building blocks:
 2. ClosedImmersionSES: the adjunction unit F -> i_*(i^*F) gives a short exact sequence
 -/
 
+-- stalkPushforward naturality w.r.t. presheaf morphisms
+private theorem stalkPush_nat_closedIncl
+    {X Y : TopCat.{u}} (f : X ⟶ Y)
+    {F G : X.Presheaf AddCommGrpCat.{u}} (α : F ⟶ G) (x : X) :
+    (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} (ConcreteCategory.hom f x)).map
+        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} f).map α) ≫
+      TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} f G x =
+    TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} f F x ≫
+      (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map α := by
+  apply TopCat.Presheaf.stalk_hom_ext; intro U hU
+  simp only [TopCat.Presheaf.stalkFunctor_map_germ_assoc,
+    TopCat.Presheaf.stalkPushforward_germ,
+    TopCat.Presheaf.stalkPushforward_germ_assoc,
+    TopCat.Presheaf.stalkFunctor_map_germ]; rfl
+
+-- Stalk of pushforward is zero outside the closed set
+private theorem pushforward_stalk_zero_closedIncl
+    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) (x : X) (hx : x ∉ s)
+    (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) :
+    ∀ a : ((TopCat.Presheaf.pushforward AddCommGrpCat.{u}
+        (TopCat.closedIncl hs)).obj G.val).stalk x, a = 0 := by
+  let F := (TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G.val
+  intro a
+  obtain ⟨U, hxU, sU, rfl⟩ := F.germ_exist x a
+  let W : Opens X := U ⊓ ⟨sᶜ, hs.isOpen_compl⟩
+  have hxW : x ∈ W := ⟨hxU, hx⟩
+  have hW_bot : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ := by
+    ext ⟨y, hy⟩; simp only [Opens.map, TopCat.closedIncl, SetLike.mem_coe,
+      Opens.coe_bot, Set.mem_empty_iff_false, iff_false]
+    exact fun h => absurd hy h.2
+  have hFW_zero : IsZero (F.obj (op W)) := by
+    change IsZero (G.val.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
+    rw [hW_bot]; exact (isTerminal_sheaf_bot G).isZero
+  let sW := ConcreteCategory.hom (F.map (homOfLE (show W ≤ U from inf_le_left)).op) sU
+  have hsW_eq : sW = 0 := by
+    calc sW = ConcreteCategory.hom (𝟙 (F.obj (op W))) sW :=
+              (ConcreteCategory.id_apply sW).symm
+      _ = ConcreteCategory.hom (0 : F.obj (op W) ⟶ F.obj (op W)) sW := by
+              rw [hFW_zero.eq_of_src (𝟙 _) 0]
+      _ = 0 := AddMonoidHom.zero_apply _
+  rw [← TopCat.Presheaf.germ_res_apply F
+    (homOfLE (show W ≤ U from inf_le_left)) x hxW sU]
+  change ConcreteCategory.hom (F.germ W x hxW) sW = 0
+  rw [hsW_eq]; exact AddMonoidHom.map_zero _
+
+-- Surjectivity transfer: f ≫ g = h ≫ k with g, h iso and k surj → f surj
+private theorem surj_transfer_closedIncl {A B C D : AddCommGrpCat.{u}}
+    {f : A ⟶ B} {g : B ⟶ C} {h : A ⟶ D} {k : D ⟶ C}
+    [IsIso g] [IsIso h]
+    (hnat : f ≫ g = h ≫ k)
+    (hk : Function.Surjective (ConcreteCategory.hom k)) :
+    Function.Surjective (ConcreteCategory.hom f) := by
+  intro b
+  obtain ⟨d, hd⟩ := hk (ConcreteCategory.hom g b)
+  refine ⟨ConcreteCategory.hom (inv h) d, ?_⟩
+  rw [show ConcreteCategory.hom f (ConcreteCategory.hom (inv h) d) =
+      ConcreteCategory.hom (inv h ≫ f) d from
+        (ConcreteCategory.comp_apply _ _ _).symm,
+    show inv h ≫ f = k ≫ inv g by
+      have : f = h ≫ k ≫ inv g := by
+        rw [← Category.assoc, ← hnat, Category.assoc,
+          IsIso.hom_inv_id, Category.comp_id]
+      rw [this]; simp,
+    ConcreteCategory.comp_apply, hd, ← ConcreteCategory.comp_apply,
+    IsIso.hom_inv_id, ConcreteCategory.id_apply]
+
+-- Pushforward along closed immersion preserves ShortExact.
+-- Proof: Mono (right adjoint), Exact (left exact + mono f + preserves kernel),
+-- Epi (stalkwise: iso at points of Z via stalkPushforward, zero stalk outside Z).
+set_option synthInstance.maxHeartbeats 160000 in
+set_option maxHeartbeats 3200000 in
+theorem closedIncl_pushforward_shortExact
+    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
+    {G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)}
+    (ip : InjectivePresentation G) :
+    (ip.shortComplex.map
+      (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+        (TopCat.closedIncl hs))).ShortExact := by
+  have hSE := ip.shortExact_shortComplex
+  -- Mono: pushforward preserves monos (right adjoint preserves limits)
+  haveI hMono : Mono (ip.shortComplex.map
+      (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+        (TopCat.closedIncl hs))).f := by
+    change Mono ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hs)).map _)
+    exact Functor.map_mono _ _
+  -- Exact: left exact functor + mono f + preserves kernel of g
+  have hExact : (ip.shortComplex.map
+      (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+        (TopCat.closedIncl hs))).Exact :=
+    hSE.exact.map_of_mono_of_preservesKernel _ hSE.mono_f inferInstance
+  -- Epi: stalkwise surjectivity for closed immersions
+  haveI hEpi : Epi (ip.shortComplex.map
+      (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+        (TopCat.closedIncl hs))).g := by
+    change Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hs)).map _)
+    rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u}]
+    change TopCat.Presheaf.IsLocallySurjective
+      ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+        (TopCat.closedIncl hs)).map ip.shortComplex.g).val
+    rw [TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
+    intro x
+    by_cases hx : (x : X) ∈ s
+    · -- x ∈ s: stalkPushforward iso transfers surjectivity
+      let z : TopCat.of s := ⟨x, hx⟩
+      haveI : IsIso (TopCat.Presheaf.stalkPushforward
+          AddCommGrpCat.{u} (TopCat.closedIncl hs)
+          ip.shortComplex.X₂.val z) :=
+        TopCat.Presheaf.stalkPushforward.stalkPushforward_iso_of_isInducing
+          AddCommGrpCat.{u}
+          hs.isClosedEmbedding_subtypeVal.isInducing _ z
+      haveI : IsIso (TopCat.Presheaf.stalkPushforward
+          AddCommGrpCat.{u} (TopCat.closedIncl hs)
+          ip.shortComplex.X₃.val z) :=
+        TopCat.Presheaf.stalkPushforward.stalkPushforward_iso_of_isInducing
+          AddCommGrpCat.{u}
+          hs.isClosedEmbedding_subtypeVal.isInducing _ z
+      have hg_surj : Function.Surjective
+          (ConcreteCategory.hom
+            ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map
+              ip.shortComplex.g.val)) :=
+        ((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
+            (T := ip.shortComplex.g.val)).mp
+          ((Sheaf.isLocallySurjective_iff_epi'
+              AddCommGrpCat.{u} _).mpr hSE.epi_g)) z
+      exact surj_transfer_closedIncl
+        (hnat := stalkPush_nat_closedIncl
+          (TopCat.closedIncl hs) ip.shortComplex.g.val z)
+        hg_surj
+    · -- x ∉ s: target stalk is 0
+      intro b
+      rw [pushforward_stalk_zero_closedIncl hs x hx
+        ip.shortComplex.X₃ b]
+      exact ⟨0, AddMonoidHom.map_zero _⟩
+  exact ShortComplex.ShortExact.mk' hExact ‹_› ‹_›
+
 -- Pushforward preserves flasqueness for any continuous map.
 theorem pushforward_preserves_flasque {Y : TopCat.{u}} (f : TopCat.of Y ⟶ X)
     (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Y)) (hG : IsFlasqueSheaf G) :
@@ -664,8 +801,8 @@ theorem PushforwardHVanishing
       obtain ⟨ip⟩ := EnoughInjectives.presentation G'
       -- Pushed-forward SES is ShortExact (i_* exact for closed immersions)
       have hSE_X : (ip.shortComplex.map
-          (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact := by
-        sorry -- i_* preserves ShortExact for closed immersions
+          (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
+        closedIncl_pushforward_shortExact hZ ip
       -- i_*J is flasque
       have hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
           ip.shortComplex.X₂) :=
