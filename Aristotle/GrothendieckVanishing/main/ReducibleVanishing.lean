@@ -49,7 +49,7 @@ theorem subsingleton_sheafH_of_isZero' {X : TopCat.{u}}
 
 set_option synthInstance.maxHeartbeats 160000 in
 set_option maxHeartbeats 3200000 in
-private theorem stalk_zero_of_ses_g_iso
+theorem stalk_zero_of_ses_g_iso
     {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hSE : S.ShortExact) (x : X)
