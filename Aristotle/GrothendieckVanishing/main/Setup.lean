@@ -934,23 +934,129 @@ theorem ClosedImmersionSES
       inferInstance inferInstance,
     rfl, rfl⟩
 
+/-! ## Helper lemmas for ReducibleVanishing -/
+
+/-- A sheaf with all stalks zero is IsZero. -/
+private theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (hstalk : ∀ (x : X)
+      (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F.val),
+      a = 0) :
+    IsZero F := by
+  have val_sub : ∀ (U : Opens X), Subsingleton (F.val.obj (op U)) := by
+    intro U; constructor; intro s t
+    apply TopCat.Presheaf.section_ext F U s t
+    intro x hx; exact (hstalk x _).trans (hstalk x _).symm
+  have val_isZero : ∀ (U : (Opens X)ᵒᵖ), IsZero (F.val.obj U) := by
+    intro ⟨U⟩; exact @AddCommGrpCat.isZero_of_subsingleton _ (val_sub U)
+  apply IsZero.mk
+  · intro G; exact ⟨{
+      default := 0
+      uniq := fun f => by
+        apply Sheaf.Hom.ext; apply NatTrans.ext; funext U
+        exact (val_isZero U).eq_zero_of_src (f.val.app U) }⟩
+  · intro G; exact ⟨{
+      default := 0
+      uniq := fun f => by
+        apply Sheaf.Hom.ext; apply NatTrans.ext; funext U
+        exact (val_isZero U).eq_zero_of_tgt (f.val.app U) }⟩
+
+/-- Sheaf cohomology vanishes for an IsZero sheaf. -/
+private theorem subsingleton_sheafH_of_isZero {X : TopCat.{u}}
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsZero F) (n : ℕ) :
+    Subsingleton (Sheaf.H F n) := by
+  constructor; intro a b
+  have hid : (𝟙 F : F ⟶ F) = 0 := hF.eq_of_src _ _
+  calc a = a.comp (Ext.mk₀ (𝟙 F)) (add_zero n) := (Ext.comp_mk₀_id a).symm
+    _ = a.comp 0 (add_zero n) := by rw [hid, Ext.mk₀_zero]
+    _ = 0 := Ext.comp_zero a F 0 n (add_zero n)
+    _ = b.comp 0 (add_zero n) := (Ext.comp_zero b F 0 n (add_zero n)).symm
+    _ = b.comp (Ext.mk₀ (𝟙 F)) (add_zero n) := by rw [hid, Ext.mk₀_zero]
+    _ = b := Ext.comp_mk₀_id b
+
+/-- For a SES `0 → A → B → C → 0` of sheaves, if `S.g` is iso on stalks at `x`,
+    then the stalk of `S.X₁` at `x` is zero. This follows from the kernel condition
+    `S.f ≫ S.g = 0`: on stalks, `stalk(S.f) ≫ stalk(S.g) = 0`; since `stalk(S.g)` is
+    iso, `stalk(S.f) = 0`; since `S.f` is mono, the domain stalk is zero. -/
+set_option maxHeartbeats 800000 in
+private theorem stalk_zero_of_ses_g_iso
+    {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hSE : S.ShortExact)
+    (x : X)
+    (hiso : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val))
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₁.val) :
+    a = 0 := by
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  have hstalk_comp : T.map S.f.val ≫ T.map S.g.val = 0 := by
+    rw [← Functor.map_comp]
+    exact Functor.map_zero T ▸ congr_arg (T.map ·) (congr_arg Sheaf.Hom.val S.zero)
+  have hf_zero : T.map S.f.val = 0 := by
+    calc T.map S.f.val
+        = (T.map S.f.val ≫ T.map S.g.val) ≫ inv (T.map S.g.val) := by simp
+      _ = 0 := by rw [hstalk_comp, zero_comp]
+  haveI : Mono S.f := hSE.mono_f
+  haveI : Mono S.f.val := by
+    change Mono ((sheafToPresheaf _ _).map S.f); infer_instance
+  haveI : Mono (T.map S.f.val) := inferInstance
+  rw [AddCommGrpCat.mono_iff_injective] at this
+  exact this (by rw [map_zero]; exact congr_fun (congr_arg AddCommGrpCat.Hom.hom hf_zero) a)
+
+/-- If `f : G ⟶ F` is mono and the stalk of `F` at `x` is zero, then the stalk
+    of `G` at `x` is zero. The stalk functor preserves monomorphisms, so the
+    stalk map `stalk(G)(x) → stalk(F)(x)` is injective with zero target. -/
+set_option maxHeartbeats 800000 in
+private theorem stalk_zero_of_mono_stalk_zero
+    {X : TopCat.{u}}
+    {G F : TopCat.Sheaf AddCommGrpCat.{u} X}
+    (f : G ⟶ F) [Mono f]
+    (x : X)
+    (hF : ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F.val), a = 0)
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj G.val) :
+    a = 0 := by
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  haveI : Mono f.val := by
+    change Mono ((sheafToPresheaf _ _).map f); infer_instance
+  haveI : Mono (T.map f.val) := inferInstance
+  rw [AddCommGrpCat.mono_iff_injective] at this
+  exact this ((hF (T.map f.val a)).trans (map_zero (T.map f.val)).symm)
+
+/-- Given a SES `0 → X₁ → X₂ → X₃ → 0`, if `Ext(Z, X₁, n) = 0`
+    and `Ext(Z, X₃, n) = 0`, then `Ext(Z, X₂, n) = 0`. -/
+private theorem subsingleton_ext_of_ses_middle'
+    {C : Type*} [Category C] [Abelian C] [HasExt C]
+    {S : ShortComplex C} (hS : S.ShortExact) (Z : C) (n : ℕ)
+    (h₁ : Subsingleton (Ext Z S.X₁ n))
+    (h₃ : Subsingleton (Ext Z S.X₃ n)) :
+    Subsingleton (Ext Z S.X₂ n) := by
+  constructor; intro a b
+  have ha : a.comp (Ext.mk₀ S.g) (add_zero n) = 0 := Subsingleton.elim _ _
+  have hb : b.comp (Ext.mk₀ S.g) (add_zero n) = 0 := Subsingleton.elim _ _
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ Z hS a ha
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ Z hS b hb
+  rw [← hc, ← hd, Subsingleton.elim c d]
+
 /-! ## Main vanishing theorems -/
 
+set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 80000 in
 /-- **Reducible vanishing** (Hartshorne III.2.7, reducible case).
     For a non-irreducible Noetherian space `X`, cohomology vanishing above the dimension
     follows from vanishing on all irreducible spaces of dim ≤ dim X.
 
     **Proof**: A Noetherian space has finitely many irreducible components `Z₁, …, Zₖ`
-    (k ≥ 2 since X is reducible). Iterate `ClosedImmersionSES` over these components.
-    At the first step: `0 → K₁ → F → i₁_*(i₁^*F) → 0` where `i₁ : Z₁ ↪ X`.
-    By `PushforwardHVanishing` + `ih_irred` (since `Z₁` is irreducible and
-    `dim Z₁ ≤ dim X`): the pushforward term vanishes. By `subsingleton_ext_of_ses_middle`:
-    vanishing of `K₁` implies vanishing of `F`.
-    `K₁` has zero stalks on `Z₁`. Apply the same to `K₁` with `Z₂`, getting `K₂` with
-    zero stalks on `Z₁ ∪ Z₂`. After `k` steps: `K_k` has zero stalks on
-    `Z₁ ∪ ⋯ ∪ Z_k = X`, hence `K_k = 0` and `H^n(X, K_k) = 0`.
-    Backtracking gives `H^n(X, F) = 0`. -/
+    (k ≥ 2 since X is reducible). We prove the result by `Finset.induction` on the set
+    of components, maintaining the invariant that the current sheaf `G` has zero stalks
+    outside `⋃ S` (where `S` is the remaining set of components).
+
+    At each step, pick `Z ∈ S` and form the SES `0 → K → G → i_*(i^*G) → 0`
+    via `ClosedImmersionSES`. The pushforward term vanishes by `ih_irred` +
+    `PushforwardHVanishing`. The kernel `K` has zero stalks on `Z` (the adjunction
+    unit is iso on stalks there) and inherits zero stalks from `G` outside `Z`
+    (since `K ↪ G`). So `K` has zero stalks outside `⋃ (S \ {Z})`, and we recurse.
+
+    Base case: `S = ∅`, so `G` has zero stalks everywhere, hence `G` is the zero
+    sheaf and `H^n(X, G) = 0`. -/
 theorem ReducibleVanishing
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
@@ -961,13 +1067,69 @@ theorem ReducibleVanishing
       topologicalKrullDim Y ≤ topologicalKrullDim X →
       n > topologicalKrullDim Y → Subsingleton (Sheaf.H G n)) :
     Subsingleton (Sheaf.H F n) := by
-  -- X has finitely many irreducible components, k ≥ 2 since non-irreducible
-  -- Iterate ClosedImmersionSES, peeling one component per step
-  -- After k steps: kernel has zero stalks everywhere → zero sheaf → H = 0
-  -- Finite iteration over irreducible components
-  -- Each step: ClosedImmersionSES + ih_irred + PushforwardHVanishing + subsingleton_ext_of_ses_middle
-  -- Final step: zero stalks → zero sheaf → H = 0
-  sorry
+  classical
+  -- Get finite set of irreducible components
+  have hfin := NoetherianSpace.finite_irreducibleComponents (α := X)
+  set comps := hfin.toFinset with comps_def
+  -- Every point is in some component
+  have hcover : ∀ x : X, x ∈ ⋃₀ (comps : Set (Set X)) := by
+    intro x; simp [comps_def, Set.Finite.toFinset]
+    exact Set.mem_sUnion.mp (sUnion_irreducibleComponents ▸ Set.mem_univ x)
+  -- Components are irreducible
+  have hcomp_irred : ∀ Z ∈ comps, Z ∈ irreducibleComponents X := by
+    intro Z hZ; simp [comps_def] at hZ; exact hZ
+  -- Prove by Finset.induction on components with invariant:
+  -- ∀ G, (zero stalks outside ⋃ s) → Subsingleton (Sheaf.H G n)
+  suffices ∀ (s : Finset (Set X)),
+      (∀ Z ∈ s, Z ∈ irreducibleComponents X) →
+      ∀ (G : TopCat.Sheaf AddCommGrpCat.{u} X),
+      (∀ x : X, x ∉ ⋃₀ (s : Set (Set X)) →
+        ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj G.val),
+        a = 0) →
+      Subsingleton (Sheaf.H G n) by
+    exact this comps hcomp_irred F (fun x hx => absurd (hcover x) hx)
+  intro s
+  induction s using Finset.induction_on with
+  | empty =>
+    -- Base case: all stalks are zero → zero sheaf → H = 0
+    intro _ G hG
+    exact subsingleton_sheafH_of_isZero G
+      (sheaf_isZero_of_zero_stalks X G (fun x a => hG x (by simp) a)) n
+  | @insert Z s' hZ_notin ih =>
+    intro hs_irred G hG_stalks
+    have hZ_comp := hs_irred Z (Finset.mem_insert_self Z s')
+    have hZ_closed := isClosed_of_mem_irreducibleComponents Z hZ_comp
+    have hZ_irred := hZ_comp.1
+    -- SES: 0 → K → G → i_*(i^*G) → 0
+    obtain ⟨S, hSE, hX₂, hX₃⟩ := ClosedImmersionSES Z hZ_closed G
+    -- Pushforward term vanishes: Z is irreducible, dim Z ≤ dim X
+    have hpush : Subsingleton (Sheaf.H S.X₃ n) := by
+      rw [hX₃]
+      apply PushforwardHVanishing Z hZ_closed
+      haveI : IrreducibleSpace (TopCat.of Z) :=
+        isIrreducible_iff_irreducibleSpace.mp hZ_irred
+      exact ih_irred (TopCat.of Z) _
+        (topologicalKrullDim_subspace_le X Z)
+        (lt_of_le_of_lt (topologicalKrullDim_subspace_le X Z) hn)
+    -- Kernel K = S.X₁ has zero stalks outside ⋃ s'
+    have hker : Subsingleton (Sheaf.H S.X₁ n) := by
+      apply ih (fun Z' hZ' => hs_irred Z' (Finset.mem_insert_of_mem hZ')) S.X₁
+      intro x hx a
+      by_cases hxZ : x ∈ Z
+      · -- x ∈ Z: adjunction unit iso on stalks → kernel stalk = 0
+        exact stalk_zero_of_ses_g_iso hSE x
+          (by subst hX₂; exact closedIncl_unit_stalk_isIso hZ_closed G ⟨x, hxZ⟩) a
+      · -- x ∉ Z, x ∉ ⋃ s': so x ∉ ⋃ (insert Z s'), stalk G x = 0, K ↪ G
+        have hx' : x ∉ ⋃₀ ((insert Z s' : Finset (Set X)) : Set (Set X)) := by
+          simp only [Finset.coe_insert, Set.sUnion_insert, Set.mem_union] at hx ⊢
+          push_neg; exact ⟨hxZ, hx⟩
+        haveI : Mono S.f := hSE.mono_f
+        exact stalk_zero_of_mono_stalk_zero (hX₂ ▸ S.f) x
+          (fun a => hG_stalks x hx' (hX₂ ▸ a)) a
+    -- Combine: SES + kernel vanishes + pushforward vanishes → middle vanishes
+    exact hX₂ ▸ subsingleton_ext_of_ses_middle' hSE
+      ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+        (AddCommGrpCat.of (ULift ℤ))) n hker hpush
 
 set_option synthInstance.maxHeartbeats 80000 in
 /-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case).

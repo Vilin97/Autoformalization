@@ -12,6 +12,8 @@
   File structure:
   - Setup.lean: category instances + 3 sorry'd theorems
   - Auxiliary.lean: topology/dimension helpers + counterexample (flasque ≠ injective)
+  - ClosedImmersion.lean: PROVED — closed immersion counit/stalk infrastructure
+  - ZeroOutside.lean: PROVED — zero-outside / extension-by-zero infrastructure
   - ConstantSheafFlasque.lean: PROVED — constant sheaf on irreducible space is flasque
   - CohomologyIso.lean: PROVED — H'(⊤, F) ≅ H(F)
   - DimZeroVanishing.lean: PROVED — irreducible dim 0 case
@@ -19,6 +21,8 @@
   - IrreducibleStep.lean: PROVED — irreducible step (modulo IrreduciblePosVanishing)
   - GrothendieckVanishing.lean: PROVED — main theorem by well-founded induction
 -/
+import Aristotle.GrothendieckVanishing.main.ClosedImmersion
+import Aristotle.GrothendieckVanishing.main.ZeroOutside
 import Aristotle.GrothendieckVanishing.main.GrothendieckVanishing
 
 #check GrothendieckVanishing
