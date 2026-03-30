@@ -287,8 +287,55 @@ theorem zeroOutsideInt_cohomology_vanishing
     exact PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim hm'_Y)
   exact hS'₂ ▸ subsingleton_sheafH_of_shortExact_middle hS'E m' hK_van hP_van
 
+/-- Third-term LES: for 0 → X₁ → X₂ → X₃ → 0, H^n(X₂)=0 ∧ H^{n+1}(X₁)=0 ⟹ H^n(X₃)=0. -/
+theorem subsingleton_ext_of_ses_third {C : Type*} [Category C] [Abelian C] [HasExt C]
+    {S : ShortComplex C} (hS : S.ShortExact) (Z : C) (n : ℕ)
+    (h₂ : Subsingleton (Ext Z S.X₂ n))
+    (h₁ : Subsingleton (Ext Z S.X₁ (n + 1))) :
+    Subsingleton (Ext Z S.X₃ n) := by
+  constructor; intro a b
+  have ha_δ : a.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
+  have hb_δ : b.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ Z hS a rfl ha_δ
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ Z hS b rfl hb_δ
+  rw [← hc, ← hd, @Subsingleton.elim _ h₂ c d]
+
+theorem subsingleton_sheafH_of_shortExact_third {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact) (n : ℕ)
+    (h₂ : Subsingleton (Sheaf.H S.X₂ n))
+    (h₁ : Subsingleton (Sheaf.H S.X₁ (n + 1))) :
+    Subsingleton (Sheaf.H S.X₃ n) :=
+  subsingleton_ext_of_ses_third hS _ n h₂ h₁
+
+/-- `zeroOutsideInt ⊥` is the zero sheaf (all stalks vanish). -/
+theorem isZero_zeroOutsideInt_bot (X : TopCat.{u}) :
+    IsZero (TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X)) := by
+  sorry
+
+/-- **Step 4** (Hartshorne III.2.7): any subsheaf of `zeroOutsideInt V` has vanishing
+    cohomology in degree `m > dim X`. Uses the structure of subsheaves of `Z_V`:
+    stalks are `d_x·ℤ ⊆ ℤ`, and after shrinking to an open `V' ⊆ V`, the subsheaf
+    restricts to `d·Z_{V'}` ≅ `Z_{V'}`. The quotient is supported on a smaller closed set. -/
+theorem subsheaf_zeroOutsideInt_vanishing
+    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
+    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      topologicalKrullDim Y < topologicalKrullDim X →
+      m > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G m))
+    (hpos : topologicalKrullDim X > 0)
+    (V : Opens X) (R : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
+    (m : ℕ) (hm : m > topologicalKrullDim X) :
+    Subsingleton (Sheaf.H R m) := by
+  sorry
+
 /-- **Steps 3C + 4 + LES** (Hartshorne III.2.7): any epi image of `zeroOutsideInt V` has
-    vanishing cohomology in degree `m > dim X`. -/
+    vanishing cohomology in degree `m > dim X`. Uses third-term LES with
+    `zeroOutsideInt_cohomology_vanishing` (Step 5) and
+    `subsheaf_zeroOutsideInt_vanishing` (Step 4). -/
+set_option synthInstance.maxHeartbeats 80000 in
 theorem epiImage_zeroOutsideInt_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
@@ -301,7 +348,21 @@ theorem epiImage_zeroOutsideInt_vanishing
     (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G) (hf : Epi f)
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H G m) := by
-  sorry
+  by_cases hV : V = ⊥
+  · subst hV
+    have hZero : IsZero G := by
+      rw [IsZero.iff_id_eq_zero]
+      exact (cancel_epi f).mp (by simp [(isZero_zeroOutsideInt_bot X).eq_of_src f 0])
+    exact subsingleton_sheafH_of_isZero' G hZero m
+  · let S := ShortComplex.mk (kernel.ι f) f (kernel.condition f)
+    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
+    have hZV : Subsingleton (Sheaf.H S.X₂ m) :=
+      zeroOutsideInt_cohomology_vanishing X ih hpos V hV m hm
+    have hKer : Subsingleton (Sheaf.H S.X₁ (m + 1)) :=
+      subsheaf_zeroOutsideInt_vanishing X ih hpos V (kernel f) (kernel.ι f) (m + 1)
+        (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
+    exact subsingleton_sheafH_of_shortExact_third hSE m hZV hKer
 
 /-- **Step 3A** (Hartshorne III.2.7): on a Noetherian space, if vanishing holds for
     all epi images of `zeroOutsideInt V`, then it holds for every sheaf. -/

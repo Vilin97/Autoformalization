@@ -1,5 +1,20 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-30 — PROVE epiImage_zeroOutsideInt_vanishing (Steps 3C+LES)
+
+**Sorry count: 3** (was 2 — decomposed further)
+
+- Added third-term LES: `subsingleton_sheafH_of_shortExact_third` (PROVED)
+  For 0→X₁→X₂→X₃→0: H^n(X₂)=0 ∧ H^{n+1}(X₁)=0 ⟹ H^n(X₃)=0.
+- **PROVED `epiImage_zeroOutsideInt_vanishing`**: for epi Z_V→G, H^m(G)=0.
+  Uses third-term LES + Step 5 + Step 4 (subsheaf vanishing).
+- Stated `isZero_zeroOutsideInt_bot` (sorry, small technical lemma)
+- Stated `subsheaf_zeroOutsideInt_vanishing` (sorry, Step 4)
+- 3 sorry's remain:
+  1. `isZero_zeroOutsideInt_bot` — Z_⊥ is zero sheaf (small)
+  2. `subsheaf_zeroOutsideInt_vanishing` — Step 4 (hard)
+  3. `directLimit_cohomology_vanishing` — Step 3A (hard)
+
 ## 2026-03-30 — PROVE zeroOutsideInt_cohomology_vanishing (Step 5) + restructure
 
 **Sorry count: 2** (was 3)
