@@ -46,7 +46,8 @@
     {
       "id": "159d3b74-d857-40a4-86eb-70e02b403f82",
       "target": "subsheaf_contains_zeroOutsideInt (Step 4 structure)",
-      "status": "QUEUED"
+      "status": "COMPLETE_WITH_ERRORS",
+      "note": "Aristotle could not prove: stalk classification of subsheaves of Z_V requires deep Mathlib API"
     },
     {
       "id": "b46c7418-a6f7-47cc-952d-24c3f65f58b9",
@@ -57,7 +58,8 @@
     {
       "id": "c42b4387-77b6-4a90-94d8-4f1693e84498",
       "target": "subsheaf_contains_zeroOutsideInt (v2, with stalk iso hint)",
-      "status": "QUEUED"
+      "status": "COMPLETE_WITH_ERRORS",
+      "note": "Aristotle could not prove even with detailed hints"
     }
   ],
   "canceled": [
