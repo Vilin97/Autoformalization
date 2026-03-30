@@ -81,7 +81,7 @@ theorem stalk_zero_of_ses_g_iso
 
 /-! ## Main proof -/
 
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 800000 in
 set_option synthInstance.maxHeartbeats 160000 in
 theorem ReducibleVanishing'
     (X : TopCat.{u}) [NoetherianSpace X]

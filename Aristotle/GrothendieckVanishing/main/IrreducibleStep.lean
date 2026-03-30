@@ -117,7 +117,7 @@ private theorem sheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x 
     Uses: sheaf stalk surjectivity + section_ext + local surjectivity of `cokernel.π`
     + `cokernel.condition`. -/
 set_option synthInstance.maxHeartbeats 200000 in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 800000 in
 private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
       (Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))).val) :
