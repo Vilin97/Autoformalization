@@ -163,10 +163,10 @@ theorem cokernel_openHom_vanishing
     (V : Opens X) (hV : V ≠ ⊥)
     (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
     (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y < topologicalKrullDim X →
-      n > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G n)) :
+      m > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G m)) :
     let f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
     Subsingleton (Sheaf.H (Limits.cokernel f) n) := by
   intro f
@@ -218,7 +218,7 @@ theorem cokernel_openHom_vanishing
     subsingleton_sheafH_of_isZero' S'.X₁ hK_zero n
   have hP_van : Subsingleton (Sheaf.H S'.X₃ n) := by
     rw [hS'₃]
-    exact PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ _ hY_dim hn_Y)
+    exact PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ n _ hY_dim hn_Y)
   exact hS'₂ ▸ subsingleton_sheafH_of_shortExact_middle hS'E n hK_van hP_van
 
 /-- Hartshorne Steps 3-5: uses IrreduciblePosVanishing (sorry). -/
@@ -227,10 +227,10 @@ private theorem grothendieck_reduction
     (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y < topologicalKrullDim X →
-      n > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G n)) :
+      m > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G m)) :
     Subsingleton (Sheaf.H F n) :=
   IrreduciblePosVanishing X n hn hpos F ih
 
@@ -241,9 +241,9 @@ theorem grothendieck_vanishing_irreducible_pos
     (hpos : topologicalKrullDim X > 0)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (ih : ∀ (Y : TopCat.{u}) [TopologicalSpace.NoetherianSpace Y]
-      (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y < topologicalKrullDim X →
-      n > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G n)) :
+      m > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G m)) :
     Subsingleton (Sheaf.H F n) :=
   grothendieck_reduction X n hn hpos F ih

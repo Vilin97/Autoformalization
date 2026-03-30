@@ -56,10 +56,10 @@ theorem irreduciblePos_pushforward_subsingleton
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (n : ℕ) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y < topologicalKrullDim X →
-      n > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G n))
+      m > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G m))
     (Z : Set X) (hZ_closed : IsClosed Z)
     (hZ_dim : topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X)
     (hn_Z : ↑n > topologicalKrullDim (TopCat.of Z))
@@ -70,21 +70,82 @@ theorem irreduciblePos_pushforward_subsingleton
           (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩)).obj F)) :
     Subsingleton (Sheaf.H S.X₃ n) := by
   rw [hS₃]
-  exact PushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ _ hZ_dim hn_Z)
+  exact PushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ n _ hZ_dim hn_Z)
 
-/-- Hartshorne III.2.7 Steps 3-5, isolated as the remaining kernel lemma. Starting from the
-closed-immersion short exact sequence `0 → K → F → i_*(i^*F) → 0` attached to a proper closed
-subset `Z ⊊ X`, this is the genuine missing argument: one must prove vanishing for the kernel
-term `K` via direct limits, finite-generator reduction, and the `zeroOutsideInt` analysis. -/
+/-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
+
+The following three lemmas decompose the kernel vanishing argument. Each is
+stated as a `sorry` and will be proved separately.
+
+1. `epiImage_zeroOutsideInt_vanishing` — vanishing for epi images of `Z_V`
+   (combines Steps 3C, 4, 5 + LES third-term argument)
+2. `directLimit_cohomology_vanishing` — reduce arbitrary sheaves to finitely
+   generated ones (Step 3A: Hartshorne Propositions 2.8–2.9)
+3. `zeroOutsideInt_cohomology_vanishing` — `H^m(Z_V) = 0` for `m > dim X`
+   (Step 5, used internally by lemma 1)
+-/
+
+/-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
+    degree `m > dim X` on an irreducible Noetherian space of positive dimension.
+    Uses the SES `0 → Z_V → Z → cokernel → 0` where `Z` is the constant sheaf (flasque)
+    and the cokernel is supported on `Vᶜ` (strictly smaller dimension). -/
+theorem zeroOutsideInt_cohomology_vanishing
+    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
+    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      topologicalKrullDim Y < topologicalKrullDim X →
+      m > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G m))
+    (hpos : topologicalKrullDim X > 0)
+    (V : Opens X) (hV : V ≠ ⊥)
+    (m : ℕ) (hm : m > topologicalKrullDim X) :
+    Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) m) := by
+  sorry
+
+/-- **Steps 3C + 4 + LES** (Hartshorne III.2.7): any epi image of `zeroOutsideInt V` has
+    vanishing cohomology in degree `m > dim X`.
+    For epi `f : Z_V ⟶ G`, the SES `0 → ker f → Z_V → G → 0` and the LES give
+    `H^m(G) = 0` from `H^m(Z_V) = 0` (Step 5) and `H^{m+1}(ker f) = 0`
+    (Step 4: subsheaf-of-`Z_V` vanishing). -/
+theorem epiImage_zeroOutsideInt_vanishing
+    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
+    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      topologicalKrullDim Y < topologicalKrullDim X →
+      m > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G m))
+    (hpos : topologicalKrullDim X > 0)
+    (V : Opens X) {G : TopCat.Sheaf AddCommGrpCat.{u} X}
+    (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G) (hf : Epi f)
+    (m : ℕ) (hm : m > topologicalKrullDim X) :
+    Subsingleton (Sheaf.H G m) := by
+  sorry
+
+/-- **Step 3A** (Hartshorne III.2.7, Propositions 2.8–2.9): on a Noetherian space,
+    if `H^m(G) = 0` for every epi image `G` of `zeroOutsideInt V` (for all `V`),
+    then `H^m(K) = 0` for every sheaf `K`.
+    Uses: cohomology commutes with filtered direct limits on Noetherian spaces,
+    every sheaf is the directed colimit of its finitely generated subsheaves,
+    and the finite-generator induction (Steps 3B–3C). -/
+theorem directLimit_cohomology_vanishing
+    {X : TopCat.{u}} [NoetherianSpace X]
+    (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ)
+    (hzero : ∀ {G : TopCat.Sheaf AddCommGrpCat.{u} X} {V : Opens X}
+      (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G), Epi f → Subsingleton (Sheaf.H G m)) :
+    Subsingleton (Sheaf.H K m) := by
+  sorry
+
+/-- Hartshorne III.2.7 Steps 3-5, isolated as the remaining kernel lemma. The proof
+    assembles `epiImage_zeroOutsideInt_vanishing` and `directLimit_cohomology_vanishing`. -/
 theorem irreduciblePos_kernel_subsingleton
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y < topologicalKrullDim X →
-      n > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G n))
+      m > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G m))
     (Z : Set X) (hZ_closed : IsClosed Z) (hZ_ne_univ : Z ≠ Set.univ)
     (hZ_dim : topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X)
     (hn_Z : ↑n > topologicalKrullDim (TopCat.of Z))
@@ -94,8 +155,9 @@ theorem irreduciblePos_kernel_subsingleton
       (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩)).obj
         ((TopCat.Sheaf.pullback AddCommGrpCat.{u}
           (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩)).obj F)) :
-    Subsingleton (Sheaf.H S.X₁ n) := by
-  sorry -- Hartshorne III.2.7 Steps 3-5 via zeroOutsideInt/direct limits
+    Subsingleton (Sheaf.H S.X₁ n) :=
+  directLimit_cohomology_vanishing S.X₁ n
+    (fun f hf => epiImage_zeroOutsideInt_vanishing X ih hpos _ f hf n hn)
 
 set_option synthInstance.maxHeartbeats 80000 in
 /-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case).
@@ -128,10 +190,10 @@ theorem IrreduciblePosVanishing
     (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y < topologicalKrullDim X →
-      n > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G n)) :
+      m > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G m)) :
     Subsingleton (Sheaf.H F n) := by
   obtain ⟨Z, hZ_closed, hZ_ne_univ, hZ_dim, hn_Z⟩ :=
     exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos

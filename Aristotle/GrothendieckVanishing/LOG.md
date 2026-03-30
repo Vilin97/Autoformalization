@@ -1,5 +1,29 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-30 — Decompose IrreduciblePosVanishing into 3 sorry sub-lemmas
+
+**Sorry count: 3 (was 1 — decomposed into sub-lemmas)**
+
+Key changes:
+1. **Generalized IH to degree-universal**: Changed the induction hypothesis in
+   `IrreduciblePosVanishing`, `cokernel_openHom_vanishing`, and 6 other theorems
+   from fixed degree `n` to universal `(m : ℕ)`. This is necessary because
+   Hartshorne's proof needs vanishing at ALL degrees above `dim X` simultaneously
+   (the LES argument shifts degree by +1).
+2. **Decomposed `irreduciblePos_kernel_subsingleton`** into 3 sub-lemmas:
+   - `zeroOutsideInt_cohomology_vanishing` — Step 5: H^m(Z_V) = 0
+   - `epiImage_zeroOutsideInt_vanishing` — Steps 3C+4+LES: epi images of Z_V vanish
+   - `directLimit_cohomology_vanishing` — Step 3A: reduce to finitely generated
+3. **Closed the main sorry** using the assembly:
+   `directLimit_cohomology_vanishing S.X₁ n (fun f hf => epiImage_zeroOutsideInt_vanishing X ih hpos _ f hf n hn)`
+
+Files changed: Setup.lean (3 sorry lemmas + kernel filled), IrreducibleStep.lean,
+ClosedOpenDecomposition.lean, GrothendieckVanishing.lean (all IH generalization).
+
+**Architecture note**: The 3 sorry lemmas are in Setup.lean but their proofs will
+need tools from IrreducibleStep.lean. A future cycle should move them to
+IrreducibleStep.lean to resolve the circular dependency.
+
 ## 2026-03-29T18:40Z — Babysit cycle: root-cause CI fix
 
 **Sorry count: 1 (IrreduciblePosVanishing at Setup.lean:95)**

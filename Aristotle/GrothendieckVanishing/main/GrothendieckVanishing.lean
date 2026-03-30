@@ -31,19 +31,19 @@ private theorem grothendieck_vanishing_aux (d : WithBot ℕ∞)
     Subsingleton (Sheaf.H F n) := by
   -- Step 1: Reduce to irreducible X
   apply grothendieck_vanishing_of_irreducible X n (hd ▸ hn) F
-  intro Y _ _ G hle hY
+  intro Y _ _ m G hle hY
   by_cases hdim : topologicalKrullDim Y ≤ 0
   · -- dim Y ≤ 0: use DimZeroVanishing
-    have hn0 : n ≠ 0 := by
+    have hm0 : m ≠ 0 := by
       intro heq; subst heq
       exact not_lt.mpr (topologicalKrullDim_nonneg_of_irreducible (X := Y)) (by exact_mod_cast hY)
-    obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn0
-    exact grothendieck_vanishing_dim_zero Y hdim G m
+    obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm0
+    exact grothendieck_vanishing_dim_zero Y hdim G k
   · -- dim Y > 0: use IrreducibleStep
     push_neg at hdim
-    exact grothendieck_vanishing_irreducible_pos Y n hY hdim G
-      (fun Z _ G' hlt hG' =>
-        ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle)) Z n G' rfl hG')
+    exact grothendieck_vanishing_irreducible_pos Y m hY hdim G
+      (fun Z _ m' G' hlt hG' =>
+        ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle)) Z m' G' rfl hG')
 
 /-- **Grothendieck's vanishing theorem** (Hartshorne III, Theorem 2.7). -/
 theorem GrothendieckVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
