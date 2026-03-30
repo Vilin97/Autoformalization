@@ -82,11 +82,11 @@ private theorem sheaf_H_subsingleton_of_reducible
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (hNotIrred : ¬ IrreducibleSpace X) [Nonempty X]
     (ih_irred : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      [IrreducibleSpace Y] (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      [IrreducibleSpace Y] (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y ≤ topologicalKrullDim X →
-      n > topologicalKrullDim Y → Subsingleton (Sheaf.H G n)) :
+      m > topologicalKrullDim Y → Subsingleton (Sheaf.H G m)) :
     Subsingleton (Sheaf.H F n) :=
-  ReducibleVanishing X n hn F hNotIrred ih_irred
+  ReducibleVanishing X n hn F hNotIrred (fun Y G hle hY => ih_irred Y n G hle hY)
 
 /-! ## Main theorem -/
 
@@ -95,13 +95,13 @@ theorem grothendieck_vanishing_of_irreducible
     (n : ℕ) (hn : n > topologicalKrullDim X)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (ih_irred : ∀ (Y : TopCat.{u}) [TopologicalSpace.NoetherianSpace Y]
-      [IrreducibleSpace Y] (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      [IrreducibleSpace Y] (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y ≤ topologicalKrullDim X →
-      n > topologicalKrullDim Y → Subsingleton (Sheaf.H G n)) :
+      m > topologicalKrullDim Y → Subsingleton (Sheaf.H G m)) :
     Subsingleton (Sheaf.H F n) := by
   by_cases hEmpty : IsEmpty X
   · exact sheaf_H_subsingleton_of_isEmpty' X F n
   · rw [not_isEmpty_iff] at hEmpty
     by_cases hIrred : IrreducibleSpace X
-    · exact @ih_irred X _ hIrred F le_rfl hn
+    · exact @ih_irred X _ hIrred n F le_rfl hn
     · exact sheaf_H_subsingleton_of_reducible X n hn F hIrred ih_irred
