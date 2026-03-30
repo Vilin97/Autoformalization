@@ -4,14 +4,14 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  Sorry's (1 remaining):
-  - IrreduciblePosVanishing (Setup.lean:95) — irreducible dim ≥ 1 case
-    Needs Hartshorne Steps 3-5 via zeroOutsideInt / direct limits.
+  Sorry's (2 remaining, both Mathlib API gaps):
+  - subsheaf_contains_zeroOutsideInt (IrreducibleStep.lean) — Step 4 subsheaf structure
+  - cohomology_vanishing_of_finitelyGenerated_vanishing (IrreducibleStep.lean) — Step 3A colimits
 
   File structure:
   - SetupCore.lean: category instances, FlasqueVanishing (PROVED),
     PushforwardHVanishing (PROVED), ClosedImmersionSES (PROVED)
-  - Setup.lean: ReducibleVanishing (PROVED), IrreduciblePosVanishing (1 sorry)
+  - Setup.lean: ReducibleVanishing (PROVED), IrreduciblePosVanishing (2 sorry's inside)
   - Auxiliary.lean: topology/dimension helpers
   - ClosedImmersion.lean: PROVED — closed immersion counit/stalk infrastructure
   - ZeroOutside.lean: PROVED — zero-outside / extension-by-zero infrastructure

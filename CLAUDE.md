@@ -70,4 +70,6 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 
 ## Remaining Work
 
-The sole gap is `IrreduciblePosVanishing` in `Setup.lean` — the irreducible dimension ≥ 1 case (Hartshorne Steps 3–5). See `Aristotle/GrothendieckVanishing/proofs.md` for the detailed decomposition into sub-lemmas. A Mathlib gap (missing LES infrastructure for right derived functors + filtered colimit commutativity for Ext) blocks the direct-limit approach.
+2 sorry's remain in `IrreducibleStep.lean`, both confirmed Mathlib API gaps:
+1. `subsheaf_contains_zeroOutsideInt` (Step 4) — stalk classification of subsheaves of Z_V
+2. `cohomology_vanishing_of_finitelyGenerated_vanishing` (Step 3A) — Hartshorne 2.9, cohomology commutes with filtered colimits (missing LES for derived functors + colimit commutativity)
