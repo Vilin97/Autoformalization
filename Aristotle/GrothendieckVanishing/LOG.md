@@ -1,5 +1,13 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-30 — Submit last 2 sorry's to Aristotle
+
+**Sorry count: 2**
+
+- Submitted `subsheaf_contains_zeroOutsideInt` to Aristotle (159d3b74)
+- Submitted `directLimit_cohomology_vanishing` to Aristotle (b46c7418)
+- Both are hard — Aristotle will attempt, we work in parallel
+
 ## 2026-03-30 — PROVE cokernel_stalk_zero_of_stalk_surj (3→2 sorry's)
 
 **Sorry count: 2** (was 3)
