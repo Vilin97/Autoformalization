@@ -787,7 +787,7 @@ private theorem pushforwardH1_epi_g_top
   let φ_hom : AddCommGrpCat.of (ULift.{u} ℤ) ⟶ R_top :=
     AddCommGrpCat.ofHom
       (AddMonoidHom.mk' (fun (n : ULift.{u} ℤ) => (n.down : ℤ) • (r : R_top))
-        (fun a b => by simp only [add_zsmul]))
+        (fun a b => by simp [add_zsmul])))
   let adj_Z := constantSheafAdj (Opens.grothendieckTopology (TopCat.of Z))
     AddCommGrpCat.{u} Limits.isTerminalTop
   let φ := (adj_Z.homEquiv _ ip.shortComplex.X₃).symm φ_hom
@@ -815,7 +815,7 @@ private theorem pushforwardH1_epi_g_top
 -- Helper for PushforwardHVanishing degree 1 case.
 -- The expensive synthesis is contained in pushforwardH1_epi_g_top above.
 set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 400000 in
+set_option synthInstance.maxHeartbeats 800000 in
 private theorem pushforwardH1Vanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
@@ -836,7 +836,7 @@ private theorem pushforwardH1Vanishing
   have hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
       ip.shortComplex.X₂) 1) :=
     FlasqueVanishing _ _ hFlasque 0
-  have htop : ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ := by ext; simp only [Opens.map, Opens.mk_coe, Set.preimage_univ, Opens.coe_top]
+  have htop : ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ := by ext; simp [Opens.map]
   have hg_epi := pushforwardH1_epi_g_top hG' ip
   -- Transfer epi to X: g_X(⊤) = g(⊤) since (Opens.map i).obj ⊤ = ⊤
   have hg_epi_X : Epi ((ip.shortComplex.map
