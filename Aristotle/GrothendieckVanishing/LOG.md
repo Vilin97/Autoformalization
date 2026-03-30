@@ -1,5 +1,17 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-30 — Decompose directLimit_cohomology_vanishing
+
+**Sorry count: 3** (was 2 — decomposed Step 3A)
+
+- **PROVED `directLimit_cohomology_vanishing`** from two sub-lemmas:
+  1. `finsetGeneratedSheaf_vanishing` — Steps 3B-3C: finite generator induction
+  2. `cohomology_vanishing_of_finitelyGenerated_vanishing` — Hartshorne 2.9 core colimit step
+- 3 sorry's remain:
+  1. `subsheaf_contains_zeroOutsideInt` — Step 4 structure
+  2. `cohomology_vanishing_of_finitelyGenerated_vanishing` — Hartshorne 2.9 colimit
+  3. `finsetGeneratedSheaf_vanishing` — Steps 3B-3C finite case
+
 ## 2026-03-30 — Submit last 2 sorry's to Aristotle
 
 **Sorry count: 2**

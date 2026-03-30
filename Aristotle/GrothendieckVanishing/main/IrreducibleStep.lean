@@ -488,15 +488,44 @@ theorem epiImage_zeroOutsideInt_vanishing
         (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
     exact subsingleton_sheafH_of_shortExact_third hSE m hZV hKer
 
+/-- **Hartshorne 2.9 core**: on a Noetherian space, if `H^m = 0` for all finitely generated
+    subsheaves of `K`, then `H^m(K) = 0`. This encapsulates the commutativity of cohomology
+    with filtered colimits: `K = colim K_α`, `H^m(K) = colim H^m(K_α) = colim 0 = 0`. -/
+theorem cohomology_vanishing_of_finitelyGenerated_vanishing
+    {X : TopCat.{u}} [NoetherianSpace X]
+    (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ)
+    (hfg : ∀ (S : Finset (TopCat.Sheaf.SectionIndex K))
+      [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
+      Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)) :
+    Subsingleton (Sheaf.H K m) := by
+  sorry
+
+/-- **Step 3B–3C**: for finitely generated subsheaves, `hzero` + finite generator induction
+    gives vanishing. Uses Finset.induction with `subsingleton_of_adjoinGenerator_of_zeroOutside`
+    and `subsingleton_of_singleton_family_of_zeroOutside`. -/
+theorem finsetGeneratedSheaf_vanishing
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {K : TopCat.Sheaf AddCommGrpCat.{u} X}
+    (m : ℕ)
+    (hzero : ∀ {G : TopCat.Sheaf AddCommGrpCat.{u} X} {V : Opens X}
+      (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G), Epi f → Subsingleton (Sheaf.H G m))
+    (S : Finset (TopCat.Sheaf.SectionIndex K))
+    [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
+    Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m) := by
+  sorry
+
 /-- **Step 3A** (Hartshorne III.2.7): on a Noetherian space, if vanishing holds for
-    all epi images of `zeroOutsideInt V`, then it holds for every sheaf. -/
+    all epi images of `zeroOutsideInt V`, then it holds for every sheaf.
+    Assembles `finsetGeneratedSheaf_vanishing` (finite case) with
+    `cohomology_vanishing_of_finitelyGenerated_vanishing` (colimit step). -/
 theorem directLimit_cohomology_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
     (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ)
     (hzero : ∀ {G : TopCat.Sheaf AddCommGrpCat.{u} X} {V : Opens X}
       (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G), Epi f → Subsingleton (Sheaf.H G m)) :
-    Subsingleton (Sheaf.H K m) := by
-  sorry
+    Subsingleton (Sheaf.H K m) :=
+  cohomology_vanishing_of_finitelyGenerated_vanishing K m
+    (fun S _ => finsetGeneratedSheaf_vanishing m hzero S)
 
 /-- Kernel vanishing via assembly of Steps 3-5. -/
 theorem irreduciblePos_kernel_subsingleton
