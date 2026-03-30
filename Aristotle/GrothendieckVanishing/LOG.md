@@ -1,5 +1,16 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-30 — PROVE cokernel_stalk_zero_of_stalk_surj (3→2 sorry's)
+
+**Sorry count: 2** (was 3)
+
+- **PROVED `cokernel_stalk_zero_of_stalk_surj`**: cokernel stalks vanish at stalk-surjective
+  points. Proof: get germ, use local surjectivity of cokernel.π (epi → locally surjective),
+  lift through surjective stalk map, apply cokernel.condition (f ≫ cokernel.π = 0).
+- 2 sorry's remain:
+  1. `subsheaf_contains_zeroOutsideInt` — structure: nonzero R ⊆ Z_V contains Z_{V'}
+  2. `directLimit_cohomology_vanishing` — Step 3A: reduce to finitely generated
+
 ## 2026-03-30 — PROVE subsheaf_zeroOutsideInt_vanishing (Step 4 glue)
 
 **Sorry count: 3** (was 2 — decomposed Step 4 into 2 focused sub-lemmas)
