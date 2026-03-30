@@ -133,7 +133,7 @@ private lemma eval_comp_zero {X : TopCat.{u}}
     (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)) (V : Opens X) :
     S.f.val.app (op V) ≫ S.g.val.app (op V) = 0 := by
   have h1 : S.f.val.app (op V) ≫ S.g.val.app (op V) =
-      (S.f.val ≫ S.g.val).app (op V) := by simp
+      (S.f.val ≫ S.g.val).app (op V) := by rw [NatTrans.comp_app]
   rw [h1]; change (S.f ≫ S.g).val.app (op V) = 0; rw [S.zero]; aesop_cat
 
 set_option maxHeartbeats 400000 in
@@ -311,7 +311,7 @@ theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
     simp only [ht''_def, map_add]
     have hgf : S.g.val.app (op W) (S.f.val.app (op W) ahat) = 0 := by
       change (S.f.val.app (op W) ≫ S.g.val.app (op W)) ahat = 0
-      rw [eval_comp_zero]; simp
+      rw [eval_comp_zero]; exact AddMonoidHom.zero_apply _
     rw [hgf, add_zero, ht']; exact presheaf_map_eq S.X₃.val _ _ s
   have hcompat_patch : S.X₂.val.map (homOfLE inf_le_right).op t'' =
       S.X₂.val.map (homOfLE inf_le_left).op t₀ := by
