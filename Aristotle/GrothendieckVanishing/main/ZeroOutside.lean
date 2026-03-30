@@ -188,6 +188,92 @@ theorem openHom_generator {V : Opens X} (h : V ≤ U) :
       Presheaf.restrictOpen (F := constZ.zeroOutside U) (generator U) V h := by
   simp [generator, Presheaf.restrictOpen, Presheaf.restrict, ← comp_apply]
 
+/-- A morphism out of `constZ.zeroOutside U` is determined by the image of the
+distinguished generator over `U`. -/
+theorem sHom_eq_of_app_generator {F : Presheaf AddCommGrpCat.{u} X}
+    (f : constZ.zeroOutside U ⟶ F) :
+    sHom (f.app (op U) (generator U)) = f := by
+  apply NatTrans.ext
+  funext W
+  ext x
+  by_cases hW : unop W ≤ U
+  · let gW : (constZ.zeroOutside U).obj W :=
+      Presheaf.restrictOpen (F := constZ.zeroOutside U) (generator U) (unop W) hW
+    have hObjW : (zeroOutside U constZ).obj W = AddCommGrpCat.of (ULift ℤ) := by
+      simp [zeroOutside, hW, constZ]
+    let w : ULift ℤ := (AddCommGrpCat.Hom.hom (eqToHom hObjW) x)
+    have hObjW₀ : (zeroOutside (unop W) constZ).obj W = AddCommGrpCat.of (ULift ℤ) := by
+      simp [zeroOutside, constZ]
+    have hmid : (zeroOutside (unop W) constZ).obj W = (zeroOutside U constZ).obj W := by
+      rw [hObjW₀, hObjW]
+    have hcollapse :
+        (AddCommGrpCat.Hom.hom (eqToHom hmid))
+            ((AddCommGrpCat.Hom.hom (eqToHom hObjW₀.symm)) (1 : ULift ℤ)) =
+          (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) (1 : ULift ℤ) := by
+      have hcollapse' :
+          (AddCommGrpCat.Hom.hom (eqToHom hmid))
+              ((AddCommGrpCat.Hom.hom (eqToHom hObjW₀.symm)) (1 : ULift ℤ)) =
+            (AddCommGrpCat.Hom.hom (eqToHom (hObjW₀.symm.trans hmid))) (1 : ULift ℤ) := by
+        simpa using hom_eqToHom_hom_eqToHom hObjW₀.symm hmid (1 : ULift ℤ)
+      have hsingle : hObjW₀.symm.trans hmid = hObjW.symm := by
+        apply Subsingleton.elim
+      simpa [hsingle] using hcollapse'
+    have hgW_transport :
+        gW = (eqToHom hObjW.symm :
+          AddCommGrpCat.of (ULift ℤ) ⟶ (zeroOutside U constZ).obj W) (1 : ULift ℤ) := by
+      calc
+        gW = (zeroOutside_openHom (F := constZ) hW).app (op (unop W)) (generator (unop W)) := by
+          simpa [gW] using (openHom_generator (U := U) (V := unop W) hW).symm
+        _ = (eqToHom hObjW.symm :
+            AddCommGrpCat.of (ULift ℤ) ⟶ (zeroOutside U constZ).obj W) (1 : ULift ℤ) := by
+          simpa [generator, zeroOutside_openHom, zeroOutside, constZ, hW, hObjW₀, hmid] using
+            hcollapse
+    have hgW :
+        (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) (1 : ULift ℤ) = gW := by
+      exact hgW_transport.symm
+    have hw : w = (w.down : ℤ) • (1 : ULift ℤ) := by
+      ext
+      simp [w]
+    have hx : x = (w.down : ℤ) • gW := by
+      calc
+        x = (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) w := by
+              simpa [w] using (hom_eqToHom_symm_hom_eqToHom (e := hObjW) x).symm
+        _ = (w.down : ℤ) • (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) (1 : ULift ℤ) := by
+              rw [hw]
+              simpa using
+                (map_zsmul (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) w.down (1 : ULift ℤ))
+        _ = (w.down : ℤ) • gW := by rw [hgW]
+    have hs_restrict :
+        (sHom (f.app (op U) (generator U))).app W gW =
+          F.map (homOfLE hW).op (f.app (op U) (generator U)) := by
+      have hs_nat := congrArg (fun g => g (generator U))
+        (NatTrans.naturality (sHom (f.app (op U) (generator U))) (homOfLE hW).op)
+      have hs_nat' :
+          (sHom (f.app (op U) (generator U))).app W gW =
+            F.map (homOfLE hW).op
+              ((sHom (f.app (op U) (generator U))).app (op U) (generator U)) := by
+        simpa [gW, Presheaf.restrictOpen, Presheaf.restrict] using hs_nat
+      rw [sHom_app_generator] at hs_nat'
+      exact hs_nat'
+    have hf_restrict :
+        f.app W gW = F.map (homOfLE hW).op (f.app (op U) (generator U)) := by
+      simpa [gW, Presheaf.restrictOpen, Presheaf.restrict] using
+        (congrArg (fun g => g (generator U))
+          (NatTrans.naturality f (homOfLE hW).op))
+    calc
+      (sHom (f.app (op U) (generator U))).app W x
+          = (sHom (f.app (op U) (generator U))).app W ((w.down : ℤ) • gW) := by rw [hx]
+      _ = (w.down : ℤ) • (sHom (f.app (op U) (generator U))).app W gW := by simp
+      _ = (w.down : ℤ) • F.map (homOfLE hW).op (f.app (op U) (generator U)) := by
+            rw [hs_restrict]
+      _ = (w.down : ℤ) • f.app W gW := by rw [hf_restrict]
+      _ = f.app W ((w.down : ℤ) • gW) := by simp
+      _ = f.app W x := by rw [hx]
+  · have hs : (sHom (f.app (op U) (generator U))).app W = 0 :=
+        (zeroOutside_isZero (F := constZ) hW).eq_of_src _ _
+    have hf : f.app W = 0 := (zeroOutside_isZero (F := constZ) hW).eq_of_src _ _
+    rw [hs, hf]
+
 end zeroOutside
 
 end Presheaf
@@ -239,6 +325,28 @@ theorem sHom_app_generator {X : TopCat.{u}} {U : Opens X}
   delta generator
   erw [sHom_val, ← ConcreteCategory.comp_apply, ← NatTrans.comp_app, toSheafify_sheafifyLift]
   exact Presheaf.zeroOutside.sHom_app_generator s
+
+/-- A morphism out of `zeroOutsideInt U` is determined by the image of the
+distinguished generator over `U`. -/
+theorem sHom_eq_of_app_generator {X : TopCat.{u}} {U : Opens X}
+    {F : Sheaf AddCommGrpCat.{u} X} (f : zeroOutsideInt U ⟶ F) :
+    sHom (f.val.app (op U) (generator U)) = f := by
+  apply Sheaf.Hom.ext
+  symm
+  apply CategoryTheory.sheafifyLift_unique
+  simpa [generator, Category.assoc, ConcreteCategory.comp_apply] using
+    (Presheaf.zeroOutside.sHom_eq_of_app_generator
+      (f := CategoryTheory.toSheafify _ (Presheaf.constZ.zeroOutside U) ≫ f.val)).symm
+
+/-- Two morphisms out of `zeroOutsideInt U` agree as soon as they agree on the
+distinguished generator over `U`. -/
+theorem hom_ext_from_generator {X : TopCat.{u}} {U : Opens X}
+    {F : Sheaf AddCommGrpCat.{u} X} (f g : zeroOutsideInt U ⟶ F)
+    (h :
+      f.val.app (op U) (generator U) =
+        g.val.app (op U) (generator U)) :
+    f = g := by
+  rw [← sHom_eq_of_app_generator f, ← sHom_eq_of_app_generator g, h]
 
 end zeroOutsideInt
 

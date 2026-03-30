@@ -380,9 +380,6 @@ theorem closedIncl_unit_stalk_isIso
   let P₁ := (Presheaf.pullback AddCommGrpCat (closedIncl hs)).obj F.val
   let P₂ := (Presheaf.pullback AddCommGrpCat (closedIncl hs)).obj
     ((Sheaf.pushforward AddCommGrpCat (closedIncl hs)).obj (pb.obj F)).val
-  -- toSheafify stalk naturality: α.stalk ≫ toSheafify(P₂).stalk = toSheafify(P₁).stalk ≫ sheafify(α).stalk
-  -- We prove Tz.map(α) is iso from Tz.map(sheafify(α)) being iso + toSheafify stalks being iso
-  -- Using: sheafify functor map decomposes through toSheafify
   have hts : Tz.map ((Presheaf.pullback AddCommGrpCat (closedIncl hs)).map η.val) ≫
       Tz.map (CategoryTheory.toSheafify K P₂) =
     Tz.map (CategoryTheory.toSheafify K P₁) ≫ Tz.map
