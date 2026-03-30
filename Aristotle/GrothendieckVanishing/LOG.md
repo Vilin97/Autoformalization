@@ -1,5 +1,20 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-30 — PROVE subsheaf_zeroOutsideInt_vanishing (Step 4 glue)
+
+**Sorry count: 3** (was 2 — decomposed Step 4 into 2 focused sub-lemmas)
+
+- **PROVED `subsheaf_zeroOutsideInt_vanishing`** (Step 4 outer proof):
+  For mono R → Z_V, H^m(R) = 0. Proof: find V' ⊆ V with Z_{V'} ↪ R (stalk-iso),
+  SES 0 → Z_{V'} → R → cokernel → 0, cokernel supported on (V')^c (dim < dim X),
+  middle-term LES gives H^m(R) = 0.
+- Stated `subsheaf_contains_zeroOutsideInt` (sorry): nonzero R ⊆ Z_V contains Z_{V'}
+- Stated `cokernel_stalk_zero_of_stalk_surj` (sorry): cokernel stalks vanish at surjective points
+- 3 sorry's remain but all are more focused than before:
+  1. `subsheaf_contains_zeroOutsideInt` — pure sheaf structure (stalks of Z_V)
+  2. `cokernel_stalk_zero_of_stalk_surj` — exactness of stalk functor
+  3. `directLimit_cohomology_vanishing` — Step 3A (Hartshorne 2.8-2.9)
+
 ## 2026-03-30 — PROVE isZero_zeroOutsideInt_bot
 
 **Sorry count: 2** (was 3)
