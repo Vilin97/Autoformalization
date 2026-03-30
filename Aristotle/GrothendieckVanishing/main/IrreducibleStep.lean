@@ -326,6 +326,45 @@ theorem isZero_zeroOutsideInt_bot (X : TopCat.{u}) :
     rw [if_neg hW]; exact isZero_zero _) s
   simp [hs, map_zero]
 
+/-- Stalks of `zeroOutsideInt V` vanish outside `V`. -/
+theorem stalk_zeroOutsideInt_zero_outside
+    {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∉ V)
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
+      (TopCat.Sheaf.zeroOutsideInt V).val) : a = 0 := by
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  haveI : IsIso (T.map (toSheafify (Opens.grothendieckTopology X)
+    (TopCat.Presheaf.constZ.zeroOutside V))) := inferInstance
+  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso
+    (T.map (toSheafify _ (TopCat.Presheaf.constZ.zeroOutside V)))).2 a
+  obtain ⟨W, hxW, s, rfl⟩ := (TopCat.Presheaf.constZ.zeroOutside V).germ_exist x q
+  have hW : ¬ (W ≤ V) := fun h => hx (h hxW)
+  have hs : s = 0 := @IsZero.eq_zero_of_src _ _ _ (by
+    rw [show (TopCat.Presheaf.constZ.zeroOutside V).obj (op W) =
+      (if W ≤ V then TopCat.Presheaf.constZ.obj (op W) else 0) from by
+        simp [TopCat.Presheaf.zeroOutside]]
+    rw [if_neg hW]; exact isZero_zero _) s
+  simp [hs, map_zero]
+
+/-- A nonzero subsheaf of `zeroOutsideInt V` has a nonzero stalk at some point of `V`. -/
+theorem exists_nonzero_stalk_in_V
+    {X : TopCat.{u}} (V : Opens X)
+    (R : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
+    (hR : ¬ IsZero R) :
+    ∃ (x : X) (_ : x ∈ V)
+      (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R.val),
+      a ≠ 0 := by
+  by_contra h; push_neg at h; apply hR
+  apply sheaf_isZero_of_zero_stalks; intro x a
+  by_cases hx : (x : X) ∈ (V : Set X)
+  · exact h x hx a
+  · let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+    have h_img : ConcreteCategory.hom (T.map i.val) a = 0 :=
+      stalk_zeroOutsideInt_zero_outside V x hx _
+    haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
+    haveI : Mono (T.map i.val) := Functor.map_mono T i.val
+    rwa [AddCommGrpCat.mono_iff_injective.mp inferInstance |>.eq_iff] at h_img
+
 /-- **Structure lemma** (Hartshorne Step 4 core): a nonzero subsheaf of `zeroOutsideInt V`
     contains `zeroOutsideInt V'` for some nonempty open `V' ⊆ V`, with the inclusion
     being a stalk-isomorphism on `V'`. This follows from: stalks of `Z_V` are `ℤ` or `0`,
