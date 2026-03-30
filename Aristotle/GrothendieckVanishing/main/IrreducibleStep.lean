@@ -311,7 +311,20 @@ theorem subsingleton_sheafH_of_shortExact_third {X : TopCat.{u}}
 /-- `zeroOutsideInt ⊥` is the zero sheaf (all stalks vanish). -/
 theorem isZero_zeroOutsideInt_bot (X : TopCat.{u}) :
     IsZero (TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X)) := by
-  sorry
+  apply sheaf_isZero_of_zero_stalks X; intro x a
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  haveI : IsIso (T.map (toSheafify (Opens.grothendieckTopology X)
+    (TopCat.Presheaf.constZ.zeroOutside (⊥ : Opens X)))) := inferInstance
+  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso
+    (T.map (toSheafify _ (TopCat.Presheaf.constZ.zeroOutside ⊥)))).2 a
+  obtain ⟨W, hxW, s, rfl⟩ := (TopCat.Presheaf.constZ.zeroOutside (⊥ : Opens X)).germ_exist x q
+  have hW : ¬ (W ≤ ⊥) := fun h => (Opens.mem_bot.mp (h hxW))
+  have hs : s = 0 := @IsZero.eq_zero_of_src _ _ _ (by
+    rw [show (TopCat.Presheaf.constZ.zeroOutside (⊥ : Opens X)).obj (op W) =
+      (if W ≤ ⊥ then TopCat.Presheaf.constZ.obj (op W) else 0) from by
+        simp [TopCat.Presheaf.zeroOutside]]
+    rw [if_neg hW]; exact isZero_zero _) s
+  simp [hs, map_zero]
 
 /-- **Step 4** (Hartshorne III.2.7): any subsheaf of `zeroOutsideInt V` has vanishing
     cohomology in degree `m > dim X`. Uses the structure of subsheaves of `Z_V`:

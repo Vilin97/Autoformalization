@@ -1,5 +1,16 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-30 — PROVE isZero_zeroOutsideInt_bot
+
+**Sorry count: 2** (was 3)
+
+- PROVED `isZero_zeroOutsideInt_bot`: Z_⊥ is the zero sheaf. Proof transfers
+  from sheaf stalk to presheaf stalk via `toSheafify`, then uses `¬(W ≤ ⊥)`
+  for any W containing x to show the presheaf value is zero.
+- 2 sorry's remain:
+  1. `subsheaf_zeroOutsideInt_vanishing` — Step 4 (subsheaf structure of Z_V)
+  2. `directLimit_cohomology_vanishing` — Step 3A (cohomology/colimit commutation)
+
 ## 2026-03-30 — PROVE epiImage_zeroOutsideInt_vanishing (Steps 3C+LES)
 
 **Sorry count: 3** (was 2 — decomposed further)
