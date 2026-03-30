@@ -169,7 +169,7 @@ private noncomputable instance sigmaPreorder {X : TopCat.{u}}
         AddMonoidHom.coe_comp, Function.comp_apply, ht₂, ht₁]⟩
 
 -- Binary gluing: given compatible sections on V₀ and W, produce a section on V₀ ⊔ W.
-set_option maxHeartbeats 3200000 in
+set_option maxHeartbeats 1600000 in
 private lemma binaryGlue_exists {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     {V₀ W : Opens X} (t₀ : F.val.obj (op V₀)) (t'' : F.val.obj (op W))
     (hcompat : ConcreteCategory.hom (F.val.map (homOfLE inf_le_right).op) t'' =
