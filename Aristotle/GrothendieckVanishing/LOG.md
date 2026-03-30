@@ -1,5 +1,20 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-30 — PROVE zeroOutsideInt_cohomology_vanishing (Step 5) + restructure
+
+**Sorry count: 2** (was 3)
+
+- Moved sorry lemmas + `IrreduciblePosVanishing` from Setup.lean to IrreducibleStep.lean
+  to resolve circular dependency (sorry proofs need IrreducibleStep tools).
+- **PROVED `zeroOutsideInt_cohomology_vanishing`** (Hartshorne Step 5):
+  H^m(Z_V) = 0 for m > dim X on irreducible Noetherian X with dim > 0.
+  Proof: write m = m'+1, apply `zeroOutsideInt_vanishing`, prove cokernel vanishing
+  at degree m' via ClosedImmersionSES on V^c + PushforwardHVanishing + degree-universal IH.
+- Setup.lean is now sorry-free (only helpers + ReducibleVanishing wrapper).
+- 2 sorry's remain in IrreducibleStep.lean:
+  1. `epiImage_zeroOutsideInt_vanishing` (Steps 3C+4+LES)
+  2. `directLimit_cohomology_vanishing` (Step 3A)
+
 ## 2026-03-30 — Decompose IrreduciblePosVanishing into 3 sorry sub-lemmas
 
 **Sorry count: 3 (was 1 — decomposed into sub-lemmas)**

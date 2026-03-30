@@ -1,8 +1,34 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-03-29T17:00Z
+**Updated**: 2026-03-30T04:00Z
 
 ## Status Summary
+- **Sorry count**: 3 (decomposed from 1)
+- **Files**: 14, ~3686 lines
+- **CI**: 3 runs in-progress
+
+## This cycle's work items
+
+1. **Move sorry lemmas + IrreduciblePosVanishing to IrreducibleStep.lean** (`/prove`)
+   Fix the circular dependency: Setup.lean → sorry lemmas need IrreducibleStep tools.
+   Move `zeroOutsideInt_cohomology_vanishing`, `epiImage_zeroOutsideInt_vanishing`,
+   `directLimit_cohomology_vanishing`, `irreduciblePos_kernel_subsingleton`,
+   `IrreduciblePosVanishing` from Setup.lean to IrreducibleStep.lean.
+   Keep `irreduciblePos_pushforward_subsingleton` and `exists_closed_subset_lt_dim`
+   in Setup.lean.
+
+2. **Prove `zeroOutsideInt_cohomology_vanishing`** (`/prove`)
+   Uses `zeroOutsideInt_vanishing` (already in IrreducibleStep) + cokernel vanishing
+   at degree m-1. The cokernel vanishing at m-1 ≥ dim X is provable by inlining the
+   `cokernel_openHom_vanishing` argument with the weaker hypothesis.
+
+## Backlog
+- Prove `epiImage_zeroOutsideInt_vanishing` (Step 4: subsheaf structure of Z_V)
+- Prove `directLimit_cohomology_vanishing` (Step 3A: Hartshorne 2.8-2.9)
+- Reduce heartbeats in stalk_zero_of_ses_g_iso, cokernel_stalk_zero_V
+
+---
+## Previous Status Summary
 
 - **Sorry count**: 1 (`IrreduciblePosVanishing` at Setup.lean:95)
 - **Files**: 13 in `main/`
