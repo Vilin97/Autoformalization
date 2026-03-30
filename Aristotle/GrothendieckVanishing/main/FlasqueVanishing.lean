@@ -67,7 +67,7 @@ private noncomputable def sectionsAt {X : TopCat.{u}} (V : Opens X) :
   sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)
 
 -- Typeclass resolution for the composite functor needs extra heartbeats.
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 private noncomputable instance sectionsAt_preservesZeroMorphisms
     {X : TopCat.{u}} (V : Opens X) :
     (sectionsAt (X := X) V).PreservesZeroMorphisms :=
@@ -77,7 +77,7 @@ private noncomputable instance sectionsAt_preservesZeroMorphisms
 -- The sections functor preserves left homology of a SES with mono f:
 -- it preserves the kernel of g (limit-preserving) and the coimage of f
 -- (f is mono ⟹ the coimage map is an iso, whose cokernel is trivially preserved).
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (V : Opens X) :
@@ -113,7 +113,7 @@ private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
 
 -- For a SES of sheaves, the evaluated sequence at V is exact:
 -- if g_V(x) = 0, then x is in the image of f_V.
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 private lemma sections_exact_of_shortExact {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (V : Opens X)
@@ -169,7 +169,7 @@ private noncomputable instance sigmaPreorder {X : TopCat.{u}}
         AddMonoidHom.coe_comp, Function.comp_apply, ht₂, ht₁]⟩
 
 -- Binary gluing: given compatible sections on V₀ and W, produce a section on V₀ ⊔ W.
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 private lemma binaryGlue_exists {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     {V₀ W : Opens X} (t₀ : F.val.obj (op V₀)) (t'' : F.val.obj (op W))
     (hcompat : ConcreteCategory.hom (F.val.map (homOfLE inf_le_right).op) t'' =

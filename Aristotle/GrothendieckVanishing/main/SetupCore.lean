@@ -94,7 +94,7 @@ private theorem surj_transfer_closedIncl {A B C D : AddCommGrpCat.{u}}
 -- Proof: Mono (right adjoint), Exact (left exact + mono f + preserves kernel),
 -- Epi (stalkwise: iso at points of Z via stalkPushforward, zero stalk outside Z).
 set_option synthInstance.maxHeartbeats 160000 in
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 theorem closedIncl_pushforward_shortExact
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     {G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)}
@@ -190,7 +190,7 @@ private lemma PushforwardHVanishing_zero
 
 -- n = 1: from H^1(G')=0 on Z, show H^1(i_*G')=0 on X
 -- Key: g(⊤) is epi from H^1=0 via LES, transfers via Γ equality
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 private lemma PushforwardHVanishing_one
     {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
@@ -302,7 +302,7 @@ private lemma PushforwardHVanishing_one
   rw [← hc, ← hd, zero_c, zero_d]
 
 -- n = m+2 ≥ 2: use pushed-forward injective presentation + FlasqueVanishing + LES
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 private lemma PushforwardHVanishing_succ
     {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
@@ -378,7 +378,7 @@ theorem PushforwardHVanishing
 -- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).
 -- Requires: stalkPushforward_iso_of_isInducing + stalk of i_*G = 0 outside Z.
 -- epi via surjective on stalks
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 set_option synthInstance.maxHeartbeats 80000 in
 theorem epi_unit_of_closedImmersion
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)

@@ -117,7 +117,7 @@ private theorem sheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x 
     Uses: sheaf stalk surjectivity + section_ext + local surjectivity of `cokernel.π`
     + `cokernel.condition`. -/
 set_option synthInstance.maxHeartbeats 200000 in
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
       (Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))).val) :
@@ -157,7 +157,7 @@ private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx
     - pushforward from Vᶜ vanishes by IH (dim Vᶜ < dim X)
     - middle-term vanishing gives H^n(C) = 0. -/
 set_option synthInstance.maxHeartbeats 80000 in
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 theorem cokernel_openHom_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) (hV : V ≠ ⊥)
@@ -430,7 +430,7 @@ theorem cokernel_stalk_zero_of_stalk_surj
     `V' ⊆ V` with `Z_{V'} ↪ R` (stalk-iso on `V'`). The cokernel is supported on `(V')^c`
     (dim < dim X), so vanishes by the IH. Middle-term LES gives `H^m(R) = 0`. -/
 set_option synthInstance.maxHeartbeats 80000 in
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 theorem subsheaf_zeroOutsideInt_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
@@ -576,7 +576,7 @@ private instance imageIncl_mono
     projection to factor `factorThruImage ≫ cokernel.π` (which is epi) through the
     `σ₀`-component, then `epi_of_epi_fac`. The S'-components vanish via
     `imageIncl ≫ cokernel.π = 0`. -/
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 private theorem imageIncl_cokernel_epi
     {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
     {S' : Finset (TopCat.Sheaf.SectionIndex K)}
