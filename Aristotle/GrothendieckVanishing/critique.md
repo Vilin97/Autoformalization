@@ -1,7 +1,25 @@
 # Adversarial Critique — Grothendieck Vanishing Formalization
 
-**Timestamp**: 2026-03-29T18:20Z
+**Timestamp**: 2026-03-30T04:00Z
 **Reviewer verdict**: REVISE
+
+## 2026-03-30 Update
+
+**Sorry count: 3** (decomposed from 1)
+
+### P0: Circular dependency blocks proving sorry's
+The 3 sorry lemmas live in Setup.lean but need tools from IrreducibleStep.lean.
+Must move `IrreduciblePosVanishing` + sorry lemmas to IrreducibleStep.lean.
+
+### P1: `zeroOutsideInt_cohomology_vanishing` is provable NOW
+Once moved, follows from existing `zeroOutsideInt_vanishing` + cokernel vanishing.
+
+### P3: High heartbeats
+- `stalk_zero_of_ses_g_iso` — 3200000
+- `cokernel_stalk_zero_V` — 1600000
+
+---
+## Previous (2026-03-29T18:20Z)
 
 ---
 
