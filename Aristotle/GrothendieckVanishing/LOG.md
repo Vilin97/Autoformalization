@@ -1,5 +1,18 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-30 — PROVE imageIncl_cokernel_epi (3→2 sorry's)
+
+**Sorry count: 2** (was 3)
+
+- **PROVED `imageIncl_cokernel_epi`**: the σ₀-component maps epi onto the cokernel of
+  imageIncl. Uses biproduct projection (HasBiproduct from Abelian + Fintype) to factor
+  factorThruImage ≫ cokernel.π through the σ₀-component, then epi_of_epi_fac.
+  S'-components vanish via imageIncl ≫ cokernel.π = 0.
+- Reverted SetupCore.lean to pre-perf state (cascading CI failures from optimization).
+- 2 sorry's remain (both Mathlib gaps):
+  1. `subsheaf_contains_zeroOutsideInt` — needs toSheafify_stalk_isIso for AddCommGrpCat
+  2. `cohomology_vanishing_of_finitelyGenerated_vanishing` — Hartshorne 2.9 colimit
+
 ## 2026-03-30 — PROVE finsetGeneratedSheaf_vanishing (Steps 3B-3C, modulo epi)
 
 **Sorry count: 3** (restructured)

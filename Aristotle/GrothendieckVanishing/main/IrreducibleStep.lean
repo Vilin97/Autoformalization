@@ -533,7 +533,11 @@ private instance imageIncl_mono
     Mono (imageIncl hσ₀ : TopCat.Sheaf.finsetGeneratedSheaf S' ⟶ _) := by
   apply mono_of_mono _ (image.ι _); rw [image.lift_fac]; exact mono_comp _ _
 
-/-- The `σ₀`-component maps epi onto the cokernel of `imageIncl`. -/
+/-- The `σ₀`-component maps epi onto the cokernel of `imageIncl`. Uses the biproduct
+    projection to factor `factorThruImage ≫ cokernel.π` (which is epi) through the
+    `σ₀`-component, then `epi_of_epi_fac`. The S'-components vanish via
+    `imageIncl ≫ cokernel.π = 0`. -/
+set_option maxHeartbeats 800000 in
 private theorem imageIncl_cokernel_epi
     {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
     {S' : Finset (TopCat.Sheaf.SectionIndex K)}
@@ -544,7 +548,37 @@ private theorem imageIncl_cokernel_epi
       ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
       factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫
       cokernel.π (imageIncl hσ₀)) := by
-  sorry
+  classical
+  let F := fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1
+  let σ₀' : {σ // σ ∈ insert σ₀ S'} := ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩
+  haveI : Epi (factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫
+      cokernel.π (imageIncl hσ₀)) := epi_comp _ _
+  haveI : HasBiproduct F := HasBiproduct.of_hasFiniteBiproducts F
+  apply epi_of_epi_fac (f := biproduct.isoCoproduct.inv ≫ biproduct.π σ₀')
+  show (biproduct.isoCoproduct.inv ≫ biproduct.π σ₀') ≫
+    (Sigma.ι F σ₀' ≫ factorThruImage _ ≫ cokernel.π (imageIncl hσ₀)) =
+    factorThruImage _ ≫ cokernel.π (imageIncl hσ₀)
+  apply colimit.hom_ext; intro ⟨σ⟩
+  simp only [Category.assoc, colimit.ι_desc_assoc, biproduct.isoCoproduct_inv,
+    colimit.ι_desc_assoc]
+  by_cases h : σ = σ₀'
+  · subst h; simp [biproduct.ι_π_self_assoc]
+  · rw [biproduct.ι_π_ne_assoc _ h, zero_comp, zero_comp]
+    have h_S' : σ.1 ∈ S' := by
+      have := σ.2; rw [Finset.mem_insert] at this
+      rcases this with rfl | hmem
+      · exact absurd rfl (by intro heq; exact h (Subtype.ext heq))
+      · exact hmem
+    have hfact : Sigma.ι (fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1)
+        ⟨σ.1, h_S'⟩ ≫ finsetCoproductIncl hσ₀ = Sigma.ι F σ := by
+      simp [finsetCoproductIncl]; congr 1; exact Subtype.ext rfl
+    rw [← hfact, Category.assoc, Category.assoc]
+    rw [show finsetCoproductIncl hσ₀ ≫ factorThruImage _ = factorThruImage _ ≫ imageIncl hσ₀ from by
+      apply (cancel_mono (image.ι _)).mp
+      rw [Category.assoc, Category.assoc, image.lift_fac, image.fac, image.fac]
+      ext τ; simp [finsetCoproductIncl, TopCat.Sheaf.finsetGeneratorMap,
+                    TopCat.Sheaf.familyGeneratorMap]]
+    rw [Category.assoc, cokernel.condition, comp_zero]
 
 /-- **Step 3B–3C**: vanishing for `finsetGeneratedSheaf S` by `Finset.induction`.
     Empty set: image = 0. Insert: SES `0 → image(S') → image(S) → cokernel → 0` where
