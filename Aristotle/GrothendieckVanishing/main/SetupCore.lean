@@ -787,7 +787,7 @@ private theorem pushforwardH1_epi_g_top
   let φ_hom : AddCommGrpCat.of (ULift.{u} ℤ) ⟶ R_top :=
     AddCommGrpCat.ofHom
       (AddMonoidHom.mk' (fun (n : ULift.{u} ℤ) => (n.down : ℤ) • (r : R_top))
-        (fun a b => by simp [add_zsmul])))
+        (fun a b => by simp [add_zsmul]))
   let adj_Z := constantSheafAdj (Opens.grothendieckTopology (TopCat.of Z))
     AddCommGrpCat.{u} Limits.isTerminalTop
   let φ := (adj_Z.homEquiv _ ip.shortComplex.X₃).symm φ_hom
