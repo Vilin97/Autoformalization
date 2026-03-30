@@ -500,9 +500,56 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     Subsingleton (Sheaf.H K m) := by
   sorry
 
-/-- **Step 3B–3C**: for finitely generated subsheaves, `hzero` + finite generator induction
-    gives vanishing. Uses Finset.induction with `subsingleton_of_adjoinGenerator_of_zeroOutside`
-    and `subsingleton_of_singleton_family_of_zeroOutside`. -/
+/-- Coproduct inclusion from `S'` to `insert σ₀ S'`. -/
+private noncomputable def finsetCoproductIncl
+    {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
+    {S' : Finset (TopCat.Sheaf.SectionIndex K)}
+    {σ₀ : TopCat.Sheaf.SectionIndex K} (_ : σ₀ ∉ S')
+    [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
+    [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
+    (∐ fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟶
+    (∐ fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1) :=
+  Sigma.desc fun σ => Sigma.ι _ ⟨σ.1, Finset.mem_insert_of_mem σ.2⟩
+
+/-- Mono from `image(S')` to `image(insert σ₀ S')` via coproduct inclusion. -/
+private noncomputable def imageIncl
+    {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
+    {S' : Finset (TopCat.Sheaf.SectionIndex K)}
+    {σ₀ : TopCat.Sheaf.SectionIndex K} (hσ₀ : σ₀ ∉ S')
+    [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
+    [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
+    TopCat.Sheaf.finsetGeneratedSheaf S' ⟶ TopCat.Sheaf.finsetGeneratedSheaf (insert σ₀ S') :=
+  image.lift ⟨_, image.ι _, finsetCoproductIncl hσ₀ ≫ factorThruImage _,
+    by rw [Category.assoc, image.fac]; ext σ
+       simp [finsetCoproductIncl, TopCat.Sheaf.finsetGeneratorMap,
+             TopCat.Sheaf.familyGeneratorMap]⟩
+
+private instance imageIncl_mono
+    {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
+    {S' : Finset (TopCat.Sheaf.SectionIndex K)}
+    {σ₀ : TopCat.Sheaf.SectionIndex K} (hσ₀ : σ₀ ∉ S')
+    [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
+    [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
+    Mono (imageIncl hσ₀ : TopCat.Sheaf.finsetGeneratedSheaf S' ⟶ _) := by
+  apply mono_of_mono _ (image.ι _); rw [image.lift_fac]; exact mono_comp _ _
+
+/-- The `σ₀`-component maps epi onto the cokernel of `imageIncl`. -/
+private theorem imageIncl_cokernel_epi
+    {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
+    {S' : Finset (TopCat.Sheaf.SectionIndex K)}
+    {σ₀ : TopCat.Sheaf.SectionIndex K} (hσ₀ : σ₀ ∉ S')
+    [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
+    [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
+    Epi (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1)
+      ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
+      factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫
+      cokernel.π (imageIncl hσ₀)) := by
+  sorry
+
+/-- **Step 3B–3C**: vanishing for `finsetGeneratedSheaf S` by `Finset.induction`.
+    Empty set: image = 0. Insert: SES `0 → image(S') → image(S) → cokernel → 0` where
+    cokernel is epi image of `Z_{σ₀.1}`, so `hzero` + middle-term LES close the step. -/
+set_option synthInstance.maxHeartbeats 80000 in
 theorem finsetGeneratedSheaf_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
     {K : TopCat.Sheaf AddCommGrpCat.{u} X}
@@ -512,7 +559,24 @@ theorem finsetGeneratedSheaf_vanishing
     (S : Finset (TopCat.Sheaf.SectionIndex K))
     [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
     Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m) := by
-  sorry
+  induction S using Finset.induction with
+  | empty =>
+    apply subsingleton_sheafH_of_isZero'
+    have : IsZero (∐ fun σ : {σ // σ ∈ (∅ : Finset _)} => TopCat.Sheaf.zeroOutsideInt σ.1.1) := by
+      haveI : IsEmpty {σ // σ ∈ (∅ : Finset (TopCat.Sheaf.SectionIndex K))} := by
+        simp; exact inferInstance
+      exact isZero_initial
+    rw [TopCat.Sheaf.finsetGeneratedSheaf, this.eq_of_src _ 0]; exact isZero_image_zero_morphism
+  | @insert σ₀ S' hσ₀ ih =>
+    let S_ses := ShortComplex.mk (imageIncl hσ₀) (cokernel.π (imageIncl hσ₀))
+      (cokernel.condition _)
+    have hSE : S_ses.ShortExact := ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
+    have h_old : Subsingleton (Sheaf.H S_ses.X₁ m) := ih
+    have h_coker : Subsingleton (Sheaf.H S_ses.X₃ m) := by
+      exact hzero (Sigma.ι _ ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
+        factorThruImage _ ≫ cokernel.π (imageIncl hσ₀)) (imageIncl_cokernel_epi hσ₀)
+    exact subsingleton_sheafH_of_shortExact_middle hSE m h_old h_coker
 
 /-- **Step 3A** (Hartshorne III.2.7): on a Noetherian space, if vanishing holds for
     all epi images of `zeroOutsideInt V`, then it holds for every sheaf.
