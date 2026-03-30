@@ -1,5 +1,22 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-30 — PERF: decompose 12.8M heartbeat proof (CI timeout fix)
+
+**Sorry count: 2** (unchanged)
+
+- **Split `epi_app_of_shortExact_flasque`** (12.8M heartbeats → no override):
+  Extracted `IsPartialLift` predicate, `partialLift_chain_ub` (chain upper bound),
+  `partialLift_maximal_eq_U` (contradiction argument). Main theorem is thin Zorn wrapper.
+- **Split `PushforwardHVanishing`** (3.2M monolith → 3 case lemmas):
+  `PushforwardHVanishing_zero` (n=0), `PushforwardHVanishing_one` (n=1),
+  `PushforwardHVanishing_succ` (n≥2). Each gets focused heartbeat budget.
+- **Peak maxHeartbeats**: 12,800,000 → 3,200,000 (75% reduction).
+- **Aristotle**: Both `subsheaf_contains_zeroOutsideInt` jobs (v1 & v2) returned
+  COMPLETE_WITH_ERRORS. Aristotle cannot solve the stalk classification problem.
+- 2 sorry's remain (both in IrreducibleStep.lean):
+  1. `subsheaf_contains_zeroOutsideInt` — Step 4 subsheaf structure
+  2. `cohomology_vanishing_of_finitelyGenerated_vanishing` — Hartshorne 2.9
+
 ## 2026-03-30 — PROVE imageIncl_cokernel_epi (3→2 sorry's)
 
 **Sorry count: 2** (was 3)
