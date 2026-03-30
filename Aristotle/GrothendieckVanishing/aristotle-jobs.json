@@ -51,7 +51,8 @@
     {
       "id": "b46c7418-a6f7-47cc-952d-24c3f65f58b9",
       "target": "directLimit_cohomology_vanishing (Step 3A)",
-      "status": "QUEUED"
+      "status": "COMPLETE_WITH_ERRORS",
+      "note": "Mathlib gap: LES for right derived functors + filtered colimit commutativity not available"
     }
   ],
   "canceled": [

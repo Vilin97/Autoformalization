@@ -1,5 +1,18 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-30 — Aristotle results: directLimit needs missing Mathlib infrastructure
+
+**Sorry count: 3**
+
+- Aristotle (b46c7418) COMPLETE_WITH_ERRORS for `directLimit_cohomology_vanishing`:
+  Confirmed that Hartshorne 2.9 (cohomology commutes with filtered colimits) requires
+  Mathlib infrastructure that doesn't exist: LES for right derived functors,
+  filtered colimit commutativity for Ext. The theorem is a genuine Mathlib gap.
+- Aristotle (159d3b74) `subsheaf_contains_zeroOutsideInt` at 57% — still working.
+- `finsetGeneratedSheaf_vanishing` needs `Finset.subtypeInsertEquivOption` to connect
+  Finset induction to the ⊕ Unit indexing in FiniteGeneratorReduction.lean.
+- Fixed CI syntax error (stray paren).
+
 ## 2026-03-30 — Decompose directLimit_cohomology_vanishing
 
 **Sorry count: 3** (was 2 — decomposed Step 3A)
