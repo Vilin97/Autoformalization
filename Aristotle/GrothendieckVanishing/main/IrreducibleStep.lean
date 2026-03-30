@@ -354,7 +354,37 @@ theorem cokernel_stalk_zero_of_stalk_surj
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val)))
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj (Limits.cokernel f).val) :
     a = 0 := by
-  sorry
+  obtain ⟨W, hxW, t, rfl⟩ := (cokernel f).presheaf.germ_exist x a
+  have hls := (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u}
+    (cokernel.π f)).mpr inferInstance
+  rw [show Sheaf.IsLocallySurjective _ = TopCat.Presheaf.IsLocallySurjective _ from rfl,
+    TopCat.Presheaf.isLocallySurjective_iff] at hls
+  obtain ⟨W', iW', ⟨s, hs⟩, hxW'⟩ := hls W t x hxW
+  obtain ⟨c, hc⟩ := hf (G.presheaf.germ W' x hxW' s)
+  obtain ⟨W'', hxW'', r, rfl⟩ := F.presheaf.germ_exist x c
+  rw [TopCat.Presheaf.stalkFunctor_map_germ_apply] at hc
+  obtain ⟨W''', hW'''W'', hW'''W', hxW''', hfrs⟩ :=
+    G.presheaf.germ_eq x hxW'' hxW' _ _ hc
+  rw [← TopCat.Presheaf.germ_res_apply _ (iW'.op ≫ (homOfLE hW'''W').op) t hxW''']
+  suffices h : (cokernel f).presheaf.map (iW'.op ≫ (homOfLE hW'''W').op) t = 0 by
+    rw [h]; exact map_zero _
+  rw [show (cokernel f).presheaf.map (iW'.op ≫ (homOfLE hW'''W').op) t =
+    (cokernel f).presheaf.map (homOfLE hW'''W').op
+      ((cokernel f).presheaf.map iW'.op t) from by
+        rw [← (cokernel f).presheaf.map_comp], hs,
+    show (cokernel f).presheaf.map (homOfLE hW'''W').op
+      ((cokernel.π f).val.app (op W') s) =
+      (cokernel.π f).val.app (op W''')
+      (G.presheaf.map (homOfLE hW'''W').op s) from by
+        change ((cokernel.π f).val.app (op W') ≫
+          (cokernel f).presheaf.map (homOfLE hW'''W').op) s = _
+        rw [← (cokernel.π f).val.naturality],
+    show G.presheaf.map (homOfLE hW'''W').op s =
+      G.presheaf.map (homOfLE hW'''W'').op (f.val.app (op W'') r) from by
+        rw [← hfrs]]
+  change ConcreteCategory.hom ((f ≫ cokernel.π f).val.app (op W'''))
+    (F.presheaf.map (homOfLE hW'''W'').op r) = 0
+  rw [cokernel.condition]; exact AddMonoidHom.zero_apply _
 
 /-- **Step 4** (Hartshorne III.2.7): any subsheaf of `zeroOutsideInt V` has vanishing
     cohomology in degree `m > dim X`. Uses `subsheaf_contains_zeroOutsideInt` to find
