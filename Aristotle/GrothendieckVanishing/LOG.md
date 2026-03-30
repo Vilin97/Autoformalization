@@ -1,5 +1,21 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-30 — PROVE finsetGeneratedSheaf_vanishing (Steps 3B-3C, modulo epi)
+
+**Sorry count: 3** (restructured)
+
+- **PROVED `finsetGeneratedSheaf_vanishing`** via Finset.induction:
+  - Empty: image = 0 (image of zero morphism from empty coproduct).
+  - Insert σ₀: build mono image(S') → image(insert σ₀ S') via `image.lift`,
+    SES 0 → old → new → cokernel → 0, cokernel is epi image of Z_{σ₀.1},
+    middle-term LES gives vanishing.
+- New helper constructions: `finsetCoproductIncl`, `imageIncl`, `imageIncl_mono`
+- Remaining sorry: `imageIncl_cokernel_epi` (σ₀ component maps epi onto cokernel)
+- 3 sorry's remain:
+  1. `subsheaf_contains_zeroOutsideInt` — Aristotle at 75%
+  2. `cohomology_vanishing_of_finitelyGenerated_vanishing` — Hartshorne 2.9
+  3. `imageIncl_cokernel_epi` — σ₀ epi onto cokernel (replaces old finsetGenerated sorry)
+
 ## 2026-03-30 — Aristotle results: directLimit needs missing Mathlib infrastructure
 
 **Sorry count: 3**
