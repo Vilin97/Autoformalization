@@ -6,7 +6,7 @@
   - constantSheaf_flasque_of_irreducible: PROVED (in ConstantSheafFlasque.lean)
   - constantSheaf_cohomology_vanishing: PROVED from flasque + FlasqueVanishing
   - grothendieck_vanishing_irreducible_pos: uses IrreduciblePosVanishing (2 sorry's:
-    subsheaf_contains_zeroOutsideInt, cohomology_vanishing_of_finitelyGenerated_vanishing)
+    exists_good_section, cohomology_vanishing_of_finitelyGenerated_vanishing)
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
