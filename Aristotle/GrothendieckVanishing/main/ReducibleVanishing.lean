@@ -47,7 +47,6 @@ theorem subsingleton_sheafH_of_isZero' {X : TopCat.{u}}
     _ = b.comp (Ext.mk₀ (𝟙 F)) (add_zero n) := by rw [hid, Ext.mk₀_zero]
     _ = b := Ext.comp_mk₀_id b
 
-set_option synthInstance.maxHeartbeats 160000 in
 theorem stalk_zero_of_ses_g_iso
     {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
@@ -80,7 +79,6 @@ theorem stalk_zero_of_ses_g_iso
 
 /-! ## Main proof -/
 
-set_option synthInstance.maxHeartbeats 160000 in
 theorem ReducibleVanishing'
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)

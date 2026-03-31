@@ -335,7 +335,6 @@ private lemma stalkPull_nat {X Y : TopCat.{u}} (f : X ⟶ Y)
 -- Unit stalk is iso for closed immersions.
 -- Proof chain: triangle identity → pullback.map(η) iso → pullbackIso naturality
 -- → toSheafify naturality → stalkPull_nat → η stalk iso
-set_option synthInstance.maxHeartbeats 160000 in
 theorem closedIncl_unit_stalk_isIso
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (x : TopCat.of s) :
