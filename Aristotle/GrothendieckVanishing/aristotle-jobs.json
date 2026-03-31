@@ -1,6 +1,47 @@
 {
   "jobs": [
     {
+      "id": "42e908b6-bc5d-4695-a0ac-36c47677b441",
+      "target": "constZ_sheafify_locally_constant + germ formulation",
+      "status": "COMPLETE",
+      "output": "aristotle-out/germ_locally_constant/",
+      "note": "FULLY PROVED (0 sorry). Sections of sheafified constant presheaf are locally constant. Key building block for exists_good_section."
+    },
+    {
+      "id": "5bca8de6-c5d1-40d0-9653-1c7263d84bb3",
+      "target": "ulift_int_subgroup_cyclic + exists_generator_section",
+      "status": "done",
+      "output": "aristotle-out/generator_section/",
+      "note": "ulift_int_subgroup_cyclic INTEGRATED into IrreducibleStep.lean. exists_generator_section available but needs adaptation for project types."
+    },
+    {
+      "id": "361dc7af-9c65-4c60-9707-6ebc878e1316",
+      "target": "exists_good_section (full assembly from proved axioms)",
+      "status": "QUEUED",
+      "note": "ASSEMBLY PROVED (0 sorry in logic). 11 sorry's are axiom stubs for building blocks. Key missing piece: full_generator_step."
+    },
+    {
+      "id": "6ff49fb8-6338-4dab-855d-2d45d85f0264",
+      "target": "full_generator_step v1 (x₀ as input)",
+      "status": "COMPLETE_WITH_ERRORS",
+      "output": "aristotle-out/full_generator_step/",
+      "note": "FOUND BUG: statement is FALSE for arbitrary x₀. Proved weaker version (condition 1 only at x₀). Needs minimality."
+    },
+    {
+      "id": "f70b67c2-3ebf-4e6c-9ee0-909d17deb7e9",
+      "target": "full_generator_step v2 (strong induction on d)",
+      "status": "COMPLETE",
+      "output": "aristotle-out/full_generator_step_v2/",
+      "note": "FULLY PROVED (0 sorry in logic). Uses strong induction on d₀.toNat instead of explicit minimality. 4 sorry's are trivial axiom stubs (all proved or trivial). COMPLETES the proof chain for sorry #1."
+    },
+    {
+      "id": "58d52866-9e50-4600-95db-7e3eee5a2692",
+      "target": "cohomology_vanishing_of_finitelyGenerated_vanishing (induction approach)",
+      "status": "COMPLETE_WITH_ERRORS",
+      "output": "aristotle-out/cohomology_fG_induction/",
+      "note": "ASSEMBLY PROVED (0 sorry in logic). 18 sorry's are Mathlib infrastructure gaps (sheafH functor, LES, connecting maps). Correct proof structure but requires deep Mathlib infrastructure not yet available."
+    },
+    {
       "id": "8d809cf1-6aeb-4ce2-8fa2-31c1ff394cb4",
       "submission": "aristotle-in/GrothendieckVanishingFull.lean",
       "target": "FlasqueVanishing (= Grothendieck vanishing)",
@@ -35,7 +76,7 @@
       "id": "17ae0f8d-5889-4b90-baf1-aab43c191bd2",
       "submission": "aristotle-in/PushforwardHVanishing.lean",
       "output": "aristotle-out/PushforwardHVanishing_aristotle.lean",
-      "target": "PushforwardHVanishing (Ext identity + \u0393 equality)"
+      "target": "PushforwardHVanishing (Ext identity + Γ equality)"
     },
     {
       "id": "6c9faa89-db61-41c5-a2af-cd6ba712116e",
@@ -65,7 +106,7 @@
   "canceled": [
     {
       "id": "bd6d76ba-0d16-46a2-bee1-9724a8ead2d7",
-      "target": "FlasqueVanishing (old, uses false flasque\u2192injective)",
+      "target": "FlasqueVanishing (old, uses false flasque→injective)",
       "status": "CANCELED",
       "note": "Uses false approach; superseded by 8d809cf1"
     },
@@ -93,13 +134,13 @@
       "id": "99a8a5d6-a6da-4274-8074-16a2c550a9ea",
       "target": "flasque_injective (Bredon's theorem)",
       "status": "PROVED_NEGATION",
-      "note": "STATEMENT IS FALSE \u2014 \u2124 on point is flasque but not injective. Counterexample integrated."
+      "note": "STATEMENT IS FALSE — ℤ on point is flasque but not injective. Counterexample integrated."
     },
     {
       "id": "72e670ee-fb8c-482c-ab1b-50229457f4f9",
       "target": "topologicalKrullDim_lt_of_isIrreducible_of_isClosed",
       "status": "COMPLETE",
-      "note": "FULLY PROVED \u2014 integrated"
+      "note": "FULLY PROVED — integrated"
     },
     {
       "id": "55ef4f62-a91c-4ed4-b80b-47aea6843b85",
@@ -124,6 +165,70 @@
       "target": "constantSheaf_flasque_of_irreducible",
       "status": "COMPLETE",
       "note": "Architecture correct, integrated manually"
+    },
+    {
+      "id": "68d0f4f8-8076-4d72-be16-5e7d14a75a67",
+      "target": "zmul_bijective_of_index_match (algebra helper)",
+      "status": "done",
+      "output": "aristotle-out/zmul_bijective/",
+      "note": "INTEGRATED into IrreducibleStep.lean. Algebra lemma: j bijective from i∘j=mul_c + image condition."
+    },
+    {
+      "id": "9fb3db72-3740-4469-8dac-30a899cd55b0",
+      "target": "sheafMapFromSection (construction via sheafifyLift)",
+      "status": "COMPLETE",
+      "output": "aristotle-out/sheafMapFromSection/",
+      "note": "FULLY PROVED (0 sorry). Constructs sheaf morphism from section, proves generator property. Redundant with project's sHom in ZeroOutside.lean."
+    },
+    {
+      "id": "1116f56f-6d94-4ae7-9ab4-3d07afba6bf5",
+      "target": "sheaf_mono_of_stalk_injective",
+      "status": "COMPLETE",
+      "output": "aristotle-out/sheaf_mono_stalk/",
+      "note": "FULLY PROVED (0 sorry). Discovered TopCat.Presheaf.mono_of_stalk_mono exists in Mathlib. One-liner proof."
+    },
+    {
+      "id": "33201a7a-26a5-4dc3-811e-bbc4013d0b3a",
+      "target": "germ_ne_zero_isOpen / section_support_isOpen",
+      "status": "COMPLETE_WITH_ERRORS",
+      "output": "aristotle-out/germ_ne_zero/",
+      "note": "Statement is INCORRECT: {germ=0} is open (not {germ≠0}). 2 sorry's remain. Not needed for proof."
+    },
+    {
+      "id": "3332de5c-02e9-4a2b-a2dc-d535d16e2ea6",
+      "target": "exists_good_section (Step 4 core)",
+      "status": "COMPLETE_WITH_ERRORS",
+      "note": "Aristotle could not prove: requires deep stalk + locally-constant-germ reasoning"
+    },
+    {
+      "id": "d18d43d0-d0a3-46ed-a61b-7889d94f8798",
+      "target": "cohomology_vanishing_of_finitelyGenerated_vanishing (Step 3A)",
+      "status": "COMPLETE_WITH_ERRORS",
+      "note": "Mathlib gap: cohomology commuting with filtered colimits. Multiple approaches tried, all failed."
+    },
+    {
+      "id": "4e963bbf-fc70-4462-89d8-7f9768031d83",
+      "target": "image_section_germ_locally_constant",
+      "status": "COMPLETE_WITH_ERRORS",
+      "note": "Locally constant germ for constant sheaf sections. Aristotle could not prove."
+    },
+    {
+      "id": "25d6ca3f-2f3a-4662-a1b8-e22f09dd73d0",
+      "target": "subsheaf_contains_zeroOutsideInt (v3)",
+      "status": "COMPLETE_WITH_ERRORS",
+      "note": "Full subsheaf structure lemma. Still too complex for Aristotle."
+    },
+    {
+      "id": "6619c95d-e4f0-4e39-ab2f-b16a470a3840",
+      "target": "subsheaf_contains_zeroOutsideInt (v4, full context)",
+      "status": "COMPLETE_WITH_ERRORS",
+      "note": "Full subsheaf structure lemma with all helpers. Still too complex."
+    },
+    {
+      "id": "2d3bb42e-a1d8-440b-9634-6b03c8059582",
+      "target": "sheafMapFromSection (v1)",
+      "status": "FAILED",
+      "note": "Failed at 35%. Superseded by 9fb3db72."
     }
   ]
 }
