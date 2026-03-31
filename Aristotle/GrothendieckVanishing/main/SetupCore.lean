@@ -190,8 +190,8 @@ private lemma PushforwardHVanishing_zero
 
 -- n = 1: from H^1(G')=0 on Z, show H^1(i_*G')=0 on X
 -- Key: g(⊤) is epi from H^1=0 via LES, transfers via Γ equality
-set_option maxHeartbeats 400000 in
-set_option synthInstance.maxHeartbeats 400000 in
+set_option maxHeartbeats 800000 in
+set_option synthInstance.maxHeartbeats 1600000 in
 private lemma PushforwardHVanishing_one
     {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
     (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))
@@ -199,9 +199,6 @@ private lemma PushforwardHVanishing_one
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') 1) := by
   intro i
-  -- Cache expensive HasDerivedCategory instances to avoid repeated synthesis
-  letI : HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) := inferInstance
-  letI : HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} X) := inferInstance
   obtain ⟨ip⟩ := EnoughInjectives.presentation G'
   have hSE_Z := ip.shortExact_shortComplex
   have hSE_X : (ip.shortComplex.map
@@ -306,7 +303,7 @@ private lemma PushforwardHVanishing_one
 
 -- n = m+2 ≥ 2: use pushed-forward injective presentation + FlasqueVanishing + LES
 set_option maxHeartbeats 400000 in
-set_option synthInstance.maxHeartbeats 400000 in
+set_option synthInstance.maxHeartbeats 1600000 in
 private lemma PushforwardHVanishing_succ
     {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
     (m : ℕ)
@@ -319,9 +316,6 @@ private lemma PushforwardHVanishing_succ
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') (m + 2)) := by
   intro i
-  -- Cache expensive HasDerivedCategory instances to avoid repeated synthesis
-  letI : HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) := inferInstance
-  letI : HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} X) := inferInstance
   obtain ⟨ip⟩ := EnoughInjectives.presentation G'
   have hSE_X : (ip.shortComplex.map
       (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
@@ -358,7 +352,7 @@ private lemma PushforwardHVanishing_succ
   exact @Subsingleton.elim _ (ih_push ip.shortComplex.X₃ hR) c d
 
 -- Pushforward along closed immersion preserves cohomological vanishing.
-set_option synthInstance.maxHeartbeats 400000 in
+set_option synthInstance.maxHeartbeats 1600000 in
 theorem PushforwardHVanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
@@ -367,9 +361,6 @@ theorem PushforwardHVanishing
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G) n) := by
   intro i
-  -- Cache expensive HasDerivedCategory instances to avoid repeated synthesis
-  letI : HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) := inferInstance
-  letI : HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} X) := inferInstance
   suffices ∀ (m : ℕ) (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)),
       Subsingleton (Sheaf.H G' m) →
       Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') m) from
