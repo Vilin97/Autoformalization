@@ -93,6 +93,7 @@ private theorem surj_transfer_closedIncl {A B C D : AddCommGrpCat.{u}}
 -- Pushforward along closed immersion preserves ShortExact.
 -- Proof: Mono (right adjoint), Exact (left exact + mono f + preserves kernel),
 -- Epi (stalkwise: iso at points of Z via stalkPushforward, zero stalk outside Z).
+set_option synthInstance.maxHeartbeats 40000 in
 theorem closedIncl_pushforward_shortExact
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     {G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)}
@@ -374,6 +375,7 @@ theorem PushforwardHVanishing
 -- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).
 -- Requires: stalkPushforward_iso_of_isInducing + stalk of i_*G = 0 outside Z.
 -- epi via surjective on stalks
+set_option synthInstance.maxHeartbeats 40000 in
 theorem epi_unit_of_closedImmersion
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
@@ -440,6 +442,7 @@ theorem epi_unit_of_closedImmersion
 
 -- Short exact sequence from closed immersion.
 -- Uses epi_unit_of_closedImmersion to form 0 → ker(η) → F → i_*(i^*F) → 0.
+set_option synthInstance.maxHeartbeats 40000 in
 theorem ClosedImmersionSES
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]

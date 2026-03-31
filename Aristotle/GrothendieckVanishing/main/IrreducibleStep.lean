@@ -103,6 +103,7 @@ private theorem presheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx :
 /-- The sheaf stalk map of `openHom(le_top)` at `x ∈ V` is surjective.
     Transfers presheaf stalk surjectivity via `toSheafify_naturality` and
     the fact that `stalk(toSheafify)` is an isomorphism. -/
+set_option synthInstance.maxHeartbeats 40000 in
 private theorem sheaf_stalk_surj_openHom
     {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
     Function.Surjective (ConcreteCategory.hom
@@ -122,6 +123,7 @@ private theorem sheaf_stalk_surj_openHom
     simp only [← ConcreteCategory.comp_apply, ← hnat, ConcreteCategory.comp_apply, hp]⟩
 
 /-- The sheaf stalk map of `openHom(le_top)` at `x ∈ V` is surjective. -/
+set_option synthInstance.maxHeartbeats 40000 in
 private theorem sheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V) :
     Function.Surjective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
@@ -145,6 +147,7 @@ private theorem sheaf_stalk_bijective_openHom
 /-- The cokernel of `openHom(le_top)` has zero stalks at points of `V`.
     Uses: sheaf stalk surjectivity + section_ext + local surjectivity of `cokernel.π`
     + `cokernel.condition`. -/
+set_option synthInstance.maxHeartbeats 40000 in
 private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
       (Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))).val) :
