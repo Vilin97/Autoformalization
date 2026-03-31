@@ -51,23 +51,22 @@ instance {X : TopCat.{u}} :
 -- Without these, each `Sheaf.H`, `Ext`, `ShortExact.extClass` etc. retriggers
 -- the full synthesis chain IsGrothendieckAbelian → EnoughInjectives → HasDerivedCategory.
 -- The elevated synthInstance budget here is a one-time cost; every downstream use is O(1).
-section CacheInstances
-set_option synthInstance.maxHeartbeats 400000
-
+set_option synthInstance.maxHeartbeats 400000 in
 noncomputable instance sheafHasDerivedCategory (X : TopCat.{u}) :
     HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} X) := inferInstance
 
+set_option synthInstance.maxHeartbeats 400000 in
 noncomputable instance sheafToPresheafAdditive (X : TopCat.{u}) :
     (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive := inferInstance
 
+set_option synthInstance.maxHeartbeats 400000 in
 noncomputable instance sheafToPresheafPreservesLimits (X : TopCat.{u}) :
     PreservesLimitsOfSize.{u, u}
       (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) := inferInstance
 
+set_option synthInstance.maxHeartbeats 400000 in
 noncomputable instance sheafEnoughInjectives (X : TopCat.{u}) :
     EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) := inferInstance
-
-end CacheInstances
 
 /-! ## Flasque sheaf sub-lemmas
 
