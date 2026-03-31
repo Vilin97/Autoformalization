@@ -47,6 +47,22 @@ instance {X : TopCat.{u}} :
     presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive
   infer_instance
 
+-- Cache expensive typeclass resolutions that are repeated in every proof about sheaf cohomology.
+-- Without these, each `Sheaf.H`, `Ext`, `ShortExact.extClass` etc. retriggers
+-- the full synthesis chain IsGrothendieckAbelian → EnoughInjectives → HasDerivedCategory.
+noncomputable instance sheafHasDerivedCategory (X : TopCat.{u}) :
+    HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} X) := inferInstance
+
+noncomputable instance sheafToPresheafAdditive (X : TopCat.{u}) :
+    (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive := inferInstance
+
+noncomputable instance sheafToPresheafPreservesLimits (X : TopCat.{u}) :
+    PreservesLimitsOfSize.{u, u}
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) := inferInstance
+
+noncomputable instance sheafEnoughInjectives (X : TopCat.{u}) :
+    EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) := inferInstance
+
 /-! ## Flasque sheaf sub-lemmas
 
 The four sub-lemmas below are adapted from Brian Nugent's Mathlib PR #35790.
@@ -66,8 +82,6 @@ private noncomputable def sectionsAt {X : TopCat.{u}} (V : Opens X) :
     TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
   sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)
 
--- Typeclass resolution for the composite functor needs extra heartbeats.
-set_option maxHeartbeats 400000 in
 private noncomputable instance sectionsAt_preservesZeroMorphisms
     {X : TopCat.{u}} (V : Opens X) :
     (sectionsAt (X := X) V).PreservesZeroMorphisms :=
@@ -77,7 +91,6 @@ private noncomputable instance sectionsAt_preservesZeroMorphisms
 -- The sections functor preserves left homology of a SES with mono f:
 -- it preserves the kernel of g (limit-preserving) and the coimage of f
 -- (f is mono ⟹ the coimage map is an iso, whose cokernel is trivially preserved).
-set_option maxHeartbeats 400000 in
 private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (V : Opens X) :
@@ -113,7 +126,6 @@ private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
 
 -- For a SES of sheaves, the evaluated sequence at V is exact:
 -- if g_V(x) = 0, then x is in the image of f_V.
-set_option maxHeartbeats 400000 in
 private lemma sections_exact_of_shortExact {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (V : Opens X)
@@ -135,7 +147,6 @@ private lemma eval_comp_zero {X : TopCat.{u}}
       (S.f.val ≫ S.g.val).app (op V) := by simp
   rw [h1]; change (S.f ≫ S.g).val.app (op V) = 0; rw [S.zero]; aesop_cat
 
-set_option maxHeartbeats 400000 in
 private lemma mono_f_app {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (V : Opens X) :
@@ -169,7 +180,6 @@ private noncomputable instance sigmaPreorder {X : TopCat.{u}}
         AddMonoidHom.coe_comp, Function.comp_apply, ht₂, ht₁]⟩
 
 -- Binary gluing: given compatible sections on V₀ and W, produce a section on V₀ ⊔ W.
-set_option maxHeartbeats 400000 in
 private lemma binaryGlue_exists {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     {V₀ W : Opens X} (t₀ : F.val.obj (op V₀)) (t'' : F.val.obj (op W))
     (hcompat : ConcreteCategory.hom (F.val.map (homOfLE inf_le_right).op) t'' =
@@ -442,7 +452,6 @@ private lemma freeAbSheafHomEquiv_naturality {U V : Opens X} (i : U ⟶ V)
           AddCommGrpCat).homEquiv (freeAbPresheaf V) I f)) i.op)
   · convert congr_arg (fun g => g (𝟙 V)) h using 1
 
-set_option synthInstance.maxHeartbeats 40000 in
 private instance freeAbSheafMap_mono {U V : Opens X} (i : U ⟶ V) :
     Mono (freeAbSheafMap i) := by
   have : ∀ (F G : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}) (f : F ⟶ G),
@@ -481,8 +490,6 @@ theorem epi_of_natIso_epi {C D : Type*} [Category C] [Category D]
 -- Ext(Z_X, I, 0) -> Ext(Z_X, Q, 0) is surjective for Z_X = constant sheaf.
 -- Proof: reduce to Hom via addEquiv₀, then use constantSheafΓAdj + projectivity
 -- of ULift ℤ + epi_app_of_shortExact_flasque.
-set_option maxHeartbeats 400000 in
-set_option synthInstance.maxHeartbeats 40000 in
 theorem ext_zero_map_surjective {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁) :
@@ -581,7 +588,6 @@ private theorem sheafH_one_of_flasque {X : TopCat.{u}}
 
 /-! ## Main theorems -/
 
-set_option synthInstance.maxHeartbeats 80000 in
 /-- **Flasque sheaves have vanishing higher cohomology** (Nugent, PR #35790).
 
     The proof is by induction on `n`:
