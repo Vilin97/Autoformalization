@@ -1,6 +1,12 @@
 {
   "jobs": [
     {
+      "id": "105033c9-934b-4e08-8239-cc82af90e5fa",
+      "target": "exists_good_section (final assembly with all axioms)",
+      "status": "QUEUED",
+      "note": "Full proof with all building blocks as axioms. Strong induction approach."
+    },
+    {
       "id": "42e908b6-bc5d-4695-a0ac-36c47677b441",
       "target": "constZ_sheafify_locally_constant + germ formulation",
       "status": "COMPLETE",
