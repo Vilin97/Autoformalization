@@ -905,20 +905,7 @@ theorem IrreduciblePosVanishing
   rw [← hS₂]
   exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
 
-/-- Hartshorne Steps 3-5: delegates to IrreduciblePosVanishing. -/
-private theorem grothendieck_reduction
-    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
-      topologicalKrullDim Y < topologicalKrullDim X →
-      m > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G m)) :
-    Subsingleton (Sheaf.H F n) :=
-  IrreduciblePosVanishing X n hn hpos F ih
-
-/-- Positive-dimensional irreducible vanishing. -/
+/-- Positive-dimensional irreducible vanishing (Hartshorne Steps 3-5). -/
 theorem grothendieck_vanishing_irreducible_pos
     (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X] [IrreducibleSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
@@ -930,4 +917,4 @@ theorem grothendieck_vanishing_irreducible_pos
       m > topologicalKrullDim Y →
       Subsingleton (Sheaf.H G m)) :
     Subsingleton (Sheaf.H F n) :=
-  grothendieck_reduction X n hn hpos F ih
+  IrreduciblePosVanishing X n hn hpos F ih
