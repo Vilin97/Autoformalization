@@ -50,6 +50,10 @@ instance {X : TopCat.{u}} :
 -- Cache expensive typeclass resolutions that are repeated in every proof about sheaf cohomology.
 -- Without these, each `Sheaf.H`, `Ext`, `ShortExact.extClass` etc. retriggers
 -- the full synthesis chain IsGrothendieckAbelian → EnoughInjectives → HasDerivedCategory.
+-- The elevated synthInstance budget here is a one-time cost; every downstream use is O(1).
+section CacheInstances
+set_option synthInstance.maxHeartbeats 400000
+
 noncomputable instance sheafHasDerivedCategory (X : TopCat.{u}) :
     HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} X) := inferInstance
 
@@ -62,6 +66,8 @@ noncomputable instance sheafToPresheafPreservesLimits (X : TopCat.{u}) :
 
 noncomputable instance sheafEnoughInjectives (X : TopCat.{u}) :
     EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) := inferInstance
+
+end CacheInstances
 
 /-! ## Flasque sheaf sub-lemmas
 
@@ -452,6 +458,7 @@ private lemma freeAbSheafHomEquiv_naturality {U V : Opens X} (i : U ⟶ V)
           AddCommGrpCat).homEquiv (freeAbPresheaf V) I f)) i.op)
   · convert congr_arg (fun g => g (𝟙 V)) h using 1
 
+set_option synthInstance.maxHeartbeats 40000 in
 private instance freeAbSheafMap_mono {U V : Opens X} (i : U ⟶ V) :
     Mono (freeAbSheafMap i) := by
   have : ∀ (F G : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}) (f : F ⟶ G),
