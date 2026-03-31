@@ -5,7 +5,7 @@
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
   Sorry's (2 remaining, both Mathlib API gaps):
-  - subsheaf_contains_zeroOutsideInt (IrreducibleStep.lean) — Step 4 subsheaf structure
+  - exists_good_section (IrreducibleStep.lean) — Step 4 core shrinking/stalk-bijection construction
   - cohomology_vanishing_of_finitelyGenerated_vanishing (IrreducibleStep.lean) — Step 3A colimits
 
   File structure:

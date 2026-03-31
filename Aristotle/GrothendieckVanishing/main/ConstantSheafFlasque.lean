@@ -102,7 +102,6 @@ private lemma toPlus_naturality_const
       ((opensGT X).plusObj (constPresheaf X)).map i.op from nat, rhs]
 
 -- Plus construction API requires extra heartbeats for typeclass resolution
-set_option maxHeartbeats 400000 in
 /-- Key lemma extracted from toPlus_surjective_of_firstPlus: preimages at different
     arrows agree because of irreducibility (intersection is nonempty). -/
 private theorem toPlus_firstPlus_key
@@ -132,7 +131,6 @@ private theorem toPlus_firstPlus_key
   exact toPlus_naturality_const I.f a
 
 -- Plus construction API requires extra heartbeats for typeclass resolution
-set_option maxHeartbeats 400000 in
 private theorem toPlus_surjective_of_firstPlus
     {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
     (U : Opens X) (hU : (U : Set X).Nonempty) :

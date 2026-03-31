@@ -71,5 +71,5 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 ## Remaining Work
 
 2 sorry's remain in `IrreducibleStep.lean`, both confirmed Mathlib API gaps:
-1. `subsheaf_contains_zeroOutsideInt` (Step 4) — stalk classification of subsheaves of Z_V
+1. `exists_good_section` (Step 4 core) — shrink to `V'` and produce a section inducing stalkwise bijections on `V'`
 2. `cohomology_vanishing_of_finitelyGenerated_vanishing` (Step 3A) — Hartshorne 2.9, cohomology commutes with filtered colimits (missing LES for derived functors + colimit commutativity)

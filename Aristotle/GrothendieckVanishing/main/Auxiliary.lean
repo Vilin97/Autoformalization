@@ -224,7 +224,6 @@ theorem covering_sieve_top_has_id {X : Type u} [TopologicalSpace X] [Irreducible
 /-! ## Epi → surjective at ⊤ on dim 0 irreducible -/
 
 -- IsLocallySurjective typeclass resolution needs extra heartbeats
-set_option maxHeartbeats 400000 in
 /-- On a dim 0 irreducible nonempty space, an epi sheaf morphism is surjective at ⊤.
     Proof: epi ↔ IsLocallySurjective → imageSieve covers ⊤ → id ∈ imageSieve → surjective. -/
 theorem epi_app_top_surjective {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
