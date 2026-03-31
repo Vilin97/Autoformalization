@@ -1,5 +1,24 @@
 # Log — Grothendieck Vanishing
 
+## 2026-03-30 — PERF: synthInstance caching + CI cleanup
+
+**Sorry count: 2** (unchanged)
+
+- **Reduced `synthInstance.maxHeartbeats`** in SetupCore.lean from 1,600,000 → 400,000 (75% reduction)
+  for `PushforwardHVanishing_one`, `PushforwardHVanishing_succ`, and `PushforwardHVanishing`.
+  Added `letI : HasDerivedCategory ... := inferInstance` caching to avoid repeated synthesis
+  of expensive derived category instances for `Ext` operations.
+- **CI workflow optimized**: Removed redundant `docgen-action` from `lean_action_ci.yml`
+  (already handled by `deploy.yml` on main). Added `concurrency: cancel-in-progress` to
+  abort stale CI runs on rapid pushes. Reduced permissions to minimum needed.
+- **Critique updated**: Full adversarial review. Docs deployment broken (404). 23 proofs
+  exceed 200K heartbeat limit. 3 files over 600 lines.
+- **Aristotle**: No new submissions — both remaining sorry's have failed 4 times total.
+  Both are confirmed Mathlib API gaps (stalk classification, filtered colimit commutativity).
+- 2 sorry's remain (both in IrreducibleStep.lean):
+  1. `subsheaf_contains_zeroOutsideInt` — Step 4 subsheaf structure
+  2. `cohomology_vanishing_of_finitelyGenerated_vanishing` — Hartshorne 2.9
+
 ## 2026-03-30 — PERF: decompose 12.8M heartbeat proof (CI timeout fix)
 
 **Sorry count: 2** (unchanged)
