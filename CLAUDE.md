@@ -70,6 +70,6 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 
 ## Remaining Work
 
-19 sorry's remain in `IrreducibleStep.lean`:
-- 2 original Mathlib API gaps: `exists_good_section` (Step 4 core), `cohomology_vanishing_of_finitelyGenerated_vanishing` (Hartshorne 2.9)
-- 17 regressed proofs that broke during heartbeat optimization and need instance-caching fixes (`haveI`/`letI` patterns)
+2 sorry's remain in `IrreducibleStep.lean`, both confirmed Mathlib API gaps:
+1. `exists_good_section` (Step 4 core) — shrink to `V'` and produce a section inducing stalkwise bijections on `V'`
+2. `cohomology_vanishing_of_finitelyGenerated_vanishing` (Step 3A) — Hartshorne 2.9, cohomology commutes with filtered colimits
