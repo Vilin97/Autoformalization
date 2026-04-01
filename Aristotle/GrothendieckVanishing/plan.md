@@ -1,69 +1,53 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-01T21:15Z
+**Updated**: 2026-04-01T23:30Z
 
 ## Status Summary
-- **CI**: IN PROGRESS (commit `663f12f`), last completed run FAILED (a3bef4a, fixed by 1c5420d)
+- **CI**: Push to `wip/grothendieck-vanishing` (commit `a901094`)
 - **Heartbeat overrides**: 0
-- **Sorry count**: 16 in IrreducibleStep.lean (was 19 last cycle; 2 original + 14 regressed)
-- **Files**: 15 files under `main/`, ~4000 lines
-- **Pre-regression commit**: `e90c2f0` has working proofs for all 14 regressed sorry's
+- **Sorry count**: 2 in IrreducibleStep.lean (both are confirmed Mathlib API gaps)
+- **Files**: 15 files under `main/`, ~5000 lines
 
-## Strategy: Restore from e90c2f0
+## Remaining Sorry's (2)
 
-All 14 regressed sorry's have working proofs at commit `e90c2f0`. The proofs broke when heartbeat overrides were removed. The fix for each is to extract the old proof and adapt it by:
-- Adding explicit `haveI`/`letI` for expensive instance synthesis
-- Fixing any API name changes (`image.ι` → `Limits.image.ι`, etc.)
-- Fixing type elaboration issues (`.presheaf` → `.val`, `closedIncl` unfolding)
+Both are genuine Mathlib API gaps, not proof regressions:
 
-### Dependency order (bottom-up)
+### 1. `exists_good_section` (line ~616)
+**Step 4 core construction**: Find V' ≤ V, V' ≠ ⊥, and section s ∈ R(V') such that
+`sHom s : zeroOutsideInt V' ⟶ R` is a stalk-isomorphism on V'.
 
-The sorry's form a dependency chain. Restore in this order:
+**Strategy**:
+1. Find x₀ ∈ V with nonzero stalk via `exists_nonzero_stalk_in_V` (proved)
+2. Identify cyclic subgroup generator via `ulift_int_subgroup_cyclic` (proved)
+3. Lift generator to section s via `stalk_zeroOutsideInt_eq_zsmul_generator` (proved)
+4. Shrink V' for stalk bijectivity using Noetherian + irreducible properties
 
-**Tier 1 — No dependencies on other sorry'd theorems:**
-1. `presheaf_stalk_surj_openHom` (line 88)
-2. `isZero_zeroOutsideInt_bot` (line 198)
-3. `stalk_zeroOutsideInt_zero_outside` (line 205)
-4. `exists_nonzero_stalk_in_V` (line 216)
-5. `presheaf_stalk_zeroOutside_eq_zsmul_generator` (line 246)
+**Dependencies**: All sub-lemmas proved. Core difficulty is the Noetherian shrinking argument.
 
-**Tier 2 — Depend on Tier 1:**
-6. `sheaf_stalk_surj_openHom` (line 105) — depends on presheaf_stalk_surj_openHom
-7. `stalk_zeroOutsideInt_eq_zsmul_generator` (line 257) — depends on presheaf version
-8. `sheaf_stalk_bijective_openHom` (line 120) — depends on sheaf_stalk_surj_openHom
+### 2. `cohomology_vanishing_of_finitelyGenerated_vanishing` (line ~774)
+**Hartshorne 2.9**: If H^m = 0 for all finitely generated subsheaves, then H^m(K) = 0.
 
-**Tier 3 — Depend on Tier 2:**
-9. `cokernel_stalk_zero_V` (line 129) — depends on sheaf_stalk_bijective_openHom
-10. `zeroOutsideInt_vanishing` (line 76) — needs `IsFlasqueSheaf (zeroOutsideInt ⊤)`
+**Strategy**: K = colim K_α (filtered colimit of finitely generated subsheaves),
+H^m(K) = colim H^m(K_α) = colim 0 = 0. Requires:
+- Ext commutes with filtered colimits (AB5 / Grothendieck abelian)
+- K expressed as filtered colimit of `finsetGeneratedSheaf S`
 
-**Tier 4 — Complex proofs depending on Tiers 1-3:**
-11. `cokernel_openHom_vanishing` (line 148) — largest proof, depends on cokernel_stalk_zero_V + IH
-12. `zeroOutsideInt_cohomology_vanishing` (line 171) — depends on zeroOutsideInt_vanishing + cokernel_openHom_vanishing
-13. `subsheaf_zeroOutsideInt_vanishing` (line 399) — depends on Tier 1-3 infrastructure
-14. `epiImage_zeroOutsideInt_vanishing` (line 417) — depends on Steps 4+5+LES
+## Recently Completed (this session)
 
-## This Cycle's Work Items
+Closed 19 sorry's in IrreducibleStep.lean (21 → 2):
+- Tier 1-2 stalk lemmas (8 proofs)
+- ClosedImmersionSES pattern proofs (4 proofs)
+- Finset infrastructure (5 proofs)
+- Germ algebra (2 proofs)
 
-### 1. [/prove] Restore Tier 1 sorry's (5 proofs)
-Extract proofs from `e90c2f0`, adapt to current API. These are independent and self-contained:
-- `presheaf_stalk_surj_openHom`: presheaf restriction + eqToHom argument
-- `isZero_zeroOutsideInt_bot`: stalks vanish via ¬(W ≤ ⊥) + toSheafify iso
-- `stalk_zeroOutsideInt_zero_outside`: similar stalk argument
-- `exists_nonzero_stalk_in_V`: contrapositive + sheaf_isZero_of_zero_stalks
-- `presheaf_stalk_zeroOutside_eq_zsmul_generator`: int_addSubgroup_eq_zmultiples + germ algebra
+Key API patterns established:
+- `stalkFunctor_map_iso_toSheafify` for IsIso instances
+- `Sheaf.forget ⋙ stalkFunctor` for PreservesMonomorphisms
+- `ConcreteCategory.mono_iff_injective_of_preservesPullback` for injectivity
+- `AddCommGrpCat.subsingleton_of_isZero` for zero object elements
 
-### 2. [/prove] Restore Tier 2 sorry's (3 proofs)
-- `sheaf_stalk_surj_openHom`: transfer via toSheafify naturality
-- `stalk_zeroOutsideInt_eq_zsmul_generator`: transfer via toSheafify
-- `sheaf_stalk_bijective_openHom`: injectivity via PreservesMonomorphisms
+## Backlog
 
-### 3. [/prove] Restore `zeroOutsideInt_vanishing` (line 76)
-The inline `sorry : IsFlasqueSheaf S.X₂` needs: `S.X₂ = zeroOutsideInt ⊤ = constantSheaf Z_X` (by rfl), which is flasque on irreducible spaces (proved in ConstantSheafFlasque.lean). Provide the instance chain explicitly.
-
-## Backlog (future cycles)
-
-- **Tier 3-4 sorry's**: `cokernel_stalk_zero_V`, `cokernel_openHom_vanishing`, `zeroOutsideInt_cohomology_vanishing`, `subsheaf_zeroOutsideInt_vanishing`, `epiImage_zeroOutsideInt_vanishing`
-- **Original sorry's**: `exists_good_section`, `cohomology_vanishing_of_finitelyGenerated_vanishing` (genuine Mathlib gaps)
 - **Docs deployment**: Fix 404 on blueprint pages
 - **File sizes**: ZeroOutside.lean (733), FlasqueVanishing.lean (616) over guideline
-- **Documentation**: Update sorry counts after each fix
+- **Plan/docs**: Keep sorry counts accurate
