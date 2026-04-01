@@ -15,6 +15,7 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian
 
+set_option synthInstance.maxHeartbeats 80000 in
 /-- Given a short exact sequence `0 → X₁ → X₂ → X₃ → 0`, if `Ext(Z, X₃, n) = 0`
     and `Ext(Z, X₂, n+1) = 0`, then `Ext(Z, X₁, n+1) = 0`. -/
 theorem subsingleton_ext_of_ses {C : Type*} [Category C] [Abelian C] [HasExt C]
@@ -60,7 +61,6 @@ theorem constantSheaf_cohomology_vanishing
     where `zeroOutsideInt ⊤ = Z_X` (constant sheaf, flasque on irreducible spaces).
     The cokernel vanishing at degree `m = n-1` is assumed (from IH on the
     closed complement `Vᶜ`). -/
-set_option synthInstance.maxHeartbeats 80000 in
 theorem zeroOutsideInt_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) (m : ℕ)
@@ -75,6 +75,7 @@ theorem zeroOutsideInt_vanishing
       inferInstance inferInstance
   exact subsingleton_ext_of_ses hSE _ m hCoker (constantSheaf_cohomology_vanishing X m)
 
+set_option synthInstance.maxHeartbeats 200000 in
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
     any germ in the larger zero-outside presheaf can be lifted by restricting to `W ∩ V ≤ V`
     where the presheaf map is `eqToHom` (identity). -/
@@ -104,7 +105,6 @@ private theorem presheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx :
 /-- The sheaf stalk map of `openHom(le_top)` at `x ∈ V` is surjective.
     Transfers presheaf stalk surjectivity via `toSheafify_naturality` and
     the fact that `stalk(toSheafify)` is an isomorphism. -/
-set_option synthInstance.maxHeartbeats 200000 in
 private theorem sheaf_stalk_surj_openHom
     {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
     Function.Surjective (ConcreteCategory.hom
@@ -123,14 +123,15 @@ private theorem sheaf_stalk_surj_openHom
   exact ⟨ConcreteCategory.hom (T.map (toSheafify J _)) p, by
     simp only [← ConcreteCategory.comp_apply, ← hnat, ConcreteCategory.comp_apply, hp]⟩
 
-/-- The sheaf stalk map of `openHom(le_top)` at `x ∈ V` is surjective. -/
 set_option synthInstance.maxHeartbeats 200000 in
+/-- The sheaf stalk map of `openHom(le_top)` at `x ∈ V` is surjective. -/
 private theorem sheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V) :
     Function.Surjective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
         (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)).val)) :=
   sheaf_stalk_surj_openHom (le_top : V ≤ ⊤) x hx
 
+set_option synthInstance.maxHeartbeats 200000 in
 /-- On points of the smaller open, `zeroOutsideInt.openHom h` induces a stalk bijection. -/
 private theorem sheaf_stalk_bijective_openHom
     {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
@@ -148,7 +149,6 @@ private theorem sheaf_stalk_bijective_openHom
 /-- The cokernel of `openHom(le_top)` has zero stalks at points of `V`.
     Uses: sheaf stalk surjectivity + section_ext + local surjectivity of `cokernel.π`
     + `cokernel.condition`. -/
-set_option synthInstance.maxHeartbeats 200000 in
 private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
       (Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))).val) :
@@ -181,13 +181,13 @@ private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx
         simp [ConcreteCategory.comp_apply],
     Limits.cokernel.condition]; simp
 
+set_option synthInstance.maxHeartbeats 80000 in
 /-- Cokernel of `openHom(le_top)` has vanishing cohomology on irreducible X.
     The cokernel C has zero stalks on V (since openHom is stalkwise iso there).
     Apply ClosedImmersionSES to C with `Y = Vᶜ`:
     - kernel K has zero stalks everywhere → IsZero → vanishing
     - pushforward from Vᶜ vanishes by IH (dim Vᶜ < dim X)
     - middle-term vanishing gives H^n(C) = 0. -/
-set_option synthInstance.maxHeartbeats 80000 in
 theorem cokernel_openHom_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) (hV : V ≠ ⊥)
@@ -257,11 +257,11 @@ These lemmas decompose the kernel vanishing argument.
 `zeroOutsideInt_cohomology_vanishing` is proved; the other two remain sorry.
 -/
 
+set_option synthInstance.maxHeartbeats 80000 in
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
     degree `m > dim X` on an irreducible Noetherian space of positive dimension.
     Proof: write `m = m' + 1`, apply `zeroOutsideInt_vanishing` (SES + flasque), then prove
     cokernel vanishing at `m'` via `ClosedImmersionSES` on `Vᶜ` + `PushforwardHVanishing`. -/
-set_option synthInstance.maxHeartbeats 80000 in
 theorem zeroOutsideInt_cohomology_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
@@ -317,6 +317,7 @@ theorem zeroOutsideInt_cohomology_vanishing
     exact PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim hm'_Y)
   exact hS'₂ ▸ subsingleton_sheafH_of_shortExact_middle hS'E m' hK_van hP_van
 
+set_option synthInstance.maxHeartbeats 80000 in
 /-- Third-term LES: for 0 → X₁ → X₂ → X₃ → 0, H^n(X₂)=0 ∧ H^{n+1}(X₁)=0 ⟹ H^n(X₃)=0. -/
 theorem subsingleton_ext_of_ses_third {C : Type*} [Category C] [Abelian C] [HasExt C]
     {S : ShortComplex C} (hS : S.ShortExact) (Z : C) (n : ℕ)
@@ -626,7 +627,6 @@ theorem cokernel_stalk_zero_of_stalk_surj
     cohomology in degree `m > dim X`. Uses `subsheaf_contains_zeroOutsideInt` to find
     `V' ⊆ V` with `Z_{V'} ↪ R` (stalk-iso on `V'`). The cokernel is supported on `(V')^c`
     (dim < dim X), so vanishes by the IH. Middle-term LES gives `H^m(R) = 0`. -/
-set_option synthInstance.maxHeartbeats 80000 in
 theorem subsheaf_zeroOutsideInt_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
@@ -690,11 +690,11 @@ theorem subsheaf_zeroOutsideInt_vanishing
       exact hS'₂ ▸ subsingleton_sheafH_of_shortExact_middle hS'E m hK_van hP_van
     exact subsingleton_sheafH_of_shortExact_middle hSE m hV'van hCoker
 
+set_option synthInstance.maxHeartbeats 80000 in
 /-- **Steps 3C + 4 + LES** (Hartshorne III.2.7): any epi image of `zeroOutsideInt V` has
     vanishing cohomology in degree `m > dim X`. Uses third-term LES with
     `zeroOutsideInt_cohomology_vanishing` (Step 5) and
     `subsheaf_zeroOutsideInt_vanishing` (Step 4). -/
-set_option synthInstance.maxHeartbeats 80000 in
 theorem epiImage_zeroOutsideInt_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
@@ -814,10 +814,10 @@ private theorem imageIncl_cokernel_epi
                     TopCat.Sheaf.familyGeneratorMap]]
     rw [Category.assoc, cokernel.condition, comp_zero]
 
+set_option synthInstance.maxHeartbeats 80000 in
 /-- **Step 3B–3C**: vanishing for `finsetGeneratedSheaf S` by `Finset.induction`.
     Empty set: image = 0. Insert: SES `0 → image(S') → image(S) → cokernel → 0` where
     cokernel is epi image of `Z_{σ₀.1}`, so `hzero` + middle-term LES close the step. -/
-set_option synthInstance.maxHeartbeats 80000 in
 theorem finsetGeneratedSheaf_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
     {K : TopCat.Sheaf AddCommGrpCat.{u} X}
