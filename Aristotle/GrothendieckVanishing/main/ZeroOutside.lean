@@ -706,13 +706,12 @@ abbrev allSectionMap {X : TopCat.{u}}
     (∐ fun σ : SectionIndex F => zeroOutsideInt σ.1) ⟶ F :=
   Sigma.desc (fun σ => zeroOutsideInt.sHom σ.2)
 
-set_option synthInstance.maxHeartbeats 200000 in
 instance allSectionMap_epi {X : TopCat.{u}}
     (F : Sheaf AddCommGrpCat.{u} X)
     [HasCoproduct (fun σ : SectionIndex F => zeroOutsideInt σ.1)] :
     Epi (allSectionMap F) := by
   letI : Balanced (CategoryTheory.Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
-    inferInstance
+    balanced_of_strongEpiCategory
   rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat]
   change TopCat.Presheaf.IsLocallySurjective (allSectionMap F).val
   rw [TopCat.Presheaf.isLocallySurjective_iff]
