@@ -58,6 +58,11 @@ noncomputable instance sheafEnoughInjectives (X : TopCat.{u}) :
   inferInstanceAs (EnoughInjectives (CategoryTheory.Sheaf _ _))
 
 set_option synthInstance.maxHeartbeats 4000000 in
+noncomputable instance sheafHasInjectiveResolutions (X : TopCat.{u}) :
+    HasInjectiveResolutions (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+  inferInstanceAs (HasInjectiveResolutions (CategoryTheory.Sheaf _ _))
+
+set_option synthInstance.maxHeartbeats 4000000 in
 noncomputable instance sheafHasDerivedCategory (X : TopCat.{u}) :
     HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   inferInstanceAs (HasDerivedCategory (CategoryTheory.Sheaf _ _))
