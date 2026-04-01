@@ -83,9 +83,32 @@ private theorem presheaf_stalk_surj_openHom
     Function.Surjective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
         (TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) h))) := by
-  -- Surjectivity: for g in stalk(zeroOutside U, x), restrict representative to W∩V ≤ V
-  -- where zeroOutside V and zeroOutside U both agree with constZ, so the map is identity.
-  sorry
+  intro g
+  obtain ⟨W, hxW, s, rfl⟩ := (TopCat.Presheaf.constZ.zeroOutside U).germ_exist x g
+  -- Restrict to W ⊓ V, where both presheaves agree with constZ
+  set WV := W ⊓ V with hWV_def
+  have hWV_le_V : WV ≤ V := inf_le_right
+  have hWV_le_W : WV ≤ W := inf_le_left
+  have hxWV : x ∈ WV := ⟨hxW, hx⟩
+  -- On WV, openHom is an iso (eqToHom)
+  have happ_iso : IsIso ((TopCat.Presheaf.zeroOutside_openHom
+    (F := TopCat.Presheaf.constZ) h).app (op WV)) := by
+    simp only [TopCat.Presheaf.zeroOutside_openHom, hWV_le_V, ↓reduceDIte]
+    infer_instance
+  -- Use the iso to find a preimage of the restricted section
+  let s_res := ConcreteCategory.hom
+    ((TopCat.Presheaf.constZ.zeroOutside U).map (homOfLE hWV_le_W).op) s
+  have h_bij := ConcreteCategory.bijective_of_isIso
+    ((TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) h).app (op WV))
+  obtain ⟨t, ht⟩ := h_bij.2 s_res
+  refine ⟨(TopCat.Presheaf.constZ.zeroOutside V).germ WV x hxWV t, ?_⟩
+  rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
+  change (TopCat.Presheaf.constZ.zeroOutside U).germ WV x hxWV
+    ((TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) h).app (op WV) t) =
+    (TopCat.Presheaf.constZ.zeroOutside U).germ W x hxW s
+  rw [ht]; simp only [s_res]
+  convert ((TopCat.Presheaf.constZ.zeroOutside U).germ_res_apply
+    (homOfLE hWV_le_W) x hxWV s) using 1
 
 /-- The presheaf stalk map of `zeroOutside_openHom(le_top)` at `x ∈ V` is surjective. -/
 private theorem presheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V) :
@@ -102,7 +125,23 @@ private theorem sheaf_stalk_surj_openHom
     Function.Surjective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
         (TopCat.Sheaf.zeroOutsideInt.openHom h).val)) := by
-  sorry
+  let J := Opens.grothendieckTopology (T := X)
+  let φ := TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) h
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  have hnat : T.map φ ≫ T.map (toSheafify J _) =
+    T.map (toSheafify J _) ≫ T.map (sheafifyMap J φ) := by
+    rw [← T.map_comp, ← T.map_comp, toSheafify_naturality]
+  haveI : IsIso (T.map (toSheafify J (TopCat.Presheaf.constZ.zeroOutside V))) :=
+    stalkFunctor_map_iso_toSheafify _ x
+  haveI : IsIso (T.map (toSheafify J (TopCat.Presheaf.constZ.zeroOutside U))) :=
+    stalkFunctor_map_iso_toSheafify _ x
+  intro g
+  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J _))).2 g
+  obtain ⟨p, hp⟩ := presheaf_stalk_surj_openHom h x hx q
+  exact ⟨ConcreteCategory.hom (T.map (toSheafify J _)) p, by
+    change ConcreteCategory.hom (T.map (sheafifyMap J φ))
+      (ConcreteCategory.hom (T.map (toSheafify J _)) p) = _
+    rw [← ConcreteCategory.comp_apply, hnat.symm, ConcreteCategory.comp_apply, hp]⟩
 
 /-- The sheaf stalk map of `openHom(le_top)` at `x ∈ V` is surjective. -/
 private theorem sheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V) :
@@ -117,7 +156,15 @@ private theorem sheaf_stalk_bijective_openHom
     Function.Bijective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
         (TopCat.Sheaf.zeroOutsideInt.openHom h).val)) :=
-  ⟨sorry, sheaf_stalk_surj_openHom h x hx⟩
+  by
+  refine ⟨?_, sheaf_stalk_surj_openHom h x hx⟩
+  let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
+    TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
+  haveI : Mono (FT.map (TopCat.Sheaf.zeroOutsideInt.openHom h)) :=
+    Functor.map_mono FT (TopCat.Sheaf.zeroOutsideInt.openHom h)
+  exact (ConcreteCategory.mono_iff_injective_of_preservesPullback
+    (FT.map (TopCat.Sheaf.zeroOutsideInt.openHom h))).mp inferInstance
 
 /-- The cokernel of `openHom(le_top)` has zero stalks at points of `V`.
     Uses: sheaf stalk surjectivity + section_ext + local surjectivity of `cokernel.π`
@@ -176,7 +223,13 @@ theorem subsingleton_ext_of_ses_third {C : Type*} [Category C] [Abelian C] [HasE
     (h₂ : Subsingleton (Ext Z S.X₂ n))
     (h₁ : Subsingleton (Ext Z S.X₁ (n + 1))) :
     Subsingleton (Ext Z S.X₃ n) := by
-  sorry
+  constructor
+  intro a b
+  have h_a_δ : a.comp hS.extClass rfl = 0 := Subsingleton.elim _ _
+  have h_b_δ : b.comp hS.extClass rfl = 0 := Subsingleton.elim _ _
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ Z hS a rfl h_a_δ
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ Z hS b rfl h_b_δ
+  rw [← hc, ← hd, Subsingleton.elim c d]
 
 theorem subsingleton_sheafH_of_shortExact_third {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
@@ -189,14 +242,33 @@ theorem subsingleton_sheafH_of_shortExact_third {X : TopCat.{u}}
 /-- `zeroOutsideInt ⊥` is the zero sheaf (all stalks vanish). -/
 theorem isZero_zeroOutsideInt_bot (X : TopCat.{u}) :
     IsZero (TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X)) := by
-  sorry
+  apply sheaf_isZero_of_zero_stalks X; intro x a
+  let P := TopCat.Presheaf.constZ.zeroOutside (⊥ : Opens X)
+  let J := Opens.grothendieckTopology (T := X)
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  haveI : IsIso (T.map (toSheafify J P)) := stalkFunctor_map_iso_toSheafify P x
+  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J P))).2 a
+  obtain ⟨W, hxW, s, rfl⟩ := P.germ_exist x q
+  have hW : ¬ (W ≤ ⊥) := fun h => Opens.mem_bot.mp (h hxW)
+  have hIsZero := TopCat.Presheaf.zeroOutside_isZero (F := TopCat.Presheaf.constZ) hW
+  haveI := AddCommGrpCat.subsingleton_of_isZero hIsZero
+  simp [Subsingleton.eq_zero s, map_zero]
 
 /-- Stalks of `zeroOutsideInt V` vanish outside `V`. -/
 theorem stalk_zeroOutsideInt_zero_outside
     {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∉ V)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
       (TopCat.Sheaf.zeroOutsideInt V).val) : a = 0 := by
-  sorry
+  let P := TopCat.Presheaf.constZ.zeroOutside V
+  let J := Opens.grothendieckTopology (T := X)
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  haveI : IsIso (T.map (toSheafify J P)) := stalkFunctor_map_iso_toSheafify P x
+  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J P))).2 a
+  obtain ⟨W, hxW, s, rfl⟩ := P.germ_exist x q
+  have hW : ¬ (W ≤ V) := fun h => hx (h hxW)
+  have hIsZero := TopCat.Presheaf.zeroOutside_isZero (F := TopCat.Presheaf.constZ) hW
+  haveI := AddCommGrpCat.subsingleton_of_isZero hIsZero
+  simp [Subsingleton.eq_zero s, map_zero]
 
 /-- A nonzero subsheaf of `zeroOutsideInt V` has a nonzero stalk at some point of `V`. -/
 theorem exists_nonzero_stalk_in_V
@@ -207,7 +279,21 @@ theorem exists_nonzero_stalk_in_V
     ∃ (x : X) (_ : x ∈ V)
       (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R.val),
       a ≠ 0 := by
-  sorry
+  by_contra h; push_neg at h; apply hR
+  apply sheaf_isZero_of_zero_stalks; intro x a
+  by_cases hx : (x : X) ∈ (V : Set X)
+  · exact h x hx a
+  · let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
+        TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+    have h_img : ConcreteCategory.hom (FT.map i) a = 0 :=
+      stalk_zeroOutsideInt_zero_outside V x hx _
+    haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
+      (C := AddCommGrpCat.{u}) (X := X) x
+    haveI : Mono (FT.map i) := Functor.map_mono FT i
+    have hinj := (ConcreteCategory.mono_iff_injective_of_preservesPullback
+      (FT.map i)).mp inferInstance
+    rw [← map_zero (ConcreteCategory.hom (FT.map i))] at h_img
+    exact hinj h_img
 
 /-- A sheaf morphism is mono if all its stalk maps are injective. -/
 theorem sheaf_mono_of_stalk_injective
@@ -216,7 +302,10 @@ theorem sheaf_mono_of_stalk_injective
     (h : ∀ x : X, Function.Injective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val))) :
     Mono f := by
-  sorry
+  have : ∀ x, Mono ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val) := by
+    intro x
+    exact (ConcreteCategory.mono_iff_injective_of_preservesPullback _).mpr (h x)
+  exact TopCat.Presheaf.mono_of_stalk_mono f
 
 /-- Every additive subgroup of `ℤ` is of the form `nℤ`. -/
 private theorem int_addSubgroup_eq_zmultiples (H : AddSubgroup ℤ) :
