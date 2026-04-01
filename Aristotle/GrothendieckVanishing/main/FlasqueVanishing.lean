@@ -48,19 +48,15 @@ instance {X : TopCat.{u}} :
   infer_instance
 
 -- Cache expensive typeclass resolutions to avoid re-synthesizing in every proof.
--- The synthesis chain IsGrothendieckAbelian → EnoughInjectives → HasDerivedCategory
--- is very expensive. Caching it here makes all downstream proofs O(1) for these lookups.
--- We use inferInstanceAs with the canonical CategoryTheory.Sheaf type, matching the
--- pattern used by the Abelian and IsGrothendieckAbelian instances above.
-set_option synthInstance.maxHeartbeats 4000000 in
+-- The chain IsGrothendieckAbelian → EnoughInjectives → HasDerivedCategory is very
+-- expensive via inference. Using explicit constructors avoids synthesis entirely.
 noncomputable instance sheafEnoughInjectives (X : TopCat.{u}) :
     EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-  inferInstanceAs (EnoughInjectives (CategoryTheory.Sheaf _ _))
+  IsGrothendieckAbelian.enoughInjectives _
 
-set_option synthInstance.maxHeartbeats 4000000 in
 noncomputable instance sheafHasDerivedCategory (X : TopCat.{u}) :
-    HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} X) := by
-  infer_instance
+    HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+  HasDerivedCategory.standard _
 
 /-! ## Flasque sheaf sub-lemmas
 
