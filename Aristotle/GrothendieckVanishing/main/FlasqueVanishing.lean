@@ -57,9 +57,10 @@ noncomputable instance sheafEnoughInjectives (X : TopCat.{u}) :
     EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   inferInstanceAs (EnoughInjectives (CategoryTheory.Sheaf _ _))
 
+set_option synthInstance.maxHeartbeats 4000000 in
 noncomputable instance sheafHasDerivedCategory (X : TopCat.{u}) :
-    HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-  Abelian.hasDerivedCategory _
+    HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} X) := by
+  infer_instance
 
 /-! ## Flasque sheaf sub-lemmas
 
