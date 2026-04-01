@@ -1,42 +1,51 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-03-30T19:30Z
+**Updated**: 2026-04-01T05:50Z
 
 ## Status Summary
 - **Sorry count**: 2 (both in IrreducibleStep.lean, both Mathlib gaps)
-- **Files**: 14 files, ~4162 lines
-- **CI**: Unknown (no `gh` access). Uncommitted perf changes untested.
-- **Docs**: Broken (404 on all GitHub Pages URLs)
-- **Peak heartbeats**: 400K maxHeartbeats, 400K synthInstance (SetupCore, UNTESTED reduction from 1.6M)
-- **Aristotle**: Both sorry's attempted (4 total), all failed. No pending jobs.
+- **Files**: 14 files under `main/`
+- **CI**: RED — last 3 commits all fail on SetupCore.lean heartbeat timeout
+- **Docs**: Broken (404 on GitHub Pages)
+- **Peak heartbeats**: 800K maxHeartbeats (SetupCore), 4M synthInstance (FlasqueVanishing), 1.6M synthInstance (SetupCore ×5)
+- **Aristotle**: No pending jobs. Both sorry's attempted previously, all failed.
 
 ## Active multi-cycle strategies
 
-1. **Sorry #1 — `subsheaf_contains_zeroOutsideInt`**: Aristotle failed twice. Requires stalk-level sheaf algebra not in Mathlib (toSheafify stalk iso for AddCommGrpCat, presheaf restriction to open subsets). Must decompose into sub-lemmas and prove manually. Target sub-lemmas: (a) stalks of subsheaves of Z_V are cyclic subgroups d·ℤ, (b) the multiplicity function d_x is locally constant on the support, (c) take V' where d_x is constant and minimal.
+1. **Fix CI (P0)**: SetupCore.lean `epi_g_app_top_of_H1_vanishing` times out at 800K heartbeats. Root cause is `HasSmallLocalizedHom` synthesis in Ext/derived category operations. Strategy: refactor the proof to cache expensive typeclass instances with `letI` and extract sub-lemmas to reduce per-proof heartbeat pressure. This is the #1 priority — nothing else matters until CI is green.
 
-2. **Sorry #2 — `cohomology_vanishing_of_finitelyGenerated_vanishing`**: Aristotle failed. This is Hartshorne 2.9: K = colim K_α ⟹ H^m(K) = colim H^m(K_α). Requires LES for derived functors + filtered colimit commutativity. Mathlib gap is real. Consider alternative proof strategy: can we bypass filtered colimits entirely by working directly with the finitely generated subsheaf lattice?
+2. **Sorry #1 — `exists_good_section`**: Decompose into sub-lemmas about stalk structure of subsheaves of Z_V. Prior Aristotle attempts failed. Must prove manually.
 
-3. **Heartbeat reduction**: 23 proofs still at 400K (2x default). SetupCore.lean synthInstance reduced to 400K via `letI` caching but UNTESTED. Systematic `letI` caching across all files could reduce further.
+3. **Sorry #2 — `cohomology_vanishing_of_finitelyGenerated_vanishing`**: Hartshorne 2.9, filtered colimit commutativity. Genuine Mathlib gap. Consider alternative: can we avoid filtered colimits by using Noetherian ascending chain condition on subsheaves directly?
+
+4. **Heartbeat reduction**: Systematic `letI` caching of `HasDerivedCategory`, `HasSmallLocalizedHom`, and related instances to bring all proofs under 400K, ideally under 200K.
 
 ## This cycle's work items
 
-1. **Fix stale docstrings** (P4, `/simplify`): Fix GrothendieckVanishing.lean:8 ("Setup.lean" → "IrreducibleStep.lean"), IrreducibleStep.lean:8 (clarify 2 sorry's), main.lean:14 (fix file reference). Immediate, no risk.
+### 1. Fix CI — refactor `epi_g_app_top_of_H1_vanishing` (P0, `/prove`)
+The proof at SetupCore.lean:194 times out because each `rw`/`exact` step triggers re-synthesis of derived category instances. Approach:
+- Add `letI` bindings at the top for `HasDerivedCategory`, `HasSmallLocalizedHom`, and related instances
+- Extract the `hψ` sub-proof (lines 214–221) into a separate lemma to reduce the proof term size
+- If still over budget, split the proof into 2–3 lemmas with explicit type annotations to guide synthesis
+- Target: maxHeartbeats ≤ 400K, synthInstance ≤ 400K
 
-2. **Remove redundant wrapper theorems** (P3, `/cleanup`): `grothendieck_reduction` (IrreducibleStep.lean:714) and `grothendieck_vanishing_irreducible_pos` (line 727) are trivial wrappers around `IrreduciblePosVanishing`. Inline them. Check callers first.
+### 2. Reduce synthInstance.maxHeartbeats 4M in FlasqueVanishing.lean (P1, `/simplify`)
+Line 53 has `synthInstance.maxHeartbeats 4000000` — 125x the Lean default. Apply `letI` caching for `HasDerivedCategory` and related instances. Target: ≤ 200K.
 
-3. **Submit sorry's to Aristotle** (P1, `/submit-aristotle`): Re-submit both sorry's with improved decomposition hints. Even though prior attempts failed, the decomposition into sub-lemmas may help.
+### 3. Reduce remaining 1.6M synthInstance overrides in SetupCore.lean (P2, `/simplify`)
+Lines 233, 258, 312, 361 all have `synthInstance.maxHeartbeats 1600000`. Same `letI` caching strategy. Target: ≤ 400K.
 
-4. **Attempt `subsheaf_contains_zeroOutsideInt` decomposition** (P1, `/prove`): Decompose into:
-   - `zeroOutsideInt_stalk_cyclic`: stalks of subsheaves of Z_V are cyclic (d·ℤ ⊆ ℤ)
-   - `subsheaf_multiplicity_locally_constant`: the multiplicity d_x is locally constant
-   - `subsheaf_contains_on_constant_locus`: on V' where d is constant, Z_{V'} ↪ R
-   Prove what we can, leave the hardest piece as a more targeted sorry.
+### 4. Submit sorry's to Aristotle (P1, `/submit-aristotle`)
+Re-submit both sorry's with fresh attempts. Even though prior attempts failed, it costs nothing.
 
-5. **Commit and push** (P0, `/commit`): Push the uncommitted SetupCore.lean + CI workflow changes to get CI feedback. This is the only way to test the synthInstance.maxHeartbeats 400K reduction.
+### 5. Attempt sorry decomposition (P1, `/prove`)
+If time permits after fixing CI, decompose `exists_good_section` into sub-lemmas.
 
 ## Backlog
-- Split IrreducibleStep.lean (738 lines) and ZeroOutside.lean (734 lines) into smaller files (P3)
-- Investigate docs deployment failure — may need to re-trigger deploy.yml (P0 but blocked on `gh`)
-- Apply `letI` HasDerivedCategory caching to other files with high synthInstance heartbeats (P3)
-- Re-enable some disabled Mathlib linters (unusedTactic, unreachableTactic) and fix findings (P3)
-- Extract FlasqueVanishing for Mathlib PR (P3)
+- Split IrreducibleStep.lean (920 lines) into smaller files
+- Split ZeroOutside.lean (734 lines) into smaller files
+- Fix docs deployment (investigate GitHub Pages 404)
+- Remove redundant wrapper theorems (`grothendieck_reduction`, `grothendieck_vanishing_irreducible_pos`)
+- Fix stale docstrings
+- Re-enable disabled Mathlib linters and fix findings
+- Extract FlasqueVanishing for Mathlib PR

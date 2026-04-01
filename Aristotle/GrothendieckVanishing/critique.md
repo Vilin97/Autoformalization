@@ -1,119 +1,146 @@
 # Adversarial Critique — Grothendieck Vanishing Formalization
 
-**Timestamp**: 2026-03-30T19:30Z
+**Timestamp**: 2026-04-01T05:45Z
 **Reviewer verdict**: REVISE
 
 ## 0. CI Status
 
-Unable to run `gh` on this machine. No local Lean toolchain available to run `lake build`.
+**P0 — CI is RED.** All 3 most recent CI runs on `grothendieck-vanishing` are failing:
 
-**Docs deployment is broken**: `https://vilin97.github.io/aristotle/` returns HTTP 404. `https://vilin97.github.io/aristotle/docs/` also 404. `https://vilin97.github.io/aristotle/blueprint/` also 404. The entire GitHub Pages site is down. The `deploy.yml` workflow exists but it is unclear when it last succeeded.
+```
+completed  failure  fix: restore original heartbeat budgets...  23827254792  21m52s  2026-04-01
+completed  failure  fix: increase maxHeartbeats to 800K...     23826964530   8m57s  2026-04-01
+completed  failure  fix: add maxHeartbeats 400K...             23826711040   9m3s   2026-04-01
+```
 
-**Uncommitted changes**: SetupCore.lean has been modified (synthInstance.maxHeartbeats reduced from 1.6M to 400K with `letI` caching, CI workflow modified to remove doc-gen). These changes are UNTESTED — no local build or CI run has verified them. If the `letI` caching is insufficient and `HasDerivedCategory` synthesis still exceeds 400K heartbeats per attempt, these changes will break the build.
+Root cause: `SetupCore.lean` line ~221 fails with `(deterministic) timeout at 'isDefEq', maximum number of heartbeats (800000) has been reached` during `HasSmallLocalizedHom` synthesis for derived category Ext operations. Cascading failure takes out `epi_g_app_top_of_H1_vanishing` and everything downstream.
 
-**P0 — Docs deployment broken. P0 — Uncommitted changes untested.**
+The last 3 commits were all failed attempts to fix this by bumping heartbeats (400K → 800K). The code is in a broken state. **Nothing compiles.**
+
+**P1 — Docs deployment broken.** Both `https://vilin97.github.io/aristotle/blueprint/` and `https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html` return HTTP 404. The entire documentation site is down.
 
 ## 1. Sorry's (2)
 
-1. **`subsheaf_contains_zeroOutsideInt`** (IrreducibleStep.lean:383): Given a non-zero subsheaf `R` of `Z_V`, find an open `V' ⊆ V` with `Z_{V'} ↪ R` bijective on stalks. Mathematically true (stalks of subsheaves of `ℤ` are `dℤ` for some `d`, take `V'` where `d` is constant). Two Aristotle attempts failed. Requires stalk-level sheaf algebra (toSheafify stalk iso for AddCommGrpCat, presheaf restriction, etc.) that is not in Mathlib API.
+Both in `IrreducibleStep.lean`, both load-bearing for the main theorem:
 
-2. **`cohomology_vanishing_of_finitelyGenerated_vanishing`** (IrreducibleStep.lean:540): Hartshorne 2.9 core — cohomology commutes with filtered colimits. Confirmed Mathlib gap: requires LES for derived functors + colimit commutativity for sheaf cohomology. No existing Mathlib API covers this.
+1. **`exists_good_section`** (line 554): Given a non-zero subsheaf R of Z_V, find V' ⊆ V with a section s ∈ R(V') inducing stalkwise bijections. Mathematically true but requires stalk-level sheaf algebra not in Mathlib (toSheafify stalk iso for AddCommGrpCat, presheaf restriction, locally constant germ analysis). Two Aristotle submissions have failed.
 
-Both sorry's are load-bearing — they appear in the dependency chain of `IrreduciblePosVanishing`, which is required by the main theorem. The formalization is INCOMPLETE without them. Calling this "modulo Mathlib gaps" does not change the fact that the main theorem depends on unproved propositions.
+2. **`cohomology_vanishing_of_finitelyGenerated_vanishing`** (line 736): Hartshorne 2.9 — cohomology commutes with filtered colimits on Noetherian spaces. Confirmed Mathlib gap: requires LES for derived functors + colimit commutativity for sheaf cohomology. No existing Mathlib API covers this.
+
+Both sorry's are in the dependency chain of `IrreduciblePosVanishing` → `grothendieck_vanishing_aux` → `GrothendieckVanishing`. The main theorem is **not proved** — it depends on unproved propositions. Calling this "modulo Mathlib gaps" is marketing, not mathematics.
 
 ## 2. Hidden Axioms
 
-No `admit`, `axiom`, `native_decide`, or disabled linters in source files. The lakefile disables 5 Mathlib linters (`mathlibStandardSet`, `unusedSimpArgs`, `unnecessarySimpa`, `unusedTactic`, `unreachableTactic`). These suppressions could hide dead code and redundant tactics. I found no issue beyond the linter suppressions.
+No `admit`, `axiom`, or `native_decide` found. The lakefile disables 5 Mathlib linters (`mathlibStandardSet`, `unusedSimpArgs`, `unnecessarySimpa`, `unusedTactic`, `unreachableTactic`). These suppressions hide dead tactics and redundant simp arguments — potential maintenance debt that becomes real cost on Mathlib bumps.
 
 ## 3. Circularity
 
-Well-founded induction on `topologicalKrullDim` (type `WithBot ℕ∞`). The induction hypothesis is strictly weaker (requires `d' < d`). The `IrreduciblePosVanishing` proof obtains `Z` with `dim Z < dim X` and applies `ih` correctly. I found no issue.
+Well-founded induction on `topologicalKrullDim` (type `WithBot ℕ∞`). The induction hypothesis requires strict `d' < d`. `IrreduciblePosVanishing` obtains `Z` with `dim Z < dim X` via closed subspace dimension drop. No circularity found.
 
 ## 4. Hypothesis Audit
 
-`GrothendieckVanishing (X : TopCat.{u}) (F : Sheaf AddCommGrpCat.{u} X) [NoetherianSpace X] (n : ℕ) (h : n > topologicalKrullDim X)`:
+Main theorem signature:
+```lean
+theorem GrothendieckVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    [NoetherianSpace X] (n : ℕ) (h : n > topologicalKrullDim X) :
+    Subsingleton (Sheaf.H F n)
+```
 
-- `TopCat.{u}` — standard, necessary for universe consistency
-- `Sheaf AddCommGrpCat.{u} X` — could theoretically generalize to Grothendieck abelian categories, but AddCommGrpCat is standard for this theorem
-- `[NoetherianSpace X]` — necessary, standard
-- `n : ℕ` — standard encoding of cohomological degree
-- `h : n > topologicalKrullDim X` — necessary, standard. Uses `WithBot ℕ∞` which handles the case `dim X = ⊤` correctly (vacuously true since no `n : ℕ` exceeds `⊤`)
+- `TopCat.{u}`, `NoetherianSpace`, `n : ℕ`, `h : n > topologicalKrullDim X` — all necessary and standard.
+- `Sheaf AddCommGrpCat.{u} X` — standard for Hartshorne's formulation. Could generalize to Grothendieck abelian categories but that's a different theorem.
+- The `Subsingleton` conclusion is weaker than `IsZero` but adequate. `topologicalKrullDim` using `WithBot ℕ∞` correctly handles dim = ⊤ (vacuously true).
 
-All hypotheses are necessary and standard. I found no issue.
+No unnecessary hypotheses found.
 
 ## 5. Mathematical Correctness
 
 Follows Hartshorne III.2.7 faithfully:
-- Reduction to irreducible: correct (closed-open decomposition, Finset induction on components)
-- Dim 0 base case: correct (constant sheaf is flasque on irreducible space)
-- Irreducible positive dim: correct strategy (closed immersion SES, pushforward vanishing, kernel vanishing via Hartshorne Steps 3-5)
-- FlasqueVanishing: correct (dimension shifting via injective presentations)
+- Reduction to irreducible: Finset induction on irreducible components, correct.
+- Dim 0 base case: constant sheaf is flasque on irreducible space, correct.
+- Irreducible dim ≥ 1: closed immersion SES, pushforward vanishing, kernel vanishing via Steps 3–5, correct strategy.
+- FlasqueVanishing: dimension shifting via injective presentations, correct.
 
-The 2 sorry's correspond exactly to Steps 3A (filtered colimit) and 4 (subsheaf classification). These are mathematically correct statements. I found no issue with the proof strategy.
+The 2 sorry's correspond to Steps 3A (filtered colimit) and 4 (subsheaf classification). Both are mathematically correct statements. No divergence from the standard proof found.
 
 ## 6. Code Quality
 
-**P2 — 23 proofs with maxHeartbeats 400000** (CLAUDE.md limit is 200000):
-- FlasqueVanishing.lean: 6 overrides
-- SetupCore.lean: 7 overrides (including 3 with synthInstance.maxHeartbeats 400000)
-- IrreducibleStep.lean: 4 overrides
-- ReducibleVanishing.lean: 2 overrides
-- ConstantSheafFlasque.lean: 2 overrides
-- Auxiliary.lean: 1 override
-- ClosedImmersion.lean: 1 override
+**P0 — CI broken.** SetupCore.lean fails to compile even at 800K heartbeats. The code is non-functional.
 
-**P2 — synthInstance.maxHeartbeats overrides**: 3 at 400000 (SetupCore, down from 1.6M but UNTESTED), 2 at 200000 (IrreducibleStep, ZeroOutside), 5 at 160000 (SetupCore, ReducibleVanishing, ClosedImmersion), 10 at 80000 (various). The 400K synthInstance overrides are 12.5x the Lean default of 32000.
+**P1 — Extreme heartbeat overrides:**
+- `FlasqueVanishing.lean:53`: `synthInstance.maxHeartbeats 4000000` — **125x the Lean default of 32000**. This is absurd.
+- `SetupCore.lean` lines 193, 233, 258, 312, 361: `synthInstance.maxHeartbeats 1600000` — 50x the default.
+- `SetupCore.lean:192`: `maxHeartbeats 800000` — 4x the CLAUDE.md limit of 200K.
+- 7 additional proofs at `maxHeartbeats 400000`.
 
-**P3 — 3 files over 600 lines**: IrreducibleStep.lean (738), ZeroOutside.lean (734), FlasqueVanishing.lean (608). SetupCore.lean was reduced from 1061 to 478, but the debt moved to FlasqueVanishing.lean.
+Total: **~30 heartbeat overrides** across the codebase. CLAUDE.md says "Never increase maxHeartbeats above 200000" — the codebase openly violates its own discipline.
 
-**P3 — 5 Mathlib linters disabled** in lakefile.toml. `unusedTactic` and `unreachableTactic` could hide dead proof steps.
+**P2 — 5 files over 300 lines, 3 over 600:**
+| File | Lines |
+|------|-------|
+| IrreducibleStep.lean | 920 |
+| ZeroOutside.lean | 734 |
+| FlasqueVanishing.lean | 624 |
+| SetupCore.lean | 475 |
+| ClosedImmersion.lean | 404 |
 
-**P3 — Redundant wrapper theorems**: `grothendieck_reduction` (IrreducibleStep.lean:714) is just `IrreduciblePosVanishing`. `grothendieck_vanishing_irreducible_pos` (line 727) is just `grothendieck_reduction`. These are dead indirections.
+IrreducibleStep.lean at 920 lines is nearly unnavigable.
+
+**P3 — Redundant wrapper theorems**: `grothendieck_reduction` and `grothendieck_vanishing_irreducible_pos` in IrreducibleStep.lean are trivial wrappers around `IrreduciblePosVanishing`. Dead indirections.
 
 ## 7. Documentation Lies
 
-- **CLAUDE.md line 63**: "Never increase maxHeartbeats above 200000" — 23 proofs violate this. The codebase itself contradicts its own discipline.
-- **GrothendieckVanishing.lean line 8**: "all proved, modulo IrreduciblePosVanishing sorry in Setup.lean" — sorry's are in IrreducibleStep.lean, not Setup.lean.
-- **IrreducibleStep.lean line 8**: "uses IrreduciblePosVanishing (sorry)" — there are 2 sorry's, not 1. Calling the wrapper "1 sorry" hides 2 distinct proof obligations.
-- **main.lean line 14**: "IrreduciblePosVanishing (2 sorry's inside)" — correct count but wrong location claim ("Setup.lean" in structure section vs actual IrreducibleStep.lean).
-- **GitHub Pages docs**: completely broken (404). Any claim about docs being deployed is false.
-- **LOG.md line 13**: "Peak maxHeartbeats: 12,800,000 → 3,200,000 (75% reduction)" — this is stale; current peak is 400,000 (after subsequent commits). But the uncommitted changes to SetupCore.lean synthInstance are untested.
+- **CLAUDE.md line 63**: "Never increase maxHeartbeats above 200000" — ~30 proofs violate this, including one at 4,000,000. The stated discipline is fiction.
+- **GrothendieckVanishing.lean line 8**: References "2 sorry's in IrreducibleStep.lean" — accurate count and location. (Fixed from previous critique.)
+- **GitHub Pages docs**: completely broken (404). Any claim about documentation deployment is false.
+- **CLAUDE.md "Remaining Work" section**: Says "2 sorry's remain" — accurate. Says both are "confirmed Mathlib API gaps" — accurate but potentially misleading; they are still unproved propositions the main theorem depends on.
 
 ## 8. Generalization Opportunities
 
-1. **Generalize from AddCommGrpCat to Grothendieck abelian categories** (LOW feasibility). The theorem should hold for any Grothendieck abelian category `A` with enough injectives. Current proof uses concrete `AddMonoidHom`, `ULift ℤ`, `zsmul` operations that don't generalize. Would require rewriting FlasqueVanishing, PushforwardHVanishing, and all stalk arguments.
+1. **Generalize from AddCommGrpCat to Grothendieck abelian categories** (LOW feasibility). The theorem holds for any Grothendieck abelian category with enough injectives. Current proof uses concrete `AddMonoidHom`, `ULift ℤ`, `zsmul` — rewriting would touch FlasqueVanishing, PushforwardHVanishing, and all stalk arguments. Major refactor.
 
-2. **Extract FlasqueVanishing as standalone Mathlib PR** (HIGH feasibility). `FlasqueVanishing` + `isFlasque_of_injective` + `epi_app_of_shortExact_flasque` form a self-contained package. Overlaps with Nugent PR #35790 but could be complementary.
+2. **Strengthen `Subsingleton (Sheaf.H F n)` to `IsZero (Sheaf.H F n)`** (MEDIUM feasibility). `IsZero` is strictly stronger and more useful for downstream consumers. Would require checking that `Sheaf.H` lives in an additive category where `Subsingleton ↔ IsZero`.
 
-3. **Extract `sheaf_isZero_of_zero_stalks`** (HIGH feasibility). Basic missing lemma: a sheaf whose stalks are all zero is zero. Currently proved inline; should be a standalone Mathlib lemma.
+3. **Extract FlasqueVanishing as a standalone Mathlib PR** (HIGH feasibility). `FlasqueVanishing`, `isFlasque_of_injective`, `epi_app_of_shortExact_flasque` form a self-contained package. Overlaps with Nugent PR #35790 but could be complementary. Would need heartbeat reduction to Mathlib standards first.
 
-4. **Weaken NoetherianSpace to locally Noetherian** (MEDIUM feasibility). Grothendieck vanishing holds for locally Noetherian spaces via sheafification on a cover. Would require significant refactoring of the induction structure.
+4. **Weaken NoetherianSpace to locally Noetherian** (LOW feasibility). Grothendieck vanishing generalizes to locally Noetherian schemes. Would require significant refactoring of the topological induction.
 
-5. **Strengthen to give explicit isomorphism `H^n(X,F) ≅ 0`** (LOW feasibility). Current statement is `Subsingleton (Sheaf.H F n)` which is weaker than `IsZero`. Could strengthen but `Subsingleton` suffices for applications.
+5. **Extract `sheaf_isZero_of_zero_stalks`** (HIGH feasibility). Basic missing lemma: a sheaf whose stalks are all zero is itself zero. Currently proved inline. Clean Mathlib PR candidate.
 
 ## 9. Mathlib Upstreamability
 
-1. **`epi_app_of_shortExact_flasque` + `isFlasque_X₃_of_shortExact`** — Flasque sheaf theory. Core result: in a SES of sheaves, if F₁ and F₂ are flasque, so is F₃. Overlaps Nugent #35790 but well-decomposed.
+1. **Flasque sheaf package** — `epi_app_of_shortExact_flasque`, `isFlasque_X₃_of_shortExact`, `FlasqueVanishing`. Self-contained, useful. Must reduce heartbeats to default first.
 
-2. **`sheaf_isZero_of_isEmpty`** — A sheaf on an empty space is zero. Basic missing lemma. Straightforward PR.
+2. **`sheaf_isZero_of_isEmpty`** — sheaf on empty space is zero. Trivial PR.
 
-3. **`closedIncl_unit_stalk_isIso`** — Stalk of the adjunction unit for closed immersion is an isomorphism. Useful infrastructure for closed immersion theory.
+3. **`closedIncl_unit_stalk_isIso`** — stalk of adjunction unit for closed immersion is iso. Useful for closed immersion theory in Mathlib.
 
-4. **`IsPartialLift` decomposition** — Reusable Zorn argument pattern for lifting sections of sheaves. Clean abstraction.
+4. **`pushforward_stalk_zero_closedIncl`** — stalk of pushforward along closed immersion vanishes outside the closed set. Basic infrastructure.
 
-5. **`pushforward_stalk_zero_closedIncl`** — Stalk of pushforward along closed immersion vanishes outside the closed set. Basic infrastructure.
+All upstream candidates would need heartbeat budgets reduced to Lean defaults and the disabled linters re-enabled to pass Mathlib CI.
 
 ## Open Issues
 
-| # | Priority | Issue |
-|---|----------|-------|
-| 1 | P0 | Docs deployment broken (404 on all pages) |
-| 2 | P0 | Uncommitted SetupCore.lean changes untested |
-| 3 | P1 | 2 sorry's (Mathlib gaps, load-bearing) |
-| 4 | P2 | 23 proofs exceed maxHeartbeats 200K limit |
-| 5 | P2 | 3 synthInstance.maxHeartbeats at 400K (12.5x default) |
-| 6 | P3 | 3 files over 600 lines |
-| 7 | P3 | 5 Mathlib linters disabled in lakefile |
-| 8 | P3 | Redundant wrapper theorems (grothendieck_reduction) |
-| 9 | P4 | Stale docstrings (sorry locations, heartbeat claims) |
-| 10 | P4 | GrothendieckVanishing.lean line 8 wrong file reference |
+| # | Priority | Issue | Status |
+|---|----------|-------|--------|
+| 1 | P0 | CI broken — SetupCore.lean timeout at 800K heartbeats | OPEN |
+| 2 | P1 | Docs deployment broken (404 on blueprint) | OPEN |
+| 3 | P1 | 2 sorry's (load-bearing, Mathlib API gaps) | OPEN |
+| 4 | P1 | synthInstance.maxHeartbeats 4,000,000 in FlasqueVanishing.lean | OPEN |
+| 5 | P2 | ~30 heartbeat overrides across codebase (limit is 200K) | OPEN |
+| 6 | P2 | IrreducibleStep.lean at 920 lines | OPEN |
+| 7 | P3 | 5 Mathlib linters disabled in lakefile | OPEN |
+| 8 | P3 | Redundant wrapper theorems | OPEN |
+| 9 | P4 | GitHub Pages docs 404 | OPEN |
+
+## Verdict: REVISE
+
+The formalization is **non-functional** — CI is red, nothing compiles. The immediate priority is fixing the SetupCore.lean heartbeat timeout that has broken the last 3 commits. Until CI is green, all other issues are moot.
+
+Conditions for CONDITIONAL ACCEPT:
+1. CI must be green (all files compile)
+2. Both sorry's must be clearly documented as blocking on specific Mathlib PRs
+3. No `maxHeartbeats` above 400K (current 4M and 1.6M overrides are unacceptable)
+4. No `synthInstance.maxHeartbeats` above 200K
+
+Conditions for ACCEPT:
+- All of the above, plus both sorry's resolved

@@ -1,5 +1,22 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-01 — Refactor epi_g_app_top_of_H1_vanishing + heartbeat reduction
+
+**Sorry count: 2** (unchanged)
+
+- **CI FIX ATTEMPT**: Extracted `ext0_comp_eq_of_covariant` helper lemma from
+  `epi_g_app_top_of_H1_vanishing` (SetupCore.lean). The expensive Ext₀ composition
+  identity (lines 214–221) is now a standalone lemma, reducing proof term size in the
+  main lemma. Reduced maxHeartbeats from 800K to 400K.
+- **Heartbeat reduction (SetupCore.lean)**: All `synthInstance.maxHeartbeats` reduced
+  from 1,600,000 → 400,000 across 4 proofs (`ext0_surj_of_epi_top`,
+  `PushforwardHVanishing_one`, `PushforwardHVanishing_succ`, `PushforwardHVanishing`).
+- **Heartbeat reduction (FlasqueVanishing.lean)**: `sheafEnoughInjectives` synthInstance
+  reduced from 4,000,000 → 400,000 (was 125x Lean default, now 12.5x).
+- **Critique + plan updated** for current cycle.
+- **No Aristotle submissions**: Both sorry's have failed 8+ times. No new decomposition available.
+- 2 sorry's remain: `exists_good_section`, `cohomology_vanishing_of_finitelyGenerated_vanishing`
+
 ## 2026-03-31 — FIX build break + Aristotle integration analysis
 
 **Sorry count: 2** (unchanged)
