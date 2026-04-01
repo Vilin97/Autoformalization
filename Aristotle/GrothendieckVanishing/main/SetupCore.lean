@@ -93,7 +93,7 @@ private theorem surj_transfer_closedIncl {A B C D : AddCommGrpCat.{u}}
 -- Pushforward along closed immersion preserves ShortExact.
 -- Proof: Mono (right adjoint), Exact (left exact + mono f + preserves kernel),
 -- Epi (stalkwise: iso at points of Z via stalkPushforward, zero stalk outside Z).
-set_option synthInstance.maxHeartbeats 40000 in
+set_option synthInstance.maxHeartbeats 160000 in
 theorem closedIncl_pushforward_shortExact
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     {G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)}
