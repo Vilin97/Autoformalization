@@ -65,9 +65,9 @@ theorem irreduciblePos_pushforward_subsingleton
     (hn_Z : ↑n > topologicalKrullDim (TopCat.of Z))
     (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X))
     (hS₃ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩)).obj
+      (TopCat.closedIncl hZ_closed)).obj
         ((TopCat.Sheaf.pullback AddCommGrpCat.{u}
-          (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩)).obj F)) :
+          (TopCat.closedIncl hZ_closed)).obj F)) :
     Subsingleton (Sheaf.H S.X₃ n) := by
   rw [hS₃]
   exact PushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ n _ hZ_dim hn_Z)

@@ -875,9 +875,9 @@ theorem irreduciblePos_kernel_subsingleton
     (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X))
     (hSE : S.ShortExact) (hS₂ : S.X₂ = F)
     (hS₃ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩)).obj
+      (TopCat.closedIncl hZ_closed)).obj
         ((TopCat.Sheaf.pullback AddCommGrpCat.{u}
-          (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩)).obj F)) :
+          (TopCat.closedIncl hZ_closed)).obj F)) :
     Subsingleton (Sheaf.H S.X₁ n) :=
   directLimit_cohomology_vanishing S.X₁ n
     (fun f hf => epiImage_zeroOutsideInt_vanishing X ih hpos _ f hf n hn)
@@ -905,16 +905,3 @@ theorem IrreduciblePosVanishing
   rw [← hS₂]
   exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
 
-/-- Positive-dimensional irreducible vanishing (Hartshorne Steps 3-5). -/
-theorem grothendieck_vanishing_irreducible_pos
-    (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X] [IrreducibleSpace X]
-    (n : ℕ) (hn : n > topologicalKrullDim X)
-    (hpos : topologicalKrullDim X > 0)
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (ih : ∀ (Y : TopCat.{u}) [TopologicalSpace.NoetherianSpace Y]
-      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
-      topologicalKrullDim Y < topologicalKrullDim X →
-      m > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G m)) :
-    Subsingleton (Sheaf.H F n) :=
-  IrreduciblePosVanishing X n hn hpos F ih

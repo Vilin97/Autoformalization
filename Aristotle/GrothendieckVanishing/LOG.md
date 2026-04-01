@@ -1,5 +1,20 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-01T09:00Z — Fix SetupCore/Setup compilation + dead code removal
+
+**Sorry count: 2** (unchanged)
+
+- **SetupCore.lean fixes** (3 bugs):
+  1. `Ext A B 0 0` → `Ext A B 0` in `ext0_comp_eq_of_covariant` (Abelian.Ext takes 3 args)
+  2. `congr_arg ... AddCommGrpCat.ext_iff.mp` → `change` + `rw [← hfact]` in
+     `epi_g_app_top_of_H1_vanishing` (ext_iff.mp returns ∀, not equality)
+  3. Restored missing `subsingleton_sheafH_of_shortExact_middle` (accidentally removed in 7c101de)
+- **Setup.lean + IrreducibleStep.lean**: Fixed `TopCat.ofHom ⟨Subtype.val, ...⟩` →
+  `TopCat.closedIncl hZ_closed` in theorem headers (type inference failure)
+- **Dead code**: Inlined `grothendieck_vanishing_irreducible_pos` wrapper
+- **Verified**: SetupCore.lean, Setup.lean compile clean locally
+- **Known issue**: IrreducibleStep.lean has 74 pre-existing Mathlib API errors (not from this cycle)
+
 ## 2026-04-01 — Refactor epi_g_app_top_of_H1_vanishing + heartbeat reduction
 
 **Sorry count: 2** (unchanged)
