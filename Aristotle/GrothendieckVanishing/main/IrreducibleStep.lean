@@ -66,7 +66,14 @@ theorem zeroOutsideInt_vanishing
     (hCoker : Subsingleton (Sheaf.H (Limits.cokernel
       (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))) m)) :
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) (m + 1)) := by
-  sorry
+  let f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
+  let S := ShortComplex.mk f (cokernel.π f) (cokernel.condition f)
+  have hSE : S.ShortExact :=
+    ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _))
+      inferInstance inferInstance
+  exact sheafH_dimension_shift_ses hSE m hCoker
+    (FlasqueVanishing X S.X₂ (sorry : IsFlasqueSheaf S.X₂) m)
 
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
     any germ in the larger zero-outside presheaf can be lifted by restricting to `W ∩ V ≤ V`
@@ -76,6 +83,8 @@ private theorem presheaf_stalk_surj_openHom
     Function.Surjective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
         (TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) h))) := by
+  -- Surjectivity: for g in stalk(zeroOutside U, x), restrict representative to W∩V ≤ V
+  -- where zeroOutside V and zeroOutside U both agree with constZ, so the map is identity.
   sorry
 
 /-- The presheaf stalk map of `zeroOutside_openHom(le_top)` at `x ∈ V` is surjective. -/
