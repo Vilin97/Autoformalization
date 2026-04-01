@@ -166,14 +166,42 @@ private theorem sheaf_stalk_bijective_openHom
   exact (ConcreteCategory.mono_iff_injective_of_preservesPullback
     (FT.map (TopCat.Sheaf.zeroOutsideInt.openHom h))).mp inferInstance
 
+/-- Cokernel stalk vanishes at points where the map is stalk-surjective.
+    Since the stalk functor on sheaves of abelian groups is exact, `stalk(cokernel f, x) =
+    cokernel(stalk(f, x))`, which is zero when `stalk(f, x)` is surjective. -/
+theorem cokernel_stalk_zero_of_stalk_surj
+    {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
+    (f : F ⟶ G) (x : X)
+    (hf : Function.Surjective (ConcreteCategory.hom
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val)))
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj (Limits.cokernel f).val) :
+    a = 0 := by
+  have hπ_surj : Function.Surjective (ConcreteCategory.hom
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map (cokernel.π f).val)) := by
+    have hEpi : Epi (cokernel.π f) := inferInstance
+    have hLS := (Sheaf.isLocallySurjective_iff_epi' (φ := cokernel.π f)).mpr hEpi
+    exact ((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
+      (cokernel.π f).val).mp hLS) x
+  obtain ⟨b, rfl⟩ := hπ_surj a
+  obtain ⟨c, rfl⟩ := hf b
+  obtain ⟨U, hxU, s, rfl⟩ := TopCat.Presheaf.germ_exist F.val x c
+  simp only [TopCat.Presheaf.stalkFunctor_map_germ_apply]
+  have hcond : f.val ≫ (cokernel.π f).val = (0 : F ⟶ cokernel f).val :=
+    congr_arg Sheaf.Hom.val (cokernel.condition f)
+  have h1 : ConcreteCategory.hom ((f.val ≫ (cokernel.π f).val).app (op U)) s = 0 := by
+    rw [hcond]; rfl
+  simp only [NatTrans.comp_app, ConcreteCategory.comp_apply] at h1
+  rw [h1, map_zero]
+
 /-- The cokernel of `openHom(le_top)` has zero stalks at points of `V`.
     Uses: sheaf stalk surjectivity + section_ext + local surjectivity of `cokernel.π`
     + `cokernel.condition`. -/
 private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
       (Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))).val) :
-    a = 0 := by
-  sorry
+    a = 0 :=
+  cokernel_stalk_zero_of_stalk_surj _ x (sheaf_stalk_surj V x hx) a
 
 /-- Cokernel of `openHom(le_top)` has vanishing cohomology on irreducible X.
     The cokernel C has zero stalks on V (since openHom is stalkwise iso there).
@@ -428,19 +456,6 @@ theorem subsheaf_contains_zeroOutsideInt
     have ha := stalk_zeroOutsideInt_zero_outside V' y hy a
     have hb := stalk_zeroOutsideInt_zero_outside V' y hy b
     rw [ha, hb]
-
-/-- Cokernel stalk vanishes at points where the map is stalk-surjective.
-    Since the stalk functor on sheaves of abelian groups is exact, `stalk(cokernel f, x) =
-    cokernel(stalk(f, x))`, which is zero when `stalk(f, x)` is surjective. -/
-theorem cokernel_stalk_zero_of_stalk_surj
-    {X : TopCat.{u}}
-    {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
-    (f : F ⟶ G) (x : X)
-    (hf : Function.Surjective (ConcreteCategory.hom
-      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val)))
-    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj (Limits.cokernel f).val) :
-    a = 0 := by
-  sorry
 
 /-- **Step 4** (Hartshorne III.2.7): any subsheaf of `zeroOutsideInt V` has vanishing
     cohomology in degree `m > dim X`. Uses `subsheaf_contains_zeroOutsideInt` to find
