@@ -93,6 +93,7 @@ private theorem surj_transfer_closedIncl {A B C D : AddCommGrpCat.{u}}
 -- Pushforward along closed immersion preserves ShortExact.
 -- Proof: Mono (right adjoint), Exact (left exact + mono f + preserves kernel),
 -- Epi (stalkwise: iso at points of Z via stalkPushforward, zero stalk outside Z).
+set_option maxHeartbeats 400000 in
 set_option synthInstance.maxHeartbeats 160000 in
 theorem closedIncl_pushforward_shortExact
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
@@ -188,6 +189,7 @@ private lemma PushforwardHVanishing_zero
   exact @Subsingleton.elim (F'.val.obj (op ⊤)) (hobj ▸ hsec) _ _
 
 -- Sub-lemma: Epi of g at ⊤ from H^1(G')=0 via LES + adj + separator
+set_option synthInstance.maxHeartbeats 80000 in
 private lemma epi_g_app_top_of_H1_vanishing
     {Z : TopCat.{u}} [NoetherianSpace Z]
     {G' : TopCat.Sheaf AddCommGrpCat.{u} Z}
@@ -226,6 +228,7 @@ private lemma epi_g_app_top_of_H1_vanishing
   rw [← this]; simp [φ_hom, one_zsmul]
 
 -- Sub-lemma: surjectivity of Ext⁰ map from epi at ⊤ via adjunction + projectivity
+set_option synthInstance.maxHeartbeats 80000 in
 private lemma ext0_surj_of_epi_top
     {X : TopCat.{u}} [NoetherianSpace X]
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
@@ -250,6 +253,7 @@ private lemma ext0_surj_of_epi_top
       Projective.factorThru_comp]⟩
 
 -- n = 1: from H^1(G')=0 on Z, show H^1(i_*G')=0 on X
+set_option synthInstance.maxHeartbeats 80000 in
 private lemma PushforwardHVanishing_one
     {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
     (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))
@@ -302,6 +306,7 @@ private lemma PushforwardHVanishing_one
   rw [← hc, ← hd, zero_c, zero_d]
 
 -- n = m+2 ≥ 2: use pushed-forward injective presentation + FlasqueVanishing + LES
+set_option synthInstance.maxHeartbeats 80000 in
 private lemma PushforwardHVanishing_succ
     {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
     (m : ℕ)
@@ -350,6 +355,7 @@ private lemma PushforwardHVanishing_succ
   exact @Subsingleton.elim _ (ih_push ip.shortComplex.X₃ hR) c d
 
 -- Pushforward along closed immersion preserves cohomological vanishing.
+set_option synthInstance.maxHeartbeats 80000 in
 theorem PushforwardHVanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
