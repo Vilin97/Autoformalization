@@ -176,7 +176,13 @@ theorem subsingleton_ext_of_ses_third {C : Type*} [Category C] [Abelian C] [HasE
     (h₂ : Subsingleton (Ext Z S.X₂ n))
     (h₁ : Subsingleton (Ext Z S.X₁ (n + 1))) :
     Subsingleton (Ext Z S.X₃ n) := by
-  sorry
+  constructor
+  intro a b
+  have h_a_δ : a.comp hS.extClass rfl = 0 := Subsingleton.elim _ _
+  have h_b_δ : b.comp hS.extClass rfl = 0 := Subsingleton.elim _ _
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ Z hS a rfl h_a_δ
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ Z hS b rfl h_b_δ
+  rw [← hc, ← hd, Subsingleton.elim c d]
 
 theorem subsingleton_sheafH_of_shortExact_third {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
@@ -216,7 +222,10 @@ theorem sheaf_mono_of_stalk_injective
     (h : ∀ x : X, Function.Injective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val))) :
     Mono f := by
-  sorry
+  have : ∀ x, Mono ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val) := by
+    intro x
+    exact (ConcreteCategory.mono_iff_injective_of_preservesPullback _).mpr (h x)
+  exact TopCat.Presheaf.mono_of_stalk_mono f
 
 /-- Every additive subgroup of `ℤ` is of the form `nℤ`. -/
 private theorem int_addSubgroup_eq_zmultiples (H : AddSubgroup ℤ) :
@@ -351,7 +360,25 @@ theorem cokernel_stalk_zero_of_stalk_surj
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val)))
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj (Limits.cokernel f).val) :
     a = 0 := by
-  sorry
+  -- stalk(cokernel.π f) is surjective (epi in sheaves → locally surj → stalk surj)
+  have hπ_surj : Function.Surjective
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map (cokernel.π f).val) := by
+    have hEpi : Epi (cokernel.π f) := inferInstance
+    have hLS := (Sheaf.isLocallySurjective_iff_epi' (φ := cokernel.π f)).mpr hEpi
+    exact ((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
+      (cokernel.π f).val).mp hLS) x
+  -- Lift a to stalk(G) via cokernel.π, then to stalk(F) via f
+  obtain ⟨b, rfl⟩ := hπ_surj a
+  obtain ⟨c, rfl⟩ := hf b
+  -- stalk(f) ≫ stalk(cokernel.π) = 0 at element c via germ representation
+  obtain ⟨U, hxU, s, rfl⟩ := TopCat.Presheaf.germ_exist F.val x c
+  simp only [TopCat.Presheaf.stalkFunctor_map_germ_apply]
+  have hcond : f.val ≫ (cokernel.π f).val = (0 : F ⟶ cokernel f).val :=
+    congr_arg Sheaf.Hom.val (cokernel.condition f)
+  have h1 : ConcreteCategory.hom ((f.val ≫ (cokernel.π f).val).app (op U)) s = 0 := by
+    rw [hcond]; rfl
+  simp only [NatTrans.comp_app, ConcreteCategory.comp_apply] at h1
+  rw [h1, map_zero]
 
 /-- **Step 4** (Hartshorne III.2.7): any subsheaf of `zeroOutsideInt V` has vanishing
     cohomology in degree `m > dim X`. Uses `subsheaf_contains_zeroOutsideInt` to find
