@@ -1,51 +1,72 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-01T05:50Z
+**Updated**: 2026-04-01T20:00Z
 
 ## Status Summary
-- **Sorry count**: 2 (both in IrreducibleStep.lean, both Mathlib gaps)
-- **Files**: 14 files under `main/`
-- **CI**: RED — last 3 commits all fail on SetupCore.lean heartbeat timeout
-- **Docs**: Broken (404 on GitHub Pages)
-- **Peak heartbeats**: 800K maxHeartbeats (SetupCore), 4M synthInstance (FlasqueVanishing), 1.6M synthInstance (SetupCore ×5)
-- **Aristotle**: No pending jobs. Both sorry's attempted previously, all failed.
+- **CI**: GREEN (commit `31af56b`)
+- **Heartbeat overrides**: 0 (was 38 across 6 files)
+- **Sorry count**: 23 in IrreducibleStep.lean (was 2 before this session; 21 are sorry'd-out proofs that broke during heartbeat optimization)
+- **Files**: 15 files under `main/`, ~4000 lines, 180 theorems
 
-## Active multi-cycle strategies
+## Priority 1: Restore IrreducibleStep.lean proofs (21 sorry's)
 
-1. **Fix CI (P0)**: SetupCore.lean `epi_g_app_top_of_H1_vanishing` times out at 800K heartbeats. Root cause is `HasSmallLocalizedHom` synthesis in Ext/derived category operations. Strategy: refactor the proof to cache expensive typeclass instances with `letI` and extract sub-lemmas to reduce per-proof heartbeat pressure. This is the #1 priority — nothing else matters until CI is green.
+These proofs existed before but broke when heartbeat overrides were removed. They need instance-caching patterns consistent with the rest of the project.
 
-2. **Sorry #1 — `exists_good_section`**: Decompose into sub-lemmas about stalk structure of subsheaves of Z_V. Prior Aristotle attempts failed. Must prove manually.
+### Category A: Instance synthesis fixes (pattern: add `haveI`/`letI`)
 
-3. **Sorry #2 — `cohomology_vanishing_of_finitelyGenerated_vanishing`**: Hartshorne 2.9, filtered colimit commutativity. Genuine Mathlib gap. Consider alternative: can we avoid filtered colimits by using Noetherian ascending chain condition on subsheaves directly?
+These proofs fail because they relied on high `synthInstance.maxHeartbeats` to synthesize expensive instances. Fix by providing instances explicitly.
 
-4. **Heartbeat reduction**: Systematic `letI` caching of `HasDerivedCategory`, `HasSmallLocalizedHom`, and related instances to bring all proofs under 400K, ideally under 200K.
+1. **`sheaf_stalk_surj_openHom`** — needs `IsIso (T.map (toSheafify ...))` instance. The stalk functor applied to `toSheafify` should be an iso (Mathlib should have this). Find the instance name and provide via `haveI`.
 
-## This cycle's work items
+2. **`sheaf_stalk_bijective_openHom`** — needs `PreservesMonomorphisms` for stalk functor. Use `TopCat.Presheaf.stalkFunctor_preserves_mono` + explicit `Mono` from `Functor.map_mono`.
 
-### 1. Fix CI — refactor `epi_g_app_top_of_H1_vanishing` (P0, `/prove`)
-The proof at SetupCore.lean:194 times out because each `rw`/`exact` step triggers re-synthesis of derived category instances. Approach:
-- Add `letI` bindings at the top for `HasDerivedCategory`, `HasSmallLocalizedHom`, and related instances
-- Extract the `hψ` sub-proof (lines 214–221) into a separate lemma to reduce the proof term size
-- If still over budget, split the proof into 2–3 lemmas with explicit type annotations to guide synthesis
-- Target: maxHeartbeats ≤ 400K, synthInstance ≤ 400K
+3. **`cokernel_stalk_zero_V`** — needs `Balanced` instance (use `letI : Balanced ... := sheafBalanced X` pattern) and `.presheaf` → `.val` fix.
 
-### 2. Reduce synthInstance.maxHeartbeats 4M in FlasqueVanishing.lean (P1, `/simplify`)
-Line 53 has `synthInstance.maxHeartbeats 4000000` — 125x the Lean default. Apply `letI` caching for `HasDerivedCategory` and related instances. Target: ≤ 200K.
+4. **`cokernel_openHom_vanishing`** — largest proof. Needs: `IsZero` from `Limits`, `closedIncl_unit_stalk_isIso` from `TopCat`, `PreservesMonomorphisms`, `Balanced`, plus `topologicalKrullDim` cast fixes (`⊥` vs `0`).
 
-### 3. Reduce remaining 1.6M synthInstance overrides in SetupCore.lean (P2, `/simplify`)
-Lines 233, 258, 312, 361 all have `synthInstance.maxHeartbeats 1600000`. Same `letI` caching strategy. Target: ≤ 400K.
+5. **`zeroOutsideInt_cohomology_vanishing`** — duplicate of `cokernel_openHom_vanishing` pattern (same fixes needed).
 
-### 4. Submit sorry's to Aristotle (P1, `/submit-aristotle`)
-Re-submit both sorry's with fresh attempts. Even though prior attempts failed, it costs nothing.
+6. **`subsheaf_zeroOutsideInt_vanishing`**, **`epiImage_zeroOutsideInt_vanishing`** — same pattern as above.
 
-### 5. Attempt sorry decomposition (P1, `/prove`)
-If time permits after fixing CI, decompose `exists_good_section` into sub-lemmas.
+### Category B: API/type fixes
 
-## Backlog
-- Split IrreducibleStep.lean (920 lines) into smaller files
-- Split ZeroOutside.lean (734 lines) into smaller files
-- Fix docs deployment (investigate GitHub Pages 404)
-- Remove redundant wrapper theorems (`grothendieck_reduction`, `grothendieck_vanishing_irreducible_pos`)
-- Fix stale docstrings
-- Re-enable disabled Mathlib linters and fix findings
-- Extract FlasqueVanishing for Mathlib PR
+7. **`presheaf_stalk_surj_openHom`** — `eqToHom` type mismatch in presheaf restriction. The `zeroOutside` presheaf restriction map needs careful type alignment.
+
+8. **`zeroOutsideInt_vanishing`** (line 69) — uses `sheafH_dimension_shift_ses` which needs `IsFlasqueSheaf (zeroOutsideInt ⊤)`. This requires showing `zeroOutsideInt ⊤ ≅ constantSheaf` on irreducible spaces, or proving flasqueness directly.
+
+9. **`isZero_zeroOutsideInt_bot`**, **`stalk_zeroOutsideInt_zero_outside`** — `IsIso (T.map (toSheafify ...))` synthesis + universe issues with `toSheafify` for `zeroOutside ⊥`.
+
+10. **`presheaf_stalk_zeroOutside_eq_zsmul_generator`**, **`stalk_zeroOutsideInt_eq_zsmul_generator`** — presheaf API: `Presheaf.restrictOpen`, `germ_res_apply` signature changes, `IsZero.eq_zero_of_src`.
+
+### Category C: Finset coproduct infrastructure
+
+11. **`finsetCoproductIncl`** — `Sigma.ι` coercion between `{σ // σ ∈ S'}` and `{σ // σ ∈ insert σ₀ S'}` subtypes.
+
+12. **`imageIncl`**, **`imageIncl_mono`** — depend on `finsetCoproductIncl`.
+
+13. **`imageIncl_cokernel_epi`** — `HasBiproduct.of_hasFiniteBiproducts` and `biproduct.isoCoproduct.inv` API names may have changed.
+
+14. **`finsetGeneratedSheaf_vanishing`** — depends on all of the above + `DecidableEq K.SectionIndex`.
+
+### Category D: Other fixes
+
+15. **`exists_nonzero_stalk_in_V`**, **`sheaf_mono_of_stalk_injective`** — `mono_iff_injective` already fixed syntax-wise, but proof body needs restoration.
+
+16. **`cokernel_stalk_zero_of_stalk_surj`** — rewrite pattern mismatch with `Presheaf.germ`.
+
+17. **`subsingleton_ext_of_ses_third`** — `topologicalKrullDim` cast: `< 0` vs `< ⊥` in `WithBot ℕ∞`.
+
+## Priority 2: Fill original 2 sorry's
+
+These are genuine mathematical gaps that existed before this session:
+
+18. **`exists_good_section`** — Given a mono `R ↪ zeroOutsideInt V` with `R` nonzero, find `V' ≤ V` and `zeroOutsideInt V' ↪ R` with stalkwise bijection on `V'`.
+
+19. **`cohomology_vanishing_of_finitelyGenerated_vanishing`** — If vanishing holds for all finitely-generated subsheaves, it holds for the full sheaf via filtered colimits.
+
+## Recommended approach
+
+- Work through Category A first (most are mechanical `haveI` additions)
+- Category B next (need careful type checking)
+- Category C last (most complex, involves coproduct API)
+- Use `/prove` skill for individual sorry's once the proof context compiles
