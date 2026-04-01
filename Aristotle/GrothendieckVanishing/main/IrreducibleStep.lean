@@ -224,7 +224,59 @@ theorem cokernel_openHom_vanishing
       Subsingleton (Sheaf.H G m)) :
     let f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
     Subsingleton (Sheaf.H (Limits.cokernel f) n) := by
-  sorry
+  intro f
+  set C := Limits.cokernel f
+  -- Y = Vᶜ is closed, proper, has dim < dim X
+  set Y := (V : Set X)ᶜ with hY_def
+  have hYcl : IsClosed Y := V.2.isClosed_compl
+  have hY_ne_univ : Y ≠ Set.univ :=
+    Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV))
+  have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne_univ
+      (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
+        (lt_of_lt_of_le hn le_top))
+  have hn_Y : ↑n > topologicalKrullDim (TopCat.of Y) :=
+    lt_trans hY_dim_lt hn
+  -- Build SES via ClosedImmersionSES on Vᶜ with C (use let-bindings for dsimp)
+  let i : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
+  let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
+  let η := adj.unit.app C
+  haveI : Epi η := epi_unit_of_closedImmersion Y hYcl C
+  let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
+  have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
+    (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
+  have hS₂ : S.X₂ = C := rfl
+  have hS₃ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
+      ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj C) := rfl
+  -- Pushforward vanishing by IH
+  have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
+    rw [hS₃]
+    exact PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ n _ hY_dim_lt hn_Y)
+  -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
+  have hKer : Subsingleton (Sheaf.H S.X₁ n) := by
+    apply subsingleton_sheafH_of_isZero'
+    apply sheaf_isZero_of_zero_stalks X; intro x a
+    by_cases hxY : x ∈ Y
+    · -- At points in Vᶜ: closedIncl_unit_stalk_isIso gives S.g iso → kernel stalk = 0
+      haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
+        dsimp [S, η]
+        exact closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
+      exact stalk_zero_of_ses_g_iso hSE x inferInstance a
+    · -- At points in V: C has zero stalks, so S.X₂ = C has zero stalk, mono gives kernel = 0
+      have hxV : x ∈ V := by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY
+      have hstalk_zero :
+          ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₂.val),
+          b = 0 := fun b => cokernel_stalk_zero_V V x hxV b
+      let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
+          TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+      haveI : Mono S.f := hSE.mono_f
+      haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
+        (C := AddCommGrpCat.{u}) (X := X) x
+      haveI : Mono (FT.map S.f) := Functor.map_mono FT S.f
+      rw [AddCommGrpCat.mono_iff_injective] at this
+      exact this ((hstalk_zero _).trans (map_zero _).symm)
+  rw [← hS₂]
+  exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
 
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
 
@@ -247,7 +299,75 @@ theorem zeroOutsideInt_cohomology_vanishing
     (V : Opens X) (hV : V ≠ ⊥)
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) m) := by
-  sorry
+  -- Step 1: m ≠ 0 (since m > dim X > 0), write m = m' + 1
+  have hm_ne : m ≠ 0 := by intro h; subst h; simp at hm; exact not_lt.mpr (le_of_lt hpos) hm
+  obtain ⟨m', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
+  -- Step 2: apply zeroOutsideInt_vanishing, reducing to cokernel vanishing at m'
+  apply zeroOutsideInt_vanishing X V m'
+  -- Goal: Subsingleton (Sheaf.H (Limits.cokernel (openHom le_top)) m')
+  -- Step 3: ClosedImmersionSES on Y = Vᶜ applied to the cokernel C
+  set f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
+  set C := Limits.cokernel f
+  set Y := (V : Set X)ᶜ with hY_def
+  have hYcl : IsClosed Y := V.2.isClosed_compl
+  have hY_ne_univ : Y ≠ Set.univ :=
+    Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV))
+  have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne_univ
+      (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
+        (lt_of_lt_of_le hm le_top))
+  -- Dimension arithmetic: m' > dim Y
+  have hm'_Y : ↑m' > topologicalKrullDim (TopCat.of Y) := by
+    show topologicalKrullDim Y < ↑m'
+    have hd_ne_bot : topologicalKrullDim X ≠ ⊥ := ne_bot_of_gt hpos
+    lift topologicalKrullDim X to ℕ∞ using hd_ne_bot with d
+    have hm' : (d : WithBot ℕ∞) < ↑((m'.succ : ℕ) : ℕ∞) := hm
+    rw [WithBot.coe_lt_coe] at hm'
+    have hd_ne_top : d ≠ ⊤ := ne_top_of_lt hm'
+    lift d to ℕ using hd_ne_top with d'
+    rw [ENat.coe_lt_coe] at hm'
+    calc topologicalKrullDim Y < ↑↑d' := hY_dim_lt
+      _ ≤ ↑↑m' := by exact_mod_cast Nat.lt_succ_iff.mp hm'
+  -- Build SES via ClosedImmersionSES on Vᶜ with C
+  let i : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
+  let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
+  let η := adj.unit.app C
+  haveI : Epi η := epi_unit_of_closedImmersion Y hYcl C
+  let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
+  have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
+    (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
+  have hS₂ : S.X₂ = C := rfl
+  have hS₃ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
+      ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj C) := rfl
+  -- Pushforward vanishing by IH
+  have hPush : Subsingleton (Sheaf.H S.X₃ m') := by
+    rw [hS₃]
+    exact PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim_lt hm'_Y)
+  -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
+  have hKer : Subsingleton (Sheaf.H S.X₁ m') := by
+    apply subsingleton_sheafH_of_isZero'
+    apply sheaf_isZero_of_zero_stalks X; intro x a
+    by_cases hxY : x ∈ Y
+    · -- At points in Vᶜ: closedIncl_unit_stalk_isIso gives S.g iso → kernel stalk = 0
+      haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
+        dsimp [S, η]
+        exact closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
+      exact stalk_zero_of_ses_g_iso hSE x inferInstance a
+    · -- At points in V: C has zero stalks, so S.X₂ = C has zero stalk, mono gives kernel = 0
+      have hxV : x ∈ V := by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY
+      have hstalk_zero :
+          ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₂.val),
+          b = 0 := fun b => cokernel_stalk_zero_V V x hxV b
+      let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
+          TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+      haveI : Mono S.f := hSE.mono_f
+      haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
+        (C := AddCommGrpCat.{u}) (X := X) x
+      haveI : Mono (FT.map S.f) := Functor.map_mono FT S.f
+      rw [AddCommGrpCat.mono_iff_injective] at this
+      exact this ((hstalk_zero _).trans (map_zero _).symm)
+  rw [← hS₂]
+  exact subsingleton_sheafH_of_shortExact_middle hSE m' hKer hPush
 
 /-- Third-term LES: for 0 → X₁ → X₂ → X₃ → 0, H^n(X₂)=0 ∧ H^{n+1}(X₁)=0 ⟹ H^n(X₃)=0. -/
 theorem subsingleton_ext_of_ses_third {C : Type*} [Category C] [Abelian C] [HasExt C]
@@ -477,7 +597,77 @@ theorem subsheaf_zeroOutsideInt_vanishing
     (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H R m) := by
-  sorry
+  by_cases hR : IsZero R
+  · exact subsingleton_sheafH_of_isZero' R hR m
+  · -- Step 1: Get V' ⊆ V, V' ≠ ⊥, and j : zeroOutsideInt V' ⟶ R with stalk-iso on V'
+    obtain ⟨V', hV'le, hV'ne, j, hj_mono, hj_stalk⟩ :=
+      subsheaf_contains_zeroOutsideInt V R i hR
+    haveI : Mono j := hj_mono
+    -- Step 2: Build SES  0 → zeroOutsideInt V' → R → cokernel j → 0
+    let S := ShortComplex.mk j (cokernel.π j) (cokernel.condition j)
+    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel j)) inferInstance inferInstance
+    -- Step 3: First-term vanishing: H^m(zeroOutsideInt V') = 0
+    have hV'van : Subsingleton (Sheaf.H S.X₁ m) :=
+      zeroOutsideInt_cohomology_vanishing X ih hpos V' hV'ne m hm
+    -- Step 4: Third-term (cokernel) vanishing via ClosedImmersionSES on (V')^c
+    have hCoker : Subsingleton (Sheaf.H S.X₃ m) := by
+      set CJ := Limits.cokernel j
+      -- Y = (V')^c is closed, proper, has dim < dim X
+      set Y := (V' : Set X)ᶜ with hY_def
+      have hYcl : IsClosed Y := V'.isOpen.isClosed_compl
+      have hY_ne_univ : Y ≠ Set.univ :=
+        Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV'ne))
+      have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
+        topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne_univ
+          (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
+            (lt_of_lt_of_le hm le_top))
+      have hm_Y : ↑m > topologicalKrullDim (TopCat.of Y) :=
+        lt_trans hY_dim_lt hm
+      -- Build SES via ClosedImmersionSES on (V')^c with CJ
+      let ci : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
+      let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} ci
+      let η := adj.unit.app CJ
+      haveI : Epi η := epi_unit_of_closedImmersion Y hYcl CJ
+      let S' := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
+      have hSE' : S'.ShortExact := ShortComplex.ShortExact.mk'
+        (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
+      have hS'₂ : S'.X₂ = CJ := rfl
+      have hS'₃ : S'.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u} ci).obj
+          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} ci).obj CJ) := rfl
+      -- Pushforward vanishing by IH
+      have hPush : Subsingleton (Sheaf.H S'.X₃ m) := by
+        rw [hS'₃]
+        exact PushforwardHVanishing Y hYcl _ m (@ih (TopCat.of Y) _ m _ hY_dim_lt hm_Y)
+      -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
+      have hKer : Subsingleton (Sheaf.H S'.X₁ m) := by
+        apply subsingleton_sheafH_of_isZero'
+        apply sheaf_isZero_of_zero_stalks X; intro x a
+        by_cases hxY : x ∈ Y
+        · -- At points in (V')^c: closedIncl_unit_stalk_isIso gives S'.g iso → kernel stalk = 0
+          haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S'.g.val) := by
+            dsimp [S', η]
+            exact closedIncl_unit_stalk_isIso hYcl CJ ⟨x, hxY⟩
+          exact stalk_zero_of_ses_g_iso hSE' x inferInstance a
+        · -- At points in V': cokernel j has zero stalks (j is stalk-surjective)
+          have hxV' : x ∈ V' := by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY
+          have hstalk_zero :
+              ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S'.X₂.val),
+              b = 0 := fun b =>
+            cokernel_stalk_zero_of_stalk_surj j x (hj_stalk x hxV').2 b
+          let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
+              TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+          haveI : Mono S'.f := hSE'.mono_f
+          haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
+            (C := AddCommGrpCat.{u}) (X := X) x
+          haveI : Mono (FT.map S'.f) := Functor.map_mono FT S'.f
+          rw [AddCommGrpCat.mono_iff_injective] at this
+          exact this ((hstalk_zero _).trans (map_zero _).symm)
+      have hS₃_eq : S.X₃ = S'.X₂ := rfl
+      rw [hS₃_eq]
+      exact subsingleton_sheafH_of_shortExact_middle hSE' m hKer hPush
+    -- Step 5: Middle-term LES gives H^m(R) = 0
+    exact subsingleton_sheafH_of_shortExact_middle hSE m hV'van hCoker
 
 /-- **Steps 3C + 4 + LES** (Hartshorne III.2.7): any epi image of `zeroOutsideInt V` has
     vanishing cohomology in degree `m > dim X`. Uses third-term LES with
@@ -495,7 +685,21 @@ theorem epiImage_zeroOutsideInt_vanishing
     (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G) (hf : Epi f)
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H G m) := by
-  sorry
+  by_cases hV : V = ⊥
+  · subst hV
+    -- If V = ⊥, then zeroOutsideInt ⊥ is zero, so G is zero (epi image of zero)
+    have hZero : IsZero G := (isZero_zeroOutsideInt_bot X).of_epi f
+    exact subsingleton_sheafH_of_isZero' G hZero m
+  · -- V ≠ ⊥: use kernel-cokernel SES  0 → ker f → zeroOutsideInt V → G → 0
+    let S := ShortComplex.mk (kernel.ι f) f (kernel.condition f)
+    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
+    have hZV : Subsingleton (Sheaf.H S.X₂ m) :=
+      zeroOutsideInt_cohomology_vanishing X ih hpos V hV m hm
+    have hKer : Subsingleton (Sheaf.H S.X₁ (m + 1)) :=
+      subsheaf_zeroOutsideInt_vanishing X ih hpos V (kernel f) (kernel.ι f) (m + 1)
+        (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
+    exact subsingleton_sheafH_of_shortExact_third hSE m hZV hKer
 
 /-- **Hartshorne 2.9 core**: on a Noetherian space, if `H^m = 0` for all finitely generated
     subsheaves of `K`, then `H^m(K) = 0`. This encapsulates the commutativity of cohomology
