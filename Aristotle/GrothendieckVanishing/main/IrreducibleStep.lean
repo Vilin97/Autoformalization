@@ -66,14 +66,7 @@ theorem zeroOutsideInt_vanishing
     (hCoker : Subsingleton (Sheaf.H (Limits.cokernel
       (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))) m)) :
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) (m + 1)) := by
-  let f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
-  let S := ShortComplex.mk f (Limits.cokernel.π f) (Limits.cokernel.condition f)
-  have hSE : S.ShortExact :=
-    ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_g_is_cokernel _ (Limits.cokernelIsCokernel _))
-      inferInstance inferInstance
-  exact sheafH_dimension_shift_ses hSE m hCoker
-    (FlasqueVanishing X S.X₂ (sorry : IsFlasqueSheaf S.X₂) m)
+  sorry
 
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
     any germ in the larger zero-outside presheaf can be lifted by restricting to `W ∩ V ≤ V`
@@ -83,16 +76,7 @@ private theorem presheaf_stalk_surj_openHom
     Function.Surjective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
         (TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) h))) := by
-  intro g
-  obtain ⟨W, hxW, s, rfl⟩ := (TopCat.Presheaf.constZ.zeroOutside U).germ_exist x g
-  refine ⟨(TopCat.Presheaf.constZ.zeroOutside V).germ (W ⊓ V) x ⟨hxW, hx⟩
-    ((eqToHom (TopCat.Presheaf.zeroOutside_le (F := TopCat.Presheaf.constZ) inf_le_right).symm)
-    ((TopCat.Presheaf.constZ.zeroOutside U).map (homOfLE inf_le_left).op s)), ?_⟩
-  rw [TopCat.Presheaf.stalkFunctor_map_germ_apply,
-    ← TopCat.Presheaf.germ_res_apply _ (homOfLE inf_le_left) s ⟨hxW, hx⟩]
-  congr 1
-  simp [TopCat.Presheaf.zeroOutside_openHom, h, inf_le_right,
-    TopCat.Presheaf.zeroOutside_le, TopCat.Presheaf.zeroOutside]
+  sorry
 
 /-- The presheaf stalk map of `zeroOutside_openHom(le_top)` at `x ∈ V` is surjective. -/
 private theorem presheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V) :
@@ -109,18 +93,7 @@ private theorem sheaf_stalk_surj_openHom
     Function.Surjective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
         (TopCat.Sheaf.zeroOutsideInt.openHom h).val)) := by
-  let J := Opens.grothendieckTopology (T := X)
-  let φ := TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) h
-  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  have hnat : T.map φ ≫ T.map (toSheafify J _) = T.map (toSheafify J _) ≫ T.map (sheafifyMap J φ) := by
-    rw [← T.map_comp, ← T.map_comp, toSheafify_naturality]
-  haveI : IsIso (T.map (toSheafify J (TopCat.Presheaf.constZ.zeroOutside V))) := inferInstance
-  haveI : IsIso (T.map (toSheafify J (TopCat.Presheaf.constZ.zeroOutside U))) := inferInstance
-  intro g
-  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J _))).2 g
-  obtain ⟨p, hp⟩ := presheaf_stalk_surj_openHom h x hx q
-  exact ⟨ConcreteCategory.hom (T.map (toSheafify J _)) p, by
-    simp only [← ConcreteCategory.comp_apply, ← hnat, ConcreteCategory.comp_apply, hp]⟩
+  sorry
 
 /-- The sheaf stalk map of `openHom(le_top)` at `x ∈ V` is surjective. -/
 private theorem sheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V) :
@@ -134,14 +107,8 @@ private theorem sheaf_stalk_bijective_openHom
     {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
     Function.Bijective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-        (TopCat.Sheaf.zeroOutsideInt.openHom h).val)) := by
-  refine ⟨?_, sheaf_stalk_surj_openHom h x hx⟩
-  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
-    (C := AddCommGrpCat.{u}) (X := X) x
-  haveI : Mono (T.map (TopCat.Sheaf.zeroOutsideInt.openHom h).val) := by
-    exact Functor.map_mono T (TopCat.Sheaf.zeroOutsideInt.openHom h).val
-  exact (AddCommGrpCat.mono_iff_injective _).mp inferInstance
+        (TopCat.Sheaf.zeroOutsideInt.openHom h).val)) :=
+  ⟨sorry, sheaf_stalk_surj_openHom h x hx⟩
 
 /-- The cokernel of `openHom(le_top)` has zero stalks at points of `V`.
     Uses: sheaf stalk surjectivity + section_ext + local surjectivity of `cokernel.π`
@@ -150,33 +117,7 @@ private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
       (Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))).val) :
     a = 0 := by
-  obtain ⟨W, hxW, t, rfl⟩ := (Limits.cokernel _).presheaf.germ_exist x a
-  rw [← TopCat.Presheaf.germ_res_apply _ (homOfLE inf_le_left) t ⟨hxW, hx⟩]
-  suffices h : (Limits.cokernel _).presheaf.map (homOfLE inf_le_left).op t = 0 by
-    rw [h]; exact map_zero _
-  apply TopCat.Presheaf.section_ext (Limits.cokernel _) (W ⊓ V) _ 0
-  intro y hy; simp only [map_zero]
-  have hls := (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u}
-    (Limits.cokernel.π _)).mpr (inferInstance : Epi (Limits.cokernel.π _))
-  rw [show Sheaf.IsLocallySurjective _ = TopCat.Presheaf.IsLocallySurjective _ from rfl,
-    TopCat.Presheaf.isLocallySurjective_iff] at hls
-  obtain ⟨W_y, iW_y, ⟨u_y, hu_y⟩, hy_W_y⟩ := hls (W ⊓ V)
-    ((Limits.cokernel _).presheaf.map (homOfLE inf_le_left).op t) y hy
-  obtain ⟨v_germ, hv⟩ := sheaf_stalk_surj V y hy.2
-    ((TopCat.Sheaf.zeroOutsideInt ⊤).presheaf.germ W_y y hy_W_y u_y)
-  obtain ⟨W'', hyW'', w, rfl⟩ := (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ_exist y v_germ
-  rw [TopCat.Presheaf.stalkFunctor_map_germ_apply] at hv
-  obtain ⟨W''', hW'''W'', hW'''W_y, hyW''', hfwu⟩ :=
-    (TopCat.Sheaf.zeroOutsideInt ⊤).presheaf.germ_eq y hyW'' hy_W_y _ _ hv
-  rw [← TopCat.Presheaf.germ_res_apply _ iW_y _ hy_W_y, hu_y,
-    ← TopCat.Presheaf.germ_res_apply _ (homOfLE hW'''W_y) u_y hyW''',
-    TopCat.Presheaf.stalkFunctor_map_germ_apply, ← hfwu,
-    show (Limits.cokernel.π _).val.app (op W''')
-      ((TopCat.Sheaf.zeroOutsideInt.openHom le_top).val.app (op W''') _) =
-      ConcreteCategory.hom (((TopCat.Sheaf.zeroOutsideInt.openHom le_top) ≫
-        Limits.cokernel.π _).val.app (op W''')) _ from by
-        simp [ConcreteCategory.comp_apply],
-    Limits.cokernel.condition]; simp
+  sorry
 
 /-- Cokernel of `openHom(le_top)` has vanishing cohomology on irreducible X.
     The cokernel C has zero stalks on V (since openHom is stalkwise iso there).
@@ -195,57 +136,7 @@ theorem cokernel_openHom_vanishing
       Subsingleton (Sheaf.H G m)) :
     let f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
     Subsingleton (Sheaf.H (Limits.cokernel f) n) := by
-  intro f
-  let Y := (V : Set X)ᶜ
-  have hYcl : IsClosed Y := V.isOpen.isClosed_compl
-  have hY_ne : Y ≠ Set.univ := by
-    intro h; apply hV; ext x; simp only [Opens.coe_bot, Set.mem_empty_iff_false, iff_false]
-    exact fun hx => (show x ∈ Y from h ▸ Set.mem_univ x) hx
-  have hY_dim : topologicalKrullDim (TopCat.of Y) < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne
-      (lt_of_le_of_lt (topologicalKrullDim_subspace_le X Y)
-        (lt_of_lt_of_le (show topologicalKrullDim X < ⊤ from lt_of_lt_of_le hn le_top) le_top))
-  have hn_Y : ↑n > topologicalKrullDim (TopCat.of Y) := lt_trans hY_dim hn
-  obtain ⟨S', hS'E, hS'₂, hS'₃⟩ := ClosedImmersionSES Y hYcl (Limits.cokernel f)
-  -- Kernel K of η_C has zero stalks everywhere → IsZero → vanishing
-  -- On Vᶜ: stalk iso from closedIncl_unit_stalk_isIso → kernel stalk = 0
-  -- On V: C has zero stalks (openHom stalkwise iso) → K ↪ C has zero stalks
-  have hK_zero : IsZero S'.X₁ := by
-    apply sheaf_isZero_of_zero_stalks X S'.X₁
-    intro x a
-    by_cases hx : (x : X) ∈ (V : Set X)
-    · -- x ∈ V: cokernel has zero stalks on V.
-      -- The presheaf stalk map of openHom at x ∈ V is surjective (restriction to W∩V
-      -- where the presheaf map is eqToHom). The sheaf stalk map is surjective by
-      -- conjugation via sheafifyStalkIso. Then cokernel stalk = 0 by section_ext +
-      -- local surjectivity of cokernel.π + cokernel.condition.
-      -- K ↪ C (mono) and C_x = 0, so K_x = 0.
-      -- K ↪ cokernel(f) via S'.f (mono). Map a into stalk(cokernel(f), x).
-      -- stalk(cokernel(f), x) = 0, so the image of a is 0.
-      -- By injectivity of the stalk of S'.f (mono), a = 0.
-      let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-      have ha_img : ConcreteCategory.hom (T.map S'.f.val) a = 0 := by
-        rw [hS'₂] at *; exact cokernel_stalk_zero_V V x hx _
-      haveI : Mono S'.f := hS'E.mono_f
-      haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
-        (C := AddCommGrpCat.{u}) (X := X) x
-      haveI : Mono (T.map S'.f.val) := Functor.map_mono T S'.f.val
-      rwa [(AddCommGrpCat.mono_iff_injective _).mp inferInstance |>.eq_iff] at ha_img
-    · -- x ∈ Vᶜ = Y: stalk map of η is iso by closedIncl_unit_stalk_isIso.
-      -- kernel stalk at x = 0.
-      have hxY : (x : X) ∈ Y := hx
-      haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-          (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
-            (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩ : TopCat.of Y ⟶ X)).unit.app
-            (Limits.cokernel f) |>.val) :=
-        closedIncl_unit_stalk_isIso hYcl (Limits.cokernel f) ⟨x, hxY⟩
-      exact stalk_zero_of_ses_g_iso hS'E x inferInstance a
-  have hK_van : Subsingleton (Sheaf.H S'.X₁ n) :=
-    subsingleton_sheafH_of_isZero' S'.X₁ hK_zero n
-  have hP_van : Subsingleton (Sheaf.H S'.X₃ n) := by
-    rw [hS'₃]
-    exact PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ n _ hY_dim hn_Y)
-  exact hS'₂ ▸ subsingleton_sheafH_of_shortExact_middle hS'E n hK_van hP_van
+  sorry
 
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
 
@@ -268,49 +159,7 @@ theorem zeroOutsideInt_cohomology_vanishing
     (V : Opens X) (hV : V ≠ ⊥)
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) m) := by
-  have hm0 : m ≠ 0 := by
-    intro h; subst h; simp at hm; exact not_lt.mpr bot_le (lt_trans hpos hm)
-  obtain ⟨m', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm0
-  apply zeroOutsideInt_vanishing X V m'
-  let Y := (V : Set X)ᶜ
-  have hYcl : IsClosed Y := V.isOpen.isClosed_compl
-  have hY_ne : Y ≠ Set.univ := by
-    intro h; apply hV; ext x; simp only [Opens.coe_bot, Set.mem_empty_iff_false, iff_false]
-    exact fun hx => (show x ∈ Y from h ▸ Set.mem_univ x) hx
-  have hdim_lt_top : topologicalKrullDim X < ⊤ := lt_of_lt_of_le hm le_top
-  have hY_dim : topologicalKrullDim (TopCat.of Y) < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne
-      (lt_of_le_of_lt (topologicalKrullDim_subspace_le X Y)
-        (lt_of_lt_of_le hdim_lt_top le_top))
-  have hm'_Y : (m' : WithBot ℕ∞) > topologicalKrullDim (TopCat.of Y) :=
-    lt_trans hY_dim (by exact_mod_cast Nat.lt_of_lt_pred (by exact_mod_cast hm))
-  let f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
-  obtain ⟨S', hS'E, hS'₂, hS'₃⟩ := ClosedImmersionSES Y hYcl (Limits.cokernel f)
-  have hK_zero : IsZero S'.X₁ := by
-    apply sheaf_isZero_of_zero_stalks X S'.X₁
-    intro x a
-    by_cases hx : (x : X) ∈ (V : Set X)
-    · let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-      have ha_img : ConcreteCategory.hom (T.map S'.f.val) a = 0 := by
-        rw [hS'₂] at *; exact cokernel_stalk_zero_V V x hx _
-      haveI : Mono S'.f := hS'E.mono_f
-      haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
-        (C := AddCommGrpCat.{u}) (X := X) x
-      haveI : Mono (T.map S'.f.val) := Functor.map_mono T S'.f.val
-      rwa [(AddCommGrpCat.mono_iff_injective _).mp inferInstance |>.eq_iff] at ha_img
-    · have hxY : (x : X) ∈ Y := hx
-      haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-          (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
-            (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩ : TopCat.of Y ⟶ X)).unit.app
-            (Limits.cokernel f) |>.val) :=
-        closedIncl_unit_stalk_isIso hYcl (Limits.cokernel f) ⟨x, hxY⟩
-      exact stalk_zero_of_ses_g_iso hS'E x inferInstance a
-  have hK_van : Subsingleton (Sheaf.H S'.X₁ m') :=
-    subsingleton_sheafH_of_isZero' S'.X₁ hK_zero m'
-  have hP_van : Subsingleton (Sheaf.H S'.X₃ m') := by
-    rw [hS'₃]
-    exact PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim hm'_Y)
-  exact hS'₂ ▸ subsingleton_sheafH_of_shortExact_middle hS'E m' hK_van hP_van
+  sorry
 
 /-- Third-term LES: for 0 → X₁ → X₂ → X₃ → 0, H^n(X₂)=0 ∧ H^{n+1}(X₁)=0 ⟹ H^n(X₃)=0. -/
 theorem subsingleton_ext_of_ses_third {C : Type*} [Category C] [Abelian C] [HasExt C]
@@ -318,12 +167,7 @@ theorem subsingleton_ext_of_ses_third {C : Type*} [Category C] [Abelian C] [HasE
     (h₂ : Subsingleton (Ext Z S.X₂ n))
     (h₁ : Subsingleton (Ext Z S.X₁ (n + 1))) :
     Subsingleton (Ext Z S.X₃ n) := by
-  constructor; intro a b
-  have ha_δ : a.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
-  have hb_δ : b.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ Z hS a rfl ha_δ
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ Z hS b rfl hb_δ
-  rw [← hc, ← hd, @Subsingleton.elim _ h₂ c d]
+  sorry
 
 theorem subsingleton_sheafH_of_shortExact_third {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
@@ -336,39 +180,14 @@ theorem subsingleton_sheafH_of_shortExact_third {X : TopCat.{u}}
 /-- `zeroOutsideInt ⊥` is the zero sheaf (all stalks vanish). -/
 theorem isZero_zeroOutsideInt_bot (X : TopCat.{u}) :
     IsZero (TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X)) := by
-  apply sheaf_isZero_of_zero_stalks X; intro x a
-  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  haveI : IsIso (T.map (toSheafify (Opens.grothendieckTopology X)
-    (TopCat.Presheaf.constZ.zeroOutside (⊥ : Opens X)))) := inferInstance
-  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso
-    (T.map (toSheafify _ (TopCat.Presheaf.constZ.zeroOutside ⊥)))).2 a
-  obtain ⟨W, hxW, s, rfl⟩ := (TopCat.Presheaf.constZ.zeroOutside (⊥ : Opens X)).germ_exist x q
-  have hW : ¬ (W ≤ ⊥) := fun h => (Opens.mem_bot.mp (h hxW))
-  have hs : s = 0 := @IsZero.eq_zero_of_src _ _ _ (by
-    rw [show (TopCat.Presheaf.constZ.zeroOutside (⊥ : Opens X)).obj (op W) =
-      (if W ≤ ⊥ then TopCat.Presheaf.constZ.obj (op W) else 0) from by
-        simp [TopCat.Presheaf.zeroOutside]]
-    rw [if_neg hW]; exact isZero_zero _) s
-  simp [hs, map_zero]
+  sorry
 
 /-- Stalks of `zeroOutsideInt V` vanish outside `V`. -/
 theorem stalk_zeroOutsideInt_zero_outside
     {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∉ V)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
       (TopCat.Sheaf.zeroOutsideInt V).val) : a = 0 := by
-  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  haveI : IsIso (T.map (toSheafify (Opens.grothendieckTopology X)
-    (TopCat.Presheaf.constZ.zeroOutside V))) := inferInstance
-  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso
-    (T.map (toSheafify _ (TopCat.Presheaf.constZ.zeroOutside V)))).2 a
-  obtain ⟨W, hxW, s, rfl⟩ := (TopCat.Presheaf.constZ.zeroOutside V).germ_exist x q
-  have hW : ¬ (W ≤ V) := fun h => hx (h hxW)
-  have hs : s = 0 := @IsZero.eq_zero_of_src _ _ _ (by
-    rw [show (TopCat.Presheaf.constZ.zeroOutside V).obj (op W) =
-      (if W ≤ V then TopCat.Presheaf.constZ.obj (op W) else 0) from by
-        simp [TopCat.Presheaf.zeroOutside]]
-    rw [if_neg hW]; exact isZero_zero _) s
-  simp [hs, map_zero]
+  sorry
 
 /-- A nonzero subsheaf of `zeroOutsideInt V` has a nonzero stalk at some point of `V`. -/
 theorem exists_nonzero_stalk_in_V
@@ -379,16 +198,7 @@ theorem exists_nonzero_stalk_in_V
     ∃ (x : X) (_ : x ∈ V)
       (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R.val),
       a ≠ 0 := by
-  by_contra h; push_neg at h; apply hR
-  apply sheaf_isZero_of_zero_stalks; intro x a
-  by_cases hx : (x : X) ∈ (V : Set X)
-  · exact h x hx a
-  · let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-    have h_img : ConcreteCategory.hom (T.map i.val) a = 0 :=
-      stalk_zeroOutsideInt_zero_outside V x hx _
-    haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
-    haveI : Mono (T.map i.val) := Functor.map_mono T i.val
-    rwa [(AddCommGrpCat.mono_iff_injective _).mp inferInstance |>.eq_iff] at h_img
+  sorry
 
 /-- A sheaf morphism is mono if all its stalk maps are injective. -/
 theorem sheaf_mono_of_stalk_injective
@@ -397,9 +207,7 @@ theorem sheaf_mono_of_stalk_injective
     (h : ∀ x : X, Function.Injective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val))) :
     Mono f := by
-  letI : ∀ x : X, Mono ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val) :=
-    fun x => ((AddCommGrpCat.mono_iff_injective _).mp <| ConcreteCategory.mono_of_injective _ (h x))
-  exact TopCat.Presheaf.mono_of_stalk_mono f
+  sorry
 
 /-- Every additive subgroup of `ℤ` is of the form `nℤ`. -/
 private theorem int_addSubgroup_eq_zmultiples (H : AddSubgroup ℤ) :
@@ -417,47 +225,7 @@ private theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
     ∃ n : ℤ,
       a = n • ((TopCat.Presheaf.constZ.zeroOutside V).germ V x hx
         (TopCat.Presheaf.zeroOutside.generator V)) := by
-  obtain ⟨W, hxW, s, rfl⟩ := (TopCat.Presheaf.constZ.zeroOutside V).germ_exist x a
-  by_cases hWV : W ≤ V
-  · have hObjW : (TopCat.Presheaf.constZ.zeroOutside V).obj (op W) =
-        AddCommGrpCat.of (ULift ℤ) := by
-      simp [TopCat.Presheaf.zeroOutside, hWV, TopCat.Presheaf.constZ]
-    let z : ULift ℤ := (AddCommGrpCat.Hom.hom (eqToHom hObjW)) s
-    have hgenW :
-        Presheaf.restrictOpen (F := TopCat.Presheaf.constZ.zeroOutside V)
-            (TopCat.Presheaf.zeroOutside.generator V) W hWV =
-          (eqToHom hObjW.symm : AddCommGrpCat.of (ULift ℤ) ⟶
-            (TopCat.Presheaf.constZ.zeroOutside V).obj (op W)) (1 : ULift ℤ) := by
-      simpa [TopCat.Presheaf.zeroOutside_openHom, TopCat.Presheaf.zeroOutside,
-        TopCat.Presheaf.constZ, TopCat.Presheaf.zeroOutside.generator, hWV, hObjW] using
-        (TopCat.Presheaf.zeroOutside.openHom_generator (U := V) (V := W) hWV).symm
-    have hs :
-        s = (z.down : ℤ) • Presheaf.restrictOpen (F := TopCat.Presheaf.constZ.zeroOutside V)
-          (TopCat.Presheaf.zeroOutside.generator V) W hWV := by
-      calc
-        s = (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) z := by
-          simpa [z] using
-            (TopCat.Presheaf.zeroOutside.hom_eqToHom_symm_hom_eqToHom (e := hObjW) s).symm
-        _ = (z.down : ℤ) • (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) (1 : ULift ℤ) := by
-          have hz : z = (z.down : ℤ) • (1 : ULift ℤ) := by
-            ext
-            simp [z]
-          rw [hz]
-          simpa using
-            (map_zsmul (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) z.down (1 : ULift ℤ))
-        _ = (z.down : ℤ) • Presheaf.restrictOpen (F := TopCat.Presheaf.constZ.zeroOutside V)
-              (TopCat.Presheaf.zeroOutside.generator V) W hWV := by
-          rw [hgenW]
-    refine ⟨z.down, ?_⟩
-    rw [hs]
-    simp only [map_zsmul]
-    rw [← TopCat.Presheaf.germ_res_apply _ (homOfLE hWV)
-      (TopCat.Presheaf.zeroOutside.generator V) hxW]
-  · have hs : s = 0 := by
-      exact @IsZero.eq_zero_of_src _ _ _ (TopCat.Presheaf.zeroOutside_isZero
-        (F := TopCat.Presheaf.constZ) hWV) s
-    refine ⟨0, ?_⟩
-    simp [hs]
+  sorry
 
 /-- At a point inside the support open, every stalk element of `zeroOutsideInt V` is an integer
     multiple of the germ of the distinguished generator over `V`. -/
@@ -468,18 +236,7 @@ private theorem stalk_zeroOutsideInt_eq_zsmul_generator
     ∃ n : ℤ,
       a = n • ((TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V x hx
         (TopCat.Sheaf.zeroOutsideInt.generator V)) := by
-  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  haveI : IsIso (T.map (toSheafify (Opens.grothendieckTopology X)
-    (TopCat.Presheaf.constZ.zeroOutside V))) := inferInstance
-  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso
-    (T.map (toSheafify (Opens.grothendieckTopology X)
-      (TopCat.Presheaf.constZ.zeroOutside V)))).2 a
-  obtain ⟨n, hn⟩ := presheaf_stalk_zeroOutside_eq_zsmul_generator V x hx q
-  refine ⟨n, ?_⟩
-  rw [hn]
-  simp only [map_zsmul]
-  rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
-  rfl
+  sorry
 
 /-- Every nonzero subgroup of `ULift ℤ` is generated by its smallest positive element.
     Proved by Aristotle (job 5bca8de6). -/
@@ -585,37 +342,7 @@ theorem cokernel_stalk_zero_of_stalk_surj
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val)))
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj (Limits.cokernel f).val) :
     a = 0 := by
-  obtain ⟨W, hxW, t, rfl⟩ := (cokernel f).presheaf.germ_exist x a
-  have hls := (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u}
-    (cokernel.π f)).mpr inferInstance
-  rw [show Sheaf.IsLocallySurjective _ = TopCat.Presheaf.IsLocallySurjective _ from rfl,
-    TopCat.Presheaf.isLocallySurjective_iff] at hls
-  obtain ⟨W', iW', ⟨s, hs⟩, hxW'⟩ := hls W t x hxW
-  obtain ⟨c, hc⟩ := hf (G.presheaf.germ W' x hxW' s)
-  obtain ⟨W'', hxW'', r, rfl⟩ := F.presheaf.germ_exist x c
-  rw [TopCat.Presheaf.stalkFunctor_map_germ_apply] at hc
-  obtain ⟨W''', hW'''W'', hW'''W', hxW''', hfrs⟩ :=
-    G.presheaf.germ_eq x hxW'' hxW' _ _ hc
-  rw [← TopCat.Presheaf.germ_res_apply _ (iW'.op ≫ (homOfLE hW'''W').op) t hxW''']
-  suffices h : (cokernel f).presheaf.map (iW'.op ≫ (homOfLE hW'''W').op) t = 0 by
-    rw [h]; exact map_zero _
-  rw [show (cokernel f).presheaf.map (iW'.op ≫ (homOfLE hW'''W').op) t =
-    (cokernel f).presheaf.map (homOfLE hW'''W').op
-      ((cokernel f).presheaf.map iW'.op t) from by
-        rw [← (cokernel f).presheaf.map_comp], hs,
-    show (cokernel f).presheaf.map (homOfLE hW'''W').op
-      ((cokernel.π f).val.app (op W') s) =
-      (cokernel.π f).val.app (op W''')
-      (G.presheaf.map (homOfLE hW'''W').op s) from by
-        change ((cokernel.π f).val.app (op W') ≫
-          (cokernel f).presheaf.map (homOfLE hW'''W').op) s = _
-        rw [← (cokernel.π f).val.naturality],
-    show G.presheaf.map (homOfLE hW'''W').op s =
-      G.presheaf.map (homOfLE hW'''W'').op (f.val.app (op W'') r) from by
-        rw [← hfrs]]
-  change ConcreteCategory.hom ((f ≫ cokernel.π f).val.app (op W'''))
-    (F.presheaf.map (homOfLE hW'''W'').op r) = 0
-  rw [cokernel.condition]; exact AddMonoidHom.zero_apply _
+  sorry
 
 /-- **Step 4** (Hartshorne III.2.7): any subsheaf of `zeroOutsideInt V` has vanishing
     cohomology in degree `m > dim X`. Uses `subsheaf_contains_zeroOutsideInt` to find
@@ -633,56 +360,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
     (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H R m) := by
-  by_cases hR : IsZero R
-  · exact subsingleton_sheafH_of_isZero' R hR m
-  · obtain ⟨V', hV'le, hV'ne, j, hj_mono, hj_stalk⟩ :=
-      subsheaf_contains_zeroOutsideInt V R i hR
-    haveI : Mono j := hj_mono
-    let S := ShortComplex.mk j (cokernel.π j) (cokernel.condition j)
-    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel j))
-      inferInstance inferInstance
-    have hV'van : Subsingleton (Sheaf.H S.X₁ m) :=
-      zeroOutsideInt_cohomology_vanishing X ih hpos V' hV'ne m hm
-    have hCoker : Subsingleton (Sheaf.H S.X₃ m) := by
-      let Y := (V' : Set X)ᶜ
-      have hYcl : IsClosed Y := V'.isOpen.isClosed_compl
-      have hY_ne : Y ≠ Set.univ := by
-        intro h; apply hV'ne; ext x
-        simp only [Opens.coe_bot, Set.mem_empty_iff_false, iff_false]
-        exact fun hx => (show x ∈ Y from h ▸ Set.mem_univ x) hx
-      have hdim_lt_top : topologicalKrullDim X < ⊤ := lt_of_lt_of_le hm le_top
-      have hY_dim : topologicalKrullDim (TopCat.of Y) < topologicalKrullDim X :=
-        topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne
-          (lt_of_le_of_lt (topologicalKrullDim_subspace_le X Y)
-            (lt_of_lt_of_le hdim_lt_top le_top))
-      have hm_Y : (m : WithBot ℕ∞) > topologicalKrullDim (TopCat.of Y) :=
-        lt_trans hY_dim hm
-      obtain ⟨S', hS'E, hS'₂, hS'₃⟩ := ClosedImmersionSES Y hYcl (cokernel j)
-      have hK_zero : IsZero S'.X₁ := by
-        apply sheaf_isZero_of_zero_stalks X S'.X₁; intro x a
-        by_cases hx : (x : X) ∈ (V' : Set X)
-        · let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-          have ha_img : ConcreteCategory.hom (T.map S'.f.val) a = 0 := by
-            rw [hS'₂]; exact cokernel_stalk_zero_of_stalk_surj j x (hj_stalk x hx).2 _
-          haveI : Mono S'.f := hS'E.mono_f
-          haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
-            (C := AddCommGrpCat.{u}) (X := X) x
-          haveI : Mono (T.map S'.f.val) := Functor.map_mono T S'.f.val
-          rwa [(AddCommGrpCat.mono_iff_injective _).mp inferInstance |>.eq_iff] at ha_img
-        · have hxY : (x : X) ∈ Y := hx
-          haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-              (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
-                (TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩ : TopCat.of Y ⟶ X)).unit.app
-                (cokernel j) |>.val) :=
-            closedIncl_unit_stalk_isIso hYcl (cokernel j) ⟨x, hxY⟩
-          exact stalk_zero_of_ses_g_iso hS'E x inferInstance a
-      have hK_van := subsingleton_sheafH_of_isZero' S'.X₁ hK_zero m
-      have hP_van : Subsingleton (Sheaf.H S'.X₃ m) := by
-        rw [hS'₃]
-        exact PushforwardHVanishing Y hYcl _ m (@ih (TopCat.of Y) _ m _ hY_dim hm_Y)
-      exact hS'₂ ▸ subsingleton_sheafH_of_shortExact_middle hS'E m hK_van hP_van
-    exact subsingleton_sheafH_of_shortExact_middle hSE m hV'van hCoker
+  sorry
 
 /-- **Steps 3C + 4 + LES** (Hartshorne III.2.7): any epi image of `zeroOutsideInt V` has
     vanishing cohomology in degree `m > dim X`. Uses third-term LES with
@@ -700,21 +378,7 @@ theorem epiImage_zeroOutsideInt_vanishing
     (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G) (hf : Epi f)
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H G m) := by
-  by_cases hV : V = ⊥
-  · subst hV
-    have hZero : IsZero G := by
-      rw [IsZero.iff_id_eq_zero]
-      exact (cancel_epi f).mp (by simp [(isZero_zeroOutsideInt_bot X).eq_of_src f 0])
-    exact subsingleton_sheafH_of_isZero' G hZero m
-  · let S := ShortComplex.mk (kernel.ι f) f (kernel.condition f)
-    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
-    have hZV : Subsingleton (Sheaf.H S.X₂ m) :=
-      zeroOutsideInt_cohomology_vanishing X ih hpos V hV m hm
-    have hKer : Subsingleton (Sheaf.H S.X₁ (m + 1)) :=
-      subsheaf_zeroOutsideInt_vanishing X ih hpos V (kernel f) (kernel.ι f) (m + 1)
-        (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
-    exact subsingleton_sheafH_of_shortExact_third hSE m hZV hKer
+  sorry
 
 /-- **Hartshorne 2.9 core**: on a Noetherian space, if `H^m = 0` for all finitely generated
     subsheaves of `K`, then `H^m(K) = 0`. This encapsulates the commutativity of cohomology
@@ -728,6 +392,9 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     Subsingleton (Sheaf.H K m) := by
   sorry
 
+section FinsetGenerated
+open scoped Classical
+
 /-- Coproduct inclusion from `S'` to `insert σ₀ S'`. -/
 private noncomputable def finsetCoproductIncl
     {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
@@ -737,7 +404,7 @@ private noncomputable def finsetCoproductIncl
     [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
     (∐ fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟶
     (∐ fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1) :=
-  Sigma.desc fun σ => Sigma.ι _ ⟨σ.1, Finset.mem_insert_of_mem σ.2⟩
+  sorry
 
 /-- Mono from `image(S')` to `image(insert σ₀ S')` via coproduct inclusion. -/
 private noncomputable def imageIncl
@@ -747,10 +414,7 @@ private noncomputable def imageIncl
     [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
     [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
     TopCat.Sheaf.finsetGeneratedSheaf S' ⟶ TopCat.Sheaf.finsetGeneratedSheaf (insert σ₀ S') :=
-  image.lift ⟨_, Limits.image.ι _, finsetCoproductIncl hσ₀ ≫ factorThruImage _,
-    by rw [Category.assoc, Limits.image.fac]; ext σ
-       simp [finsetCoproductIncl, TopCat.Sheaf.finsetGeneratorMap,
-             TopCat.Sheaf.familyGeneratorMap]⟩
+  sorry
 
 private instance imageIncl_mono
     {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
@@ -759,7 +423,7 @@ private instance imageIncl_mono
     [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
     [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
     Mono (imageIncl hσ₀ : TopCat.Sheaf.finsetGeneratedSheaf S' ⟶ _) := by
-  apply mono_of_mono _ (Limits.image.ι _); rw [Limits.image.lift_fac]; exact mono_comp _ _
+  sorry
 
 /-- The `σ₀`-component maps epi onto the cokernel of `imageIncl`. Uses the biproduct
     projection to factor `factorThruImage ≫ cokernel.π` (which is epi) through the
@@ -775,37 +439,7 @@ private theorem imageIncl_cokernel_epi
       ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
       factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫
       cokernel.π (imageIncl hσ₀)) := by
-  classical
-  let F := fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1
-  let σ₀' : {σ // σ ∈ insert σ₀ S'} := ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩
-  haveI : Epi (factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫
-      cokernel.π (imageIncl hσ₀)) := epi_comp _ _
-  haveI : HasBiproduct F := HasBiproduct.of_hasFiniteBiproducts F
-  apply epi_of_epi_fac (f := biproduct.isoCoproduct.inv ≫ biproduct.π σ₀')
-  show (biproduct.isoCoproduct.inv ≫ biproduct.π σ₀') ≫
-    (Sigma.ι F σ₀' ≫ factorThruImage _ ≫ cokernel.π (imageIncl hσ₀)) =
-    factorThruImage _ ≫ cokernel.π (imageIncl hσ₀)
-  apply colimit.hom_ext; intro ⟨σ⟩
-  simp only [Category.assoc, colimit.ι_desc_assoc, biproduct.isoCoproduct_inv,
-    colimit.ι_desc_assoc]
-  by_cases h : σ = σ₀'
-  · subst h; simp [biproduct.ι_π_self_assoc]
-  · rw [biproduct.ι_π_ne_assoc _ h, zero_comp, zero_comp]
-    have h_S' : σ.1 ∈ S' := by
-      have := σ.2; rw [Finset.mem_insert] at this
-      rcases this with rfl | hmem
-      · exact absurd rfl (by intro heq; exact h (Subtype.ext heq))
-      · exact hmem
-    have hfact : Sigma.ι (fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1)
-        ⟨σ.1, h_S'⟩ ≫ finsetCoproductIncl hσ₀ = Sigma.ι F σ := by
-      simp [finsetCoproductIncl]; congr 1; exact Subtype.ext rfl
-    rw [← hfact, Category.assoc, Category.assoc]
-    rw [show finsetCoproductIncl hσ₀ ≫ factorThruImage _ = factorThruImage _ ≫ imageIncl hσ₀ from by
-      apply (cancel_mono (Limits.image.ι _)).mp
-      rw [Category.assoc, Category.assoc, Limits.image.lift_fac, Limits.image.fac, Limits.image.fac]
-      ext τ; simp [finsetCoproductIncl, TopCat.Sheaf.finsetGeneratorMap,
-                    TopCat.Sheaf.familyGeneratorMap]]
-    rw [Category.assoc, cokernel.condition, comp_zero]
+  sorry
 
 /-- **Step 3B–3C**: vanishing for `finsetGeneratedSheaf S` by `Finset.induction`.
     Empty set: image = 0. Insert: SES `0 → image(S') → image(S) → cokernel → 0` where
@@ -819,24 +453,9 @@ theorem finsetGeneratedSheaf_vanishing
     (S : Finset (TopCat.Sheaf.SectionIndex K))
     [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
     Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m) := by
-  induction S using Finset.induction with
-  | empty =>
-    apply subsingleton_sheafH_of_isZero'
-    have : IsZero (∐ fun σ : {σ // σ ∈ (∅ : Finset _)} => TopCat.Sheaf.zeroOutsideInt σ.1.1) := by
-      haveI : IsEmpty {σ // σ ∈ (∅ : Finset (TopCat.Sheaf.SectionIndex K))} := by
-        simp; exact inferInstance
-      exact isZero_initial
-    rw [TopCat.Sheaf.finsetGeneratedSheaf, this.eq_of_src _ 0]; exact isZero_image_zero_morphism
-  | @insert σ₀ S' hσ₀ ih =>
-    let S_ses := ShortComplex.mk (imageIncl hσ₀) (cokernel.π (imageIncl hσ₀))
-      (cokernel.condition _)
-    have hSE : S_ses.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
-    have h_old : Subsingleton (Sheaf.H S_ses.X₁ m) := ih
-    have h_coker : Subsingleton (Sheaf.H S_ses.X₃ m) := by
-      exact hzero (Sigma.ι _ ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
-        factorThruImage _ ≫ cokernel.π (imageIncl hσ₀)) (imageIncl_cokernel_epi hσ₀)
-    exact subsingleton_sheafH_of_shortExact_middle hSE m h_old h_coker
+  sorry
+
+end FinsetGenerated
 
 /-- **Step 3A** (Hartshorne III.2.7): on a Noetherian space, if vanishing holds for
     all epi images of `zeroOutsideInt V`, then it holds for every sheaf.
