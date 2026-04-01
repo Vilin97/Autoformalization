@@ -189,6 +189,7 @@ private lemma PushforwardHVanishing_zero
   exact @Subsingleton.elim (F'.val.obj (op ⊤)) (hobj ▸ hsec) _ _
 
 -- Sub-lemma: Epi of g at ⊤ from H^1(G')=0 via LES + adj + separator
+set_option maxHeartbeats 400000 in
 set_option synthInstance.maxHeartbeats 400000 in
 private lemma epi_g_app_top_of_H1_vanishing
     {Z : TopCat.{u}} [NoetherianSpace Z]
