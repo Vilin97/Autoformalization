@@ -72,8 +72,12 @@ theorem zeroOutsideInt_vanishing
     ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _))
       inferInstance inferInstance
+  have hFlasque : IsFlasqueSheaf S.X₂ := by
+    intro U W i
+    have := constantSheaf_flasque_of_irreducible X i
+    sorry -- needs: zeroOutsideInt ⊤ = constantSheaf ℤ (flasque)
   exact sheafH_dimension_shift_ses hSE m hCoker
-    (FlasqueVanishing X S.X₂ (sorry : IsFlasqueSheaf S.X₂) m)
+    (FlasqueVanishing X S.X₂ hFlasque m)
 
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
     any germ in the larger zero-outside presheaf can be lifted by restricting to `W ∩ V ≤ V`
