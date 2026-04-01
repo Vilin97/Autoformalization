@@ -584,6 +584,73 @@ private theorem ulift_int_subgroup_cyclic
     ⟨h.down / d.down, by
       ext; simp +decide [Int.ediv_mul_cancel (Int.dvd_of_emod_eq_zero (hd_gen.2 h hh))]⟩⟩
 
+/-- In `stalk(zeroOutsideInt V, x)` for `x ∈ V`, the integer coefficient in the generator
+    representation is unique: `n • gen = m • gen → n = m`. -/
+private theorem zsmul_generator_injective
+    {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
+    {n m : ℤ}
+    (h : n • ((TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V x hx
+        (TopCat.Sheaf.zeroOutsideInt.generator V)) =
+      m • ((TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V x hx
+        (TopCat.Sheaf.zeroOutsideInt.generator V))) : n = m := by
+  let P := TopCat.Presheaf.constZ.zeroOutside V
+  let J := Opens.grothendieckTopology (T := X)
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  haveI : IsIso (T.map (toSheafify J P)) := stalkFunctor_map_iso_toSheafify P x
+  have hbij := ConcreteCategory.bijective_of_isIso (T.map (toSheafify J P))
+  have hgen_eq : ConcreteCategory.hom (T.map (toSheafify J P))
+      (P.germ V x hx (TopCat.Presheaf.zeroOutside.generator V)) =
+      (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V x hx
+        (TopCat.Sheaf.zeroOutsideInt.generator V) :=
+    TopCat.Presheaf.stalkFunctor_map_germ_apply V x hx
+      (toSheafify J P) (TopCat.Presheaf.zeroOutside.generator V)
+  -- Transfer to presheaf stalk via injectivity of toSheafify stalk map
+  set gen_P := TopCat.Presheaf.zeroOutside.generator V with hgen_P_def
+  have h' : P.germ V x hx (n • gen_P) = P.germ V x hx (m • gen_P) := by
+    rw [map_zsmul, map_zsmul]
+    apply hbij.1; simp only [map_zsmul, hgen_eq]; exact h
+  -- Use germ_eq: equal germs agree on a refinement W ≤ V
+  obtain ⟨W, hxW, iU, iV, hEq⟩ := P.germ_eq x hx hx _ _ h'
+  -- Both iU, iV are maps W → V; they're equal by subsingleton
+  have hiUiV : iU = iV := Subsingleton.elim _ _
+  rw [hiUiV, map_zsmul, map_zsmul] at hEq
+  -- Now: n • P.map iV.op gen_V = m • P.map iV.op gen_V in P.obj(op W)
+  have hWV : W ≤ V := leOfHom iV
+  -- Replace iV.op by (homOfLE hWV).op (subsingleton)
+  have hiV_eq : iV = homOfLE hWV := Subsingleton.elim _ _
+  rw [hiV_eq] at hEq
+  -- P.obj(op W) = ULift ℤ since W ≤ V
+  have hObjW : P.obj (op W) = AddCommGrpCat.of (ULift ℤ) := by
+    simp [P, TopCat.Presheaf.zeroOutside, hWV, TopCat.Presheaf.constZ]
+  -- The restricted generator maps to 1 in ULift ℤ (reuse pattern from line 491)
+  set resGen := ConcreteCategory.hom (P.map (homOfLE hWV).op) gen_P with hresGen_def
+  -- resGen maps to 1 ∈ ULift ℤ via eqToHom (same calculation as line ~491)
+  have hresGen_val : (AddCommGrpCat.Hom.hom (eqToHom hObjW)) resGen = (1 : ULift ℤ) := by
+    -- resGen = (P.map (homOfLE hWV).op) gen_P where P = constZ.zeroOutside V
+    -- Under eqToHom to ULift ℤ, this composition sends gen to 1
+    -- (eqToHom ∘ zeroOutside_map ∘ eqToHom)(1) = 1 by eqToHom_trans
+    simp only [resGen, gen_P, P]
+    -- Now the goal is explicit: unfold generator and zeroOutside_map
+    unfold TopCat.Presheaf.zeroOutside.generator
+    simp only [TopCat.Presheaf.zeroOutside_map, dif_pos hWV, dif_pos (le_refl V)]
+    simp only [← ConcreteCategory.comp_apply, ← CategoryTheory.comp_apply,
+      eqToHom_trans, Functor.const_obj_map, Category.id_comp]
+    have : hObjW.symm.trans hObjW = rfl := Subsingleton.elim _ _
+    simp [this]
+  -- eqToHom is injective
+  have hinj_eqToHom : Function.Injective (AddCommGrpCat.Hom.hom (eqToHom hObjW)) := by
+    intro a b hab
+    have := TopCat.Presheaf.zeroOutside.hom_eqToHom_symm_hom_eqToHom hObjW
+    exact (this a).symm.trans (congrArg _ hab |>.trans (this b))
+  -- Transfer hEq to ULift ℤ
+  have hEq_ULift : n • (1 : ULift ℤ) = m • (1 : ULift ℤ) := by
+    have := congrArg (AddCommGrpCat.Hom.hom (eqToHom hObjW)) hEq
+    rwa [map_zsmul, map_zsmul, hresGen_val] at this
+  -- n • (1 : ULift ℤ) = m • (1 : ULift ℤ) → n = m
+  have := congrArg ULift.down hEq_ULift
+  simp at this
+  exact this
+
 /-- If `i : A →+ ULift ℤ` is injective, `j : ULift ℤ →+ A`, `i ∘ j` is multiplication by
     `c ≠ 0`, and `range(i) = c·ℤ`, then `j` is bijective.
     Proved by Aristotle (job 68d0f4f8). -/
@@ -600,6 +667,100 @@ private theorem zmul_bijective_of_index_match
   · intro a; specialize himg (i a); aesop
 
 
+/-- The stalk map of `sHom s` at `x ∈ U` is bijective when every stalk element of R at x
+    is an integer multiple of `germ(s, x)`, and R embeds into `zeroOutsideInt V`
+    (providing torsion-freeness needed for injectivity). -/
+private theorem sHom_stalk_bijective_at
+    {X : TopCat.{u}} (V U : Opens X) (hUV : U ≤ V)
+    (R : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
+    (s : R.val.obj (op U))
+    (x : X) (hxU : x ∈ U)
+    -- germ(s, x) ≠ 0 (needed for injectivity; without this, stalk(R,x) could be 0
+    -- while stalk(zeroOutsideInt U, x) ≅ ℤ, making the map non-injective)
+    (hs_ne : R.presheaf.germ U x hxU s ≠ 0)
+    -- Every stalk element of R at x is an integer multiple of germ(s, x)
+    (hgen : ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R.val),
+      ∃ k : ℤ, a = k • R.presheaf.germ U x hxU s) :
+    Function.Bijective (ConcreteCategory.hom
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
+        (TopCat.Sheaf.zeroOutsideInt.sHom s).val)) := by
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  let sHom_x := ConcreteCategory.hom (T.map (TopCat.Sheaf.zeroOutsideInt.sHom s).val)
+  let i_x := ConcreteCategory.hom (T.map i.val)
+  -- i_x is injective
+  let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙ T
+  haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
+  haveI : Mono (FT.map i) := Functor.map_mono FT i
+  have hi_inj : Function.Injective i_x :=
+    (ConcreteCategory.mono_iff_injective_of_preservesPullback (FT.map i)).mp inferInstance
+  -- i_x(germ(s,x)) ≠ 0
+  have hi_s_ne : i_x (R.presheaf.germ U x hxU s) ≠ 0 := by
+    intro h; exact hs_ne (hi_inj (h.trans (map_zero i_x).symm))
+  -- i_x(germ(s,x)) = c • gen_V for some c ≠ 0
+  obtain ⟨c, hc⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x (hUV hxU)
+    (i_x (R.presheaf.germ U x hxU s))
+  have hc_ne : c ≠ 0 := by
+    intro hc0; rw [hc0, zero_smul] at hc; exact hi_s_ne hc
+  -- Key: sHom_x(germ(gen_U, x)) = germ(s, x)
+  have h_sHom_gen : sHom_x ((TopCat.Sheaf.zeroOutsideInt U).presheaf.germ U x hxU
+      (TopCat.Sheaf.zeroOutsideInt.generator U)) = R.presheaf.germ U x hxU s := by
+    show T.map (TopCat.Sheaf.zeroOutsideInt.sHom s).val
+      ((TopCat.Sheaf.zeroOutsideInt U).presheaf.germ U x hxU
+        (TopCat.Sheaf.zeroOutsideInt.generator U)) =
+      R.presheaf.germ U x hxU s
+    rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
+    congr 1
+    exact TopCat.Sheaf.zeroOutsideInt.sHom_app_generator s
+  -- Surjectivity
+  have h_surj : Function.Surjective sHom_x := by
+    intro a
+    obtain ⟨k, hk⟩ := hgen a
+    refine ⟨k • (TopCat.Sheaf.zeroOutsideInt U).presheaf.germ U x hxU
+      (TopCat.Sheaf.zeroOutsideInt.generator U), ?_⟩
+    rw [map_zsmul, h_sHom_gen, hk]
+  -- Injectivity: n • germ(s,x) = m • germ(s,x) → n = m (using torsion-freeness via i)
+  have h_inj : Function.Injective sHom_x := by
+    intro a b hab
+    obtain ⟨n, rfl⟩ := stalk_zeroOutsideInt_eq_zsmul_generator U x hxU a
+    obtain ⟨m, rfl⟩ := stalk_zeroOutsideInt_eq_zsmul_generator U x hxU b
+    simp only [map_zsmul, h_sHom_gen] at hab
+    -- hab : n • germ(s, x) = m • germ(s, x) in stalk(R, x)
+    -- Apply i_x: n • i_x(germ(s,x)) = m • i_x(germ(s,x))
+    have h_i : n • i_x (R.presheaf.germ U x hxU s) =
+        m • i_x (R.presheaf.germ U x hxU s) := by
+      rw [← map_zsmul i_x, ← map_zsmul i_x, hab]
+    -- Substitute i_x(germ(s,x)) = c • gen_V: n • (c • gen_V) = m • (c • gen_V)
+    rw [hc, smul_comm n, smul_comm m, ← mul_smul, ← mul_smul] at h_i
+    -- h_i : (c * n) • gen_V = (c * m) • gen_V, so c * n = c * m
+    have h_cn : c * n = c * m := zsmul_generator_injective V x (hUV hxU) h_i
+    -- c ≠ 0, so n = m
+    have h_nm : n = m := mul_left_cancel₀ hc_ne h_cn
+    rw [h_nm]
+  exact ⟨h_inj, h_surj⟩
+
+/-- At each point `x ∈ V`, the image of the stalk of `R` under `i` is a subgroup of
+    `stalk(zeroOutsideInt V, x) ≅ ULift ℤ`. By `ulift_int_subgroup_cyclic`, if this image
+    is nonzero, it has a positive generator `d_x`. The "index" `d_x` measures how deeply
+    `R` sits inside `zeroOutsideInt V` at `x`.
+
+    This lemma produces `V' ≤ V`, `V' ≠ ⊥`, and `s ∈ R(V')` such that for all `x ∈ V'`:
+    (1) `germ(s, x) ≠ 0`
+    (2) every stalk element of `R` at `x` is an integer multiple of `germ(s, x)`.
+    This is the hard "Noetherian shrinking" step of Hartshorne III.2.7, Step 4. -/
+private theorem exists_section_generating_stalks
+    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
+    (V : Opens X) (R : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
+    (hR : ¬ IsZero R) :
+    ∃ (V' : Opens X) (_ : V' ≤ V) (_ : V' ≠ ⊥)
+      (s : R.val.obj (op V')),
+      ∀ (x : X) (hx : x ∈ V'),
+        (R.presheaf.germ V' x hx s ≠ 0) ∧
+        (∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R.val),
+          ∃ k : ℤ, a = k • R.presheaf.germ V' x hx s) := by
+  sorry
+
 /-- Core construction for Step 4: find V' ≤ V, V' ≠ ⊥, and a section s ∈ R(V') such that
     `sHom s : zeroOutsideInt V' ⟶ R` is a stalk-isomorphism on V'.
     Uses: minimum-index point, generator section, locally constant germ shrinking. -/
@@ -614,25 +775,10 @@ theorem exists_good_section
         Function.Bijective (ConcreteCategory.hom
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
             (TopCat.Sheaf.zeroOutsideInt.sHom s).val)) := by
-  -- Step 1: Find x₀ ∈ V with nonzero stalk of R
-  obtain ⟨x₀, hx₀V, a₀, ha₀⟩ := exists_nonzero_stalk_in_V V R i hR
-  -- Step 2: Represent a₀ by section s₀ ∈ R(W₀), set U = W₀ ⊓ V
-  obtain ⟨W₀, hx₀W₀, s₀, hs₀⟩ := TopCat.Presheaf.germ_exist R.val x₀ a₀
-  let U := W₀ ⊓ V
-  have hUV : U ≤ V := inf_le_right
-  have hx₀U : x₀ ∈ U := ⟨hx₀W₀, hx₀V⟩
-  have hU_ne : U ≠ ⊥ := by
-    intro h; rw [h] at hx₀U; exact (Opens.mem_bot.mp hx₀U)
-  -- Restrict s₀ to U
-  let s_U := R.val.map (homOfLE (inf_le_left : U ≤ W₀)).op s₀
-  -- Step 3: Form the composition g = sHom(s_U) ≫ i : zeroOutsideInt U ⟶ zeroOutsideInt V
-  let g := TopCat.Sheaf.zeroOutsideInt.sHom s_U ≫ i
-  -- g is nonzero since g sends generator at x₀ to i(germ(s_U, x₀)) = i(a₀) ≠ 0
-  -- Step 4: Apply shrinking lemma to g
-  -- TODO: need to show image(g) is nonzero, then apply exists_open_bijective_stalks
-  -- Step 5: Get V' ≤ U where sHom(s_U|_{V'}) is stalk-bijective
-  -- For now, leave the core shrinking as sorry
-  sorry
+  -- Use the Noetherian shrinking lemma to get V', s with generating property
+  obtain ⟨V', hV'V, hV'ne, s, hgen⟩ := exists_section_generating_stalks V R i hR
+  exact ⟨V', hV'V, hV'ne, s, fun x hx =>
+    sHom_stalk_bijective_at V V' hV'V R i s x hx (hgen x hx).1 (hgen x hx).2⟩
 
 /-- **Structure lemma** (Hartshorne Step 4 core): a nonzero subsheaf of `zeroOutsideInt V`
     contains `zeroOutsideInt V'` for some nonempty open `V' ⊆ V`, with the inclusion
