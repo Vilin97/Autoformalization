@@ -1,5 +1,25 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-01T21:00Z — Restore Category C proofs + fix Classical instance mismatch
+
+**Sorry count: 19** (was 24 before Category C; 2 original + 17 regressed)
+
+- **Restored 5 Category C proofs** (finset coproduct infrastructure):
+  1. `finsetCoproductIncl` — coproduct inclusion from S' to insert σ₀ S'
+  2. `imageIncl` — mono from image(S') to image(insert σ₀ S') via `Limits.image.lift`
+  3. `imageIncl_mono` — proof that imageIncl is mono
+  4. `imageIncl_cokernel_epi` — σ₀-component maps epi onto cokernel (biproduct projection)
+  5. `finsetGeneratedSheaf_vanishing` — Step 3B–3C by Finset.induction
+- **Fixed Limits.image.* disambiguation**: `Limits.image.ι`, `Limits.image.fac`,
+  `Limits.image.lift`, `Limits.image.lift_fac` (not bare `image.ι` etc.)
+- **Fixed Classical kernel mismatch**: Removed `[HasCoproduct ...]` from
+  `finsetGeneratedSheaf_vanishing` and `cohomology_vanishing_of_finitelyGenerated_vanishing`.
+  `open scoped Classical` provides `HasCoproduct` via `Classical.choice`, which conflicts
+  with explicit instance parameters at the kernel level.
+- **CI**: Previous commit (a3bef4a) failed due to the kernel mismatch + type error.
+  Fix pushed (1c5420d), awaiting CI.
+- 19 sorry's remain: 2 original Mathlib gaps + 17 regressed proofs
+
 ## 2026-04-01T09:00Z — Fix SetupCore/Setup compilation + dead code removal
 
 **Sorry count: 2** (unchanged)
