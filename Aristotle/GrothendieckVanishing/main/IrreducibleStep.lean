@@ -599,6 +599,21 @@ private theorem zmul_bijective_of_index_match
   · intro n m hnm; have := hcomp n; aesop
   · intro a; specialize himg (i a); aesop
 
+/-- Sub-lemma: On a Noetherian irreducible space, if a sheaf morphism
+    `f : zeroOutsideInt U ⟶ zeroOutsideInt V` has a nonzero stalk at some point, then there
+    exists V' ≤ U, V' ≠ ⊥, such that the stalk map of f is bijective on V'.
+    (The "shrinking to constant index" argument.) -/
+private theorem exists_open_bijective_stalks
+    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
+    {V : Opens X} {U : Opens X} (hUV : U ≤ V) (hU : U ≠ ⊥)
+    (f : TopCat.Sheaf.zeroOutsideInt U ⟶ TopCat.Sheaf.zeroOutsideInt V)
+    (hf_nonzero : ¬ IsZero (Limits.image f)) :
+    ∃ (V' : Opens X) (_ : V' ≤ U) (_ : V' ≠ ⊥),
+      ∀ (x : X) (hx : x ∈ V'),
+        Function.Bijective (ConcreteCategory.hom
+          ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val)) := by
+  sorry
+
 /-- Core construction for Step 4: find V' ≤ V, V' ≠ ⊥, and a section s ∈ R(V') such that
     `sHom s : zeroOutsideInt V' ⟶ R` is a stalk-isomorphism on V'.
     Uses: minimum-index point, generator section, locally constant germ shrinking. -/
@@ -613,6 +628,24 @@ theorem exists_good_section
         Function.Bijective (ConcreteCategory.hom
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
             (TopCat.Sheaf.zeroOutsideInt.sHom s).val)) := by
+  -- Step 1: Find x₀ ∈ V with nonzero stalk of R
+  obtain ⟨x₀, hx₀V, a₀, ha₀⟩ := exists_nonzero_stalk_in_V V R i hR
+  -- Step 2: Represent a₀ by section s₀ ∈ R(W₀), set U = W₀ ⊓ V
+  obtain ⟨W₀, hx₀W₀, s₀, hs₀⟩ := TopCat.Presheaf.germ_exist R.val x₀ a₀
+  let U := W₀ ⊓ V
+  have hUV : U ≤ V := inf_le_right
+  have hx₀U : x₀ ∈ U := ⟨hx₀W₀, hx₀V⟩
+  have hU_ne : U ≠ ⊥ := by
+    intro h; rw [h] at hx₀U; exact (Opens.mem_bot.mp hx₀U)
+  -- Restrict s₀ to U
+  let s_U := R.val.map (homOfLE (inf_le_left : U ≤ W₀)).op s₀
+  -- Step 3: Form the composition g = sHom(s_U) ≫ i : zeroOutsideInt U ⟶ zeroOutsideInt V
+  let g := TopCat.Sheaf.zeroOutsideInt.sHom s_U ≫ i
+  -- g is nonzero since g sends generator at x₀ to i(germ(s_U, x₀)) = i(a₀) ≠ 0
+  -- Step 4: Apply shrinking lemma to g
+  -- TODO: need to show image(g) is nonzero, then apply exists_open_bijective_stalks
+  -- Step 5: Get V' ≤ U where sHom(s_U|_{V'}) is stalk-bijective
+  -- For now, leave the core shrinking as sorry
   sorry
 
 /-- **Structure lemma** (Hartshorne Step 4 core): a nonzero subsheaf of `zeroOutsideInt V`
