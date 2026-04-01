@@ -188,9 +188,28 @@ private lemma PushforwardHVanishing_zero
   apply (sheafH0EquivSections F').injective
   exact @Subsingleton.elim (F'.val.obj (op ⊤)) (hobj ▸ hsec) _ _
 
+-- Helper: Ext₀ composition identity used in epi_g_app_top_of_H1_vanishing
+set_option maxHeartbeats 400000 in
+set_option synthInstance.maxHeartbeats 400000 in
+private lemma ext0_comp_eq_of_covariant
+    {Z : TopCat.{u}} [NoetherianSpace Z]
+    {A B C : TopCat.Sheaf AddCommGrpCat.{u} Z}
+    (g : B ⟶ C)
+    (z : Ext A B 0 0)
+    (φ : A ⟶ C)
+    (hz : z.comp (Ext.mk₀ g) (add_zero 0) = Ext.addEquiv₀.symm φ) :
+    Ext.addEquiv₀ z ≫ g = φ := by
+  apply Ext.addEquiv₀.symm.injective
+  change Ext.addEquiv₀.symm (Ext.addEquiv₀ z ≫ g) = Ext.addEquiv₀.symm φ
+  rw [show Ext.addEquiv₀.symm (Ext.addEquiv₀ z ≫ g) =
+      Ext.mk₀ (Ext.addEquiv₀ z ≫ g) from rfl, ← Ext.mk₀_comp_mk₀]
+  show (Ext.addEquiv₀.symm (Ext.addEquiv₀ z)).comp
+      (Ext.mk₀ g) _ = Ext.addEquiv₀.symm φ
+  rw [AddEquiv.symm_apply_apply]; exact hz
+
 -- Sub-lemma: Epi of g at ⊤ from H^1(G')=0 via LES + adj + separator
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 1600000 in
+set_option maxHeartbeats 400000 in
+set_option synthInstance.maxHeartbeats 400000 in
 private lemma epi_g_app_top_of_H1_vanishing
     {Z : TopCat.{u}} [NoetherianSpace Z]
     {G' : TopCat.Sheaf AddCommGrpCat.{u} Z}
@@ -211,14 +230,8 @@ private lemma epi_g_app_top_of_H1_vanishing
     @Subsingleton.elim _ hG' _ _
   obtain ⟨z, hz⟩ := Ext.covariant_sequence_exact₃ _ hSE_Z _ rfl hy
   let ψ := Ext.addEquiv₀ z
-  have hψ : ψ ≫ ip.shortComplex.g = φ := by
-    apply Ext.addEquiv₀.symm.injective
-    change Ext.addEquiv₀.symm (ψ ≫ ip.shortComplex.g) = Ext.addEquiv₀.symm φ
-    rw [show Ext.addEquiv₀.symm (ψ ≫ ip.shortComplex.g) =
-        Ext.mk₀ (ψ ≫ ip.shortComplex.g) from rfl, ← Ext.mk₀_comp_mk₀]
-    show (Ext.addEquiv₀.symm (Ext.addEquiv₀ z)).comp
-        (Ext.mk₀ ip.shortComplex.g) _ = Ext.addEquiv₀.symm φ
-    rw [AddEquiv.symm_apply_apply]; exact hz
+  have hψ : ψ ≫ ip.shortComplex.g = φ :=
+    ext0_comp_eq_of_covariant ip.shortComplex.g z φ hz
   let ψ_hom := (adj_Z.homEquiv _ ip.shortComplex.X₂) ψ
   have hfact := Adjunction.homEquiv_naturality_right adj_Z ψ ip.shortComplex.g
   rw [hψ, Equiv.apply_symm_apply] at hfact
@@ -230,7 +243,7 @@ private lemma epi_g_app_top_of_H1_vanishing
 
 -- Sub-lemma: surjectivity of Ext⁰ map from epi at ⊤ via adjunction + projectivity
 set_option maxHeartbeats 400000 in
-set_option synthInstance.maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 400000 in
 private lemma ext0_surj_of_epi_top
     {X : TopCat.{u}} [NoetherianSpace X]
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
@@ -255,7 +268,7 @@ private lemma ext0_surj_of_epi_top
       Projective.factorThru_comp]⟩
 
 -- n = 1: from H^1(G')=0 on Z, show H^1(i_*G')=0 on X
-set_option synthInstance.maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 400000 in
 private lemma PushforwardHVanishing_one
     {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
     (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))
@@ -309,7 +322,7 @@ private lemma PushforwardHVanishing_one
 
 -- n = m+2 ≥ 2: use pushed-forward injective presentation + FlasqueVanishing + LES
 set_option maxHeartbeats 400000 in
-set_option synthInstance.maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 400000 in
 private lemma PushforwardHVanishing_succ
     {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
     (m : ℕ)
@@ -358,7 +371,7 @@ private lemma PushforwardHVanishing_succ
   exact @Subsingleton.elim _ (ih_push ip.shortComplex.X₃ hR) c d
 
 -- Pushforward along closed immersion preserves cohomological vanishing.
-set_option synthInstance.maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 400000 in
 theorem PushforwardHVanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
