@@ -60,8 +60,8 @@ noncomputable instance sheafHasDerivedCategory (X : TopCat.{u}) :
   HasDerivedCategory.standard _
 
 noncomputable instance sheafHasExt (X : TopCat.{u}) :
-    HasExt.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-  hasExt_of_hasDerivedCategory
+    HasExt.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) := by
+  exact hasExt_of_hasDerivedCategory
 
 /-! ## Flasque sheaf sub-lemmas
 
