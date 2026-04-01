@@ -533,6 +533,16 @@ theorem exists_good_section
         Function.Bijective (ConcreteCategory.hom
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
             (TopCat.Sheaf.zeroOutsideInt.sHom s).val)) := by
+  -- Step 1: Find a point x₀ ∈ V with nonzero stalk in R
+  obtain ⟨x₀, hx₀V, a₀, ha₀⟩ := exists_nonzero_stalk_in_V V R i hR
+  -- Step 2: The image of stalk(R, x₀) in stalk(zeroOutsideInt V, x₀) ≅ ULift ℤ
+  -- is a nonzero subgroup d₀·ℤ. By ulift_int_subgroup_cyclic, find the generator d₀.
+  -- Step 3: Lift the d₀-generator of stalk(R, x₀) to a section s ∈ R(V') for some V' ≤ V.
+  -- Step 4: Shrink V' so that sHom s is a stalk-iso on all of V'.
+  -- Uses: Noetherian space (ascending chain on opens where stalk map is bijective),
+  -- irreducible (the open where bijective holds is dense, hence nonempty).
+  -- Key helper: zmul_bijective_of_index_match provides bijectivity once we verify
+  -- the index conditions at each point of V'.
   sorry
 
 /-- **Structure lemma** (Hartshorne Step 4 core): a nonzero subsheaf of `zeroOutsideInt V`
