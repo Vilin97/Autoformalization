@@ -86,7 +86,9 @@ private theorem sheaf_H_subsingleton_of_reducible
       topologicalKrullDim Y ≤ topologicalKrullDim X →
       m > topologicalKrullDim Y → Subsingleton (Sheaf.H G m)) :
     Subsingleton (Sheaf.H F n) :=
-  ReducibleVanishing X n hn F hNotIrred (fun Y G hle hY => ih_irred Y n G hle hY)
+  ReducibleVanishing' X n hn F hNotIrred
+    (fun (Y : TopCat.{u}) [_inst1 : NoetherianSpace Y] [_inst2 : IrreducibleSpace Y]
+      (G : TopCat.Sheaf AddCommGrpCat.{u} Y) hle hY => ih_irred Y n G hle hY)
 
 /-! ## Main theorem -/
 
