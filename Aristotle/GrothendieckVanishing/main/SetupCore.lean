@@ -500,3 +500,18 @@ theorem ClosedImmersionSES
       (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η))
       inferInstance inferInstance,
     rfl, rfl⟩
+
+/-- Dimension shift via SES: if `0 → X₁ → X₂ → X₃ → 0` is short exact,
+`H^n(X₃) = 0`, and `H^{n+1}(X₂) = 0`, then `H^{n+1}(X₁) = 0`. -/
+theorem sheafH_dimension_shift_ses {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact) (n : ℕ)
+    (h₃ : Subsingleton (Sheaf.H S.X₃ n))
+    (h₂ : Subsingleton (Sheaf.H S.X₂ (n + 1))) :
+    Subsingleton (Sheaf.H S.X₁ (n + 1)) := by
+  constructor; intro a b
+  have ha : a.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
+  have hb : b.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hS a ha rfl
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hS b hb rfl
+  rw [← hc, ← hd, @Subsingleton.elim _ h₃ c d]
