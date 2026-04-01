@@ -1,72 +1,69 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-01T20:00Z
+**Updated**: 2026-04-01T21:15Z
 
 ## Status Summary
-- **CI**: GREEN (commit `31af56b`)
-- **Heartbeat overrides**: 0 (was 38 across 6 files)
-- **Sorry count**: 23 in IrreducibleStep.lean (was 2 before this session; 21 are sorry'd-out proofs that broke during heartbeat optimization)
-- **Files**: 15 files under `main/`, ~4000 lines, 180 theorems
+- **CI**: IN PROGRESS (commit `663f12f`), last completed run FAILED (a3bef4a, fixed by 1c5420d)
+- **Heartbeat overrides**: 0
+- **Sorry count**: 16 in IrreducibleStep.lean (was 19 last cycle; 2 original + 14 regressed)
+- **Files**: 15 files under `main/`, ~4000 lines
+- **Pre-regression commit**: `e90c2f0` has working proofs for all 14 regressed sorry's
 
-## Priority 1: Restore IrreducibleStep.lean proofs (21 sorry's)
+## Strategy: Restore from e90c2f0
 
-These proofs existed before but broke when heartbeat overrides were removed. They need instance-caching patterns consistent with the rest of the project.
+All 14 regressed sorry's have working proofs at commit `e90c2f0`. The proofs broke when heartbeat overrides were removed. The fix for each is to extract the old proof and adapt it by:
+- Adding explicit `haveI`/`letI` for expensive instance synthesis
+- Fixing any API name changes (`image.ι` → `Limits.image.ι`, etc.)
+- Fixing type elaboration issues (`.presheaf` → `.val`, `closedIncl` unfolding)
 
-### Category A: Instance synthesis fixes (pattern: add `haveI`/`letI`)
+### Dependency order (bottom-up)
 
-These proofs fail because they relied on high `synthInstance.maxHeartbeats` to synthesize expensive instances. Fix by providing instances explicitly.
+The sorry's form a dependency chain. Restore in this order:
 
-1. **`sheaf_stalk_surj_openHom`** — needs `IsIso (T.map (toSheafify ...))` instance. The stalk functor applied to `toSheafify` should be an iso (Mathlib should have this). Find the instance name and provide via `haveI`.
+**Tier 1 — No dependencies on other sorry'd theorems:**
+1. `presheaf_stalk_surj_openHom` (line 88)
+2. `isZero_zeroOutsideInt_bot` (line 198)
+3. `stalk_zeroOutsideInt_zero_outside` (line 205)
+4. `exists_nonzero_stalk_in_V` (line 216)
+5. `presheaf_stalk_zeroOutside_eq_zsmul_generator` (line 246)
 
-2. **`sheaf_stalk_bijective_openHom`** — needs `PreservesMonomorphisms` for stalk functor. Use `TopCat.Presheaf.stalkFunctor_preserves_mono` + explicit `Mono` from `Functor.map_mono`.
+**Tier 2 — Depend on Tier 1:**
+6. `sheaf_stalk_surj_openHom` (line 105) — depends on presheaf_stalk_surj_openHom
+7. `stalk_zeroOutsideInt_eq_zsmul_generator` (line 257) — depends on presheaf version
+8. `sheaf_stalk_bijective_openHom` (line 120) — depends on sheaf_stalk_surj_openHom
 
-3. **`cokernel_stalk_zero_V`** — needs `Balanced` instance (use `letI : Balanced ... := sheafBalanced X` pattern) and `.presheaf` → `.val` fix.
+**Tier 3 — Depend on Tier 2:**
+9. `cokernel_stalk_zero_V` (line 129) — depends on sheaf_stalk_bijective_openHom
+10. `zeroOutsideInt_vanishing` (line 76) — needs `IsFlasqueSheaf (zeroOutsideInt ⊤)`
 
-4. **`cokernel_openHom_vanishing`** — largest proof. Needs: `IsZero` from `Limits`, `closedIncl_unit_stalk_isIso` from `TopCat`, `PreservesMonomorphisms`, `Balanced`, plus `topologicalKrullDim` cast fixes (`⊥` vs `0`).
+**Tier 4 — Complex proofs depending on Tiers 1-3:**
+11. `cokernel_openHom_vanishing` (line 148) — largest proof, depends on cokernel_stalk_zero_V + IH
+12. `zeroOutsideInt_cohomology_vanishing` (line 171) — depends on zeroOutsideInt_vanishing + cokernel_openHom_vanishing
+13. `subsheaf_zeroOutsideInt_vanishing` (line 399) — depends on Tier 1-3 infrastructure
+14. `epiImage_zeroOutsideInt_vanishing` (line 417) — depends on Steps 4+5+LES
 
-5. **`zeroOutsideInt_cohomology_vanishing`** — duplicate of `cokernel_openHom_vanishing` pattern (same fixes needed).
+## This Cycle's Work Items
 
-6. **`subsheaf_zeroOutsideInt_vanishing`**, **`epiImage_zeroOutsideInt_vanishing`** — same pattern as above.
+### 1. [/prove] Restore Tier 1 sorry's (5 proofs)
+Extract proofs from `e90c2f0`, adapt to current API. These are independent and self-contained:
+- `presheaf_stalk_surj_openHom`: presheaf restriction + eqToHom argument
+- `isZero_zeroOutsideInt_bot`: stalks vanish via ¬(W ≤ ⊥) + toSheafify iso
+- `stalk_zeroOutsideInt_zero_outside`: similar stalk argument
+- `exists_nonzero_stalk_in_V`: contrapositive + sheaf_isZero_of_zero_stalks
+- `presheaf_stalk_zeroOutside_eq_zsmul_generator`: int_addSubgroup_eq_zmultiples + germ algebra
 
-### Category B: API/type fixes
+### 2. [/prove] Restore Tier 2 sorry's (3 proofs)
+- `sheaf_stalk_surj_openHom`: transfer via toSheafify naturality
+- `stalk_zeroOutsideInt_eq_zsmul_generator`: transfer via toSheafify
+- `sheaf_stalk_bijective_openHom`: injectivity via PreservesMonomorphisms
 
-7. **`presheaf_stalk_surj_openHom`** — `eqToHom` type mismatch in presheaf restriction. The `zeroOutside` presheaf restriction map needs careful type alignment.
+### 3. [/prove] Restore `zeroOutsideInt_vanishing` (line 76)
+The inline `sorry : IsFlasqueSheaf S.X₂` needs: `S.X₂ = zeroOutsideInt ⊤ = constantSheaf Z_X` (by rfl), which is flasque on irreducible spaces (proved in ConstantSheafFlasque.lean). Provide the instance chain explicitly.
 
-8. **`zeroOutsideInt_vanishing`** (line 69) — uses `sheafH_dimension_shift_ses` which needs `IsFlasqueSheaf (zeroOutsideInt ⊤)`. This requires showing `zeroOutsideInt ⊤ ≅ constantSheaf` on irreducible spaces, or proving flasqueness directly.
+## Backlog (future cycles)
 
-9. **`isZero_zeroOutsideInt_bot`**, **`stalk_zeroOutsideInt_zero_outside`** — `IsIso (T.map (toSheafify ...))` synthesis + universe issues with `toSheafify` for `zeroOutside ⊥`.
-
-10. **`presheaf_stalk_zeroOutside_eq_zsmul_generator`**, **`stalk_zeroOutsideInt_eq_zsmul_generator`** — presheaf API: `Presheaf.restrictOpen`, `germ_res_apply` signature changes, `IsZero.eq_zero_of_src`.
-
-### Category C: Finset coproduct infrastructure
-
-11. **`finsetCoproductIncl`** — `Sigma.ι` coercion between `{σ // σ ∈ S'}` and `{σ // σ ∈ insert σ₀ S'}` subtypes.
-
-12. **`imageIncl`**, **`imageIncl_mono`** — depend on `finsetCoproductIncl`.
-
-13. **`imageIncl_cokernel_epi`** — `HasBiproduct.of_hasFiniteBiproducts` and `biproduct.isoCoproduct.inv` API names may have changed.
-
-14. **`finsetGeneratedSheaf_vanishing`** — depends on all of the above + `DecidableEq K.SectionIndex`.
-
-### Category D: Other fixes
-
-15. **`exists_nonzero_stalk_in_V`**, **`sheaf_mono_of_stalk_injective`** — `mono_iff_injective` already fixed syntax-wise, but proof body needs restoration.
-
-16. **`cokernel_stalk_zero_of_stalk_surj`** — rewrite pattern mismatch with `Presheaf.germ`.
-
-17. **`subsingleton_ext_of_ses_third`** — `topologicalKrullDim` cast: `< 0` vs `< ⊥` in `WithBot ℕ∞`.
-
-## Priority 2: Fill original 2 sorry's
-
-These are genuine mathematical gaps that existed before this session:
-
-18. **`exists_good_section`** — Given a mono `R ↪ zeroOutsideInt V` with `R` nonzero, find `V' ≤ V` and `zeroOutsideInt V' ↪ R` with stalkwise bijection on `V'`.
-
-19. **`cohomology_vanishing_of_finitelyGenerated_vanishing`** — If vanishing holds for all finitely-generated subsheaves, it holds for the full sheaf via filtered colimits.
-
-## Recommended approach
-
-- Work through Category A first (most are mechanical `haveI` additions)
-- Category B next (need careful type checking)
-- Category C last (most complex, involves coproduct API)
-- Use `/prove` skill for individual sorry's once the proof context compiles
+- **Tier 3-4 sorry's**: `cokernel_stalk_zero_V`, `cokernel_openHom_vanishing`, `zeroOutsideInt_cohomology_vanishing`, `subsheaf_zeroOutsideInt_vanishing`, `epiImage_zeroOutsideInt_vanishing`
+- **Original sorry's**: `exists_good_section`, `cohomology_vanishing_of_finitelyGenerated_vanishing` (genuine Mathlib gaps)
+- **Docs deployment**: Fix 404 on blueprint pages
+- **File sizes**: ZeroOutside.lean (733), FlasqueVanishing.lean (616) over guideline
+- **Documentation**: Update sorry counts after each fix
