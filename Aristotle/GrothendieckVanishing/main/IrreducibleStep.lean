@@ -701,6 +701,10 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     (hfg : ∀ (S : Finset (TopCat.Sheaf.SectionIndex K)),
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)) :
     Subsingleton (Sheaf.H K m) := by
+  -- Key sub-claim: any element of Ext^m(Z, K) factors through some finsetGeneratedSheaf S.
+  -- This follows from: (1) Sheaf category is Grothendieck abelian, (2) AB5 gives exact
+  -- filtered colimits, (3) derived functors of Hom(Z,-) commute with filtered colimits
+  -- when Z is finitely presented (which the constant sheaf is on a Noetherian space).
   sorry
 
 section FinsetGenerated
