@@ -599,20 +599,6 @@ private theorem zmul_bijective_of_index_match
   · intro n m hnm; have := hcomp n; aesop
   · intro a; specialize himg (i a); aesop
 
-/-- Sub-lemma: On a Noetherian irreducible space, if a sheaf morphism
-    `f : zeroOutsideInt U ⟶ zeroOutsideInt V` has a nonzero stalk at some point, then there
-    exists V' ≤ U, V' ≠ ⊥, such that the stalk map of f is bijective on V'.
-    (The "shrinking to constant index" argument.) -/
-private theorem exists_open_bijective_stalks
-    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
-    {V : Opens X} {U : Opens X} (hUV : U ≤ V) (hU : U ≠ ⊥)
-    (f : TopCat.Sheaf.zeroOutsideInt U ⟶ TopCat.Sheaf.zeroOutsideInt V)
-    (hf_nonzero : ¬ IsZero (Limits.image f)) :
-    ∃ (V' : Opens X) (_ : V' ≤ U) (_ : V' ≠ ⊥),
-      ∀ (x : X) (hx : x ∈ V'),
-        Function.Bijective (ConcreteCategory.hom
-          ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val)) := by
-  sorry
 
 /-- Core construction for Step 4: find V' ≤ V, V' ≠ ⊥, and a section s ∈ R(V') such that
     `sHom s : zeroOutsideInt V' ⟶ R` is a stalk-isomorphism on V'.
