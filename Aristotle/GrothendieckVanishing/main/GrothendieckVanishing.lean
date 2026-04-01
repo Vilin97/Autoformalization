@@ -41,7 +41,7 @@ private theorem grothendieck_vanishing_aux (d : WithBot ℕ∞)
     exact grothendieck_vanishing_dim_zero Y hdim G k
   · -- dim Y > 0: use IrreducibleStep
     push_neg at hdim
-    exact grothendieck_vanishing_irreducible_pos Y m hY hdim G
+    exact IrreduciblePosVanishing Y m hY hdim G
       (fun Z _ m' G' hlt hG' =>
         ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle)) Z m' G' rfl hG')
 

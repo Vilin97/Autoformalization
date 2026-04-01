@@ -167,6 +167,24 @@ theorem pushforward_preserves_flasque {Y : TopCat.{u}} (f : TopCat.of Y ⟶ X)
     IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} f).obj G) :=
   fun i => by change Epi (G.val.map ((Opens.map f).op.map i.op)); exact hG _
 
+-- If both ends of a short exact sequence have vanishing H^n, so does the middle.
+set_option synthInstance.maxHeartbeats 400000 in
+theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact) (n : ℕ)
+    (h₁ : Subsingleton (Sheaf.H S.X₁ n))
+    (h₃ : Subsingleton (Sheaf.H S.X₃ n)) :
+    Subsingleton (Sheaf.H S.X₂ n) := by
+  let Z := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+    (AddCommGrpCat.of (ULift ℤ))
+  constructor
+  intro a b
+  have ha : a.comp (Ext.mk₀ S.g) (add_zero n) = 0 := @Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _
+  have hb : b.comp (Ext.mk₀ S.g) (add_zero n) = 0 := @Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ Z hS a ha
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ Z hS b hb
+  rw [← hc, ← hd, @Subsingleton.elim _ h₁ c d]
+
 /-! ### PushforwardHVanishing sub-lemmas -/
 
 -- Base case: Γ comparison. Γ_X(i_*G') = G'(⊤_Z) = Γ_Z(G')
@@ -195,7 +213,7 @@ private lemma ext0_comp_eq_of_covariant
     {Z : TopCat.{u}} [NoetherianSpace Z]
     {A B C : TopCat.Sheaf AddCommGrpCat.{u} Z}
     (g : B ⟶ C)
-    (z : Ext A B 0 0)
+    (z : Ext A B 0)
     (φ : A ⟶ C)
     (hz : z.comp (Ext.mk₀ g) (add_zero 0) = Ext.addEquiv₀.symm φ) :
     Ext.addEquiv₀ z ≫ g = φ := by
@@ -237,9 +255,8 @@ private lemma epi_g_app_top_of_H1_vanishing
   rw [hψ, Equiv.apply_symm_apply] at hfact
   change φ_hom = ψ_hom ≫ ip.shortComplex.g.val.app (op ⊤) at hfact
   refine ⟨ψ_hom (ULift.up 1), ?_⟩
-  have := congr_arg (fun f => f (ULift.up 1)) (AddCommGrpCat.ext_iff.mp hfact)
-  simp only [AddCommGrpCat.hom_comp, AddMonoidHom.coe_comp, Function.comp_apply] at this
-  rw [← this]; simp [φ_hom, one_zsmul]
+  change (ConcreteCategory.hom (ψ_hom ≫ ip.shortComplex.g.val.app (op ⊤))) (ULift.up 1) = r
+  rw [← hfact]; simp [φ_hom, one_zsmul]
 
 -- Sub-lemma: surjectivity of Ext⁰ map from epi at ⊤ via adjunction + projectivity
 set_option maxHeartbeats 400000 in
