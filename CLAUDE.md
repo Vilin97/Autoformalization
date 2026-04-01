@@ -25,9 +25,11 @@ lake clean && lake build
 
 **Critical**: `lake build` uses cached `.olean` files and may not recompile modified files. Always verify modified files with `lake env lean <file>` before committing.
 
-## CI
+## CI & Branch Protection
 
 GitHub Actions runs `leanprover/lean-action@v1` on every push/PR (`.github/workflows/lean_action_ci.yml`). Documentation is deployed via `doc-gen4` to GitHub Pages.
+
+**The `grothendieck-vanishing` branch is protected.** Direct pushes are blocked. Agents work on the persistent `wip/grothendieck-vanishing` branch and push there freely. A single PR (`wip/grothendieck-vanishing` → `grothendieck-vanishing`) stays open with auto-merge enabled and merges automatically once the `build` CI check passes. See `/commit` for the full workflow.
 
 ## Code Structure
 
