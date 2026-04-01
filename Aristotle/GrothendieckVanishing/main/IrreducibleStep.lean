@@ -13,9 +13,8 @@ import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
 
 universe u
 
-open CategoryTheory TopologicalSpace Abelian
+open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 
-set_option synthInstance.maxHeartbeats 80000 in
 /-- Given a short exact sequence `0 → X₁ → X₂ → X₃ → 0`, if `Ext(Z, X₃, n) = 0`
     and `Ext(Z, X₂, n+1) = 0`, then `Ext(Z, X₁, n+1) = 0`. -/
 theorem subsingleton_ext_of_ses {C : Type*} [Category C] [Abelian C] [HasExt C]
@@ -73,9 +72,9 @@ theorem zeroOutsideInt_vanishing
     ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_g_is_cokernel _ (Limits.cokernelIsCokernel _))
       inferInstance inferInstance
-  exact subsingleton_ext_of_ses hSE _ m hCoker (constantSheaf_cohomology_vanishing X m)
+  exact sheafH_dimension_shift_ses hSE m hCoker
+    (FlasqueVanishing X S.X₂ (sorry : IsFlasqueSheaf S.X₂) m)
 
-set_option synthInstance.maxHeartbeats 200000 in
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
     any germ in the larger zero-outside presheaf can be lifted by restricting to `W ∩ V ≤ V`
     where the presheaf map is `eqToHom` (identity). -/
@@ -123,7 +122,6 @@ private theorem sheaf_stalk_surj_openHom
   exact ⟨ConcreteCategory.hom (T.map (toSheafify J _)) p, by
     simp only [← ConcreteCategory.comp_apply, ← hnat, ConcreteCategory.comp_apply, hp]⟩
 
-set_option synthInstance.maxHeartbeats 200000 in
 /-- The sheaf stalk map of `openHom(le_top)` at `x ∈ V` is surjective. -/
 private theorem sheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V) :
     Function.Surjective (ConcreteCategory.hom
@@ -131,7 +129,6 @@ private theorem sheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x 
         (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)).val)) :=
   sheaf_stalk_surj_openHom (le_top : V ≤ ⊤) x hx
 
-set_option synthInstance.maxHeartbeats 200000 in
 /-- On points of the smaller open, `zeroOutsideInt.openHom h` induces a stalk bijection. -/
 private theorem sheaf_stalk_bijective_openHom
     {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
@@ -144,7 +141,7 @@ private theorem sheaf_stalk_bijective_openHom
     (C := AddCommGrpCat.{u}) (X := X) x
   haveI : Mono (T.map (TopCat.Sheaf.zeroOutsideInt.openHom h).val) := by
     exact Functor.map_mono T (TopCat.Sheaf.zeroOutsideInt.openHom h).val
-  exact AddCommGrpCat.mono_iff_injective.mp inferInstance
+  exact (AddCommGrpCat.mono_iff_injective _).mp inferInstance
 
 /-- The cokernel of `openHom(le_top)` has zero stalks at points of `V`.
     Uses: sheaf stalk surjectivity + section_ext + local surjectivity of `cokernel.π`
@@ -181,7 +178,6 @@ private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx
         simp [ConcreteCategory.comp_apply],
     Limits.cokernel.condition]; simp
 
-set_option synthInstance.maxHeartbeats 80000 in
 /-- Cokernel of `openHom(le_top)` has vanishing cohomology on irreducible X.
     The cokernel C has zero stalks on V (since openHom is stalkwise iso there).
     Apply ClosedImmersionSES to C with `Y = Vᶜ`:
@@ -234,7 +230,7 @@ theorem cokernel_openHom_vanishing
       haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
         (C := AddCommGrpCat.{u}) (X := X) x
       haveI : Mono (T.map S'.f.val) := Functor.map_mono T S'.f.val
-      rwa [AddCommGrpCat.mono_iff_injective.mp inferInstance |>.eq_iff] at ha_img
+      rwa [(AddCommGrpCat.mono_iff_injective _).mp inferInstance |>.eq_iff] at ha_img
     · -- x ∈ Vᶜ = Y: stalk map of η is iso by closedIncl_unit_stalk_isIso.
       -- kernel stalk at x = 0.
       have hxY : (x : X) ∈ Y := hx
@@ -257,7 +253,6 @@ These lemmas decompose the kernel vanishing argument.
 `zeroOutsideInt_cohomology_vanishing` is proved; the other two remain sorry.
 -/
 
-set_option synthInstance.maxHeartbeats 80000 in
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
     degree `m > dim X` on an irreducible Noetherian space of positive dimension.
     Proof: write `m = m' + 1`, apply `zeroOutsideInt_vanishing` (SES + flasque), then prove
@@ -302,7 +297,7 @@ theorem zeroOutsideInt_cohomology_vanishing
       haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
         (C := AddCommGrpCat.{u}) (X := X) x
       haveI : Mono (T.map S'.f.val) := Functor.map_mono T S'.f.val
-      rwa [AddCommGrpCat.mono_iff_injective.mp inferInstance |>.eq_iff] at ha_img
+      rwa [(AddCommGrpCat.mono_iff_injective _).mp inferInstance |>.eq_iff] at ha_img
     · have hxY : (x : X) ∈ Y := hx
       haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
           (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
@@ -317,7 +312,6 @@ theorem zeroOutsideInt_cohomology_vanishing
     exact PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim hm'_Y)
   exact hS'₂ ▸ subsingleton_sheafH_of_shortExact_middle hS'E m' hK_van hP_van
 
-set_option synthInstance.maxHeartbeats 80000 in
 /-- Third-term LES: for 0 → X₁ → X₂ → X₃ → 0, H^n(X₂)=0 ∧ H^{n+1}(X₁)=0 ⟹ H^n(X₃)=0. -/
 theorem subsingleton_ext_of_ses_third {C : Type*} [Category C] [Abelian C] [HasExt C]
     {S : ShortComplex C} (hS : S.ShortExact) (Z : C) (n : ℕ)
@@ -394,7 +388,7 @@ theorem exists_nonzero_stalk_in_V
       stalk_zeroOutsideInt_zero_outside V x hx _
     haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
     haveI : Mono (T.map i.val) := Functor.map_mono T i.val
-    rwa [AddCommGrpCat.mono_iff_injective.mp inferInstance |>.eq_iff] at h_img
+    rwa [(AddCommGrpCat.mono_iff_injective _).mp inferInstance |>.eq_iff] at h_img
 
 /-- A sheaf morphism is mono if all its stalk maps are injective. -/
 theorem sheaf_mono_of_stalk_injective
@@ -404,7 +398,7 @@ theorem sheaf_mono_of_stalk_injective
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val))) :
     Mono f := by
   letI : ∀ x : X, Mono ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val) :=
-    fun x => (AddCommGrpCat.mono_iff_injective.mp <| ConcreteCategory.mono_of_injective _ (h x))
+    fun x => ((AddCommGrpCat.mono_iff_injective _).mp <| ConcreteCategory.mono_of_injective _ (h x))
   exact TopCat.Presheaf.mono_of_stalk_mono f
 
 /-- Every additive subgroup of `ℤ` is of the form `nℤ`. -/
@@ -675,7 +669,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
           haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
             (C := AddCommGrpCat.{u}) (X := X) x
           haveI : Mono (T.map S'.f.val) := Functor.map_mono T S'.f.val
-          rwa [AddCommGrpCat.mono_iff_injective.mp inferInstance |>.eq_iff] at ha_img
+          rwa [(AddCommGrpCat.mono_iff_injective _).mp inferInstance |>.eq_iff] at ha_img
         · have hxY : (x : X) ∈ Y := hx
           haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
               (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
@@ -690,7 +684,6 @@ theorem subsheaf_zeroOutsideInt_vanishing
       exact hS'₂ ▸ subsingleton_sheafH_of_shortExact_middle hS'E m hK_van hP_van
     exact subsingleton_sheafH_of_shortExact_middle hSE m hV'van hCoker
 
-set_option synthInstance.maxHeartbeats 80000 in
 /-- **Steps 3C + 4 + LES** (Hartshorne III.2.7): any epi image of `zeroOutsideInt V` has
     vanishing cohomology in degree `m > dim X`. Uses third-term LES with
     `zeroOutsideInt_cohomology_vanishing` (Step 5) and
@@ -754,8 +747,8 @@ private noncomputable def imageIncl
     [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
     [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
     TopCat.Sheaf.finsetGeneratedSheaf S' ⟶ TopCat.Sheaf.finsetGeneratedSheaf (insert σ₀ S') :=
-  image.lift ⟨_, image.ι _, finsetCoproductIncl hσ₀ ≫ factorThruImage _,
-    by rw [Category.assoc, image.fac]; ext σ
+  image.lift ⟨_, Limits.image.ι _, finsetCoproductIncl hσ₀ ≫ factorThruImage _,
+    by rw [Category.assoc, Limits.image.fac]; ext σ
        simp [finsetCoproductIncl, TopCat.Sheaf.finsetGeneratorMap,
              TopCat.Sheaf.familyGeneratorMap]⟩
 
@@ -766,7 +759,7 @@ private instance imageIncl_mono
     [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
     [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
     Mono (imageIncl hσ₀ : TopCat.Sheaf.finsetGeneratedSheaf S' ⟶ _) := by
-  apply mono_of_mono _ (image.ι _); rw [image.lift_fac]; exact mono_comp _ _
+  apply mono_of_mono _ (Limits.image.ι _); rw [Limits.image.lift_fac]; exact mono_comp _ _
 
 /-- The `σ₀`-component maps epi onto the cokernel of `imageIncl`. Uses the biproduct
     projection to factor `factorThruImage ≫ cokernel.π` (which is epi) through the
@@ -808,13 +801,12 @@ private theorem imageIncl_cokernel_epi
       simp [finsetCoproductIncl]; congr 1; exact Subtype.ext rfl
     rw [← hfact, Category.assoc, Category.assoc]
     rw [show finsetCoproductIncl hσ₀ ≫ factorThruImage _ = factorThruImage _ ≫ imageIncl hσ₀ from by
-      apply (cancel_mono (image.ι _)).mp
-      rw [Category.assoc, Category.assoc, image.lift_fac, image.fac, image.fac]
+      apply (cancel_mono (Limits.image.ι _)).mp
+      rw [Category.assoc, Category.assoc, Limits.image.lift_fac, Limits.image.fac, Limits.image.fac]
       ext τ; simp [finsetCoproductIncl, TopCat.Sheaf.finsetGeneratorMap,
                     TopCat.Sheaf.familyGeneratorMap]]
     rw [Category.assoc, cokernel.condition, comp_zero]
 
-set_option synthInstance.maxHeartbeats 80000 in
 /-- **Step 3B–3C**: vanishing for `finsetGeneratedSheaf S` by `Finset.induction`.
     Empty set: image = 0. Insert: SES `0 → image(S') → image(S) → cokernel → 0` where
     cokernel is epi image of `Z_{σ₀.1}`, so `hzero` + middle-term LES close the step. -/
@@ -882,7 +874,6 @@ theorem irreduciblePos_kernel_subsingleton
   directLimit_cohomology_vanishing S.X₁ n
     (fun f hf => epiImage_zeroOutsideInt_vanishing X ih hpos _ f hf n hn)
 
-set_option synthInstance.maxHeartbeats 80000 in
 /-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case). -/
 theorem IrreduciblePosVanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
