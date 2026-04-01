@@ -392,11 +392,11 @@ theorem epiImage_zeroOutsideInt_vanishing
 /-- **Hartshorne 2.9 core**: on a Noetherian space, if `H^m = 0` for all finitely generated
     subsheaves of `K`, then `H^m(K) = 0`. This encapsulates the commutativity of cohomology
     with filtered colimits: `K = colim K_α`, `H^m(K) = colim H^m(K_α) = colim 0 = 0`. -/
+open scoped Classical in
 theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
     (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ)
-    (hfg : ∀ (S : Finset (TopCat.Sheaf.SectionIndex K))
-      [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
+    (hfg : ∀ (S : Finset (TopCat.Sheaf.SectionIndex K)),
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)) :
     Subsingleton (Sheaf.H K m) := by
   sorry
@@ -491,8 +491,7 @@ theorem finsetGeneratedSheaf_vanishing
     (m : ℕ)
     (hzero : ∀ {G : TopCat.Sheaf AddCommGrpCat.{u} X} {V : Opens X}
       (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G), Epi f → Subsingleton (Sheaf.H G m))
-    (S : Finset (TopCat.Sheaf.SectionIndex K))
-    [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
+    (S : Finset (TopCat.Sheaf.SectionIndex K)) :
     Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m) := by
   induction S using Finset.induction with
   | empty =>
@@ -509,7 +508,9 @@ theorem finsetGeneratedSheaf_vanishing
       (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
     have h_old : Subsingleton (Sheaf.H S_ses.X₁ m) := ih
     have h_coker : Subsingleton (Sheaf.H S_ses.X₃ m) := by
-      exact hzero (Sigma.ι _ ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
+      exact hzero
+        (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1)
+          ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
         factorThruImage _ ≫ cokernel.π (imageIncl hσ₀)) (imageIncl_cokernel_epi hσ₀)
     exact subsingleton_sheafH_of_shortExact_middle hSE m h_old h_coker
 
@@ -526,7 +527,7 @@ theorem directLimit_cohomology_vanishing
       (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G), Epi f → Subsingleton (Sheaf.H G m)) :
     Subsingleton (Sheaf.H K m) :=
   cohomology_vanishing_of_finitelyGenerated_vanishing K m
-    (fun S _ => finsetGeneratedSheaf_vanishing m hzero S)
+    (fun S => finsetGeneratedSheaf_vanishing m hzero S)
 
 /-- Kernel vanishing via assembly of Steps 3-5. -/
 theorem irreduciblePos_kernel_subsingleton
