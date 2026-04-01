@@ -50,9 +50,10 @@ instance {X : TopCat.{u}} :
 -- Cache expensive typeclass resolutions to avoid re-synthesizing in every proof.
 -- The chain IsGrothendieckAbelian → EnoughInjectives → HasDerivedCategory is very
 -- expensive via inference. Using explicit constructors avoids synthesis entirely.
+set_option synthInstance.maxHeartbeats 4000000 in
 noncomputable instance sheafEnoughInjectives (X : TopCat.{u}) :
     EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-  IsGrothendieckAbelian.enoughInjectives _
+  inferInstanceAs (EnoughInjectives (CategoryTheory.Sheaf _ _))
 
 noncomputable instance sheafHasDerivedCategory (X : TopCat.{u}) :
     HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} X) :=
