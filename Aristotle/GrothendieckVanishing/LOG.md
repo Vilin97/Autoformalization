@@ -1,5 +1,27 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-01T21:30Z — MAJOR: Restore all 14 regressed sorry's (16 → 2)
+
+**Sorry count: 2** (was 16 before this cycle; restored to pre-regression level)
+
+- **Restored 14 proofs** from pre-regression commit e90c2f0, adapted to heartbeat-free environment:
+  - Tier 1 (5): presheaf_stalk_surj_openHom, isZero_zeroOutsideInt_bot,
+    stalk_zeroOutsideInt_zero_outside, exists_nonzero_stalk_in_V,
+    presheaf_stalk_zeroOutside_eq_zsmul_generator
+  - Tier 2 (4): sheaf_stalk_surj_openHom, sheaf_stalk_bijective_openHom,
+    stalk_zeroOutsideInt_eq_zsmul_generator, cokernel_stalk_zero_V
+  - Tier 3-4 (5): cokernel_openHom_vanishing, zeroOutsideInt_vanishing,
+    zeroOutsideInt_cohomology_vanishing, subsheaf_zeroOutsideInt_vanishing,
+    epiImage_zeroOutsideInt_vanishing
+- **Fixed `zeroOutsideInt_vanishing`**: replaced `FlasqueVanishing` + sorry with
+  `subsingleton_ext_of_ses` + `constantSheaf_cohomology_vanishing` (no sorry needed)
+- **Fixed Classical kernel mismatch**: removed `[HasCoproduct]` params from
+  `finsetGeneratedSheaf_vanishing` and `cohomology_vanishing_of_finitelyGenerated_vanishing`
+- **CI**: awaiting result on commit d85946a
+- 2 sorry's remain (both original Mathlib API gaps):
+  1. `exists_good_section` — Step 4 subsheaf structure
+  2. `cohomology_vanishing_of_finitelyGenerated_vanishing` — Hartshorne 2.9
+
 ## 2026-04-01T21:00Z — Restore Category C proofs + fix Classical instance mismatch
 
 **Sorry count: 19** (was 24 before Category C; 2 original + 17 regressed)
