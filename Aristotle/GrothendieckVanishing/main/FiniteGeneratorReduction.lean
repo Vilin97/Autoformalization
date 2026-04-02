@@ -31,27 +31,6 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
     because `Hom(Z, F) ≅ Γ(X, F) = F(X)` and filtered colimits of sheaves are objectwise.
     The mono-transition condition is NOT needed; the proof works for arbitrary filtered
     diagrams. -/
--- Base case: Hom(Z, -) preserves filtered colimits of mono diagrams.
--- Given Subsingleton (Z ⟶ Y.obj j) for all j, show Subsingleton (Z ⟶ c.pt).
-private theorem hom_subsingleton_of_filtered_colimit_mono
-    {C : Type u} [Category.{v} C] [Abelian C]
-    [IsGrothendieckAbelian.{w} C]
-    {J : Type w} [SmallCategory J] [IsFiltered J]
-    (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
-    [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
-    (Z : C)
-    (hvan : ∀ j, Subsingleton (Z ⟶ Y.obj j)) :
-    Subsingleton (Z ⟶ c.pt) := by
-  -- Use well-poweredness to find κ bounding Subobject Z, then apply
-  -- preservesColimit_coyoneda_obj_of_mono.
-  -- Step 1: In a Grothendieck abelian category, Subobject Z is w-small (well-powered).
-  -- Step 2: Choose κ > max(card(Subobject Z), ℵ₀) that is regular.
-  -- Step 3: J is κ-filtered since J : Type w and κ is large enough.
-  -- Step 4: Apply preservesColimit_coyoneda_obj_of_mono.
-  -- Step 5: The colimit-preserving Hom functor maps the colimit to the colimit
-  --         of Hom-sets, which is subsingleton since each Hom(Z, Y.obj j) is.
-  sorry
-
 theorem ext_comm_filtered_colimit_mono
     {C : Type u} [Category.{v} C] [Abelian C] [HasExt C]
     [IsGrothendieckAbelian.{w} C]
@@ -59,20 +38,18 @@ theorem ext_comm_filtered_colimit_mono
     (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
     [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
     (Z : C) (n : ℕ)
+    -- The `hHom` hypothesis: Hom(Z,-) sends colimit vanishing to vanishing.
+    -- For sheaves, this follows from objectwise colimits: Hom(Z_X, F) ≅ F(X).
+    (hHom : (∀ j, Subsingleton (Z ⟶ Y.obj j)) → Subsingleton (Z ⟶ c.pt))
     (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)) :
     Subsingleton (Ext Z c.pt n) := by
-  -- Decomposed into n=0 (Hom case) and n≥1 (Ext case).
-  -- The n=0 case reduces to hom_subsingleton_of_filtered_colimit_mono via Ext.homEquiv₀.
-  -- The n≥1 case is a genuine Mathlib API gap requiring Čech cohomology,
-  -- universal δ-functor theorem, or functorial flasque/Godement resolution.
-  -- None of these are currently in Mathlib v4.28.0.
   induction n with
   | zero =>
-    have h := hom_subsingleton_of_filtered_colimit_mono Y c hc Z
-      (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j))
-    exact Ext.homEquiv₀.subsingleton_congr.mpr h
+    -- n=0: Ext^0 ≅ Hom via homEquiv₀, then apply hHom. PROVED.
+    exact Ext.homEquiv₀.subsingleton_congr.mpr
+      (hHom (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j)))
   | succ n _ =>
-    -- Mathlib API gap: Ext^{n+1} case requires Čech cohomology, universal δ-functors,
+    -- n≥1: Mathlib API gap. Requires Čech cohomology, universal δ-functors,
     -- or functorial Godement resolution. See proofs.md for analysis.
     sorry
 
@@ -207,8 +184,16 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)) :
     Subsingleton (Sheaf.H K m) := by
+  -- hHom: for sheaves, Hom(Z_X, colim F_j) ≅ colim Hom(Z_X, F_j) because
+  -- filtered colimits of sheaves are computed objectwise and Hom(Z_X, F) ≅ F(X).
+  let Z := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+    (AddCommGrpCat.of (ULift ℤ))
+  have hHom : (∀ j, Subsingleton (Z ⟶ (finsetGenFunctor K).obj j)) →
+      Subsingleton (Z ⟶ (finsetGenCocone K).pt) := by
+    intro hvan
+    sorry
   exact ext_comm_filtered_colimit_mono (finsetGenFunctor K) (finsetGenCocone K)
-    (finsetGenCocone_isColimit K) _ m (fun S => hfg S)
+    (finsetGenCocone_isColimit K) Z m hHom (fun S => hfg S)
 
 section FinsetGenerated
 open scoped Classical
