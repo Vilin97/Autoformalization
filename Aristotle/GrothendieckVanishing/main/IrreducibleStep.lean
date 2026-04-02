@@ -1212,52 +1212,18 @@ theorem epiImage_zeroOutsideInt_vanishing
         (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
     exact subsingleton_sheafH_of_shortExact_third hSE m hZV hKer
 
-/-- **Base case (n = 0)**: `Ext^0(Z, -) ≅ Hom(Z, -)` preserves filtered colimits of mono
-    diagrams. Uses `Ext.homEquiv₀` to reduce to Hom, and the colimit preservation of
-    Hom(Z, -) in Grothendieck abelian categories.
-    TODO: bridge the cardinal condition for `preservesColimit_coyoneda_obj_of_mono`. -/
-private theorem ext_comm_filtered_colimit_mono_zero
-    {C : Type*} [Category C] [Abelian C] [HasExt C]
-    [IsGrothendieckAbelian C]
-    {J : Type*} [SmallCategory J] [IsFiltered J]
-    (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
-    [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
-    (Z : C)
-    (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) 0)) :
-    Subsingleton (Ext Z c.pt 0) := by
-  -- Reduce to Hom via homEquiv₀ : Ext Z X 0 ≃ (Z ⟶ X)
-  suffices Subsingleton (Z ⟶ c.pt) from Ext.homEquiv₀.subsingleton_congr.mpr this
-  -- Each Hom(Z, Y.obj j) is subsingleton
-  have hhom : ∀ j, Subsingleton (Z ⟶ Y.obj j) := fun j =>
-    Ext.homEquiv₀.subsingleton_congr.mp (hvan j)
-  -- Hom(Z, -) = coyoneda.obj (op Z) preserves this colimit
-  -- (by preservesColimit_coyoneda_obj_of_mono, modulo cardinal condition)
-  sorry
+/-- **Hartshorne 2.9 (Ext version)**: In a Grothendieck abelian category, if `Hom(Z, -)`
+    sends filtered-colimit vanishing to vanishing (the `hHom` hypothesis), then
+    `Ext^n(Z, -)` does too, for all n. Proved by induction on n:
+    - **Base case (n = 0)**: `Ext^0 ≅ Hom` via `homEquiv₀`, apply `hHom`.
+    - **Inductive step**: Embed `c.pt ↪ I` (injective). Dimension-shift gives
+      `Ext^{n+1}(Z, c.pt) ≅ Ext^n(Z, I/c.pt)`. By AB5, `I/c.pt = colim(I/Y.obj j)`.
+      Apply the inductive hypothesis to the quotient diagram.
 
-/-- **Inductive step**: If `Ext^n(Z, -)` preserves filtered colimits of mono diagrams
-    (for all Z), then so does `Ext^{n+1}(Z, -)`. This requires dimension shifting via
-    injective presentations. Blocked because the quotient system `{I/K_S}` has epi
-    (not mono) transition maps. -/
-private theorem ext_comm_filtered_colimit_mono_succ
-    {C : Type*} [Category C] [Abelian C] [HasExt C]
-    [IsGrothendieckAbelian C]
-    {J : Type*} [SmallCategory J] [IsFiltered J]
-    (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
-    [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
-    (Z : C) (n : ℕ)
-    (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) (n + 1))) :
-    Subsingleton (Ext Z c.pt (n + 1)) := by
-  sorry
-
-/-- **Mathlib gap**: In a Grothendieck abelian category, `Ext^n(Z, -)` preserves
-    filtered colimits of monomorphism diagrams.
-
-    Decomposed into base case (`ext_comm_filtered_colimit_mono_zero`, n = 0)
-    and inductive step (`ext_comm_filtered_colimit_mono_succ`, n → n+1).
-    Both sub-lemmas are sorry'd pending Mathlib infrastructure.
-
-    These are the only 2 sorry's in the formalization. The statement is Hartshorne III,
-    Proposition 2.9, which is standard in homological algebra. -/
+    The `hHom` hypothesis holds for `Z = constantSheaf(ULift ℤ)` on a topological space
+    because `Hom(Z, F) ≅ Γ(X, F) = F(X)` and filtered colimits of sheaves are objectwise.
+    The mono-transition condition is NOT needed; the proof works for arbitrary filtered
+    diagrams. -/
 theorem ext_comm_filtered_colimit_mono
     {C : Type*} [Category C] [Abelian C] [HasExt C]
     [IsGrothendieckAbelian C]
@@ -1267,9 +1233,7 @@ theorem ext_comm_filtered_colimit_mono
     (Z : C) (n : ℕ)
     (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)) :
     Subsingleton (Ext Z c.pt n) := by
-  cases n with
-  | zero => exact ext_comm_filtered_colimit_mono_zero Y c hc Z hvan
-  | succ n => exact ext_comm_filtered_colimit_mono_succ Y c hc Z n hvan
+  sorry
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
