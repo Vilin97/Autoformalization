@@ -258,8 +258,16 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       have hcreates : CreatesColimit (finsetGenFunctor K)
           (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat) := by
         apply Sheaf.createsColimitOfIsSheaf; intro pc hpc
-        -- The presheaf colimit of a filtered diagram of sheaves is a sheaf:
-        -- filtered colimits commute with the finite limits in the sheaf condition.
+        -- The presheaf colimit of a filtered diagram of sheaves is a sheaf.
+        -- Proof: isSheaf_iff_isLimit reduces to: for each covering sieve S,
+        -- pc.pt.mapCone S.arrows.cocone.op is a limit.
+        -- Each (F.obj j).val.mapCone is a limit (each is a sheaf).
+        -- pc.pt is the colimit of these presheaves.
+        -- colim in the presheaf category preserves finite limits (AB5 + filtered J):
+        -- PreservesFiniteLimits (colim (J := J) (C := (Opens X)ᵒᵖ ⥤ AddCommGrpCat))
+        -- holds by inferInstance. So the colimit mapCone is also a limit.
+        show TopCat.Presheaf.IsSheaf pc.pt
+        rw [TopCat.Presheaf.isSheaf_iff_isSheafPairwiseIntersections]
         sorry
       haveI := preservesColimit_of_createsColimit_and_hasColimit
         (finsetGenFunctor K) (sheafToPresheaf _ _)
