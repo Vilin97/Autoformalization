@@ -1,5 +1,17 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T09:30Z — Babysit cycle: merged remote work (cohomology_vanishing proved)
+
+**Sorry count: 2** (decomposed from 1 — `ext_comm_filtered_colimit_mono_zero` + `_succ`)
+
+- **Merged remote agent work** (commits fc020e6, cd71c5e): another agent proved
+  `cohomology_vanishing_of_finitelyGenerated_vanishing` and decomposed
+  `ext_comm_filtered_colimit_mono` into base case (n=0) and inductive step (n→n+1).
+- Filtered diagram infrastructure added: `finsetGenFunctor`, `finsetGenCocone`,
+  `finsetGenCocone_isColimit` (using `colim.map_mono'` for mono proof).
+- **Aristotle MCP**: Not connected. Cannot submit or check jobs.
+- 2 sorry's remain in `ext_comm_filtered_colimit_mono_zero` and `_succ` (Mathlib gaps)
+
 ## 2026-04-02T08:30Z — Decompose last sorry into 2 well-typed sub-lemmas
 
 **Sorry count: 2** (was 1 opaque sorry — now 2 focused sub-lemmas)
