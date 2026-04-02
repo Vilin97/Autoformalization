@@ -7,8 +7,8 @@
   Sorry's (1 remaining, Mathlib API gap):
   - ext_comm_filtered_colimit_mono (IrreducibleStep.lean) — Ext^n commutes with
     filtered colimits of mono diagrams in Grothendieck abelian categories.
-    Decomposed into ext_comm_filtered_colimit_mono_zero (base, sorry)
-    and ext_comm_filtered_colimit_mono_succ (inductive step, sorry).
+    Proof strategy: induction on n, using Gamma-colimit commutation at n=0
+    and dimension shifting via injective hulls for n -> n+1.
 
   File structure:
   - SetupCore.lean: category instances, FlasqueVanishing (PROVED),
