@@ -5,8 +5,11 @@
   - subsingleton_ext_of_ses: PROVED — abstract LES vanishing
   - constantSheaf_flasque_of_irreducible: PROVED (in ConstantSheafFlasque.lean)
   - constantSheaf_cohomology_vanishing: PROVED from flasque + FlasqueVanishing
-  - grothendieck_vanishing_irreducible_pos: uses IrreduciblePosVanishing (2 sorry's:
-    exists_good_section, cohomology_vanishing_of_finitelyGenerated_vanishing)
+  - exists_section_generating_stalks: PROVED — uses Nat.find to choose x₀ with minimal
+    image subgroup generator d, then divisibility d | d_x follows from minimality.
+  - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
+  - grothendieck_vanishing_irreducible_pos: uses IrreduciblePosVanishing (1 sorry:
+    cohomology_vanishing_of_finitelyGenerated_vanishing — Mathlib API gap)
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
@@ -74,8 +77,39 @@ theorem zeroOutsideInt_vanishing
       inferInstance inferInstance
   have hFlasque : IsFlasqueSheaf S.X₂ := by
     intro U W i
-    have := constantSheaf_flasque_of_irreducible X i
-    sorry -- needs: zeroOutsideInt ⊤ = constantSheaf ℤ (flasque)
+    -- S.X₂ = zeroOutsideInt ⊤ ≅ constantSheaf ℤ (via presheaf NatIso + sheafification)
+    -- Build NatIso at presheaf level
+    let J := Opens.grothendieckTopology (T := X)
+    let A := AddCommGrpCat.of (ULift.{u} ℤ)
+    let α : TopCat.Presheaf.constZ.zeroOutside (⊤ : Opens X) ≅
+        (CategoryTheory.Functor.const (Opens X)ᵒᵖ).obj A :=
+      CategoryTheory.NatIso.ofComponents
+        (fun W => eqToIso (by show _ = A; simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ, A]))
+        (by intro W₁ W₂ f; simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ, A])
+    -- Sheafify to get sheaf iso β : S.X₂ ≅ constantSheaf(A)
+    let β : S.X₂ ≅ (constantSheaf J AddCommGrpCat.{u}).obj A :=
+      (presheafToSheaf J AddCommGrpCat.{u}).mapIso α
+    -- β is an iso in the Sheaf category; its val is a natural iso of presheaves
+    have hβ_iso : IsIso β.hom := Iso.isIso_hom β
+    -- β.hom is an iso in Sheaf, so β.hom.val is iso as a nat trans
+    haveI : IsIso β.hom.val :=
+      (sheafToPresheaf J AddCommGrpCat.{u}).map_isIso β.hom
+    haveI : IsIso (β.hom.val.app (op W)) :=
+      CategoryTheory.NatIso.isIso_app_of_isIso β.hom.val (op W)
+    haveI : IsIso (β.hom.val.app (op U)) :=
+      CategoryTheory.NatIso.isIso_app_of_isIso β.hom.val (op U)
+    -- From naturality: S.X₂.val.map i.op = inv(β_W) ≫ C.val.map i.op ≫ β_U
+    have h_nat := β.hom.val.naturality i.op
+    have hEpi_const := constantSheaf_flasque_of_irreducible X i
+    -- S.X₂.map = β_W⁻¹ ≫ C.map ≫ β_U, so epi (iso ∘ epi ∘ iso = epi)
+    have hrw : S.X₂.val.map i.op = β.hom.val.app (op W) ≫
+        ((constantSheaf J AddCommGrpCat.{u}).obj A).val.map i.op ≫
+        inv (β.hom.val.app (op U)) := by
+      have := h_nat
+      rw [← Category.assoc, ← this, Category.assoc, IsIso.hom_inv_id, Category.comp_id]
+    rw [hrw]
+    haveI := constantSheaf_flasque_of_irreducible X i
+    exact inferInstance
   exact sheafH_dimension_shift_ses hSE m hCoker
     (FlasqueVanishing X S.X₂ hFlasque m)
 
@@ -281,7 +315,8 @@ theorem cokernel_openHom_vanishing
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
 
 These lemmas decompose the kernel vanishing argument.
-`zeroOutsideInt_cohomology_vanishing` is proved; the other two remain sorry.
+`zeroOutsideInt_cohomology_vanishing` is proved. `exists_good_section` is proved.
+`cohomology_vanishing_of_finitelyGenerated_vanishing` has 1 sorry (Mathlib API gap).
 -/
 
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
@@ -759,7 +794,257 @@ private theorem exists_section_generating_stalks
         (R.presheaf.germ V' x hx s ≠ 0) ∧
         (∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R.val),
           ∃ k : ℤ, a = k • R.presheaf.germ V' x hx s) := by
-  sorry
+  -- Stalk map at any point x
+  let i_x (x : X) := ConcreteCategory.hom
+    ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map i.val)
+  -- i_x is injective at all points
+  have hi_inj : ∀ (x : X), Function.Injective (i_x x) := by
+    intro x
+    let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
+      TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+    haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
+    haveI : Mono (FT.map i) := Functor.map_mono FT i
+    exact (ConcreteCategory.mono_iff_injective_of_preservesPullback (FT.map i)).mp inferInstance
+  -- Abbreviation for germ of generator at x ∈ V
+  let gen_at (x : X) (hx : x ∈ V) := (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V x hx
+    (TopCat.Sheaf.zeroOutsideInt.generator V)
+  -- Helper: build image subgroup at any point x ∈ V
+  let H_at (x : X) (hx : x ∈ V) : AddSubgroup (ULift.{u} ℤ) := {
+    carrier := {n | n.down • gen_at x hx ∈ Set.range (i_x x)}
+    add_mem' := by
+      intro a b ha hb; obtain ⟨ra, hra⟩ := ha; obtain ⟨rb, hrb⟩ := hb
+      exact ⟨ra + rb, by rw [ULift.add_down, add_smul, map_add, hra, hrb]⟩
+    zero_mem' := ⟨0, by simp [ULift.zero_down]⟩
+    neg_mem' := by
+      intro a ha; obtain ⟨ra, hra⟩ := ha
+      exact ⟨-ra, by rw [ULift.neg_down, neg_smul, map_neg, hra]⟩
+  }
+  -- Step 1: Choose x₀ ∈ V with MINIMAL image subgroup generator.
+  -- P(n): n > 0 and some x ∈ V has image subgroup generated by n
+  let P : ℕ → Prop := fun n => 0 < n ∧ ∃ (x : X) (hx : x ∈ V),
+    (↑n : ℤ) • gen_at x hx ∈ Set.range (i_x x) ∧
+    ∀ (m : ℤ), m • gen_at x hx ∈ Set.range (i_x x) → (↑n : ℤ) ∣ m
+  have hP : ∃ n, P n := by
+    obtain ⟨x₀', hx₀'V, a₀', ha₀'⟩ := exists_nonzero_stalk_in_V V R i hR
+    have hH'_ne : H_at x₀' hx₀'V ≠ ⊥ := by
+      rw [ne_eq, AddSubgroup.eq_bot_iff_forall]; push_neg
+      obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x₀' hx₀'V (i_x x₀' a₀')
+      exact ⟨⟨n⟩, ⟨a₀', hn⟩, fun h => by
+        simp only [ULift.ext_iff, ULift.zero_down] at h
+        rw [h, zero_smul] at hn; exact ha₀' (hi_inj x₀' (hn.trans (map_zero (i_x x₀')).symm))⟩
+    obtain ⟨d', hd'_mem, hd'_pos, hd'_gen⟩ := ulift_int_subgroup_cyclic _ hH'_ne
+    refine ⟨d'.down.toNat, Int.pos_iff_toNat_pos.mp hd'_pos, x₀', hx₀'V, ?_, ?_⟩
+    · rwa [Int.toNat_of_nonneg (le_of_lt hd'_pos)]
+    · intro m hm
+      obtain ⟨k, hk⟩ := hd'_gen ⟨m⟩ hm
+      rw [Int.toNat_of_nonneg (le_of_lt hd'_pos)]
+      exact ⟨k, by have := congrArg ULift.down hk; simp at this; linarith⟩
+  -- d_nat is the minimal positive generator among all points of V
+  have hP_dec : DecidablePred P := Classical.decPred P
+  set d_nat := Nat.find (p := P) hP with hd_nat_def
+  obtain ⟨hd_nat_pos, x₀, hx₀V, hd_in_range, hd_divides⟩ := Nat.find_spec (p := P) hP
+  -- Minimality of d_nat
+  have h_minimal : ∀ n, P n → d_nat ≤ n := fun n hn => Nat.find_min' (p := P) hP hn
+  -- Convert to ULift ℤ
+  set d : ULift.{u} ℤ := ⟨(d_nat : ℤ)⟩ with hd_def
+  have hd_pos : d.down > 0 := by simp [hd_def]; exact_mod_cast hd_nat_pos
+  -- Step 2: Build image subgroup at x₀ and derive generator properties
+  let H := H_at x₀ hx₀V
+  have hH_ne : H ≠ ⊥ := by
+    rw [ne_eq, AddSubgroup.eq_bot_iff_forall]; push_neg
+    refine ⟨d, hd_in_range, ?_⟩
+    rw [ne_eq, ULift.ext_iff, ULift.zero_down]; omega
+  have hd_mem : d.down • gen_at x₀ hx₀V ∈ Set.range (i_x x₀) := hd_in_range
+  have hd_gen : ∀ h ∈ H, ∃ k : ℤ, h = ⟨k * d.down⟩ := by
+    intro h hh
+    obtain ⟨k, hk⟩ := hd_divides h.down hh
+    exact ⟨k, by ext; simp only [hd_def]; rw [hk, mul_comm]⟩
+  -- Step 3: Find a₁ generating stalk(R, x₀)
+  obtain ⟨a₁, ha₁⟩ : d.down • gen_at x₀ hx₀V ∈ Set.range (i_x x₀) := hd_mem
+  have ha₁_ne : a₁ ≠ 0 := by
+    intro h; rw [h, map_zero] at ha₁
+    -- ha₁ : 0 = d.down • gen_at x₀ hx₀V
+    have : (0 : ℤ) = d.down :=
+      zsmul_generator_injective V x₀ hx₀V ((zero_smul _ _).trans ha₁)
+    linarith
+  have ha₁_gen : ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x₀).obj R.val),
+      ∃ k : ℤ, a = k • a₁ := by
+    intro a
+    obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x₀ hx₀V (i_x x₀ a)
+    obtain ⟨k, hk⟩ := hd_gen ⟨n⟩
+      (show (⟨n⟩ : ULift.{u} ℤ) ∈ H from ⟨a, show i_x x₀ a = (⟨n⟩ : ULift.{u} ℤ).down •
+        gen_at x₀ hx₀V from hn⟩)
+    have hn_eq : n = k * d.down := by simpa using congrArg ULift.down hk
+    exact ⟨k, hi_inj x₀ (by rw [map_zsmul, hn, hn_eq, mul_smul, ← ha₁])⟩
+  -- Step 4: Represent a₁ by section s, restrict to W₀ ⊓ V
+  obtain ⟨W₀, hx₀W₀, s₀, hs₀⟩ := TopCat.Presheaf.germ_exist R.val x₀ a₁
+  set V₁ := W₀ ⊓ V with hV₁_def
+  have hV₁V : V₁ ≤ V := inf_le_right
+  have hx₀V₁ : x₀ ∈ V₁ := ⟨hx₀W₀, hx₀V⟩
+  set s₁ := ConcreteCategory.hom (R.val.map (homOfLE (inf_le_left : V₁ ≤ W₀)).op) s₀
+  have hs₁_germ : R.presheaf.germ V₁ x₀ hx₀V₁ s₁ = a₁ :=
+    (TopCat.Presheaf.germ_res_apply R.val (homOfLE inf_le_left) x₀ hx₀V₁ s₀).trans hs₀
+  -- Step 5: Shrink to where germ coefficient is constant
+  -- i(s₁) is a section of zeroOutsideInt V over V₁. Its germ at x₀ is d.down • gen_at x₀.
+  -- The section d.down • (restriction of gen_V to V₁) has the same germ at x₀.
+  -- By germ_eq, they agree on some W ≤ V₁.
+  set is₁ := i.val.app (op V₁) s₁ with his₁_def
+  set gen_V_res := ConcreteCategory.hom
+    ((TopCat.Sheaf.zeroOutsideInt V).val.map (homOfLE hV₁V).op)
+    (TopCat.Sheaf.zeroOutsideInt.generator V) with hgen_V_res_def
+  set d_gen_res := d.down • gen_V_res with hd_gen_res_def
+  -- Germ of is₁ at x₀ = d.down • gen_at x₀
+  have his₁_germ : (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁ is₁ =
+      d.down • gen_at x₀ hx₀V := by
+    rw [his₁_def,
+      show (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁
+        (i.val.app (op V₁) s₁) =
+      i_x x₀ (R.presheaf.germ V₁ x₀ hx₀V₁ s₁) from
+      (TopCat.Presheaf.stalkFunctor_map_germ_apply V₁ x₀ hx₀V₁ i.val s₁).symm,
+      hs₁_germ, ha₁]
+  -- Germ of d_gen_res at x₀ = d.down • gen_at x₀
+  have hd_gen_res_germ :
+      (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁ d_gen_res =
+      d.down • gen_at x₀ hx₀V := by
+    rw [hd_gen_res_def, map_zsmul, hgen_V_res_def]
+    congr 1
+    exact TopCat.Presheaf.germ_res_apply (TopCat.Sheaf.zeroOutsideInt V).val
+      (homOfLE hV₁V) x₀ hx₀V₁ (TopCat.Sheaf.zeroOutsideInt.generator V)
+  -- Equal germs at x₀ → agree on some W ≤ V₁
+  have hgerms_eq : (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁ is₁ =
+      (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁ d_gen_res := by
+    rw [his₁_germ, hd_gen_res_germ]
+  obtain ⟨W, hx₀W, iW1, iW2, hW_eq⟩ :=
+    TopCat.Presheaf.germ_eq (TopCat.Sheaf.zeroOutsideInt V).val x₀ hx₀V₁ hx₀V₁
+      is₁ d_gen_res hgerms_eq
+  -- W ≤ V₁ ≤ V
+  have hWV₁ : W ≤ V₁ := leOfHom iW1
+  have hWV : W ≤ V := le_trans hWV₁ hV₁V
+  -- W ≠ ⊥ (contains x₀)
+  have hW_ne : W ≠ ⊥ := by
+    intro h; exact (Opens.mem_bot (x := x₀)).mp (h ▸ hx₀W)
+  -- On W, the sections is₁|_W and d_gen_res|_W agree (from hW_eq)
+  have hiW : iW1 = iW2 := Subsingleton.elim _ _
+  -- Key: at every x ∈ W, i_x(germ(s₁|_W, x)) = d.down • gen_at x
+  -- This follows because is₁|_W = d_gen_res|_W (from hW_eq), and germs respect restriction
+  have hcoeff_const : ∀ (x : X) (hxW : x ∈ W),
+      i_x x (R.presheaf.germ W x hxW
+        (ConcreteCategory.hom (R.val.map (homOfLE hWV₁).op) s₁)) =
+      d.down • gen_at x (hWV hxW) := by
+    intro x hxW
+    -- Use: i_x(germ(s|_W, x)) = i_x(germ(s, x at V₁)) = germ(i(s), x at V₁)
+    --   = germ(is₁, x at V₁) = germ(is₁|_W, x) ... = germ(d_gen_res|_W, x) = ...
+    -- Simplify via: everything factors through germ_res_apply + stalkFunctor_map_germ
+    calc i_x x (R.presheaf.germ W x hxW
+          (ConcreteCategory.hom (R.val.map (homOfLE hWV₁).op) s₁))
+        = i_x x (R.presheaf.germ V₁ x (hWV₁ hxW) s₁) := by
+          congr 1
+          exact TopCat.Presheaf.germ_res_apply R.val (homOfLE hWV₁) x hxW s₁
+      _ = (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x (hWV₁ hxW) is₁ := by
+          rw [his₁_def]
+          show ConcreteCategory.hom
+              ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map i.val)
+              (ConcreteCategory.hom (TopCat.Presheaf.germ R.val V₁ x (hWV₁ hxW)) s₁) =
+            ConcreteCategory.hom (TopCat.Presheaf.germ
+              (TopCat.Sheaf.zeroOutsideInt V).val V₁ x (hWV₁ hxW))
+              (ConcreteCategory.hom (i.val.app (op V₁)) s₁)
+          exact TopCat.Presheaf.stalkFunctor_map_germ_apply V₁ x (hWV₁ hxW) i.val s₁
+      _ = (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x (hWV₁ hxW) d_gen_res := by
+          -- is₁ and d_gen_res have equal germs at x (from hW_eq via germ_res)
+          have h_eq_sec : ConcreteCategory.hom
+              ((TopCat.Sheaf.zeroOutsideInt V).val.map iW1.op) is₁ =
+            ConcreteCategory.hom
+              ((TopCat.Sheaf.zeroOutsideInt V).val.map iW1.op) d_gen_res := by
+            rw [hW_eq, hiW]
+          -- Both sides are germ_res from V₁ to W; use germ_res_apply in reverse
+          have hg1 := TopCat.Presheaf.germ_res_apply
+            (TopCat.Sheaf.zeroOutsideInt V).val (homOfLE hWV₁) x hxW is₁
+          have hg2 := TopCat.Presheaf.germ_res_apply
+            (TopCat.Sheaf.zeroOutsideInt V).val (homOfLE hWV₁) x hxW d_gen_res
+          rw [← hg1, ← hg2]; congr 1
+      _ = d.down • (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x (hWV₁ hxW) gen_V_res := by
+          rw [hd_gen_res_def, map_zsmul]
+      _ = d.down • gen_at x (hWV hxW) := by
+          congr 1; rw [hgen_V_res_def]
+          exact TopCat.Presheaf.germ_res_apply (TopCat.Sheaf.zeroOutsideInt V).val
+            (homOfLE hV₁V) x (hWV₁ hxW) (TopCat.Sheaf.zeroOutsideInt.generator V)
+  -- Restrict s₁ to W
+  set s_W := ConcreteCategory.hom (R.val.map (homOfLE hWV₁).op) s₁ with hs_W_def
+  refine ⟨W, hWV, hW_ne, s_W, fun x hxW => ?_⟩
+  -- At x ∈ W: i_x(germ(s_W, x)) = d.down • gen_at x (from hcoeff_const)
+  have hcoeff_x := hcoeff_const x hxW
+  rw [hs_W_def] at hcoeff_x ⊢
+  constructor
+  · -- germ(s_W, x) ≠ 0: since i_x(germ(s_W, x)) = d.down • gen_at x ≠ 0, and i_x injective
+    intro h_zero
+    rw [h_zero, map_zero] at hcoeff_x
+    -- hcoeff_x : 0 = d.down • gen_at x (hWV hxW)
+    have : (0 : ℤ) = d.down :=
+      zsmul_generator_injective V x (hWV hxW) ((zero_smul _ _).trans hcoeff_x)
+    linarith
+  · -- Every stalk element a is a multiple of germ(s_W, x).
+    -- Strategy: d.down generates the image subgroup at x (not just at x₀),
+    -- because d_nat was chosen MINIMAL via Nat.find. At x, the generator d_x
+    -- satisfies d_x | d.down (since d.down ∈ image at x from hcoeff_x) and
+    -- d.down ≤ d_x (minimality), forcing d_x = d.down.
+    intro a
+    obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x (hWV hxW) (i_x x a)
+    -- d.down • gen_at x ∈ range(i_x x) (from hcoeff_x)
+    have hd_in_Hx : d.down • gen_at x (hWV hxW) ∈ Set.range (i_x x) :=
+      ⟨_, hcoeff_x⟩
+    -- Image subgroup at x is nonzero (contains d.down)
+    have hHx_ne : H_at x (hWV hxW) ≠ ⊥ := by
+      rw [ne_eq, AddSubgroup.eq_bot_iff_forall]; push_neg
+      refine ⟨d, hd_in_Hx, ?_⟩
+      rw [ne_eq, ULift.ext_iff, ULift.zero_down]; omega
+    -- Get generator d_x of image subgroup at x
+    obtain ⟨d_x, hd_x_mem, hd_x_pos, hd_x_gen⟩ := ulift_int_subgroup_cyclic _ hHx_ne
+    -- d_x generates image subgroup at x, so P(d_x.down.toNat) holds
+    have hP_dx : P d_x.down.toNat := by
+      refine ⟨Int.pos_iff_toNat_pos.mp hd_x_pos, x, hWV hxW, ?_, ?_⟩
+      · rwa [Int.toNat_of_nonneg (le_of_lt hd_x_pos)]
+      · intro m hm
+        obtain ⟨k, hk⟩ := hd_x_gen ⟨m⟩ hm
+        rw [Int.toNat_of_nonneg (le_of_lt hd_x_pos)]
+        exact ⟨k, by have := congrArg ULift.down hk; simp at this; linarith⟩
+    -- Minimality: d_nat ≤ d_x.down.toNat
+    have h_le : d_nat ≤ d_x.down.toNat := h_minimal _ hP_dx
+    -- Also d_x | d.down (since d.down ∈ image subgroup at x)
+    have hd_mem_Hx : (d : ULift.{u} ℤ) ∈ H_at x (hWV hxW) := hd_in_Hx
+    obtain ⟨k_div, hk_div⟩ := hd_x_gen d hd_mem_Hx
+    have hd_eq_k_dx : d.down = k_div * d_x.down := by
+      have := congrArg ULift.down hk_div; simp at this; linarith
+    -- d.down ≤ d_x.down (from minimality) and d.down = k_div * d_x.down
+    -- Forces k_div = 1 and d_x.down = d.down
+    have hd_x_eq : d_x.down = d.down := by
+      have h1 : (d_nat : ℤ) ≤ d_x.down := by
+        have := Int.toNat_of_nonneg (le_of_lt hd_x_pos)
+        rw [← this]; exact_mod_cast h_le
+      -- h1 : d.down ≤ d_x.down (since d.down = ↑d_nat)
+      -- hd_eq_k_dx : d.down = k_div * d_x.down
+      -- hd_x_pos : d_x.down > 0, hd_pos : d.down > 0
+      -- k_div > 0 (since d.down > 0 and d_x.down > 0)
+      -- k_div * d_x.down ≤ d_x.down, so (k_div - 1) * d_x.down ≤ 0
+      -- combined with d_x.down > 0 gives k_div ≤ 1, so k_div = 1
+      have hk_pos : 0 < k_div := by
+        by_contra hle; push_neg at hle
+        have := mul_nonpos_of_nonpos_of_nonneg hle (le_of_lt hd_x_pos)
+        linarith
+      have hk_le1 : k_div ≤ 1 := by
+        by_contra hgt; push_neg at hgt
+        have : 1 * d_x.down < k_div * d_x.down :=
+          mul_lt_mul_of_pos_right hgt hd_x_pos
+        linarith
+      have hk_eq : k_div = 1 := le_antisymm hk_le1 hk_pos
+      rw [hk_eq, one_mul] at hd_eq_k_dx; linarith
+    -- Now d.down | n (since d_x generates at x and d_x.down = d.down)
+    have hn_mem : (⟨n⟩ : ULift.{u} ℤ) ∈ H_at x (hWV hxW) :=
+      ⟨a, show i_x x a = (⟨n⟩ : ULift.{u} ℤ).down • gen_at x (hWV hxW) from hn⟩
+    obtain ⟨k₀, hk₀⟩ := hd_x_gen ⟨n⟩ hn_mem
+    have hn_eq : n = k₀ * d.down := by
+      have h1 := congrArg ULift.down hk₀
+      simp at h1; rw [hd_x_eq] at h1; linarith
+    exact ⟨k₀, hi_inj x (by rw [map_zsmul, hn, hn_eq, mul_smul, ← hcoeff_x])⟩
 
 /-- Core construction for Step 4: find V' ≤ V, V' ≠ ⊥, and a section s ∈ R(V') such that
     `sHom s : zeroOutsideInt V' ⟶ R` is a stalk-isomorphism on V'.
@@ -936,6 +1221,11 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)) :
     Subsingleton (Sheaf.H K m) := by
+  -- Hartshorne 2.9: every element of H^m(K) factors through a f.g. subsheaf.
+  -- On a Noetherian space, K = colim(finsetGeneratedSheaf S).
+  -- Since H^m commutes with filtered colimits (Grothendieck abelian),
+  -- H^m(K) = colim H^m(K_S) = colim 0 = 0.
+  -- This requires: Ext commutes with filtered colimits, not yet in Mathlib.
   sorry
 
 section FinsetGenerated
