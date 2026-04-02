@@ -1,5 +1,20 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T23:40Z — Complete proof skeleton with hQvan_provider, all IH plumbing done
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux with 3 sub-sorry's + 2 in wrapper)
+
+- Added `hQvan_provider` hypothesis to aux: the caller provides per-j quotient vanishing
+  (from mono transitions + LES). The IH application at line 110 is now complete modulo sorry
+  for the iterated provider.
+- Full proof structure: dimension shift → quotient functor → cocone → IH application. ✓
+- Remaining sorry's:
+  - hQcolim: IsColimit for quotient cocone (AB5)
+  - hQvan: per-j Ext vanishing (needs mono of c.ι.app j, from AB5 + mono transitions)
+  - Iterated hQvan_provider for IH (recursive structure)
+  - Universality upgrade of hHom (in wrapper)
+  - hQvan_provider from mono transitions (in wrapper)
+
 ## 2026-04-02T23:30Z — Prove cocone natural transformation, 2 sub-sorry's remain
 
 **Sorry count: 1** (ext_vanishing_of_colimit_aux, 2 sub-sorry's + universality upgrade)

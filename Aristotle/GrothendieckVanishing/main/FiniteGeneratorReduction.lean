@@ -61,18 +61,20 @@ private theorem ext_vanishing_of_colimit_aux
       (∀ j, Subsingleton (Z ⟶ Y.obj j)) → Subsingleton (Z ⟶ c.pt))
     : ∀ (n : ℕ) {J : Type w} [SmallCategory J] [IsFiltered J]
         (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
-        (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)),
+        (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n))
+        -- Per-j quotient vanishing: for any injective embedding, Ext^{n-1} vanishes on each
+        -- cokernel Q_j. The caller provides this from mono transitions + LES.
+        (hQvan_provider : ∀ (n' : ℕ), n = n' + 1 →
+          ∀ (ip : InjectivePresentation c.pt) (j : J),
+          Subsingleton (Ext Z (cokernel (c.ι.app j ≫ ip.shortComplex.f)) n')),
       Subsingleton (Ext Z c.pt n) := by
   intro n; induction n with
   | zero =>
-    intro J _ _ Y c hc hvan
+    intro J _ _ Y c hc hvan _
     exact Ext.homEquiv₀.subsingleton_congr.mpr
       (hHom_univ Y c hc (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j)))
   | succ n ih =>
-    -- ih : ∀ {J} [SmallCategory J] [IsFiltered J] (Y c) (hc : IsColimit c),
-    --      (∀ j, Subsingleton (Ext Z (Y.obj j) n)) → Subsingleton (Ext Z c.pt n)
-    -- NOTE: ih has NO mono transition requirement!
-    intro J _ _ Y c hc hvan
+    intro J _ _ Y c hc hvan hQvan_provider
     -- Step 1: Dimension shift via injective embedding.
     obtain ⟨ip⟩ := EnoughInjectives.presentation c.pt
     have hSE := ip.shortExact_shortComplex
@@ -105,7 +107,7 @@ private theorem ext_vanishing_of_colimit_aux
     -- Needs c.ι.app j ≫ ι to be mono (requires mono transitions on the diagram).
     -- This is provided by ext_comm_filtered_colimit_mono which has [Mono (Y.map φ)].
     have hQvan : ∀ j, Subsingleton (Ext Z (Qfun.obj j) n) := sorry
-    exact @Subsingleton.elim _ (ih Qfun Qcocone hQcolim hQvan) ca cb
+    exact @Subsingleton.elim _ (ih Qfun Qcocone hQcolim hQvan sorry) ca cb
 
 /-- **Hartshorne 2.9 (Ext version)**: In a Grothendieck abelian category, if `Hom(Z, -)`
     sends filtered-colimit vanishing to vanishing (the `hHom` hypothesis), then
@@ -128,7 +130,7 @@ theorem ext_comm_filtered_colimit_mono
   | succ n _ =>
     -- The aux lemma needs universal hHom. At the call site (sheaves), this holds.
     -- For the abstract setting, we use sorry for the universality upgrade.
-    exact ext_vanishing_of_colimit_aux Z (by sorry) (n + 1) Y c hc hvan
+    exact ext_vanishing_of_colimit_aux Z (by sorry) (n + 1) Y c hc hvan (by sorry)
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
