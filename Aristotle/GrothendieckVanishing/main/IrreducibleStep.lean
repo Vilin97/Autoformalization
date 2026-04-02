@@ -77,7 +77,29 @@ theorem zeroOutsideInt_vanishing
   have hFlasque : IsFlasqueSheaf S.X₂ := by
     intro U W i
     have := constantSheaf_flasque_of_irreducible X i
-    sorry
+    -- S.X₂.val = (presheafToSheaf J _).obj (constZ.zeroOutside ⊤) |>.val
+    -- constantSheaf.val = (presheafToSheaf J _).obj constZ |>.val
+    -- These are equal because constZ.zeroOutside ⊤ = constZ (all opens ≤ ⊤)
+    change Epi ((TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).val.map i.op)
+    rw [show (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) =
+        (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+          (AddCommGrpCat.of (ULift.{u} ℤ)) from by
+      unfold TopCat.Sheaf.zeroOutsideInt constantSheaf
+      simp only [Functor.comp_obj]
+      congr 1
+      exact CategoryTheory.Functor.hext
+        (fun W => by simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ])
+        (fun W₁ W₂ f => by
+          simp only [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ, le_top, ↓reduceDIte,
+            CategoryTheory.Functor.const_obj_map]
+          have h1 : (TopCat.Presheaf.constZ.zeroOutside (⊤ : Opens X)).obj W₁ =
+              AddCommGrpCat.of (ULift.{u} ℤ) := by
+            simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ]
+          have h2 : (TopCat.Presheaf.constZ.zeroOutside (⊤ : Opens X)).obj W₂ =
+              AddCommGrpCat.of (ULift.{u} ℤ) := by
+            simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ]
+          sorry)]
+    exact this
   exact sheafH_dimension_shift_ses hSE m hCoker
     (FlasqueVanishing X S.X₂ hFlasque m)
 
