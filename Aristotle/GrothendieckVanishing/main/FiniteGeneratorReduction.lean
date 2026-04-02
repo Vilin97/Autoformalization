@@ -3,7 +3,7 @@
 
   Key results:
   - ext_comm_filtered_colimit_mono: Ext^n preserves filtered colimits of mono diagrams
-    (2 sorry's: objectwise colimit evaluation + n≥1 Ext case)
+    (1 sorry: n≥1 Ext case — Mathlib API gap)
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
@@ -334,8 +334,27 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       --         = (Sigma.ι ≫ finsetGeneratorMap)(⊤)(standard generator)
       --         = finsetGeneratorMap(⊤)(Sigma.ι(⊤)(standard generator))
       --         = 0(Sigma.ι(⊤)(standard generator)) = 0.
-      -- The step x = (sHom x)(⊤)(generator) requires unfolding sHom.
-      sorry
+      -- x = sHom(x)(⊤)(generator ⊤) by sHom_app_generator.
+      -- And sHom(x) = Sigma.ι ≫ finsetGeneratorMap {σ} (by Sigma.ι_desc).
+      -- So x = finsetGeneratorMap(⊤)(Sigma.ι(⊤)(generator ⊤)) = 0(anything) = 0.
+      have hsHom := TopCat.Sheaf.zeroOutsideInt.sHom_app_generator x
+      -- hsHom : (sHom x).val.app (op ⊤) (generator ⊤) = x
+      -- sHom x = Sigma.ι ≫ finsetGeneratorMap {σ} (by Sigma.ι_desc for singleton coproduct)
+      have hι : (Sigma.ι (fun τ : {τ // τ ∈ ({σ} : Finset _)} =>
+            TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ, Finset.mem_singleton_self σ⟩ ≫
+          TopCat.Sheaf.finsetGeneratorMap ({σ} : Finset _)) =
+        TopCat.Sheaf.zeroOutsideInt.sHom x := by
+        simp [TopCat.Sheaf.finsetGeneratorMap, TopCat.Sheaf.familyGeneratorMap, σ]
+      -- At ⊤: (Sigma.ι ≫ finsetGeneratorMap)(⊤)(generator ⊤) = sHom(x)(⊤)(generator ⊤) = x
+      rw [← hsHom, ← congr_arg (fun f => (Sheaf.Hom.val f).app (op ⊤)) hι]
+      -- Goal: (Sigma.ι ≫ finsetGeneratorMap).val.app(op ⊤)(generator ⊤) = 0
+      -- Decompose: (f ≫ g).val.app = f.val.app ≫ g.val.app (definitional for Sheaf.Hom)
+      -- Then use hzero_map on the finsetGeneratorMap part.
+      show ((Sigma.ι (fun τ : {τ // τ ∈ ({σ} : Finset _)} =>
+            TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ, Finset.mem_singleton_self σ⟩).val.app (op ⊤) ≫
+          (TopCat.Sheaf.finsetGeneratorMap ({σ} : Finset _)).val.app (op ⊤))
+        (TopCat.Sheaf.zeroOutsideInt.generator ⊤) = 0
+      rw [hzero_map]; simp
     -- Hom(ULift ℤ, subsingleton) is subsingleton.
     exact addCommGrpCat_subsingleton_hom_of_subsingleton _ hKsub
   exact ext_comm_filtered_colimit_mono (finsetGenFunctor K) (finsetGenCocone K)
