@@ -77,7 +77,7 @@ theorem zeroOutsideInt_vanishing
   have hFlasque : IsFlasqueSheaf S.X₂ := by
     intro U W i
     have := constantSheaf_flasque_of_irreducible X i
-    sorry -- needs: zeroOutsideInt ⊤ = constantSheaf ℤ (flasque)
+    sorry
   exact sheafH_dimension_shift_ses hSE m hCoker
     (FlasqueVanishing X S.X₂ hFlasque m)
 
