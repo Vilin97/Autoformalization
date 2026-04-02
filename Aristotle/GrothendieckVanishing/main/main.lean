@@ -5,13 +5,15 @@
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
   Sorry's (1 remaining, Mathlib API gap):
-  - cohomology_vanishing_of_finitelyGenerated_vanishing (IrreducibleStep.lean) — Step 3A:
-    Hartshorne 2.9, cohomology commutes with filtered colimits
+  - ext_comm_filtered_colimit_mono (IrreducibleStep.lean) — Ext^n commutes with
+    filtered colimits of mono diagrams in Grothendieck abelian categories.
+    Proof strategy: induction on n, using Gamma-colimit commutation at n=0
+    and dimension shifting via injective hulls for n -> n+1.
 
   File structure:
   - SetupCore.lean: category instances, FlasqueVanishing (PROVED),
     PushforwardHVanishing (PROVED), ClosedImmersionSES (PROVED)
-  - Setup.lean: ReducibleVanishing (PROVED), IrreduciblePosVanishing (1 sorry inside)
+  - Setup.lean: ReducibleVanishing (PROVED), IrreduciblePosVanishing (1 sorry: ext_comm_filtered_colimit_mono)
   - Auxiliary.lean: topology/dimension helpers
   - ClosedImmersion.lean: PROVED — closed immersion counit/stalk infrastructure
   - ZeroOutside.lean: PROVED — zero-outside / extension-by-zero infrastructure
