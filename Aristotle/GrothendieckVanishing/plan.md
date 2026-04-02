@@ -1,53 +1,35 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-01T23:30Z
+**Updated**: 2026-04-02T02:30Z
 
 ## Status Summary
-- **CI**: Push to `wip/grothendieck-vanishing` (commit `a901094`)
+- **CI**: PR #5 open with auto-merge, CI pending
 - **Heartbeat overrides**: 0
-- **Sorry count**: 2 in IrreducibleStep.lean (both are confirmed Mathlib API gaps)
-- **Files**: 15 files under `main/`, ~5000 lines
+- **Sorry count**: 1 in IrreducibleStep.lean
+- **Files**: 15 files under `main/`, ~6500 lines
 
-## Remaining Sorry's (2)
+## Remaining Sorry (1)
 
-Both are genuine Mathlib API gaps, not proof regressions:
+### `cohomology_vanishing_of_finitelyGenerated_vanishing` (line ~1222)
+**Hartshorne 2.9**: If H^m = 0 for all finitely generated subsheaves of K, then H^m(K) = 0.
 
-### 1. `exists_good_section` (line ~616)
-**Step 4 core construction**: Find V' ≤ V, V' ≠ ⊥, and section s ∈ R(V') such that
-`sHom s : zeroOutsideInt V' ⟶ R` is a stalk-isomorphism on V'.
+**Mathematical content**: K is the filtered colimit of its finitely generated subsheaves K_S.
+Then H^m(K) = colim H^m(K_S) = colim 0 = 0.
 
-**Strategy**:
-1. Find x₀ ∈ V with nonzero stalk via `exists_nonzero_stalk_in_V` (proved)
-2. Identify cyclic subgroup generator via `ulift_int_subgroup_cyclic` (proved)
-3. Lift generator to section s via `stalk_zeroOutsideInt_eq_zsmul_generator` (proved)
-4. Shrink V' for stalk bijectivity using Noetherian + irreducible properties
+**Mathlib status**: 
+- `Sheaf.instIsGrothendieckAbelian` exists (sheaf category is Grothendieck abelian)
+- `IsGrothendieckAbelian.hasFilteredColimitsOfSize` exists
+- "Ext commutes with filtered colimits" is NOT in Mathlib (as of v4.28.0)
 
-**Dependencies**: All sub-lemmas proved. Core difficulty is the Noetherian shrinking argument.
+**Possible approaches**:
+1. **AB5 + Ext**: Show Ext preserves filtered colimits using the Grothendieck abelian structure. Requires proving the colimit formula for Ext.
+2. **Direct Noetherian argument**: Show any element of H^m(K) factors through a finitely generated subsheaf. Uses: on a Noetherian space, every section of K lives in some finsetGeneratedSheaf(S), and Ext classes can be represented by extensions that factor through f.g. subsheaves.
+3. **Accept as axiom**: This is a standard theorem in homological algebra. If proving it from scratch is too costly, it could be stated as an axiom pending Mathlib development.
 
-### 2. `cohomology_vanishing_of_finitelyGenerated_vanishing` (line ~774)
-**Hartshorne 2.9**: If H^m = 0 for all finitely generated subsheaves, then H^m(K) = 0.
+## Completed This Session
 
-**Strategy**: K = colim K_α (filtered colimit of finitely generated subsheaves),
-H^m(K) = colim H^m(K_α) = colim 0 = 0. Requires:
-- Ext commutes with filtered colimits (AB5 / Grothendieck abelian)
-- K expressed as filtered colimit of `finsetGeneratedSheaf S`
-
-## Recently Completed (this session)
-
-Closed 19 sorry's in IrreducibleStep.lean (21 → 2):
-- Tier 1-2 stalk lemmas (8 proofs)
-- ClosedImmersionSES pattern proofs (4 proofs)
-- Finset infrastructure (5 proofs)
-- Germ algebra (2 proofs)
-
-Key API patterns established:
-- `stalkFunctor_map_iso_toSheafify` for IsIso instances
-- `Sheaf.forget ⋙ stalkFunctor` for PreservesMonomorphisms
-- `ConcreteCategory.mono_iff_injective_of_preservesPullback` for injectivity
-- `AddCommGrpCat.subsingleton_of_isZero` for zero object elements
-
-## Backlog
-
-- **Docs deployment**: Fix 404 on blueprint pages
-- **File sizes**: ZeroOutside.lean (733), FlasqueVanishing.lean (616) over guideline
-- **Plan/docs**: Keep sorry counts accurate
+Closed 22+ sorry's total, reducing from 23 to 1:
+- All stalk lemmas, ClosedImmersionSES proofs, finset infrastructure
+- exists_good_section (via Nat.find minimality for exists_section_generating_stalks)
+- IsFlasqueSheaf(zeroOutsideInt ⊤) (via presheaf NatIso + sheafification)
+- zsmul_generator_injective, sHom_stalk_bijective_at, and many more helpers
