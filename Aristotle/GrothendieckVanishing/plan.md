@@ -1,39 +1,50 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-02T12:00Z
+**Updated**: 2026-04-02T18:25Z
 
 ## Status Summary
-- **CI**: GREEN (PRs auto-merging)
+- **CI**: GREEN (latest push in_progress, previous green)
 - **Heartbeat overrides**: 0
-- **Sorry count**: 1 in IrreducibleStep.lean
-- **Files**: 15 files under `main/`, ~5074 lines
+- **Sorry count**: 1 in IrreducibleStep.lean (`ext_comm_filtered_colimit_mono`, line 1245)
+- **Files**: 15 files under `main/`, ~5079 lines
+- **New this session**: `sheafH_vanishing_cascade` proved in GrothendieckVanishing.lean
 
 ## Remaining Sorry (1)
 
-### `ext_comm_filtered_colimit_mono` (line ~1227)
-**Pure categorical Mathlib gap**: In a Grothendieck abelian category, Ext^n(Z,-) preserves
-filtered colimits of monomorphism diagrams.
+### `ext_comm_filtered_colimit_mono` (line 1227)
+**Genuine Mathlib API gap**: Ext^n(Z,-) preserves filtered colimits of mono diagrams.
 
-Mathlib has `preservesColimit_coyoneda_obj_of_mono` which gives the n=0 (Hom) case.
-The general case (Ext^n for n > 0) requires dimension shifting via injective presentations,
-which is NOT in Mathlib v4.28.0.
+After extensive analysis (documented in proofs.md), all dimension-shifting approaches
+fail at degree ≥ 2 because cohomological vanishing does not propagate to subsheaves.
+The correct proof requires Čech cohomology, universal δ-functors, or Godement resolution,
+none of which are in Mathlib v4.28.0.
 
-## Recently Closed
+## This Cycle's Work Items
 
-### `cohomology_vanishing_of_finitelyGenerated_vanishing` (was sorry, now proved)
-**Hartshorne 2.9**: If H^m = 0 for all finitely generated subsheaves of K, then H^m(K) = 0.
-Now proved via the filtered diagram of finitely generated subsheaves:
-- Built `finsetGenFunctor : Finset(SectionIndex K) ⥤ Sheaf(X)` sending S ↦ finsetGeneratedSheaf S
-- Built `finsetGenCocone` with vertex K (maps are image.ι)
-- Proved `finsetGenCocone_isColimit`: the canonical map colim → K is mono (AB5) and epi
-  (allSectionMap K factors through it), hence iso
-- Applied `ext_comm_filtered_colimit_mono` to close the sorry
+### 1. Fix documentation issues (P3, `/simplify`)
+- Fix "ONLY axiom" → "ONLY sorry" in IrreducibleStep.lean:1236
+- Fix "m₀ ≥ 1" → remove constraint in GrothendieckVanishing.lean docstring
+- Fix CLAUDE.md: remove nonexistent FiniteGeneratorReduction.lean from tree
+- Fix CLAUDE.md: remove stale heartbeat reference
 
-## Completed This Session
+### 2. Address dead cascade code (P2, `/simplify`)
+- Either integrate cascade into main proof OR remove `private` and add `#check`
+  to make them reachable. Best: keep the theorems but make them non-private, since
+  they are correct infrastructure that may be used in future restructuring.
 
-Closed 23+ sorry's total, reducing from 23 to 1:
-- All stalk lemmas, ClosedImmersionSES proofs, finset infrastructure
-- exists_good_section (via Nat.find minimality for exists_section_generating_stalks)
-- IsFlasqueSheaf(zeroOutsideInt ⊤) (via presheaf NatIso + sheafification)
-- cohomology_vanishing_of_finitelyGenerated_vanishing (via filtered diagram construction)
-- zsmul_generator_injective, sHom_stalk_bijective_at, and many more helpers
+### 3. Submit sorry to Aristotle (P1, `/submit-aristotle`)
+- The sorry has NOT been submitted with the current formulation. Submit it.
+  Previous Aristotle attempts used different formulations and all failed, but
+  the current statement is cleaner.
+
+### 4. Attempt sorry proof (P0, `/prove`)
+- Try the n=0 case directly using objectwise colimits (sheaf-specific)
+- Even partial progress (proving n=0, n=1) is valuable for decomposition
+
+## Backlog
+
+| Priority | Item |
+|----------|------|
+| P2 | Split IrreducibleStep.lean (1582 lines → ≤1000) |
+| P1 | Docs/blueprint 404 — needs deploy workflow |
+| P3 | Clean up aristotle-jobs.json (many stale entries) |

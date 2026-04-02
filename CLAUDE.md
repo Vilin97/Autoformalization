@@ -42,7 +42,6 @@ GrothendieckVanishing.lean    ← Main theorem (assembles all cases)
 ├── DimZeroVanishing.lean     ← Irreducible dim=0: constant sheaf is flasque
 │   └── ConstantSheafFlasque.lean
 ├── IrreducibleStep.lean      ← Irreducible dim≥1 (uses IrreduciblePosVanishing)
-│   └── FiniteGeneratorReduction.lean
 ├── ClosedOpenDecomposition.lean ← Reduction to irreducible spaces
 │   └── ReducibleVanishing.lean  ← Reducible case via Finset.induction
 └── (shared infrastructure)

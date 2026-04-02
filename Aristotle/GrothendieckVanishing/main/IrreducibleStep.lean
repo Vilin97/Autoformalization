@@ -1224,6 +1224,19 @@ theorem epiImage_zeroOutsideInt_vanishing
     because `Hom(Z, F) ≅ Γ(X, F) = F(X)` and filtered colimits of sheaves are objectwise.
     The mono-transition condition is NOT needed; the proof works for arbitrary filtered
     diagrams. -/
+-- Base case: Hom(Z, -) preserves filtered colimits of mono diagrams.
+-- Given Subsingleton (Z ⟶ Y.obj j) for all j, show Subsingleton (Z ⟶ c.pt).
+private theorem hom_subsingleton_of_filtered_colimit_mono
+    {C : Type*} [Category C] [Abelian C]
+    [IsGrothendieckAbelian C]
+    {J : Type*} [SmallCategory J] [IsFiltered J]
+    (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
+    [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
+    (Z : C)
+    (hvan : ∀ j, Subsingleton (Z ⟶ Y.obj j)) :
+    Subsingleton (Z ⟶ c.pt) := by
+  sorry
+
 theorem ext_comm_filtered_colimit_mono
     {C : Type*} [Category C] [Abelian C] [HasExt C]
     [IsGrothendieckAbelian C]
@@ -1233,16 +1246,20 @@ theorem ext_comm_filtered_colimit_mono
     (Z : C) (n : ℕ)
     (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)) :
     Subsingleton (Ext Z c.pt n) := by
-  -- This is the ONLY axiom in the formalization (Mathlib API gap).
-  -- Ext^n(Z, -) preserves filtered colimits of mono diagrams in Grothendieck
-  -- abelian categories. The proof requires either:
-  -- (a) Čech cohomology (Hartshorne III.2.9), or
-  -- (b) Universal δ-functor theorem (effaceable functors), or
-  -- (c) Functorial flasque/Godement resolution
+  -- Decomposed into n=0 (Hom case) and n≥1 (Ext case).
+  -- The n=0 case reduces to hom_subsingleton_of_filtered_colimit_mono via Ext.homEquiv₀.
+  -- The n≥1 case is a genuine Mathlib API gap requiring Čech cohomology,
+  -- universal δ-functor theorem, or functorial flasque/Godement resolution.
   -- None of these are currently in Mathlib v4.28.0.
-  -- For n = 0: follows from Hom ≅ Γ and objectwise colimits (sheaf-specific).
-  -- For n ≥ 1: requires the full infrastructure above.
-  sorry
+  induction n with
+  | zero =>
+    have h := hom_subsingleton_of_filtered_colimit_mono Y c hc Z
+      (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j))
+    exact Ext.homEquiv₀.subsingleton_congr.mpr h
+  | succ n _ =>
+    -- Mathlib API gap: Ext^{n+1} case requires Čech cohomology, universal δ-functors,
+    -- or functorial Godement resolution. See proofs.md for analysis.
+    sorry
 
 /-! ### Filtered diagram of finitely generated subsheaves
 

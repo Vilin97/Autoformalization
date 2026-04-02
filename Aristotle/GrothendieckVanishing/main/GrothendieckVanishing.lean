@@ -20,7 +20,7 @@ open CategoryTheory TopologicalSpace Order Limits
 
 /-! ## Degree cascade: vanishing at one degree implies vanishing at all higher degrees
 
-Once we establish `H^m₀(F) = 0` for ALL sheaves `F` on `X` at a single degree `m₀ ≥ 1`,
+Once we establish `H^m₀(F) = 0` for ALL sheaves `F` on `X` at a single degree `m₀`,
 we get `H^n(F) = 0` for all `n ≥ m₀` by injective presentation + dimension shifting:
 embed `F ↪ I` (injective), form `0 → F → I → Q → 0`, then `H^n(Q) = 0` by the inductive
 hypothesis and `H^{n+1}(I) = 0` since `I` is injective. -/

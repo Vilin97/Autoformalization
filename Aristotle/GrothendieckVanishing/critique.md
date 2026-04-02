@@ -1,53 +1,90 @@
 # Adversarial Critique — Grothendieck Vanishing Formalization
 
-**Timestamp**: 2026-04-02T20:00Z
+**Timestamp**: 2026-04-02T18:20Z
 **Reviewer verdict**: CONDITIONAL PASS
+
+## 0. CI Status
+
+Latest CI run (push dd87a8d) is **in_progress**. Previous runs both **green**.
+Local `lake build` succeeds with 0 errors.
+
+**Docs deployment is BROKEN**: both `https://vilin97.github.io/aristotle/blueprint/` and
+`https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html` return **HTTP 404**.
+
+**Assessment**: P1 — docs are inaccessible.
 
 ## 1. Sorry's (1)
 
-One `sorry` term in `IrreducibleStep.lean` line 1236: `ext_comm_filtered_colimit_mono`.
+One `sorry` at `IrreducibleStep.lean:1245` in `ext_comm_filtered_colimit_mono`.
 
-The sub-lemmas `_zero` and `_succ` were consolidated back into the parent theorem.
-The proof strategy (induction on n via Gamma-colimit commutation + dimension shifting)
-is documented in the docstring and `proofs.md`.
+The comment at line 1236 says "This is the ONLY axiom in the formalization". This is
+**misleading terminology**: it is not a Lean `axiom` declaration, it is a `theorem` with
+`sorry`. Calling it an "axiom" obscures the fact that it is an unproved claim.
 
-**Assessment**: Implementation requires heavy categorical plumbing (constant sheaf
-adjunction, objectwise colimits, injective hulls, AB5 cokernel commutation). All pieces
-exist in Mathlib but haven't been wired together.
+The statement IS mathematically true (Hartshorne III.2.9). No risk of falsity.
 
 ## 2. Hidden Axioms
 
-None. No `admit`, `axiom`, or `native_decide` in any `.lean` file.
-
-Note: IrreducibleStep.lean line 1259 comment says "This is the ONLY axiom in the
-formalization" referring to a `theorem` with sorry inside. This is misleading
-terminology (it is not a Lean `axiom` declaration) but not a soundness issue.
+None. No `admit`, `axiom`, `native_decide`, or linter/heartbeat overrides.
 
 ## 3. File Sizes
 
-- `IrreducibleStep.lean`: **1609 lines** (over 1000-line guideline)
+- `IrreducibleStep.lean`: **1582 lines** (over 1000-line guideline by 58%)
 
-**Recommendation**: Extract `ext_comm_filtered_colimit_mono*` and the filtered diagram
-infrastructure (lines ~1210-1400) into a dedicated file. Low priority.
+25 `private` declarations. Should be split: extract filtered diagram infrastructure
+(~1238-1357) and finitely generated vanishing (~1359-1515) into a separate file.
 
-## 4. Heartbeat Overrides
+## 4. Dead Code: Cascade Theorems
 
-None in `main/*.lean`. All proofs compile within default 200000 heartbeats.
+`sheafH_vanishing_succ` and `sheafH_vanishing_cascade` in `GrothendieckVanishing.lean`
+are **private and never used** outside their own file. Neither is called from
+`grothendieck_vanishing_aux` or `GrothendieckVanishing`. Dead code.
 
-CLAUDE.md line 65 references "Existing violations in SetupCore.lean" but there are none.
-That documentation is stale.
+## 5. Documentation Issues
 
-## 5. Stale Comments
+1. **GrothendieckVanishing.lean docstring** (line 23): says "m₀ ≥ 1" but
+   `sheafH_vanishing_cascade` has NO such constraint — works for m₀ = 0.
 
-All previously flagged stale comments (main.lean, GrothendieckVanishing.lean headers)
-have been fixed. No new stale comments detected.
+2. **IrreducibleStep.lean line 1236**: "ONLY axiom" should say "ONLY sorry".
 
-## 6. Documentation Consistency
+3. **CLAUDE.md** code tree lists `FiniteGeneratorReduction.lean` as a child of
+   `IrreducibleStep.lean`, but this file does NOT exist. Stale.
 
-CLAUDE.md, plan.md, and file headers are consistent with 1 sorry.
-Previous issues (FlasqueVanishing missing from tree, stale heartbeat reference,
-inflated line count) have been fixed.
+4. **CLAUDE.md** line 65 references "Existing violations in SetupCore.lean" but
+   there are none. Stale (carried over from previous critique).
 
-## 7. Open Issues
+## 6. Generalization Opportunities
 
-1. **P3 — File size** (IrreducibleStep.lean ~1470 lines) — over 1000-line guideline, splitting is disruptive but would improve maintainability.
+1. **Drop NoetherianSpace from cascade theorems**: `sheafH_vanishing_succ` doesn't
+   use `NoetherianSpace` — remove the unneeded `[NoetherianSpace X]` hypothesis.
+   **Feasibility: trivial.**
+
+2. **Drop mono condition from sorry**: Hartshorne III.2.9 states the result WITHOUT
+   mono transitions. The mono condition is not necessary for the mathematical truth.
+   **Feasibility: hard (proof infrastructure not in Mathlib).**
+
+3. **Generalize to arbitrary Grothendieck topologies**: The theorem currently works
+   for `Opens.grothendieckTopology` on `TopCat`. The cascade theorems already work
+   for arbitrary sites. The sorry could be stated for general sites too.
+   **Feasibility: moderate.**
+
+## 7. Mathlib Upstreamability
+
+1. **Cascade theorems**: General facts about Ext + injective presentations. Could go
+   to `Mathlib.CategoryTheory.Sites.SheafCohomology` after making non-private and
+   dropping `NoetherianSpace`.
+
+2. **Filtered diagram of finitely generated subsheaves**: `finsetGenFunctor` etc.
+   could be useful for other colimit arguments on Noetherian spaces.
+
+## 8. Open Issues
+
+| # | Priority | Issue |
+|---|----------|-------|
+| 1 | P0 | Sorry in `ext_comm_filtered_colimit_mono` (line 1245) |
+| 2 | P1 | Docs/blueprint return 404 |
+| 3 | P2 | IrreducibleStep.lean at 1582 lines — split |
+| 4 | P2 | Dead code: cascade theorems unused |
+| 5 | P3 | Misleading "axiom" comment (line 1236) |
+| 6 | P3 | Stale CLAUDE.md (nonexistent FiniteGeneratorReduction.lean, stale heartbeat ref) |
+| 7 | P3 | Docstring "m₀ ≥ 1" inaccurate |
