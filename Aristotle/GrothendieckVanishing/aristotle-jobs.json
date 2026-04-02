@@ -1,6 +1,13 @@
 {
   "jobs": [
     {
+      "id": "PENDING_SUBMISSION",
+      "submission": "aristotle-in/ext_filtered_colimit.lean",
+      "target": "ext_vanishing_of_filtered_colimit_vanishing (general categorical form)",
+      "status": "NOT_SUBMITTED",
+      "note": "Aristotle MCP not connected. Clean categorical formulation of Ext^n vanishing through filtered colimits of mono diagrams."
+    },
+    {
       "id": "105033c9-934b-4e08-8239-cc82af90e5fa",
       "target": "exists_good_section (final assembly with all axioms)",
       "status": "QUEUED",

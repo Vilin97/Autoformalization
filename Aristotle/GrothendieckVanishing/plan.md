@@ -1,9 +1,9 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-02T02:30Z
+**Updated**: 2026-04-02T08:00Z
 
 ## Status Summary
-- **CI**: PR #5 open with auto-merge, CI pending
+- **CI**: GREEN (PRs auto-merging)
 - **Heartbeat overrides**: 0
 - **Sorry count**: 1 in IrreducibleStep.lean
 - **Files**: 15 files under `main/`, ~6500 lines
@@ -16,15 +16,23 @@
 **Mathematical content**: K is the filtered colimit of its finitely generated subsheaves K_S.
 Then H^m(K) = colim H^m(K_S) = colim 0 = 0.
 
-**Mathlib status**: 
+**Mathlib status**:
 - `Sheaf.instIsGrothendieckAbelian` exists (sheaf category is Grothendieck abelian)
 - `IsGrothendieckAbelian.hasFilteredColimitsOfSize` exists
-- "Ext commutes with filtered colimits" is NOT in Mathlib (as of v4.28.0)
+- `Sheaf.ab5ofSize` exists (filtered colimits are exact)
+- `preservesColimit_coyoneda_obj_of_mono` exists — Hom(X,-) preserves colimits of
+  mono diagrams in Grothendieck abelian categories. Gives the n=0 (Hom) case.
+- "Ext^n commutes with filtered colimits" is NOT in Mathlib (as of v4.28.0).
+  The dimension-shifting step (Hom → Ext^n) requires additional infrastructure.
 
 **Possible approaches**:
-1. **AB5 + Ext**: Show Ext preserves filtered colimits using the Grothendieck abelian structure. Requires proving the colimit formula for Ext.
-2. **Direct Noetherian argument**: Show any element of H^m(K) factors through a finitely generated subsheaf. Uses: on a Noetherian space, every section of K lives in some finsetGeneratedSheaf(S), and Ext classes can be represented by extensions that factor through f.g. subsheaves.
-3. **Accept as axiom**: This is a standard theorem in homological algebra. If proving it from scratch is too costly, it could be stated as an axiom pending Mathlib development.
+1. **Coyoneda + dimension shifting**: Use `preservesColimit_coyoneda_obj_of_mono` for
+   n=0, then prove Ext^n preserves filtered colimits by induction on n using injective
+   presentations + LES. Obstacle: quotient system {I/K_S} has epi (not mono) transitions.
+2. **Direct Noetherian argument**: Show any element of H^m(K) factors through a f.g.
+   subsheaf. Requires Čech cohomology or Godement resolution (not in Mathlib).
+3. **Accept as axiom**: Standard theorem in homological algebra. State as axiom pending
+   Mathlib development.
 
 ## Completed This Session
 
