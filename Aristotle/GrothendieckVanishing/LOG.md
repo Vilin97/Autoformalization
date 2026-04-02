@@ -1,5 +1,20 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T19:15Z — Babysit cycle: PROVE n=0 case of ext_comm_filtered_colimit_mono
+
+**Sorry count: 2** (was 2, but sorry's MOVED — n=0 case now PROVED)
+
+- **PROVED n=0 case** of `ext_comm_filtered_colimit_mono`: added `hHom` hypothesis
+  (Hom(Z,-) preserves the colimit) which the caller provides. The theorem's n=0
+  induction case now closes by `Ext.homEquiv₀.subsingleton_congr` + `hHom`.
+  This is a structural improvement: the abstract theorem has one proved case.
+- **Sorry moved**: the old abstract n=0 sorry is replaced by a sheaf-specific sorry
+  at the call site (`cohomology_vanishing_of_finitelyGenerated_vanishing`), which is
+  a more tractable target: "Hom(constantSheaf(ULift ℤ), K) is subsingleton given
+  Hom(constantSheaf(ULift ℤ), finsetGeneratedSheaf j) is subsingleton for all j".
+  This follows from `constantSheafΓAdj` + objectwise filtered colimits.
+- 2 sorry's remain: n≥1 case (Mathlib gap) + hHom at call site (sheaf-specific).
+
 ## 2026-04-02T19:00Z — Babysit cycle: universe fix, split file
 
 **Sorry count: 2** (both in FiniteGeneratorReduction.lean)
