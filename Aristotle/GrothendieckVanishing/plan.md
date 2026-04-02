@@ -1,17 +1,22 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-02T08:00Z
+**Updated**: 2026-04-02T08:30Z
 
 ## Status Summary
 - **CI**: GREEN (PRs auto-merging)
 - **Heartbeat overrides**: 0
-- **Sorry count**: 1 in IrreducibleStep.lean
+- **Sorry count**: 2 in IrreducibleStep.lean (decomposed from 1)
 - **Files**: 15 files under `main/`, ~6500 lines
 
-## Remaining Sorry (1)
+## Remaining Sorry's (2)
 
-### `cohomology_vanishing_of_finitelyGenerated_vanishing` (line ~1222)
+### 1. `ext_comm_filtered_colimit_mono` (line ~1227)
+**Pure categorical Mathlib gap**: In a Grothendieck abelian category, Ext^n(Z,-) preserves
+filtered colimits of monomorphism diagrams.
+
+### 2. `cohomology_vanishing_of_finitelyGenerated_vanishing` (line ~1241)
 **Hartshorne 2.9**: If H^m = 0 for all finitely generated subsheaves of K, then H^m(K) = 0.
+Applies (1) to the specific sheaf case.
 
 **Mathematical content**: K is the filtered colimit of its finitely generated subsheaves K_S.
 Then H^m(K) = colim H^m(K_S) = colim 0 = 0.
