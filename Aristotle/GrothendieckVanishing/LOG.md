@@ -1,5 +1,17 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T19:00Z — Babysit cycle: universe fix, split file
+
+**Sorry count: 2** (both in FiniteGeneratorReduction.lean)
+
+- **Constrained universe parameters** in `hom_subsingleton_of_filtered_colimit_mono`
+  and `ext_comm_filtered_colimit_mono`: now `J : Type w` matches
+  `IsGrothendieckAbelian.{w}`, which is necessary for any proof attempt using Mathlib's
+  `preservesColimit_coyoneda_obj_of_mono`. Investigated: even with matching universes,
+  `IsCardinalFiltered` condition cannot be satisfied for `Finset(SectionIndex K)` at
+  κ > ℵ₀. Abstract n=0 case needs sheaf-specific proof via objectwise colimits.
+- Full build passes (8042 jobs).
+
 ## 2026-04-02T18:50Z — Babysit cycle: split IrreducibleStep.lean
 
 **Sorry count: 2** (both in FiniteGeneratorReduction.lean)
