@@ -75,8 +75,11 @@ theorem ext_comm_filtered_colimit_mono
     exact Ext.homEquiv₀.subsingleton_congr.mpr
       (hHom (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j)))
   | succ n _ =>
-    -- n≥1: Mathlib API gap. Requires Čech cohomology, universal δ-functors,
-    -- or functorial Godement resolution. See proofs.md for analysis.
+    -- n≥1: Mathlib API gap. The dimension shifting approach requires the IH for the
+    -- quotient diagram {I/Y.obj j} which has epi (not mono) transitions.
+    -- The IH can't be applied because: (1) the quotient lacks mono transitions,
+    -- (2) providing hHom for the quotient requires objectwise colimit theory.
+    -- Closing this requires Čech cohomology, universal δ-functors, or Godement resolution.
     sorry
 
 /-! ### Filtered diagram of finitely generated subsheaves
