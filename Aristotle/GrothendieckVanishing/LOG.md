@@ -1,5 +1,15 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T22:55Z — Prove n=0 case inside ext_vanishing_of_colimit_pieces, decompose n≥1
+
+**Sorry count: 1** (`ext_vanishing_of_colimit_pieces` succ case at FiniteGeneratorReduction.lean:84)
+
+- **PROVED n=0 case** of `ext_vanishing_of_colimit_pieces` via Ext.homEquiv₀ + hHom
+- Decomposed n≥1 case with explicit dimension-shift: InjectivePresentation + LES lifting
+  + Ext.eq_zero_of_injective. Sorry isolated to `ca = cb` for two Ext^n(Z, Q) elements.
+- Updated FiniteGeneratorReduction.lean header (P4 from critique)
+- Aristotle MCP unavailable; file ready for resubmission
+
 ## 2026-04-02T22:40Z — Extract sorry into standalone lemma, clean up proof
 
 **Sorry count: 1** (`ext_vanishing_of_colimit_pieces` in FiniteGeneratorReduction.lean:56)

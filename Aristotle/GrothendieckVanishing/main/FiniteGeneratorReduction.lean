@@ -2,11 +2,12 @@
   FiniteGeneratorReduction.lean — Colimit step and finitely generated vanishing
 
   Key results:
-  - ext_comm_filtered_colimit_mono: Ext^n preserves filtered colimits of mono diagrams
-    (1 sorry: Ext^n(Z, cokernel(ι)) for cokernel of injective embedding — Mathlib API gap.
-     The dimension shift reduces Ext^{n+1}(Z, c.pt) to Ext^n(Z, I/c.pt) via the covariant
-     Ext LES. Closing this requires showing Ext^n preserves the filtered colimit
-     I/c.pt = colim(I/Y.obj j), needing Čech / universal δ-functors / Godement resolution.)
+  - ext_vanishing_of_colimit_pieces: Ext^n colimit transfer (Hartshorne III Lemma 2.9).
+    n=0 case PROVED via hHom + Ext.homEquiv₀. n≥1 case has 1 sorry (Mathlib API gap):
+    dimension shift reduces to Ext^n(Z, Q) = 0 for Q = cokernel of injective embedding.
+    Needs Čech / universal δ-functors / Godement resolution.
+  - ext_comm_filtered_colimit_mono: Wrapper that handles n=0 directly and delegates n≥1
+    to ext_vanishing_of_colimit_pieces (PROVED modulo the sorry in that lemma)
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
@@ -62,7 +63,30 @@ private theorem ext_vanishing_of_colimit_pieces
     (hHom : (∀ j, Subsingleton (Z ⟶ Y.obj j)) → Subsingleton (Z ⟶ c.pt))
     (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)) :
     Subsingleton (Ext Z c.pt n) := by
-  sorry
+  cases n with
+  | zero =>
+    -- n=0: Ext^0 ≅ Hom, transfer via hHom. PROVED.
+    exact Ext.homEquiv₀.subsingleton_congr.mpr
+      (hHom (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j)))
+  | succ n =>
+    -- n≥1: Embed c.pt ↪ I (injective). By the covariant Ext LES, every element of
+    -- Ext^{n+1}(Z, c.pt) lifts to Ext^n(Z, Q) where Q = cokernel(c.pt ↪ I).
+    -- So Ext^{n+1}(Z, c.pt) = 0 iff Ext^n(Z, Q) = 0.
+    -- Q = colim Q_j by AB5 + mono transitions, each Ext^n(Z, Q_j) = 0 by per-j LES.
+    -- This requires Ext^n to preserve the colimit (Mathlib API gap).
+    obtain ⟨ip⟩ := EnoughInjectives.presentation c.pt
+    have hSE := ip.shortExact_shortComplex
+    constructor; intro a b
+    have ha : a.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
+    have hb : b.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
+    obtain ⟨ca, hca⟩ := Ext.covariant_sequence_exact₁ Z hSE a ha rfl
+    obtain ⟨cb, hcb⟩ := Ext.covariant_sequence_exact₁ Z hSE b hb rfl
+    rw [← hca, ← hcb]; congr 1
+    -- Goal: ca = cb where ca cb : Ext Z ip.shortComplex.X₃ n
+    -- This requires Ext^n(Z, Q) = 0 for Q = cokernel of injective embedding.
+    -- Q = colim Q_j with Ext^n vanishing on each Q_j, but the colimit transfer
+    -- for Ext^n (n ≥ 1) needs universal δ-functor / Čech infrastructure.
+    exact @Subsingleton.elim _ (by sorry) ca cb
 
 /-- **Hartshorne 2.9 (Ext version)**: In a Grothendieck abelian category, if `Hom(Z, -)`
     sends filtered-colimit vanishing to vanishing (the `hHom` hypothesis), then
