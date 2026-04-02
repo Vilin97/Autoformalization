@@ -18,6 +18,38 @@ universe u
 
 open CategoryTheory TopologicalSpace Order Limits
 
+/-! ## Degree cascade: vanishing at one degree implies vanishing at all higher degrees
+
+Once we establish `H^m₀(F) = 0` for ALL sheaves `F` on `X` at a single degree `m₀ ≥ 1`,
+we get `H^n(F) = 0` for all `n ≥ m₀` by injective presentation + dimension shifting:
+embed `F ↪ I` (injective), form `0 → F → I → Q → 0`, then `H^n(Q) = 0` by the inductive
+hypothesis and `H^{n+1}(I) = 0` since `I` is injective. -/
+
+/-- Vanishing cascades: if `H^m(F) = 0` for all `F` at degree `m`, then `H^{m+1}(F) = 0`
+    for all `F`. Proof: inject `F ↪ I`, dimension-shift via `0 → F → I → Q → 0`. -/
+private theorem sheafH_vanishing_succ (X : TopCat.{u})
+    (m : ℕ)
+    (hall : ∀ (F : TopCat.Sheaf AddCommGrpCat.{u} X), Subsingleton (Sheaf.H F m))
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
+    Subsingleton (Sheaf.H F (m + 1)) := by
+  obtain ⟨ip⟩ := EnoughInjectives.presentation F
+  have hInj : Subsingleton (Sheaf.H ip.shortComplex.X₂ (m + 1)) :=
+    ⟨fun a b => (Abelian.Ext.eq_zero_of_injective a).trans
+      (Abelian.Ext.eq_zero_of_injective b).symm⟩
+  exact sheafH_dimension_shift_ses ip.shortExact_shortComplex m
+    (hall ip.shortComplex.X₃) hInj
+
+/-- Once vanishing holds at degree `m₀` for all sheaves, it holds at all degrees `≥ m₀`. -/
+private theorem sheafH_vanishing_cascade (X : TopCat.{u})
+    (m₀ : ℕ)
+    (hbase : ∀ (F : TopCat.Sheaf AddCommGrpCat.{u} X), Subsingleton (Sheaf.H F m₀))
+    (n : ℕ) (hn : n ≥ m₀) :
+    ∀ (F : TopCat.Sheaf AddCommGrpCat.{u} X), Subsingleton (Sheaf.H F n) := by
+  obtain ⟨k, rfl⟩ : ∃ k, n = m₀ + k := ⟨n - m₀, (Nat.add_sub_cancel' hn).symm⟩
+  induction k with
+  | zero => exact hbase
+  | succ k ih => exact sheafH_vanishing_succ X (m₀ + k) (ih (Nat.le_add_right m₀ k))
+
 /-! ## Main induction -/
 
 /-- The core induction step: vanishing at dimension d, given vanishing at all d' < d. -/

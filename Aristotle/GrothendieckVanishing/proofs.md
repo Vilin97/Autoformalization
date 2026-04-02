@@ -4,58 +4,90 @@
 On a Noetherian space X, if H^m(K_S) = 0 for all finitely generated subsheaves K_S of K,
 then H^m(K) = 0. Here H^m = Ext^m(Z_X, -) where Z_X is the constant sheaf.
 
-## Key Insight
-The general categorical statement `ext_comm_filtered_colimit_mono` (Ext^n preserves
-filtered colimits of mono diagrams in Grothendieck abelian categories) is TOO GENERAL.
-For sheaves, we have the crucial property that Gamma(X, colim F_i) = colim Gamma(X, F_i)
-(filtered colimits of sheaves are computed objectwise). This gives us the n=0 base case
-for free, and the inductive step uses dimension shifting via injective hulls.
+## Current Status
 
-## Proof by strong induction on m
+**1 sorry remains**: `ext_comm_filtered_colimit_mono` in IrreducibleStep.lean.
 
-**Base case m = 0:**
-Sheaf.H K 0 = Ext^0(Z_X, K) ~ Hom(Z_X, K) ~ K(X) (global sections).
-K = colim K_S (filtered colimit of subsheaves). Filtered colimits of sheaves are objectwise:
-K(X) = colim K_S(X). Each K_S(X) is subsingleton => colim is subsingleton => K(X) subsingleton.
+This sorry encodes: in a Grothendieck abelian category, Ext^n(Z, -) preserves
+filtered colimits of monomorphism diagrams. Equivalently, for sheaves on a
+Noetherian space, H^n commutes with filtered colimits (Hartshorne III Lemma 2.9).
 
-Key Mathlib facts needed:
-- Ext.homEquiv_0 : Ext Z X 0 ~ (Z -> X)
-- Hom(constantSheaf Z, F) ~ F(top) (constant sheaf-global sections adjunction)
-- Filtered colimits of sheaves are objectwise
+## Why this is hard (analysis of failed approaches)
 
-**Inductive step m -> m+1:**
-Given: Ext^{m+1}(Z_X, K_S) = 0 for all S. Want: Ext^{m+1}(Z_X, K) = 0.
+### Approach 1: Dimension shifting by induction on n
+- **Base case (n=0)**: WORKS. Hom(Z_X, colim F_i) ≅ Γ(colim F_i) = colim Γ(F_i)
+  because filtered colimits of sheaves are objectwise.
+- **Inductive step (n→n+1)**: Embed colim ↪ I (injective), form quotient Q = I/colim.
+  By AB5: Q = colim(I/F_j). The quotient diagram has EPI transitions (not mono).
+  Applying the IH at degree n to the quotient requires the IH for ARBITRARY filtered
+  diagrams (not just mono). This creates a new problem:
+  - For n≥1 WITHOUT mono transitions: can't form individual SES's for pieces
+    (Y_j → colim → I might not be mono if Y_j → colim is not mono).
+  - For n=0 WITHOUT mono: works (objectwise colimits).
+  - So the induction BREAKS at degree 2: need degree 1 for the quotient (epi transitions),
+    which needs degree 0 for the double-quotient (works), BUT forming the double-quotient
+    requires mono embeddings that the epi-transition quotient doesn't provide.
 
-Choose an injective hull: 0 -> K -> I (exists in Grothendieck abelian category).
-Set Q = I/K. Then 0 -> K -> I -> Q -> 0 is SES.
+### Approach 2: Specializing to sheaves + Γ-surjectivity
+- For n=1 specifically: can prove directly using surjectivity of Γ(I) → Γ(Q_j)
+  (from H^1(Y_j)=0 and the LES) combined with objectwise colimits.
+- For n≥2: the recursive reduction to n=1 fails because quotient diagrams
+  have epi transitions and we can't form SES's for their subsheaves.
 
-For each S: 0 -> K_S -> I -> I/K_S -> 0 is SES.
-Dimension shift: Ext^{m+1}(Z_X, K_S) ~ Ext^m(Z_X, I/K_S) (since I injective).
-So Ext^m(Z_X, I/K_S) = 0 for all S.
+### Approach 3: Cardinal-filtered colimit preservation
+- Mathlib has `preservesColimit_coyoneda_obj_of_mono` requiring `IsCardinalFiltered J κ`
+  and `HasCardinalLT (Subobject Z) κ` for a regular κ.
+- For our J = Finset(SectionIndex K): only ℵ₀-filtered (IsFiltered), not κ-filtered
+  for κ > ℵ₀. And Subobject(constantSheaf ℤ) is infinite. So κ = ℵ₀ is too small.
+- **Cardinal conditions cannot be satisfied for this application.**
 
-Key step: Q = I/K = I/colim(K_S) = colim(I/K_S) by AB5 (exactness of filtered colimits).
-The diagram {I/K_S} is a filtered diagram (transitions need NOT be mono).
+### Fundamental Obstacle
+All dimension-shifting approaches fail because:
+**Cohomological vanishing for a sheaf does NOT propagate to its subsheaves.**
+From H^k(A) = 0 and B ↪ A, one CANNOT conclude H^k(B) = 0.
 
-By the INDUCTIVE HYPOTHESIS (for m, applied to the diagram {I/K_S}):
-Ext^m(Z_X, colim(I/K_S)) = 0, i.e., Ext^m(Z_X, Q) = 0.
+The correct proof of Hartshorne III.2.9 requires either:
+(a) Čech cohomology (finite covers commute with filtered colimits), or
+(b) Universal δ-functor theorem (effaceable functors), or
+(c) Functorial flasque/Godement resolution (commutes with filtered colimits)
+None of these are in Mathlib v4.28.0.
 
-From the SES 0 -> K -> I -> Q -> 0 and I injective:
-subsingleton_ext_of_ses gives Ext^{m+1}(Z_X, K) subsingleton. QED.
+## What IS proved
 
-## Implementation Plan
+### Degree cascade (NEW, in GrothendieckVanishing.lean)
+`sheafH_vanishing_succ`: If H^m(F) = 0 for ALL F at degree m, then H^{m+1}(F) = 0 for all F.
+`sheafH_vanishing_cascade`: Extends from one degree to all higher degrees.
 
-1. DELETE ext_comm_filtered_colimit_mono and its sub-lemmas (they are not needed)
-2. REWRITE cohomology_vanishing_of_finitelyGenerated_vanishing with the inductive proof
-3. The proof needs:
-   - The filtered diagram infrastructure (finsetGenFunctor, finsetGenCocone, etc.) — KEEP
-   - n=0 base: Sheaf.H specialization + objectwise colimit — NEW
-   - Injective hull for the inductive step — from IsGrothendieckAbelian
-   - AB5 for I/colim = colim(I/-) — from AB5OfSize
-   - subsingleton_ext_of_ses — EXISTING (line 24)
+This means: once we establish vanishing at the MINIMUM degree (dim+1) for ALL sheaves,
+all higher degrees follow automatically WITHOUT the colimit step. The colimit step is
+only needed at degree dim+1.
 
-4. Key new sub-lemma: for sheaves on a topological space,
-   `Subsingleton (Sheaf.H (colim F_i) 0)` given `forall i, Subsingleton (Sheaf.H (F_i) 0)`.
-   This is the n=0 base case using Gamma-colimit commutation.
+### Filtered diagram infrastructure (PROVED, in IrreducibleStep.lean)
+- `finsetGenFunctor`: functor Finset(SectionIndex K) ⥤ Sheaf(X)
+- `finsetGenCocone`: cocone with vertex K
+- `finsetGenCocone_isColimit`: K is the colimit
+- `finsetGenFunctor_mono`: transition maps are mono
 
-5. The inductive hypothesis needs to be for GENERAL filtered diagrams (not just mono).
-   So the theorem statement should drop the mono condition.
+## Paths to closing the sorry
+
+### Path A: Build Čech cohomology infrastructure
+- Define Čech complex for finite open covers
+- Prove Čech cohomology commutes with filtered colimits (uses finite intersections)
+- Prove Čech = derived functor cohomology on Noetherian spaces
+- **Effort: ~500+ lines, requires substantial new Mathlib infrastructure**
+
+### Path B: Universal δ-functor theorem
+- Define universal δ-functors in Lean
+- Prove effaceability implies universality
+- Show the filtered-colimit Ext functor is effaceable
+- **Effort: ~300+ lines, requires abstract homological algebra**
+
+### Path C: Godement resolution
+- Define the Godement resolution G^n(F) = ∏_x F_x (product over stalks)
+- Prove it's functorial and flasque
+- Prove it commutes with filtered colimits (stalkwise computation)
+- **Effort: ~400+ lines, requires stalk theory**
+
+### Path D: Wait for Mathlib
+- The theorem `Ext^n commutes with filtered colimits` is a standard result
+  that may eventually be added to Mathlib as part of the derived category infrastructure.
