@@ -9,9 +9,15 @@ CI GREEN on PR #5. Auto-merge pending rebase.
 
 ## 1. Sorry's (1)
 
-Only `cohomology_vanishing_of_finitelyGenerated_vanishing` (line 1227 of IrreducibleStep.lean).
+Only `ext_comm_filtered_colimit_mono` (line 1227 of IrreducibleStep.lean).
 
-This is Hartshorne 2.9: "if H^m = 0 for all f.g. subsheaves, then H^m(K) = 0". Requires Ext commuting with filtered colimits — not in Mathlib v4.28.0. The Grothendieck abelian structure (`Sheaf.instIsGrothendieckAbelian`) and `extFunctorObj` exist, but `PreservesFilteredColimits (extFunctorObj Z m)` does not.
+This is the pure categorical statement: in a Grothendieck abelian category, Ext^n(Z,-)
+preserves filtered colimits of monomorphism diagrams. Mathlib has the n=0 case
+(`preservesColimit_coyoneda_obj_of_mono`) but not the general case.
+
+`cohomology_vanishing_of_finitelyGenerated_vanishing` (Hartshorne 2.9) is now fully proved
+via the filtered diagram construction: `finsetGenFunctor`, `finsetGenCocone`,
+`finsetGenCocone_isColimit` (mono + epi → iso argument).
 
 **Assessment**: Genuine Mathlib API gap. Cannot be closed without new Mathlib infrastructure.
 

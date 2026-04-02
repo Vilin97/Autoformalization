@@ -73,4 +73,4 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 ## Remaining Work
 
 1 sorry remains in `IrreducibleStep.lean` (Mathlib API gap):
-1. `cohomology_vanishing_of_finitelyGenerated_vanishing` (Step 3A) — Hartshorne 2.9, cohomology commutes with filtered colimits
+1. `ext_comm_filtered_colimit_mono` — Ext^n(Z,-) preserves filtered colimits of mono diagrams in Grothendieck abelian categories. Not in Mathlib v4.28.0.
