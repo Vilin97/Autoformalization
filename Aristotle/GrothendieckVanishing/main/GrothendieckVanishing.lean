@@ -7,7 +7,7 @@
 
   The proof assembles (modulo 1 sorry in IrreducibleStep.lean):
   - DimZeroVanishing: irreducible dim 0 case
-  - IrreducibleStep: irreducible dim ≥ 1 case (1 sorry: filtered colimits / Hartshorne 2.9)
+  - IrreducibleStep: irreducible dim >= 1 case (1 sorry: ext_comm_filtered_colimit_mono)
   - ClosedOpenDecomposition: reduction to irreducible
 -/
 import Aristotle.GrothendieckVanishing.main.DimZeroVanishing

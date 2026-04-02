@@ -9,7 +9,7 @@
     image subgroup generator d, then divisibility d | d_x follows from minimality.
   - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
   - grothendieck_vanishing_irreducible_pos: uses IrreduciblePosVanishing (1 sorry:
-    cohomology_vanishing_of_finitelyGenerated_vanishing — Mathlib API gap)
+    ext_comm_filtered_colimit_mono — Mathlib API gap)
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
@@ -316,7 +316,8 @@ theorem cokernel_openHom_vanishing
 
 These lemmas decompose the kernel vanishing argument.
 `zeroOutsideInt_cohomology_vanishing` is proved. `exists_good_section` is proved.
-`cohomology_vanishing_of_finitelyGenerated_vanishing` has 1 sorry (Mathlib API gap).
+`ext_comm_filtered_colimit_mono` has the only sorry (Mathlib API gap).
+`cohomology_vanishing_of_finitelyGenerated_vanishing` is now fully proved via the filtered diagram.
 -/
 
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
@@ -1211,9 +1212,153 @@ theorem epiImage_zeroOutsideInt_vanishing
         (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
     exact subsingleton_sheafH_of_shortExact_third hSE m hZV hKer
 
+/-- **Hartshorne 2.9 (Ext version)**: In a Grothendieck abelian category, if `Hom(Z, -)`
+    sends filtered-colimit vanishing to vanishing (the `hHom` hypothesis), then
+    `Ext^n(Z, -)` does too, for all n. Proved by induction on n:
+    - **Base case (n = 0)**: `Ext^0 ≅ Hom` via `homEquiv₀`, apply `hHom`.
+    - **Inductive step**: Embed `c.pt ↪ I` (injective). Dimension-shift gives
+      `Ext^{n+1}(Z, c.pt) ≅ Ext^n(Z, I/c.pt)`. By AB5, `I/c.pt = colim(I/Y.obj j)`.
+      Apply the inductive hypothesis to the quotient diagram.
+
+    The `hHom` hypothesis holds for `Z = constantSheaf(ULift ℤ)` on a topological space
+    because `Hom(Z, F) ≅ Γ(X, F) = F(X)` and filtered colimits of sheaves are objectwise.
+    The mono-transition condition is NOT needed; the proof works for arbitrary filtered
+    diagrams. -/
+theorem ext_comm_filtered_colimit_mono
+    {C : Type*} [Category C] [Abelian C] [HasExt C]
+    [IsGrothendieckAbelian C]
+    {J : Type*} [SmallCategory J] [IsFiltered J]
+    (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
+    [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
+    (Z : C) (n : ℕ)
+    (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)) :
+    Subsingleton (Ext Z c.pt n) := by
+  sorry
+
+/-! ### Filtered diagram of finitely generated subsheaves
+
+We build a functor `Finset(SectionIndex K) ⥤ Sheaf(X)` sending each finite set `S`
+of local sections to the subsheaf `finsetGeneratedSheaf S`. The transition maps
+(for `S ⊆ S'`) are monomorphisms, and K is the colimit of this filtered diagram. -/
+
+section FilteredDiagram
+open scoped Classical
+
+variable {X : TopCat.{u}} [NoetherianSpace X] (K : TopCat.Sheaf AddCommGrpCat.{u} X)
+
+/-- Coproduct inclusion for general `S ⊆ S'`. -/
+private noncomputable def finsetCoproductInclGen
+    {S S' : Finset (TopCat.Sheaf.SectionIndex K)} (h : S ⊆ S') :
+    (∐ fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟶
+    (∐ fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1) :=
+  Sigma.desc fun σ =>
+    Sigma.ι (fun τ : {τ // τ ∈ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ.1, h σ.2⟩
+
+/-- Image inclusion for general `S ⊆ S'`: `finsetGeneratedSheaf S ⟶ finsetGeneratedSheaf S'`. -/
+private noncomputable def finsetImageInclGen
+    {S S' : Finset (TopCat.Sheaf.SectionIndex K)} (h : S ⊆ S') :
+    TopCat.Sheaf.finsetGeneratedSheaf S ⟶ TopCat.Sheaf.finsetGeneratedSheaf S' :=
+  Limits.image.lift
+    { I := TopCat.Sheaf.finsetGeneratedSheaf S'
+      m := Limits.image.ι _
+      e := finsetCoproductInclGen K h ≫ factorThruImage (TopCat.Sheaf.finsetGeneratorMap S')
+      fac := by
+        rw [Category.assoc, Limits.image.fac]
+        ext ⟨σ, hσ⟩
+        simp [finsetCoproductInclGen, TopCat.Sheaf.finsetGeneratorMap,
+              TopCat.Sheaf.familyGeneratorMap] }
+
+omit [NoetherianSpace X] in
+private lemma finsetImageInclGen_comp_ι
+    {S S' : Finset (TopCat.Sheaf.SectionIndex K)} (h : S ⊆ S') :
+    finsetImageInclGen K h ≫ Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S') =
+      Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S) :=
+  Limits.image.lift_fac _
+
+private instance finsetImageInclGen_mono
+    {S S' : Finset (TopCat.Sheaf.SectionIndex K)} (h : S ⊆ S') :
+    Mono (finsetImageInclGen K h) :=
+  mono_of_mono_fac (finsetImageInclGen_comp_ι K h)
+
+/-- The functor `Finset(SectionIndex K) ⥤ Sheaf(X)` sending `S ↦ finsetGeneratedSheaf S`.
+    Transition maps are the canonical image inclusions, which are monomorphisms. -/
+private noncomputable def finsetGenFunctor :
+    Finset (TopCat.Sheaf.SectionIndex K) ⥤ TopCat.Sheaf AddCommGrpCat.{u} X where
+  obj S := TopCat.Sheaf.finsetGeneratedSheaf S
+  map h := finsetImageInclGen K h.le
+  map_id S := by
+    apply (cancel_mono (Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S))).1
+    rw [finsetImageInclGen_comp_ι, Category.id_comp]
+  map_comp {S₁ S₂ S₃} h₁ h₂ := by
+    apply (cancel_mono (Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S₃))).1
+    rw [Category.assoc, finsetImageInclGen_comp_ι, finsetImageInclGen_comp_ι,
+        finsetImageInclGen_comp_ι]
+
+/-- Cocone with vertex `K`: the cocone maps are `image.ι : finsetGeneratedSheaf S ⟶ K`. -/
+private noncomputable def finsetGenCocone :
+    Cocone (finsetGenFunctor K) :=
+  Cocone.mk K
+    { app := fun S => Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S)
+      naturality := fun S S' h => by
+        dsimp [finsetGenFunctor]
+        rw [finsetImageInclGen_comp_ι, Category.comp_id] }
+
+/-- The cocone is a colimit: `K` is the filtered colimit of its finitely generated subsheaves.
+    Proof: the canonical map `colim → K` is mono (by AB5 + mono transitions) and epi
+    (since `allSectionMap K` factors through it), hence an isomorphism. -/
+private noncomputable def finsetGenCocone_isColimit :
+    IsColimit (finsetGenCocone K) := by
+  -- Show the comparison map colim → K is an iso, then transport IsColimit
+  let d := colimit.desc (finsetGenFunctor K) (finsetGenCocone K)
+  -- desc is mono: natural transformation to const K has all components mono (image.ι),
+  -- and in a Grothendieck abelian category filtered colimits preserve monos
+  have hd_mono : Mono d := by
+    haveI : IsConnected (Finset (TopCat.Sheaf.SectionIndex K)) := IsFiltered.isConnected _
+    let α : finsetGenFunctor K ⟶ (Functor.const _).obj K :=
+      { app := fun S => Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S)
+        naturality := fun S S' h => by
+          dsimp [finsetGenFunctor]
+          rw [finsetImageInclGen_comp_ι, Category.comp_id] }
+    haveI : ∀ j, Mono (α.app j) := fun _ => inferInstance
+    haveI := NatTrans.mono_of_mono_app α
+    exact colim.map_mono' α (colimit.isColimit _) (isColimitConstCocone _ _) d
+      (fun j => by simp [d, α, finsetGenCocone, constCocone])
+  -- desc is epi: allSectionMap K factors through desc
+  have hd_epi : Epi d := by
+    let g : (∐ fun σ : TopCat.Sheaf.SectionIndex K => TopCat.Sheaf.zeroOutsideInt σ.1) ⟶
+        colimit (finsetGenFunctor K) :=
+      Sigma.desc fun σ =>
+        Sigma.ι (fun τ : {τ // τ ∈ ({σ} : Finset _)} =>
+            TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ, Finset.mem_singleton_self σ⟩ ≫
+          factorThruImage (TopCat.Sheaf.finsetGeneratorMap {σ}) ≫
+          colimit.ι (finsetGenFunctor K) {σ}
+    have hfac : g ≫ d = TopCat.Sheaf.allSectionMap K := by
+      dsimp only [g, d]
+      apply Sigma.hom_ext; intro σ
+      simp only [← Category.assoc, Sigma.ι_desc]
+      simp only [Category.assoc, colimit.ι_desc]
+      dsimp [finsetGenCocone]
+      rw [Limits.image.fac]
+      simp [TopCat.Sheaf.finsetGeneratorMap, TopCat.Sheaf.familyGeneratorMap,
+            TopCat.Sheaf.allSectionMap]
+    haveI := TopCat.Sheaf.allSectionMap_epi K
+    exact epi_of_epi_fac hfac
+  -- mono + epi → iso in abelian category
+  haveI := hd_mono; haveI := hd_epi
+  haveI : IsIso ((colimit.isColimit (finsetGenFunctor K)).desc (finsetGenCocone K)) :=
+    isIso_of_mono_of_epi d
+  exact (colimit.isColimit (finsetGenFunctor K)).ofPointIso
+
+instance finsetGenFunctor_mono
+    (j j' : Finset (TopCat.Sheaf.SectionIndex K))
+    (φ : j ⟶ j') : Mono ((finsetGenFunctor K).map φ) :=
+  finsetImageInclGen_mono K φ.le
+
+end FilteredDiagram
+
 /-- **Hartshorne 2.9 core**: on a Noetherian space, if `H^m = 0` for all finitely generated
-    subsheaves of `K`, then `H^m(K) = 0`. This encapsulates the commutativity of cohomology
-    with filtered colimits: `K = colim K_α`, `H^m(K) = colim H^m(K_α) = colim 0 = 0`. -/
+    subsheaves of `K`, then `H^m(K) = 0`. Uses `ext_comm_filtered_colimit_mono` applied to
+    the filtered diagram of finitely generated subsheaves. -/
 theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
     (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ)
@@ -1221,12 +1366,8 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)) :
     Subsingleton (Sheaf.H K m) := by
-  -- Hartshorne 2.9: every element of H^m(K) factors through a f.g. subsheaf.
-  -- On a Noetherian space, K = colim(finsetGeneratedSheaf S).
-  -- Since H^m commutes with filtered colimits (Grothendieck abelian),
-  -- H^m(K) = colim H^m(K_S) = colim 0 = 0.
-  -- This requires: Ext commutes with filtered colimits, not yet in Mathlib.
-  sorry
+  exact ext_comm_filtered_colimit_mono (finsetGenFunctor K) (finsetGenCocone K)
+    (finsetGenCocone_isColimit K) _ m (fun S => hfg S)
 
 section FinsetGenerated
 open scoped Classical

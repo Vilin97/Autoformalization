@@ -1,5 +1,34 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T09:30Z — Babysit cycle: merged remote work (cohomology_vanishing proved)
+
+**Sorry count: 2** (decomposed from 1 — `ext_comm_filtered_colimit_mono_zero` + `_succ`)
+
+- **Merged remote agent work** (commits fc020e6, cd71c5e): another agent proved
+  `cohomology_vanishing_of_finitelyGenerated_vanishing` and decomposed
+  `ext_comm_filtered_colimit_mono` into base case (n=0) and inductive step (n→n+1).
+- Filtered diagram infrastructure added: `finsetGenFunctor`, `finsetGenCocone`,
+  `finsetGenCocone_isColimit` (using `colim.map_mono'` for mono proof).
+- **Aristotle MCP**: Not connected. Cannot submit or check jobs.
+- 2 sorry's remain in `ext_comm_filtered_colimit_mono_zero` and `_succ` (Mathlib gaps)
+
+## 2026-04-02T08:30Z — Decompose last sorry into 2 well-typed sub-lemmas
+
+**Sorry count: 2** (was 1 opaque sorry — now 2 focused sub-lemmas)
+
+- **Decomposed `cohomology_vanishing_of_finitelyGenerated_vanishing`** into:
+  1. `ext_comm_filtered_colimit_mono` — pure categorical Mathlib gap: Ext^n(Z,-) preserves
+    filtered colimits of mono diagrams in Grothendieck abelian categories
+  2. `cohomology_vanishing_of_finitelyGenerated_vanishing` — applies (1) to the specific
+    sheaf case (K = colim of f.g. subsheaves)
+- **Prepared `aristotle-in/ext_filtered_colimit.lean`** — clean standalone submission for
+  the categorical statement. Aristotle MCP not connected, submission pending.
+- **Fixed stale sorry counts** in GrothendieckVanishing.lean and main.lean headers
+- **Updated plan.md** with Mathlib status: `preservesColimit_coyoneda_obj_of_mono` gives
+  n=0 case; dimension shifting obstacle identified for n≥1
+- **Aristotle**: MCP not connected. 2 QUEUED jobs (105033c9, 361dc7af) unchecked.
+  1 PENDING_SUBMISSION (ext_filtered_colimit.lean).
+
 ## 2026-04-01T21:30Z — MAJOR: Restore all 14 regressed sorry's (16 → 2)
 
 **Sorry count: 2** (was 16 before this cycle; restored to pre-regression level)
