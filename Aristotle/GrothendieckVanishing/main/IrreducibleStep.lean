@@ -7,8 +7,9 @@
   - constantSheaf_cohomology_vanishing: PROVED from flasque + FlasqueVanishing
   - exists_section_generating_stalks: PROVED — uses Nat.find to choose x₀ with minimal
     image subgroup generator d, then divisibility d | d_x follows from minimality.
-  - grothendieck_vanishing_irreducible_pos: uses IrreduciblePosVanishing (2 sorry's:
-    exists_good_section, cohomology_vanishing_of_finitelyGenerated_vanishing)
+  - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
+  - grothendieck_vanishing_irreducible_pos: uses IrreduciblePosVanishing (1 sorry:
+    cohomology_vanishing_of_finitelyGenerated_vanishing — Mathlib API gap)
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
@@ -314,7 +315,8 @@ theorem cokernel_openHom_vanishing
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
 
 These lemmas decompose the kernel vanishing argument.
-`zeroOutsideInt_cohomology_vanishing` is proved; the other two remain sorry.
+`zeroOutsideInt_cohomology_vanishing` is proved. `exists_good_section` is proved.
+`cohomology_vanishing_of_finitelyGenerated_vanishing` has 1 sorry (Mathlib API gap).
 -/
 
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
