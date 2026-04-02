@@ -9,7 +9,7 @@
     image subgroup generator d, then divisibility d | d_x follows from minimality.
   - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
   - grothendieck_vanishing_irreducible_pos: uses IrreduciblePosVanishing
-    (1 sorry in FiniteGeneratorReduction.lean: ext_comm_filtered_colimit_mono n≥1 case)
+    (1 sorry in FiniteGeneratorReduction.lean: ext_vanishing_of_colimit_pieces)
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
@@ -317,7 +317,7 @@ theorem cokernel_openHom_vanishing
 
 These lemmas decompose the kernel vanishing argument.
 `zeroOutsideInt_cohomology_vanishing` is proved. `exists_good_section` is proved.
-`ext_comm_filtered_colimit_mono` has the only sorry (Mathlib API gap).
+`ext_vanishing_of_colimit_pieces` has the only sorry (Mathlib API gap).
 `cohomology_vanishing_of_finitelyGenerated_vanishing` is now fully proved via the filtered diagram.
 -/
 

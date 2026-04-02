@@ -1,5 +1,24 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T22:40Z — Extract sorry into standalone lemma, clean up proof
+
+**Sorry count: 1** (`ext_vanishing_of_colimit_pieces` in FiniteGeneratorReduction.lean:56)
+
+- **Extracted `ext_vanishing_of_colimit_pieces`**: Standalone sorry'd lemma for the
+  colimit transfer. Does NOT require mono transitions — cleaner target for future work.
+- **Made `ext_comm_filtered_colimit_mono` sorry-free**: The succ case now delegates to
+  the extracted lemma instead of inlining the sorry. Proof is: base case via hHom +
+  Ext.homEquiv₀, succ case via `ext_vanishing_of_colimit_pieces`.
+- **Removed redundant dimension-shift code**: The prior version used InjectivePresentation
+  + covariant_sequence_exact₁ + Ext.eq_zero_of_injective to reduce to an equivalent sorry.
+  Since the reduction was circular (Ext^n(Q) ≅ Ext^{n+1}(c.pt)), the clean delegation
+  is simpler.
+- Extensive mathematical analysis confirmed the gap requires one of: universal δ-functor
+  theorem (~300 lines), Čech cohomology (~500 lines), or derived category colimit
+  preservation (~500 lines).
+- Aristotle MCP unavailable; kept `aristotle-in/ext_filtered_colimit.lean` for resubmission.
+- Updated critique.md, plan.md, all documentation headers.
+
 ## 2026-04-02T21:00Z — Babysit cycles: CLOSE n=0 case, reduce to 1 sorry
 
 **Sorry count: 1** (n≥1 Ext case only)

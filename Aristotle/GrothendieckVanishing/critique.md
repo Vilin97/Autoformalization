@@ -1,56 +1,156 @@
 # Adversarial Critique — Grothendieck Vanishing Formalization
 
-**Timestamp**: 2026-04-02T22:20Z
+**Timestamp**: 2026-04-02T22:35Z
 **Reviewer verdict**: CONDITIONAL PASS
 
 ## 0. CI Status
 
-All CI runs **green**. Local `lake build` succeeds with 0 errors.
+Latest CI run (23925073144) is **in_progress** for the most recent commit. Previous two
+runs are **green**.
+
+**Docs Check (P1)**: Both `https://vilin97.github.io/aristotle/blueprint/` and
+`https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html` return **HTTP 404**.
+Blueprint/docs are broken and not deployed.
+
+No `admit`, `axiom`, `native_decide`, heartbeat overrides, or `set_option linter` found.
 
 ## 1. Sorry's (1)
 
-One `sorry` at `FiniteGeneratorReduction.lean:~94` inside `ext_comm_filtered_colimit_mono`.
+**`FiniteGeneratorReduction.lean:95`**: `exact @Subsingleton.elim _ (by sorry) ca cb`
 
-**Precise goal**: `Subsingleton (Ext Z ip.shortComplex.X₃ n)` — vanishing of Ext^n on the
-cokernel Q = I/c.pt of an injective embedding.
+The sorry provides `Subsingleton (Abelian.Ext Z ip.shortComplex.X₃ n)` — vanishing
+of Ext^n on the cokernel Q = I/c.pt of an injective embedding.
 
-**What's proved**: The dimension shift via the covariant Ext LES reduces Ext^{n+1}(Z, c.pt)
-to Ext^n(Z, Q). The injective vanishing Ext^{n+1}(Z, I) = 0 is proved. The n=0 case of
-the full theorem is PROVED. The n≥1 case's sorry is isolated to exactly this one subgoal.
+**Is the statement true?** Yes. This is Hartshorne III Lemma 2.9 (filtered colimit
+commutes with cohomology). Mathematically uncontroversial.
 
-**Why it remains**: Q = colim Q_j (by AB5 + mono transitions) with Ext^n(Z, Q_j) = 0 for
-each j (per-j LES). But showing Ext^n preserves this colimit requires infrastructure not
-in Mathlib v4.28.0 (universal δ-functors / Čech / derived category colimits). The quotient
-diagram has epi transitions, blocking recursive application.
+**Could Aristotle prove the negation?** No. The statement is true, and a counterexample
+would require producing a non-zero Ext^n element on a filtered colimit where all pieces
+have zero Ext^n. No such object exists in a Grothendieck abelian category.
 
-**Assessment**: Genuine Mathlib API gap. The statement is mathematically true
-(Hartshorne III Lemma 2.9). No risk of falsity.
+**Worst case**: The sorry propagates through `ext_comm_filtered_colimit_mono` →
+`cohomology_vanishing_of_finitelyGenerated_vanishing` → `directLimit_cohomology_vanishing`
+→ `irreduciblePos_kernel_subsingleton` → `IrreduciblePosVanishing` →
+`grothendieck_vanishing_aux` → `GrothendieckVanishing`. The main theorem depends on it.
+
+**What's proved around the sorry**: The dimension shift via `InjectivePresentation` +
+`Ext.covariant_sequence_exact₁` + `Ext.eq_zero_of_injective` is fully proved. The sorry
+is precisely isolated: `Subsingleton (Ext Z Q n)` where Q is the cokernel.
 
 ## 2. Hidden Axioms
 
-None. No `admit`, `axiom`, `native_decide`, or linter/heartbeat overrides.
+`lean_verify` on `GrothendieckVanishing`, `sheafH_vanishing_cascade`, and
+`ext_comm_filtered_colimit_mono` reports **no axioms** beyond the standard Lean kernel
+axioms (propext, Classical.choice, Quot.sound). No `admit`, `native_decide`, or unsafe
+`Decidable.decide`. I found no issue beyond the sorry itself.
 
-## 3. File Sizes
+## 3. Circularity
 
-- `IrreducibleStep.lean`: 1263 lines (26% over 1000-line guideline, acceptable)
-- `FiniteGeneratorReduction.lean`: ~370 lines
-- All other files ≤ 733 lines
+The main theorem `GrothendieckVanishing` uses well-founded induction on
+`topologicalKrullDim X`. The IH provides vanishing for strictly lower-dimensional spaces.
+There is no self-reference: the sorry is in `ext_comm_filtered_colimit_mono` which is a
+separate (non-recursive) theorem about abstract Grothendieck abelian categories. The
+IH for `grothendieck_vanishing_aux` only passes through spaces of strictly smaller dimension.
+I found no circularity.
 
-## 4. Code Quality
+## 4. Hypothesis Audit
 
-- `sheafH_vanishing_succ` and `sheafH_vanishing_cascade` are public with docstrings
-- No heartbeat overrides
-- No dead code
-- The sorry is well-decomposed: dimension shift is explicit, injective vanishing proved,
-  only the core colimit-transfer subgoal remains
+Main theorem: `GrothendieckVanishing (X : TopCat.{u}) (F : Sheaf AddCommGrpCat.{u} X)
+    [NoetherianSpace X] (n : ℕ) (h : n > topologicalKrullDim X)`
 
-## 5. Documentation
+- `X : TopCat.{u}`: Required. Cannot weaken beyond topological spaces.
+- `F : Sheaf AddCommGrpCat.{u} X`: Required. The theorem is about sheaves of abelian groups.
+- `[NoetherianSpace X]`: Required. Counterexamples exist for non-Noetherian spaces.
+- `n : ℕ`: Could be generalized to `ℤ` or `ℕ∞`, but `ℕ` is standard for Hartshorne.
+- `h : n > topologicalKrullDim X`: Required. The comparison `n > d` where d is WithBot ℕ∞
+  is correct — if dim = ⊤, no n satisfies this, so the theorem is vacuous for
+  infinite-dimensional spaces.
 
-All headers consistent with 1 sorry in FiniteGeneratorReduction.lean
+**Possible weakness**: The theorem uses `topologicalKrullDim` which is the Krull dimension
+of the topological space, not the Krull dimension of a scheme. For non-scheme topological
+spaces, this may differ from the classical notion. This is standard for Hartshorne III.2.7
+but could be made more explicit.
 
-## 6. Open Issues
+## 5. Mathematical Correctness
 
-| # | Priority | Issue |
-|---|----------|-------|
-| 1 | P0 | 1 sorry: Ext^n colimit transfer (Mathlib gap, see plan.md for paths) |
-| 2 | P1 | Docs/blueprint return 404 |
+The proof follows Hartshorne III.2.7 faithfully:
+- WF induction on dimension
+- Irreducible case: closed-open decomposition + SES
+- Dim 0: constant sheaf flasque
+- Dim ≥ 1: kernel vanishing via zeroOutsideInt + filtered diagram
+
+The sorry is at the correct step (Hartshorne III Lemma 2.9, filtered colimit commutes
+with cohomology). The dimension shift decomposition (Ext LES + injective vanishing)
+is mathematically correct.
+
+I found no divergence from the standard proof.
+
+## 6. Code Quality
+
+| File | Lines | Status |
+|------|-------|--------|
+| IrreducibleStep.lean | 1263 | **26% over 1000-line guideline** |
+| ZeroOutside.lean | 733 | OK |
+| FlasqueVanishing.lean | 616 | Slightly over 600 |
+| FiniteGeneratorReduction.lean | 519 | OK |
+| All others | ≤ 517 | OK |
+
+- `IrreducibleStep.lean` at 1263 lines is the largest file. It was already split once
+  (from 1604 lines). A further split into `IrreducibleStep.lean` + `EpiImageVanishing.lean`
+  would bring both under 700 lines.
+- No heartbeat overrides.
+- No `set_option` usage at all.
+- The sorry is well-isolated with clear comments explaining the gap.
+
+## 7. Documentation Lies
+
+- `main.lean` header says "1 sorry" — correct.
+- `GrothendieckVanishing.lean` header says "1 sorry: ext_comm_filtered_colimit_mono n≥1
+  case — Mathlib API gap" — accurate but the sorry is now more precisely at the
+  `Subsingleton (Ext Z Q n)` subgoal after dimension shifting. The header could be updated
+  to reflect this decomposition.
+- `FiniteGeneratorReduction.lean` header: accurately describes the sorry location.
+- `plan.md` says "1 sorry" — correct.
+- `plan.md` says "~5100 lines" — actual is 5183. Close enough.
+
+## 8. Generalization Opportunities
+
+1. **Drop NoetherianSpace to finite cohomological dimension** (feasibility: medium):
+   The theorem holds for any topological space of finite cohomological dimension,
+   not just Noetherian spaces. This would require replacing the Noetherian induction
+   with a direct cohomological dimension argument.
+
+2. **Generalize to arbitrary Grothendieck topologies** (feasibility: hard):
+   The theorem holds for sheaves on any site with finite cohomological dimension,
+   not just topological spaces. The proof uses stalk arguments specific to topological
+   spaces in several places.
+
+3. **Extract `FlasqueVanishing` as standalone Mathlib PR** (feasibility: easy):
+   The flasque sheaf cohomological vanishing theorem (`FlasqueVanishing`) is
+   self-contained and useful independently of Grothendieck vanishing.
+
+## 9. Mathlib Upstreamability
+
+1. **`FlasqueVanishing`** (FlasqueVanishing.lean): Flasque sheaves have vanishing higher
+   cohomology. Self-contained, ~616 lines. Would need universe polymorphism cleanup.
+
+2. **`constantSheaf_flasque_of_irreducible`** (ConstantSheafFlasque.lean): The constant
+   sheaf on an irreducible space is flasque. ~224 lines, clean.
+
+3. **`subsingleton_ext_of_ses` / `subsingleton_ext_of_ses_middle` / `subsingleton_ext_of_ses_third`**
+   (IrreducibleStep.lean): General-purpose Ext vanishing lemmas from short exact sequences.
+   These are missing from Mathlib and useful for any Ext computation.
+
+4. **`sheafH_vanishing_cascade`** (GrothendieckVanishing.lean): Vanishing cascades from
+   one degree to all higher degrees. General-purpose.
+
+## Verdict: CONDITIONAL PASS
+
+Conditions:
+1. **P0**: Wait for CI run 23925073144 to complete green.
+2. **P1**: Fix docs/blueprint 404 (or document that it's not yet set up).
+3. **P1**: The 1 sorry in `ext_comm_filtered_colimit_mono` is a genuine Mathlib gap.
+   Acceptable for a formalization that honestly documents it.
+4. **P2**: Consider splitting `IrreducibleStep.lean` (1263 lines) further.
+5. **P3**: Update `GrothendieckVanishing.lean` header to reflect the dimension-shift
+   decomposition of the sorry.
