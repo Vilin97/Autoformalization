@@ -1219,6 +1219,11 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)) :
     Subsingleton (Sheaf.H K m) := by
+  -- Hartshorne 2.9: every element of H^m(K) factors through a f.g. subsheaf.
+  -- On a Noetherian space, K = colim(finsetGeneratedSheaf S).
+  -- Since H^m commutes with filtered colimits (Grothendieck abelian),
+  -- H^m(K) = colim H^m(K_S) = colim 0 = 0.
+  -- This requires: Ext commutes with filtered colimits, not yet in Mathlib.
   sorry
 
 section FinsetGenerated
