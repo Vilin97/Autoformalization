@@ -49,53 +49,41 @@ private theorem addCommGrpCat_subsingleton_hom_of_subsingleton
   ext x
   exact @Subsingleton.elim _ h _ _
 
-/-- Ext^n vanishing transfers from filtered colimit pieces to the colimit for any
-    filtered diagram (no mono transitions required), provided `Hom(Z, -)` transfers
-    subsingleton. This is the Mathlib API gap: closing requires showing `Ext^n` preserves
-    the filtered colimit (Čech cohomology / universal δ-functors / Godement resolution).
-    Mathematically true by Hartshorne III Lemma 2.9. -/
-private theorem ext_vanishing_of_colimit_pieces
+/-- Core induction: Ext^n colimit transfer with `n` universally quantified BEFORE `J`,
+    so the IH at degree `n` is universal over all filtered diagrams (no mono transitions
+    in the IH). Mono transitions are only needed at the TOP level for the SES construction.
+    `hHom_univ` is universal: works for any filtered diagram, not just the given one. -/
+private theorem ext_vanishing_of_colimit_aux
     {C : Type u} [Category.{v} C] [Abelian C] [HasExt C]
-    [IsGrothendieckAbelian.{w} C]
-    {J : Type w} [SmallCategory J] [IsFiltered J]
-    (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
-    (Z : C) (n : ℕ)
-    (hHom : (∀ j, Subsingleton (Z ⟶ Y.obj j)) → Subsingleton (Z ⟶ c.pt))
-    (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)) :
-    Subsingleton (Ext Z c.pt n) := by
-  cases n with
+    [IsGrothendieckAbelian.{w} C] (Z : C)
+    (hHom_univ : ∀ {J : Type w} [SmallCategory J] [IsFiltered J]
+      (Y : J ⥤ C) (c : Cocone Y), IsColimit c →
+      (∀ j, Subsingleton (Z ⟶ Y.obj j)) → Subsingleton (Z ⟶ c.pt))
+    : ∀ (n : ℕ) {J : Type w} [SmallCategory J] [IsFiltered J]
+        (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
+        (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)),
+      Subsingleton (Ext Z c.pt n) := by
+  intro n; induction n with
   | zero =>
-    -- n=0: Ext^0 ≅ Hom, transfer via hHom. PROVED.
+    intro J _ _ Y c hc hvan
     exact Ext.homEquiv₀.subsingleton_congr.mpr
-      (hHom (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j)))
-  | succ n =>
-    -- n≥1: Embed c.pt ↪ I (injective). By the covariant Ext LES, every element of
-    -- Ext^{n+1}(Z, c.pt) lifts to Ext^n(Z, Q) where Q = cokernel(c.pt ↪ I).
-    -- So Ext^{n+1}(Z, c.pt) = 0 iff Ext^n(Z, Q) = 0.
-    -- Q = colim Q_j by AB5 + mono transitions, each Ext^n(Z, Q_j) = 0 by per-j LES.
-    -- This requires Ext^n to preserve the colimit (Mathlib API gap).
-    obtain ⟨ip⟩ := EnoughInjectives.presentation c.pt
-    have hSE := ip.shortExact_shortComplex
-    constructor; intro a b
-    have ha : a.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
-    have hb : b.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
-    obtain ⟨ca, hca⟩ := Ext.covariant_sequence_exact₁ Z hSE a ha rfl
-    obtain ⟨cb, hcb⟩ := Ext.covariant_sequence_exact₁ Z hSE b hb rfl
-    rw [← hca, ← hcb]; congr 1
-    -- Goal: ca = cb where ca cb : Ext Z ip.shortComplex.X₃ n
-    -- This requires Ext^n(Z, Q) = 0 for Q = cokernel of injective embedding.
-    -- Q = colim Q_j with Ext^n vanishing on each Q_j, but the colimit transfer
-    -- for Ext^n (n ≥ 1) needs universal δ-functor / Čech infrastructure.
-    exact @Subsingleton.elim _ (by sorry) ca cb
+      (hHom_univ Y c hc (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j)))
+  | succ n ih =>
+    -- ih : ∀ {J} [SmallCategory J] [IsFiltered J] (Y c) (hc : IsColimit c),
+    --      (∀ j, Subsingleton (Ext Z (Y.obj j) n)) → Subsingleton (Ext Z c.pt n)
+    -- NOTE: ih has NO mono transition requirement!
+    intro J _ _ Y c hc hvan
+    -- Dimension shift: embed c.pt ↪ I, form SES 0 → c.pt → I → Q → 0.
+    -- Every element of Ext^{n+1}(Z, c.pt) lifts to Ext^n(Z, Q).
+    -- Need: Subsingleton (Ext^n(Z, Q)). Apply ih to the quotient diagram.
+    -- The quotient diagram has epi transitions but ih doesn't need mono. ✓
+    -- TODO: construct quotient functor Q_j, prove Q = colim Q_j, show per-j vanishing
+    sorry
 
 /-- **Hartshorne 2.9 (Ext version)**: In a Grothendieck abelian category, if `Hom(Z, -)`
     sends filtered-colimit vanishing to vanishing (the `hHom` hypothesis), then
-    `Ext^n(Z, -)` does too, for all n.
-    - **n = 0**: `Ext^0 ≅ Hom` via `homEquiv₀`, apply `hHom`. PROVED.
-    - **n ≥ 1**: Dimension shift via injective embedding + covariant Ext LES reduces to
-      `Ext^n(Z, I/c.pt) = 0`. The cokernel I/c.pt = colim(I/Y.obj j) by AB5 + mono
-      transitions, and each `Ext^n(Z, I/Y.obj j) = 0` by the per-j LES.
-      Applied via `ext_vanishing_of_colimit_pieces` for the quotient diagram. -/
+    `Ext^n(Z, -)` does too. Delegates to `ext_vanishing_of_colimit_aux` via sorry for
+    the universality upgrade of `hHom`. -/
 theorem ext_comm_filtered_colimit_mono
     {C : Type u} [Category.{v} C] [Abelian C] [HasExt C]
     [IsGrothendieckAbelian.{w} C]
@@ -103,19 +91,17 @@ theorem ext_comm_filtered_colimit_mono
     (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
     [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
     (Z : C) (n : ℕ)
-    -- The `hHom` hypothesis: Hom(Z,-) sends colimit vanishing to vanishing.
-    -- For sheaves, this follows from objectwise colimits: Hom(Z_X, F) ≅ F(X).
     (hHom : (∀ j, Subsingleton (Z ⟶ Y.obj j)) → Subsingleton (Z ⟶ c.pt))
     (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)) :
     Subsingleton (Ext Z c.pt n) := by
   induction n with
   | zero =>
-    -- n=0: Ext^0 ≅ Hom via homEquiv₀, then apply hHom. PROVED.
     exact Ext.homEquiv₀.subsingleton_congr.mpr
       (hHom (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j)))
   | succ n _ =>
-    -- Apply the colimit-transfer lemma (which carries the sorry).
-    exact ext_vanishing_of_colimit_pieces Y c hc Z (n + 1) hHom hvan
+    -- The aux lemma needs universal hHom. At the call site (sheaves), this holds.
+    -- For the abstract setting, we use sorry for the universality upgrade.
+    exact ext_vanishing_of_colimit_aux Z (by sorry) (n + 1) Y c hc hvan
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
