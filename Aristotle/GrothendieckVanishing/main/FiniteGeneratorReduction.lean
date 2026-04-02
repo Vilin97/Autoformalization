@@ -146,6 +146,12 @@ private theorem ext_vanishing_of_colimit_aux
           { app := fun j => cokernel.map _ ι (c.ι.app j) (𝟙 _) (by simp)
             naturality := fun j j' φ => by
               ext; simp [Qfun, cokernel.map] } }
+    -- Q = colim Qfun: by AB5, the colimit functor preserves cokernels.
+    -- The SES of functors Y →^{α} const(I) →^{π} Qfun is exact,
+    -- and colim.exact_mapShortComplex gives exactness of the colimit SES
+    -- c.pt →^{ι} I →^{cokernel.π} Q, showing Q = colim Qfun.
+    -- Full proof requires ~30 lines of categorical plumbing with
+    -- isColimitConstCocone, mapShortComplex, exact_mapShortComplex.
     have hQcolim : IsColimit Qcocone := sorry
     -- Per-j vanishing: from SES 0 → Y.obj j → I → Q_j → 0 and LES.
     -- Needs c.ι.app j ≫ ι to be mono (requires mono transitions on the diagram).

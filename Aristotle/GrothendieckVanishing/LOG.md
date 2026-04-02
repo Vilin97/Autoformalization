@@ -1,5 +1,15 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T00:20Z — Clean up hQcolim sorry, document colim.exact_mapShortComplex approach
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux, 4 sub-sorry's)
+
+- Researched colim.exact_mapShortComplex: found exact signature and usage pattern from
+  ColimCoyoneda.lean. The approach: build SES of functors Y → const(I) → Qfun, show
+  exact, apply exact_mapShortComplex + isColimitConstCocone. ~30 lines of plumbing.
+- Cleaned up hQcolim sorry with detailed roadmap comment.
+- No new proofs closed (hQcolim requires categorical infrastructure).
+
 ## 2026-04-03T00:05Z — Analyze hQcolim, commit current state
 
 **Sorry count: 1** (ext_vanishing_of_colimit_aux with 4 sub-sorry's)
