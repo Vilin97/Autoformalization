@@ -106,7 +106,8 @@ private theorem ext_vanishing_of_colimit_aux
     -- Per-j vanishing: from SES 0 → Y.obj j → I → Q_j → 0 and LES.
     -- Needs c.ι.app j ≫ ι to be mono (requires mono transitions on the diagram).
     -- This is provided by ext_comm_filtered_colimit_mono which has [Mono (Y.map φ)].
-    have hQvan : ∀ j, Subsingleton (Ext Z (Qfun.obj j) n) := sorry
+    have hQvan : ∀ j, Subsingleton (Ext Z (Qfun.obj j) n) :=
+      fun j => hQvan_provider n rfl ip j
     exact @Subsingleton.elim _ (ih Qfun Qcocone hQcolim hQvan sorry) ca cb
 
 /-- **Hartshorne 2.9 (Ext version)**: In a Grothendieck abelian category, if `Hom(Z, -)`
@@ -130,7 +131,44 @@ theorem ext_comm_filtered_colimit_mono
   | succ n _ =>
     -- The aux lemma needs universal hHom. At the call site (sheaves), this holds.
     -- For the abstract setting, we use sorry for the universality upgrade.
-    exact ext_vanishing_of_colimit_aux Z (by sorry) (n + 1) Y c hc hvan (by sorry)
+    refine ext_vanishing_of_colimit_aux Z (by sorry) (n + 1) Y c hc hvan ?_
+    -- hQvan_provider: for any injective pres of c.pt, Ext^n(Z, cokernel(c.ι.app j ≫ f)) = 0
+    -- From SES 0 → Y.obj j → I → Q_j → 0 (mono by AB5) and LES:
+    -- Ext^n(Z, I) → Ext^n(Z, Q_j) → Ext^{n+1}(Z, Y.obj j) → Ext^{n+1}(Z, I)
+    -- For n ≥ 1: both end terms vanish (injective), and hvan j gives middle vanishing.
+    intro n' hn' ip j
+    have hn : n' = n := by omega
+    subst hn
+    -- SES: 0 → Y.obj j →^{c.ι.app j ≫ ip.f} I → Q_j → 0
+    -- Need Mono (c.ι.app j ≫ ip.f). Use AB5 + mono transitions for Mono (c.ι.app j).
+    let f_j := c.ι.app j ≫ ip.shortComplex.f
+    let Sj := ShortComplex.mk f_j (cokernel.π f_j) (by simp [f_j, ShortComplex.mk])
+    -- The SES is short exact (f_j mono, cokernel.π is cokernel)
+    haveI : Mono (c.ι.app j) :=
+      IsColimit.mono_ι_app_of_isFiltered hc j
+    haveI : Mono f_j := mono_comp _ _
+    have hSEj : Sj.ShortExact := ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
+    -- LES: Ext^n(Z, I) → Ext^n(Z, Q_j) → Ext^{n+1}(Z, Y.obj j) → Ext^{n+1}(Z, I)
+    -- Sj.X₂ = I (injective), Sj.X₁ = Y.obj j, Sj.X₃ = Q_j
+    -- subsingleton_ext_of_ses_third: Ext^n(Z, X₂)=0 ∧ Ext^{n+1}(Z, X₁)=0 → Ext^n(Z, X₃)=0
+    -- Ext^n(Z, I) is subsingleton for n ≥ 1 (injective)
+    -- Ext^{n+1}(Z, Y.obj j) is subsingleton (hvan j)
+    constructor; intro a' b'
+    have h_a_δ : a'.comp hSEj.extClass rfl = 0 := @Subsingleton.elim _ (hvan j) _ _
+    have h_b_δ : b'.comp hSEj.extClass rfl = 0 := @Subsingleton.elim _ (hvan j) _ _
+    obtain ⟨ca', hca'⟩ := Ext.covariant_sequence_exact₃ Z hSEj a' rfl h_a_δ
+    obtain ⟨cb', hcb'⟩ := Ext.covariant_sequence_exact₃ Z hSEj b' rfl h_b_δ
+    rw [← hca', ← hcb']
+    cases n' with
+    | zero =>
+      -- n'=0: need Subsingleton(Hom(Z, Q_j)). Hom(Z, Q_j) is a quotient of Hom(Z, I)
+      -- by the LES, not necessarily subsingleton. Needs hHom_univ for Q_j.
+      -- This case only arises when the outer degree is 1.
+      sorry
+    | succ n'' =>
+      -- n' ≥ 1: Ext^{n'+1}(Z, I) = 0 (injective), so ca' = cb'. PROVED.
+      congr 1; exact @Subsingleton.elim _ (Ext.subsingleton_of_injective Z _ n'') _ _
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
