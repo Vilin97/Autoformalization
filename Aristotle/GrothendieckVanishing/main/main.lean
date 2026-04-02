@@ -5,10 +5,11 @@
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
   Sorry's (1 remaining, Mathlib API gap):
-  - ext_comm_filtered_colimit_mono n≥1 case (FiniteGeneratorReduction.lean) —
-    Ext^{n+1}(Z,-) preserves filtered colimits of mono diagrams.
-    The n=0 case (Hom) is PROVED via constantSheafAdj + direct section argument.
-    The n≥1 case requires Čech cohomology / universal δ-functors / Godement resolution.
+  - ext_vanishing_of_colimit_pieces (FiniteGeneratorReduction.lean) —
+    Ext^n(Z,-) preserves filtered colimits (Hartshorne III Lemma 2.9).
+    The n=0 case of ext_comm_filtered_colimit_mono is PROVED via hHom + Ext.homEquiv₀.
+    The n≥1 case delegates to ext_vanishing_of_colimit_pieces (sorry: Mathlib API gap,
+    requires Čech cohomology / universal δ-functors / Godement resolution).
 
   File structure:
   - SetupCore.lean: category instances, FlasqueVanishing, PushforwardHVanishing, ClosedImmersionSES

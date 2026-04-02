@@ -8,7 +8,7 @@
   The proof assembles (modulo 1 sorry in FiniteGeneratorReduction.lean):
   - DimZeroVanishing: irreducible dim 0 case
   - IrreducibleStep + FiniteGeneratorReduction: irreducible dim >= 1 case
-    (1 sorry: ext_comm_filtered_colimit_mono n≥1 case — Mathlib API gap)
+    (1 sorry: ext_vanishing_of_colimit_pieces — Ext^n colimit transfer, Mathlib API gap)
   - ClosedOpenDecomposition: reduction to irreducible
 -/
 import Aristotle.GrothendieckVanishing.main.DimZeroVanishing
@@ -41,7 +41,7 @@ theorem sheafH_vanishing_succ (X : TopCat.{u})
     (hall ip.shortComplex.X₃) hInj
 
 /-- Once vanishing holds at degree `m₀` for all sheaves, it holds at all degrees `≥ m₀`.
-    This means the colimit step (sorry) is only needed at the minimum degree `dim(X)+1`;
+    This means the colimit step (`ext_vanishing_of_colimit_pieces`) is only needed at `dim(X)+1`;
     all higher degrees follow for free. -/
 theorem sheafH_vanishing_cascade (X : TopCat.{u})
     (m₀ : ℕ)

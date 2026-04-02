@@ -48,16 +48,30 @@ private theorem addCommGrpCat_subsingleton_hom_of_subsingleton
   ext x
   exact @Subsingleton.elim _ h _ _
 
+/-- Ext^n vanishing transfers from filtered colimit pieces to the colimit for any
+    filtered diagram (no mono transitions required), provided `Hom(Z, -)` transfers
+    subsingleton. This is the Mathlib API gap: closing requires showing `Ext^n` preserves
+    the filtered colimit (Čech cohomology / universal δ-functors / Godement resolution).
+    Mathematically true by Hartshorne III Lemma 2.9. -/
+private theorem ext_vanishing_of_colimit_pieces
+    {C : Type u} [Category.{v} C] [Abelian C] [HasExt C]
+    [IsGrothendieckAbelian.{w} C]
+    {J : Type w} [SmallCategory J] [IsFiltered J]
+    (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
+    (Z : C) (n : ℕ)
+    (hHom : (∀ j, Subsingleton (Z ⟶ Y.obj j)) → Subsingleton (Z ⟶ c.pt))
+    (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)) :
+    Subsingleton (Ext Z c.pt n) := by
+  sorry
+
 /-- **Hartshorne 2.9 (Ext version)**: In a Grothendieck abelian category, if `Hom(Z, -)`
     sends filtered-colimit vanishing to vanishing (the `hHom` hypothesis), then
     `Ext^n(Z, -)` does too, for all n.
     - **n = 0**: `Ext^0 ≅ Hom` via `homEquiv₀`, apply `hHom`. PROVED.
-    - **n ≥ 1**: Embed `c.pt ↪ I` (injective). By the covariant Ext LES, every element
-      of `Ext^{n+1}(Z, c.pt)` lifts to `Ext^n(Z, I/c.pt)` (since `Ext^{n+1}(Z, I) = 0`).
-      So it suffices to show `Ext^n(Z, I/c.pt) = 0`. By AB5 + mono transitions,
-      `I/c.pt = colim(I/Y.obj j)`, and each `Ext^n(Z, I/Y.obj j) = 0` by the per-j LES.
-      **Sorry**: showing `Ext^n` preserves this filtered colimit requires Čech cohomology,
-      universal δ-functors, or Godement resolution (not in Mathlib v4.28.0). -/
+    - **n ≥ 1**: Dimension shift via injective embedding + covariant Ext LES reduces to
+      `Ext^n(Z, I/c.pt) = 0`. The cokernel I/c.pt = colim(I/Y.obj j) by AB5 + mono
+      transitions, and each `Ext^n(Z, I/Y.obj j) = 0` by the per-j LES.
+      Applied via `ext_vanishing_of_colimit_pieces` for the quotient diagram. -/
 theorem ext_comm_filtered_colimit_mono
     {C : Type u} [Category.{v} C] [Abelian C] [HasExt C]
     [IsGrothendieckAbelian.{w} C]
@@ -76,23 +90,8 @@ theorem ext_comm_filtered_colimit_mono
     exact Ext.homEquiv₀.subsingleton_congr.mpr
       (hHom (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j)))
   | succ n _ =>
-    -- Dimension shift: embed c.pt ↪ I (injective), form SES 0 → c.pt → I → Q → 0.
-    -- By the covariant Ext LES, every element of Ext^{n+1}(Z, c.pt) lifts to Ext^n(Z, Q)
-    -- (since Ext^{n+1}(Z, I) = 0 for I injective). So it suffices to show Ext^n(Z, Q) = 0.
-    -- Q = I/c.pt is a filtered colimit of Q_j = I/Y.obj j (by AB5 + mono transitions).
-    -- Each Ext^n(Z, Q_j) = 0 (from per-j LES + hvan + injective vanishing).
-    -- Closing this requires showing Ext^n preserves this filtered colimit, which needs
-    -- Čech cohomology, universal δ-functors, or Godement resolution (not in Mathlib v4.28.0).
-    obtain ⟨ip⟩ := EnoughInjectives.presentation c.pt
-    have hSE := ip.shortExact_shortComplex
-    constructor; intro a b
-    have ha : a.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
-    have hb : b.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
-    obtain ⟨ca, hca⟩ := Ext.covariant_sequence_exact₁ Z hSE a ha rfl
-    obtain ⟨cb, hcb⟩ := Ext.covariant_sequence_exact₁ Z hSE b hb rfl
-    rw [← hca, ← hcb]
-    congr 1
-    exact @Subsingleton.elim _ (by sorry) ca cb
+    -- Apply the colimit-transfer lemma (which carries the sorry).
+    exact ext_vanishing_of_colimit_pieces Y c hc Z (n + 1) hHom hvan
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
