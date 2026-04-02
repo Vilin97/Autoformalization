@@ -1,5 +1,15 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T00:30Z — Fix addCommGrpCat_exact_sandwich, simplify hQvan_provider via ext_sandwich
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux, 4 sub-sorry's)
+
+- Fixed `addCommGrpCat_exact_sandwich`: `AddCommGrpCat.exact_iff` → `ShortComplex.ab_exact_iff_range_eq_ker`
+  and updated field access to use `.hom` (for the underlying AddMonoidHom).
+- Simplified hQvan_provider n≥1 case: replaced 10 lines of manual LES handling with
+  single line `ext_sandwich Z hSEj (n'' + 1) (Ext.subsingleton_of_injective ...) (hvan j)`.
+- Remaining sorry's unchanged: hQcolim, iterated provider, hHom universality, hQvan_provider n=0.
+
 ## 2026-04-03T00:20Z — Clean up hQcolim sorry, document colim.exact_mapShortComplex approach
 
 **Sorry count: 1** (ext_vanishing_of_colimit_aux, 4 sub-sorry's)
