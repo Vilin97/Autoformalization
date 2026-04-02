@@ -4,14 +4,16 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  Sorry's (1 remaining, Mathlib API gap):
+  Sorry's (2 remaining, both Mathlib API gaps):
+  - ext_comm_filtered_colimit_mono (IrreducibleStep.lean) — Ext^n commutes with
+    filtered colimits of mono diagrams in Grothendieck abelian categories
   - cohomology_vanishing_of_finitelyGenerated_vanishing (IrreducibleStep.lean) — Step 3A:
-    Hartshorne 2.9, cohomology commutes with filtered colimits
+    applies the above to the sheaf case (Hartshorne 2.9)
 
   File structure:
   - SetupCore.lean: category instances, FlasqueVanishing (PROVED),
     PushforwardHVanishing (PROVED), ClosedImmersionSES (PROVED)
-  - Setup.lean: ReducibleVanishing (PROVED), IrreduciblePosVanishing (1 sorry inside)
+  - Setup.lean: ReducibleVanishing (PROVED), IrreduciblePosVanishing (2 sorry's inside)
   - Auxiliary.lean: topology/dimension helpers
   - ClosedImmersion.lean: PROVED — closed immersion counit/stalk infrastructure
   - ZeroOutside.lean: PROVED — zero-outside / extension-by-zero infrastructure

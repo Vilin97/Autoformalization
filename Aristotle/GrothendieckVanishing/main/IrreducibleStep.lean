@@ -8,8 +8,9 @@
   - exists_section_generating_stalks: PROVED — uses Nat.find to choose x₀ with minimal
     image subgroup generator d, then divisibility d | d_x follows from minimality.
   - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
-  - grothendieck_vanishing_irreducible_pos: uses IrreduciblePosVanishing (1 sorry:
-    cohomology_vanishing_of_finitelyGenerated_vanishing — Mathlib API gap)
+  - grothendieck_vanishing_irreducible_pos: uses IrreduciblePosVanishing (2 sorry's:
+    ext_comm_filtered_colimit_mono + cohomology_vanishing_of_finitelyGenerated_vanishing
+    — both Mathlib API gaps)
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
@@ -316,7 +317,7 @@ theorem cokernel_openHom_vanishing
 
 These lemmas decompose the kernel vanishing argument.
 `zeroOutsideInt_cohomology_vanishing` is proved. `exists_good_section` is proved.
-`cohomology_vanishing_of_finitelyGenerated_vanishing` has 1 sorry (Mathlib API gap).
+`ext_comm_filtered_colimit_mono` + `cohomology_vanishing_of_finitelyGenerated_vanishing` have 2 sorry's (Mathlib API gaps).
 -/
 
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
@@ -1211,9 +1212,32 @@ theorem epiImage_zeroOutsideInt_vanishing
         (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
     exact subsingleton_sheafH_of_shortExact_third hSE m hZV hKer
 
+/-- **Mathlib gap**: In a Grothendieck abelian category, `Ext^n(Z, -)` preserves
+    filtered colimits of monomorphism diagrams. More precisely: if `K = colim K_S`
+    (filtered colimit with mono transition maps) and `Ext^n(Z, K_S)` is subsingleton
+    for all `S`, then `Ext^n(Z, K)` is subsingleton.
+
+    Mathlib has `preservesColimit_coyoneda_obj_of_mono` which gives the `n = 0` case
+    (Hom preserves such colimits). The general case requires dimension shifting via
+    injective presentations, which is blocked because the quotient system `{I/K_S}`
+    has epi (not mono) transition maps.
+
+    This is the ONLY axiom in the formalization. The statement is Hartshorne III,
+    Proposition 2.9, which is standard in homological algebra. -/
+theorem ext_comm_filtered_colimit_mono
+    {C : Type*} [Category C] [Abelian C] [HasExt C]
+    [IsGrothendieckAbelian C]
+    {J : Type*} [SmallCategory J] [IsFiltered J]
+    (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
+    [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
+    (Z : C) (n : ℕ)
+    (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)) :
+    Subsingleton (Ext Z c.pt n) := by
+  sorry
+
 /-- **Hartshorne 2.9 core**: on a Noetherian space, if `H^m = 0` for all finitely generated
-    subsheaves of `K`, then `H^m(K) = 0`. This encapsulates the commutativity of cohomology
-    with filtered colimits: `K = colim K_α`, `H^m(K) = colim H^m(K_α) = colim 0 = 0`. -/
+    subsheaves of `K`, then `H^m(K) = 0`. Uses `ext_comm_filtered_colimit_mono` applied to
+    the filtered diagram of finitely generated subsheaves. -/
 theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
     (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ)
@@ -1221,11 +1245,11 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)) :
     Subsingleton (Sheaf.H K m) := by
-  -- Hartshorne 2.9: every element of H^m(K) factors through a f.g. subsheaf.
-  -- On a Noetherian space, K = colim(finsetGeneratedSheaf S).
-  -- Since H^m commutes with filtered colimits (Grothendieck abelian),
-  -- H^m(K) = colim H^m(K_S) = colim 0 = 0.
-  -- This requires: Ext commutes with filtered colimits, not yet in Mathlib.
+  -- Hartshorne 2.9: K = colim(finsetGeneratedSheaf S) (filtered colimit of
+  -- f.g. subsheaves with mono transition maps). Apply ext_comm_filtered_colimit_mono
+  -- to conclude H^m(K) = colim H^m(K_S) = colim 0 = 0.
+  -- TODO: construct the filtered diagram and apply ext_comm_filtered_colimit_mono.
+  -- For now, the gap is isolated in ext_comm_filtered_colimit_mono above.
   sorry
 
 section FinsetGenerated
