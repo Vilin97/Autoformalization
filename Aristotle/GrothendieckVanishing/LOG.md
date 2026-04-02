@@ -1,5 +1,25 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T23:55Z — PROVE hQvan and hQvan_provider (n≥1 case) via LES + AB5
+
+**Sorry count: 1** (with 4 sub-sorry's)
+
+- **PROVED hQvan** inside aux: `fun j => hQvan_provider n rfl ip j` (direct from provider)
+- **PROVED hQvan_provider n≥1 case** in wrapper via:
+  - `IsColimit.mono_ι_app_of_isFiltered` for Mono (c.ι.app j)
+  - `mono_comp` for Mono (c.ι.app j ≫ ip.f)
+  - ShortComplex.ShortExact.mk' for the SES
+  - `Ext.covariant_sequence_exact₃` for the LES extraction
+  - `Ext.subsingleton_of_injective` for Ext^n(Z,I) = 0 when n ≥ 1
+  - `hvan j` for Ext^{n+1}(Z, Y.obj j) = 0
+- **hQvan_provider n=0 case**: sorry (needs hHom_univ for Q_j, only arises at outer
+  degree 1 which doesn't occur at the call site since dim ≥ 1 implies m ≥ 2)
+- Remaining sorry's:
+  1. hQcolim — IsColimit for quotient cocone (AB5)
+  2. Iterated provider for IH (recursive)
+  3. hHom universality upgrade
+  4. hQvan_provider n=0 (dead code at call site)
+
 ## 2026-04-02T23:40Z — Complete proof skeleton with hQvan_provider, all IH plumbing done
 
 **Sorry count: 1** (ext_vanishing_of_colimit_aux with 3 sub-sorry's + 2 in wrapper)
