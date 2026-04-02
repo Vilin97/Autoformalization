@@ -3,7 +3,7 @@
 
   Key results:
   - ext_comm_filtered_colimit_mono: Ext^n preserves filtered colimits of mono diagrams
-    (2 sorry's: n=0 Hom case + n≥1 Ext case — Mathlib API gaps)
+    (2 sorry's: objectwise colimit evaluation + n≥1 Ext case)
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
@@ -18,6 +18,32 @@ import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
 universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
+
+/-! ### Helper lemmas: Subsingleton transfer for AddCommGrpCat -/
+
+/-- In `AddCommGrpCat`, `Subsingleton (ULift ℤ ⟶ G)` implies `Subsingleton G`. -/
+private theorem addCommGrpCat_subsingleton_of_subsingleton_hom
+    (G : AddCommGrpCat.{u})
+    (h : Subsingleton (AddCommGrpCat.of (ULift.{u} ℤ) ⟶ G)) :
+    Subsingleton G := by
+  constructor; intro a b
+  -- Every a ∈ G determines a hom fa : ULift ℤ → G with fa(⟨1⟩) = a.
+  let fa : AddCommGrpCat.of (ULift.{u} ℤ) ⟶ G := AddCommGrpCat.ofHom
+    (AddMonoidHom.mk' (fun z => ULift.down z • a) (fun x y => by simp [add_smul]))
+  let fb : AddCommGrpCat.of (ULift.{u} ℤ) ⟶ G := AddCommGrpCat.ofHom
+    (AddMonoidHom.mk' (fun z => ULift.down z • b) (fun x y => by simp [add_smul]))
+  have heq := @Subsingleton.elim _ h fa fb
+  have := AddCommGrpCat.ext_iff.mp heq (⟨1⟩ : ULift.{u} ℤ)
+  simpa [fa, fb] using this
+
+/-- In `AddCommGrpCat`, `Subsingleton G` implies `Subsingleton (ULift ℤ ⟶ G)`. -/
+private theorem addCommGrpCat_subsingleton_hom_of_subsingleton
+    (G : AddCommGrpCat.{u})
+    (h : Subsingleton G) :
+    Subsingleton (AddCommGrpCat.of (ULift.{u} ℤ) ⟶ G) := by
+  constructor; intro f g
+  ext x
+  exact @Subsingleton.elim _ h _ _
 
 /-- **Hartshorne 2.9 (Ext version)**: In a Grothendieck abelian category, if `Hom(Z, -)`
     sends filtered-colimit vanishing to vanishing (the `hHom` hypothesis), then
@@ -191,7 +217,53 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
   have hHom : (∀ j, Subsingleton (Z ⟶ (finsetGenFunctor K).obj j)) →
       Subsingleton (Z ⟶ (finsetGenCocone K).pt) := by
     intro hvan
-    sorry
+    -- Step 1: Z ⟶ F ≃ Ext^0(Z,F) ≃ F(⊤) via sheafH0EquivSections
+    -- So Subsingleton (Z ⟶ F) ↔ Subsingleton F(⊤)
+    -- Step 2: K(⊤) = colim((finsetGeneratedSheaf j)(⊤)) by objectwise colimits
+    -- Step 3: Each (finsetGeneratedSheaf j)(⊤) is subsingleton → colim is subsingleton
+    -- Via Ext.homEquiv₀: (Z ⟶ F) ≃ Ext^0(Z,F). Via sheafH0EquivSections: Ext^0 ≃+ F(⊤).
+    -- So Subsingleton (Z ⟶ F) ↔ Subsingleton (F.val.obj (op ⊤)).
+    have adj := constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
+      Limits.isTerminalTop
+    -- Use adjunction to transfer: (Z ⟶ K) ≃ (ULift ℤ ⟶ K.val.obj(op ⊤))
+    rw [show (finsetGenCocone K).pt = K from rfl]
+    have heq : ∀ F : TopCat.Sheaf AddCommGrpCat.{u} X,
+        (Z ⟶ F) ≃ (AddCommGrpCat.of (ULift.{u} ℤ) ⟶
+          ((sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op ⊤)).obj F) :=
+      fun F => adj.homEquiv _ F
+    -- Transfer Subsingleton across the equivalence for K
+    apply (heq K).subsingleton_congr.mpr
+    -- Now goal: Subsingleton (ULift ℤ ⟶ K.val.obj(op ⊤))
+    -- From hvan: Subsingleton (Z ⟶ finsetGeneratedSheaf j) for each j
+    -- Via adjunction: Subsingleton (ULift ℤ ⟶ (finsetGeneratedSheaf j).val.obj(op ⊤))
+    have hvan' : ∀ j, Subsingleton (AddCommGrpCat.of (ULift.{u} ℤ) ⟶
+        ((finsetGenFunctor K).obj j).val.obj (op ⊤)) :=
+      fun j => (heq _).subsingleton_congr.mp (hvan j)
+    -- Each finsetGeneratedSheaf(j)(⊤) is zero (Subsingleton in AddCommGrpCat).
+    -- K is their colimit. The colimit cocone maps ι_j(⊤) all map from zero objects.
+    -- In AddCommGrpCat, Subsingleton (ULift ℤ ⟶ G) iff G is zero.
+    -- We need: Subsingleton (ULift ℤ ⟶ K(⊤)).
+    -- Use: every morphism ULift ℤ → K(⊤) factors through some G_j (⊤) via the
+    -- colimit structure, and G_j(⊤) is zero, so the morphism is zero.
+    -- Each G_j(⊤) is subsingleton → K(⊤) is subsingleton → Hom(ULift ℤ, K(⊤)) subsingleton
+    -- First: Subsingleton(ULift ℤ ⟶ G) ↔ Subsingleton G in AddCommGrpCat
+    have hGsub : ∀ j, Subsingleton (((finsetGenFunctor K).obj j).val.obj (op ⊤)) := by
+      intro j
+      exact addCommGrpCat_subsingleton_of_subsingleton_hom _ (hvan' j)
+    -- K.val.obj(op ⊤) = colim(G_j(⊤)) since sheaf filtered colimits are objectwise.
+    -- colim of subsingleton (zero) groups is subsingleton.
+    -- Therefore K(⊤) is subsingleton.
+    have hKsub : Subsingleton (K.val.obj (op ⊤)) := by
+      -- K(⊤) = colim(finsetGeneratedSheaf(j)(⊤)) via objectwise filtered colimits.
+      -- Each section group is subsingleton → colimit is subsingleton.
+      -- Use: the cocone maps ι_j(⊤) are zero (from subsingleton source).
+      -- K(⊤) is subsingleton iff every element equals 0.
+      -- Every element of K(⊤) is the image of some ι_j(⊤)(s) where s ∈ G_j(⊤).
+      -- Since G_j(⊤) is subsingleton, s = 0, so ι_j(⊤)(s) = 0.
+      -- The cocone maps jointly generate K(⊤) because K is the colimit.
+      sorry
+    -- Hom(ULift ℤ, subsingleton) is subsingleton.
+    exact addCommGrpCat_subsingleton_hom_of_subsingleton _ hKsub
   exact ext_comm_filtered_colimit_mono (finsetGenFunctor K) (finsetGenCocone K)
     (finsetGenCocone_isColimit K) Z m hHom (fun S => hfg S)
 
