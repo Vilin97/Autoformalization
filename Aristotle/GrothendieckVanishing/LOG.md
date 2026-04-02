@@ -1,5 +1,24 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T18:30Z — Babysit cycle: cascade theorems, decompose sorry, critique
+
+**Sorry count: 2** (decomposed: `hom_subsingleton_of_filtered_colimit_mono` + n≥1 step)
+
+- **Added `sheafH_vanishing_cascade`** (GrothendieckVanishing.lean): two new proved theorems
+  showing once vanishing holds at one degree for all sheaves, it cascades to all higher
+  degrees via injective presentation + dimension shifting. Currently unused but ready for
+  future restructuring.
+- **Re-decomposed `ext_comm_filtered_colimit_mono`** via `Nat.induction` into:
+  1. `hom_subsingleton_of_filtered_colimit_mono` (n=0): Hom preserves colimit vanishing
+  2. Inductive step (n≥1): sorry (genuine Mathlib gap)
+  The n=0 case is properly wired: proving the sub-lemma closes the zero case automatically.
+- **Extensive analysis** of proof approaches documented in `proofs.md`:
+  dimension shifting fails at degree ≥2 because vanishing doesn't propagate to subsheaves.
+  Correct proof requires Čech cohomology, universal δ-functors, or Godement resolution.
+- **Critique updated**: found docs 404, dead cascade code, stale CLAUDE.md entries,
+  misleading "axiom" comment.
+- **Aristotle**: MCP has no submit endpoint. Cannot submit.
+
 ## 2026-04-02T09:30Z — Babysit cycle: merged remote work (cohomology_vanishing proved)
 
 **Sorry count: 2** (decomposed from 1 — `ext_comm_filtered_colimit_mono_zero` + `_succ`)
