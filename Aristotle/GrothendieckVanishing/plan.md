@@ -1,53 +1,45 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-01T23:30Z
+**Updated**: 2026-04-02T01:00Z
 
 ## Status Summary
-- **CI**: Push to `wip/grothendieck-vanishing` (commit `a901094`)
+- **CI**: PR #5 pending merge (`wip/grothendieck-vanishing` → `grothendieck-vanishing`)
 - **Heartbeat overrides**: 0
-- **Sorry count**: 2 in IrreducibleStep.lean (both are confirmed Mathlib API gaps)
-- **Files**: 15 files under `main/`, ~5000 lines
+- **Sorry count**: 2 in IrreducibleStep.lean
+- **Files**: 15 files under `main/`, ~6000 lines
 
 ## Remaining Sorry's (2)
 
-Both are genuine Mathlib API gaps, not proof regressions:
+### 1. Divisibility sub-goal in `exists_section_generating_stalks` (line ~934)
+**Goal**: For any `a ∈ stalk(R, x)` with `x ∈ W`, show `∃ k, a = k • germ(s_W, x)`.
 
-### 1. `exists_good_section` (line ~616)
-**Step 4 core construction**: Find V' ≤ V, V' ≠ ⊥, and section s ∈ R(V') such that
-`sHom s : zeroOutsideInt V' ⟶ R` is a stalk-isomorphism on V'.
+Equivalently: if `i_x(a) = n • gen` and `i_x(germ(s_W, x)) = d • gen` (known), show `d | n`.
 
-**Strategy**:
-1. Find x₀ ∈ V with nonzero stalk via `exists_nonzero_stalk_in_V` (proved)
-2. Identify cyclic subgroup generator via `ulift_int_subgroup_cyclic` (proved)
-3. Lift generator to section s via `stalk_zeroOutsideInt_eq_zsmul_generator` (proved)
-4. Shrink V' for stalk bijectivity using Noetherian + irreducible properties
+**Status**: 90% of `exists_section_generating_stalks` is proved. All steps except this divisibility.
 
-**Dependencies**: All sub-lemmas proved. Core difficulty is the Noetherian shrinking argument.
+**Fix needed**: The proof currently picks x₀ arbitrarily via `exists_nonzero_stalk_in_V`. It should instead pick x₀ to **minimize** the generator `d`. With minimality:
+- `d_x | d` (proved: from `hcoeff_const`, `d ∈ image(i_x)`)
+- `d ≤ d_x` (from minimality)
+- Combined: `d_x = d`, so `d | n` (since `d_x | n`)
 
-### 2. `cohomology_vanishing_of_finitelyGenerated_vanishing` (line ~774)
+**Implementation**: Restructure proof to use `Nat.find` or well-founded induction on d to choose x₀ with minimal generator. This requires changes to Steps 1-2 of the proof.
+
+### 2. `cohomology_vanishing_of_finitelyGenerated_vanishing` (line ~1111)
 **Hartshorne 2.9**: If H^m = 0 for all finitely generated subsheaves, then H^m(K) = 0.
 
-**Strategy**: K = colim K_α (filtered colimit of finitely generated subsheaves),
-H^m(K) = colim H^m(K_α) = colim 0 = 0. Requires:
-- Ext commutes with filtered colimits (AB5 / Grothendieck abelian)
-- K expressed as filtered colimit of `finsetGeneratedSheaf S`
+**Strategy**: K = colim K_α, H^m(K) = colim H^m(K_α) = 0. Requires Ext commuting with filtered colimits (AB5 / Grothendieck abelian).
 
-## Recently Completed (this session)
+## What's Been Proved (this cycle)
 
-Closed 19 sorry's in IrreducibleStep.lean (21 → 2):
-- Tier 1-2 stalk lemmas (8 proofs)
-- ClosedImmersionSES pattern proofs (4 proofs)
-- Finset infrastructure (5 proofs)
-- Germ algebra (2 proofs)
-
-Key API patterns established:
-- `stalkFunctor_map_iso_toSheafify` for IsIso instances
-- `Sheaf.forget ⋙ stalkFunctor` for PreservesMonomorphisms
-- `ConcreteCategory.mono_iff_injective_of_preservesPullback` for injectivity
-- `AddCommGrpCat.subsingleton_of_isZero` for zero object elements
+Closed 21+ sorry's total:
+- All stalk lemmas (Tier 1-2): 8 proofs
+- ClosedImmersionSES pattern: 4 proofs (cokernel_openHom_vanishing, etc.)
+- Finset infrastructure: 5 proofs
+- Germ algebra: 2 proofs
+- exists_good_section: proved using exists_section_generating_stalks
+- zsmul_generator_injective, sHom_stalk_bijective_at: new helper lemmas
+- 90% of exists_section_generating_stalks (Steps 1-5 of Noetherian shrinking)
 
 ## Backlog
-
-- **Docs deployment**: Fix 404 on blueprint pages
-- **File sizes**: ZeroOutside.lean (733), FlasqueVanishing.lean (616) over guideline
-- **Plan/docs**: Keep sorry counts accurate
+- Update plan sorry counts after fixes
+- Docs deployment: Fix 404 on blueprint pages
