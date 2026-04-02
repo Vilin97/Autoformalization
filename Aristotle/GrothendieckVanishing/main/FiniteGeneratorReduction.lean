@@ -34,25 +34,28 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 -- Base case: Hom(Z, -) preserves filtered colimits of mono diagrams.
 -- Given Subsingleton (Z ⟶ Y.obj j) for all j, show Subsingleton (Z ⟶ c.pt).
 private theorem hom_subsingleton_of_filtered_colimit_mono
-    {C : Type*} [Category C] [Abelian C]
-    [IsGrothendieckAbelian C]
-    {J : Type*} [SmallCategory J] [IsFiltered J]
+    {C : Type u} [Category.{v} C] [Abelian C]
+    [IsGrothendieckAbelian.{w} C]
+    {J : Type w} [SmallCategory J] [IsFiltered J]
     (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
     [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
     (Z : C)
     (hvan : ∀ j, Subsingleton (Z ⟶ Y.obj j)) :
     Subsingleton (Z ⟶ c.pt) := by
-  -- Needs: Hom(Z,-) preserves the filtered colimit of Y (mono transitions).
-  -- Mathlib has `preservesColimit_coyoneda_obj_of_mono` but requires J and
-  -- IsGrothendieckAbelian to share universe + cardinal conditions.
-  -- In the actual application (sheaves on Noetherian space), universes match
-  -- and this reduces to objectwise evaluation of filtered colimits.
+  -- Use well-poweredness to find κ bounding Subobject Z, then apply
+  -- preservesColimit_coyoneda_obj_of_mono.
+  -- Step 1: In a Grothendieck abelian category, Subobject Z is w-small (well-powered).
+  -- Step 2: Choose κ > max(card(Subobject Z), ℵ₀) that is regular.
+  -- Step 3: J is κ-filtered since J : Type w and κ is large enough.
+  -- Step 4: Apply preservesColimit_coyoneda_obj_of_mono.
+  -- Step 5: The colimit-preserving Hom functor maps the colimit to the colimit
+  --         of Hom-sets, which is subsingleton since each Hom(Z, Y.obj j) is.
   sorry
 
 theorem ext_comm_filtered_colimit_mono
-    {C : Type*} [Category C] [Abelian C] [HasExt C]
-    [IsGrothendieckAbelian C]
-    {J : Type*} [SmallCategory J] [IsFiltered J]
+    {C : Type u} [Category.{v} C] [Abelian C] [HasExt C]
+    [IsGrothendieckAbelian.{w} C]
+    {J : Type w} [SmallCategory J] [IsFiltered J]
     (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
     [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
     (Z : C) (n : ℕ)
