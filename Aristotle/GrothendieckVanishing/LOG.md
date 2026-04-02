@@ -1,5 +1,23 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T21:00Z — Babysit cycles: CLOSE n=0 case, reduce to 1 sorry
+
+**Sorry count: 1** (n≥1 Ext case only)
+
+- **CLOSED the n=0 case** of ext_comm_filtered_colimit_mono. The full chain:
+  1. Added `hHom` hypothesis to ext_comm_filtered_colimit_mono (caller provides)
+  2. Used `constantSheafAdj` + `addCommGrpCat_subsingleton_of_subsingleton_hom`
+     to reduce Hom(Z_X, K) to Subsingleton(K(⊤))
+  3. Direct section argument: for any x ∈ K(⊤), finsetGeneratedSheaf({⟨⊤,x⟩})
+     has zero sections at ⊤ (from hypothesis), and finsetGeneratorMap factors
+     through this zero group via factorThruImage ≫ image.ι = 0, so x = 0
+  4. Used `sHom_app_generator` + `Sigma.ι_desc` to show x is in the image
+- **Eliminated the IsSheafPairwiseIntersections / CreatesColimit sorry**
+  that blocked progress for ~6 cycles, by replacing the abstract colimit
+  argument with a direct concrete section-level argument
+- **1 sorry remains**: n≥1 Ext case (genuine Mathlib API gap)
+- Updated all stale headers in main.lean, IrreducibleStep.lean, CLAUDE.md
+
 ## 2026-04-02T20:30Z — Babysit cycles: narrow IsSheaf sorry, extensive analysis
 
 **Sorry count: 2** (IsSheafPairwiseIntersections + n≥1 Ext case)

@@ -73,5 +73,5 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 
 ## Remaining Work
 
-1 sorry remains in `IrreducibleStep.lean` (Mathlib API gap):
-1. `ext_comm_filtered_colimit_mono` — Ext^n(Z,-) preserves filtered colimits of mono diagrams in Grothendieck abelian categories. Not in Mathlib v4.28.0.
+1 sorry remains in `FiniteGeneratorReduction.lean` (Mathlib API gap):
+1. `ext_comm_filtered_colimit_mono` n≥1 case — Ext^{n+1}(Z,-) preserves filtered colimits of mono diagrams. The n=0 case (Hom) is PROVED via constantSheafAdj + direct section argument. The n≥1 case requires Čech cohomology, universal δ-functors, or Godement resolution not in Mathlib v4.28.0.

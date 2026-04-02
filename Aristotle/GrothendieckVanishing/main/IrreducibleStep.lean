@@ -8,8 +8,8 @@
   - exists_section_generating_stalks: PROVED — uses Nat.find to choose x₀ with minimal
     image subgroup generator d, then divisibility d | d_x follows from minimality.
   - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
-  - grothendieck_vanishing_irreducible_pos: uses IrreduciblePosVanishing (1 sorry:
-    ext_comm_filtered_colimit_mono — Mathlib API gap)
+  - grothendieck_vanishing_irreducible_pos: uses IrreduciblePosVanishing
+    (1 sorry in FiniteGeneratorReduction.lean: ext_comm_filtered_colimit_mono n≥1 case)
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
