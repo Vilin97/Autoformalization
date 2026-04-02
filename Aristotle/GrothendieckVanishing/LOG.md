@@ -1,5 +1,19 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T23:20Z — Construct quotient functor Qfun, prove functor laws
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux, 3 sub-sorry's remaining)
+
+- **DEFINED quotient functor Qfun**: `j ↦ cokernel(c.ι.app j ≫ ι)` as a full `J ⥤ C`
+  with `obj`, `map` (cokernel.map with naturality square PROVED), `map_id` PROVED,
+  `map_comp` PROVED.
+- **DEFINED cocone structure**: Qcocone with `.pt = ip.shortComplex.X₃` and sorry'd `.ι`.
+- **Remaining sorry's** (all inside ext_vanishing_of_colimit_aux succ case):
+  1. Qcocone.ι — natural transformation for the cocone
+  2. hQcolim — colimit proof (by AB5)
+  3. hQvan — per-j Ext^n vanishing (by LES)
+- The proof skeleton is COMPLETE: dimension shift + apply ih to quotient diagram.
+
 ## 2026-04-02T23:10Z — Restructure with universal IH via ext_vanishing_of_colimit_aux
 
 **Sorry count: 1** (ext_vanishing_of_colimit_aux succ case + universality upgrade)
