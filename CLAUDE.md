@@ -46,7 +46,8 @@ GrothendieckVanishing.lean    ← Main theorem (assembles all cases)
 ├── ClosedOpenDecomposition.lean ← Reduction to irreducible spaces
 │   └── ReducibleVanishing.lean  ← Reducible case via Finset.induction
 └── (shared infrastructure)
-    ├── SetupCore.lean         ← Core: category instances, FlasqueVanishing, ClosedImmersionSES
+    ├── SetupCore.lean         ← Core: category instances, ClosedImmersionSES
+    ├── FlasqueVanishing.lean  ← Flasque sheaf theory and cohomological vanishing
     ├── Setup.lean             ← Wrapper theorems (contains IrreduciblePosVanishing sorry)
     ├── ClosedImmersion.lean   ← Closed immersion counit/stalk
     ├── ZeroOutside.lean       ← Extension-by-zero sheaf machinery
@@ -62,7 +63,7 @@ GrothendieckVanishing.lean    ← Main theorem (assembles all cases)
 
 ## Heartbeat Discipline
 
-Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds this, refactor it into smaller lemmas instead. Existing violations in SetupCore.lean are technical debt, not precedent.
+Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds this, refactor it into smaller lemmas instead.
 
 ## Automated Proving Infrastructure
 

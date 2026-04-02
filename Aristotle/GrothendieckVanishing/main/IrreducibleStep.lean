@@ -1256,7 +1256,7 @@ private theorem ext_comm_filtered_colimit_mono_succ
     and inductive step (`ext_comm_filtered_colimit_mono_succ`, n → n+1).
     Both sub-lemmas are sorry'd pending Mathlib infrastructure.
 
-    This is the ONLY axiom in the formalization. The statement is Hartshorne III,
+    These are the only 2 sorry's in the formalization. The statement is Hartshorne III,
     Proposition 2.9, which is standard in homological algebra. -/
 theorem ext_comm_filtered_colimit_mono
     {C : Type*} [Category C] [Abelian C] [HasExt C]
