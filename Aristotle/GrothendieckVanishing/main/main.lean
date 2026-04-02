@@ -22,8 +22,9 @@
   - DimZeroVanishing.lean: PROVED — irreducible dim 0 case
   - ReducibleVanishing.lean: PROVED — reducible case via Finset.induction
   - ClosedOpenDecomposition.lean: PROVED — reduction to irreducible
-  - IrreducibleStep.lean: PROVED — irreducible step (modulo IrreduciblePosVanishing)
-  - GrothendieckVanishing.lean: PROVED — main theorem by well-founded induction
+  - FiniteGeneratorReduction.lean: colimit step, filtered diagram, f.g. vanishing (2 sorry's)
+  - IrreducibleStep.lean: PROVED — irreducible step (modulo FiniteGeneratorReduction)
+  - GrothendieckVanishing.lean: PROVED — main theorem + cascade theorems
 -/
 import Aristotle.GrothendieckVanishing.main.ClosedImmersion
 import Aristotle.GrothendieckVanishing.main.ZeroOutside

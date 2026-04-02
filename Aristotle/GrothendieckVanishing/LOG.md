@@ -1,5 +1,16 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T18:50Z — Babysit cycle: split IrreducibleStep.lean
+
+**Sorry count: 2** (both in FiniteGeneratorReduction.lean)
+
+- **Split IrreducibleStep.lean** (1604 → 1263 lines): extracted colimit theorem,
+  filtered diagram infrastructure, and finitely generated vanishing into new
+  `FiniteGeneratorReduction.lean` (~340 lines). IrreducibleStep now imports it.
+  Resolves P2 file size issue from critique.
+- Updated CLAUDE.md code tree, main.lean header.
+- Full build passes (8042 jobs).
+
 ## 2026-04-02T18:40Z — Babysit cycle: fix dead code, doc cleanup, sorry analysis
 
 **Sorry count: 2** (n=0 Hom case + n≥1 Ext case, both in IrreducibleStep.lean)
