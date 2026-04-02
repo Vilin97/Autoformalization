@@ -6,7 +6,7 @@
 - **CI**: GREEN (PRs auto-merging)
 - **Heartbeat overrides**: 0
 - **Sorry count**: 1 in IrreducibleStep.lean
-- **Files**: 15 files under `main/`, ~6600 lines
+- **Files**: 15 files under `main/`, ~5074 lines
 
 ## Remaining Sorry (1)
 
