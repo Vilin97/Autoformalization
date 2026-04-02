@@ -1,5 +1,19 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T00:05Z — Analyze hQcolim, commit current state
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux with 4 sub-sorry's)
+
+- Analyzed hQcolim (IsColimit for quotient cocone): requires showing `colim` preserves
+  cokernels. Mathlib has `instPreservesColimitsOfSizeOfIsLeftAdjoint` for left adjoints,
+  but connecting it to our specific cocone construction requires significant plumbing.
+- No new proofs closed this cycle.
+- Current sorry inventory:
+  1. hQcolim — IsColimit (colim preserves cokernels, ~50 lines of categorical infrastructure)
+  2. Iterated hQvan_provider for IH (recursive/structural)
+  3. hHom universality upgrade (abstract → universal)
+  4. hQvan_provider n=0 (dead at call site)
+
 ## 2026-04-02T23:55Z — PROVE hQvan and hQvan_provider (n≥1 case) via LES + AB5
 
 **Sorry count: 1** (with 4 sub-sorry's)
