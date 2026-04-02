@@ -1235,6 +1235,11 @@ private theorem hom_subsingleton_of_filtered_colimit_mono
     (Z : C)
     (hvan : ∀ j, Subsingleton (Z ⟶ Y.obj j)) :
     Subsingleton (Z ⟶ c.pt) := by
+  -- Needs: Hom(Z,-) preserves the filtered colimit of Y (mono transitions).
+  -- Mathlib has `preservesColimit_coyoneda_obj_of_mono` but requires J and
+  -- IsGrothendieckAbelian to share universe + cardinal conditions.
+  -- In the actual application (sheaves on Noetherian space), universes match
+  -- and this reduces to objectwise evaluation of filtered colimits.
   sorry
 
 theorem ext_comm_filtered_colimit_mono

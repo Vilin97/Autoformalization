@@ -1,6 +1,6 @@
 # Adversarial Critique — Grothendieck Vanishing Formalization
 
-**Timestamp**: 2026-04-02T18:20Z
+**Timestamp**: 2026-04-02T18:35Z
 **Reviewer verdict**: CONDITIONAL PASS
 
 ## 0. CI Status
@@ -13,15 +13,16 @@ Local `lake build` succeeds with 0 errors.
 
 **Assessment**: P1 — docs are inaccessible.
 
-## 1. Sorry's (1)
+## 1. Sorry's (2, decomposed from 1)
 
-One `sorry` at `IrreducibleStep.lean:1245` in `ext_comm_filtered_colimit_mono`.
+Two sorry terms in `IrreducibleStep.lean`, both inside `ext_comm_filtered_colimit_mono`:
+- Line 1238: `hom_subsingleton_of_filtered_colimit_mono` (n=0 case: Hom preserves colimit)
+- Line 1262: inductive step (n≥1: Ext case, genuine Mathlib gap)
 
-The comment at line 1236 says "This is the ONLY axiom in the formalization". This is
-**misleading terminology**: it is not a Lean `axiom` declaration, it is a `theorem` with
-`sorry`. Calling it an "axiom" obscures the fact that it is an unproved claim.
+The n=0 case is properly wired via `Nat.induction` — proving the sub-lemma
+auto-closes the zero case. The n≥1 case requires infrastructure not in Mathlib.
 
-The statement IS mathematically true (Hartshorne III.2.9). No risk of falsity.
+Both statements are mathematically true (Hartshorne III.2.9). No risk of falsity.
 
 ## 2. Hidden Axioms
 
@@ -42,16 +43,8 @@ are **private and never used** outside their own file. Neither is called from
 
 ## 5. Documentation Issues
 
-1. **GrothendieckVanishing.lean docstring** (line 23): says "m₀ ≥ 1" but
-   `sheafH_vanishing_cascade` has NO such constraint — works for m₀ = 0.
-
-2. **IrreducibleStep.lean line 1236**: "ONLY axiom" should say "ONLY sorry".
-
-3. **CLAUDE.md** code tree lists `FiniteGeneratorReduction.lean` as a child of
-   `IrreducibleStep.lean`, but this file does NOT exist. Stale.
-
-4. **CLAUDE.md** line 65 references "Existing violations in SetupCore.lean" but
-   there are none. Stale (carried over from previous critique).
+All previously flagged issues (misleading "axiom" comment, "m₀ ≥ 1" docstring,
+stale CLAUDE.md tree) were fixed in commit 8da54d7. No new issues detected.
 
 ## 6. Generalization Opportunities
 
@@ -81,10 +74,7 @@ are **private and never used** outside their own file. Neither is called from
 
 | # | Priority | Issue |
 |---|----------|-------|
-| 1 | P0 | Sorry in `ext_comm_filtered_colimit_mono` (line 1245) |
+| 1 | P0 | 2 sorry's in `ext_comm_filtered_colimit_mono` (lines 1238, 1262) |
 | 2 | P1 | Docs/blueprint return 404 |
-| 3 | P2 | IrreducibleStep.lean at 1582 lines — split |
+| 3 | P2 | IrreducibleStep.lean at 1584 lines — split |
 | 4 | P2 | Dead code: cascade theorems unused |
-| 5 | P3 | Misleading "axiom" comment (line 1236) |
-| 6 | P3 | Stale CLAUDE.md (nonexistent FiniteGeneratorReduction.lean, stale heartbeat ref) |
-| 7 | P3 | Docstring "m₀ ≥ 1" inaccurate |

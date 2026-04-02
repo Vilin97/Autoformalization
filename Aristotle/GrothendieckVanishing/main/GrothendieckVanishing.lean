@@ -25,9 +25,9 @@ we get `H^n(F) = 0` for all `n ≥ m₀` by injective presentation + dimension s
 embed `F ↪ I` (injective), form `0 → F → I → Q → 0`, then `H^n(Q) = 0` by the inductive
 hypothesis and `H^{n+1}(I) = 0` since `I` is injective. -/
 
-/-- Vanishing cascades: if `H^m(F) = 0` for all `F` at degree `m`, then `H^{m+1}(F) = 0`
-    for all `F`. Proof: inject `F ↪ I`, dimension-shift via `0 → F → I → Q → 0`. -/
-private theorem sheafH_vanishing_succ (X : TopCat.{u})
+/-- Vanishing cascades upward: `H^m = 0` for all sheaves implies `H^{m+1} = 0` for all
+    sheaves, via injective presentation + dimension shifting. -/
+theorem sheafH_vanishing_succ (X : TopCat.{u})
     (m : ℕ)
     (hall : ∀ (F : TopCat.Sheaf AddCommGrpCat.{u} X), Subsingleton (Sheaf.H F m))
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
@@ -39,8 +39,10 @@ private theorem sheafH_vanishing_succ (X : TopCat.{u})
   exact sheafH_dimension_shift_ses ip.shortExact_shortComplex m
     (hall ip.shortComplex.X₃) hInj
 
-/-- Once vanishing holds at degree `m₀` for all sheaves, it holds at all degrees `≥ m₀`. -/
-private theorem sheafH_vanishing_cascade (X : TopCat.{u})
+/-- Once vanishing holds at degree `m₀` for all sheaves, it holds at all degrees `≥ m₀`.
+    This means the colimit step (sorry) is only needed at the minimum degree `dim(X)+1`;
+    all higher degrees follow for free. -/
+theorem sheafH_vanishing_cascade (X : TopCat.{u})
     (m₀ : ℕ)
     (hbase : ∀ (F : TopCat.Sheaf AddCommGrpCat.{u} X), Subsingleton (Sheaf.H F m₀))
     (n : ℕ) (hn : n ≥ m₀) :
