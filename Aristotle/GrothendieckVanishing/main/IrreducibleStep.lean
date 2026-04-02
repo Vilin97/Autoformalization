@@ -1233,6 +1233,15 @@ theorem ext_comm_filtered_colimit_mono
     (Z : C) (n : ℕ)
     (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)) :
     Subsingleton (Ext Z c.pt n) := by
+  -- This is the ONLY axiom in the formalization (Mathlib API gap).
+  -- Ext^n(Z, -) preserves filtered colimits of mono diagrams in Grothendieck
+  -- abelian categories. The proof requires either:
+  -- (a) Čech cohomology (Hartshorne III.2.9), or
+  -- (b) Universal δ-functor theorem (effaceable functors), or
+  -- (c) Functorial flasque/Godement resolution
+  -- None of these are currently in Mathlib v4.28.0.
+  -- For n = 0: follows from Hom ≅ Γ and objectwise colimits (sheaf-specific).
+  -- For n ≥ 1: requires the full infrastructure above.
   sorry
 
 /-! ### Filtered diagram of finitely generated subsheaves
