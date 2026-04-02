@@ -279,11 +279,17 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       -- sheafToPresheaf creates filtered colimits → it preserves them.
       -- evaluation preserves all colimits. Compose to get section-level colimit.
       -- Each section group is zero → colimit is zero.
-      -- K(⊤) = colim(G_j(⊤)) since filtered colimits of sheaves are objectwise.
-      -- Each G_j(⊤) is zero → colimit is zero → K(⊤) is zero.
-      -- The formal proof needs sheafToPresheaf to create the filtered colimit
-      -- (CreatesColimit instance), then evaluation at ⊤ preserves it.
-      -- CreatesColimit is not auto-synthesized for specific functors in Lean.
+      -- Use the Mathlib colimit construction: sheafifyCocone gives a colimit in Sheaf.
+      -- The finsetGenCocone_isColimit shows our cocone is also a colimit.
+      -- So K ≅ the Mathlib colimit, whose underlying presheaf is the sheafification
+      -- of the presheaf colimit. For AddCommGrpCat, sheafification doesn't change sections
+      -- at ⊤ because ⊤ covers itself.
+      -- Direct approach: use the presheaf-level colimit + evaluation.
+      -- The sheaf-level colimit is isColimitSheafifyCocone.
+      -- sheafifyCocone is sheafify ∘ presheaf colimit. At ⊤, sheafify preserves sections.
+      -- So K(⊤) ≅ (sheafify(presheaf colimit))(⊤) ≅ (presheaf colimit)(⊤) = colim(G_j(⊤)).
+      -- Since each G_j(⊤) is zero, colim is zero.
+      -- For now, encapsulate as a focused sorry.
       sorry
     -- Hom(ULift ℤ, subsingleton) is subsingleton.
     exact addCommGrpCat_subsingleton_hom_of_subsingleton _ hKsub
