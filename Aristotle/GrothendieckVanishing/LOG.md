@@ -1,5 +1,20 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T19:30Z — Babysit cycle: prove hHom infrastructure, narrow sorry
+
+**Sorry count: 2** (objectwise colimit eval + n≥1 Ext case)
+
+- **Added helper lemmas**: `addCommGrpCat_subsingleton_of_subsingleton_hom` and
+  `addCommGrpCat_subsingleton_hom_of_subsingleton` — bridge between `Subsingleton (Hom(ULift ℤ, G))`
+  and `Subsingleton G` in AddCommGrpCat. PROVED.
+- **Used `constantSheafAdj`** to reduce `Subsingleton (Z ⟶ K)` to
+  `Subsingleton (ULift ℤ ⟶ K(⊤))` and then to `Subsingleton (K(⊤))`. PROVED.
+- **Narrowed remaining sorry** to: `Subsingleton (K.val.obj (op ⊤))` given
+  `∀ j, Subsingleton ((finsetGeneratedSheaf j).val.obj (op ⊤))`.
+  This is: the colimit of zero section groups is zero. Requires the objectwise
+  filtered colimit property for sheaves.
+- n≥1 sorry remains unchanged (Mathlib gap).
+
 ## 2026-04-02T19:15Z — Babysit cycle: PROVE n=0 case of ext_comm_filtered_colimit_mono
 
 **Sorry count: 2** (was 2, but sorry's MOVED — n=0 case now PROVED)
