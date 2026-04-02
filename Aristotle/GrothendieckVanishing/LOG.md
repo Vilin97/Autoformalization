@@ -1,5 +1,20 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T23:10Z — Restructure with universal IH via ext_vanishing_of_colimit_aux
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux succ case + universality upgrade)
+
+- **Created `ext_vanishing_of_colimit_aux`**: Puts `n` BEFORE `J` in quantification so
+  the IH at degree `n` is universal over all filtered diagrams (NO mono transitions in IH).
+  This is the correct proof structure — when the quotient diagram construction is filled in,
+  the IH can be applied to it even though it has epi transitions.
+- **Proved n=0 case** via Ext.homEquiv₀ + hHom_univ.
+- **Updated `ext_comm_filtered_colimit_mono`**: n=0 case proved directly, n≥1 delegates
+  to aux lemma. Sorry for universality upgrade of hHom (trivial at the call site).
+- The sorry is now in the RIGHT PLACE: the succ case of aux, where the IH is available
+  and universal. Filling it requires constructing the quotient functor Q_j, showing
+  Q = colim Q_j (AB5), proving per-j Ext vanishing (LES), and applying ih.
+
 ## 2026-04-02T22:55Z — Prove n=0 case inside ext_vanishing_of_colimit_pieces, decompose n≥1
 
 **Sorry count: 1** (`ext_vanishing_of_colimit_pieces` succ case at FiniteGeneratorReduction.lean:84)
