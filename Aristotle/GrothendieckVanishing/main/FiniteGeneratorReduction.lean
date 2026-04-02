@@ -73,12 +73,33 @@ private theorem ext_vanishing_of_colimit_aux
     --      (∀ j, Subsingleton (Ext Z (Y.obj j) n)) → Subsingleton (Ext Z c.pt n)
     -- NOTE: ih has NO mono transition requirement!
     intro J _ _ Y c hc hvan
-    -- Dimension shift: embed c.pt ↪ I, form SES 0 → c.pt → I → Q → 0.
-    -- Every element of Ext^{n+1}(Z, c.pt) lifts to Ext^n(Z, Q).
-    -- Need: Subsingleton (Ext^n(Z, Q)). Apply ih to the quotient diagram.
-    -- The quotient diagram has epi transitions but ih doesn't need mono. ✓
-    -- TODO: construct quotient functor Q_j, prove Q = colim Q_j, show per-j vanishing
-    sorry
+    -- Step 1: Dimension shift via injective embedding.
+    obtain ⟨ip⟩ := EnoughInjectives.presentation c.pt
+    have hSE := ip.shortExact_shortComplex
+    -- Step 2: By the LES, Ext^{n+1}(Z, c.pt) = 0 follows from Ext^n(Z, Q) = 0.
+    constructor; intro a b
+    have ha : a.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
+    have hb : b.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
+    obtain ⟨ca, hca⟩ := Ext.covariant_sequence_exact₁ Z hSE a ha rfl
+    obtain ⟨cb, hcb⟩ := Ext.covariant_sequence_exact₁ Z hSE b hb rfl
+    rw [← hca, ← hcb]; congr 1
+    -- Step 3: Need ca = cb, i.e. Subsingleton (Ext Z Q n) where Q = ip.shortComplex.X₃.
+    -- Construct the quotient functor and cocone, then apply ih.
+    let ι := ip.shortComplex.f  -- mono c.pt ↪ I (injective)
+    -- Quotient functor: j ↦ cokernel(c.ι.app j ≫ ι)
+    let Qfun : J ⥤ C :=
+      { obj := fun j => cokernel (c.ι.app j ≫ ι)
+        map := fun {j j'} φ => cokernel.map _ _ (Y.map φ) (𝟙 _)
+          (by rw [Category.assoc, Category.comp_id, ← Category.assoc]; exact congrArg (· ≫ ι) (c.w φ).symm)
+        map_id := fun j => by ext; simp
+        map_comp := fun {j j' j''} φ ψ => by ext; simp }
+    -- Cocone with point Q and maps Q_j → Q
+    let Qcocone : Cocone Qfun :=
+      { pt := ip.shortComplex.X₃
+        ι := sorry }
+    have hQcolim : IsColimit Qcocone := sorry
+    have hQvan : ∀ j, Subsingleton (Ext Z (Qfun.obj j) n) := sorry
+    exact @Subsingleton.elim _ (ih Qfun Qcocone hQcolim hQvan) ca cb
 
 /-- **Hartshorne 2.9 (Ext version)**: In a Grothendieck abelian category, if `Hom(Z, -)`
     sends filtered-colimit vanishing to vanishing (the `hHom` hypothesis), then
