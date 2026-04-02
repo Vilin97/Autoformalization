@@ -1,5 +1,14 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T23:30Z — Prove cocone natural transformation, 2 sub-sorry's remain
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux, 2 sub-sorry's + universality upgrade)
+
+- **PROVED Qcocone.ι** via cokernel.map + naturality by ext/simp
+- Remaining sorry's in ext_vanishing_of_colimit_aux:
+  1. hQcolim — IsColimit for the quotient cocone (AB5)
+  2. hQvan — per-j Ext^n vanishing (needs mono transitions from caller)
+
 ## 2026-04-02T23:20Z — Construct quotient functor Qfun, prove functor laws
 
 **Sorry count: 1** (ext_vanishing_of_colimit_aux, 3 sub-sorry's remaining)

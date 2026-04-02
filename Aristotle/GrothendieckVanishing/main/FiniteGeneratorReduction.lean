@@ -96,8 +96,14 @@ private theorem ext_vanishing_of_colimit_aux
     -- Cocone with point Q and maps Q_j → Q
     let Qcocone : Cocone Qfun :=
       { pt := ip.shortComplex.X₃
-        ι := sorry }
+        ι :=
+          { app := fun j => cokernel.map _ ι (c.ι.app j) (𝟙 _) (by simp)
+            naturality := fun j j' φ => by
+              ext; simp [Qfun, cokernel.map] } }
     have hQcolim : IsColimit Qcocone := sorry
+    -- Per-j vanishing: from SES 0 → Y.obj j → I → Q_j → 0 and LES.
+    -- Needs c.ι.app j ≫ ι to be mono (requires mono transitions on the diagram).
+    -- This is provided by ext_comm_filtered_colimit_mono which has [Mono (Y.map φ)].
     have hQvan : ∀ j, Subsingleton (Ext Z (Qfun.obj j) n) := sorry
     exact @Subsingleton.elim _ (ih Qfun Qcocone hQcolim hQvan) ca cb
 
