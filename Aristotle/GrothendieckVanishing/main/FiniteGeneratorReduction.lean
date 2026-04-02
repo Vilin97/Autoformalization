@@ -60,10 +60,10 @@ private theorem addCommGrpCat_exact_sandwich
     (S : ShortComplex AddCommGrpCat) (hS : S.Exact)
     (h₁ : Subsingleton S.X₁) (h₃ : Subsingleton S.X₃) :
     Subsingleton S.X₂ := by
-  rw [AddCommGrpCat.exact_iff] at hS
+  rw [ShortComplex.ab_exact_iff_range_eq_ker] at hS
   constructor; intro a b
-  have hgab := @Subsingleton.elim _ h₃ (S.g a) (S.g b)
-  have hmem : a - b ∈ AddMonoidHom.ker S.g := by
+  have hgab := @Subsingleton.elim _ h₃ (S.g.hom a) (S.g.hom b)
+  have hmem : a - b ∈ S.g.hom.ker := by
     simp [AddMonoidHom.mem_ker, map_sub, sub_eq_zero.mpr hgab]
   rw [← hS] at hmem
   obtain ⟨y, hy⟩ := hmem
@@ -204,21 +204,12 @@ theorem ext_comm_filtered_colimit_mono
     -- subsingleton_ext_of_ses_third: Ext^n(Z, X₂)=0 ∧ Ext^{n+1}(Z, X₁)=0 → Ext^n(Z, X₃)=0
     -- Ext^n(Z, I) is subsingleton for n ≥ 1 (injective)
     -- Ext^{n+1}(Z, Y.obj j) is subsingleton (hvan j)
-    constructor; intro a' b'
-    have h_a_δ : a'.comp hSEj.extClass rfl = 0 := @Subsingleton.elim _ (hvan j) _ _
-    have h_b_δ : b'.comp hSEj.extClass rfl = 0 := @Subsingleton.elim _ (hvan j) _ _
-    obtain ⟨ca', hca'⟩ := Ext.covariant_sequence_exact₃ Z hSEj a' rfl h_a_δ
-    obtain ⟨cb', hcb'⟩ := Ext.covariant_sequence_exact₃ Z hSEj b' rfl h_b_δ
-    rw [← hca', ← hcb']
+    -- Use ext_sandwich: Ext^n'(Z, I) = 0 ∧ Ext^{n'+1}(Z, Y.obj j) = 0 ⟹ Ext^n'(Z, Q_j) = 0
+    -- For n' ≥ 1: Ext^n'(Z, I) = 0 by injectivity. For n' = 0: sorry (dead at call site).
     cases n' with
-    | zero =>
-      -- n'=0: need Subsingleton(Hom(Z, Q_j)). Hom(Z, Q_j) is a quotient of Hom(Z, I)
-      -- by the LES, not necessarily subsingleton. Needs hHom_univ for Q_j.
-      -- This case only arises when the outer degree is 1.
-      sorry
+    | zero => sorry  -- Hom case: only arises at outer degree 1, dead at call site (dim ≥ 1 ⟹ m ≥ 2)
     | succ n'' =>
-      -- n' ≥ 1: Ext^{n'+1}(Z, I) = 0 (injective), so ca' = cb'. PROVED.
-      congr 1; exact @Subsingleton.elim _ (Ext.subsingleton_of_injective Z _ n'') _ _
+      exact ext_sandwich Z hSEj (n'' + 1) (Ext.subsingleton_of_injective Z _ n'') (hvan j)
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
