@@ -3,7 +3,10 @@
 
   Key results:
   - ext_comm_filtered_colimit_mono: Ext^n preserves filtered colimits of mono diagrams
-    (1 sorry: n≥1 Ext case — Mathlib API gap)
+    (1 sorry: Ext^n(Z, cokernel(ι)) for cokernel of injective embedding — Mathlib API gap.
+     The dimension shift reduces Ext^{n+1}(Z, c.pt) to Ext^n(Z, I/c.pt) via the covariant
+     Ext LES. Closing this requires showing Ext^n preserves the filtered colimit
+     I/c.pt = colim(I/Y.obj j), needing Čech / universal δ-functors / Godement resolution.)
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
@@ -47,16 +50,14 @@ private theorem addCommGrpCat_subsingleton_hom_of_subsingleton
 
 /-- **Hartshorne 2.9 (Ext version)**: In a Grothendieck abelian category, if `Hom(Z, -)`
     sends filtered-colimit vanishing to vanishing (the `hHom` hypothesis), then
-    `Ext^n(Z, -)` does too, for all n. Proved by induction on n:
-    - **Base case (n = 0)**: `Ext^0 ≅ Hom` via `homEquiv₀`, apply `hHom`.
-    - **Inductive step**: Embed `c.pt ↪ I` (injective). Dimension-shift gives
-      `Ext^{n+1}(Z, c.pt) ≅ Ext^n(Z, I/c.pt)`. By AB5, `I/c.pt = colim(I/Y.obj j)`.
-      Apply the inductive hypothesis to the quotient diagram.
-
-    The `hHom` hypothesis holds for `Z = constantSheaf(ULift ℤ)` on a topological space
-    because `Hom(Z, F) ≅ Γ(X, F) = F(X)` and filtered colimits of sheaves are objectwise.
-    The mono-transition condition is NOT needed; the proof works for arbitrary filtered
-    diagrams. -/
+    `Ext^n(Z, -)` does too, for all n.
+    - **n = 0**: `Ext^0 ≅ Hom` via `homEquiv₀`, apply `hHom`. PROVED.
+    - **n ≥ 1**: Embed `c.pt ↪ I` (injective). By the covariant Ext LES, every element
+      of `Ext^{n+1}(Z, c.pt)` lifts to `Ext^n(Z, I/c.pt)` (since `Ext^{n+1}(Z, I) = 0`).
+      So it suffices to show `Ext^n(Z, I/c.pt) = 0`. By AB5 + mono transitions,
+      `I/c.pt = colim(I/Y.obj j)`, and each `Ext^n(Z, I/Y.obj j) = 0` by the per-j LES.
+      **Sorry**: showing `Ext^n` preserves this filtered colimit requires Čech cohomology,
+      universal δ-functors, or Godement resolution (not in Mathlib v4.28.0). -/
 theorem ext_comm_filtered_colimit_mono
     {C : Type u} [Category.{v} C] [Abelian C] [HasExt C]
     [IsGrothendieckAbelian.{w} C]
@@ -75,12 +76,23 @@ theorem ext_comm_filtered_colimit_mono
     exact Ext.homEquiv₀.subsingleton_congr.mpr
       (hHom (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j)))
   | succ n _ =>
-    -- n≥1: Mathlib API gap. The dimension shifting approach requires the IH for the
-    -- quotient diagram {I/Y.obj j} which has epi (not mono) transitions.
-    -- The IH can't be applied because: (1) the quotient lacks mono transitions,
-    -- (2) providing hHom for the quotient requires objectwise colimit theory.
-    -- Closing this requires Čech cohomology, universal δ-functors, or Godement resolution.
-    sorry
+    -- Dimension shift: embed c.pt ↪ I (injective), form SES 0 → c.pt → I → Q → 0.
+    -- By the covariant Ext LES, every element of Ext^{n+1}(Z, c.pt) lifts to Ext^n(Z, Q)
+    -- (since Ext^{n+1}(Z, I) = 0 for I injective). So it suffices to show Ext^n(Z, Q) = 0.
+    -- Q = I/c.pt is a filtered colimit of Q_j = I/Y.obj j (by AB5 + mono transitions).
+    -- Each Ext^n(Z, Q_j) = 0 (from per-j LES + hvan + injective vanishing).
+    -- Closing this requires showing Ext^n preserves this filtered colimit, which needs
+    -- Čech cohomology, universal δ-functors, or Godement resolution (not in Mathlib v4.28.0).
+    obtain ⟨ip⟩ := EnoughInjectives.presentation c.pt
+    have hSE := ip.shortExact_shortComplex
+    constructor; intro a b
+    have ha : a.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
+    have hb : b.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
+    obtain ⟨ca, hca⟩ := Ext.covariant_sequence_exact₁ Z hSE a ha rfl
+    obtain ⟨cb, hcb⟩ := Ext.covariant_sequence_exact₁ Z hSE b hb rfl
+    rw [← hca, ← hcb]
+    congr 1
+    exact @Subsingleton.elim _ (by sorry) ca cb
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
