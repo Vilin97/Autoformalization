@@ -1,11 +1,11 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-02T18:35Z
+**Updated**: 2026-04-02T20:30Z
 
 ## Status Summary
 - **CI**: GREEN (latest push in_progress, previous green)
 - **Heartbeat overrides**: 0
-- **Sorry count**: 1 in IrreducibleStep.lean (`ext_comm_filtered_colimit_mono`, line 1245)
+- **Sorry count**: 2 in FiniteGeneratorReduction.lean (IsSheafPairwiseIntersections line 271 + n≥1 Ext line 80)
 - **Files**: 15 files under `main/`, ~5079 lines
 - **New this session**: `sheafH_vanishing_cascade` proved in GrothendieckVanishing.lean
 

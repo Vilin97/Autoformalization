@@ -1,5 +1,22 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-02T20:30Z — Babysit cycles: narrow IsSheaf sorry, extensive analysis
+
+**Sorry count: 2** (IsSheafPairwiseIntersections + n≥1 Ext case)
+
+- Multiple babysit cycles working on the IsSheafPairwiseIntersections sorry.
+- Verified `PreservesFiniteLimits (colim (J := J) (C := AddCommGrpCat))` synthesizes,
+  confirming filtered colimits commute with finite limits in AddCommGrpCat.
+- The blocker is connecting `pc.pt.mapCone(Pairwise diagram)` (a limit in AddCommGrpCat)
+  to the colimit of `(F_j.val).mapCone(Pairwise diagram)` — requires `CreatesColimit`
+  for `sheafToPresheaf` which is circular (needs `IsSheaf` to prove `CreatesColimit`).
+- Explored: using Mathlib's sheaf colimit construction directly, transferring IsSheaf
+  across iso, bypassing CreatesColimit. All approaches lead to the same circular dependency.
+- The sorry is a well-known mathematical fact: "filtered colimits of sheaves are sheaves
+  (presheaf colimit is already a sheaf for filtered diagrams)". The Lean formalization
+  requires manual construction of the limit-colimit interchange at the presheaf level.
+- The n≥1 Ext sorry remains unchanged (deep Mathlib gap).
+
 ## 2026-04-02T19:30Z — Babysit cycle: prove hHom infrastructure, narrow sorry
 
 **Sorry count: 2** (objectwise colimit eval + n≥1 Ext case)
