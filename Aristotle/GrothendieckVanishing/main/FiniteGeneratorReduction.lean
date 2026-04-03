@@ -17,6 +17,7 @@
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.SheafHom
+import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
 
 universe u
 
