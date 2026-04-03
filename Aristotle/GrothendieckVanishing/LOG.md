@@ -1,5 +1,24 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T20:00Z — Close sorry at line 180, analyze hQprov structural gap (2 sorry's)
+
+**Sorry count: 2** (1 in SheafHom.lean:63, 1 in FiniteGeneratorReduction.lean:196)
+
+- **Closed sorry at line 180** (n=0 case of degree ≥1 branch): Proved using `hHom_univ` applied
+  to the Q-diagram with per-j vanishing from `hQvan_provider 0 rfl ip j`, converted via
+  `Ext.homEquiv₀.subsingleton_congr`.
+- **Analyzed hQprov structural gap** (line 196): The Q-diagram's transition maps are NOT mono
+  (snake lemma: ker(cokernel.map) ≅ coker(Y.map φ) ≠ 0). This means:
+  (1) Qcocone.ι.app j is not provably mono → no ShortExact sequence
+  (2) ext_sandwich cannot be applied
+  (3) hHom_univ (vanishing only) is too weak to derive surjectivity of Hom(Z,I)→Hom(Z,Q)
+  **Fix needed**: Either strengthen hHom_univ to PreservesFilteredColimits, or restructure
+  proof to use individual injective presentations per Y_j (Hartshorne's actual approach).
+- **Aristotle**: API still unreachable from HPC cluster.
+- Remaining sorry's:
+  1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:63) — core AB5 gap
+  2. `hQprov` (FiniteGeneratorReduction.lean:196) — structural gap in proof strategy
+
 ## 2026-04-03T18:00Z — Close sorry #3, deduplicate IrreducibleStep.lean (3→2 sorry's)
 
 **Sorry count: 2** (1 in SheafHom.lean, 1 in FiniteGeneratorReduction.lean)

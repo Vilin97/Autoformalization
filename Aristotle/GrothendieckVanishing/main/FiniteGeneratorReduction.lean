@@ -177,12 +177,22 @@ private theorem ext_vanishing_of_colimit_aux
       -- We want a = b which is (ca ≫ extClass) = (cb ≫ extClass).
       -- Suffices: ca = cb. We need Subsingleton(Ext^0(Z, Q)).
       -- This = Subsingleton(Hom(Z, Q)). Use sorry (colimit factoring / surjectivity).
-      exact @Subsingleton.elim _ (by sorry) ca cb
+      exact @Subsingleton.elim _ (Ext.homEquiv₀.subsingleton_congr.mpr
+        (hHom_univ Qfun Qcocone hQcolim
+          (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hQvan_provider 0 rfl ip j)))) ca cb
     | succ n' =>
       -- Degree ≥ 2 (n = n'+1 ≥ 1): use IH at degree n'+1 for Q diagram.
-      -- Per-j vanishing: Ext^{n'+1}(Z, Q_j) = 0 by ext_sandwich.
+      -- Per-j vanishing: Ext^{n'+1}(Z, Q_j) = 0 from hQvan_provider.
       have hQvan : ∀ j, Subsingleton (Ext Z (Qfun.obj j) (n' + 1)) :=
         fun j => hQvan_provider (n' + 1) rfl ip j
+      -- hQprov: provider for recursive call. Asks for Ext^{n'}(Z, cokernel(Qcocone.ι.app j ≫ ip'.f))=0.
+      -- STRUCTURAL GAP: The Q-diagram's transitions are NOT mono (snake lemma shows
+      -- ker(cokernel.map) ≅ coker(Y.map φ) ≠ 0), so:
+      -- (1) Qcocone.ι.app j is not provably mono
+      -- (2) ext_sandwich can't be applied (no short exact sequence)
+      -- (3) hHom_univ (vanishing only) is too weak to derive surjectivity of Hom(Z,I)→Hom(Z,Q)
+      -- FIX: Either strengthen hHom_univ to PreservesFilteredColimits (coyoneda.obj (op Z)),
+      -- or restructure proof to use individual injective presentations per Y_j (Hartshorne 2.9).
       have hQprov : ∀ (n'' : ℕ), n' + 1 = n'' + 1 →
           ∀ (ip' : InjectivePresentation Qcocone.pt) (j : J),
           Subsingleton (Ext Z (cokernel (Qcocone.ι.app j ≫ ip'.shortComplex.f)) n'') := sorry
