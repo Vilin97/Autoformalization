@@ -1,5 +1,16 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T20:32Z — Noetherian finite subcover step in isSheaf proof
+
+**Sorry count: 3 keywords, 1 logical gap (unchanged)**
+
+- Added finite subcover extraction to `isSheaf_presheaf_filtered_colimit` using
+  `NoetherianSpace.isCompact` + `IsCompact.elim_finite_subcover`. Gets `t : Finset ι`
+  with `ht : ↑(iSup U) ⊆ ⋃ i ∈ t, ↑(U i)`. Proof framework via `IsSheafUniqueGluing`.
+- Fixed stale docstrings (GrothendieckVanishing.lean, IrreducibleStep.lean, SheafStalkAlgebra.lean)
+- Fixed inconsistent `haveI`/`letI`
+- Aristotle jobs: 22%, 44%, 11%
+
 ## 2026-04-03T20:20Z — Decomposed sorry + dimension shifting + docstring fixes
 
 **Sorry count: 3 keywords, 1 logical gap (unchanged)**

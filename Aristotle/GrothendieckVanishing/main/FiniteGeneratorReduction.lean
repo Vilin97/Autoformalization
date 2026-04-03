@@ -194,6 +194,11 @@ private theorem isSheaf_presheaf_filtered_colimit
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     (c : Cocone (Y' ⋙ sheafToPresheaf _ _)) (hc : IsColimit c) :
     TopCat.Presheaf.IsSheaf c.pt := by
+  rw [TopCat.Presheaf.isSheaf_iff_isSheafUniqueGluing]
+  intro ι U sf hcompat
+  -- Noetherian → finite subcover: find finite t with iSup U = ⨆ k ∈ t, U k
+  obtain ⟨t, ht⟩ := (NoetherianSpace.isCompact (↑(iSup U) : Set X)).elim_finite_subcover
+    (fun i => ↑(U i)) (fun i => (U i).isOpen) (by simp [Opens.coe_iSup])
   sorry
 
 /-- On a Noetherian space, `sheafToPresheaf` creates filtered colimits of sheaves. -/
