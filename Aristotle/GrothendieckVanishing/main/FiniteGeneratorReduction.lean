@@ -6,7 +6,7 @@
     n=0 via hHom_univ + Ext.homEquiv₀. n≥1 via dimension shift. 1 sorry (hQprov:
     recursive quotient vanishing for IH call).
   - ext_comm_filtered_colimit_mono: Wrapper using ext_vanishing_of_colimit_aux.
-    1 sorry (n'=0 dead case at call site, needs filtered colimit preservation for Hom).
+    n=0 case closed by omega (dead at call site: dim ≥ 1 ⟹ 2 ≤ n).
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
@@ -171,7 +171,7 @@ private theorem ext_vanishing_of_colimit_aux
       -- δ = 0 iff g* : Hom(Z, I) → Hom(Z, Q) is surjective (by exactness: im(g*) = ker(δ)).
       -- g* surjective: every f : Z → Q factors through some Q_j (colimit factoring),
       -- and each g_j* : Hom(Z, I) → Hom(Z, Q_j) is surjective (LES + hvan).
-      -- For now, sorry the surjectivity (= sorry #3, colimit factoring).
+      -- For now, sorry the surjectivity (colimit factoring for Hom).
       -- δ(ca) = δ(cb) gives a = b, so we need the connecting maps to be equal.
       -- Actually, hca says ca ≫ hSE.extClass = a, hcb says cb ≫ hSE.extClass = b.
       -- We want a = b which is (ca ≫ extClass) = (cb ≫ extClass).
@@ -197,17 +197,15 @@ theorem ext_comm_filtered_colimit_mono
     {J : Type w} [SmallCategory J] [IsFiltered J]
     (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
     [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
-    (Z : C) (n : ℕ)
+    (Z : C) (n : ℕ) (hn_ge : 2 ≤ n)
     (hHom_univ : ∀ {J' : Type w} [SmallCategory J'] [IsFiltered J']
       (Y' : J' ⥤ C) (c' : Cocone Y'), IsColimit c' →
       (∀ j, Subsingleton (Z ⟶ Y'.obj j)) → Subsingleton (Z ⟶ c'.pt))
     (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)) :
     Subsingleton (Ext Z c.pt n) := by
   cases n with
-  | zero =>
-    exact Ext.homEquiv₀.subsingleton_congr.mpr
-      (hHom_univ Y c hc (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j)))
-  | succ n _ =>
+  | zero => omega
+  | succ n =>
     refine ext_vanishing_of_colimit_aux Z hHom_univ (n + 1) Y c hc hvan ?_
     -- hQvan_provider: for any injective pres of c.pt, Ext^n(Z, cokernel(c.ι.app j ≫ f)) = 0
     -- From SES 0 → Y.obj j → I → Q_j → 0 (mono by AB5) and LES:
@@ -234,7 +232,7 @@ theorem ext_comm_filtered_colimit_mono
     -- Use ext_sandwich: Ext^n'(Z, I) = 0 ∧ Ext^{n'+1}(Z, Y.obj j) = 0 ⟹ Ext^n'(Z, Q_j) = 0
     -- For n' ≥ 1: Ext^n'(Z, I) = 0 by injectivity. For n' = 0: sorry (dead at call site).
     cases n' with
-    | zero => sorry  -- Hom case: only arises at outer degree 1, dead at call site (dim ≥ 1 ⟹ m ≥ 2)
+    | zero => omega  -- n = 0 contradicts 2 ≤ n + 1 (i.e., 1 ≤ n)
     | succ n'' =>
       exact ext_sandwich Z hSEj (n'' + 1) (Ext.subsingleton_of_injective Z _ n'') (hvan j)
 
@@ -364,7 +362,7 @@ end FilteredDiagram
     the filtered diagram of finitely generated subsheaves. -/
 theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
-    (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ)
+    (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ) (hm : 2 ≤ m)
     (hfg : ∀ (S : Finset (TopCat.Sheaf.SectionIndex K))
       [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)) :
@@ -373,7 +371,7 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     (finsetGenCocone_isColimit K)
     ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
       (AddCommGrpCat.of (ULift ℤ)))
-    m constantSheaf_hom_preserves_filtered_colimit_vanishing (fun S => hfg S)
+    m hm constantSheaf_hom_preserves_filtered_colimit_vanishing (fun S => hfg S)
 
 section FinsetGenerated
 open scoped Classical
@@ -511,9 +509,9 @@ end FinsetGenerated
     `cohomology_vanishing_of_finitelyGenerated_vanishing` (colimit step). -/
 theorem directLimit_cohomology_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
-    (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ)
+    (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ) (hm : 2 ≤ m)
     (hzero : ∀ {G : TopCat.Sheaf AddCommGrpCat.{u} X} {V : Opens X}
       (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G), Epi f → Subsingleton (Sheaf.H G m)) :
     Subsingleton (Sheaf.H K m) :=
-  cohomology_vanishing_of_finitelyGenerated_vanishing K m
+  cohomology_vanishing_of_finitelyGenerated_vanishing K m hm
     (fun S _ => finsetGeneratedSheaf_vanishing m hzero S)
