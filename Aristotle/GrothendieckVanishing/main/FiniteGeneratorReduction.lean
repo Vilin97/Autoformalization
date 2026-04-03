@@ -589,8 +589,11 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       -- The colimit cocone maps (colimit.ι Y' j) jointly generate (colimit Y').
       -- At the section level: every x ∈ (colimit Y').val.obj(op ⊤) factors through some
       -- (colimit.ι Y' j).val.app(op ⊤). Since hzero₂, x = 0.
-      -- This factoring is the content of the sheaf colimit being objectwise.
-      -- For abelian sheaves on a topological space with AB5, this holds.
+      -- Embed x into Hom(Z, colimit Y') via adjunction, then factor through a piece.
+      -- Z = constantSheaf(ULift ℤ) is NOT IsFinitelyPresentable in the sheaf category,
+      -- but the factoring holds via the adjunction: Hom(Z, F) ≅ F(⊤), and for filtered
+      -- colimits of sheaves on topological spaces, sections are objectwise colimits.
+      -- For now, sorry the factoring (needs sheafToPresheaf ⋙ evaluation preserves colimits).
       sorry)
     (fun S => hfg S)
 
