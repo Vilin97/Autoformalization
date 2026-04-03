@@ -1,5 +1,24 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T18:00Z — Close sorry #3, deduplicate IrreducibleStep.lean (3→2 sorry's)
+
+**Sorry count: 2** (1 in SheafHom.lean, 1 in FiniteGeneratorReduction.lean)
+
+- **Closed sorry #3** (n'=0 dead case): Added `(hn_ge : 2 ≤ n)` parameter to
+  `ext_comm_filtered_colimit_mono` and propagated through `cohomology_vanishing_of_finitelyGenerated_vanishing`
+  and `directLimit_cohomology_vanishing`. The n=0 case now closes with `omega` (contradiction:
+  2 ≤ 0). At the call site in IrreducibleStep.lean, proved `2 ≤ n` from `dim X > 0` and `n > dim X`
+  via `Order.succ_le_of_lt`.
+- **Deduplicated IrreducibleStep.lean**: Removed ~540 lines of declarations that were duplicated
+  from SheafStalkAlgebra.lean (subsingleton_ext_of_ses, ulift_int_subgroup_cyclic,
+  zsmul_generator_injective, and 10+ others). File reduced from ~1264 to ~610 lines.
+- **Aristotle**: API unreachable from HPC cluster. `isSheaf_filtered_colimit.lean` ready in
+  `aristotle-in/` but not submitted. Marked 2 stale QUEUED jobs as OBSOLETE.
+- **Build verified**: IrreducibleStep.lean and main.lean compile with 0 errors.
+- Remaining sorry's:
+  1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:63) — core AB5 gap
+  2. `hQprov` (FiniteGeneratorReduction.lean:180,188) — recursive quotient-of-quotient vanishing
+
 ## 2026-04-03T10:00Z — Extract SheafHom.lean, fix architecture (3 sorry's, better locations)
 
 **Sorry count: 3** (1 in SheafHom.lean, 2 in FiniteGeneratorReduction.lean)

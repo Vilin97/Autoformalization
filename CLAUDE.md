@@ -73,7 +73,6 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 
 ## Remaining Work
 
-3 sorry's remain (Mathlib API gap — all reduce to AB5 for sheaves on Noetherian spaces):
-1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:64): filtered presheaf colimits of sheaves are sheaves on Noetherian spaces. Core AB5 gap.
-2. `ext_vanishing_of_colimit_aux` (FiniteGeneratorReduction.lean:146): recursive hQprov — quotient-of-quotient vanishing for the inductive step.
-3. `ext_comm_filtered_colimit_mono` (FiniteGeneratorReduction.lean:195): n=0 dead case — Hom-level cokernel vanishing, dead at call site (dim >= 1 implies m >= 2).
+2 sorry's remain (Mathlib API gap — all reduce to AB5 for sheaves on Noetherian spaces):
+1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:63): filtered presheaf colimits of sheaves are sheaves on Noetherian spaces. Core AB5 gap.
+2. `ext_vanishing_of_colimit_aux` (FiniteGeneratorReduction.lean:180,188): recursive hQprov — quotient-of-quotient vanishing for the inductive step.
