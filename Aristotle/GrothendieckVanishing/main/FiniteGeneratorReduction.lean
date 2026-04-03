@@ -187,12 +187,13 @@ private theorem ext_vanishing_of_colimit_aux
         fun j => hQvan_provider (n' + 1) rfl ip j
       -- hQprov: provider for recursive call (n'+1 = n''+1 forces n'' = n').
       -- Asks: ∀ ip' j, Ext^{n'}(Z, cokernel(Qcocone.ι.app j ≫ ip'.f)) = 0.
-      -- STRUCTURAL GAP: Q-diagram transitions are NOT mono (snake lemma:
-      -- ker(cokernel.map) ≅ coker(Y.map φ) ≠ 0). Without mono, ext_sandwich can't recurse.
-      -- Fix: follow Hartshorne III.2.9 more closely — use functorial injective resolutions
-      -- (one per Y_j) so quotient transitions inherit mono. Alternatively, establish
-      -- PreservesFilteredColimitsOfSize for coyoneda.obj (op Z) in the sheaf category
-      -- (true for Z = constant sheaf on Noetherian spaces, via AB5 + evaluation).
+      -- STRUCTURAL GAP: Q-diagram cocone maps Qcocone.ι.app j are EPI but NOT mono
+      -- (by snake lemma: ker(cokernel.map) ≅ cokernel(c.ι.app j) ≠ 0). Image factorization
+      -- of q_j ≫ ip'.f leads to circularity: Ext^{n'+2}(Z, c.pt) = 0 requires itself.
+      -- This sorry DEPENDS on sorry #1 (isSheaf_filtered_colimit in SheafHom.lean):
+      -- once AB5 gives sheafToPresheaf preserving filtered colimits, Ext^n(Z, -) preserves
+      -- filtered colimits automatically (R^n of a colimit-preserving functor on Grothendieck
+      -- abelian preserves filtered colimits). Then hQprov follows from hQvan.
       have hQprov : ∀ (n'' : ℕ), n' + 1 = n'' + 1 →
           ∀ (ip' : InjectivePresentation Qcocone.pt) (j : J),
           Subsingleton (Ext Z (cokernel (Qcocone.ι.app j ≫ ip'.shortComplex.f)) n'') := sorry
