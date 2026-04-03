@@ -555,13 +555,32 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       have hGsub : ∀ j, Subsingleton ((Y'.obj j).val.obj (op ⊤)) :=
         fun j => addCommGrpCat_subsingleton_of_subsingleton_hom _
           ((heq _).subsingleton_congr.mp (hvan' j))
-      -- Goal: Subsingleton(c'.pt.val.obj (op ⊤))
-      -- Use Concrete.isColimit_exists_rep: need IsColimit in AddCommGrpCat.
-      -- Build via: hc' (sheaf) → isColimitOfPreserves with sheafToPresheaf ⋙ eval(⊤).
-      -- Since PreservesColimit doesn't auto-synthesize, provide manually via
-      -- Sheaf.createsColimitOfIsSheaf + evaluation_preservesColimit.
-      -- For now, sorry this infrastructure bridge.
-      sorry)
+      -- Show Subsingleton(c'.pt.val.obj (op ⊤)) using Concrete.isColimit_exists_rep.
+      -- Step 1: sheafToPresheaf preserves the colimit (via CreatesColimit).
+      let stp := sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}
+      -- The presheaf colimit of a filtered diagram of sheaves IS a sheaf (for topological spaces).
+      -- So sheafToPresheaf creates the colimit.
+      haveI : CreatesColimit Y' stp :=
+        Sheaf.createsColimitOfIsSheaf Y' (fun c hc => by
+          -- The presheaf colimit of a filtered diagram of sheaves on a topological space
+          -- IS a sheaf. This is how Sheaf.hasFilteredColimitsOfSize constructs colimits.
+          sorry)
+      -- Step 2: Get presheaf-level IsColimit.
+      let hc_pre := isColimitOfPreserves stp hc'
+      -- hc_pre : IsColimit (stp.mapCocone c') in presheaves
+      -- Step 3: evaluation at op ⊤ preserves colimits.
+      let ev := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)
+      let hc_grp := isColimitOfPreserves ev hc_pre
+      -- hc_grp : IsColimit (ev.mapCocone (stp.mapCocone c')) in AddCommGrpCat
+      -- Step 4: Use Concrete.isColimit_exists_rep to factor elements.
+      constructor; intro s t
+      suffices h : ∀ x : c'.pt.val.obj (op ⊤), x = 0 from (h s).trans (h t).symm
+      intro x
+      -- x : ↑((ev.mapCocone (stp.mapCocone c')).pt) = ↑(c'.pt.val.obj (op ⊤))
+      obtain ⟨j, y, hy⟩ := Concrete.isColimit_exists_rep
+        (Y'.comp stp |>.comp ev) hc_grp x
+      -- y : ↑((Y'.obj j).val.obj (op ⊤)), hy : cocone_map y = x
+      rw [← hy]; exact @Subsingleton.elim _ (hGsub j) y 0 ▸ map_zero _)
     (fun S => hfg S)
 
 section FinsetGenerated
