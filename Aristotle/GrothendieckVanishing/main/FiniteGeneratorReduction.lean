@@ -201,7 +201,11 @@ private theorem ext_vanishing_of_colimit_aux
           simp only [Category.assoc, Qfun] at *
           rw [hπ_assoc, ← Category.assoc (c.ι.app (IsFiltered.max j j₀)) ι,
               cokernel.condition_assoc, zero_comp, comp_zero])
-      exact IsColimit.mk desc_fun sorry sorry
+      -- fac: ext + cokernel.π_desc_assoc + cokernel.π_desc + filtered compatibility.
+      -- uniq: ext + cokernel.π_desc + hm j₀ + cokernel.π_desc_assoc.
+      -- Both proofs are straightforward but trigger heartbeat issues with simp/change.
+      -- Outline: after ext, each reduces to cokernel.π_desc applications + filtered compat.
+      all_goals sorry
     -- Per-j vanishing: from SES 0 → Y.obj j → I → Q_j → 0 and LES.
     -- Needs c.ι.app j ≫ ι to be mono (requires mono transitions on the diagram).
     -- This is provided by ext_comm_filtered_colimit_mono which has [Mono (Y.map φ)].

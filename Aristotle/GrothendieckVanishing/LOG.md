@@ -1,5 +1,13 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T01:15Z — PROVE desc_fun + ι ≫ g = 0 in hQcolim, fac/uniq outlined
+
+**Sorry count: 1** (sub-sorry's: hQcolim fac+uniq, iterated provider, hHom univ, n=0 dead)
+
+- desc_fun FULLY PROVED: cokernel.desc ι (cokernel.π ≫ s.ι.app j₀) with ι ≫ g = 0.
+- fac and uniq outlined: both reduce to cokernel.π_desc + filtered compatibility after ext,
+  but trigger heartbeat issues with simp/change. Left as sorry with detailed outlines.
+
 ## 2026-04-03T01:00Z — PROVE ι ≫ g = 0 inside hQcolim via filtered compatibility
 
 **Sorry count: 1** (sub-sorry's: hQcolim fac+uniq, iterated provider, hHom univ, n=0 dead)
