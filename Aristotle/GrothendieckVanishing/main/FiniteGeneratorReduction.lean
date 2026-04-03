@@ -168,7 +168,10 @@ private theorem ext_vanishing_of_colimit_aux
     -- This is provided by ext_comm_filtered_colimit_mono which has [Mono (Y.map φ)].
     have hQvan : ∀ j, Subsingleton (Ext Z (Qfun.obj j) n) :=
       fun j => hQvan_provider n rfl ip j
-    exact @Subsingleton.elim _ (ih Qfun Qcocone hQcolim hQvan sorry) ca cb
+    have hQprov : ∀ (n' : ℕ), n = n' + 1 →
+        ∀ (ip' : InjectivePresentation Qcocone.pt) (j : J),
+        Subsingleton (Ext Z (cokernel (Qcocone.ι.app j ≫ ip'.shortComplex.f)) n') := sorry
+    exact @Subsingleton.elim _ (ih Qfun Qcocone hQcolim hQvan hQprov) ca cb
 
 /-- **Hartshorne 2.9 (Ext version)**: In a Grothendieck abelian category, if `Hom(Z, -)`
     sends filtered-colimit vanishing to vanishing (the `hHom` hypothesis), then

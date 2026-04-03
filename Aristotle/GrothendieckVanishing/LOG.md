@@ -1,5 +1,18 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T01:45Z — Extract hQprov, stabilize sorry inventory at 4
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux + ext_comm_filtered_colimit_mono, 4 sorry's)
+
+- Extracted `hQprov` as explicit sorry'd `have` (was implicit in `ih` call)
+- Attempted hQcolim via standalone lemma and inline IsColimit.mk — both fail on
+  heartbeats from associativity manipulation within let-binding context
+- Stabilized sorry inventory:
+  1. hQcolim (line 165) — IsColimit for quotient cocone
+  2. hQprov (line 173) — iterated provider for Q's sub-quotient
+  3. hHom universality (line 197) — abstract → universal hHom upgrade
+  4. hQvan_provider n=0 (line 223) — dead at call site (dim ≥ 1 ⟹ m ≥ 2)
+
 ## 2026-04-03T01:15Z — PROVE desc_fun + ι ≫ g = 0 in hQcolim, fac/uniq outlined
 
 **Sorry count: 1** (sub-sorry's: hQcolim fac+uniq, iterated provider, hHom univ, n=0 dead)
