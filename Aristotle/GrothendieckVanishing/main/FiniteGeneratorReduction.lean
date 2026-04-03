@@ -93,6 +93,22 @@ private theorem ext_sandwich (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) 
 
 end ExtHelpers
 
+/-- The cokernel cocone `j ↦ cokernel(c.ι.app j ≫ ι)` with point `cokernel(ι)` is a
+    colimit, for any colimit cocone `c` of `Y` and mono `ι : c.pt ⟶ I`. -/
+private noncomputable def cokernelCocone_isColimit
+    {C : Type u} [Category.{v} C] [Abelian C]
+    {J : Type*} [SmallCategory J] [IsFiltered J]
+    {Y : J ⥤ C} {c : Cocone Y} (hc : IsColimit c)
+    {I : C} (ι : c.pt ⟶ I)
+    -- The quotient functor j ↦ cokernel(c.ι.app j ≫ ι)
+    (Qfun : J ⥤ C)
+    (hQobj : ∀ j, Qfun.obj j = cokernel (c.ι.app j ≫ ι))
+    -- The cocone with point cokernel(ι)
+    (Qcocone : Cocone Qfun)
+    (hQpt : Qcocone.pt = cokernel ι) :
+    IsColimit Qcocone := by
+  sorry
+
 /-- Core induction: Ext^n colimit transfer with `n` universally quantified BEFORE `J`,
     so the IH at degree `n` is universal over all filtered diagrams (no mono transitions
     in the IH). Mono transitions are only needed at the TOP level for the SES construction.
@@ -154,7 +170,8 @@ private theorem ext_vanishing_of_colimit_aux
     -- isColimitConstCocone, mapShortComplex, exact_mapShortComplex.
     -- hQcolim: Q = colim Qfun. desc_fun via cokernel.desc, ι ≫ g = 0 proved,
     -- fac and uniq are cokernel.π_desc + filtered compatibility (sorry: heartbeat issue).
-    have hQcolim : IsColimit Qcocone := sorry
+    have hQcolim : IsColimit Qcocone :=
+      cokernelCocone_isColimit hc ι Qfun (fun j => rfl) Qcocone rfl
     -- Per-j vanishing: from SES 0 → Y.obj j → I → Q_j → 0 and LES.
     -- Needs c.ι.app j ≫ ι to be mono (requires mono transitions on the diagram).
     -- This is provided by ext_comm_filtered_colimit_mono which has [Mono (Y.map φ)].
