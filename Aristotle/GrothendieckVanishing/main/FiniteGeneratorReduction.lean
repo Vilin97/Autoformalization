@@ -555,25 +555,34 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       have hGsub : ∀ j, Subsingleton ((Y'.obj j).val.obj (op ⊤)) :=
         fun j => addCommGrpCat_subsingleton_of_subsingleton_hom _
           ((heq _).subsingleton_congr.mp (hvan' j))
-      -- Show Subsingleton(c'.pt.val.obj (op ⊤)) using Concrete.isColimit_exists_rep.
-      -- Step 1: sheafToPresheaf preserves the colimit (via CreatesColimit).
-      -- Build colimit chain: sheafToPresheaf creates colimit → evaluation preserves →
-      -- Concrete.isColimit_exists_rep factors elements through pieces.
-      let stp := sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}
-      haveI : CreatesColimit Y' stp :=
-        Sheaf.createsColimitOfIsSheaf Y' (fun c hc => by
-          -- Filtered colimit of sheaves on a topological space: presheaf colimit is a sheaf
-          -- because filtered colimits commute with the finite limits defining the sheaf condition.
-          sorry)
-      let hc_pre := isColimitOfPreserves stp hc'
-      let ev := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)
-      let hc_grp := isColimitOfPreserves ev hc_pre
+      -- Show Subsingleton(c'.pt.val.obj (op ⊤)).
+      -- Transfer c'.pt ≅ colimit Y' via hc', then factor elements of (colimit Y').val.obj(op ⊤)
+      -- through pieces using the cocone structure.
+      let iso := hc'.coconePointUniqueUpToIso (colimit.isColimit Y')
+      -- iso : c'.pt ≅ colimit Y'
+      -- Subsingleton transfers across isomorphisms:
+      suffices Subsingleton ((colimit Y').val.obj (op ⊤)) by
+        constructor; intro s t
+        have := @Subsingleton.elim _ this (iso.hom.val.app (op ⊤) s) (iso.hom.val.app (op ⊤) t)
+        have hinj : Function.Injective (iso.hom.val.app (op ⊤)) := by
+          haveI : IsIso iso.hom := Iso.isIso_hom iso
+          haveI : IsIso (Sheaf.Hom.val iso.hom) := by
+            rw [show Sheaf.Hom.val iso.hom = (sheafToPresheaf _ _).map iso.hom from rfl]
+            infer_instance
+          haveI : IsIso (iso.hom.val.app (op ⊤)) := NatIso.isIso_app_of_isIso _ _
+          exact (ConcreteCategory.bijective_of_isIso (iso.hom.val.app (op ⊤))).1
+        exact hinj this
+      -- Now show Subsingleton((colimit Y').val.obj (op ⊤)).
+      -- Every element factors through some (colimit.ι Y' j).val.app (op ⊤).
+      -- Since (Y'.obj j).val.obj (op ⊤) is subsingleton, the element is 0.
       constructor; intro s t
-      suffices h : ∀ x : c'.pt.val.obj (op ⊤), x = 0 from (h s).trans (h t).symm
+      suffices h : ∀ x : (colimit Y').val.obj (op ⊤), x = 0 from (h s).trans (h t).symm
       intro x
-      obtain ⟨j, y, hy⟩ := Concrete.isColimit_exists_rep
-        (Y'.comp stp |>.comp ev) hc_grp x
-      rw [← hy]; exact @Subsingleton.elim _ (hGsub j) y 0 ▸ map_zero _)
+      -- Factor x through a piece. Use Concrete.colimit_exists_rep on the presheaf-level
+      -- colimit (evaluation at op ⊤ of the standard presheaf colimit).
+      -- The presheaf (colimit Y').val is related to colimit(Y' ⋙ stp) via sheafification.
+      -- For now, sorry the factoring (needs PreservesColimit for sheafToPresheaf on filtered).
+      sorry)
     (fun S => hfg S)
 
 section FinsetGenerated
