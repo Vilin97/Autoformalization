@@ -22,7 +22,8 @@
   - ReducibleVanishing.lean: reducible case via Finset.induction
   - ClosedOpenDecomposition.lean: reduction to irreducible
   - FiniteGeneratorReduction.lean: colimit step, filtered diagram, f.g. vanishing (3 sorry's)
-  - IrreducibleStep.lean: irreducible step assembly
+  - SheafStalkAlgebra.lean: stalk algebra, Ext LES helpers, generator properties
+  - IrreducibleStep.lean: irreducible step assembly (uses SheafStalkAlgebra)
   - GrothendieckVanishing.lean: main theorem + cascade theorems
 -/
 import Aristotle.GrothendieckVanishing.main.ClosedImmersion
