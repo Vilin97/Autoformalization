@@ -548,12 +548,29 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       -- Goal: Subsingleton (c'.pt.val.obj (op ⊤))
       -- Every element of c'.pt(⊤) comes from some Y'.obj j (⊤) via the cocone map.
       -- Since Y'.obj j (⊤) is subsingleton, the image is {0}. So every element = 0.
-      -- Use the existing hHom (specific to finsetGenFunctor K):
-      -- hHom says: if all Hom(Z, finsetGenFunctor K .obj j) are subsingleton,
-      -- then Hom(Z, K) is subsingleton. Its proof shows K(⊤) is subsingleton.
-      -- For the UNIVERSAL version, we need the same for arbitrary Y'/c'.
-      -- The proof uses objectwise colimits for filtered colimits of sheaves.
-      -- This is available via sheafToPresheaf preserving filtered colimits.
+      -- c'.pt.val.obj (op ⊤) is a colimit (in AddCommGrpCat) of (Y'.obj j).val.obj (op ⊤)
+      -- which are all subsingleton. Use: sheafToPresheaf preserves filtered colimits,
+      -- and evaluation preserves colimits, so c'.pt(⊤) = colim Y'_j(⊤).
+      -- Then: colimit of subsingleton groups is subsingleton.
+      -- For each j: the cocone map at ⊤ sends from a zero group, so its image is {0}.
+      -- Any element of the colimit factors through some piece, hence = 0.
+      constructor; intro s t
+      -- suffices: s = 0 ∧ t = 0
+      suffices h : ∀ x : c'.pt.val.obj (op ⊤), x = 0 from (h s).trans (h t).symm
+      intro x
+      -- x comes from some Y'.obj j (⊤) via the cocone map.
+      -- Use: sheafToPresheaf creates filtered colimits, evaluation preserves colimits.
+      -- So c'.pt(⊤) is a concrete filtered colimit of (Y'.obj j)(⊤).
+      -- Every element factors through a piece (concrete colimit property).
+      -- Since pieces are subsingleton, the element is 0.
+      -- The cocone map at ⊤ from Y'.obj j (subsingleton) maps everything to 0.
+      have hzero : ∀ j (y : (Y'.obj j).val.obj (op ⊤)),
+          (c'.ι.app j).val.app (op ⊤) y = 0 :=
+        fun j y => @Subsingleton.elim _ (hGsub j) y 0 ▸ map_zero _
+      -- Use hc' to show x = 0: the two morphisms c'.pt → c'.pt (id and 0)
+      -- agree on all pieces at ⊤ (since cocone maps at ⊤ land in {0}).
+      -- But hc' is a sheaf-level colimit, not section-level.
+      -- Need: section-level colimit property (filtered colimits are objectwise).
       sorry)
     (fun S => hfg S)
 
