@@ -1,5 +1,15 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T01:00Z — PROVE ι ≫ g = 0 inside hQcolim via filtered compatibility
+
+**Sorry count: 1** (sub-sorry's: hQcolim fac+uniq, iterated provider, hHom univ, n=0 dead)
+
+- **PROVED `ι ≫ g = 0`** for the desc map: Used `hc.hom_ext` + `IsFiltered.max/leftToMax/rightToMax`
+  to show compatibility of cokernel.π maps, then `cokernel.condition` for the zero.
+  Key intermediate: `hπ_assoc` (reassociated version of `cokernel.π_desc`).
+- desc_fun is now FULLY PROVED (cokernel.desc with valid hg proof).
+- Remaining in hQcolim: `fac` (cocone factoring) and `uniq` (uniqueness).
+
 ## 2026-04-03T00:45Z — Construct hQcolim desc_fun via cokernel.desc
 
 **Sorry count: 1** (ext_vanishing_of_colimit_aux, sub-sorry's in hQcolim + others)

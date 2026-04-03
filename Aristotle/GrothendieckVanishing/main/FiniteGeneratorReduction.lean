@@ -168,13 +168,39 @@ private theorem ext_vanishing_of_colimit_aux
           apply hc.hom_ext; intro j
           simp only [comp_zero, Category.assoc]
           -- Goal: c.ι.app j ≫ ι ≫ cokernel.π(c.ι.app j₀ ≫ ι) ≫ s.ι.app j₀ = 0
-          -- Use cocone compatibility: the maps are all equal, so we can replace j₀ with j.
-          -- cokernel.π(c.ι.app j ≫ ι) ≫ s.ι.app j = cokernel.π(c.ι.app j₀ ≫ ι) ≫ s.ι.app j₀
-          -- (by naturality of s via IsFiltered)
-          -- Then: c.ι.app j ≫ ι ≫ cokernel.π(c.ι.app j ≫ ι) ≫ s.ι.app j
-          --     = (c.ι.app j ≫ ι) ≫ cokernel.π(c.ι.app j ≫ ι) ≫ s.ι.app j
-          --     = 0 ≫ s.ι.app j = 0  (by cokernel.condition)
-          sorry)
+          -- Use filtered structure: take k = max j j₀, use cocone naturality
+          -- to reduce to (c.ι.app k ≫ ι) ≫ cokernel.π(c.ι.app k ≫ ι) ≫ s.ι.app k = 0.
+          let k := IsFiltered.max j j₀
+          let φ := IsFiltered.leftToMax j j₀  -- j → k
+          let ψ := IsFiltered.rightToMax j j₀  -- j₀ → k
+          -- c.ι.app j = Y.map φ ≫ c.ι.app k  (cocone naturality, reversed)
+          have hj : c.ι.app j = Y.map φ ≫ c.ι.app k := (c.w φ).symm
+          -- cokernel.π(c.ι.app j₀ ≫ ι) ≫ s.ι.app j₀
+          -- = cokernel.π(c.ι.app j₀ ≫ ι) ≫ Qfun.map ψ ≫ s.ι.app k  (cocone naturality of s)
+          -- = (𝟙 _) ≫ cokernel.π(c.ι.app k ≫ ι) ≫ s.ι.app k  (cokernel.π_desc)
+          have hsψ : s.ι.app j₀ = Qfun.map ψ ≫ s.ι.app k := (s.w ψ).symm
+          -- After rw [hj]: Y.map φ ≫ c.ι.app k ≫ ι ≫ cokernel.π(...) ≫ s.ι.app j₀ = 0
+          -- Rewrite s.ι.app j₀ using hsψ:
+          rw [hj, hsψ]
+          -- Goal: Y.map φ ≫ c.ι.app k ≫ ι ≫ cokernel.π ≫ Qfun.map ψ ≫ s.ι.app k = 0
+          -- Step 1: cokernel.π ≫ Qfun.map ψ = cokernel.π (by cokernel.π_desc + id_comp)
+          have hπ : cokernel.π (c.ι.app j₀ ≫ ι) ≫
+              cokernel.map (c.ι.app j₀ ≫ ι) (c.ι.app (IsFiltered.max j j₀) ≫ ι) (Y.map ψ) (𝟙 _)
+                (by rw [Category.assoc, Category.comp_id, ← Category.assoc]; exact congrArg (· ≫ ι) (c.w ψ).symm) =
+              cokernel.π (c.ι.app (IsFiltered.max j j₀) ≫ ι) := by
+            simp [cokernel.π_desc]
+          -- Step 2: Apply rewrites. Need reassoc version of hπ.
+          have hπ_assoc : ∀ (X : C) (h : cokernel (c.ι.app (IsFiltered.max j j₀) ≫ ι) ⟶ X),
+              cokernel.π (c.ι.app j₀ ≫ ι) ≫
+                cokernel.map (c.ι.app j₀ ≫ ι) (c.ι.app (IsFiltered.max j j₀) ≫ ι)
+                  (Y.map ψ) (𝟙 _)
+                  (by rw [Category.assoc, Category.comp_id, ← Category.assoc]; exact congrArg (· ≫ ι) (c.w ψ).symm) ≫
+                h =
+              cokernel.π (c.ι.app (IsFiltered.max j j₀) ≫ ι) ≫ h := by
+            intro X h; rw [← Category.assoc, hπ]
+          simp only [Category.assoc, Qfun] at *
+          rw [hπ_assoc, ← Category.assoc (c.ι.app (IsFiltered.max j j₀)) ι,
+              cokernel.condition_assoc, zero_comp, comp_zero])
       exact IsColimit.mk desc_fun sorry sorry
     -- Per-j vanishing: from SES 0 → Y.obj j → I → Q_j → 0 and LES.
     -- Needs c.ι.app j ≫ ι to be mono (requires mono transitions on the diagram).
