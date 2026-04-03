@@ -1,9 +1,23 @@
 # Log — Grothendieck Vanishing
 
-## 2026-04-03T03:00Z — Final session cleanup, 4 sorry's stable
+## 2026-04-03T04:00Z — Final state: 3 sorry warnings, colimit chain built
 
-**Sorry count: 4 code sorry's (3 warnings)**. All infrastructure gaps, no mathematical gaps.
-See FiniteGeneratorReduction.lean for details.
+**Sorry count: 3 warnings (4 code sorry's, 1 dead)**
+
+Key achievements this session (starting from 1 opaque sorry):
+- PROVED: Quotient functor Qfun (all laws), quotient cocone Qcocone (all naturality)
+- PROVED: IsColimit hQcolim (desc + fac + uniq via hπ_cocone/hcompat)
+- PROVED: hQvan via hQvan_provider, ext_sandwich for n≥1
+- PROVED: Colimit chain at call site: CreatesColimit → isColimitOfPreserves →
+  Concrete.isColimit_exists_rep → element factoring → hGsub → x = 0
+- SPLIT: IrreducibleStep.lean (1263→688+594 lines) into SheafStalkAlgebra + IrreducibleStep
+- Fixed all stale documentation headers
+
+Remaining sorry's:
+1. IsSheaf of presheaf filtered colimit (line 567) — AB5 fact, not in Mathlib
+2. degree-1 Ext^0(Z,Q) (line 207) — same underlying issue
+3. hQprov iterated provider (line 215) — recursive
+4. DEAD n'=0 branch (line 254) — never evaluated
 
 ## 2026-04-03T02:15Z — CLOSE hQcolim! fac + uniq proved via ext + hπ_cocone + hcompat
 
