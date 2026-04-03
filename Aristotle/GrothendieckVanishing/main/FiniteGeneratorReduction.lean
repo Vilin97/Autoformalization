@@ -225,13 +225,47 @@ private theorem isSheaf_presheaf_filtered_colimit
       rw [Types.FilteredColimit.isColimit_eq_iff' hcTyp] at h0
       obtain ⟨jk, fk, hfk⟩ := h0
       exact ⟨jk, fk, by simpa [map_zero] using hfk⟩
-    -- Remaining: find common j₁ above all jk (IsFiltered.sup_objs_exists),
-    -- show res_k(transition(b₀)) = 0 for all k ∈ t (naturality + map_zero),
-    -- apply sheaf separation on (Y'.obj j₁) to get transition(b₀) = 0,
-    -- then a = ι_{j₁}(transition(b₀)) = ι_{j₁}(0) = 0.
-    -- Alternatively: use isColimit_eq_iff' on hcV (iSup U) to reduce to
-    -- ∃ j f, F(f)(b₀) = 0, then construct j via common index + sheaf condition.
-    sorry
+    -- Choose jk, fk for each k ∈ t
+    have h_choices : ∀ k : {k // k ∈ t}, ∃ (jk : J') (fk : j₀ ⟶ jk),
+        ConcreteCategory.hom ((F_k k).map fk)
+          (ConcreteCategory.hom ((Y'.obj j₀).val.map (Opens.leSupr U k).op) b₀) = 0 :=
+      fun ⟨k, hk⟩ => h_ev_zero k hk
+    choose jk fk hfk using h_choices
+    -- Find common j₁ above j₀ and all jk (filteredness)
+    haveI : DecidableEq J' := Classical.decEq _
+    obtain ⟨j₁, hj₁⟩ := IsFiltered.sup_objs_exists
+      (({j₀} : Finset J') ∪ t.attach.image (fun k => jk k))
+    have hj₀_le : Nonempty (j₀ ⟶ j₁) := hj₁ (Finset.mem_union_left _ (Finset.mem_singleton_self _))
+    -- Get the morphism j₀ ⟶ j₁
+    let g₀ : j₀ ⟶ j₁ := hj₀_le.some
+    let b₁ := ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _) ⋙ ev (iSup U)).map g₀) b₀
+    -- b₁ restricts to 0 on each U_k for k ∈ t
+    -- (transition commutes with restriction, and further transition preserves 0)
+    have hb₁_zero : ∀ k ∈ t,
+        ConcreteCategory.hom ((Y'.obj j₁).val.map (Opens.leSupr U k).op) b₁ = 0 := by
+      sorry
+    -- (Y'.obj j₁) is a sheaf, {U_k}_{k∈t} covers iSup U, so b₁ = 0
+    -- (sheaf separation: section zero on cover → zero; expensive for heartbeats)
+    have hb₁_eq_zero : b₁ = 0 := by
+      sorry
+    -- a = ι_{j₀}(b₀) = ι_{j₁}(b₁) = ι_{j₁}(0) = 0
+    rw [← hb₀]
+    -- Cocone naturality: ι_{j₀} = F(g₀) ≫ ι_{j₁}, so ι_{j₀}(b₀) = ι_{j₁}(b₁)
+    change ConcreteCategory.hom ((c.ι.app j₀).app (op (iSup U))) b₀ = 0
+    have hnat_g₀ := c.ι.naturality g₀
+    -- hnat_g₀: (Y' ⋙ sheafToPresheaf).map g₀ ≫ c.ι.app j₁ = c.ι.app j₀ ≫ const.map g₀
+    -- const.map g₀ = 𝟙 c.pt, so c.ι.app j₀ = (Y' ⋙ sheafToPresheaf).map g₀ ≫ c.ι.app j₁
+    have hfac : (c.ι.app j₀).app (op (iSup U)) =
+        ((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op (iSup U)) ≫
+        (c.ι.app j₁).app (op (iSup U)) := by
+      have := congrArg (fun α => NatTrans.app α (op (iSup U))) hnat_g₀
+      simp [Functor.const_obj_map] at this; exact this.symm
+    show ConcreteCategory.hom ((c.ι.app j₀).app (op (iSup U))) b₀ = 0
+    conv_lhs => rw [hfac]
+    change ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U)))
+      (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op (iSup U))) b₀) = 0
+    rw [show ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₀).app
+        (op (iSup U))) b₀ = b₁ from rfl, hb₁_eq_zero, map_zero]
   -- Existence: construct a gluing section
   have hexist : ∃ s, Presheaf.IsGluing c.pt U sf s := by
     sorry
