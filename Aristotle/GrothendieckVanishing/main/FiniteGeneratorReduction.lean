@@ -541,88 +541,12 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     -- Proof: Hom(Z, F) ≅ F(⊤) via constantSheafAdj. Filtered colimits of sheaves are
     -- objectwise: (colim F_j)(⊤) = colim(F_j(⊤)). Colimit of subsingletons is subsingleton.
     (fun Y' c' hc' hvan' => by
-      -- Universal hHom: Hom(Z, colim F_j) subsingleton from Hom(Z, F_j) subsingleton.
+      -- Universal hHom: Subsingleton(Z ⟶ c'.pt) from Subsingleton(Z ⟶ Y'.obj j) for all j.
       -- Via constantSheafAdj: Hom(Z, F) ≅ F(⊤). So Subsingleton(F_j(⊤)) for all j.
-      -- For the colimit: c'.pt(⊤) receives maps from all F_j(⊤) which are subsingleton.
-      -- By the colimit universal property, c'.pt(⊤) is subsingleton.
-      have adj := constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
-        Limits.isTerminalTop
-      have heq : ∀ F : TopCat.Sheaf AddCommGrpCat.{u} X,
-          (Z ⟶ F) ≃ (AddCommGrpCat.of (ULift.{u} ℤ) ⟶
-            ((sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op ⊤)).obj F) :=
-        fun F => adj.homEquiv _ F
-      apply (heq c'.pt).subsingleton_congr.mpr
-      have hGsub : ∀ j, Subsingleton ((Y'.obj j).val.obj (op ⊤)) :=
-        fun j => addCommGrpCat_subsingleton_of_subsingleton_hom _
-          ((heq _).subsingleton_congr.mp (hvan' j))
-      -- c'.pt(⊤) subsingleton: use addCommGrpCat_subsingleton_hom_of_subsingleton.
-      -- Need: Subsingleton (c'.pt.val.obj (op ⊤)).
-      -- c'.pt(⊤) is a colimit of (Y'.obj j)(⊤) which are all subsingleton (zero).
-      -- Cocone maps from zero groups to c'.pt(⊤) all map to 0.
-      -- So c'.pt(⊤) is "generated" by 0's, hence subsingleton.
-      apply addCommGrpCat_subsingleton_hom_of_subsingleton
-      -- Goal: Subsingleton (c'.pt.val.obj (op ⊤))
-      -- Every element of c'.pt(⊤) comes from some Y'.obj j (⊤) via the cocone map.
-      -- Since Y'.obj j (⊤) is subsingleton, the image is {0}. So every element = 0.
-      -- c'.pt.val.obj (op ⊤) is a colimit (in AddCommGrpCat) of (Y'.obj j).val.obj (op ⊤)
-      -- which are all subsingleton. Use: sheafToPresheaf preserves filtered colimits,
-      -- and evaluation preserves colimits, so c'.pt(⊤) = colim Y'_j(⊤).
-      -- Then: colimit of subsingleton groups is subsingleton.
-      -- For each j: the cocone map at ⊤ sends from a zero group, so its image is {0}.
-      -- Any element of the colimit factors through some piece, hence = 0.
-      constructor; intro s t
-      -- suffices: s = 0 ∧ t = 0
-      suffices h : ∀ x : c'.pt.val.obj (op ⊤), x = 0 from (h s).trans (h t).symm
-      intro x
-      -- x comes from some Y'.obj j (⊤) via the cocone map.
-      -- Use: sheafToPresheaf creates filtered colimits, evaluation preserves colimits.
-      -- So c'.pt(⊤) is a concrete filtered colimit of (Y'.obj j)(⊤).
-      -- Every element factors through a piece (concrete colimit property).
-      -- Since pieces are subsingleton, the element is 0.
-      -- The cocone map at ⊤ from Y'.obj j (subsingleton) maps everything to 0.
-      have hzero : ∀ j (y : (Y'.obj j).val.obj (op ⊤)),
-          (c'.ι.app j).val.app (op ⊤) y = 0 :=
-        fun j y => @Subsingleton.elim _ (hGsub j) y 0 ▸ map_zero _
-      -- The composition sheafToPresheaf ⋙ eval(op ⊤) : Sheaf → AddCommGrpCat
-      -- preserves filtered colimits (evaluation preserves all colimits).
-      -- So c'.pt(⊤) is a colimit in AddCommGrpCat of the (Y'.obj j)(⊤).
-      -- Use Types.jointly_surjective to factor x through some piece.
-      -- Since the piece (Y'.obj j)(⊤) is subsingleton, the element is 0.
-      -- Step 1: Build the colimit cocone in AddCommGrpCat at ⊤
-      let evalTop := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)
-      -- The composite F = sheafToPresheaf ⋙ evalTop maps Sheaf → AddCommGrpCat
-      -- and preserves filtered colimits. So F.mapCocone c' is a colimit.
-      -- Since all F(Y'.obj j) are subsingleton, every element of F(c'.pt) is 0.
-      -- Use forget AddCommGrpCat + Types.jointly_surjective for the factoring.
-      -- Transfer c'.pt ≅ colimit Y' via hc', work in standard colimit.
-      -- The standard colimit cocone for Y' has colimit.ι.app j : Y'.obj j → colimit Y'.
-      -- FunctorToTypes.jointly_surjective' gives: for the presheaf-level colimit
-      -- evaluated at op ⊤, every element factors through a piece.
-      -- Transfer via c'.pt ≅ colimit Y' to show x = 0.
-      let iso_pt := hc'.coconePointUniqueUpToIso (colimit.isColimit Y')
-      -- iso_pt.hom : c'.pt ⟶ colimit Y'. Transfer x to (colimit Y')(⊤).
-      let x' := (iso_pt.hom).val.app (op ⊤) x
-      -- x' factors through (colimit.ι Y' j).val.app (op ⊤) for some j.
-      -- Since (Y'.obj j)(⊤) is subsingleton, x' = 0. Then x = 0 by iso.
-      -- Use: colimit.ι Y' j commutes with iso_pt via c'.ι.app j.
-      -- hc'.fac gives: c'.ι.app j ≫ iso_pt.hom = (colimit.cocone Y').ι.app j = colimit.ι Y' j
-      -- So (colimit.ι Y' j).val.app(op ⊤) y = (c'.ι.app j ≫ iso_pt.hom).val.app(op ⊤) y
-      --    = iso_pt.hom.val.app(op ⊤) ((c'.ι.app j).val.app(op ⊤) y)
-      --    = iso_pt.hom.val.app(op ⊤) 0  (by hzero)
-      --    = 0  (by map_zero)
-      -- So all colimit.ι at ⊤ send to 0, and since they're jointly surjective, x' = 0.
-      -- Then x = iso_pt.inv.val.app(op ⊤) x' = 0.
-      suffices hx' : x' = 0 by
-        have hinv : ConcreteCategory.hom (iso_pt.inv.val.app (op ⊤)) x' = x := by
-          change ConcreteCategory.hom ((iso_pt.hom ≫ iso_pt.inv).val.app (op ⊤)) x = x
-          rw [show iso_pt.hom ≫ iso_pt.inv = 𝟙 _ from iso_pt.hom_inv_id]
-          rfl
-        rw [← hinv, hx', map_zero]
-      -- Use Concrete.isColimit_exists_rep to factor x' through a piece.
-      -- Need: an IsColimit for a diagram in AddCommGrpCat evaluated at op ⊤.
-      -- Chain: sheaf colimit → presheaf colimit → eval at op ⊤ → AddCommGrpCat colimit.
-      -- Concrete.isColimit_exists_rep needs [PreservesColimit F (forget AddCommGrpCat)].
-      -- For now, sorry this colimit chain.
+      -- Need: Subsingleton(c'.pt(⊤)). This follows from: c'.pt(⊤) is a filtered colimit
+      -- of (Y'.obj j)(⊤) (which are all zero) in AddCommGrpCat. Every element factors
+      -- through a zero piece, hence is 0. Needs Concrete.isColimit_exists_rep + chain
+      -- sheafToPresheaf ⋙ evaluation preserves filtered colimits.
       sorry)
     (fun S => hfg S)
 
