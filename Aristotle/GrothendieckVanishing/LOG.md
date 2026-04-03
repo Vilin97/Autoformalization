@@ -1,5 +1,17 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T02:15Z — CLOSE hQcolim! fac + uniq proved via ext + hπ_cocone + hcompat
+
+**Sorry count: 1** (3 sub-sorry's: hQprov, hHom univ, n=0 dead)
+
+- **CLOSED hQcolim** — IsColimit for quotient cocone. The proof:
+  - desc_fun: cokernel.desc ι (cokernel.π(j₀≫ι) ≫ s.ι.app j₀) with ι ≫ g = 0
+  - fac: ext + show + simp [Category.assoc] + rw [hπ_cocone, cokernel.π_desc] + hcompat
+  - uniq: ext + show + rw [cokernel.π_desc, hm j₀, hπ_cocone]
+  - Helpers hπ_cocone, hcompat: PROVED via cokernel.π_desc + filtered compatibility
+- This was the main bottleneck for 5+ cycles (heartbeat issues with let-binding context).
+  Solved by using `show cokernel.π _ ≫ _ = cokernel.π _ ≫ _` to normalize after `ext`.
+
 ## 2026-04-03T01:45Z — Extract hQprov, stabilize sorry inventory at 4
 
 **Sorry count: 1** (ext_vanishing_of_colimit_aux + ext_comm_filtered_colimit_mono, 4 sorry's)

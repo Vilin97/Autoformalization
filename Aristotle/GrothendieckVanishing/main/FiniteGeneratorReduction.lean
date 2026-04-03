@@ -176,18 +176,17 @@ private theorem ext_vanishing_of_colimit_aux
                        ← Category.assoc, cokernel.condition, zero_comp])))
         (fun s j => by
           -- fac: Qcocone.ι.app j ≫ desc = s.ι.app j
-          -- After ext: cokernel.π(j≫ι) ≫ Qcocone.ι.app j ≫ desc = cokernel.π(j≫ι) ≫ s.ι.app j
-          -- LHS = cokernel.π(ι) ≫ desc = g = cokernel.π(j₀≫ι) ≫ s.ι.app j₀
-          -- RHS = cokernel.π(j≫ι) ≫ s.ι.app j
-          -- These are equal by hcompat.
-          sorry)
+          ext  -- precompose with cokernel.π(c.ι.app j ≫ ι)
+          show cokernel.π _ ≫ _ = cokernel.π _ ≫ _
+          simp only [Category.assoc]
+          rw [← Category.assoc (cokernel.π _) (Qcocone.ι.app j),
+              hπ_cocone j, cokernel.π_desc]
+          exact hcompat s j₀ j)
         (fun s m hm => by
           -- uniq: m = desc
-          -- After ext: cokernel.π(ι) ≫ m = cokernel.π(ι) ≫ desc
-          -- RHS = g = cokernel.π(j₀≫ι) ≫ s.ι.app j₀
-          -- LHS: cokernel.π(j₀≫ι) ≫ Qcocone.ι.app j₀ ≫ m = cokernel.π(j₀≫ι) ≫ s.ι.app j₀
-          -- (by hπ_cocone and hm j₀)
-          sorry)
+          ext  -- precompose with cokernel.π(ι)
+          show cokernel.π ι ≫ m = cokernel.π ι ≫ _
+          rw [cokernel.π_desc, ← hm j₀, ← Category.assoc, hπ_cocone j₀])
     -- Per-j vanishing: from SES 0 → Y.obj j → I → Q_j → 0 and LES.
     -- Needs c.ι.app j ≫ ι to be mono (requires mono transitions on the diagram).
     -- This is provided by ext_comm_filtered_colimit_mono which has [Mono (Y.map φ)].
