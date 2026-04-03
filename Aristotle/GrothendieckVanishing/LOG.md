@@ -1,5 +1,21 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T00:10Z — Extract sheaf separation lemma, simplify hsep structure
+
+**Sorry count: 5 keywords in 3 theorems, 1 logical gap**
+
+- **Extracted** standalone `sheaf_section_zero_of_zero_on_finite_cover` (sorry):
+  a section of a sheaf that restricts to 0 on a finite open cover is 0.
+  Moved outside the main proof to avoid heartbeat issues.
+- **Simplified** hsep proof: removed broken common-index approach (g₀ = hj₀_le.some
+  can't prove hb₁_zero), replaced with single sorry + documented strategy:
+  Finset.induction to iteratively build transition, then apply sheaf separation.
+- **Proved** h_ev_zero remains: each restriction eventually 0 via isColimit_eq_iff'
+- Aristotle job 50689427 at 24%
+- **Architecture insight**: the iterative construction needs IsFiltered.coeq_hom to
+  equalize parallel morphisms from j₀ to j_next at each Finset.induction step.
+  Previous zeros are preserved since transition maps are group homomorphisms (map_zero).
+
 ## 2026-04-03T23:50Z — Prove common index + cocone factorization in hsep
 
 **Sorry count: 4 keywords, 1 logical gap (same)**
