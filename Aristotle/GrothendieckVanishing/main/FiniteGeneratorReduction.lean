@@ -578,19 +578,35 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       -- and preserves filtered colimits. So F.mapCocone c' is a colimit.
       -- Since all F(Y'.obj j) are subsingleton, every element of F(c'.pt) is 0.
       -- Use forget AddCommGrpCat + Types.jointly_surjective for the factoring.
-      -- Use the concrete colimit: c'.pt = colimit Y'. Via colimit.isColimit and
-      -- the concrete colimit in presheaves, c'.pt(⊤) is a colimit in AddCommGrpCat.
-      -- The colimit API gives: (colimit.ι Y' j).val.app (op ⊤) is jointly surjective.
-      -- But c' might not be the STANDARD colimit cocone.
-      -- Transfer: c' ≅ colimit.cocone Y' via hc' ≅ colimit.isColimit.
-      -- Then c'.pt ≅ colimit Y', and c'.pt(⊤) ≅ (colimit Y')(⊤) = colimit (Y'.obj j)(⊤).
-      -- Elements of colimit (Y'.obj j)(⊤) factor through pieces (jointly_surjective).
-      -- Since pieces are subsingleton, x = 0.
-      -- Use the presheaf-level colimit: colimit of Y'.val at (op ⊤) is a colimit
-      -- in AddCommGrpCat. Since sheaf filtered colimits are computed objectwise
-      -- (presheaf colimit is already a sheaf), c'.pt.val.obj(op ⊤) is the colimit.
-      -- Then jointly_surjective gives factoring through a piece.
-      -- For now, sorry (needs Sheaf.hasFilteredColimitsOfSize internal structure).
+      -- Transfer c'.pt ≅ colimit Y' via hc', work in standard colimit.
+      -- The standard colimit cocone for Y' has colimit.ι.app j : Y'.obj j → colimit Y'.
+      -- FunctorToTypes.jointly_surjective' gives: for the presheaf-level colimit
+      -- evaluated at op ⊤, every element factors through a piece.
+      -- Transfer via c'.pt ≅ colimit Y' to show x = 0.
+      let iso_pt := hc'.coconePointUniqueUpToIso (colimit.isColimit Y')
+      -- iso_pt.hom : c'.pt ⟶ colimit Y'. Transfer x to (colimit Y')(⊤).
+      let x' := (iso_pt.hom).val.app (op ⊤) x
+      -- x' factors through (colimit.ι Y' j).val.app (op ⊤) for some j.
+      -- Since (Y'.obj j)(⊤) is subsingleton, x' = 0. Then x = 0 by iso.
+      -- Use: colimit.ι Y' j commutes with iso_pt via c'.ι.app j.
+      -- hc'.fac gives: c'.ι.app j ≫ iso_pt.hom = (colimit.cocone Y').ι.app j = colimit.ι Y' j
+      -- So (colimit.ι Y' j).val.app(op ⊤) y = (c'.ι.app j ≫ iso_pt.hom).val.app(op ⊤) y
+      --    = iso_pt.hom.val.app(op ⊤) ((c'.ι.app j).val.app(op ⊤) y)
+      --    = iso_pt.hom.val.app(op ⊤) 0  (by hzero)
+      --    = 0  (by map_zero)
+      -- So all colimit.ι at ⊤ send to 0, and since they're jointly surjective, x' = 0.
+      -- Then x = iso_pt.inv.val.app(op ⊤) x' = 0.
+      suffices hx' : x' = 0 by
+        have hinv : ConcreteCategory.hom (iso_pt.inv.val.app (op ⊤)) x' = x := by
+          change ConcreteCategory.hom ((iso_pt.hom ≫ iso_pt.inv).val.app (op ⊤)) x = x
+          rw [show iso_pt.hom ≫ iso_pt.inv = 𝟙 _ from iso_pt.hom_inv_id]
+          rfl
+        rw [← hinv, hx', map_zero]
+      -- x' ∈ (colimit Y').val.obj(op ⊤). Use FunctorToTypes.jointly_surjective'
+      -- on the presheaf-level diagram. Need to cast to Type-valued functors.
+      -- The presheaf (colimit Y').val is colimit of (Y'.obj j).val in presheaves.
+      -- Evaluation at op ⊤ gives a colimit in AddCommGrpCat.
+      -- forget to Type + jointly_surjective gives factoring.
       sorry)
     (fun S => hfg S)
 
