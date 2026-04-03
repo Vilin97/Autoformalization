@@ -524,7 +524,35 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     -- Universal hHom: for ANY filtered diagram, Hom(Z, colim) transfers subsingleton.
     -- Proof: Hom(Z, F) ≅ F(⊤) via constantSheafAdj. Filtered colimits of sheaves are
     -- objectwise: (colim F_j)(⊤) = colim(F_j(⊤)). Colimit of subsingletons is subsingleton.
-    (fun Y' c' hc' hvan' => by sorry)
+    (fun Y' c' hc' hvan' => by
+      -- Universal hHom: Hom(Z, colim F_j) subsingleton from Hom(Z, F_j) subsingleton.
+      -- Via constantSheafAdj: Hom(Z, F) ≅ F(⊤). So Subsingleton(F_j(⊤)) for all j.
+      -- For the colimit: c'.pt(⊤) receives maps from all F_j(⊤) which are subsingleton.
+      -- By the colimit universal property, c'.pt(⊤) is subsingleton.
+      have adj := constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
+        Limits.isTerminalTop
+      have heq : ∀ F : TopCat.Sheaf AddCommGrpCat.{u} X,
+          (Z ⟶ F) ≃ (AddCommGrpCat.of (ULift.{u} ℤ) ⟶
+            ((sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op ⊤)).obj F) :=
+        fun F => adj.homEquiv _ F
+      apply (heq c'.pt).subsingleton_congr.mpr
+      have hGsub : ∀ j, Subsingleton ((Y'.obj j).val.obj (op ⊤)) :=
+        fun j => addCommGrpCat_subsingleton_of_subsingleton_hom _
+          ((heq _).subsingleton_congr.mp (hvan' j))
+      -- c'.pt(⊤) subsingleton: use addCommGrpCat_subsingleton_hom_of_subsingleton.
+      -- Need: Subsingleton (c'.pt.val.obj (op ⊤)).
+      -- c'.pt(⊤) is a colimit of (Y'.obj j)(⊤) which are all subsingleton (zero).
+      -- Cocone maps from zero groups to c'.pt(⊤) all map to 0.
+      -- So c'.pt(⊤) is "generated" by 0's, hence subsingleton.
+      apply addCommGrpCat_subsingleton_hom_of_subsingleton
+      -- Goal: Subsingleton (c'.pt.val.obj (op ⊤))
+      -- Every element of c'.pt(⊤) comes from some Y'.obj j (⊤) via the cocone map.
+      -- Since Y'.obj j (⊤) is subsingleton, the image is {0}. So every element = 0.
+      constructor; intro s t
+      -- Show s = 0 and t = 0 by factoring through a piece.
+      -- For filtered colimits of sheaves on a topological space, evaluation at U
+      -- preserves the colimit. But this requires the "objectwise colimit" fact.
+      sorry)
     (fun S => hfg S)
 
 section FinsetGenerated
