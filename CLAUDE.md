@@ -73,5 +73,7 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 
 ## Remaining Work
 
-1 sorry remains in `FiniteGeneratorReduction.lean` (Mathlib API gap):
-1. `ext_comm_filtered_colimit_mono` n≥1 case — Ext^{n+1}(Z,-) preserves filtered colimits of mono diagrams. The n=0 case (Hom) is PROVED via constantSheafAdj + direct section argument. The n≥1 case requires Čech cohomology, universal δ-functors, or Godement resolution not in Mathlib v4.28.0.
+3 sorry's remain (Mathlib API gap — all reduce to AB5 for sheaves on Noetherian spaces):
+1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:64): filtered presheaf colimits of sheaves are sheaves on Noetherian spaces. Core AB5 gap.
+2. `ext_vanishing_of_colimit_aux` (FiniteGeneratorReduction.lean:146): recursive hQprov — quotient-of-quotient vanishing for the inductive step.
+3. `ext_comm_filtered_colimit_mono` (FiniteGeneratorReduction.lean:195): n=0 dead case — Hom-level cokernel vanishing, dead at call site (dim >= 1 implies m >= 2).
