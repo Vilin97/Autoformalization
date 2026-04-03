@@ -1,5 +1,17 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T23:30Z — Prove "eventually zero" via isColimit_eq_iff' in hsep
+
+**Sorry count: 4 keywords, 1 logical gap (same)**
+
+- **Proved** `h_ev_zero` inside `hsep`: for each k ∈ t, restriction of b₀ eventually
+  becomes 0 via transition map. Uses `Types.FilteredColimit.isColimit_eq_iff'` composed
+  with `forget AddCommGrpCat`. Key bridge: `change` + `map_zero` for Type/AddCommGrpCat
+  conversion.
+- **Remaining gap in hsep**: common index via `IsFiltered.sup_objs_exists`, then
+  sheaf separation on the piece to conclude `transition(b₀) = 0`.
+- Aristotle job 50689427 still at 5%
+
 ## 2026-04-03T23:15Z — Prove evaluation colimit + naturality in hsep; further decompose
 
 **Sorry count: 4 keywords, 1 logical gap (same)**
