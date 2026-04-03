@@ -1,5 +1,28 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T21:30Z — Deep analysis of hQprov, improved documentation (2 sorry's)
+
+**Sorry count: 2** (1 in SheafHom.lean:63, 1 in FiniteGeneratorReduction.lean:198)
+
+- **Deep analysis of hQprov sorry**: Exhaustive investigation of approaches to close the
+  recursive quotient vanishing sorry. Key findings:
+  - The 5-lemma approach (comparing colim LES with colim LES) works at degree 1 but requires
+    PreservesFilteredColimitsOfSize for coyoneda at degree 0 on Q (no mono transitions).
+  - For degree ≥ 2, the 5-lemma requires θ_{n-1}^Q iso, creating a circular dependency
+    with the same problem at one degree lower.
+  - Cumulative per-j vanishing (at all degrees ≥ m) allows ext_sandwich on Q_j at all
+    degrees ≥ 1, but the recursion to Q-of-Q still fails without mono transitions on Q.
+  - The only viable fixes remain: (a) functorial injective resolutions (Hartshorne's actual
+    approach), or (b) establishing PreservesFilteredColimitsOfSize for coyoneda.obj(op Z)
+    combined with a non-recursive argument.
+- **Improved sorry documentation**: Updated structural gap comments in FiniteGeneratorReduction.lean
+  with clearer description of the gap and potential fixes.
+- **Updated plan.md and critique.md** for this cycle.
+- **Aristotle**: API still unreachable from HPC cluster.
+- Remaining sorry's (unchanged):
+  1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:63) — core AB5 gap
+  2. `hQprov` (FiniteGeneratorReduction.lean:198) — structural gap in proof strategy
+
 ## 2026-04-03T20:00Z — Close sorry at line 180, analyze hQprov structural gap (2 sorry's)
 
 **Sorry count: 2** (1 in SheafHom.lean:63, 1 in FiniteGeneratorReduction.lean:196)

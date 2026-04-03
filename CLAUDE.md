@@ -48,7 +48,7 @@ GrothendieckVanishing.lean    ← Main theorem (assembles all cases)
 └── (shared infrastructure)
     ├── SetupCore.lean         ← Core: category instances, ClosedImmersionSES
     ├── FlasqueVanishing.lean  ← Flasque sheaf theory and cohomological vanishing
-    ├── Setup.lean             ← Wrapper theorems (contains IrreduciblePosVanishing sorry)
+    ├── Setup.lean             ← Wrapper theorems (IrreduciblePosVanishing, ReducibleVanishing)
     ├── ClosedImmersion.lean   ← Closed immersion counit/stalk
     ├── ZeroOutside.lean       ← Extension-by-zero sheaf machinery
     ├── CohomologyIso.lean     ← H'(⊤, F) ≅ H(F) isomorphisms
@@ -73,6 +73,6 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 
 ## Remaining Work
 
-2 sorry's remain (Mathlib API gap — all reduce to AB5 for sheaves on Noetherian spaces):
-1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:63): filtered presheaf colimits of sheaves are sheaves on Noetherian spaces. Core AB5 gap.
-2. `ext_vanishing_of_colimit_aux` (FiniteGeneratorReduction.lean:180,188): recursive hQprov — quotient-of-quotient vanishing for the inductive step.
+2 sorry's remain:
+1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:63): filtered presheaf colimits of sheaves are sheaves on Noetherian spaces. Mathlib API gap (AB5).
+2. `hQprov` in `ext_vanishing_of_colimit_aux` (FiniteGeneratorReduction.lean:198): recursive quotient vanishing. Structural gap — Q-diagram transitions are not mono, breaking the inductive scheme. Needs restructuring (see plan.md).

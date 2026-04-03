@@ -8,7 +8,7 @@
   - isSheaf_filtered_colimit_of_sheaves (SheafHom.lean:63) — filtered presheaf colimits of
     sheaves are sheaves on Noetherian spaces (AB5: filtered colimits commute with finite
     limits in the sheaf condition).
-  - hQprov (FiniteGeneratorReduction.lean:180,188) — recursive quotient vanishing for IH call.
+  - hQprov (FiniteGeneratorReduction.lean:198) — recursive quotient vanishing for IH call.
 
   File structure:
   - SetupCore.lean: category instances, FlasqueVanishing, PushforwardHVanishing, ClosedImmersionSES

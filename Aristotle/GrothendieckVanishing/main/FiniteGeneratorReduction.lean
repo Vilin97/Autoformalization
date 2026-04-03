@@ -185,14 +185,14 @@ private theorem ext_vanishing_of_colimit_aux
       -- Per-j vanishing: Ext^{n'+1}(Z, Q_j) = 0 from hQvan_provider.
       have hQvan : ∀ j, Subsingleton (Ext Z (Qfun.obj j) (n' + 1)) :=
         fun j => hQvan_provider (n' + 1) rfl ip j
-      -- hQprov: provider for recursive call. Asks for Ext^{n'}(Z, cokernel(Qcocone.ι.app j ≫ ip'.f))=0.
-      -- STRUCTURAL GAP: The Q-diagram's transitions are NOT mono (snake lemma shows
-      -- ker(cokernel.map) ≅ coker(Y.map φ) ≠ 0), so:
-      -- (1) Qcocone.ι.app j is not provably mono
-      -- (2) ext_sandwich can't be applied (no short exact sequence)
-      -- (3) hHom_univ (vanishing only) is too weak to derive surjectivity of Hom(Z,I)→Hom(Z,Q)
-      -- FIX: Either strengthen hHom_univ to PreservesFilteredColimits (coyoneda.obj (op Z)),
-      -- or restructure proof to use individual injective presentations per Y_j (Hartshorne 2.9).
+      -- hQprov: provider for recursive call (n'+1 = n''+1 forces n'' = n').
+      -- Asks: ∀ ip' j, Ext^{n'}(Z, cokernel(Qcocone.ι.app j ≫ ip'.f)) = 0.
+      -- STRUCTURAL GAP: Q-diagram transitions are NOT mono (snake lemma:
+      -- ker(cokernel.map) ≅ coker(Y.map φ) ≠ 0). Without mono, ext_sandwich can't recurse.
+      -- Fix: follow Hartshorne III.2.9 more closely — use functorial injective resolutions
+      -- (one per Y_j) so quotient transitions inherit mono. Alternatively, establish
+      -- PreservesFilteredColimitsOfSize for coyoneda.obj (op Z) in the sheaf category
+      -- (true for Z = constant sheaf on Noetherian spaces, via AB5 + evaluation).
       have hQprov : ∀ (n'' : ℕ), n' + 1 = n'' + 1 →
           ∀ (ip' : InjectivePresentation Qcocone.pt) (j : J),
           Subsingleton (Ext Z (cokernel (Qcocone.ι.app j ≫ ip'.shortComplex.f)) n'') := sorry
