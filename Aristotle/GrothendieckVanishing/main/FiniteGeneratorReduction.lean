@@ -578,10 +578,19 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       constructor; intro s t
       suffices h : ∀ x : (colimit Y').val.obj (op ⊤), x = 0 from (h s).trans (h t).symm
       intro x
-      -- Factor x through a piece. Use Concrete.colimit_exists_rep on the presheaf-level
-      -- colimit (evaluation at op ⊤ of the standard presheaf colimit).
-      -- The presheaf (colimit Y').val is related to colimit(Y' ⋙ stp) via sheafification.
-      -- For now, sorry the factoring (needs PreservesColimit for sheafToPresheaf on filtered).
+      -- All cocone maps at ⊤ send to 0 (since source is subsingleton).
+      -- x is in the image of some cocone map (colimit.ι Y' j).val.app (op ⊤).
+      -- Since source (Y'.obj j).val.obj (op ⊤) is subsingleton, x = 0.
+      -- Cocone maps at ⊤ map to 0:
+      have hzero₂ : ∀ j (y : (Y'.obj j).val.obj (op ⊤)),
+          (colimit.ι Y' j).val.app (op ⊤) y = 0 :=
+        fun j y => @Subsingleton.elim _ (hGsub j) y 0 ▸ map_zero _
+      -- Use hc' (IsColimit c') transferred to colimit Y' via iso.
+      -- The colimit cocone maps (colimit.ι Y' j) jointly generate (colimit Y').
+      -- At the section level: every x ∈ (colimit Y').val.obj(op ⊤) factors through some
+      -- (colimit.ι Y' j).val.app(op ⊤). Since hzero₂, x = 0.
+      -- This factoring is the content of the sheaf colimit being objectwise.
+      -- For abelian sheaves on a topological space with AB5, this holds.
       sorry)
     (fun S => hfg S)
 
