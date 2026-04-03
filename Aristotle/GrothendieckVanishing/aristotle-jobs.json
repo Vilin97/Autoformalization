@@ -1,11 +1,18 @@
 {
   "jobs": [
     {
+      "id": "1676d0c9-2664-416b-b255-9c5c2de326c0",
+      "submission": "aristotle-in/sheafH_filtered_colimit.lean",
+      "target": "sheafH_preserves_filtered_colimits (LAST sorry)",
+      "status": "QUEUED",
+      "note": "Submitted 2026-04-03. Sheaf-specific version. Would close the ONLY remaining sorry."
+    },
+    {
       "id": "782d0f32-ebe4-4a3c-826c-0e4769b7707d",
       "submission": "aristotle-in/ext_filtered_colimit.lean",
       "target": "ext_vanishing_of_filtered_colimit (general categorical form)",
-      "status": "QUEUED",
-      "note": "Submitted 2026-04-03. Ext^n vanishing through filtered colimits. Would close all 4 sorry's if proved."
+      "status": "IN_PROGRESS",
+      "note": "Submitted 2026-04-03. Abstract version at 38%. Superseded by sheaf-specific submission but may still produce useful results."
     },
     {
       "id": "105033c9-934b-4e08-8239-cc82af90e5fa",
