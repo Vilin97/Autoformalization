@@ -8,7 +8,7 @@
   - IrreduciblePosVanishing: assembles all pieces
     (2 sorry's: 1 in SheafHom.lean (AB5), 1 in FiniteGeneratorReduction.lean)
 -/
-import Aristotle.GrothendieckVanishing.main.SheafStalkAlgebra
+import Aristotle.GrothendieckVanishing.main.StalkGeneratorAlgebra
 
 universe u
 
