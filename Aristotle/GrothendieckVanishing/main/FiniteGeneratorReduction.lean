@@ -185,6 +185,30 @@ private theorem isSheaf_presheaf_filtered_colimit
   -- Separation: a section of c.pt zero on all U_k (k ∈ t) is zero
   have hsep : ∀ (a : ToType (c.pt.obj (op (iSup U)))),
       (∀ k ∈ t, c.pt.map (Opens.leSupr U k).op a = 0) → a = 0 := by
+    intro a ha
+    -- Evaluation at each open gives a colimit in AddCommGrpCat
+    let ev V := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op V)
+    have hcV : ∀ V, IsColimit ((ev V).mapCocone c) := fun V => isColimitOfPreserves (ev V) hc
+    -- a factors through some (Y'.obj j₀).val.obj (op (iSup U))
+    obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ (hcV (iSup U)) a
+    -- For each k ∈ t, the restriction of b₀ to U_k maps to 0 in the colimit.
+    -- By naturality, this is the same as restricting a (= image of b₀) to U_k.
+    -- Naturality: ι_{j₀}(res(b₀)) = res(ι_{j₀}(b₀)) = res(a)
+    have hnat : ∀ k, ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀)
+        (ConcreteCategory.hom ((Y'.obj j₀).val.map (Opens.leSupr U k).op) b₀) =
+      ConcreteCategory.hom (c.pt.map (Opens.leSupr U k).op) a := by
+      intro k; simp only [Functor.mapCocone_ι_app]; rw [← hb₀]
+      change ConcreteCategory.hom
+        (((Y' ⋙ sheafToPresheaf _ _).obj j₀).map _ ≫ (c.ι.app j₀).app _) b₀ =
+        ConcreteCategory.hom
+        ((c.ι.app j₀).app _ ≫ (((Functor.const J').obj c.pt).obj j₀).map _) b₀
+      rw [(c.ι.app j₀).naturality (Opens.leSupr U k).op]
+    -- So the restriction of b₀ to U_k maps to 0 in the k-th evaluation colimit
+    have hres_zero : ∀ k ∈ t, ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀)
+        (ConcreteCategory.hom ((Y'.obj j₀).val.map (Opens.leSupr U k).op) b₀) = 0 := by
+      intro k hk; rw [hnat k]; exact ha k hk
+    -- Each restriction eventually becomes 0 in some piece (filtered colimit property)
+    -- Then find common index, apply sheaf condition on the piece, conclude a = 0
     sorry
   -- Existence: construct a gluing section
   have hexist : ∃ s, Presheaf.IsGluing c.pt U sf s := by

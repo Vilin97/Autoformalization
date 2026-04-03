@@ -1,5 +1,18 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T23:15Z — Prove evaluation colimit + naturality in hsep; further decompose
+
+**Sorry count: 4 keywords, 1 logical gap (same)**
+
+- **Proved** inside `hsep` (separation sub-goal of `isSheaf_presheaf_filtered_colimit`):
+  - `hcV`: evaluation at each open V gives colimit in AddCommGrpCat (`isColimitOfPreserves`)
+  - `⟨j₀, b₀, hb₀⟩`: representative via `Concrete.isColimit_exists_rep`
+  - `hnat`: naturality — ι_{j₀}(res(b₀, U_k)) = res(a) (via `NatTrans.naturality`)
+  - `hres_zero`: restriction of b₀ maps to 0 in k-th evaluation colimit
+- **Remaining gap in hsep**: need "eventually zero" property of filtered colimits
+  (if ι_j(x) = 0 then ∃ f : j → k, F(f)(x) = 0), then common index, sheaf separation
+- Aristotle job 50689427 still at 5%
+
 ## 2026-04-03T22:40Z — Decompose isSheaf sorry into separation + existence; submit to Aristotle
 
 **Sorry count: 4 keywords, 1 logical gap (same gap, finer decomposition)**
