@@ -169,7 +169,13 @@ private theorem sheaf_section_zero_of_zero_on_finite_cover
     (b : ToType (F.val.obj (op (iSup U))))
     (hzero : ∀ k ∈ t, ConcreteCategory.hom (F.val.map (Opens.leSupr U k).op) b = 0) :
     b = 0 := by
-  sorry
+  -- Use section_ext: b and 0 agree on an open cover, hence are equal
+  have hFS : TopCat.Presheaf.IsSheaf F.val := F.cond
+  exact hFS.section_ext (s := b) (t := 0) fun x hx => by
+    -- x ∈ iSup U, so x ∈ some U_k with k ∈ t (from hcov)
+    obtain ⟨k, hk⟩ := Opens.mem_iSup.mp (hcov hx)
+    obtain ⟨hkt, hxk⟩ := Opens.mem_iSup.mp hk
+    exact ⟨U k, le_iSup U k, hxk, (hzero k hkt).trans (map_zero _).symm⟩
 
 /-- On a Noetherian space, the presheaf-level filtered colimit of sheaves is a sheaf.
     Uses: Noetherian → every open cover has finite subcover → sheaf condition is a finite limit →
