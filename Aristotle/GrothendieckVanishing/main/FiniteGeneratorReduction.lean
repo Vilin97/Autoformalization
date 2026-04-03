@@ -578,12 +578,20 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       -- and preserves filtered colimits. So F.mapCocone c' is a colimit.
       -- Since all F(Y'.obj j) are subsingleton, every element of F(c'.pt) is 0.
       -- Use forget AddCommGrpCat + Types.jointly_surjective for the factoring.
-      -- sheafToPresheaf ⋙ evalTop : Sheaf → AddCommGrpCat preserves the filtered colimit.
-      -- Then forget to Type + Types.jointly_surjective gives: x factors through some piece.
-      -- Since the piece is subsingleton (hGsub), x = hzero j y = 0.
-      -- The PreservesColimit instance for sheafToPresheaf on filtered diagrams follows
-      -- from Sheaf.hasFilteredColimitsOfSize (presheaf colimit is already a sheaf).
-      -- For now, sorry this pure Mathlib infrastructure piece.
+      -- Use hHom (specific to finsetGenFunctor K) to show Z ⟶ K is subsingleton.
+      -- But we need this for ARBITRARY c'.pt, not just K!
+      -- The issue: hc'.hom_ext only works for morphisms OUT of c'.pt, not INTO it.
+      -- For morphisms INTO c'.pt (like Z ⟶ c'.pt), we need the dual property.
+      -- For filtered colimits with Hom(Z, -) factoring (hFactor), every Z → c'.pt
+      -- factors through some Y'.obj j. Since Z → Y'.obj j is subsingleton, so is Z → c'.pt.
+      -- This IS exactly what hHom says: Subsingleton on pieces → Subsingleton on colimit.
+      -- But hHom is specific to the finsetGenFunctor diagram, not universal.
+      -- For the universal version, we need the same argument for any filtered diagram.
+      -- The key: the hHom proof uses sHom_app_generator (specific to finsetGenFunctor).
+      -- For the UNIVERSAL version, we use: Hom(Z, -) factors through pieces (hFactor).
+      -- Since IsFiltered J' and Z is finitely presentable (for sheaves on Noetherian space),
+      -- every Z → c'.pt factors through some Y'.obj j.
+      -- But IsFinitelyPresentable Z is not available here.
       sorry)
     (fun S => hfg S)
 
