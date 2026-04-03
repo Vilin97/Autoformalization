@@ -1,5 +1,18 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T23:50Z — Prove common index + cocone factorization in hsep
+
+**Sorry count: 4 keywords, 1 logical gap (same)**
+
+- **Proved** inside `hsep`:
+  - Common index `j₁` via `IsFiltered.sup_objs_exists` + `DecidableEq`
+  - Cocone factorization: `ι_{j₀}(b₀) = ι_{j₁}(b₁)` via `c.ι.naturality g₀`
+  - Final conclusion: `b₁ = 0 → a = 0` via `map_zero`
+- **Remaining 2 sorry's in hsep**:
+  - `hb₁_zero`: transition restricts to 0 (needs `Finset.induction` to merge paths)
+  - `hb₁_eq_zero`: sheaf separation (heartbeat-expensive inside complex proof context)
+- Aristotle job 50689427 at 12%
+
 ## 2026-04-03T23:30Z — Prove "eventually zero" via isColimit_eq_iff' in hsep
 
 **Sorry count: 4 keywords, 1 logical gap (same)**
