@@ -316,8 +316,8 @@ theorem cokernel_openHom_vanishing
 
 These lemmas decompose the kernel vanishing argument.
 `zeroOutsideInt_cohomology_vanishing` is proved. `exists_good_section` is proved.
-`ext_vanishing_of_colimit_aux` + `ext_comm_filtered_colimit_mono` have 2 sorry's (see FiniteGeneratorReduction.lean).
-`cohomology_vanishing_of_finitelyGenerated_vanishing` is now fully proved via the filtered diagram.
+`sheafH_preserves_filtered_colimits` has 1 sorry (isSheaf_presheaf_filtered_colimit).
+`cohomology_vanishing_of_finitelyGenerated_vanishing` is fully proved via the filtered diagram.
 -/
 
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every

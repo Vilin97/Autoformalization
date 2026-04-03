@@ -221,7 +221,7 @@ private theorem sheafH_filtered_colimit_aux
     -- isSheaf_presheaf_filtered_colimit), so global sections commute with
     -- filtered colimits. If each piece has trivial global sections, so does the colimit.
     intro J' inst1 inst2 Y' c' hc' hvan
-    haveI := inst1; haveI := inst2
+    letI := inst1; letI := inst2
     sorry
   | succ n ih =>
     -- Inductive step: dimension shifting via injective embedding.
