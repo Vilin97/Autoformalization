@@ -5,9 +5,9 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  The proof assembles (modulo 2 sorry's: 1 AB5 in SheafHom.lean, 1 in FiniteGeneratorReduction.lean):
+  The proof assembles (1 sorry in FiniteGeneratorReduction.lean: isSheaf_presheaf_filtered_colimit):
   - DimZeroVanishing: irreducible dim 0 case
-  - IrreducibleStep + SheafHom + FiniteGeneratorReduction: irreducible dim >= 1 case
+  - IrreducibleStep + FiniteGeneratorReduction: irreducible dim >= 1 case
   - ClosedOpenDecomposition: reduction to irreducible
 -/
 import Aristotle.GrothendieckVanishing.main.DimZeroVanishing

@@ -1,5 +1,24 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T20:20Z — Decomposed sorry + dimension shifting + docstring fixes
+
+**Sorry count: 3 keywords, 1 logical gap (unchanged)**
+
+- **Decomposed** `sheafH_preserves_filtered_colimits` into structured proof:
+  - `isSheaf_presheaf_filtered_colimit` — KEY sub-lemma (sorry)
+  - `createsFilteredColimit` — follows from above (proved)
+  - `sheafH_filtered_colimit_aux` — induction on n:
+    - Base case n=0: sorry (needs isSheaf)
+    - Inductive step n+1: dimension shifting via `Injective.ι`, `ext_dimension_shift`,
+      `Ext.subsingleton_of_injective` — PROVED modulo hQ sorry
+- **Submitted** `isSheaf_presheaf_filtered_colimit` to Aristotle (job b1902f2c, 11%)
+- **Fixed 3 stale docstrings** referencing deleted SheafHom.lean and nonexistent theorems:
+  - GrothendieckVanishing.lean:8
+  - IrreducibleStep.lean:9
+  - SheafStalkAlgebra.lean:319
+- **Critique updated** — found docs 404 (P1), stale docstrings (P2), dead code (P3)
+- **Aristotle status**: 1676d0c9 at 20%, 782d0f32 at 42%, b1902f2c at 11%
+
 ## 2026-04-03T19:30Z — 1 sorry remains: sheafH_preserves_filtered_colimits
 
 **Sorry count: 1 (was 2 at start of session)**

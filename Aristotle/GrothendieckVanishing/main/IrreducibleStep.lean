@@ -6,7 +6,7 @@
     image subgroup generator d, then divisibility d | d_x follows from minimality.
   - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
   - IrreduciblePosVanishing: assembles all pieces
-    (2 sorry's: 1 in SheafHom.lean (AB5), 1 in FiniteGeneratorReduction.lean)
+    (1 sorry in FiniteGeneratorReduction.lean: isSheaf_presheaf_filtered_colimit)
 -/
 import Aristotle.GrothendieckVanishing.main.StalkGeneratorAlgebra
 
