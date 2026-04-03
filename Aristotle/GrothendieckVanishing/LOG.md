@@ -1,5 +1,10 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T03:00Z — Final session cleanup, 4 sorry's stable
+
+**Sorry count: 4 code sorry's (3 warnings)**. All infrastructure gaps, no mathematical gaps.
+See FiniteGeneratorReduction.lean for details.
+
 ## 2026-04-03T02:15Z — CLOSE hQcolim! fac + uniq proved via ext + hπ_cocone + hcompat
 
 **Sorry count: 1** (3 sub-sorry's: hQprov, hHom univ, n=0 dead)
