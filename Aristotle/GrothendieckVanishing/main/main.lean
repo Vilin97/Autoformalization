@@ -4,25 +4,23 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  Sorry's (2 remaining):
-  - isSheaf_filtered_colimit_of_sheaves (SheafHom.lean:63) — filtered presheaf colimits of
-    sheaves are sheaves on Noetherian spaces (AB5: filtered colimits commute with finite
-    limits in the sheaf condition).
-  - hQprov (FiniteGeneratorReduction.lean:198) — recursive quotient vanishing for IH call.
+  Sorry's (1 remaining):
+  - sheafH_preserves_filtered_colimits (FiniteGeneratorReduction.lean) — sheaf cohomology
+    H^n commutes with filtered colimits on Noetherian spaces (derived functor commutation).
 
   File structure:
   - SetupCore.lean: category instances, FlasqueVanishing, PushforwardHVanishing, ClosedImmersionSES
   - Setup.lean: ReducibleVanishing, IrreduciblePosVanishing wrapper
   - Auxiliary.lean: topology/dimension helpers
   - ClosedImmersion.lean: closed immersion counit/stalk infrastructure
-  - ZeroOutside.lean: extension-by-zero sheaf machinery
+  - ZeroOutside.lean + ZeroOutsideFinset.lean: extension-by-zero sheaf machinery
   - ConstantSheafFlasque.lean: constant sheaf on irreducible space is flasque
   - CohomologyIso.lean: H'(⊤, F) ≅ H(F) isomorphisms
   - DimZeroVanishing.lean: irreducible dim 0 case
   - ReducibleVanishing.lean: reducible case via Finset.induction
   - ClosedOpenDecomposition.lean: reduction to irreducible
-  - SheafHom.lean: Hom(Z_X,-) preserves filtered colimit vanishing (1 sorry: AB5)
-  - FiniteGeneratorReduction.lean: colimit step, filtered diagram, f.g. vanishing (1 sorry: hQprov)
+  - FiniteGeneratorReduction.lean: colimit step, filtered diagram, f.g. vanishing (1 sorry)
+  - SheafStalkAlgebra.lean + StalkGeneratorAlgebra.lean: stalk algebra, Ext LES
   - IrreducibleStep.lean: irreducible step assembly
   - GrothendieckVanishing.lean: main theorem + cascade theorems
 -/

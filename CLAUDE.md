@@ -73,6 +73,5 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 
 ## Remaining Work
 
-2 sorry's remain:
-1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:63): filtered presheaf colimits of sheaves are sheaves on Noetherian spaces. Mathlib API gap (AB5).
-2. `hQprov` in `ext_vanishing_of_colimit_aux` (FiniteGeneratorReduction.lean:198): recursive quotient vanishing. Structural gap — Q-diagram transitions are not mono, breaking the inductive scheme. Needs restructuring (see plan.md).
+1 sorry remains in `FiniteGeneratorReduction.lean`:
+1. `sheafH_preserves_filtered_colimits` — sheaf cohomology H^n commutes with filtered colimits on Noetherian spaces. This is the derived functor commutation theorem (R^n Γ preserves filtered colimits). Requires: (a) Γ preserves filtered colimits (AB5 for sheaves), (b) filtered colimits of injective resolutions are injective resolutions, (c) cohomology commutes with filtered colimits of abelian groups.
