@@ -578,20 +578,19 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       -- and preserves filtered colimits. So F.mapCocone c' is a colimit.
       -- Since all F(Y'.obj j) are subsingleton, every element of F(c'.pt) is 0.
       -- Use forget AddCommGrpCat + Types.jointly_surjective for the factoring.
-      -- Use hHom (specific to finsetGenFunctor K) to show Z ⟶ K is subsingleton.
-      -- But we need this for ARBITRARY c'.pt, not just K!
-      -- The issue: hc'.hom_ext only works for morphisms OUT of c'.pt, not INTO it.
-      -- For morphisms INTO c'.pt (like Z ⟶ c'.pt), we need the dual property.
-      -- For filtered colimits with Hom(Z, -) factoring (hFactor), every Z → c'.pt
-      -- factors through some Y'.obj j. Since Z → Y'.obj j is subsingleton, so is Z → c'.pt.
-      -- This IS exactly what hHom says: Subsingleton on pieces → Subsingleton on colimit.
-      -- But hHom is specific to the finsetGenFunctor diagram, not universal.
-      -- For the universal version, we need the same argument for any filtered diagram.
-      -- The key: the hHom proof uses sHom_app_generator (specific to finsetGenFunctor).
-      -- For the UNIVERSAL version, we use: Hom(Z, -) factors through pieces (hFactor).
-      -- Since IsFiltered J' and Z is finitely presentable (for sheaves on Noetherian space),
-      -- every Z → c'.pt factors through some Y'.obj j.
-      -- But IsFinitelyPresentable Z is not available here.
+      -- Use the concrete colimit: c'.pt = colimit Y'. Via colimit.isColimit and
+      -- the concrete colimit in presheaves, c'.pt(⊤) is a colimit in AddCommGrpCat.
+      -- The colimit API gives: (colimit.ι Y' j).val.app (op ⊤) is jointly surjective.
+      -- But c' might not be the STANDARD colimit cocone.
+      -- Transfer: c' ≅ colimit.cocone Y' via hc' ≅ colimit.isColimit.
+      -- Then c'.pt ≅ colimit Y', and c'.pt(⊤) ≅ (colimit Y')(⊤) = colimit (Y'.obj j)(⊤).
+      -- Elements of colimit (Y'.obj j)(⊤) factor through pieces (jointly_surjective).
+      -- Since pieces are subsingleton, x = 0.
+      -- Use the presheaf-level colimit: colimit of Y'.val at (op ⊤) is a colimit
+      -- in AddCommGrpCat. Since sheaf filtered colimits are computed objectwise
+      -- (presheaf colimit is already a sheaf), c'.pt.val.obj(op ⊤) is the colimit.
+      -- Then jointly_surjective gives factoring through a piece.
+      -- For now, sorry (needs Sheaf.hasFilteredColimitsOfSize internal structure).
       sorry)
     (fun S => hfg S)
 
