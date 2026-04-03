@@ -1,5 +1,15 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T00:20Z — PROVE sheaf_section_zero_of_zero_on_finite_cover (3→2 sorry warnings)
+
+**Sorry count: 4 keywords in 2 theorems (was 5 in 3)**
+
+- **PROVED** `sheaf_section_zero_of_zero_on_finite_cover` using `IsSheaf.section_ext`:
+  for each x ∈ iSup U, hcov gives k ∈ t with x ∈ U_k, then hzero + map_zero.
+  Clean 5-line proof. Key discovery: `F.cond` needs explicit type annotation
+  `TopCat.Presheaf.IsSheaf F.val` for dot notation to work.
+- Aristotle job 50689427 at 24%
+
 ## 2026-04-04T00:10Z — Extract sheaf separation lemma, simplify hsep structure
 
 **Sorry count: 5 keywords in 3 theorems, 1 logical gap**
