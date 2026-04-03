@@ -1,5 +1,23 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T19:30Z — 1 sorry remains: sheafH_preserves_filtered_colimits
+
+**Sorry count: 1 (was 2 at start of session)**
+
+Major restructuring this session:
+- **Consolidated 2 sorry's → 1**: introduced `sheafH_preserves_filtered_colimits` at the sheaf
+  level, bypassing the abstract `ext_vanishing_of_colimit_aux` which had the hQprov circularity.
+- **Deleted SheafHom.lean** (entire file — sorry #1 subsumed by the new single sorry)
+- **Deleted ext_vanishing_of_colimit_aux + ext_comm_filtered_colimit_mono** (162 lines dead code)
+- **Removed m≥2 constraint** from directLimit_cohomology_vanishing and callers
+- **Split ZeroOutside.lean** (733 → 445 + 318 lines, new ZeroOutsideFinset.lean)
+- **Split SheafStalkAlgebra.lean** (688 → 432 + 277 lines, new StalkGeneratorAlgebra.lean)
+- Submitted 2 Aristotle jobs for the last sorry (abstract 782d0f32 at 38%, sheaf-specific 1676d0c9 at 4%)
+- Updated CLAUDE.md, main.lean docstrings
+
+Remaining sorry: `sheafH_preserves_filtered_colimits` — derived functor commutation (H^n
+commutes with filtered colimits on Noetherian spaces). Requires AB5 for sheaves.
+
 ## 2026-04-03T16:30Z — Close sorry #3 (dead branch), reduce to 3 sorry's
 
 **Sorry count: 3 (was 4)**
