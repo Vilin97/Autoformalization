@@ -541,12 +541,26 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     -- Proof: Hom(Z, F) ≅ F(⊤) via constantSheafAdj. Filtered colimits of sheaves are
     -- objectwise: (colim F_j)(⊤) = colim(F_j(⊤)). Colimit of subsingletons is subsingleton.
     (fun Y' c' hc' hvan' => by
-      -- Universal hHom: Subsingleton(Z ⟶ c'.pt) from Subsingleton(Z ⟶ Y'.obj j) for all j.
-      -- Via constantSheafAdj: Hom(Z, F) ≅ F(⊤). So Subsingleton(F_j(⊤)) for all j.
-      -- Need: Subsingleton(c'.pt(⊤)). This follows from: c'.pt(⊤) is a filtered colimit
-      -- of (Y'.obj j)(⊤) (which are all zero) in AddCommGrpCat. Every element factors
-      -- through a zero piece, hence is 0. Needs Concrete.isColimit_exists_rep + chain
-      -- sheafToPresheaf ⋙ evaluation preserves filtered colimits.
+      -- Hom(Z, c'.pt) subsingleton from Hom(Z, Y'.obj j) subsingleton.
+      -- Via constantSheafAdj: Hom(Z, F) ≅ F(⊤). Need Subsingleton(c'.pt(⊤)).
+      -- Use Concrete.isColimit_exists_rep on the sections-at-⊤ diagram.
+      have adj := constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
+        Limits.isTerminalTop
+      have heq : ∀ F : TopCat.Sheaf AddCommGrpCat.{u} X,
+          (Z ⟶ F) ≃ (AddCommGrpCat.of (ULift.{u} ℤ) ⟶
+            ((sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op ⊤)).obj F) :=
+        fun F => adj.homEquiv _ F
+      apply (heq c'.pt).subsingleton_congr.mpr
+      apply addCommGrpCat_subsingleton_hom_of_subsingleton
+      have hGsub : ∀ j, Subsingleton ((Y'.obj j).val.obj (op ⊤)) :=
+        fun j => addCommGrpCat_subsingleton_of_subsingleton_hom _
+          ((heq _).subsingleton_congr.mp (hvan' j))
+      -- Goal: Subsingleton(c'.pt.val.obj (op ⊤))
+      -- Use Concrete.isColimit_exists_rep: need IsColimit in AddCommGrpCat.
+      -- Build via: hc' (sheaf) → isColimitOfPreserves with sheafToPresheaf ⋙ eval(⊤).
+      -- Since PreservesColimit doesn't auto-synthesize, provide manually via
+      -- Sheaf.createsColimitOfIsSheaf + evaluation_preservesColimit.
+      -- For now, sorry this infrastructure bridge.
       sorry)
     (fun S => hfg S)
 
