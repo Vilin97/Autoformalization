@@ -2,12 +2,12 @@
   FiniteGeneratorReduction.lean — Colimit step and finitely generated vanishing
 
   Key results:
-  - ext_vanishing_of_colimit_pieces: Ext^n colimit transfer (Hartshorne III Lemma 2.9).
-    n=0 case PROVED via hHom + Ext.homEquiv₀. n≥1 case has 1 sorry (Mathlib API gap):
-    dimension shift reduces to Ext^n(Z, Q) = 0 for Q = cokernel of injective embedding.
-    Needs Čech / universal δ-functors / Godement resolution.
-  - ext_comm_filtered_colimit_mono: Wrapper that handles n=0 directly and delegates n≥1
-    to ext_vanishing_of_colimit_pieces (PROVED modulo the sorry in that lemma)
+  - ext_vanishing_of_colimit_aux: Ext^n colimit transfer (Hartshorne III Lemma 2.9).
+    n=0 PROVED. n≥1: dimension shift + quotient functor Qfun + cocone + IsColimit all PROVED.
+    3 sorry's remain: hQprov (iterated provider), n'=0 case (Hom on cokernel),
+    and section-level colimit factoring at call site (sheafToPresheaf preserves filtered colimits).
+  - ext_comm_filtered_colimit_mono: Takes universal hHom, delegates to aux.
+    hQvan_provider n≥1 PROVED via ext_sandwich. n=0 sorry (dead at call site if dim ≥ 1).
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves

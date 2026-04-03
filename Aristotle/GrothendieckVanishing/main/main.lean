@@ -4,12 +4,11 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  Sorry's (1 remaining, Mathlib API gap):
-  - ext_vanishing_of_colimit_pieces (FiniteGeneratorReduction.lean) —
-    Ext^n(Z,-) preserves filtered colimits (Hartshorne III Lemma 2.9).
-    The n=0 case of ext_comm_filtered_colimit_mono is PROVED via hHom + Ext.homEquiv₀.
-    The n≥1 case delegates to ext_vanishing_of_colimit_pieces (sorry: Mathlib API gap,
-    requires Čech cohomology / universal δ-functors / Godement resolution).
+  Sorry's (3 remaining in FiniteGeneratorReduction.lean):
+  1. hQprov — iterated quotient vanishing provider for recursive IH call
+  2. n'=0 case — Subsingleton(Hom(Z, Q_j)) for cokernel Q_j (dead at call site if dim ≥ 1)
+  3. Section-level colimit factoring at call site — needs sheafToPresheaf preserves
+     filtered colimits + evaluation + Types.jointly_surjective
 
   File structure:
   - SetupCore.lean: category instances, FlasqueVanishing, PushforwardHVanishing, ClosedImmersionSES
@@ -22,7 +21,7 @@
   - DimZeroVanishing.lean: irreducible dim 0 case
   - ReducibleVanishing.lean: reducible case via Finset.induction
   - ClosedOpenDecomposition.lean: reduction to irreducible
-  - FiniteGeneratorReduction.lean: colimit step, filtered diagram, f.g. vanishing (1 sorry)
+  - FiniteGeneratorReduction.lean: colimit step, filtered diagram, f.g. vanishing (3 sorry's)
   - IrreducibleStep.lean: irreducible step assembly
   - GrothendieckVanishing.lean: main theorem + cascade theorems
 -/
