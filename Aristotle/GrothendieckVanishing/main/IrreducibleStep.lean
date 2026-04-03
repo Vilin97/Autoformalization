@@ -562,13 +562,7 @@ theorem irreduciblePos_kernel_subsingleton
         ((TopCat.Sheaf.pullback AddCommGrpCat.{u}
           (TopCat.closedIncl hZ_closed)).obj F)) :
     Subsingleton (Sheaf.H S.X₁ n) :=
-  have hm2 : 2 ≤ n := by
-    by_contra h
-    push_neg at h
-    interval_cases n
-    · exact absurd (lt_trans hpos hn) (lt_irrefl _)
-    · exact absurd hn (not_lt.mpr (Order.succ_le_of_lt hpos))
-  directLimit_cohomology_vanishing S.X₁ n hm2
+  directLimit_cohomology_vanishing S.X₁ n
     (fun f hf => epiImage_zeroOutsideInt_vanishing X ih hpos _ f hf n hn)
 
 /-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case). -/

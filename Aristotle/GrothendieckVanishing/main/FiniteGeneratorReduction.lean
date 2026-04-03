@@ -369,21 +369,40 @@ instance finsetGenFunctor_mono
 
 end FilteredDiagram
 
+/-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
+    This is the derived functor commutation theorem for `H^n = R^n Γ`:
+    if `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
+
+    The proof requires showing that `R^n Γ` preserves filtered colimits, which follows from:
+    (1) Γ = global sections preserves filtered colimits (sheafToPresheaf creates them on
+        Noetherian spaces — the AB5 property), and
+    (2) filtered colimits of injective resolutions are injective resolutions, and
+    (3) cohomology of chain complexes commutes with filtered colimits (AB5 for Ab).
+
+    This single sorry subsumes both the former sorry #1 (isSheaf_filtered_colimit_of_sheaves)
+    and sorry #2 (hQprov in ext_vanishing_of_colimit_aux). -/
+theorem sheafH_preserves_filtered_colimits
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (c' : Cocone Y') (hc' : IsColimit c')
+    (n : ℕ)
+    (hvan : ∀ j, Subsingleton (Sheaf.H (Y'.obj j) n)) :
+    Subsingleton (Sheaf.H c'.pt n) := by
+  sorry
+
 /-- **Hartshorne 2.9 core**: on a Noetherian space, if `H^m = 0` for all finitely generated
-    subsheaves of `K`, then `H^m(K) = 0`. Uses `ext_comm_filtered_colimit_mono` applied to
-    the filtered diagram of finitely generated subsheaves. -/
+    subsheaves of `K`, then `H^m(K) = 0`. Applies `sheafH_preserves_filtered_colimits`
+    to the filtered diagram of finitely generated subsheaves. -/
 theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
-    (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ) (hm : 2 ≤ m)
+    (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ)
     (hfg : ∀ (S : Finset (TopCat.Sheaf.SectionIndex K))
       [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)) :
-    Subsingleton (Sheaf.H K m) := by
-  exact ext_comm_filtered_colimit_mono (finsetGenFunctor K) (finsetGenCocone K)
-    (finsetGenCocone_isColimit K)
-    ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-      (AddCommGrpCat.of (ULift ℤ)))
-    m hm constantSheaf_hom_preserves_filtered_colimit_vanishing (fun S => hfg S)
+    Subsingleton (Sheaf.H K m) :=
+  sheafH_preserves_filtered_colimits (finsetGenFunctor K) (finsetGenCocone K)
+    (finsetGenCocone_isColimit K) m (fun S => hfg S)
 
 section FinsetGenerated
 open scoped Classical
@@ -521,9 +540,9 @@ end FinsetGenerated
     `cohomology_vanishing_of_finitelyGenerated_vanishing` (colimit step). -/
 theorem directLimit_cohomology_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
-    (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ) (hm : 2 ≤ m)
+    (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ)
     (hzero : ∀ {G : TopCat.Sheaf AddCommGrpCat.{u} X} {V : Opens X}
       (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G), Epi f → Subsingleton (Sheaf.H G m)) :
     Subsingleton (Sheaf.H K m) :=
-  cohomology_vanishing_of_finitelyGenerated_vanishing K m hm
+  cohomology_vanishing_of_finitelyGenerated_vanishing K m
     (fun S _ => finsetGeneratedSheaf_vanishing m hzero S)
