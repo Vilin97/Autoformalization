@@ -1,17 +1,17 @@
 {
   "jobs": [
     {
-      "id": "PENDING_SUBMISSION_AB5",
-      "submission": "aristotle-in/isSheaf_filtered_colimit.lean",
-      "target": "isSheaf_filtered_colimit_of_sheaves (AB5 gap)",
-      "status": "NOT_SUBMITTED",
-      "note": "Aristotle API unreachable from HPC cluster (DNS fails). File ready for submission when network is available."
+      "id": "782d0f32-ebe4-4a3c-826c-0e4769b7707d",
+      "submission": "aristotle-in/ext_filtered_colimit.lean",
+      "target": "ext_vanishing_of_filtered_colimit (general categorical form)",
+      "status": "QUEUED",
+      "note": "Submitted 2026-04-03. Ext^n vanishing through filtered colimits. Would close all 4 sorry's if proved."
     },
     {
       "id": "105033c9-934b-4e08-8239-cc82af90e5fa",
       "target": "exists_good_section (final assembly with all axioms)",
-      "status": "OBSOLETE",
-      "note": "exists_good_section already proved in IrreducibleStep.lean. Job is stale."
+      "status": "QUEUED",
+      "note": "Full proof with all building blocks as axioms. Strong induction approach."
     },
     {
       "id": "42e908b6-bc5d-4695-a0ac-36c47677b441",
@@ -30,8 +30,8 @@
     {
       "id": "361dc7af-9c65-4c60-9707-6ebc878e1316",
       "target": "exists_good_section (full assembly from proved axioms)",
-      "status": "OBSOLETE",
-      "note": "exists_good_section already proved in IrreducibleStep.lean. Job is stale."
+      "status": "QUEUED",
+      "note": "ASSEMBLY PROVED (0 sorry in logic). 11 sorry's are axiom stubs for building blocks. Key missing piece: full_generator_step."
     },
     {
       "id": "6ff49fb8-6338-4dab-855d-2d45d85f0264",

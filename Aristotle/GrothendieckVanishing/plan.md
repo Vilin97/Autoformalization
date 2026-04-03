@@ -1,44 +1,45 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-03T21:00Z
+**Updated**: 2026-04-03T15:30Z
 
 ## Status Summary
-- **CI**: Last green run at 37943bf. Pending run from latest push.
-- **Sorry count**: 2 (SheafHom.lean:63, FiniteGeneratorReduction.lean:198)
-- **Files**: 14 main files, ~5300 lines total
-- **Docs**: Blueprint 404 (deployed on main only)
-- **Progress last cycle**: Closed sorry at line 180 (n=0 Hom case), documented structural gap
+- **CI**: Green (3/3 recent runs pass)
+- **Sorry count**: 4 syntactic (3 logical gaps) in `FiniteGeneratorReduction.lean`
+- **Files**: 16 files, ~5425 lines
+- **Oversized files**: 4 over 600-line limit (FiniteGeneratorReduction 741, ZeroOutside 733, SheafStalkAlgebra 688, FlasqueVanishing 616)
+- **Docs**: Blueprint 404 (P1, unfixed for 2 cycles)
+- **CLAUDE.md**: Sorry count FIXED this cycle (was claiming 1, now correct at 4)
 
 ## Active Multi-Cycle Strategies
 
-1. **Close AB5 sorry (isSheaf_filtered_colimit_of_sheaves)**: Core mathematical gap. Filtered presheaf colimits of sheaves are sheaves on Noetherian spaces. File ready in `aristotle-in/isSheaf_filtered_colimit.lean` but Aristotle API unreachable from HPC. Approach: use `Sheaf.ab5ofSize` + Noetherian finite-cover machinery.
+1. **Ext/colimit commutation gap**: All 4 sorry's relate to Hartshorne III Lemma 2.9 (Ext commutes with filtered colimits of mono diagrams). Mathlib v4.28.0 lacks universal δ-functors, Čech cohomology, and Godement resolutions. Three approaches under consideration:
+   - (a) Build effaceable δ-functor theorem from scratch (~300 lines)
+   - (b) Prove section-level colimit factoring directly via Mathlib's existing colimit preservation API
+   - (c) Restructure to eliminate dead branches and reduce sorry count without closing the core gap
 
-2. **Restructure hQprov to eliminate recursive quotient problem**: The sorry at line 198 asks for `Ext^{n'}(Z, cokernel(Qcocone.ι.app j ≫ ip'.f)) n'` — vanishing on Q-of-Q quotients. The Q-diagram's transitions are NOT mono (documented at lines 189-195), so ext_sandwich can't be applied recursively. Two fix strategies:
-   - **(A) Strengthen hHom_univ to PreservesFilteredColimitsOfSize**: If coyoneda.obj(op Z) preserves filtered colimits, then hQprov can be derived internally for ALL depths of quotient. Search Mathlib for `PreservesFilteredColimits` on coyoneda + Grothendieck abelian.
-   - **(B) Restructure to per-object injective embeddings (Hartshorne's approach)**: Embed each Y_j ↪ I_j separately, getting compatible system of SES. Quotient transitions inherit mono. Avoids Q-of-Q problem entirely, but requires functorial injective embeddings.
+2. **File size reduction**: IrreducibleStep was 1263→594 (split into SheafStalkAlgebra). But SheafStalkAlgebra (688), ZeroOutside (733), FiniteGeneratorReduction (741) are now over limit. Need further splits.
 
 ## This Cycle's Work Items
 
-1. **[/prove] Search Mathlib for colimit preservation tools** (P1, immediate)
-   - `lean_leansearch` / `lean_loogle` for:
-     - `PreservesFilteredColimitsOfSize` instances for coyoneda
-     - `IsGrothendieckAbelian` + filtered colimit preservation
-     - Whether Noetherian sheaf categories have compact generators
-   - If found: strengthen `hHom_univ` parameter and close hQprov
+1. **[/prove] Verify `#print axioms` for main theorem** (P1, critique issue #4)
+   Run `#print axioms GrothendieckVanishing` to confirm `sorryAx` is present (expected) and no other unexpected axioms exist. The `lean_verify` tool's clean report is suspicious.
 
-2. **[/prove] Attempt hQprov sorry — decompose if Mathlib tools insufficient** (P1)
-   - If approach (A) works: rewrite ext_vanishing_of_colimit_aux to not need hQprov as parameter
-   - If not: extract the n'=0 sub-case as a separate sorry'd lemma (the only truly hard case), prove n'≥1 case via injectivity + ext_sandwich
-   - Concrete fallback: split hQprov into `hQprov_zero` (Hom-level, hard) and `hQprov_succ` (provable from injectivity + hvan)
+2. **[/prove] Attempt sorry #4 (line 597): section-level colimit factoring** (P1)
+   This sorry needs: sheafToPresheaf ⋙ evaluation preserves filtered colimits for sheaves on topological spaces. Search Mathlib for `PreservesFilteredColimits` instances on `sheafToPresheaf` and `evaluation`. If Mathlib has these, the sorry is closable. If not, check if objectwise colimit of sheaves = sheaf colimit at each stalk.
 
-3. **[/submit-aristotle] Retry AB5 submission** (P1)
-   Attempt Aristotle API. If unreachable, skip.
+3. **[/prove] Attempt sorry #3 (line 254): eliminate dead branch** (P1)
+   This is claimed "dead at call site" since `ext_comm_filtered_colimit_mono` is only called with `n ≥ dim(X)+1 ≥ 2`. If we can restructure the proof to pass `n' + 1` instead of `n` to `ext_comm_filtered_colimit_mono`, the dead branch may be eliminable. Alternatively, add `(hn : n ≥ 1)` hypothesis and prove the n=0 case separately at the call site.
 
-4. **[/simplify] No urgent code quality fixes** (P3)
-   ZeroOutside.lean (733), SheafStalkAlgebra.lean (688), FlasqueVanishing.lean (616) — over 600-line guideline but not severe. Focus on sorry closure this cycle.
+4. **[/simplify] Split FiniteGeneratorReduction.lean** (P2)
+   At 741 lines, the largest file. Natural split point at line 260 (end of Ext helpers) / line 600 (start of FinsetGenerated section). Extract `FinsetGenerated` section (lines 600-741) into a new file `FinsetGeneratedSheaf.lean`.
+
+5. **[/prove] Attempt sorry #1 (line 207) and #2 (line 215)** (P1)
+   These are the hardest sorry's (Ext colimit commutation core). If sorry #4 is closed, sorry #1 may become tractable via the connecting map argument. Sorry #2 (hQprov) requires the full recursive IH — attempt decomposition into sub-lemmas.
 
 ## Backlog
-- P1: Fix docs/blueprint 404 (needs merge to main or deploy workflow change)
-- P3: ZeroOutside.lean (733), SheafStalkAlgebra.lean (688), FlasqueVanishing.lean (616) — over 600-line guideline
-- P3: Clean up `finsetCoproductIncl` vs `finsetCoproductInclGen` naming
-- P4: Upstream FlasqueVanishing, ext_sandwich, sheafH_vanishing_cascade to Mathlib
+- P1: Fix docs/blueprint 404 (requires merge to protected branch → main)
+- P2: Split ZeroOutside.lean (733 lines)
+- P2: Split SheafStalkAlgebra.lean (688 lines)
+- P3: Split FlasqueVanishing.lean (616 lines, borderline)
+- P3: Universe polymorphism audit
+- P4: Mathlib upstream PRs (FlasqueVanishing, constantSheaf_flasque_of_irreducible)

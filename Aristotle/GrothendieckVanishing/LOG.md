@@ -1,94 +1,21 @@
 # Log — Grothendieck Vanishing
 
-## 2026-04-03T21:30Z — Deep analysis of hQprov, improved documentation (2 sorry's)
+## 2026-04-03T16:30Z — Close sorry #3 (dead branch), reduce to 3 sorry's
 
-**Sorry count: 2** (1 in SheafHom.lean:63, 1 in FiniteGeneratorReduction.lean:198)
+**Sorry count: 3 (was 4)**
 
-- **Deep analysis of hQprov sorry**: Exhaustive investigation of approaches to close the
-  recursive quotient vanishing sorry. Key findings:
-  - The 5-lemma approach (comparing colim LES with colim LES) works at degree 1 but requires
-    PreservesFilteredColimitsOfSize for coyoneda at degree 0 on Q (no mono transitions).
-  - For degree ≥ 2, the 5-lemma requires θ_{n-1}^Q iso, creating a circular dependency
-    with the same problem at one degree lower.
-  - Cumulative per-j vanishing (at all degrees ≥ m) allows ext_sandwich on Q_j at all
-    degrees ≥ 1, but the recursion to Q-of-Q still fails without mono transitions on Q.
-  - The only viable fixes remain: (a) functorial injective resolutions (Hartshorne's actual
-    approach), or (b) establishing PreservesFilteredColimitsOfSize for coyoneda.obj(op Z)
-    combined with a non-recursive argument.
-- **Improved sorry documentation**: Updated structural gap comments in FiniteGeneratorReduction.lean
-  with clearer description of the gap and potential fixes.
-- **Updated plan.md and critique.md** for this cycle.
-- **Aristotle**: API still unreachable from HPC cluster.
-- Remaining sorry's (unchanged):
-  1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:63) — core AB5 gap
-  2. `hQprov` (FiniteGeneratorReduction.lean:198) — structural gap in proof strategy
+- **CLOSED sorry #3** (line 254): eliminated dead n'=0 branch in `ext_comm_filtered_colimit_mono` by adding `(hn_ge : n ≥ 2)` hypothesis. Propagated through `cohomology_vanishing_of_finitelyGenerated_vanishing` and `directLimit_cohomology_vanishing`. At call site in `irreduciblePos_kernel_subsingleton`, proved `n ≥ 2` from `n > topologicalKrullDim X > 0` via `Order.succ_le_of_lt`.
+- **Fixed CLAUDE.md**: updated sorry count from 1 (incorrect) to 3 (accurate after closing #3).
+- **Submitted** `ext_filtered_colimit.lean` to Aristotle (job `782d0f32`, IN_PROGRESS 5%). Would close all remaining sorry's if proved.
+- **Critique**: wrote full adversarial critique identifying 4 sorry's, documentation lies, 4 oversized files, blueprint 404.
+- Updated docstrings in FiniteGeneratorReduction.lean, GrothendieckVanishing.lean.
 
-## 2026-04-03T20:00Z — Close sorry at line 180, analyze hQprov structural gap (2 sorry's)
-
-**Sorry count: 2** (1 in SheafHom.lean:63, 1 in FiniteGeneratorReduction.lean:196)
-
-- **Closed sorry at line 180** (n=0 case of degree ≥1 branch): Proved using `hHom_univ` applied
-  to the Q-diagram with per-j vanishing from `hQvan_provider 0 rfl ip j`, converted via
-  `Ext.homEquiv₀.subsingleton_congr`.
-- **Analyzed hQprov structural gap** (line 196): The Q-diagram's transition maps are NOT mono
-  (snake lemma: ker(cokernel.map) ≅ coker(Y.map φ) ≠ 0). This means:
-  (1) Qcocone.ι.app j is not provably mono → no ShortExact sequence
-  (2) ext_sandwich cannot be applied
-  (3) hHom_univ (vanishing only) is too weak to derive surjectivity of Hom(Z,I)→Hom(Z,Q)
-  **Fix needed**: Either strengthen hHom_univ to PreservesFilteredColimits, or restructure
-  proof to use individual injective presentations per Y_j (Hartshorne's actual approach).
-- **Aristotle**: API still unreachable from HPC cluster.
-- Remaining sorry's:
-  1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:63) — core AB5 gap
-  2. `hQprov` (FiniteGeneratorReduction.lean:196) — structural gap in proof strategy
-
-## 2026-04-03T18:00Z — Close sorry #3, deduplicate IrreducibleStep.lean (3→2 sorry's)
-
-**Sorry count: 2** (1 in SheafHom.lean, 1 in FiniteGeneratorReduction.lean)
-
-- **Closed sorry #3** (n'=0 dead case): Added `(hn_ge : 2 ≤ n)` parameter to
-  `ext_comm_filtered_colimit_mono` and propagated through `cohomology_vanishing_of_finitelyGenerated_vanishing`
-  and `directLimit_cohomology_vanishing`. The n=0 case now closes with `omega` (contradiction:
-  2 ≤ 0). At the call site in IrreducibleStep.lean, proved `2 ≤ n` from `dim X > 0` and `n > dim X`
-  via `Order.succ_le_of_lt`.
-- **Deduplicated IrreducibleStep.lean**: Removed ~540 lines of declarations that were duplicated
-  from SheafStalkAlgebra.lean (subsingleton_ext_of_ses, ulift_int_subgroup_cyclic,
-  zsmul_generator_injective, and 10+ others). File reduced from ~1264 to ~610 lines.
-- **Aristotle**: API unreachable from HPC cluster. `isSheaf_filtered_colimit.lean` ready in
-  `aristotle-in/` but not submitted. Marked 2 stale QUEUED jobs as OBSOLETE.
-- **Build verified**: IrreducibleStep.lean and main.lean compile with 0 errors.
-- Remaining sorry's:
-  1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:63) — core AB5 gap
-  2. `hQprov` (FiniteGeneratorReduction.lean:180,188) — recursive quotient-of-quotient vanishing
-
-## 2026-04-03T10:00Z — Extract SheafHom.lean, fix architecture (3 sorry's, better locations)
-
-**Sorry count: 3** (1 in SheafHom.lean, 2 in FiniteGeneratorReduction.lean)
-
-- **Created SheafHom.lean**: extracted `constantSheaf_hom_preserves_filtered_colimit_vanishing`
-  and helper lemmas from FiniteGeneratorReduction.lean into a standalone file.
-- **Fixed hHom_univ architecture**: `cohomology_vanishing_of_finitelyGenerated_vanishing` now
-  calls `ext_comm_filtered_colimit_mono` with the universal `hHom_univ` from SheafHom.lean,
-  eliminating the old sorry #2 (hHom_univ universality upgrade).
-- **Key technique**: used `Sheaf.createsColimitOfIsSheaf` to derive `PreservesColimit` for
-  `sheafToPresheaf` from a proof that presheaf colimit points are sheaves. This avoids the
-  missing `PreservesFilteredColimits (sheafToPresheaf ...)` instance in Mathlib v4.28.0.
-- **New sorry**: `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:64) — filtered presheaf
-  colimits of sheaves are sheaves on Noetherian spaces (AB5). Well-defined mathematical
-  statement, cleaner than the previous inline sorry.
-- **Fixed documentation lies**: updated sorry counts and locations in headers of
-  FiniteGeneratorReduction.lean, main.lean, IrreducibleStep.lean, GrothendieckVanishing.lean,
-  and CLAUDE.md.
-- **Build verified**: both SheafHom.lean (768s) and FiniteGeneratorReduction.lean (611s)
-  compile with `lake build`.
-- Remaining sorry's:
-  1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:64) — core AB5 gap
-  2. `hQprov` (FiniteGeneratorReduction.lean:146) — recursive quotient vanishing
-  3. n=0 dead case (FiniteGeneratorReduction.lean:195) — dead at call site
+Remaining sorry's:
+1. Line 207: Subsingleton(Hom(Z, Q)) — colimit factoring
+2. Line 215: hQprov — iterated quotient vanishing provider
+3. Line 597: section-level colimit factoring (sheafToPresheaf ⋙ evaluation preserves filtered colimits)
 
 ## 2026-04-03T04:00Z — Final state: 3 sorry warnings, colimit chain built
-
-## 2026-04-03T02:00Z — Close hQcolim sorry, remove unused helpers (4→3 sorry's)
 
 **Sorry count: 3 warnings (4 code sorry's, 1 dead)**
 

@@ -570,6 +570,13 @@ theorem irreduciblePos_kernel_subsingleton
     · exact absurd hn (not_lt.mpr (Order.succ_le_of_lt hpos))
   directLimit_cohomology_vanishing S.X₁ n hm2
     (fun f hf => epiImage_zeroOutsideInt_vanishing X ih hpos _ f hf n hn)
+    (by
+      -- n ≥ 2: from hn : n > topologicalKrullDim X > 0
+      have h1 := Order.succ_le_of_lt hpos
+      have h2 := Order.succ_le_of_lt (lt_of_le_of_lt h1 hn)
+      change Order.succ 1 ≤ _ at h2
+      rw [show Order.succ (1 : WithBot ℕ∞) = 2 from rfl] at h2
+      exact_mod_cast h2)
 
 /-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case). -/
 theorem IrreduciblePosVanishing
