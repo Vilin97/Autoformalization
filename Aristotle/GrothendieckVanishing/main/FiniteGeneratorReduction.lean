@@ -567,10 +567,23 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       have hzero : ∀ j (y : (Y'.obj j).val.obj (op ⊤)),
           (c'.ι.app j).val.app (op ⊤) y = 0 :=
         fun j y => @Subsingleton.elim _ (hGsub j) y 0 ▸ map_zero _
-      -- Use hc' to show x = 0: the two morphisms c'.pt → c'.pt (id and 0)
-      -- agree on all pieces at ⊤ (since cocone maps at ⊤ land in {0}).
-      -- But hc' is a sheaf-level colimit, not section-level.
-      -- Need: section-level colimit property (filtered colimits are objectwise).
+      -- The composition sheafToPresheaf ⋙ eval(op ⊤) : Sheaf → AddCommGrpCat
+      -- preserves filtered colimits (evaluation preserves all colimits).
+      -- So c'.pt(⊤) is a colimit in AddCommGrpCat of the (Y'.obj j)(⊤).
+      -- Use Types.jointly_surjective to factor x through some piece.
+      -- Since the piece (Y'.obj j)(⊤) is subsingleton, the element is 0.
+      -- Step 1: Build the colimit cocone in AddCommGrpCat at ⊤
+      let evalTop := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)
+      -- The composite F = sheafToPresheaf ⋙ evalTop maps Sheaf → AddCommGrpCat
+      -- and preserves filtered colimits. So F.mapCocone c' is a colimit.
+      -- Since all F(Y'.obj j) are subsingleton, every element of F(c'.pt) is 0.
+      -- Use forget AddCommGrpCat + Types.jointly_surjective for the factoring.
+      -- sheafToPresheaf ⋙ evalTop : Sheaf → AddCommGrpCat preserves the filtered colimit.
+      -- Then forget to Type + Types.jointly_surjective gives: x factors through some piece.
+      -- Since the piece is subsingleton (hGsub), x = hzero j y = 0.
+      -- The PreservesColimit instance for sheafToPresheaf on filtered diagrams follows
+      -- from Sheaf.hasFilteredColimitsOfSize (presheaf colimit is already a sheaf).
+      -- For now, sorry this pure Mathlib infrastructure piece.
       sorry)
     (fun S => hfg S)
 
