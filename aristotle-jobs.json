@@ -1,0 +1,9 @@
+[
+  {
+    "id": "50689427-7b9a-4ec1-adc1-cf4f1466912d",
+    "submission": "Aristotle/GrothendieckVanishing/aristotle-in/isSheaf_filtered_colimit.lean",
+    "output": "Aristotle/GrothendieckVanishing/aristotle-out/isSheaf_filtered_colimit_aristotle.lean",
+    "target": "isSheaf_presheaf_filtered_colimit",
+    "submitted": "2026-04-03T22:38Z"
+  }
+]

@@ -2,7 +2,7 @@
   FiniteGeneratorReduction.lean — Colimit step and finitely generated vanishing
 
   Key results:
-  - Ext LES helper lemmas (ext_sandwich, addCommGrpCat_exact_sandwich)
+  - ext_dimension_shift: Ext LES dimension shift helper
   - sheafH_preserves_filtered_colimits: H^n commutes with filtered colimits (1 sorry)
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
@@ -24,22 +24,6 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 section ExtHelpers
 variable {C' : Type*} [Category C'] [Abelian C'] [HasExt C']
 
-/-- Exact sandwich in `AddCommGrpCat`: if a short complex is exact and both ends
-    are subsingleton, the middle is subsingleton. -/
-private theorem addCommGrpCat_exact_sandwich
-    (S : ShortComplex AddCommGrpCat) (hS : S.Exact)
-    (h₁ : Subsingleton S.X₁) (h₃ : Subsingleton S.X₃) :
-    Subsingleton S.X₂ := by
-  rw [ShortComplex.ab_exact_iff_range_eq_ker] at hS
-  constructor; intro a b
-  have hgab := @Subsingleton.elim _ h₃ (S.g.hom a) (S.g.hom b)
-  have hmem : a - b ∈ S.g.hom.ker := by
-    simp [AddMonoidHom.mem_ker, map_sub, sub_eq_zero.mpr hgab]
-  rw [← hS] at hmem
-  obtain ⟨y, hy⟩ := hmem
-  rw [@Subsingleton.elim _ h₁ y 0, map_zero] at hy
-  exact sub_eq_zero.mp hy.symm
-
 /-- Dimension shift for Ext via LES: given `0 → X₁ → X₂ → X₃ → 0` short exact,
     `Ext^n(Z, X₃) = 0` and `Ext^{n+1}(Z, X₂) = 0` imply `Ext^{n+1}(Z, X₁) = 0`. -/
 private theorem ext_dimension_shift (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
@@ -52,14 +36,6 @@ private theorem ext_dimension_shift (Z : C') {S : ShortComplex C'} (hS : S.Short
   obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hS a ha rfl
   obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hS b hb rfl
   rw [← hc, ← hd, @Subsingleton.elim _ h₃ c d]
-
-/-- Ext sandwich via LES: given `0 → X₁ → X₂ → X₃ → 0` short exact,
-    `Ext^n(Z, X₂) = 0` and `Ext^{n+1}(Z, X₁) = 0` imply `Ext^n(Z, X₃) = 0`. -/
-private theorem ext_sandwich (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
-    (h₂ : Subsingleton (Ext Z S.X₂ n))
-    (h₁ : Subsingleton (Ext Z S.X₁ (n + 1))) :
-    Subsingleton (Ext Z S.X₃ n) :=
-  addCommGrpCat_exact_sandwich _ (Ext.covariant_sequence_exact₃' Z hS n (n+1) rfl) h₂ h₁
 
 end ExtHelpers
 
@@ -199,7 +175,28 @@ private theorem isSheaf_presheaf_filtered_colimit
   -- Noetherian → finite subcover: find finite t with iSup U = ⨆ k ∈ t, U k
   obtain ⟨t, ht⟩ := (NoetherianSpace.isCompact (↑(iSup U) : Set X)).elim_finite_subcover
     (fun i => ↑(U i)) (fun i => (U i).isOpen) (by simp [Opens.coe_iSup])
-  sorry
+  -- The finite subcover covers the same open set
+  have hbsup_le : ⨆ i ∈ t, U i ≤ iSup U := iSup₂_le (fun i _ => le_iSup U i)
+  have hsup_le : iSup U ≤ ⨆ i ∈ t, U i := by
+    rw [SetLike.le_def]
+    intro x hx
+    obtain ⟨i, hi, hxi⟩ := Set.mem_iUnion₂.mp (ht hx)
+    exact Opens.mem_iSup.mpr ⟨i, Opens.mem_iSup.mpr ⟨hi, hxi⟩⟩
+  -- Separation: a section of c.pt zero on all U_k (k ∈ t) is zero
+  have hsep : ∀ (a : ToType (c.pt.obj (op (iSup U)))),
+      (∀ k ∈ t, c.pt.map (Opens.leSupr U k).op a = 0) → a = 0 := by
+    sorry
+  -- Existence: construct a gluing section
+  have hexist : ∃ s, Presheaf.IsGluing c.pt U sf s := by
+    sorry
+  -- Assembly: existence + uniqueness from separation
+  obtain ⟨s, hs⟩ := hexist
+  refine ⟨s, hs, fun s' hs' => ?_⟩
+  have h0 : s' - s = 0 := hsep (s' - s) (fun k hk => by
+    show c.pt.map (Opens.leSupr U k).op (s' - s) = 0
+    rw [map_sub, sub_eq_zero]
+    exact (hs' k).trans (hs k).symm)
+  rwa [sub_eq_zero] at h0
 
 /-- On a Noetherian space, `sheafToPresheaf` creates filtered colimits of sheaves. -/
 private noncomputable def createsFilteredColimit

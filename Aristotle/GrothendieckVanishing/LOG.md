@@ -1,5 +1,20 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T22:40Z — Decompose isSheaf sorry into separation + existence; submit to Aristotle
+
+**Sorry count: 4 keywords, 1 logical gap (same gap, finer decomposition)**
+
+- **Decomposed** `isSheaf_presheaf_filtered_colimit` sorry into 3 parts:
+  - `hsup_le` / `hbsup_le`: finite subcover equals full cover (PROVED)
+  - `hsep`: separation — section zero on finite subcover implies zero (sorry)
+  - `hexist`: existence — construct gluing section (sorry)
+  - Assembly: uniqueness from separation via `map_sub` + `sub_eq_zero` (PROVED)
+- **Updated critique.md**: new timestamp, found 5 dead theorems/defs, 3 stale docstrings,
+  `lean_verify` inconsistency (reports no axioms for `GrothendieckVanishing` — tool bug)
+- **Submitted** `isSheaf_filtered_colimit.lean` to Aristotle (job 50689427, 5% at check time)
+- Aristotle previous jobs expired (no jobs file existed)
+- CI: all green (3 latest runs)
+
 ## 2026-04-03T20:32Z — Noetherian finite subcover step in isSheaf proof
 
 **Sorry count: 3 keywords, 1 logical gap (unchanged)**
