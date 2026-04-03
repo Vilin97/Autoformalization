@@ -4,8 +4,15 @@
       "id": "1676d0c9-2664-416b-b255-9c5c2de326c0",
       "submission": "aristotle-in/sheafH_filtered_colimit.lean",
       "target": "sheafH_preserves_filtered_colimits (LAST sorry)",
+      "status": "IN_PROGRESS",
+      "note": "Submitted 2026-04-03. Sheaf-specific version at 8%. Would close the ONLY remaining sorry."
+    },
+    {
+      "id": "b1902f2c-ea36-43c9-be1b-cdacc81dd374",
+      "submission": "aristotle-in/isSheaf_filtered_colimit.lean",
+      "target": "isSheaf_presheaf_filtered_colimit (sub-lemma: presheaf colimit is sheaf on Noetherian)",
       "status": "QUEUED",
-      "note": "Submitted 2026-04-03. Sheaf-specific version. Would close the ONLY remaining sorry."
+      "note": "Submitted 2026-04-03. Key sub-lemma extracted from the main sorry. Would enable CreatesColimit for sheafToPresheaf."
     },
     {
       "id": "782d0f32-ebe4-4a3c-826c-0e4769b7707d",
