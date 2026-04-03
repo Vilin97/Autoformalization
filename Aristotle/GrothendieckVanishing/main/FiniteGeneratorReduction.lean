@@ -2,12 +2,11 @@
   FiniteGeneratorReduction.lean — Colimit step and finitely generated vanishing
 
   Key results:
-  - ext_vanishing_of_colimit_aux: Ext^n colimit transfer (Hartshorne III Lemma 2.9).
-    n=0 PROVED. n≥1: dimension shift + quotient functor Qfun + cocone + IsColimit all PROVED.
-    3 sorry's remain: hQprov (iterated provider), n'=0 case (Hom on cokernel),
-    and section-level colimit factoring at call site (sheafToPresheaf preserves filtered colimits).
-  - ext_comm_filtered_colimit_mono: Takes universal hHom, delegates to aux.
-    hQvan_provider n≥1 PROVED via ext_sandwich. n=0 sorry (dead at call site if dim ≥ 1).
+  - ext_vanishing_of_colimit_aux: Ext^n colimit transfer core (Hartshorne III Lemma 2.9).
+    n=0 via hHom_univ + Ext.homEquiv₀. n≥1 via dimension shift. 1 sorry (hQprov:
+    recursive quotient vanishing for IH call).
+  - ext_comm_filtered_colimit_mono: Wrapper using ext_vanishing_of_colimit_aux.
+    1 sorry (n'=0 dead case at call site, needs filtered colimit preservation for Hom).
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
@@ -17,37 +16,11 @@
   - directLimit_cohomology_vanishing: from epi-image vanishing to all sheaves (PROVED)
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
-import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
+import Aristotle.GrothendieckVanishing.main.SheafHom
 
 universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
-
-/-! ### Helper lemmas: Subsingleton transfer for AddCommGrpCat -/
-
-/-- In `AddCommGrpCat`, `Subsingleton (ULift ℤ ⟶ G)` implies `Subsingleton G`. -/
-private theorem addCommGrpCat_subsingleton_of_subsingleton_hom
-    (G : AddCommGrpCat.{u})
-    (h : Subsingleton (AddCommGrpCat.of (ULift.{u} ℤ) ⟶ G)) :
-    Subsingleton G := by
-  constructor; intro a b
-  -- Every a ∈ G determines a hom fa : ULift ℤ → G with fa(⟨1⟩) = a.
-  let fa : AddCommGrpCat.of (ULift.{u} ℤ) ⟶ G := AddCommGrpCat.ofHom
-    (AddMonoidHom.mk' (fun z => ULift.down z • a) (fun x y => by simp [add_smul]))
-  let fb : AddCommGrpCat.of (ULift.{u} ℤ) ⟶ G := AddCommGrpCat.ofHom
-    (AddMonoidHom.mk' (fun z => ULift.down z • b) (fun x y => by simp [add_smul]))
-  have heq := @Subsingleton.elim _ h fa fb
-  have := AddCommGrpCat.ext_iff.mp heq (⟨1⟩ : ULift.{u} ℤ)
-  simpa [fa, fb] using this
-
-/-- In `AddCommGrpCat`, `Subsingleton G` implies `Subsingleton (ULift ℤ ⟶ G)`. -/
-private theorem addCommGrpCat_subsingleton_hom_of_subsingleton
-    (G : AddCommGrpCat.{u})
-    (h : Subsingleton G) :
-    Subsingleton (AddCommGrpCat.of (ULift.{u} ℤ) ⟶ G) := by
-  constructor; intro f g
-  ext x
-  exact @Subsingleton.elim _ h _ _
 
 /-! ### Ext LES helper lemmas -/
 
@@ -216,9 +189,8 @@ private theorem ext_vanishing_of_colimit_aux
       exact @Subsingleton.elim _ (ih Qfun Qcocone hQcolim hQvan hQprov) ca cb
 
 /-- **Hartshorne 2.9 (Ext version)**: In a Grothendieck abelian category, if `Hom(Z, -)`
-    sends filtered-colimit vanishing to vanishing (the `hHom` hypothesis), then
-    `Ext^n(Z, -)` does too. Delegates to `ext_vanishing_of_colimit_aux` via sorry for
-    the universality upgrade of `hHom`. -/
+    preserves filtered-colimit vanishing universally (over all filtered diagrams), then
+    `Ext^n(Z, -)` does too. -/
 theorem ext_comm_filtered_colimit_mono
     {C : Type u} [Category.{v} C] [Abelian C] [HasExt C]
     [IsGrothendieckAbelian.{w} C]
@@ -226,36 +198,45 @@ theorem ext_comm_filtered_colimit_mono
     (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
     [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
     (Z : C) (n : ℕ)
-    -- Universal hHom: works for ANY filtered diagram, not just Y.
-    -- At the call site (sheaves), Hom(Z,-) ≅ Γ(X,-) preserves all filtered colimits.
-    (hHom : ∀ {J' : Type w} [SmallCategory J'] [IsFiltered J']
+    (hHom_univ : ∀ {J' : Type w} [SmallCategory J'] [IsFiltered J']
       (Y' : J' ⥤ C) (c' : Cocone Y'), IsColimit c' →
       (∀ j, Subsingleton (Z ⟶ Y'.obj j)) → Subsingleton (Z ⟶ c'.pt))
     (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)) :
     Subsingleton (Ext Z c.pt n) := by
-  refine ext_vanishing_of_colimit_aux Z hHom n Y c hc hvan ?_
-  -- hQvan_provider: for any injective pres of c.pt, Ext^n'(Z, cokernel(c.ι.app j ≫ f)) = 0
-  intro n' hn' ip j
-  have hn : n' = n - 1 := by omega
-  -- SES: 0 → Y.obj j →^{c.ι.app j ≫ ip.f} I → Q_j → 0
-  haveI : Mono (c.ι.app j) := IsColimit.mono_ι_app_of_isFiltered hc j
-  let f_j := c.ι.app j ≫ ip.shortComplex.f
-  haveI : Mono f_j := mono_comp _ _
-  let Sj := ShortComplex.mk f_j (cokernel.π f_j) (by simp [f_j, ShortComplex.mk])
-  have hSEj : Sj.ShortExact := ShortComplex.ShortExact.mk'
-    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
-  -- Use ext_sandwich or hHom depending on n'
-  cases n' with
+  cases n with
   | zero =>
-    -- n'=0 (n=1): Dead branch — the aux's degree-1 case bypasses hQvan_provider.
-    -- Value is compiled but never evaluated. Subsingleton(Hom(Z, Q_j)) is FALSE
-    -- in general, so we sorry it. This does NOT affect soundness since the branch
-    -- is unreachable at runtime.
-    sorry
-  | succ n'' =>
-    have hneq : n'' + 1 + 1 = n := by omega
-    exact ext_sandwich Z hSEj (n'' + 1) (Ext.subsingleton_of_injective Z _ n'')
-      (hneq ▸ hvan j)
+    exact Ext.homEquiv₀.subsingleton_congr.mpr
+      (hHom_univ Y c hc (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j)))
+  | succ n _ =>
+    refine ext_vanishing_of_colimit_aux Z hHom_univ (n + 1) Y c hc hvan ?_
+    -- hQvan_provider: for any injective pres of c.pt, Ext^n(Z, cokernel(c.ι.app j ≫ f)) = 0
+    -- From SES 0 → Y.obj j → I → Q_j → 0 (mono by AB5) and LES:
+    -- Ext^n(Z, I) → Ext^n(Z, Q_j) → Ext^{n+1}(Z, Y.obj j) → Ext^{n+1}(Z, I)
+    -- For n ≥ 1: both end terms vanish (injective), and hvan j gives middle vanishing.
+    intro n' hn' ip j
+    have hn : n' = n := by omega
+    subst hn
+    -- SES: 0 → Y.obj j →^{c.ι.app j ≫ ip.f} I → Q_j → 0
+    -- Need Mono (c.ι.app j ≫ ip.f). Use AB5 + mono transitions for Mono (c.ι.app j).
+    let f_j := c.ι.app j ≫ ip.shortComplex.f
+    let Sj := ShortComplex.mk f_j (cokernel.π f_j) (by simp [f_j, ShortComplex.mk])
+    -- The SES is short exact (f_j mono, cokernel.π is cokernel)
+    haveI : Mono (c.ι.app j) :=
+      IsColimit.mono_ι_app_of_isFiltered hc j
+    haveI : Mono f_j := mono_comp _ _
+    have hSEj : Sj.ShortExact := ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
+    -- LES: Ext^n(Z, I) → Ext^n(Z, Q_j) → Ext^{n+1}(Z, Y.obj j) → Ext^{n+1}(Z, I)
+    -- Sj.X₂ = I (injective), Sj.X₁ = Y.obj j, Sj.X₃ = Q_j
+    -- subsingleton_ext_of_ses_third: Ext^n(Z, X₂)=0 ∧ Ext^{n+1}(Z, X₁)=0 → Ext^n(Z, X₃)=0
+    -- Ext^n(Z, I) is subsingleton for n ≥ 1 (injective)
+    -- Ext^{n+1}(Z, Y.obj j) is subsingleton (hvan j)
+    -- Use ext_sandwich: Ext^n'(Z, I) = 0 ∧ Ext^{n'+1}(Z, Y.obj j) = 0 ⟹ Ext^n'(Z, Q_j) = 0
+    -- For n' ≥ 1: Ext^n'(Z, I) = 0 by injectivity. For n' = 0: sorry (dead at call site).
+    cases n' with
+    | zero => sorry  -- Hom case: only arises at outer degree 1, dead at call site (dim ≥ 1 ⟹ m ≥ 2)
+    | succ n'' =>
+      exact ext_sandwich Z hSEj (n'' + 1) (Ext.subsingleton_of_injective Z _ n'') (hvan j)
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
@@ -388,214 +369,11 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)) :
     Subsingleton (Sheaf.H K m) := by
-  -- hHom: for sheaves, Hom(Z_X, colim F_j) ≅ colim Hom(Z_X, F_j) because
-  -- filtered colimits of sheaves are computed objectwise and Hom(Z_X, F) ≅ F(X).
-  let Z := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-    (AddCommGrpCat.of (ULift ℤ))
-  have hHom : (∀ j, Subsingleton (Z ⟶ (finsetGenFunctor K).obj j)) →
-      Subsingleton (Z ⟶ (finsetGenCocone K).pt) := by
-    intro hvan
-    -- Step 1: Z ⟶ F ≃ Ext^0(Z,F) ≃ F(⊤) via sheafH0EquivSections
-    -- So Subsingleton (Z ⟶ F) ↔ Subsingleton F(⊤)
-    -- Step 2: K(⊤) = colim((finsetGeneratedSheaf j)(⊤)) by objectwise colimits
-    -- Step 3: Each (finsetGeneratedSheaf j)(⊤) is subsingleton → colim is subsingleton
-    -- Via Ext.homEquiv₀: (Z ⟶ F) ≃ Ext^0(Z,F). Via sheafH0EquivSections: Ext^0 ≃+ F(⊤).
-    -- So Subsingleton (Z ⟶ F) ↔ Subsingleton (F.val.obj (op ⊤)).
-    have adj := constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
-      Limits.isTerminalTop
-    -- Use adjunction to transfer: (Z ⟶ K) ≃ (ULift ℤ ⟶ K.val.obj(op ⊤))
-    rw [show (finsetGenCocone K).pt = K from rfl]
-    have heq : ∀ F : TopCat.Sheaf AddCommGrpCat.{u} X,
-        (Z ⟶ F) ≃ (AddCommGrpCat.of (ULift.{u} ℤ) ⟶
-          ((sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op ⊤)).obj F) :=
-      fun F => adj.homEquiv _ F
-    -- Transfer Subsingleton across the equivalence for K
-    apply (heq K).subsingleton_congr.mpr
-    -- Now goal: Subsingleton (ULift ℤ ⟶ K.val.obj(op ⊤))
-    -- From hvan: Subsingleton (Z ⟶ finsetGeneratedSheaf j) for each j
-    -- Via adjunction: Subsingleton (ULift ℤ ⟶ (finsetGeneratedSheaf j).val.obj(op ⊤))
-    have hvan' : ∀ j, Subsingleton (AddCommGrpCat.of (ULift.{u} ℤ) ⟶
-        ((finsetGenFunctor K).obj j).val.obj (op ⊤)) :=
-      fun j => (heq _).subsingleton_congr.mp (hvan j)
-    -- Each finsetGeneratedSheaf(j)(⊤) is zero (Subsingleton in AddCommGrpCat).
-    -- K is their colimit. The colimit cocone maps ι_j(⊤) all map from zero objects.
-    -- In AddCommGrpCat, Subsingleton (ULift ℤ ⟶ G) iff G is zero.
-    -- We need: Subsingleton (ULift ℤ ⟶ K(⊤)).
-    -- Use: every morphism ULift ℤ → K(⊤) factors through some G_j (⊤) via the
-    -- colimit structure, and G_j(⊤) is zero, so the morphism is zero.
-    -- Each G_j(⊤) is subsingleton → K(⊤) is subsingleton → Hom(ULift ℤ, K(⊤)) subsingleton
-    -- First: Subsingleton(ULift ℤ ⟶ G) ↔ Subsingleton G in AddCommGrpCat
-    have hGsub : ∀ j, Subsingleton (((finsetGenFunctor K).obj j).val.obj (op ⊤)) := by
-      intro j
-      exact addCommGrpCat_subsingleton_of_subsingleton_hom _ (hvan' j)
-    -- K.val.obj(op ⊤) = colim(G_j(⊤)) since sheaf filtered colimits are objectwise.
-    -- colim of subsingleton (zero) groups is subsingleton.
-    -- Therefore K(⊤) is subsingleton.
-    have hKsub : Subsingleton (K.val.obj (op ⊤)) := by
-      -- Direct proof: for any s ∈ K(⊤), the finitely generated subsheaf
-      -- generated by s has zero global sections (from hGsub). Since s is in
-      -- the image of the generator map, s must be 0.
-      constructor; intro s t
-      -- Show s = 0: s determines a SectionIndex σ = (⊤, s).
-      -- finsetGeneratedSheaf {σ} is the image of zeroOutsideInt ⊤ → K via sHom s.
-      -- Its global sections at ⊤ are subsingleton (hGsub).
-      -- The cocone map image.ι : finsetGeneratedSheaf {σ} → K is mono.
-      -- The section s factors through this image.
-      suffices hs : ∀ (x : K.val.obj (op ⊤)), x = 0 from (hs s).trans (hs t).symm
-      intro x
-      -- x determines SectionIndex σ = ⟨⊤, x⟩.
-      -- finsetGeneratorMap {σ} : ∐ zeroOutsideInt → K factors through
-      -- finsetGeneratedSheaf {σ} (= image) via factorThruImage ≫ image.ι.
-      -- At ⊤: the composite sends the generator to x.
-      -- But the middle term (finsetGeneratedSheaf {σ})(⊤) is subsingleton (hGsub).
-      -- So factorThruImage(⊤) maps to 0, and image.ι(⊤)(0) = 0. Hence x = 0.
-      let σ : TopCat.Sheaf.SectionIndex K := ⟨⊤, x⟩
-      have h0 := hGsub {σ}
-      -- The factorization: finsetGeneratorMap {σ} = factorThruImage ≫ image.ι
-      -- At ⊤: (finsetGeneratorMap {σ}).val.app (op ⊤) =
-      --   (factorThruImage _).val.app (op ⊤) ≫ (image.ι _).val.app (op ⊤)
-      have hfac := Limits.image.fac (TopCat.Sheaf.finsetGeneratorMap ({σ} : Finset _))
-      -- hfac : factorThruImage _ ≫ image.ι _ = finsetGeneratorMap {σ}
-      -- The image.ι at ⊤ maps from a subsingleton to K(⊤).
-      -- The factorThruImage at ⊤ maps to the subsingleton group → sends everything to 0.
-      -- So the composite at ⊤ sends everything to 0.
-      -- factorThruImage maps to the subsingleton group (h0), so it's the zero map at ⊤.
-      -- Hence finsetGeneratorMap = factorThruImage ≫ image.ι is 0 at ⊤.
-      -- And x is in the image of finsetGeneratorMap at ⊤ (via sHom x).
-      -- So x = 0.
-      -- Step 1: finsetGeneratorMap {σ} at ⊤ is the zero map
-      have hzero_map : (TopCat.Sheaf.finsetGeneratorMap ({σ} : Finset _)).val.app (op ⊤) = 0 := by
-        have hft0 : (factorThruImage (TopCat.Sheaf.finsetGeneratorMap ({σ} : Finset _))).val.app (op ⊤) = 0 := by
-          ext y; exact @Subsingleton.elim _ h0 _ _
-        -- hfac : factorThruImage _ ≫ image.ι _ = finsetGeneratorMap {σ}  (in Sheaf category)
-        -- At presheaf level: .val gives NatTrans.
-        -- (f ≫ g).val = f.val ≫ g.val (Sheaf.Hom.comp_val or similar)
-        -- At (op ⊤): (f.val ≫ g.val).app(op ⊤) = f.val.app(op ⊤) ≫ g.val.app(op ⊤)
-        -- Goal: finsetGeneratorMap.val.app(op ⊤) = 0
-        -- = (factorThruImage ≫ image.ι).val.app(op ⊤)  (by hfac)
-        -- = factorThruImage.val.app(op ⊤) ≫ image.ι.val.app(op ⊤) (by comp)
-        -- = 0 ≫ image.ι.val.app(op ⊤) = 0
-        -- Use hfac element-wise: for any e, finsetGeneratorMap(⊤)(e) =
-        -- (factorThruImage ≫ image.ι)(⊤)(e) = image.ι(⊤)(factorThruImage(⊤)(e))
-        -- = image.ι(⊤)(0) = 0  (since factorThruImage(⊤) maps to subsingleton, i.e., 0)
-        -- factorThruImage ≫ image.ι = finsetGeneratorMap (hfac).
-        -- At ⊤: finsetGeneratorMap(⊤) = factorThruImage(⊤) ≫ image.ι(⊤).
-        -- factorThruImage(⊤) = 0 (hft0), so composite = 0.
-        -- Lean plumbing: (f ≫ g).val = f.val ≫ g.val for Sheaf.Hom.
-        have hval := Sheaf.Hom.ext_iff.mp hfac
-        -- hval : (ft ≫ ι).val = fGM.val
-        have htop := congr_arg (NatTrans.app · (op ⊤)) hval
-        -- htop : (ft ≫ ι).val.app(op ⊤) = fGM.val.app(op ⊤)
-        -- Since (ft ≫ ι).val = ft.val ≫ ι.val (rfl for Sheaf morphism composition):
-        -- (ft.val ≫ ι.val).app(op ⊤) = ft.val.app(op ⊤) ≫ ι.val.app(op ⊤) = 0 ≫ _ = 0
-        -- htop says (ft ≫ ι).val.app(op ⊤) = fGM.val.app(op ⊤) (modulo lambda wrapping).
-        -- Use hval instead: (ft ≫ ι).val = fGM.val. So .app(op ⊤) gives equality.
-        -- Then (ft ≫ ι).val.app(op ⊤) = fGM.val.app(op ⊤) → rw to get (ft ≫ ι) form → use NatTrans.comp_app.
-        -- Actually, (ft ≫ ι).val IS ft.val ≫ ι.val by rfl (Sheaf.Hom.comp definitional).
-        -- So (ft ≫ ι).val.app(op ⊤) = (ft.val ≫ ι.val).app(op ⊤)
-        --   = ft.val.app(op ⊤) ≫ ι.val.app(op ⊤) = 0 ≫ _ = 0
-        -- rw ← hval to change goal from fGM.val.app to (ft ≫ ι).val.app:
-        conv_lhs => rw [← hval]
-        -- Now goal should be (ft ≫ ι).val.app(op ⊤) = 0
-        -- (f ≫ g).val.app U = f.val.app U ≫ g.val.app U (by rfl for Sheaf.Hom.comp)
-        show (factorThruImage (TopCat.Sheaf.finsetGeneratorMap ({σ} : Finset _))).val.app (op ⊤) ≫
-          (Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap ({σ} : Finset _))).val.app (op ⊤) = 0
-        rw [hft0, zero_comp]
-      -- Step 2: x is the image of the generator element under finsetGeneratorMap at ⊤.
-      -- finsetGeneratorMap {σ} = Sigma.desc (fun ⟨τ, _⟩ => sHom τ.2)
-      -- For σ = ⟨⊤, x⟩: sHom(x) at ⊤ sends the canonical generator to x.
-      -- Since finsetGeneratorMap(⊤) = 0 (hzero_map), x = 0.
-      -- The image of the coproduct inclusion ≫ finsetGeneratorMap at ⊤ sends the
-      -- generator of zeroOutsideInt(⊤)(⊤) to x. But finsetGeneratorMap(⊤) = 0.
-      -- So x is in the image of the zero map, hence x = 0.
-      -- Formally: x = (sHom x at ⊤)(standard generator)
-      --         = (Sigma.ι ≫ finsetGeneratorMap)(⊤)(standard generator)
-      --         = finsetGeneratorMap(⊤)(Sigma.ι(⊤)(standard generator))
-      --         = 0(Sigma.ι(⊤)(standard generator)) = 0.
-      -- x = sHom(x)(⊤)(generator ⊤) by sHom_app_generator.
-      -- And sHom(x) = Sigma.ι ≫ finsetGeneratorMap {σ} (by Sigma.ι_desc).
-      -- So x = finsetGeneratorMap(⊤)(Sigma.ι(⊤)(generator ⊤)) = 0(anything) = 0.
-      have hsHom := TopCat.Sheaf.zeroOutsideInt.sHom_app_generator x
-      -- hsHom : (sHom x).val.app (op ⊤) (generator ⊤) = x
-      -- sHom x = Sigma.ι ≫ finsetGeneratorMap {σ} (by Sigma.ι_desc for singleton coproduct)
-      have hι : (Sigma.ι (fun τ : {τ // τ ∈ ({σ} : Finset _)} =>
-            TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ, Finset.mem_singleton_self σ⟩ ≫
-          TopCat.Sheaf.finsetGeneratorMap ({σ} : Finset _)) =
-        TopCat.Sheaf.zeroOutsideInt.sHom x := by
-        simp [TopCat.Sheaf.finsetGeneratorMap, TopCat.Sheaf.familyGeneratorMap, σ]
-      -- At ⊤: (Sigma.ι ≫ finsetGeneratorMap)(⊤)(generator ⊤) = sHom(x)(⊤)(generator ⊤) = x
-      rw [← hsHom, ← congr_arg (fun f => (Sheaf.Hom.val f).app (op ⊤)) hι]
-      -- Goal: (Sigma.ι ≫ finsetGeneratorMap).val.app(op ⊤)(generator ⊤) = 0
-      -- Decompose: (f ≫ g).val.app = f.val.app ≫ g.val.app (definitional for Sheaf.Hom)
-      -- Then use hzero_map on the finsetGeneratorMap part.
-      show ((Sigma.ι (fun τ : {τ // τ ∈ ({σ} : Finset _)} =>
-            TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ, Finset.mem_singleton_self σ⟩).val.app (op ⊤) ≫
-          (TopCat.Sheaf.finsetGeneratorMap ({σ} : Finset _)).val.app (op ⊤))
-        (TopCat.Sheaf.zeroOutsideInt.generator ⊤) = 0
-      rw [hzero_map]; simp
-    -- Hom(ULift ℤ, subsingleton) is subsingleton.
-    exact addCommGrpCat_subsingleton_hom_of_subsingleton _ hKsub
   exact ext_comm_filtered_colimit_mono (finsetGenFunctor K) (finsetGenCocone K)
-    (finsetGenCocone_isColimit K) Z m
-    -- Universal hHom: for ANY filtered diagram, Hom(Z, colim) transfers subsingleton.
-    -- Proof: Hom(Z, F) ≅ F(⊤) via constantSheafAdj. Filtered colimits of sheaves are
-    -- objectwise: (colim F_j)(⊤) = colim(F_j(⊤)). Colimit of subsingletons is subsingleton.
-    (fun Y' c' hc' hvan' => by
-      -- Hom(Z, c'.pt) subsingleton from Hom(Z, Y'.obj j) subsingleton.
-      -- Via constantSheafAdj: Hom(Z, F) ≅ F(⊤). Need Subsingleton(c'.pt(⊤)).
-      -- Use Concrete.isColimit_exists_rep on the sections-at-⊤ diagram.
-      have adj := constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
-        Limits.isTerminalTop
-      have heq : ∀ F : TopCat.Sheaf AddCommGrpCat.{u} X,
-          (Z ⟶ F) ≃ (AddCommGrpCat.of (ULift.{u} ℤ) ⟶
-            ((sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op ⊤)).obj F) :=
-        fun F => adj.homEquiv _ F
-      apply (heq c'.pt).subsingleton_congr.mpr
-      apply addCommGrpCat_subsingleton_hom_of_subsingleton
-      have hGsub : ∀ j, Subsingleton ((Y'.obj j).val.obj (op ⊤)) :=
-        fun j => addCommGrpCat_subsingleton_of_subsingleton_hom _
-          ((heq _).subsingleton_congr.mp (hvan' j))
-      -- Show Subsingleton(c'.pt.val.obj (op ⊤)).
-      -- Transfer c'.pt ≅ colimit Y' via hc', then factor elements of (colimit Y').val.obj(op ⊤)
-      -- through pieces using the cocone structure.
-      let iso := hc'.coconePointUniqueUpToIso (colimit.isColimit Y')
-      -- iso : c'.pt ≅ colimit Y'
-      -- Subsingleton transfers across isomorphisms:
-      suffices Subsingleton ((colimit Y').val.obj (op ⊤)) by
-        constructor; intro s t
-        have := @Subsingleton.elim _ this (iso.hom.val.app (op ⊤) s) (iso.hom.val.app (op ⊤) t)
-        have hinj : Function.Injective (iso.hom.val.app (op ⊤)) := by
-          haveI : IsIso iso.hom := Iso.isIso_hom iso
-          haveI : IsIso (Sheaf.Hom.val iso.hom) := by
-            rw [show Sheaf.Hom.val iso.hom = (sheafToPresheaf _ _).map iso.hom from rfl]
-            infer_instance
-          haveI : IsIso (iso.hom.val.app (op ⊤)) := NatIso.isIso_app_of_isIso _ _
-          exact (ConcreteCategory.bijective_of_isIso (iso.hom.val.app (op ⊤))).1
-        exact hinj this
-      -- Now show Subsingleton((colimit Y').val.obj (op ⊤)).
-      -- Every element factors through some (colimit.ι Y' j).val.app (op ⊤).
-      -- Since (Y'.obj j).val.obj (op ⊤) is subsingleton, the element is 0.
-      constructor; intro s t
-      suffices h : ∀ x : (colimit Y').val.obj (op ⊤), x = 0 from (h s).trans (h t).symm
-      intro x
-      -- All cocone maps at ⊤ send to 0 (since source is subsingleton).
-      -- x is in the image of some cocone map (colimit.ι Y' j).val.app (op ⊤).
-      -- Since source (Y'.obj j).val.obj (op ⊤) is subsingleton, x = 0.
-      -- Cocone maps at ⊤ map to 0:
-      have hzero₂ : ∀ j (y : (Y'.obj j).val.obj (op ⊤)),
-          (colimit.ι Y' j).val.app (op ⊤) y = 0 :=
-        fun j y => @Subsingleton.elim _ (hGsub j) y 0 ▸ map_zero _
-      -- Use hc' (IsColimit c') transferred to colimit Y' via iso.
-      -- The colimit cocone maps (colimit.ι Y' j) jointly generate (colimit Y').
-      -- At the section level: every x ∈ (colimit Y').val.obj(op ⊤) factors through some
-      -- (colimit.ι Y' j).val.app(op ⊤). Since hzero₂, x = 0.
-      -- Embed x into Hom(Z, colimit Y') via adjunction, then factor through a piece.
-      -- Z = constantSheaf(ULift ℤ) is NOT IsFinitelyPresentable in the sheaf category,
-      -- but the factoring holds via the adjunction: Hom(Z, F) ≅ F(⊤), and for filtered
-      -- colimits of sheaves on topological spaces, sections are objectwise colimits.
-      -- For now, sorry the factoring (needs sheafToPresheaf ⋙ evaluation preserves colimits).
-      sorry)
-    (fun S => hfg S)
+    (finsetGenCocone_isColimit K)
+    ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+      (AddCommGrpCat.of (ULift ℤ)))
+    m constantSheaf_hom_preserves_filtered_colimit_vanishing (fun S => hfg S)
 
 section FinsetGenerated
 open scoped Classical

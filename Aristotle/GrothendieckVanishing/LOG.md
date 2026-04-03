@@ -1,6 +1,33 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T10:00Z — Extract SheafHom.lean, fix architecture (3 sorry's, better locations)
+
+**Sorry count: 3** (1 in SheafHom.lean, 2 in FiniteGeneratorReduction.lean)
+
+- **Created SheafHom.lean**: extracted `constantSheaf_hom_preserves_filtered_colimit_vanishing`
+  and helper lemmas from FiniteGeneratorReduction.lean into a standalone file.
+- **Fixed hHom_univ architecture**: `cohomology_vanishing_of_finitelyGenerated_vanishing` now
+  calls `ext_comm_filtered_colimit_mono` with the universal `hHom_univ` from SheafHom.lean,
+  eliminating the old sorry #2 (hHom_univ universality upgrade).
+- **Key technique**: used `Sheaf.createsColimitOfIsSheaf` to derive `PreservesColimit` for
+  `sheafToPresheaf` from a proof that presheaf colimit points are sheaves. This avoids the
+  missing `PreservesFilteredColimits (sheafToPresheaf ...)` instance in Mathlib v4.28.0.
+- **New sorry**: `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:64) — filtered presheaf
+  colimits of sheaves are sheaves on Noetherian spaces (AB5). Well-defined mathematical
+  statement, cleaner than the previous inline sorry.
+- **Fixed documentation lies**: updated sorry counts and locations in headers of
+  FiniteGeneratorReduction.lean, main.lean, IrreducibleStep.lean, GrothendieckVanishing.lean,
+  and CLAUDE.md.
+- **Build verified**: both SheafHom.lean (768s) and FiniteGeneratorReduction.lean (611s)
+  compile with `lake build`.
+- Remaining sorry's:
+  1. `isSheaf_filtered_colimit_of_sheaves` (SheafHom.lean:64) — core AB5 gap
+  2. `hQprov` (FiniteGeneratorReduction.lean:146) — recursive quotient vanishing
+  3. n=0 dead case (FiniteGeneratorReduction.lean:195) — dead at call site
+
 ## 2026-04-03T04:00Z — Final state: 3 sorry warnings, colimit chain built
+
+## 2026-04-03T02:00Z — Close hQcolim sorry, remove unused helpers (4→3 sorry's)
 
 **Sorry count: 3 warnings (4 code sorry's, 1 dead)**
 

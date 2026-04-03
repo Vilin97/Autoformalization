@@ -4,11 +4,13 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  Sorry's (3 remaining in FiniteGeneratorReduction.lean):
-  1. hQprov — iterated quotient vanishing provider for recursive IH call
-  2. n'=0 case — Subsingleton(Hom(Z, Q_j)) for cokernel Q_j (dead at call site if dim ≥ 1)
-  3. Section-level colimit factoring at call site — needs sheafToPresheaf preserves
-     filtered colimits + evaluation + Types.jointly_surjective
+  Sorry's (3 remaining):
+  - isSheaf_filtered_colimit_of_sheaves (SheafHom.lean) — filtered presheaf colimits of
+    sheaves are sheaves on Noetherian spaces (AB5: filtered colimits commute with finite
+    limits in the sheaf condition).
+  - hQprov (FiniteGeneratorReduction.lean:146) — recursive quotient vanishing for IH call.
+  - n'=0 dead case (FiniteGeneratorReduction.lean:195) — needs Hom(Z,-) to preserve
+    filtered colimits; dead at call site (dim ≥ 1 ⟹ m ≥ 2).
 
   File structure:
   - SetupCore.lean: category instances, FlasqueVanishing, PushforwardHVanishing, ClosedImmersionSES
@@ -21,9 +23,9 @@
   - DimZeroVanishing.lean: irreducible dim 0 case
   - ReducibleVanishing.lean: reducible case via Finset.induction
   - ClosedOpenDecomposition.lean: reduction to irreducible
-  - FiniteGeneratorReduction.lean: colimit step, filtered diagram, f.g. vanishing (3 sorry's)
-  - SheafStalkAlgebra.lean: stalk algebra, Ext LES helpers, generator properties
-  - IrreducibleStep.lean: irreducible step assembly (uses SheafStalkAlgebra)
+  - SheafHom.lean: Hom(Z_X,-) preserves filtered colimit vanishing (1 sorry: AB5)
+  - FiniteGeneratorReduction.lean: colimit step, filtered diagram, f.g. vanishing (2 sorry's)
+  - IrreducibleStep.lean: irreducible step assembly
   - GrothendieckVanishing.lean: main theorem + cascade theorems
 -/
 import Aristotle.GrothendieckVanishing.main.ClosedImmersion
