@@ -548,10 +548,12 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       -- Goal: Subsingleton (c'.pt.val.obj (op ⊤))
       -- Every element of c'.pt(⊤) comes from some Y'.obj j (⊤) via the cocone map.
       -- Since Y'.obj j (⊤) is subsingleton, the image is {0}. So every element = 0.
-      constructor; intro s t
-      -- Show s = 0 and t = 0 by factoring through a piece.
-      -- For filtered colimits of sheaves on a topological space, evaluation at U
-      -- preserves the colimit. But this requires the "objectwise colimit" fact.
+      -- Use the existing hHom (specific to finsetGenFunctor K):
+      -- hHom says: if all Hom(Z, finsetGenFunctor K .obj j) are subsingleton,
+      -- then Hom(Z, K) is subsingleton. Its proof shows K(⊤) is subsingleton.
+      -- For the UNIVERSAL version, we need the same for arbitrary Y'/c'.
+      -- The proof uses objectwise colimits for filtered colimits of sheaves.
+      -- This is available via sheafToPresheaf preserving filtered colimits.
       sorry)
     (fun S => hfg S)
 
