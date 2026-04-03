@@ -618,20 +618,11 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
           rw [show iso_pt.hom ≫ iso_pt.inv = 𝟙 _ from iso_pt.hom_inv_id]
           rfl
         rw [← hinv, hx', map_zero]
-      -- x' factors through a piece via FunctorToTypes.jointly_surjective'.
-      -- (colimit Y').val = colimit (Y' ⋙ sheafToPresheaf) as presheaves.
-      -- For Type-valued presheaves, jointly_surjective' gives factoring.
-      -- Our presheaves are AddCommGrpCat-valued. Use forget to Type.
-      -- FunctorToTypes.jointly_surjective' applies to (Y' ⋙ sheafToPresheaf ⋙ forget₂_to_Type):
-      -- But colimit(F ⋙ G) ≠ G(colimit F) in general.
-      -- Instead: use that colimit in sheaf category agrees with colimit in presheaf category
-      -- (for filtered diagrams with AB5). Then evaluation at op ⊤ preserves colimits.
-      -- Then concrete Types.jointly_surjective.
-      -- This needs: [PreservesFilteredColimitsOfSize (forget AddCommGrpCat)]
-      -- which IS an instance in Mathlib.
-      -- AND: the colimit in presheaves evaluated at (op ⊤) IS the colimit in AddCommGrpCat
-      -- of the evaluated pieces.
-      -- For now, sorry this infrastructure chain.
+      -- Use Concrete.isColimit_exists_rep to factor x' through a piece.
+      -- Need: an IsColimit for a diagram in AddCommGrpCat evaluated at op ⊤.
+      -- Chain: sheaf colimit → presheaf colimit → eval at op ⊤ → AddCommGrpCat colimit.
+      -- Concrete.isColimit_exists_rep needs [PreservesColimit F (forget AddCommGrpCat)].
+      -- For now, sorry this colimit chain.
       sorry)
     (fun S => hfg S)
 
