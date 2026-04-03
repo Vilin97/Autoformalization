@@ -162,6 +162,11 @@ private theorem ext_vanishing_of_colimit_aux
     -- cokernel.desc ι (cokernel.π(c.ι.app j₀ ≫ ι) ≫ s.ι.app j₀) with ι ≫ g = 0
     -- proved via hc.hom_ext + IsFiltered.max + cokernel.condition.
     -- fac and uniq follow from cokernel.π_desc + filtered compatibility.
+    -- hQcolim: Use Mathlib's colimit API. colimit Qfun exists, and we transfer via
+    -- Cocones.ext to show our Qcocone is isomorphic to the standard colimit cocone.
+    -- The iso colimit Qfun ≅ cokernel ι follows from PreservesCokernel.iso applied to
+    -- colim, but connecting the abstract cokernel functor to our concrete Qfun is complex.
+    -- For now, sorry this categorical infrastructure piece.
     have hQcolim : IsColimit Qcocone := sorry
     -- Per-j vanishing: from SES 0 → Y.obj j → I → Q_j → 0 and LES.
     -- Needs c.ι.app j ≫ ι to be mono (requires mono transitions on the diagram).
