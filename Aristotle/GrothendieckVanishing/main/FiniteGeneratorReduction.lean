@@ -152,7 +152,30 @@ private theorem ext_vanishing_of_colimit_aux
     -- c.pt →^{ι} I →^{cokernel.π} Q, showing Q = colim Qfun.
     -- Full proof requires ~30 lines of categorical plumbing with
     -- isColimitConstCocone, mapShortComplex, exact_mapShortComplex.
-    have hQcolim : IsColimit Qcocone := sorry
+    have hQcolim : IsColimit Qcocone := by
+      -- For any cocone s of Qfun, define desc: cokernel(ι) → s.pt.
+      -- Step: pick j₀, define g := cokernel.π(c.ι.app j₀ ≫ ι) ≫ s.ι.app j₀ : I → s.pt.
+      -- This is independent of j₀ (by filtered compatibility).
+      -- Then ι ≫ g = 0 (by hc.hom_ext: for all j, c.ι.app j ≫ ι ≫ g = 0).
+      -- So cokernel.desc ι g (ι ≫ g = 0) gives the desc map.
+      -- Filtered category is nonempty:
+      haveI : Nonempty J := IsFiltered.nonempty
+      let j₀ : J := Classical.arbitrary J
+      -- Define the desc function and prove fac/uniq
+      -- desc: cokernel(ι) → s.pt via cokernel.desc
+      let desc_fun : ∀ (s : Cocone Qfun), Qcocone.pt ⟶ s.pt := fun s =>
+        cokernel.desc ι (cokernel.π (c.ι.app j₀ ≫ ι) ≫ s.ι.app j₀) (by
+          apply hc.hom_ext; intro j
+          simp only [comp_zero, Category.assoc]
+          -- Goal: c.ι.app j ≫ ι ≫ cokernel.π(c.ι.app j₀ ≫ ι) ≫ s.ι.app j₀ = 0
+          -- Use cocone compatibility: the maps are all equal, so we can replace j₀ with j.
+          -- cokernel.π(c.ι.app j ≫ ι) ≫ s.ι.app j = cokernel.π(c.ι.app j₀ ≫ ι) ≫ s.ι.app j₀
+          -- (by naturality of s via IsFiltered)
+          -- Then: c.ι.app j ≫ ι ≫ cokernel.π(c.ι.app j ≫ ι) ≫ s.ι.app j
+          --     = (c.ι.app j ≫ ι) ≫ cokernel.π(c.ι.app j ≫ ι) ≫ s.ι.app j
+          --     = 0 ≫ s.ι.app j = 0  (by cokernel.condition)
+          sorry)
+      exact IsColimit.mk desc_fun sorry sorry
     -- Per-j vanishing: from SES 0 → Y.obj j → I → Q_j → 0 and LES.
     -- Needs c.ι.app j ≫ ι to be mono (requires mono transitions on the diagram).
     -- This is provided by ext_comm_filtered_colimit_mono which has [Mono (Y.map φ)].

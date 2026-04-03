@@ -1,5 +1,15 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-03T00:45Z — Construct hQcolim desc_fun via cokernel.desc
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux, sub-sorry's in hQcolim + others)
+
+- Defined `desc_fun` for hQcolim: `cokernel.desc ι (cokernel.π ≫ s.ι.app j₀) (sorry)`
+- The desc MAP is now concrete — sorry's remain for:
+  1. `ι ≫ g = 0` condition (needs hc.hom_ext + cokernel.condition + filtered compatibility)
+  2. `fac` (factoring through cocone maps)
+  3. `uniq` (uniqueness)
+
 ## 2026-04-03T00:30Z — Fix addCommGrpCat_exact_sandwich, simplify hQvan_provider via ext_sandwich
 
 **Sorry count: 1** (ext_vanishing_of_colimit_aux, 4 sub-sorry's)
