@@ -185,18 +185,76 @@ instance finsetGenFunctor_mono
 
 end FilteredDiagram
 
+/-- On a Noetherian space, the presheaf-level filtered colimit of sheaves is a sheaf.
+    Uses: Noetherian → every open cover has finite subcover → sheaf condition is a finite limit →
+    filtered colimits commute with finite limits (`colimitLimitIso`) → colimit is a sheaf. -/
+private theorem isSheaf_presheaf_filtered_colimit
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (c : Cocone (Y' ⋙ sheafToPresheaf _ _)) (hc : IsColimit c) :
+    TopCat.Presheaf.IsSheaf c.pt := by
+  sorry
+
+/-- On a Noetherian space, `sheafToPresheaf` creates filtered colimits of sheaves. -/
+private noncomputable def createsFilteredColimit
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X) :
+    CreatesColimit Y' (sheafToPresheaf _ _) :=
+  Sheaf.createsColimitOfIsSheaf Y' (fun c hc => isSheaf_presheaf_filtered_colimit Y' c hc)
+
+/-- Auxiliary: sheaf cohomology vanishing commutes with filtered colimits, universally
+    quantified over the degree `n` so that the IH applies to all diagrams.
+    Proof by induction on `n` with dimension shifting. -/
+private theorem sheafH_filtered_colimit_aux
+    {X : TopCat.{u}} [NoetherianSpace X] (n : ℕ) :
+    ∀ {J' : Type u} [inst1 : SmallCategory J'] [inst2 : IsFiltered J']
+      (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+      (c' : Cocone Y') (hc' : IsColimit c')
+      (hvan : ∀ j, Subsingleton (Sheaf.H (Y'.obj j) n)),
+    Subsingleton (Sheaf.H c'.pt n) := by
+  induction n with
+  | zero =>
+    -- Base case: H^0 = Ext^0 ≅ Hom ≅ global sections.
+    -- On Noetherian spaces, sheafToPresheaf creates filtered colimits (via
+    -- isSheaf_presheaf_filtered_colimit), so global sections commute with
+    -- filtered colimits. If each piece has trivial global sections, so does the colimit.
+    intro J' inst1 inst2 Y' c' hc' hvan
+    haveI := inst1; haveI := inst2
+    sorry
+  | succ n ih =>
+    -- Inductive step: dimension shifting via injective embedding.
+    intro J' inst1 inst2 Y' c' hc' hvan
+    letI := inst1; letI := inst2
+    -- Embed c'.pt ↪ I (injective)
+    haveI : EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+      IsGrothendieckAbelian.enoughInjectives
+    let ι' := Injective.ι c'.pt
+    -- Short exact sequence 0 → c'.pt → I → cokernel ι' → 0
+    let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+      ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
+    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
+    -- Ext^{n+1}(Z, I) = 0 since I is injective
+    have hI : Subsingleton (Sheaf.H (Injective.under c'.pt) (n + 1)) :=
+      Ext.subsingleton_of_injective _ _ n
+    -- Ext^n(Z, cokernel ι') = 0 by IH applied to the quotient diagram
+    -- (Q = colim Q_j where Q_j = coker(F_j → I), each Ext^n(Z, Q_j) = 0 by LES)
+    have hQ : Subsingleton (Sheaf.H S.X₃ n) := by sorry
+    -- Dimension shift: Ext^{n+1}(Z, c'.pt) = 0
+    exact ext_dimension_shift _ hSE n hQ hI
+
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
     This is the derived functor commutation theorem for `H^n = R^n Γ`:
     if `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
 
-    The proof requires showing that `R^n Γ` preserves filtered colimits, which follows from:
-    (1) Γ = global sections preserves filtered colimits (sheafToPresheaf creates them on
-        Noetherian spaces — the AB5 property), and
-    (2) filtered colimits of injective resolutions are injective resolutions, and
-    (3) cohomology of chain complexes commutes with filtered colimits (AB5 for Ab).
-
-    This single sorry subsumes both the former sorry #1 (isSheaf_filtered_colimit_of_sheaves)
-    and sorry #2 (hQprov in ext_vanishing_of_colimit_aux). -/
+    Proof by induction on `n`:
+    - `n = 0`: `Ext^0 = Hom ≅ global sections`, which commutes with filtered colimits on
+      Noetherian spaces because `sheafToPresheaf` creates filtered colimits.
+    - `n + 1`: Embed `colim F_j ↪ I` (injective). The cokernel `Q` is a filtered colimit
+      of `Q_j = I / F_j`. The LES gives `Ext^{n+1}(Z, colim F_j) ≅ Ext^n(Z, Q)`.
+      Each `Ext^n(Z, Q_j) = 0` by LES, so by IH `Ext^n(Z, Q) = 0`. -/
 theorem sheafH_preserves_filtered_colimits
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
@@ -204,8 +262,8 @@ theorem sheafH_preserves_filtered_colimits
     (c' : Cocone Y') (hc' : IsColimit c')
     (n : ℕ)
     (hvan : ∀ j, Subsingleton (Sheaf.H (Y'.obj j) n)) :
-    Subsingleton (Sheaf.H c'.pt n) := by
-  sorry
+    Subsingleton (Sheaf.H c'.pt n) :=
+  sheafH_filtered_colimit_aux n Y' c' hc' hvan
 
 /-- **Hartshorne 2.9 core**: on a Noetherian space, if `H^m = 0` for all finitely generated
     subsheaves of `K`, then `H^m(K) = 0`. Applies `sheafH_preserves_filtered_colimits`
