@@ -208,45 +208,38 @@ theorem ext_comm_filtered_colimit_mono
     (Y : J ⥤ C) (c : Cocone Y) (hc : IsColimit c)
     [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
     (Z : C) (n : ℕ)
-    (hHom : (∀ j, Subsingleton (Z ⟶ Y.obj j)) → Subsingleton (Z ⟶ c.pt))
+    -- Universal hHom: works for ANY filtered diagram, not just Y.
+    -- At the call site (sheaves), Hom(Z,-) ≅ Γ(X,-) preserves all filtered colimits.
+    (hHom : ∀ {J' : Type w} [SmallCategory J'] [IsFiltered J']
+      (Y' : J' ⥤ C) (c' : Cocone Y'), IsColimit c' →
+      (∀ j, Subsingleton (Z ⟶ Y'.obj j)) → Subsingleton (Z ⟶ c'.pt))
     (hvan : ∀ j, Subsingleton (Ext Z (Y.obj j) n)) :
     Subsingleton (Ext Z c.pt n) := by
-  induction n with
+  refine ext_vanishing_of_colimit_aux Z hHom n Y c hc hvan ?_
+  -- hQvan_provider: for any injective pres of c.pt, Ext^n'(Z, cokernel(c.ι.app j ≫ f)) = 0
+  intro n' hn' ip j
+  have hn : n' = n - 1 := by omega
+  -- SES: 0 → Y.obj j →^{c.ι.app j ≫ ip.f} I → Q_j → 0
+  haveI : Mono (c.ι.app j) := IsColimit.mono_ι_app_of_isFiltered hc j
+  let f_j := c.ι.app j ≫ ip.shortComplex.f
+  haveI : Mono f_j := mono_comp _ _
+  let Sj := ShortComplex.mk f_j (cokernel.π f_j) (by simp [f_j, ShortComplex.mk])
+  have hSEj : Sj.ShortExact := ShortComplex.ShortExact.mk'
+    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
+  -- Use ext_sandwich or hHom depending on n'
+  cases n' with
   | zero =>
-    exact Ext.homEquiv₀.subsingleton_congr.mpr
-      (hHom (fun j => Ext.homEquiv₀.subsingleton_congr.mp (hvan j)))
-  | succ n _ =>
-    -- The aux lemma needs universal hHom. At the call site (sheaves), this holds.
-    -- For the abstract setting, we use sorry for the universality upgrade.
-    refine ext_vanishing_of_colimit_aux Z (by sorry) (n + 1) Y c hc hvan ?_
-    -- hQvan_provider: for any injective pres of c.pt, Ext^n(Z, cokernel(c.ι.app j ≫ f)) = 0
-    -- From SES 0 → Y.obj j → I → Q_j → 0 (mono by AB5) and LES:
-    -- Ext^n(Z, I) → Ext^n(Z, Q_j) → Ext^{n+1}(Z, Y.obj j) → Ext^{n+1}(Z, I)
-    -- For n ≥ 1: both end terms vanish (injective), and hvan j gives middle vanishing.
-    intro n' hn' ip j
-    have hn : n' = n := by omega
-    subst hn
-    -- SES: 0 → Y.obj j →^{c.ι.app j ≫ ip.f} I → Q_j → 0
-    -- Need Mono (c.ι.app j ≫ ip.f). Use AB5 + mono transitions for Mono (c.ι.app j).
-    let f_j := c.ι.app j ≫ ip.shortComplex.f
-    let Sj := ShortComplex.mk f_j (cokernel.π f_j) (by simp [f_j, ShortComplex.mk])
-    -- The SES is short exact (f_j mono, cokernel.π is cokernel)
-    haveI : Mono (c.ι.app j) :=
-      IsColimit.mono_ι_app_of_isFiltered hc j
-    haveI : Mono f_j := mono_comp _ _
-    have hSEj : Sj.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
-    -- LES: Ext^n(Z, I) → Ext^n(Z, Q_j) → Ext^{n+1}(Z, Y.obj j) → Ext^{n+1}(Z, I)
-    -- Sj.X₂ = I (injective), Sj.X₁ = Y.obj j, Sj.X₃ = Q_j
-    -- subsingleton_ext_of_ses_third: Ext^n(Z, X₂)=0 ∧ Ext^{n+1}(Z, X₁)=0 → Ext^n(Z, X₃)=0
-    -- Ext^n(Z, I) is subsingleton for n ≥ 1 (injective)
-    -- Ext^{n+1}(Z, Y.obj j) is subsingleton (hvan j)
-    -- Use ext_sandwich: Ext^n'(Z, I) = 0 ∧ Ext^{n'+1}(Z, Y.obj j) = 0 ⟹ Ext^n'(Z, Q_j) = 0
-    -- For n' ≥ 1: Ext^n'(Z, I) = 0 by injectivity. For n' = 0: sorry (dead at call site).
-    cases n' with
-    | zero => sorry  -- Hom case: only arises at outer degree 1, dead at call site (dim ≥ 1 ⟹ m ≥ 2)
-    | succ n'' =>
-      exact ext_sandwich Z hSEj (n'' + 1) (Ext.subsingleton_of_injective Z _ n'') (hvan j)
+    -- n'=0, n=1: need Subsingleton(Hom(Z, Q_j)) where Q_j = cokernel(c.ι.app j ≫ ι).
+    -- From the LES: Hom(Z, I) ↠ Hom(Z, Q_j) (surjective, since Ext^1(Z, Y.obj j) = 0).
+    -- So Hom(Z, Q_j) is a quotient of Hom(Z, I) — NOT subsingleton in general.
+    -- Use hHom on the trivial 1-element diagram {Q_j}:
+    -- every morphism Z → Q_j factors... but Q_j is not a filtered colimit.
+    -- This requires additional infrastructure (Hom(Z, -) transfers surj quotients).
+    sorry
+  | succ n'' =>
+    have hneq : n'' + 1 + 1 = n := by omega
+    exact ext_sandwich Z hSEj (n'' + 1) (Ext.subsingleton_of_injective Z _ n'')
+      (hneq ▸ hvan j)
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
@@ -527,7 +520,12 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     -- Hom(ULift ℤ, subsingleton) is subsingleton.
     exact addCommGrpCat_subsingleton_hom_of_subsingleton _ hKsub
   exact ext_comm_filtered_colimit_mono (finsetGenFunctor K) (finsetGenCocone K)
-    (finsetGenCocone_isColimit K) Z m hHom (fun S => hfg S)
+    (finsetGenCocone_isColimit K) Z m
+    -- Universal hHom: for ANY filtered diagram, Hom(Z, colim) transfers subsingleton.
+    -- Proof: Hom(Z, F) ≅ F(⊤) via constantSheafAdj. Filtered colimits of sheaves are
+    -- objectwise: (colim F_j)(⊤) = colim(F_j(⊤)). Colimit of subsingletons is subsingleton.
+    (fun Y' c' hc' hvan' => by sorry)
+    (fun S => hfg S)
 
 section FinsetGenerated
 open scoped Classical
