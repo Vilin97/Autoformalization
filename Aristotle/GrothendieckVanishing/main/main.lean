@@ -9,7 +9,8 @@
     H^n commutes with filtered colimits on Noetherian spaces (derived functor commutation).
 
   File structure:
-  - SetupCore.lean: category instances, FlasqueVanishing, PushforwardHVanishing, ClosedImmersionSES
+  - FlasqueVanishing.lean: category instances, IsFlasqueSheaf, FlasqueVanishing
+  - SetupCore.lean: PushforwardHVanishing, epi_unit_of_closedImmersion, ClosedImmersionSES
   - Setup.lean: ReducibleVanishing, IrreduciblePosVanishing wrapper
   - Auxiliary.lean: topology/dimension helpers
   - ClosedImmersion.lean: closed immersion counit/stalk infrastructure
