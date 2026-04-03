@@ -207,8 +207,30 @@ private theorem isSheaf_presheaf_filtered_colimit
     have hres_zero : ∀ k ∈ t, ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀)
         (ConcreteCategory.hom ((Y'.obj j₀).val.map (Opens.leSupr U k).op) b₀) = 0 := by
       intro k hk; rw [hnat k]; exact ha k hk
-    -- Each restriction eventually becomes 0 in some piece (filtered colimit property)
-    -- Then find common index, apply sheaf condition on the piece, conclude a = 0
+    -- Each restriction eventually becomes 0: use isColimit_eq_iff' at the Type level
+    let F_k k := (Y' ⋙ sheafToPresheaf _ _) ⋙ ev (U k)
+    have h_ev_zero : ∀ k ∈ t, ∃ (jk : J') (fk : j₀ ⟶ jk),
+        ConcreteCategory.hom ((F_k k).map fk)
+          (ConcreteCategory.hom ((Y'.obj j₀).val.map (Opens.leSupr U k).op) b₀) = 0 := by
+      intro k hk
+      have hcTyp := isColimitOfPreserves (CategoryTheory.forget AddCommGrpCat) (hcV (U k))
+      have h0 : ((CategoryTheory.forget AddCommGrpCat).mapCocone
+          ((ev (U k)).mapCocone c)).ι.app j₀
+          (ConcreteCategory.hom ((Y'.obj j₀).val.map (Opens.leSupr U k).op) b₀) =
+        ((CategoryTheory.forget AddCommGrpCat).mapCocone
+          ((ev (U k)).mapCocone c)).ι.app j₀ 0 := by
+        change ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀) _ =
+          ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀) 0
+        rw [hres_zero k hk, map_zero]
+      rw [Types.FilteredColimit.isColimit_eq_iff' hcTyp] at h0
+      obtain ⟨jk, fk, hfk⟩ := h0
+      exact ⟨jk, fk, by simpa [map_zero] using hfk⟩
+    -- Remaining: find common j₁ above all jk (IsFiltered.sup_objs_exists),
+    -- show res_k(transition(b₀)) = 0 for all k ∈ t (naturality + map_zero),
+    -- apply sheaf separation on (Y'.obj j₁) to get transition(b₀) = 0,
+    -- then a = ι_{j₁}(transition(b₀)) = ι_{j₁}(0) = 0.
+    -- Alternatively: use isColimit_eq_iff' on hcV (iSup U) to reduce to
+    -- ∃ j f, F(f)(b₀) = 0, then construct j via common index + sheaf condition.
     sorry
   -- Existence: construct a gluing section
   have hexist : ∃ s, Presheaf.IsGluing c.pt U sf s := by

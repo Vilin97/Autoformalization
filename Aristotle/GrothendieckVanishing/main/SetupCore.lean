@@ -6,10 +6,10 @@
   2. `epi_unit_of_closedImmersion` (adjunction unit is epi)
   3. `ClosedImmersionSES` (short exact sequence from closed immersion)
 
-  Depends on FlasqueVanishing.lean for `FlasqueVanishing`, `IsFlasqueSheaf`,
-  `isFlasque_of_injective`.
+  Depends on FlasqueCohomology.lean for `FlasqueVanishing`, `sheafH0EquivSections`,
+  and FlasqueVanishing.lean for `IsFlasqueSheaf`, `isFlasque_of_injective`.
 -/
-import Aristotle.GrothendieckVanishing.main.FlasqueVanishing
+import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
 
 universe u
 
