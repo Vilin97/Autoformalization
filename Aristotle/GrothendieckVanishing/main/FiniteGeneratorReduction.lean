@@ -768,19 +768,36 @@ private theorem sheafH_filtered_colimit_aux
         uniq := fun s m hm => by
           apply (cancel_epi (cokernel.π ι')).mp
           rw [cokernel.π_desc, ← hπC j₀, Category.assoc, hm j₀] }
-    -- Per-piece vanishing: H^n(Q_j) = 0
-    -- For n ≥ 1: dimension shift via SES 0 → Y_j → I → Q_j → 0 (needs Mono)
-    -- For n = 0: separate argument needed (H^0(I) ≠ 0 so dim shift fails)
-    have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) n) := by
-      intro j
-      match n with
-      | 0 =>
-        -- n = 0: proving H^1(colim Y_j) = 0 via H^0(Q_j) = 0.
-        -- H^0(Q_j) = Γ(Q_j) surjects from Γ(I) when mono, and H^1(Y_j) = 0
-        -- gives Γ(I) ↠ Γ(Q_j). Needs direct LES argument.
-        sorry
-      | n' + 1 =>
-        -- n = n' + 1 ≥ 1: dim shift works since H^{n'+1}(I) = 0
+    -- Split on n: n=0 needs direct H^1 argument, n≥1 uses dimension shift
+    match n with
+    | 0 =>
+      -- Direct proof of H^1(c'.pt) = 0 using the LES + Ext^0 surjectivity.
+      -- Pattern: every α ∈ Ext^1(Z, c'.pt) lifts to β ∈ Ext^0(Z, Q) (by exact₁),
+      -- then β lifts to γ ∈ Ext^0(Z, I) (by surjectivity: Q = colim Q_j, each
+      -- Ext^0(Z, I) ↠ Ext^0(Z, Q_j) from SES + Mono + H^1(Y_j)=0), hence
+      -- β.comp hSE.extClass = 0 (by associativity + comp_extClass = 0).
+      -- Ext^0 surjectivity: every element of Ext^0(Z, Q) lifts to Ext^0(Z, I)
+      have h_surj : ∀ y : Sheaf.H S.X₃ 0,
+          ∃ z : Sheaf.H I 0, z.comp (Ext.mk₀ S.g) (add_zero 0) = y := by
+        sorry -- Provable from: Q = colim Q_j + Γ commuting with colim + mono + H^1(Y_j)=0
+      constructor; intro a b
+      have ha : a.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ hI _ _
+      have hb : b.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ hI _ _
+      obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a ha rfl
+      obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b hb rfl
+      obtain ⟨c', hc'⟩ := h_surj c
+      obtain ⟨d', hd'⟩ := h_surj d
+      have zero_c : c.comp hSE.extClass rfl = 0 := by
+        rw [← hc', Ext.comp_assoc_of_second_deg_zero c' (Ext.mk₀ S.g)
+          hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero c' _ 1 1 rfl]
+      have zero_d : d.comp hSE.extClass rfl = 0 := by
+        rw [← hd', Ext.comp_assoc_of_second_deg_zero d' (Ext.mk₀ S.g)
+          hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero d' _ 1 1 rfl]
+      rw [← hc, ← hd, zero_c, zero_d]
+    | n' + 1 =>
+      -- For n ≥ 1: dimension shift via h_van_Q + IH
+      have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) (n' + 1)) := by
+        intro j
         let S_j : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
           ShortComplex.mk (c'.ι.app j ≫ ι') (cokernel.π (c'.ι.app j ≫ ι'))
             (cokernel.condition _)
@@ -791,9 +808,9 @@ private theorem sheafH_filtered_colimit_aux
           sorry
         exact ext_dimension_shift_X₃ _ hSE_j (n' + 1)
           (Ext.subsingleton_of_injective _ _ n') (hvan j)
-    have hQ : Subsingleton (Sheaf.H S.X₃ n) := ih Q qCocone hqColim h_van_Q
-    -- Dimension shift: Ext^{n+1}(Z, c'.pt) = 0
-    exact ext_dimension_shift _ hSE n hQ hI
+      have hQ : Subsingleton (Sheaf.H S.X₃ (n' + 1)) :=
+        ih Q qCocone hqColim h_van_Q
+      exact ext_dimension_shift _ hSE (n' + 1) hQ hI
 
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
     This is the derived functor commutation theorem for `H^n = R^n Γ`:
