@@ -233,8 +233,8 @@ private lemma ext0_comp_eq_of_covariant
       (Ext.mk₀ g) _ = Ext.addEquiv₀.symm φ
   rw [AddEquiv.symm_apply_apply]; exact hz
 
--- Sub-lemma: Epi of g at ⊤ from H^1(G')=0 via LES + adj + separator
-private lemma epi_g_app_top_of_H1_vanishing
+-- Epi of g at ⊤ from H^1(G')=0 via LES + adj + separator
+theorem epi_g_app_top_of_H1_vanishing
     {Z : TopCat.{u}} [NoetherianSpace Z]
     {G' : TopCat.Sheaf AddCommGrpCat.{u} Z}
     (ip : InjectivePresentation G')

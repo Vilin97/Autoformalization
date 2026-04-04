@@ -783,9 +783,34 @@ private theorem sheafH_filtered_colimit_aux
       -- β.comp hSE.extClass = 0 (by associativity + comp_extClass = 0).
       -- Ext^0 surjectivity: every element of Ext^0(Z, Q) lifts to Ext^0(Z, I)
       -- Ext^0 surjectivity: every element of Ext^0(Z, Q) lifts to Ext^0(Z, I).
-      -- Uses ext0_surj_of_epi_top with Epi (S.g.val.app (op ⊤)) = Γ(I) ↠ Γ(Q).
-      -- Proof: Q = colim Q_j, Γ(Q) = colim Γ(Q_j), each Γ(I) ↠ Γ(Q_j) by SES + mono + H^1=0.
-      have h_surj := ext0_surj_of_epi_top (S := S) (sorry : Epi (S.g.val.app (op ⊤)))
+      -- Proof: Γ(I) ↠ Γ(Q) because Q = colim Q_j, each Γ(I) ↠ Γ(Q_j) by LES + mono.
+      have hΓg_epi : Epi (S.g.val.app (op ⊤)) := by
+        rw [AddCommGrpCat.epi_iff_surjective]; intro q
+        -- Γ(Q) = colim Γ(Q_j) via filtered colimit preservation
+        haveI := createsFilteredColimit Q
+        have hc_top_Q := isColimitOfPreserves
+          ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤))
+          (isColimitOfPreserves (sheafToPresheaf _ _) hqColim)
+        obtain ⟨j₀, q₀, hq₀⟩ := Concrete.isColimit_exists_rep _ hc_top_Q q
+        -- Per-piece: Γ(I) ↠ Γ(Q_{j₀}) from SES + mono + H^1(Y_{j₀}) = 0
+        haveI : Mono ι' := inferInstance
+        haveI : Mono (c'.ι.app j₀ ≫ ι') := mono_comp _ _
+        let ip_j₀ : InjectivePresentation (Y'.obj j₀) :=
+          { J := I, f := c'.ι.app j₀ ≫ ι' }
+        have hπ_epi := epi_g_app_top_of_H1_vanishing ip_j₀ (hvan j₀)
+        rw [AddCommGrpCat.epi_iff_surjective] at hπ_epi
+        obtain ⟨p, hp⟩ := hπ_epi q₀
+        -- Composition: I →[π_{j₀}] Q_{j₀} →[cocone] Q = I →[S.g] Q
+        -- From hqColim: cokernel.π(f_{j₀}) ≫ qCocone.ι.app j₀ = cokernel.π(ι') = S.g
+        have hcomp : ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀ = S.g := by
+          show cokernel.π _ ≫ _ = cokernel.π _
+          exact (cokernel.π_desc _ _ _).trans (Category.id_comp _)
+        refine ⟨p, ?_⟩
+        show (S.g.val.app (op ⊤)) p = q
+        have hkey := congrArg (·.val.app (op ⊤)) hcomp
+        simp only [Sheaf.comp_val, NatTrans.comp_app] at hkey
+        rw [hkey.symm]; exact hq₀ ▸ hp ▸ rfl
+      have h_surj := ext0_surj_of_epi_top (S := S) hΓg_epi
       constructor; intro a b
       have ha : a.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ hI _ _
       have hb : b.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ hI _ _
