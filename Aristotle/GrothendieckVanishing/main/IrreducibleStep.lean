@@ -384,7 +384,7 @@ theorem exists_good_section
     (hR : ¬ IsZero R) :
     ∃ (V' : Opens X) (_ : V' ≤ V) (_ : V' ≠ ⊥)
       (s : R.val.obj (op V')),
-      ∀ (x : X) (hx : x ∈ V'),
+      ∀ (x : X) (_ : x ∈ V'),
         Function.Bijective (ConcreteCategory.hom
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
             (TopCat.Sheaf.zeroOutsideInt.sHom s).val)) := by
@@ -405,7 +405,7 @@ theorem subsheaf_contains_zeroOutsideInt
     (hR : ¬ IsZero R) :
     ∃ (V' : Opens X) (_ : V' ≤ V) (_ : V' ≠ ⊥)
       (j : TopCat.Sheaf.zeroOutsideInt V' ⟶ R), Mono j ∧
-      (∀ (x : X) (hx : x ∈ V'),
+      (∀ (x : X) (_ : x ∈ V'),
         Function.Bijective (ConcreteCategory.hom
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map j.val))) := by
   obtain ⟨V', hle, hne, s, hbij⟩ := exists_good_section V R i hR
@@ -552,15 +552,15 @@ theorem irreduciblePos_kernel_subsingleton
       topologicalKrullDim Y < topologicalKrullDim X →
       m > topologicalKrullDim Y →
       Subsingleton (Sheaf.H G m))
-    (Z : Set X) (hZ_closed : IsClosed Z) (hZ_ne_univ : Z ≠ Set.univ)
-    (hZ_dim : topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X)
-    (hn_Z : ↑n > topologicalKrullDim (TopCat.of Z))
+    (_Z : Set X) (_hZ_closed : IsClosed _Z) (_ : _Z ≠ Set.univ)
+    (_ : topologicalKrullDim (TopCat.of _Z) < topologicalKrullDim X)
+    (_ : ↑n > topologicalKrullDim (TopCat.of _Z))
     (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X))
-    (hSE : S.ShortExact) (hS₂ : S.X₂ = F)
-    (hS₃ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hZ_closed)).obj
+    (_ : S.ShortExact) (_ : S.X₂ = F)
+    (_ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl _hZ_closed)).obj
         ((TopCat.Sheaf.pullback AddCommGrpCat.{u}
-          (TopCat.closedIncl hZ_closed)).obj F)) :
+          (TopCat.closedIncl _hZ_closed)).obj F)) :
     Subsingleton (Sheaf.H S.X₁ n) :=
   directLimit_cohomology_vanishing S.X₁ n
     (fun f hf => epiImage_zeroOutsideInt_vanishing X ih hpos _ f hf n hn)
