@@ -217,7 +217,7 @@ private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx
 theorem cokernel_openHom_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) (hV : V ≠ ⊥)
-    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
+    (n : ℕ) (hn : n > topologicalKrullDim X) (_ : topologicalKrullDim X > 0)
     (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
       (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y < topologicalKrullDim X →

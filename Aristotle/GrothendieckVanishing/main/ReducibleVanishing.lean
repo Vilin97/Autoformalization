@@ -83,7 +83,7 @@ theorem ReducibleVanishing'
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (hNotIrred : ¬ IrreducibleSpace X) [Nonempty X]
+    (_ : ¬ IrreducibleSpace X) [Nonempty X]
     (ih_irred : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
       [IrreducibleSpace Y] (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y ≤ topologicalKrullDim X →
