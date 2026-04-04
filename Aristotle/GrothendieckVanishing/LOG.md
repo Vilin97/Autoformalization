@@ -1,5 +1,19 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T00:45Z — PROVE 2 key lemmas: sheaf separation + filtered colimit kills all
+
+**Sorry count: 4 keywords in 2 theorems (same count, but 2 standalone lemmas CLOSED)**
+
+- **PROVED** `sheaf_section_zero_of_zero_on_finite_cover` (5 lines) using `IsSheaf.section_ext`
+- **PROVED** `filtered_colimit_kills_all_restrictions` (~40 lines) using:
+  - `Finset.induction` to iteratively merge transition morphisms
+  - `IsFiltered.max` + `IsFiltered.coeqHom` to equalize parallel morphisms
+  - Naturality of presheaf transition maps + `map_zero` to preserve zeros
+  - Key proof technique: `change ConcreteCategory.hom ...` to unify `AddCommGrpCat.Hom.hom` notation
+- Remaining sorry's in hsep and hexist now only need to CALL these proved lemmas
+  plus the cocone factorization (already proved last cycle)
+- Aristotle job 50689427 at 24%
+
 ## 2026-04-04T00:20Z — PROVE sheaf_section_zero_of_zero_on_finite_cover (3→2 sorry warnings)
 
 **Sorry count: 4 keywords in 2 theorems (was 5 in 3)**
