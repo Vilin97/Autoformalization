@@ -1,5 +1,25 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T05:15Z — Prove hqColim (IsColimit for quotient cocone)
+
+**Sorry count: 1 sorry in 1 theorem (`sheafH_filtered_colimit_aux`)**
+
+- **CLOSED hqColim sorry** (line 731): proved `IsColimit qCocone` by constructing
+  desc/fac/uniq directly from cokernel universality and filtered category properties.
+  Key helpers: `hπQ` (cokernel.π commutes with Q.map), `hπC` (cokernel.π commutes
+  with cocone maps), `g_eq` (g_j independent of j via IsFiltered.max). Uses
+  `cancel_epi (cokernel.π ...)` for fac/uniq.
+- **Aristotle job `96c1158c` expired** (500 error on status check).
+- **Mathematical analysis of h_van_Q**: The remaining sorry requires proving
+  `H^n(cokernel(c'.ι.app j ≫ ι')) = 0` for all j. This has a fundamental gap:
+  the map `c'.ι.app j ≫ ι'` may not be mono, so dimension shifting via
+  `ext_dimension_shift_X₃` fails. The recursive IH call produces a Q-diagram
+  without mono coprojections, so adding a mono hypothesis breaks recursion.
+  Requires either: (a) Čech cohomology approach, (b) functorial injective
+  resolutions + colimits of injectives, or (c) restructuring to avoid n=0 case.
+
+Remaining sorry: `h_van_Q` at line 769 in `FiniteGeneratorReduction.lean`.
+
 ## 2026-04-04T02:15Z — Fix PR merge conflict, write project status
 
 **Sorry count: 3 keywords in 2 theorems (unchanged)**

@@ -3,7 +3,7 @@
 
   Key results:
   - ext_dimension_shift: Ext LES dimension shift helper
-  - sheafH_preserves_filtered_colimits: H^n commutes with filtered colimits (1 sorry)
+  - sheafH_preserves_filtered_colimits: H^n commutes with filtered colimits (1 sorry: h_van_Q)
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
