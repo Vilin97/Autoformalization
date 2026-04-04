@@ -690,7 +690,13 @@ private theorem sheafH_filtered_colimit_aux
       Ext.subsingleton_of_injective _ _ n
     -- Ext^n(Z, cokernel ι') = 0 by IH applied to the quotient diagram
     -- (Q = colim Q_j where Q_j = coker(F_j → I), each Ext^n(Z, Q_j) = 0 by LES)
-    have hQ : Subsingleton (Sheaf.H S.X₃ n) := by sorry
+    have hQ : Subsingleton (Sheaf.H S.X₃ n) := by
+      -- S.X₃ = cokernel(c'.pt → I) is a filtered colimit of Q_j = cokernel(Y'.obj j → I).
+      -- For n ≥ 1: each H^n(Q_j) = 0 by dimension shift (H^n(I) = 0, H^{n+1}(Y'.obj j) = 0).
+      -- For n = 0: H^0(Q_j) ≠ 0 in general (quotient of Γ(I)), requires different argument.
+      -- Applying ih to the quotient diagram gives hQ.
+      -- Construction: Q_j functor + colimit = S.X₃ + AB5 exactness.
+      sorry
     -- Dimension shift: Ext^{n+1}(Z, c'.pt) = 0
     exact ext_dimension_shift _ hSE n hQ hI
 
