@@ -3,9 +3,10 @@
 
   Key results (presheaf colimit theory split to PresheafFilteredColimit.lean):
   - sheafH_filtered_colimit_aux / sheafH_preserves_filtered_colimits: H^n commutes with
-    filtered colimits (1 sorry: hmono_transitions — mono transitions for Y', true at call
-    site via finsetGenFunctor_mono but FALSE at recursive IH level; closing requires
-    Čech cohomology or a proof that avoids dimension shifting)
+    filtered colimits (PROVED modulo gabriel_injective_of_filtered_colimit).
+    Uses per-object functorial injective embeddings via
+    IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp to avoid
+    needing mono transitions in the diagram.
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
@@ -21,6 +22,22 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
 universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
+
+/-! ### Gabriel's theorem (locally Noetherian Grothendieck abelian categories)
+
+On a Noetherian topological space, the category of abelian sheaves is locally
+Noetherian. In a locally Noetherian Grothendieck abelian category, filtered colimits
+of injective objects are injective. This is Gabriel's theorem (see Gabriel's thesis,
+or Hartshorne, Residues and Duality, Ch. II, Thm. 7.8).
+
+This is the SOLE sorry in the formalization. It is a TRUE, standard mathematical fact. -/
+theorem gabriel_injective_of_filtered_colimit
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J : Type u} [SmallCategory J] [IsFiltered J]
+    (F : J ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    [hInj : ∀ j, Injective (F.obj j)]
+    {c : Cocone F} (hc : IsColimit c) : Injective c.pt := by
+  sorry
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
@@ -148,21 +165,21 @@ end FilteredDiagram
 The main result `sheafH_preserves_filtered_colimits` proves that on a Noetherian
 space, if `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
 
-**Gap**: The proof uses dimension shifting via injective embedding, which requires the
-coprojections `c'.ι.app j : F_j → colim` to be mono. This is derived from mono transitions
-via `mono_ι_app_of_isFiltered` (AB5). At the call site (`finsetGenFunctor`), mono
-transitions hold by `finsetGenFunctor_mono`. The sorry asserts this in the universally
-quantified context. Closing requires Čech cohomology or Gabriel's theorem (filtered
-colimits of injective sheaves are injective on locally Noetherian Grothendieck abelian
-categories — not yet in Mathlib). -/
+The proof uses per-object functorial injective embeddings via Mathlib's
+`IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp`. For each `j`,
+the zero morphism `0 : Y'.obj j → 0` is factored as a monomorphism followed by a
+morphism with the RLP w.r.t. monomorphisms, giving `Y'.obj j ↪ I_j` with `I_j` injective.
+This is functorial in `j`, yielding a functor `Inj : J' ⥤ Sheaf` and a mono natural
+transformation `η : Y' ⟶ Inj`. The filtered colimit `colim(Inj)` is injective by
+Gabriel's theorem, and the induced map `c'.pt → colim(Inj)` is mono by AB5.
+
+This approach avoids requiring mono transitions in the diagram (the previous approach
+embedded into a single injective and needed mono coprojections, which is false at
+recursive IH levels). -/
 
 /-- Auxiliary: sheaf cohomology vanishing commutes with filtered colimits on Noetherian
-    spaces. Proof by induction on `n` with dimension shifting.
-
-    1 sorry: `hmono_transitions` — mono transitions for Y'. TRUE at the call site
-    (`finsetGenFunctor_mono`) but FALSE at recursive IH levels (the quotient diagram Q
-    has non-mono transitions by the snake lemma: `ker(Q.map φ) ≅ coker(Y'.map φ) ≠ 0`).
-    Closing requires a proof that avoids recursive dimension shifting. -/
+    spaces. Proof by induction on `n` with dimension shifting via per-object functorial
+    injective embeddings. PROVED modulo `gabriel_injective_of_filtered_colimit`. -/
 private theorem sheafH_filtered_colimit_aux
     {X : TopCat.{u}} [NoetherianSpace X] (n : ℕ) :
     ∀ {J' : Type u} [inst1 : SmallCategory J'] [inst2 : IsFiltered J']
@@ -194,102 +211,157 @@ private theorem sheafH_filtered_colimit_aux
           @Subsingleton.elim _ (h_sec j₂) y 0, map_zero, map_zero]
     exact subsingleton_of_addEquiv (sheafH0EquivSections c'.pt).symm
   | succ n ih =>
-    -- Inductive step: dimension shifting via injective embedding.
+    -- Inductive step: dimension shifting via per-object functorial injective embedding.
+    -- Key idea: instead of embedding colim(Y') into a single injective (which needs mono
+    -- coprojections), embed each Y'.obj j into its own injective I_j via functorial
+    -- factorization. This gives mono η.app j : Y'.obj j → I_j for free, avoiding the
+    -- need for mono transitions in the diagram.
     intro J' inst1 inst2 Y' c' hc' hvan
     letI := inst1; letI := inst2
-    -- Mono transitions: true at call site via finsetGenFunctor_mono.
-    -- Used to derive mono coprojections (via mono_ι_app_of_isFiltered / AB5).
-    -- This is the sole sorry in the formalization.
-    have hmono_transitions : ∀ ⦃j j' : J'⦄ (φ : j ⟶ j'), Mono (Y'.map φ) := sorry
-    have hmono_ι : ∀ j, Mono (c'.ι.app j) := by
-      intro j; haveI := hmono_transitions; exact hc'.mono_ι_app_of_isFiltered j
-    -- Embed c'.pt ↪ I (injective)
-    haveI : EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-      IsGrothendieckAbelian.enoughInjectives
-    let ι' := Injective.ι c'.pt
-    -- Short exact sequence 0 → c'.pt → I → cokernel ι' → 0
+    -- Zero instance for sheaves (needed for `(0 : X ⟶ 0)` syntax in Arrow.mk)
+    letI : Zero (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+      Limits.HasZeroObject.zero' _
+    -- Arrow functor: j ↦ Arrow.mk (0 : Y'.obj j ⟶ 0)
+    let toArrow : J' ⥤ Arrow (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+      { obj := fun j => Arrow.mk (0 : Y'.obj j ⟶ 0)
+        map := fun f => Arrow.homMk (Y'.map f) (𝟙 0) (by simp)
+        map_id := fun j => by ext <;> simp
+        map_comp := fun f g => by ext <;> simp }
+    -- Functorial factorization data
+    let ffData := MorphismProperty.functorialFactorizationData
+      (MorphismProperty.monomorphisms (TopCat.Sheaf AddCommGrpCat.{u} X))
+      (MorphismProperty.monomorphisms (TopCat.Sheaf AddCommGrpCat.{u} X)).rlp
+    -- Injective functor: Inj.obj j = ffData.Z(Arrow.mk(0 : Y'.obj j → 0))
+    let Inj : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X := toArrow ⋙ ffData.Z
+    -- Per-object mono embedding η : Y' ⟶ Inj (naturality from ffData.i)
+    let η : Y' ⟶ Inj :=
+      { app := fun j => ffData.i.app (toArrow.obj j)
+        naturality := fun _ _ f => ffData.i.naturality (toArrow.map f) }
+    -- Each η.app j is mono (from the functorial factorization)
+    have hη_mono : ∀ j, Mono (η.app j) := fun j => ffData.hi (toArrow.obj j)
+    -- Each Inj.obj j is injective (factorization of zero morphism)
+    -- Proof: monoMapFactorizationDataRlp(0 : X → 0).Z is injective by Mathlib instance
+    haveI hInj : ∀ j, Injective (Inj.obj j) := fun j => by
+      change Injective (ffData.Z.obj (Arrow.mk (0 : Y'.obj j ⟶ 0)))
+      exact IsGrothendieckAbelian.instInjectiveZMonomorphismsRlpMonoMapFactorizationDataRlpOfNatHom
+    -- Build cocone c'.pt → colim(Inj) via η and c'
+    -- The cocone maps are: η.app j ≫ colimit.ι Inj j
+    let injCocone : Cocone Inj := colimit.cocone Inj
+    let ι'Cocone : Cocone Y' := Cocone.mk injCocone.pt
+      { app := fun j => η.app j ≫ injCocone.ι.app j
+        naturality := fun j j' f => by
+          have h1 := η.naturality f; have h2 := injCocone.w f
+          simp only [Functor.const_obj_obj, Functor.const_obj_map, Category.comp_id,
+            ← h2, ← Category.assoc, h1] }
+    -- ι' : c'.pt → colim(Inj) is the desc of ι'Cocone
+    let ι' : c'.pt ⟶ injCocone.pt := hc'.desc ι'Cocone
+    -- ι' is mono: η is mono nat trans, and filtered colimits preserve monos (AB5)
+    have hι'_mono : Mono ι' := by
+      haveI : ∀ j, Mono (η.app j) := hη_mono
+      haveI := NatTrans.mono_of_mono_app η
+      exact colim.map_mono' η hc' (colimit.isColimit Inj) ι' (fun j =>
+        hc'.fac ι'Cocone j)
+    -- colim(Inj) is injective by Gabriel's theorem
+    haveI : Injective injCocone.pt :=
+      gabriel_injective_of_filtered_colimit Inj (colimit.isColimit Inj)
+    -- Short exact sequence 0 → c'.pt →[ι'] colim(Inj) → cokernel(ι') → 0
+    haveI : Mono ι' := hι'_mono
     let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
       ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
-    -- Ext^{n+1}(Z, I) = 0 since I is injective
-    have hI : Subsingleton (Sheaf.H (Injective.under c'.pt) (n + 1)) :=
+    -- H^{n+1}(colim Inj) = 0 since colim Inj is injective
+    have hI : Subsingleton (Sheaf.H injCocone.pt (n + 1)) :=
       Ext.subsingleton_of_injective _ _ n
-    -- Ext^n(Z, cokernel ι') = 0 by IH applied to the quotient diagram
-    -- (Q = colim Q_j where Q_j = coker(F_j → I), each Ext^n(Z, Q_j) = 0 by LES)
-    -- Build quotient diagram Q_j = cokernel(c'.ι.app j ≫ ι') and apply IH
-    let I := Injective.under c'.pt
-    have hnat_ι : ∀ {j j' : J'} (f : j ⟶ j'),
-        (c'.ι.app j ≫ ι') ≫ (𝟙 I) = Y'.map f ≫ (c'.ι.app j' ≫ ι') := by
-      intro j j' f; rw [Category.comp_id, ← Category.assoc, Cocone.w]
-    -- Quotient functor Q.obj j = cokernel(c'.ι.app j ≫ ι')
+    -- Build per-object quotient functor Q.obj j = cokernel(η.app j)
+    -- η.app j is ALWAYS mono by ffData.hi, so no hmono needed!
     let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
-      { obj := fun j => cokernel (c'.ι.app j ≫ ι')
-        map := fun {j j'} f => cokernel.map _ _ (Y'.map f) (𝟙 I) (hnat_ι f)
-        map_id := fun j => by ext; rw [cokernel.π_desc]; exact Category.id_comp _
+      { obj := fun j => cokernel (η.app j)
+        map := fun {j j'} f => cokernel.map _ _ (Y'.map f) (Inj.map f) (η.naturality f).symm
+        map_id := fun j => by
+          ext; show cokernel.π _ ≫ _ = cokernel.π _ ≫ _
+          rw [cokernel.π_desc, Category.comp_id]
+          show (Inj.map (𝟙 j)) ≫ _ = _
+          rw [Inj.map_id, Category.id_comp]
         map_comp := fun {j j' j''} f g => by
           ext; show cokernel.π _ ≫ _ = cokernel.π _ ≫ _ ≫ _
-          dsimp only [cokernel.map]
-          conv_rhs => rw [← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
-          rw [cokernel.π_desc]; exact congrArg (𝟙 I ≫ ·) (Category.id_comp _).symm }
-    -- Cocone on Q with vertex S.X₃ = cokernel ι'
+          simp only [cokernel.map, cokernel.π_desc_assoc, cokernel.π_desc, Category.assoc,
+            Functor.map_comp] }
+    -- Factoring lemma: c'.ι.app j ≫ ι' = η.app j ≫ injCocone.ι.app j
+    have hfac_ι : ∀ j, c'.ι.app j ≫ ι' = η.app j ≫ injCocone.ι.app j :=
+      fun j => hc'.fac ι'Cocone j
+    -- Cocone on Q with vertex S.X₃ = cokernel(ι')
+    -- Map: cokernel(η.app j) → cokernel(ι') via the commutative square
+    --   Y'.obj j --c'.ι.app j-→ c'.pt
+    --      |                       |
+    --   η.app j                   ι'
+    --      |                       |
+    --   Inj.obj j --ι_j--------→ colim Inj
     let qCocone : Cocone Q := Cocone.mk S.X₃
-      { app := fun j => cokernel.map _ _ (c'.ι.app j) (𝟙 I) (by rw [Category.comp_id])
+      { app := fun j => cokernel.map (η.app j) ι' (c'.ι.app j) (injCocone.ι.app j)
+            (hfac_ι j).symm
         naturality := fun j j' f => by
-          ext; show cokernel.π _ ≫ _ ≫ _ = cokernel.π _ ≫ _ ≫ _
-          dsimp only [cokernel.map]; simp only [Functor.const_obj_map, Category.comp_id]
-          conv_lhs => rw [← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
-          conv_rhs => rw [← Category.assoc, cokernel.π_desc]
-          exact (Category.id_comp _).symm.trans (Category.comp_id _).symm }
-    -- IsColimit: cokernel preserves filtered colimits (AB5)
+          -- Goal: Q.map f ≫ qCocone.ι j' = qCocone.ι j ≫ const.map f
+          ext
+          -- After ext: cokernel.π(η j) ≫ LHS = cokernel.π(η j) ≫ RHS
+          show cokernel.π _ ≫ Q.map f ≫ _ = cokernel.π _ ≫ _ ≫ _
+          -- LHS: cokernel.π(η j) ≫ Q.map f = Inj.map f ≫ cokernel.π(η j')
+          rw [← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
+          -- RHS: cokernel.π(η j) ≫ qCocone.ι j = injCocone.ι j ≫ cokernel.π(ι')
+          simp only [cokernel.π_desc, Category.assoc,
+            Functor.const_obj_map, ← Category.assoc, injCocone.w]
+          exact (Category.comp_id _).symm }
+    -- IsColimit: qCocone is a colimit.
+    -- Strategy: lift a cocone s on Q to a cocone on Inj, use colimit of Inj to descend.
     have hqColim : IsColimit qCocone := by
       haveI : Nonempty J' := IsFiltered.nonempty
-      -- cokernel.π(f_j) ≫ Q.map a = cokernel.π(f_{j'})
+      -- cokernel.π(η.app j) ≫ qCocone.ι.app j = injCocone.ι.app j ≫ cokernel.π(ι')
+      have hπC : ∀ j, cokernel.π (η.app j) ≫ qCocone.ι.app j =
+          injCocone.ι.app j ≫ cokernel.π ι' := by
+        intro j; exact cokernel.π_desc _ _ _
+      -- For a cocone s on Q, the maps Inj.obj j →[cokernel.π ≫ s.ι] s.pt form a cocone on Inj
+      -- cokernel.π(η.app j) ≫ Q.map a = Inj.map a ≫ cokernel.π(η.app j')
       have hπQ : ∀ {j₁ j₂ : J'} (a : j₁ ⟶ j₂),
-          cokernel.π (c'.ι.app j₁ ≫ ι') ≫ Q.map a =
-          cokernel.π (c'.ι.app j₂ ≫ ι') := by
-        intro j₁ j₂ a
-        exact (cokernel.π_desc _ _ _).trans (Category.id_comp _)
-      -- cokernel.π(f_j) ≫ qCocone.ι.app j = cokernel.π(ι')
-      have hπC : ∀ j, cokernel.π (c'.ι.app j ≫ ι') ≫ qCocone.ι.app j =
-          cokernel.π ι' := by
-        intro j
-        exact (cokernel.π_desc _ _ _).trans (Category.id_comp _)
-      -- g_j := cokernel.π(f_j) ≫ s.ι.app j is independent of j
-      have g_eq : ∀ (s : Cocone Q) (j₁ j₂ : J'),
-          cokernel.π (c'.ι.app j₁ ≫ ι') ≫ s.ι.app j₁ =
-          cokernel.π (c'.ι.app j₂ ≫ ι') ≫ s.ι.app j₂ := by
-        intro s j₁ j₂
-        have h₁ : s.ι.app j₁ = Q.map (IsFiltered.leftToMax j₁ j₂) ≫
-            s.ι.app (IsFiltered.max j₁ j₂) := by rw [s.w]
-        have h₂ : s.ι.app j₂ = Q.map (IsFiltered.rightToMax j₁ j₂) ≫
-            s.ι.app (IsFiltered.max j₁ j₂) := by rw [s.w]
-        rw [h₁, h₂, ← Category.assoc, ← Category.assoc, hπQ, hπQ]
-      let j₀ := Classical.arbitrary J'
+          cokernel.π (η.app j₁) ≫ Q.map a =
+          Inj.map a ≫ cokernel.π (η.app j₂) := by
+        intro j₁ j₂ a; exact cokernel.π_desc _ _ _
+      have liftCocone_nat : ∀ (s : Cocone Q) {j₁ j₂ : J'} (a : j₁ ⟶ j₂),
+          Inj.map a ≫ (cokernel.π (η.app j₂) ≫ s.ι.app j₂) =
+          cokernel.π (η.app j₁) ≫ s.ι.app j₁ := by
+        intro s j₁ j₂ a
+        rw [← Category.assoc, ← hπQ a, Category.assoc, s.w]
+      let liftCocone : ∀ (s : Cocone Q), Cocone Inj := fun s =>
+        Cocone.mk s.pt
+          { app := fun j => cokernel.π (η.app j) ≫ s.ι.app j
+            naturality := fun j j' a => by
+              dsimp; rw [Category.comp_id, liftCocone_nat s a] }
+      -- Use injCocone as colimit of Inj to get d : injCocone.pt → s.pt
+      let injColim := colimit.isColimit Inj
+      -- desc: cokernel(ι') → s.pt
+      -- Factor through: injCocone.pt →[d] s.pt where d = injColim.desc(liftCocone s)
+      -- Then cokernel.desc ι' d (condition)
+      have hd_cond : ∀ (s : Cocone Q),
+          ι' ≫ injColim.desc (liftCocone s) = 0 := by
+        intro s
+        apply hc'.hom_ext; intro j
+        rw [comp_zero]; conv_lhs => rw [← Category.assoc, hfac_ι j, Category.assoc]
+        rw [injColim.fac, ← Category.assoc, cokernel.condition, zero_comp]
       exact
-      { desc := fun s => cokernel.desc ι'
-            (cokernel.π (c'.ι.app j₀ ≫ ι') ≫ s.ι.app j₀)
-            (hc'.hom_ext (fun j => by
-              simp only [comp_zero, Category.assoc, g_eq _ j₀ j,
-                ← Category.assoc (c'.ι.app j), ← Category.assoc (c'.ι.app j ≫ ι'),
-                cokernel.condition, zero_comp]))
+      { desc := fun s => cokernel.desc ι' (injColim.desc (liftCocone s)) (hd_cond s)
         fac := fun s j => by
-          apply (cancel_epi (cokernel.π (c'.ι.app j ≫ ι'))).mp
-          rw [← Category.assoc, hπC, cokernel.π_desc, g_eq s j₀ j]
+          apply (cancel_epi (cokernel.π (η.app j))).mp
+          rw [← Category.assoc, hπC, Category.assoc, cokernel.π_desc, injColim.fac]
         uniq := fun s m hm => by
           apply (cancel_epi (cokernel.π ι')).mp
-          rw [cokernel.π_desc, ← hπC j₀, Category.assoc, hm j₀] }
+          rw [cokernel.π_desc]
+          apply injColim.hom_ext; intro j
+          rw [injColim.fac]
+          show injCocone.ι.app j ≫ cokernel.π ι' ≫ m = _
+          rw [← Category.assoc, ← hπC j, Category.assoc, hm] }
     -- Split on n: n=0 needs direct H^1 argument, n≥1 uses dimension shift
     match n with
     | 0 =>
       -- Direct proof of H^1(c'.pt) = 0 using the LES + Ext^0 surjectivity.
-      -- Pattern: every α ∈ Ext^1(Z, c'.pt) lifts to β ∈ Ext^0(Z, Q) (by exact₁),
-      -- then β lifts to γ ∈ Ext^0(Z, I) (by surjectivity: Q = colim Q_j, each
-      -- Ext^0(Z, I) ↠ Ext^0(Z, Q_j) from SES + Mono + H^1(Y_j)=0), hence
-      -- β.comp hSE.extClass = 0 (by associativity + comp_extClass = 0).
-      -- Ext^0 surjectivity: every element of Ext^0(Z, Q) lifts to Ext^0(Z, I)
-      -- Ext^0 surjectivity: every element of Ext^0(Z, Q) lifts to Ext^0(Z, I).
-      -- Proof: Γ(I) ↠ Γ(Q) because Q = colim Q_j, each Γ(I) ↠ Γ(Q_j) by LES + mono.
       have hΓg_epi : Epi (S.g.val.app (op ⊤)) := by
         rw [AddCommGrpCat.epi_iff_surjective]; intro q
         -- Γ(Q) = colim Γ(Q_j) via filtered colimit preservation
@@ -298,24 +370,34 @@ private theorem sheafH_filtered_colimit_aux
           ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤))
           (isColimitOfPreserves (sheafToPresheaf _ _) hqColim)
         obtain ⟨j₀, q₀, hq₀⟩ := Concrete.isColimit_exists_rep _ hc_top_Q q
-        -- Per-piece: Γ(I) ↠ Γ(Q_{j₀}) from SES + mono + H^1(Y_{j₀}) = 0
-        haveI : Mono ι' := inferInstance
-        haveI : Mono (c'.ι.app j₀ ≫ ι') := mono_comp _ _
+        -- Per-piece: Γ(Inj.obj j₀) ↠ Γ(Q_{j₀}) from SES + mono + H^1(Y_{j₀}) = 0
+        haveI : Mono (η.app j₀) := hη_mono j₀
         let ip_j₀ : InjectivePresentation (Y'.obj j₀) :=
-          { J := I, f := c'.ι.app j₀ ≫ ι' }
+          { J := Inj.obj j₀
+            injective := hInj j₀
+            f := η.app j₀ }
         have hπ_epi := epi_g_app_top_of_H1_vanishing ip_j₀ (hvan j₀)
         rw [AddCommGrpCat.epi_iff_surjective] at hπ_epi
         obtain ⟨p, hp⟩ := hπ_epi q₀
-        -- Composition: I →[π_{j₀}] Q_{j₀} →[cocone] Q = I →[S.g] Q
-        -- From hqColim: cokernel.π(f_{j₀}) ≫ qCocone.ι.app j₀ = cokernel.π(ι') = S.g
-        have hcomp : ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀ = S.g := by
-          show cokernel.π _ ≫ _ = cokernel.π _
-          exact (cokernel.π_desc _ _ _).trans (Category.id_comp _)
-        refine ⟨p, ?_⟩
-        show (S.g.val.app (op ⊤)) p = q
-        have hkey := congrArg (·.val.app (op ⊤)) hcomp
-        simp only [] at hkey
-        rw [hkey.symm]; exact hq₀ ▸ hp ▸ rfl
+        -- Composition: Inj.obj j₀ →[π_{j₀}] Q_{j₀} →[cocone] Q
+        -- = Inj.obj j₀ →[ι_{j₀}] colim Inj →[S.g] Q
+        have hcomp : ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀ =
+            injCocone.ι.app j₀ ≫ S.g := by
+          show cokernel.π _ ≫ _ = _
+          exact cokernel.π_desc _ _ _
+        -- Push p ∈ Γ(Inj.obj j₀) through injCocone.ι to Γ(S.X₂)
+        refine ⟨(injCocone.ι.app j₀).val.app (op ⊤) p, ?_⟩
+        show (S.g.val.app (op ⊤)) ((injCocone.ι.app j₀).val.app (op ⊤) p) = q
+        -- hcomp: ip_j₀.shortComplex.g ≫ qCocone.ι j₀ = injCocone.ι j₀ ≫ S.g
+        -- Section-level: S.g(ι_j₀(p)) = qCocone.ι(j₀)(ip_j₀.shortComplex.g(p)) = qCocone.ι(j₀)(q₀) = q
+        have hcomp_sec : (injCocone.ι.app j₀ ≫ S.g).val.app (op ⊤) =
+            (ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀).val.app (op ⊤) :=
+          congrArg (·.val.app (op ⊤)) hcomp.symm
+        -- Evaluate at p using comp_apply
+        rw [← hq₀, ← hp]
+        change ((injCocone.ι.app j₀ ≫ S.g).val.app (op ⊤)) p =
+          ((ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀).val.app (op ⊤)) p
+        exact congrArg (· p) (congrArg ConcreteCategory.hom hcomp_sec)
       have h_surj := ext0_surj_of_epi_top (S := S) hΓg_epi
       constructor; intro a b
       have ha : a.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ hI _ _
@@ -335,14 +417,11 @@ private theorem sheafH_filtered_colimit_aux
       -- For n ≥ 1: dimension shift via h_van_Q + IH
       have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) (n' + 1)) := by
         intro j
+        haveI : Mono (η.app j) := hη_mono j
         let S_j : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-          ShortComplex.mk (c'.ι.app j ≫ ι') (cokernel.π (c'.ι.app j ≫ ι'))
-            (cokernel.condition _)
-        have hSE_j : S_j.ShortExact := by
-          refine ShortComplex.ShortExact.mk'
-            (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) ?_ inferInstance
-          haveI : Mono ι' := inferInstance
-          exact mono_comp (c'.ι.app j) ι'
+          ShortComplex.mk (η.app j) (cokernel.π (η.app j)) (cokernel.condition _)
+        have hSE_j : S_j.ShortExact := ShortComplex.ShortExact.mk'
+          (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
         exact ext_dimension_shift_X₃ _ hSE_j (n' + 1)
           (Ext.subsingleton_of_injective _ _ n') (hvan j)
       have hQ : Subsingleton (Sheaf.H S.X₃ (n' + 1)) :=
@@ -352,7 +431,7 @@ private theorem sheafH_filtered_colimit_aux
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
     If `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
 
-    1 sorry: mono transitions (true at call site via `finsetGenFunctor_mono`). -/
+    PROVED modulo `gabriel_injective_of_filtered_colimit`. -/
 theorem sheafH_preserves_filtered_colimits
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']

@@ -4,13 +4,11 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  Sorry's (1 remaining in sheafH_filtered_colimit_aux in FiniteGeneratorReduction.lean):
-  - hmono_transitions: ∀ φ, Mono (Y'.map φ) — mono transitions for the filtered diagram.
-    TRUE at the call site (finsetGenFunctor_mono), but FALSE at recursive IH levels
-    (the quotient diagram Q has non-mono transitions by the snake lemma). The dimension-
-    shifting proof fundamentally requires mono coprojections at every recursive level.
-    Closing requires either Čech cohomology, universal δ-functor theory, or a proof
-    that avoids recursive dimension shifting.
+  Sorry's (1 remaining — gabriel_injective_of_filtered_colimit in FiniteGeneratorReduction.lean):
+  - Gabriel's theorem: filtered colimits of injective sheaves are injective on Noetherian
+    spaces. TRUE standard mathematical fact (Gabriel's thesis; Hartshorne, Residues and
+    Duality, Ch. II, Thm. 7.8). Proof requires Baer's criterion + locally Noetherian
+    subobjects are finitely presentable. All other sorry's have been eliminated.
 
   File structure:
   - FlasqueVanishing.lean + FlasqueCohomology.lean: IsFlasqueSheaf, FlasqueVanishing, dim shift
@@ -25,7 +23,7 @@
   - ReducibleVanishing.lean: reducible case via Finset.induction
   - ClosedOpenDecomposition.lean: reduction to irreducible
   - PresheafFilteredColimit.lean: presheaf colimit is sheaf on Noetherian spaces (PROVED)
-  - FiniteGeneratorReduction.lean: colimit step, f.g. vanishing (1 sorry: hmono_transitions)
+  - FiniteGeneratorReduction.lean: colimit step, f.g. vanishing (1 sorry: Gabriel's theorem)
   - SheafStalkAlgebra.lean + StalkGeneratorAlgebra.lean: stalk algebra, generator section
   - IrreducibleStep.lean: irreducible step assembly
   - GrothendieckVanishing.lean: main theorem + cascade theorems
