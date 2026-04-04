@@ -5,9 +5,9 @@
   - Stalk surjectivity/bijectivity for zeroOutsideInt
   - Cokernel vanishing (cokernel_openHom_vanishing)
   - zeroOutsideInt cohomology vanishing (zeroOutsideInt_cohomology_vanishing)
-  - Stalk generator algebra (stalk_zeroOutsideInt_eq_zsmul_generator, etc.)
-  - ULift ℤ subgroup cyclicity (ulift_int_subgroup_cyclic)
-  - Generator injectivity (zsmul_generator_injective)
+
+  Note: stalk_zeroOutsideInt_eq_zsmul_generator, ulift_int_subgroup_cyclic,
+  and zsmul_generator_injective are in StalkGeneratorAlgebra.lean.
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque

@@ -2,8 +2,11 @@
   FiniteGeneratorReduction.lean — Colimit step and finitely generated vanishing
 
   Key results:
-  - ext_dimension_shift: Ext LES dimension shift helper
-  - sheafH_preserves_filtered_colimits: H^n commutes with filtered colimits (1 sorry: h_van_Q)
+  - isSheaf_presheaf_filtered_colimit: presheaf-level filtered colimit of sheaves is a sheaf
+    on Noetherian spaces (PROVED)
+  - createsFilteredColimit: sheafToPresheaf creates filtered colimits (PROVED)
+  - sheafH_filtered_colimit_aux / sheafH_preserves_filtered_colimits: H^n commutes with
+    filtered colimits (1 sorry: h_van_Q — per-piece vanishing for quotient diagram)
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
@@ -344,7 +347,7 @@ private theorem isSheaf_presheaf_filtered_colimit
     change ConcreteCategory.hom ((((Y' ⋙ sheafToPresheaf _ _).map (g₀ k hk)).app (op (U k))) ≫
       (c.ι.app j₀).app (op (U k))) (x_all k) = sf k
     rw [hfac]; exact hx_all k
-  -- Pairwise compatibility after merging (sorry for now — same merge pattern)
+  -- Pairwise compatibility after merging via IsFiltered
   obtain ⟨j₁, g₁, hg₁⟩ : ∃ (j₁ : J') (g₁ : j₀ ⟶ j₁),
       ∀ (k : ι) (hk : k ∈ t) (l : ι) (hl : l ∈ t),
         ConcreteCategory.hom ((Y'.obj j₁).val.map (Opens.infLELeft (U k) (U l)).op)
