@@ -73,5 +73,6 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 
 ## Remaining Work
 
-1 sorry remains in `FiniteGeneratorReduction.lean`:
-1. `sheafH_preserves_filtered_colimits` — sheaf cohomology H^n commutes with filtered colimits on Noetherian spaces. This is the derived functor commutation theorem (R^n Γ preserves filtered colimits). Requires: (a) Γ preserves filtered colimits (AB5 for sheaves), (b) filtered colimits of injective resolutions are injective resolutions, (c) cohomology commutes with filtered colimits of abelian groups.
+2 sorry's remain in `FiniteGeneratorReduction.lean` (both in `sheafH_filtered_colimit_aux`):
+1. **h_van_Q n=0** (line ~781): `H^0(Q_j) = 0` for quotient diagram. Needs direct surjectivity argument for H^1 (Γ(I) ↠ Γ(Q_j) when mono coprojections + H^1(Y_j) = 0).
+2. **h_van_Q n≥1** (line ~791): `Mono (c'.ι.app j ≫ ι')`. Provable when diagram has mono transitions (as at call site via `finsetGenFunctor_mono` + `IsColimit.mono_ι_app_of_isFiltered`), but adding the hypothesis breaks recursive IH call on Q (which has non-mono coprojections).
