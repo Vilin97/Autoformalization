@@ -1,5 +1,22 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T01:00Z — CLOSE hsep separation proof (major milestone)
+
+**Sorry count: 3 keywords in 2 theorems (down from 5 in 3)**
+
+- **CLOSED** `hsep` — the separation sub-goal of `isSheaf_presheaf_filtered_colimit`!
+  This was the hardest remaining sub-goal. Full proof chain:
+  1. `Concrete.isColimit_exists_rep` → representative b₀
+  2. `NatTrans.naturality` → restriction-maps-to-zero (hres_zero)
+  3. `Types.FilteredColimit.isColimit_eq_iff'` → eventually-zero (h_ev_zero)
+  4. `filtered_colimit_kills_all_restrictions` → common index j₁ with all restrictions 0
+  5. `sheaf_section_zero_of_zero_on_finite_cover` → b₁ = 0
+  6. `c.ι.naturality` → cocone factorization → a = 0
+- Also proved conversion between "restrict-then-transition" and "transition-then-restrict"
+  using naturality of `(Y' ⋙ sheafToPresheaf _ _).map fk`
+- **Remaining sorry's**: `hexist` (existence of gluing) + n=0/hQ in `sheafH_filtered_colimit_aux`
+- Aristotle job 50689427 at 24%
+
 ## 2026-04-04T00:45Z — PROVE 2 key lemmas: sheaf separation + filtered colimit kills all
 
 **Sorry count: 4 keywords in 2 theorems (same count, but 2 standalone lemmas CLOSED)**
