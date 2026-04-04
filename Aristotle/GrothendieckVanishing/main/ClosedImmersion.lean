@@ -190,7 +190,7 @@ theorem closedIncl_counit_isIso
     have hlan_id :
         (Opens.map (closedIncl hs)).op.lan.map (𝟙 ((Opens.map (closedIncl hs)).op ⋙ F.val)) =
           𝟙 ((Opens.map (closedIncl hs)).op.lan.obj ((Opens.map (closedIncl hs)).op ⋙ F.val)) := by
-      simpa using Functor.map_id ((Opens.map (closedIncl hs)).op.lan) ((Opens.map (closedIncl hs)).op ⋙ F.val)
+      simp [Functor.map_id]
     calc
       CategoryTheory.toSheafify K P ≫
           (((CategoryTheory.Functor.sheafPullbackConstruction.sheafAdjunctionContinuous
@@ -212,7 +212,7 @@ theorem closedIncl_counit_isIso
               (((Opens.map (closedIncl hs)).op.lan.map
                   (𝟙 ((Opens.map (closedIncl hs)).op ⋙ F.val))) ≫
                 ((Opens.map (closedIncl hs)).op.lanAdjunction AddCommGrpCat).counit.app F.val)
-              F.cond) using 1 <;> simp [P]
+              F.cond) using 1
       _ =
         ((Opens.map (closedIncl hs)).op.lanAdjunction AddCommGrpCat).counit.app F.val := by
           rw [hlan_id, Category.id_comp]
@@ -234,7 +234,7 @@ theorem closedIncl_counit_isIso
       let T := TopCat.Presheaf.stalkFunctor (X := TopCat.of s) AddCommGrpCat x
       have hcomp0 :
           CategoryTheory.toSheafify K P ≫ CategoryTheory.sheafifyLift K η F.cond = η := by
-        simpa [P] using CategoryTheory.toSheafify_sheafifyLift K η F.cond
+        simp [P, CategoryTheory.toSheafify_sheafifyLift K η F.cond]
       haveI :
           IsIso (T.map (CategoryTheory.toSheafify K P)) :=
         stalkFunctor_map_iso_toSheafify P x

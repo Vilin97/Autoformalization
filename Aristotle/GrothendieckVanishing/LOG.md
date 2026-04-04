@@ -1,5 +1,80 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T08:00Z — Code quality: split file, consolidate lemmas, cleanup
+
+**Sorry count: 1 sorry (`hmono_ι`)**
+
+- **Split FiniteGeneratorReduction.lean**: extracted PresheafFilteredColimit.lean (494 lines)
+  with isSheaf_presheaf_filtered_colimit + createsFilteredColimit. FiniteGeneratorReduction
+  reduced from 1020 → 507 lines (both under 600 threshold).
+- **Consolidated dimension-shift lemmas**: moved ext_dimension_shift + ext_dimension_shift_X₃
+  from FiniteGeneratorReduction to SetupCore. Made sheafH_dimension_shift_ses a thin wrapper.
+  Eliminated 34-line ExtHelpers duplication.
+- **Deleted stale docs**: proofs.md (referenced outdated 3 sorry's), SOUNDNESS_ISSUE.md
+  (resolved lean_run_code bug), critique.md (predated major restructuring).
+- **Fixed 5 unused variable warnings** in IrreducibleStep.lean.
+- **Made ext0_surj_of_epi_top and epi_g_app_top_of_H1_vanishing public** in SetupCore.
+- **Updated docs**: CLAUDE.md, main.lean, plan.md, SheafStalkAlgebra.lean docstrings.
+- **Submitted to Aristotle**: job `b3dcac1a` (sheafH_colim.lean with full context).
+
+## 2026-04-04T07:30Z — Close Epi sorry, reduce to 1 sorry (hmono_ι)
+
+**Sorry count: 1 sorry (`hmono_ι : ∀ j, Mono (c'.ι.app j)` in `sheafH_filtered_colimit_aux`)**
+
+Major restructuring across multiple cycles:
+- **Eliminated FALSE sorry (H^0(Q_j)=0)**: Restructured n=0 case to use direct H^1 proof
+  via Ext LES element chasing (exact₁ + surjectivity + comp_extClass = 0), following
+  the pattern from `sheafH_one_of_flasque` in FlasqueCohomology.lean.
+- **Closed n≥1 Mono sorry**: Added local `hmono_ι := sorry`, proved `Mono S_j.f` via
+  `mono_comp (c'.ι.app j) ι'`.
+- **Eliminated FALSE sorry (IsFlasqueSheaf)**: Replaced `ext_zero_map_surjective` (needs
+  flasque) with `ext0_surj_of_epi_top` (needs only Epi on sections). Made
+  `ext0_surj_of_epi_top` public in SetupCore.lean.
+- **Closed Epi sorry**: Proved Γ(I) → Γ(Q) surjective via colimit element chasing:
+  construct per-piece InjectivePresentation, apply `epi_g_app_top_of_H1_vanishing` for
+  per-piece surjectivity, lift via `Concrete.isColimit_exists_rep`, compose through cocone.
+  Made `epi_g_app_top_of_H1_vanishing` public in SetupCore.lean.
+- **Fixed 5 unused variable warnings** in IrreducibleStep.lean.
+- **Updated docs**: CLAUDE.md, main.lean, plan.md, SheafStalkAlgebra.lean docstrings.
+
+Remaining sorry: `hmono_ι` — mono coprojections, true at call site via
+`finsetGenFunctor_mono` + `IsColimit.mono_ι_app_of_isFiltered`, but the recursive IH
+call on Q introduces the same sorry at each level (Q has epi coprojections).
+Requires either: restructuring to thread hmono as a parameter (breaks IH),
+or new proof infrastructure (Čech cohomology, spectral sequences).
+
+## 2026-04-04T05:15Z — Prove hqColim (IsColimit for quotient cocone)
+
+**Sorry count: 1 sorry in 1 theorem (`sheafH_filtered_colimit_aux`)**
+
+- **CLOSED hqColim sorry** (line 731): proved `IsColimit qCocone` by constructing
+  desc/fac/uniq directly from cokernel universality and filtered category properties.
+  Key helpers: `hπQ` (cokernel.π commutes with Q.map), `hπC` (cokernel.π commutes
+  with cocone maps), `g_eq` (g_j independent of j via IsFiltered.max). Uses
+  `cancel_epi (cokernel.π ...)` for fac/uniq.
+- **Aristotle job `96c1158c` expired** (500 error on status check).
+- **Mathematical analysis of h_van_Q**: The remaining sorry requires proving
+  `H^n(cokernel(c'.ι.app j ≫ ι')) = 0` for all j. This has a fundamental gap:
+  the map `c'.ι.app j ≫ ι'` may not be mono, so dimension shifting via
+  `ext_dimension_shift_X₃` fails. The recursive IH call produces a Q-diagram
+  without mono coprojections, so adding a mono hypothesis breaks recursion.
+  Requires either: (a) Čech cohomology approach, (b) functorial injective
+  resolutions + colimits of injectives, or (c) restructuring to avoid n=0 case.
+
+Remaining sorry: `h_van_Q` at line 769 in `FiniteGeneratorReduction.lean`.
+
+## 2026-04-04T02:15Z — Fix PR merge conflict, write project status
+
+**Sorry count: 3 keywords in 2 theorems (unchanged)**
+
+- **Fixed PR #10 merge conflict**: `grothendieck-vanishing` had squash-merge commit f7c889e
+  from PR #9 diverging from `wip/grothendieck-vanishing`. Merged `origin/grothendieck-vanishing`
+  into wip, resolved 8 file conflicts (all ours — wip is strictly newer). PR now MERGEABLE,
+  CI running.
+- **Updated `proofs.md`**: rewrote as comprehensive project status document (was stale,
+  still referenced `ext_comm_filtered_colimit_mono`). Now documents: completion %, sorry
+  inventory, architecture, hexist proof plan, timeline, backlog.
+
 ## 2026-04-04T01:45Z — Document hexist strategy in detail
 
 **Sorry count: 3 keywords in 2 theorems (unchanged)**

@@ -1,65 +1,37 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-03T21:05Z
+**Updated**: 2026-04-04T06:30Z
 
 ## Status Summary
-- **Sorry count**: 3 keywords, 1 logical gap (`isSheaf_presheaf_filtered_colimit`)
-- **Files**: 16 `.lean` in `main/`, 5155 total lines
-- **CI**: Green (all 3 latest runs pass)
-- **Aristotle**: No active jobs
-- **Docs**: 404 (blueprint broken)
-- **Dead code**: 5 dead theorems/defs identified in critique
+- **Sorry count**: 2 (both in `sheafH_filtered_colimit_aux` in FiniteGeneratorReduction.lean)
+- **Files**: 16 `.lean` in `main/`, ~5200 total lines
+- **CI**: Green
+- **Architecture**: Main theorem `GrothendieckVanishing` → `grothendieck_vanishing_aux` → well-founded induction on Krull dim → `IrreduciblePosVanishing` → `directLimit_cohomology_vanishing` → `sheafH_preserves_filtered_colimits` → sorry
 
-## Active Multi-Cycle Strategy
+## Remaining Sorry's
 
-**Closing `isSheaf_presheaf_filtered_colimit`** (the last sorry):
+### Sorry 1: h_van_Q n=0 (line ~781)
+**Goal**: `Subsingleton (Sheaf.H (Q.obj j) 0)` where `Q.obj j = cokernel(c'.ι.app j ≫ ι')`
+**Issue**: H^0(Q_j) = Γ(Q_j) = Γ(I/image(f_j)). Since Γ(I) ≠ 0, this is nonzero in general. Dimension shifting fails because H^0(I) ≠ 0.
+**Approach needed**: Direct surjectivity argument for H^1 that bypasses h_van_Q at level 0. From SES with mono coprojections: Γ(I) ↠ Γ(Q_j) (via H^1(Y_j)=0), colimit preserves surjection, hence H^1=cokernel=0. BUT this needs mono coprojections which only the top-level call has.
 
-The proof is partially scaffolded at FiniteGeneratorReduction.lean:191-202:
-```
-isSheaf_iff_isSheafUniqueGluing → intro cover → obtain finite subcover → ???
-```
+### Sorry 2: h_van_Q n≥1 (line ~791)
+**Goal**: `Mono (c'.ι.app j ≫ ι')` 
+**Issue**: Provable at the top-level call site (finsetGenFunctor has mono transitions → `IsColimit.mono_ι_app_of_isFiltered` gives mono coprojections → composition with mono ι' is mono). But the theorem is universally quantified, and the recursive IH call on Q doesn't have mono.
+**Approach needed**: Either add hmono_trans to the theorem (breaks recursive IH), or find a proof of H^n commuting with filtered colimits that doesn't use dimension shifting (Čech cohomology, functorial injective resolutions).
 
-The gap after obtaining finite subcover `t` is:
-1. Reduce unique gluing for the full cover `U` to unique gluing for the finite subcover `U ∘ t`
-2. Show the presheaf colimit satisfies unique gluing for the finite subcover
-3. Key insight: sheaf condition for finite cover = finite limit, and filtered colimits commute with finite limits (`colimitLimitIso`)
+## Fundamental Obstacle
 
-This is Stacks 009E. The approach: show that a compatible family on `U` restricts to a compatible family on the finite subcover, construct the gluing via the finite subcover, and use the cover refinement to get uniqueness for the full cover.
+The dimension-shifting approach for "H^n commutes with filtered colimits" creates a Q-diagram with non-mono coprojections. The Ext LES requires `ShortExact` (hence `Mono`) for the SES `0 → Y_j → I → Q_j → 0`. Without mono, the proof cannot close.
 
-**Alternative approach**: Instead of `isSheafUniqueGluing`, use `Presheaf.isSheaf_of_isLimit` or similar Mathlib API that directly relates sheaf condition to finite limits, avoiding manual gluing.
+The correct proof (Stacks 009E/Tohoku) uses one of:
+1. **Čech cohomology**: Finite covers → finite products → commute with filtered colimits. Needs Čech-to-derived comparison.
+2. **Functorial injective resolutions**: Γ commutes with colimits, AB5, cohomology of chain complexes commutes with filtered colimits. Needs chain complex infrastructure.
+3. **Compact objects**: Show the constant sheaf Z is compact in derived category, so RHom(Z,-) preserves colimits.
 
-## This Cycle's Work Items
-
-1. **Delete dead code** (P3, `/cleanup`) — immediate, 2 min
-   - Delete `ext_sandwich` + `addCommGrpCat_exact_sandwich` from FiniteGeneratorReduction.lean:29-63
-   - Delete `subsingleton_ext_of_ses` + `subsingleton_ext_of_ses_middle` from SheafStalkAlgebra.lean:23-51
-   - `createsFilteredColimit` stays — it's used by the sorry resolution path
-
-2. **Fix stale docstrings** (P3, `/simplify`) — immediate, 2 min
-   - main.lean:12 — SetupCore description wrong
-   - SheafStalkAlgebra.lean:5 — claims to contain lemmas that are elsewhere
-   - FiniteGeneratorReduction.lean:5 — lists dead code as key results
-
-3. **Submit `isSheaf_presheaf_filtered_colimit` to Aristotle** (`/submit-aristotle`) — 1 min
-   - May need to extract as standalone lemma for submission
-
-4. **Work on `isSheaf_presheaf_filtered_colimit` directly** (P1, `/prove`) — main effort
-   - Strategy: after obtaining finite subcover `t`, construct the gluing section
-   - For existence: each `Y'.obj j` is a sheaf, so compatible sections on `U` glue in each `Y'.obj j`; the colimit of these gluings gives the global section
-   - For uniqueness: if two global sections agree on each `U i`, they agree on the colimit
-   - Key Mathlib lemma needed: `TopCat.Presheaf.IsSheafUniqueGluing` API for working with finite subcovers
-
-5. **Work on L230 (base case n=0)** (P1, `/prove`) — if L202 progress made
-   - Uses `createsFilteredColimit` → need L202 first
-   - Alternative: prove directly that if `Ext^0(Z, F_j) = 0` for all j, then `Ext^0(Z, colim F_j) = 0`, using that `Ext^0 ≅ Hom` and Hom preserves filtered colimits in Grothendieck abelian categories
-
-6. **Work on L249 (hQ)** (P1, `/prove`) — if L202 progress made
-   - Construct the cokernel diagram: for each j, `Q_j = coker(Y'.obj j → I)`
-   - Show `Q = colim Q_j` (cokernels commute with filtered colimits)
-   - Apply IH: each `H^n(Q_j) = 0` by LES, so `H^n(Q) = 0`
+None of these are available in the current codebase or Mathlib.
 
 ## Backlog
-- P1: Fix docs 404 (blueprint deployment)
-- P3: Split FlasqueVanishing.lean (616 lines)
-- P3: Generalize to ModuleCat R
-- P4: Replace blanket `import Mathlib` with specific imports
+- P3: FiniteGeneratorReduction.lean at 972 lines (threshold: 600)
+- P3: Duplicate dimension-shift lemmas (ext_dimension_shift vs sheafH_dimension_shift_ses)
+- P4: Blanket `import Mathlib` in 3 files

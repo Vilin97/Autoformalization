@@ -15,6 +15,39 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
+/-! ## Abstract Ext dimension shift helpers -/
+
+section ExtDimShift
+variable {C' : Type*} [Category C'] [Abelian C'] [HasExt C']
+
+/-- Dimension shift for Ext via LES: given `0 → X₁ → X₂ → X₃ → 0` short exact,
+    `Ext^n(Z, X₃) = 0` and `Ext^{n+1}(Z, X₂) = 0` imply `Ext^{n+1}(Z, X₁) = 0`. -/
+theorem ext_dimension_shift (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
+    (h₃ : Subsingleton (Ext Z S.X₃ n))
+    (h₂ : Subsingleton (Ext Z S.X₂ (n + 1))) :
+    Subsingleton (Ext Z S.X₁ (n + 1)) := by
+  constructor; intro a b
+  have ha : a.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
+  have hb : b.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hS a ha rfl
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hS b hb rfl
+  rw [← hc, ← hd, @Subsingleton.elim _ h₃ c d]
+
+/-- Reverse dimension shift: `Ext^n(Z, X₂) = 0` and `Ext^{n+1}(Z, X₁) = 0` imply
+    `Ext^n(Z, X₃) = 0`. Uses exactness at X₃ in the covariant LES. -/
+theorem ext_dimension_shift_X₃ (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
+    (h₂ : Subsingleton (Ext Z S.X₂ n))
+    (h₁ : Subsingleton (Ext Z S.X₁ (n + 1))) :
+    Subsingleton (Ext Z S.X₃ n) := by
+  constructor; intro a b
+  have ha : a.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
+  have hb : b.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ _ hS a rfl ha
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ _ hS b rfl hb
+  rw [← hc, ← hd, @Subsingleton.elim _ h₂ c d]
+
+end ExtDimShift
+
 /-! ## Building blocks for the closed-open decomposition
 
 ReducibleVanishing and IrreduciblePosVanishing require two building blocks:
@@ -199,7 +232,7 @@ theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
 
 -- Base case: Γ comparison. Γ_X(i_*G') = G'(⊤_Z) = Γ_Z(G')
 private lemma PushforwardHVanishing_zero
-    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
+    {X : TopCat.{u}} {Z : Set X} (_hZ : IsClosed Z) [NoetherianSpace X]
     (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))
     (hG' : Subsingleton (Sheaf.H G' 0)) :
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
@@ -233,8 +266,8 @@ private lemma ext0_comp_eq_of_covariant
       (Ext.mk₀ g) _ = Ext.addEquiv₀.symm φ
   rw [AddEquiv.symm_apply_apply]; exact hz
 
--- Sub-lemma: Epi of g at ⊤ from H^1(G')=0 via LES + adj + separator
-private lemma epi_g_app_top_of_H1_vanishing
+-- Epi of g at ⊤ from H^1(G')=0 via LES + adj + separator
+theorem epi_g_app_top_of_H1_vanishing
     {Z : TopCat.{u}} [NoetherianSpace Z]
     {G' : TopCat.Sheaf AddCommGrpCat.{u} Z}
     (ip : InjectivePresentation G')
@@ -264,8 +297,8 @@ private lemma epi_g_app_top_of_H1_vanishing
   change (ConcreteCategory.hom (ψ_hom ≫ ip.shortComplex.g.val.app (op ⊤))) (ULift.up 1) = r
   rw [← hfact]; simp [φ_hom, one_zsmul]
 
--- Sub-lemma: surjectivity of Ext⁰ map from epi at ⊤ via adjunction + projectivity
-private lemma ext0_surj_of_epi_top
+-- Surjectivity of Ext⁰ map from epi at ⊤ via adjunction + projectivity of ULift ℤ
+theorem ext0_surj_of_epi_top
     {X : TopCat.{u}} [NoetherianSpace X]
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hg_epi_top : Epi (S.g.val.app (op ⊤))) :
@@ -501,17 +534,11 @@ theorem ClosedImmersionSES
       inferInstance inferInstance,
     rfl, rfl⟩
 
-/-- Dimension shift via SES: if `0 → X₁ → X₂ → X₃ → 0` is short exact,
-`H^n(X₃) = 0`, and `H^{n+1}(X₂) = 0`, then `H^{n+1}(X₁) = 0`. -/
+/-- Dimension shift via SES: specialization of `ext_dimension_shift` to sheaves. -/
 theorem sheafH_dimension_shift_ses {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (n : ℕ)
     (h₃ : Subsingleton (Sheaf.H S.X₃ n))
     (h₂ : Subsingleton (Sheaf.H S.X₂ (n + 1))) :
-    Subsingleton (Sheaf.H S.X₁ (n + 1)) := by
-  constructor; intro a b
-  have ha : a.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
-  have hb : b.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hS a ha rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hS b hb rfl
-  rw [← hc, ← hd, @Subsingleton.elim _ h₃ c d]
+    Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
+  ext_dimension_shift _ hS n h₃ h₂

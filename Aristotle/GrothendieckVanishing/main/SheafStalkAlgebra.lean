@@ -5,9 +5,9 @@
   - Stalk surjectivity/bijectivity for zeroOutsideInt
   - Cokernel vanishing (cokernel_openHom_vanishing)
   - zeroOutsideInt cohomology vanishing (zeroOutsideInt_cohomology_vanishing)
-  - Stalk generator algebra (stalk_zeroOutsideInt_eq_zsmul_generator, etc.)
-  - ULift ℤ subgroup cyclicity (ulift_int_subgroup_cyclic)
-  - Generator injectivity (zsmul_generator_injective)
+
+  Note: stalk_zeroOutsideInt_eq_zsmul_generator, ulift_int_subgroup_cyclic,
+  and zsmul_generator_injective are in StalkGeneratorAlgebra.lean.
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
@@ -217,7 +217,7 @@ private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx
 theorem cokernel_openHom_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) (hV : V ≠ ⊥)
-    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
+    (n : ℕ) (hn : n > topologicalKrullDim X) (_ : topologicalKrullDim X > 0)
     (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
       (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y < topologicalKrullDim X →
@@ -283,7 +283,7 @@ theorem cokernel_openHom_vanishing
 
 These lemmas decompose the kernel vanishing argument.
 `zeroOutsideInt_cohomology_vanishing` is proved. `exists_good_section` is proved.
-`sheafH_preserves_filtered_colimits` has 1 sorry (isSheaf_presheaf_filtered_colimit).
+`sheafH_preserves_filtered_colimits` has 1 sorry (hmono_ι — mono coprojections).
 `cohomology_vanishing_of_finitelyGenerated_vanishing` is fully proved via the filtered diagram.
 -/
 

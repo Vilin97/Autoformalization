@@ -1,9 +1,9 @@
 /-
   FiniteGeneratorReduction.lean — Colimit step and finitely generated vanishing
 
-  Key results:
-  - ext_dimension_shift: Ext LES dimension shift helper
-  - sheafH_preserves_filtered_colimits: H^n commutes with filtered colimits (1 sorry)
+  Key results (presheaf colimit theory split to PresheafFilteredColimit.lean):
+  - sheafH_filtered_colimit_aux / sheafH_preserves_filtered_colimits: H^n commutes with
+    filtered colimits (1 sorry: hmono_ι — mono coprojections, true at call site)
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
@@ -12,33 +12,13 @@
     Finset.induction (PROVED)
   - directLimit_cohomology_vanishing: from epi-image vanishing to all sheaves (PROVED)
 -/
+import Aristotle.GrothendieckVanishing.main.PresheafFilteredColimit
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
 
 universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
-
-/-! ### Ext LES helper lemmas -/
-
-section ExtHelpers
-variable {C' : Type*} [Category C'] [Abelian C'] [HasExt C']
-
-/-- Dimension shift for Ext via LES: given `0 → X₁ → X₂ → X₃ → 0` short exact,
-    `Ext^n(Z, X₃) = 0` and `Ext^{n+1}(Z, X₂) = 0` imply `Ext^{n+1}(Z, X₁) = 0`. -/
-private theorem ext_dimension_shift (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
-    (h₃ : Subsingleton (Ext Z S.X₃ n))
-    (h₂ : Subsingleton (Ext Z S.X₂ (n + 1))) :
-    Subsingleton (Ext Z S.X₁ (n + 1)) := by
-  constructor; intro a b
-  have ha : a.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
-  have hb : b.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hS a ha rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hS b hb rfl
-  rw [← hc, ← hd, @Subsingleton.elim _ h₃ c d]
-
-end ExtHelpers
-
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
@@ -161,227 +141,6 @@ instance finsetGenFunctor_mono
 
 end FilteredDiagram
 
-/-- A section of a sheaf that restricts to 0 on a finite open cover is 0.
-    Used for the separation step in `isSheaf_presheaf_filtered_colimit`. -/
-private theorem sheaf_section_zero_of_zero_on_finite_cover
-    {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    {ι : Type u} (U : ι → Opens X) (t : Finset ι) (hcov : iSup U ≤ ⨆ i ∈ t, U i)
-    (b : ToType (F.val.obj (op (iSup U))))
-    (hzero : ∀ k ∈ t, ConcreteCategory.hom (F.val.map (Opens.leSupr U k).op) b = 0) :
-    b = 0 := by
-  -- Use section_ext: b and 0 agree on an open cover, hence are equal
-  have hFS : TopCat.Presheaf.IsSheaf F.val := F.cond
-  exact hFS.section_ext (s := b) (t := 0) fun x hx => by
-    -- x ∈ iSup U, so x ∈ some U_k with k ∈ t (from hcov)
-    obtain ⟨k, hk⟩ := Opens.mem_iSup.mp (hcov hx)
-    obtain ⟨hkt, hxk⟩ := Opens.mem_iSup.mp hk
-    exact ⟨U k, le_iSup U k, hxk, (hzero k hkt).trans (map_zero _).symm⟩
-
-/-- In a filtered category, given an element and for each `k ∈ t` a transition that
-    kills the k-th restriction, there exists a single transition killing ALL restrictions.
-    Uses `IsFiltered.max` + `IsFiltered.coeqHom` iteratively via `Finset.induction`. -/
-private theorem filtered_colimit_kills_all_restrictions
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    {X : TopCat.{u}} (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    {ι : Type u} (U : ι → Opens X) (j₀ : J')
-    (b₀ : ToType ((Y'.obj j₀).val.obj (op (iSup U))))
-    (t : Finset ι)
-    (h_ev : ∀ k ∈ t, ∃ (jk : J') (fk : j₀ ⟶ jk),
-      ConcreteCategory.hom ((Y'.obj jk).val.map (Opens.leSupr U k).op)
-        (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op (iSup U))) b₀) = 0) :
-    ∃ (j₁ : J') (g₀ : j₀ ⟶ j₁),
-      ∀ k ∈ t, ConcreteCategory.hom ((Y'.obj j₁).val.map (Opens.leSupr U k).op)
-        (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op (iSup U))) b₀) = 0 := by
-  classical
-  induction t using Finset.induction with
-  | empty => exact ⟨j₀, 𝟙 j₀, fun _ hk => absurd hk (by simp)⟩
-  | @insert k₀ t₀ hk₀ ih =>
-    obtain ⟨j_cur, g_cur, hg_cur⟩ := ih (fun k hk => h_ev k (Finset.mem_insert_of_mem hk))
-    obtain ⟨jk₀, fk₀, hfk₀⟩ := h_ev k₀ (Finset.mem_insert_self k₀ t₀)
-    -- Equalize g_cur and fk₀ via IsFiltered: find j₁ with g_cur ≫ ... = fk₀ ≫ ...
-    let j_mid := IsFiltered.max j_cur jk₀
-    let j₁ := IsFiltered.coeq (g_cur ≫ IsFiltered.leftToMax j_cur jk₀)
-        (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
-    let h_eq := IsFiltered.coeqHom (g_cur ≫ IsFiltered.leftToMax j_cur jk₀)
-        (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
-    have heq : g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq =
-        fk₀ ≫ IsFiltered.rightToMax j_cur jk₀ ≫ h_eq := by
-      have := IsFiltered.coeq_condition (g_cur ≫ IsFiltered.leftToMax j_cur jk₀)
-        (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
-      simp only [Category.assoc] at this; exact this
-    refine ⟨j₁, g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq, fun k hk => ?_⟩
-    -- Helper: if res_k(F(f)(b₀)) = 0, then res_k(F(f ≫ g)(b₀)) = 0
-    -- (naturality: res commutes with transition, and transition preserves 0)
-    have htrans : ∀ {j j' : J'} (f : j₀ ⟶ j) (g : j ⟶ j') (k' : ι),
-        ConcreteCategory.hom ((Y'.obj j).val.map (Opens.leSupr U k').op)
-          (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map f).app (op (iSup U))) b₀) = 0 →
-        ConcreteCategory.hom ((Y'.obj j').val.map (Opens.leSupr U k').op)
-          (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map (f ≫ g)).app
-            (op (iSup U))) b₀) = 0 := by
-      intro j j' f g k' hfk
-      -- F(f ≫ g) = F(f) ≫ F(g), so F(f ≫ g)(b₀) = F(g)(F(f)(b₀))
-      -- res_k'(F(f ≫ g)(b₀)) = res_k'(F(g)(F(f)(b₀))) by functoriality
-      -- = F_k'(g)(res_k'(F(f)(b₀))) by naturality = F_k'(g)(0) = 0
-      let α := ((Y' ⋙ sheafToPresheaf _ _).map g)
-      -- Naturality: α.app (iSup U) ≫ res = res ≫ α.app (U k')
-      have hnat := α.naturality (Opens.leSupr U k').op
-      -- Convert goal to use composition form, then apply naturality
-      change ConcreteCategory.hom
-        (((Y' ⋙ sheafToPresheaf _ _).map (f ≫ g)).app (op (iSup U)) ≫
-          (Y'.obj j').val.map (Opens.leSupr U k').op) b₀ = 0
-      rw [(Y' ⋙ sheafToPresheaf _ _).map_comp, NatTrans.comp_app, Category.assoc,
-        show α.app (op (iSup U)) ≫ (Y'.obj j').val.map (Opens.leSupr U k').op =
-          (Y'.obj j).val.map (Opens.leSupr U k').op ≫ α.app (op (U k')) from hnat.symm,
-        ← Category.assoc]
-      show ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map f).app (op (iSup U)) ≫
-        (Y'.obj j).val.map (Opens.leSupr U k').op ≫ α.app (op (U k'))) b₀ = 0
-      simp only [AddCommGrpCat.hom_comp, AddMonoidHom.coe_comp, Function.comp_apply]
-      change ConcreteCategory.hom (α.app (op (U k')))
-        (ConcreteCategory.hom ((Y'.obj j).val.map (Opens.leSupr U k').op)
-          (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map f).app (op (iSup U))) b₀)) = 0
-      rw [hfk, map_zero]
-    rw [Finset.mem_insert] at hk; rcases hk with rfl | hk
-    · rw [heq]; exact htrans fk₀ (IsFiltered.rightToMax j_cur jk₀ ≫ h_eq) k hfk₀
-    · exact htrans g_cur (IsFiltered.leftToMax j_cur jk₀ ≫ h_eq) k (hg_cur k hk)
-
-/-- On a Noetherian space, the presheaf-level filtered colimit of sheaves is a sheaf.
-    Uses: Noetherian → every open cover has finite subcover → sheaf condition is a finite limit →
-    filtered colimits commute with finite limits (`colimitLimitIso`) → colimit is a sheaf. -/
-private theorem isSheaf_presheaf_filtered_colimit
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (c : Cocone (Y' ⋙ sheafToPresheaf _ _)) (hc : IsColimit c) :
-    TopCat.Presheaf.IsSheaf c.pt := by
-  rw [TopCat.Presheaf.isSheaf_iff_isSheafUniqueGluing]
-  intro ι U sf hcompat
-  -- Noetherian → finite subcover: find finite t with iSup U = ⨆ k ∈ t, U k
-  obtain ⟨t, ht⟩ := (NoetherianSpace.isCompact (↑(iSup U) : Set X)).elim_finite_subcover
-    (fun i => ↑(U i)) (fun i => (U i).isOpen) (by simp [Opens.coe_iSup])
-  -- The finite subcover covers the same open set
-  have hbsup_le : ⨆ i ∈ t, U i ≤ iSup U := iSup₂_le (fun i _ => le_iSup U i)
-  have hsup_le : iSup U ≤ ⨆ i ∈ t, U i := by
-    rw [SetLike.le_def]
-    intro x hx
-    obtain ⟨i, hi, hxi⟩ := Set.mem_iUnion₂.mp (ht hx)
-    exact Opens.mem_iSup.mpr ⟨i, Opens.mem_iSup.mpr ⟨hi, hxi⟩⟩
-  -- Separation: a section of c.pt zero on all U_k (k ∈ t) is zero
-  have hsep : ∀ (a : ToType (c.pt.obj (op (iSup U)))),
-      (∀ k ∈ t, c.pt.map (Opens.leSupr U k).op a = 0) → a = 0 := by
-    intro a ha
-    -- Evaluation at each open gives a colimit in AddCommGrpCat
-    let ev V := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op V)
-    have hcV : ∀ V, IsColimit ((ev V).mapCocone c) := fun V => isColimitOfPreserves (ev V) hc
-    -- a factors through some (Y'.obj j₀).val.obj (op (iSup U))
-    obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ (hcV (iSup U)) a
-    -- For each k ∈ t, the restriction of b₀ to U_k maps to 0 in the colimit.
-    -- By naturality, this is the same as restricting a (= image of b₀) to U_k.
-    -- Naturality: ι_{j₀}(res(b₀)) = res(ι_{j₀}(b₀)) = res(a)
-    have hnat : ∀ k, ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀)
-        (ConcreteCategory.hom ((Y'.obj j₀).val.map (Opens.leSupr U k).op) b₀) =
-      ConcreteCategory.hom (c.pt.map (Opens.leSupr U k).op) a := by
-      intro k; simp only [Functor.mapCocone_ι_app]; rw [← hb₀]
-      change ConcreteCategory.hom
-        (((Y' ⋙ sheafToPresheaf _ _).obj j₀).map _ ≫ (c.ι.app j₀).app _) b₀ =
-        ConcreteCategory.hom
-        ((c.ι.app j₀).app _ ≫ (((Functor.const J').obj c.pt).obj j₀).map _) b₀
-      rw [(c.ι.app j₀).naturality (Opens.leSupr U k).op]
-    -- So the restriction of b₀ to U_k maps to 0 in the k-th evaluation colimit
-    have hres_zero : ∀ k ∈ t, ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀)
-        (ConcreteCategory.hom ((Y'.obj j₀).val.map (Opens.leSupr U k).op) b₀) = 0 := by
-      intro k hk; rw [hnat k]; exact ha k hk
-    -- Each restriction eventually becomes 0: use isColimit_eq_iff' at the Type level
-    let F_k k := (Y' ⋙ sheafToPresheaf _ _) ⋙ ev (U k)
-    have h_ev_zero : ∀ k ∈ t, ∃ (jk : J') (fk : j₀ ⟶ jk),
-        ConcreteCategory.hom ((F_k k).map fk)
-          (ConcreteCategory.hom ((Y'.obj j₀).val.map (Opens.leSupr U k).op) b₀) = 0 := by
-      intro k hk
-      have hcTyp := isColimitOfPreserves (CategoryTheory.forget AddCommGrpCat) (hcV (U k))
-      have h0 : ((CategoryTheory.forget AddCommGrpCat).mapCocone
-          ((ev (U k)).mapCocone c)).ι.app j₀
-          (ConcreteCategory.hom ((Y'.obj j₀).val.map (Opens.leSupr U k).op) b₀) =
-        ((CategoryTheory.forget AddCommGrpCat).mapCocone
-          ((ev (U k)).mapCocone c)).ι.app j₀ 0 := by
-        change ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀) _ =
-          ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀) 0
-        rw [hres_zero k hk, map_zero]
-      rw [Types.FilteredColimit.isColimit_eq_iff' hcTyp] at h0
-      obtain ⟨jk, fk, hfk⟩ := h0
-      exact ⟨jk, fk, by simpa [map_zero] using hfk⟩
-    -- Build j₁ and g₀ killing all restrictions
-    -- Convert h_ev_zero from "restriction then transition" to "transition then restriction"
-    have h_ev' : ∀ k ∈ t, ∃ (jk : J') (fk : j₀ ⟶ jk),
-        ConcreteCategory.hom ((Y'.obj jk).val.map (Opens.leSupr U k).op)
-          (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op (iSup U))) b₀) = 0 := by
-      intro k hk; obtain ⟨jk, fk, hfk⟩ := h_ev_zero k hk; refine ⟨jk, fk, ?_⟩
-      -- Naturality: res ∘ transition = transition_at_U_k ∘ res
-      have hnat := ((Y' ⋙ sheafToPresheaf _ _).map fk).naturality (Opens.leSupr U k).op
-      change ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op (iSup U)) ≫
-        ((Y' ⋙ sheafToPresheaf _ _).obj jk).map (Opens.leSupr U k).op) b₀ = 0
-      rw [← hnat]; exact hfk
-    obtain ⟨j₁, g₀, hg₀⟩ := filtered_colimit_kills_all_restrictions Y' U j₀ b₀ t h_ev'
-    -- The transition of b₀ is 0 by sheaf separation
-    let b₁ := ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op (iSup U))) b₀
-    have hb₁_zero : b₁ = 0 :=
-      sheaf_section_zero_of_zero_on_finite_cover (Y'.obj j₁) U t hsup_le b₁ hg₀
-    -- Cocone factorization: a = ι_{j₀}(b₀) = ι_{j₁}(b₁) = 0
-    rw [← hb₀]
-    change ConcreteCategory.hom ((c.ι.app j₀).app (op (iSup U))) b₀ = 0
-    have hfac : (c.ι.app j₀).app (op (iSup U)) =
-        ((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op (iSup U)) ≫
-        (c.ι.app j₁).app (op (iSup U)) := by
-      have := congrArg (fun α => NatTrans.app α (op (iSup U))) (c.ι.naturality g₀)
-      simp [Functor.const_obj_map] at this; exact this.symm
-    conv_lhs => rw [hfac]
-    change ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U))) b₁ = 0
-    rw [hb₁_zero, map_zero]
-  -- Existence: construct a gluing section
-  have hexist : ∃ s, Presheaf.IsGluing c.pt U sf s := by
-    -- Step 1: Set up evaluation colimits
-    let ev V := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op V)
-    have hcV : ∀ V, IsColimit ((ev V).mapCocone c) := fun V => isColimitOfPreserves (ev V) hc
-    -- Step 2: For each k ∈ t, lift sf_k to a representative in some piece
-    have hrep : ∀ k ∈ t, ∃ (j : J') (x : ToType ((Y'.obj j).val.obj (op (U k)))),
-        ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j) x = sf k := by
-      intro k _; exact Concrete.isColimit_exists_rep _ (hcV (U k)) (sf k)
-    -- Step 3: Lift to common piece, glue, map to colimit
-    -- The section s₀ in the piece restricts to sf_k for k ∈ t, and by section_ext
-    -- (applied through the piece) it restricts to sf_i for all i.
-    -- Full construction needs: IsFiltered merging + IsSheafUniqueGluing on piece +
-    -- section_ext through the piece for i ∉ t.
-    -- This is symmetric to hsep but constructive.
-
-    -- For now, use hsep to reduce: it suffices to find s agreeing on finite subcover.
-    -- Given s with s|_{U_k} = sf_k for k ∈ t, for any i:
-    -- s|_{U_i} - sf_i restricts to 0 on each U_i ∩ U_k (by compatibility + s|_{U_k} = sf_k).
-    -- The cover {U_i ∩ U_k | k ∈ t} covers U_i (since U_i ≤ ⨆_{k∈t} U_k).
-    -- Need: separation for c.pt at U_i → s|_{U_i} = sf_i.
-
-    -- The separation for c.pt at any open V follows from the same argument as hsep
-    -- (evaluation colimit + representative + eventually zero + merge + sheaf separation).
-    -- This is exactly the same proof with V replacing iSup U.
-
-    -- For efficiency, we apply section_ext through the colimit:
-    -- both s|_{U_i} and sf_i, when lifted to a common piece and restricted to U_i ∩ U_k,
-    -- agree. By section_ext for the piece (a sheaf), they agree on U_i.
-    -- Hence they agree in the colimit.
-    sorry
-  -- Assembly: existence + uniqueness from separation
-  obtain ⟨s, hs⟩ := hexist
-  refine ⟨s, hs, fun s' hs' => ?_⟩
-  have h0 : s' - s = 0 := hsep (s' - s) (fun k hk => by
-    show c.pt.map (Opens.leSupr U k).op (s' - s) = 0
-    rw [map_sub, sub_eq_zero]
-    exact (hs' k).trans (hs k).symm)
-  rwa [sub_eq_zero] at h0
-
-/-- On a Noetherian space, `sheafToPresheaf` creates filtered colimits of sheaves. -/
-private noncomputable def createsFilteredColimit
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X) :
-    CreatesColimit Y' (sheafToPresheaf _ _) :=
-  Sheaf.createsColimitOfIsSheaf Y' (fun c hc => isSheaf_presheaf_filtered_colimit Y' c hc)
 
 /-- Auxiliary: sheaf cohomology vanishing commutes with filtered colimits, universally
     quantified over the degree `n` so that the IH applies to all diagrams.
@@ -401,11 +160,30 @@ private theorem sheafH_filtered_colimit_aux
     -- filtered colimits. If each piece has trivial global sections, so does the colimit.
     intro J' inst1 inst2 Y' c' hc' hvan
     letI := inst1; letI := inst2
-    sorry
+    -- H^0 ≅ global sections, colimit of trivial sections is trivial
+    haveI := createsFilteredColimit Y'
+    let c_psh := (sheafToPresheaf _ _).mapCocone c'
+    have hc_psh := isColimitOfPreserves (sheafToPresheaf _ _) hc'
+    let ev_top := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)
+    have hc_top := isColimitOfPreserves ev_top hc_psh
+    have h_sec : ∀ j, Subsingleton ((Y'.obj j).val.obj (op ⊤)) := fun j => by
+      haveI := hvan j; exact subsingleton_of_addEquiv (sheafH0EquivSections (Y'.obj j))
+    have : Subsingleton (c'.pt.val.obj (op ⊤)) := by
+      constructor; intro a b
+      obtain ⟨j₁, x, hx⟩ := Concrete.isColimit_exists_rep _ hc_top a
+      obtain ⟨j₂, y, hy⟩ := Concrete.isColimit_exists_rep _ hc_top b
+      rw [← hx, ← hy, @Subsingleton.elim _ (h_sec j₁) x 0,
+          @Subsingleton.elim _ (h_sec j₂) y 0, map_zero, map_zero]
+    exact subsingleton_of_addEquiv (sheafH0EquivSections c'.pt).symm
   | succ n ih =>
     -- Inductive step: dimension shifting via injective embedding.
     intro J' inst1 inst2 Y' c' hc' hvan
     letI := inst1; letI := inst2
+    -- Mono coprojections: needed for SES 0 → Y_j → I → Q_j → 0.
+    -- At call site: finsetGenFunctor has mono transitions →
+    -- IsColimit.mono_ι_app_of_isFiltered gives mono coprojections.
+    -- The IH call on Q introduces its own mono sorry at recursive levels.
+    have hmono_ι : ∀ j, Mono (c'.ι.app j) := sorry
     -- Embed c'.pt ↪ I (injective)
     haveI : EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) :=
       IsGrothendieckAbelian.enoughInjectives
@@ -420,9 +198,137 @@ private theorem sheafH_filtered_colimit_aux
       Ext.subsingleton_of_injective _ _ n
     -- Ext^n(Z, cokernel ι') = 0 by IH applied to the quotient diagram
     -- (Q = colim Q_j where Q_j = coker(F_j → I), each Ext^n(Z, Q_j) = 0 by LES)
-    have hQ : Subsingleton (Sheaf.H S.X₃ n) := by sorry
-    -- Dimension shift: Ext^{n+1}(Z, c'.pt) = 0
-    exact ext_dimension_shift _ hSE n hQ hI
+    -- Build quotient diagram Q_j = cokernel(c'.ι.app j ≫ ι') and apply IH
+    let I := Injective.under c'.pt
+    have hnat_ι : ∀ {j j' : J'} (f : j ⟶ j'),
+        (c'.ι.app j ≫ ι') ≫ (𝟙 I) = Y'.map f ≫ (c'.ι.app j' ≫ ι') := by
+      intro j j' f; rw [Category.comp_id, ← Category.assoc, Cocone.w]
+    -- Quotient functor Q.obj j = cokernel(c'.ι.app j ≫ ι')
+    let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
+      { obj := fun j => cokernel (c'.ι.app j ≫ ι')
+        map := fun {j j'} f => cokernel.map _ _ (Y'.map f) (𝟙 I) (hnat_ι f)
+        map_id := fun j => by ext; rw [cokernel.π_desc]; exact Category.id_comp _
+        map_comp := fun {j j' j''} f g => by
+          ext; show cokernel.π _ ≫ _ = cokernel.π _ ≫ _ ≫ _
+          dsimp only [cokernel.map]
+          conv_rhs => rw [← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
+          rw [cokernel.π_desc]; exact congrArg (𝟙 I ≫ ·) (Category.id_comp _).symm }
+    -- Cocone on Q with vertex S.X₃ = cokernel ι'
+    let qCocone : Cocone Q := Cocone.mk S.X₃
+      { app := fun j => cokernel.map _ _ (c'.ι.app j) (𝟙 I) (by rw [Category.comp_id])
+        naturality := fun j j' f => by
+          ext; show cokernel.π _ ≫ _ ≫ _ = cokernel.π _ ≫ _ ≫ _
+          dsimp only [cokernel.map]; simp only [Functor.const_obj_map, Category.comp_id]
+          conv_lhs => rw [← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
+          conv_rhs => rw [← Category.assoc, cokernel.π_desc]
+          exact (Category.id_comp _).symm.trans (Category.comp_id _).symm }
+    -- IsColimit: cokernel preserves filtered colimits (AB5)
+    have hqColim : IsColimit qCocone := by
+      haveI : Nonempty J' := IsFiltered.nonempty
+      -- cokernel.π(f_j) ≫ Q.map a = cokernel.π(f_{j'})
+      have hπQ : ∀ {j₁ j₂ : J'} (a : j₁ ⟶ j₂),
+          cokernel.π (c'.ι.app j₁ ≫ ι') ≫ Q.map a =
+          cokernel.π (c'.ι.app j₂ ≫ ι') := by
+        intro j₁ j₂ a
+        exact (cokernel.π_desc _ _ _).trans (Category.id_comp _)
+      -- cokernel.π(f_j) ≫ qCocone.ι.app j = cokernel.π(ι')
+      have hπC : ∀ j, cokernel.π (c'.ι.app j ≫ ι') ≫ qCocone.ι.app j =
+          cokernel.π ι' := by
+        intro j
+        exact (cokernel.π_desc _ _ _).trans (Category.id_comp _)
+      -- g_j := cokernel.π(f_j) ≫ s.ι.app j is independent of j
+      have g_eq : ∀ (s : Cocone Q) (j₁ j₂ : J'),
+          cokernel.π (c'.ι.app j₁ ≫ ι') ≫ s.ι.app j₁ =
+          cokernel.π (c'.ι.app j₂ ≫ ι') ≫ s.ι.app j₂ := by
+        intro s j₁ j₂
+        have h₁ : s.ι.app j₁ = Q.map (IsFiltered.leftToMax j₁ j₂) ≫
+            s.ι.app (IsFiltered.max j₁ j₂) := by rw [s.w]
+        have h₂ : s.ι.app j₂ = Q.map (IsFiltered.rightToMax j₁ j₂) ≫
+            s.ι.app (IsFiltered.max j₁ j₂) := by rw [s.w]
+        rw [h₁, h₂, ← Category.assoc, ← Category.assoc, hπQ, hπQ]
+      let j₀ := Classical.arbitrary J'
+      exact
+      { desc := fun s => cokernel.desc ι'
+            (cokernel.π (c'.ι.app j₀ ≫ ι') ≫ s.ι.app j₀)
+            (hc'.hom_ext (fun j => by
+              simp only [comp_zero, Category.assoc, g_eq _ j₀ j,
+                ← Category.assoc (c'.ι.app j), ← Category.assoc (c'.ι.app j ≫ ι'),
+                cokernel.condition, zero_comp]))
+        fac := fun s j => by
+          apply (cancel_epi (cokernel.π (c'.ι.app j ≫ ι'))).mp
+          rw [← Category.assoc, hπC, cokernel.π_desc, g_eq s j₀ j]
+        uniq := fun s m hm => by
+          apply (cancel_epi (cokernel.π ι')).mp
+          rw [cokernel.π_desc, ← hπC j₀, Category.assoc, hm j₀] }
+    -- Split on n: n=0 needs direct H^1 argument, n≥1 uses dimension shift
+    match n with
+    | 0 =>
+      -- Direct proof of H^1(c'.pt) = 0 using the LES + Ext^0 surjectivity.
+      -- Pattern: every α ∈ Ext^1(Z, c'.pt) lifts to β ∈ Ext^0(Z, Q) (by exact₁),
+      -- then β lifts to γ ∈ Ext^0(Z, I) (by surjectivity: Q = colim Q_j, each
+      -- Ext^0(Z, I) ↠ Ext^0(Z, Q_j) from SES + Mono + H^1(Y_j)=0), hence
+      -- β.comp hSE.extClass = 0 (by associativity + comp_extClass = 0).
+      -- Ext^0 surjectivity: every element of Ext^0(Z, Q) lifts to Ext^0(Z, I)
+      -- Ext^0 surjectivity: every element of Ext^0(Z, Q) lifts to Ext^0(Z, I).
+      -- Proof: Γ(I) ↠ Γ(Q) because Q = colim Q_j, each Γ(I) ↠ Γ(Q_j) by LES + mono.
+      have hΓg_epi : Epi (S.g.val.app (op ⊤)) := by
+        rw [AddCommGrpCat.epi_iff_surjective]; intro q
+        -- Γ(Q) = colim Γ(Q_j) via filtered colimit preservation
+        haveI := createsFilteredColimit Q
+        have hc_top_Q := isColimitOfPreserves
+          ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤))
+          (isColimitOfPreserves (sheafToPresheaf _ _) hqColim)
+        obtain ⟨j₀, q₀, hq₀⟩ := Concrete.isColimit_exists_rep _ hc_top_Q q
+        -- Per-piece: Γ(I) ↠ Γ(Q_{j₀}) from SES + mono + H^1(Y_{j₀}) = 0
+        haveI : Mono ι' := inferInstance
+        haveI : Mono (c'.ι.app j₀ ≫ ι') := mono_comp _ _
+        let ip_j₀ : InjectivePresentation (Y'.obj j₀) :=
+          { J := I, f := c'.ι.app j₀ ≫ ι' }
+        have hπ_epi := epi_g_app_top_of_H1_vanishing ip_j₀ (hvan j₀)
+        rw [AddCommGrpCat.epi_iff_surjective] at hπ_epi
+        obtain ⟨p, hp⟩ := hπ_epi q₀
+        -- Composition: I →[π_{j₀}] Q_{j₀} →[cocone] Q = I →[S.g] Q
+        -- From hqColim: cokernel.π(f_{j₀}) ≫ qCocone.ι.app j₀ = cokernel.π(ι') = S.g
+        have hcomp : ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀ = S.g := by
+          show cokernel.π _ ≫ _ = cokernel.π _
+          exact (cokernel.π_desc _ _ _).trans (Category.id_comp _)
+        refine ⟨p, ?_⟩
+        show (S.g.val.app (op ⊤)) p = q
+        have hkey := congrArg (·.val.app (op ⊤)) hcomp
+        simp only [] at hkey
+        rw [hkey.symm]; exact hq₀ ▸ hp ▸ rfl
+      have h_surj := ext0_surj_of_epi_top (S := S) hΓg_epi
+      constructor; intro a b
+      have ha : a.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ hI _ _
+      have hb : b.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ hI _ _
+      obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a ha rfl
+      obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b hb rfl
+      obtain ⟨c', hc'⟩ := h_surj c
+      obtain ⟨d', hd'⟩ := h_surj d
+      have zero_c : c.comp hSE.extClass rfl = 0 := by
+        rw [← hc', Ext.comp_assoc_of_second_deg_zero c' (Ext.mk₀ S.g)
+          hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero c' _ 1 1 rfl]
+      have zero_d : d.comp hSE.extClass rfl = 0 := by
+        rw [← hd', Ext.comp_assoc_of_second_deg_zero d' (Ext.mk₀ S.g)
+          hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero d' _ 1 1 rfl]
+      rw [← hc, ← hd, zero_c, zero_d]
+    | n' + 1 =>
+      -- For n ≥ 1: dimension shift via h_van_Q + IH
+      have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) (n' + 1)) := by
+        intro j
+        let S_j : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+          ShortComplex.mk (c'.ι.app j ≫ ι') (cokernel.π (c'.ι.app j ≫ ι'))
+            (cokernel.condition _)
+        have hSE_j : S_j.ShortExact := by
+          refine ShortComplex.ShortExact.mk'
+            (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) ?_ inferInstance
+          haveI : Mono ι' := inferInstance
+          exact mono_comp (c'.ι.app j) ι'
+        exact ext_dimension_shift_X₃ _ hSE_j (n' + 1)
+          (Ext.subsingleton_of_injective _ _ n') (hvan j)
+      have hQ : Subsingleton (Sheaf.H S.X₃ (n' + 1)) :=
+        ih Q qCocone hqColim h_van_Q
+      exact ext_dimension_shift _ hSE (n' + 1) hQ hI
 
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
     This is the derived functor commutation theorem for `H^n = R^n Γ`:
