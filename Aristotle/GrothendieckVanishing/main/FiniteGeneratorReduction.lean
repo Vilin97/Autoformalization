@@ -309,8 +309,89 @@ private theorem isSheaf_presheaf_filtered_colimit
     conv_lhs => rw [hfac]
     change ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U))) b₁ = 0
     rw [hb₁_zero, map_zero]
-  -- Existence + uniqueness
-  sorry
+  -- Existence: construct a gluing section
+  classical
+  choose j_all x_all hx_all using fun k =>
+    Concrete.isColimit_exists_rep _ (hcV (U k)) (sf k)
+  -- Merge j_all k (k ∈ t) to common index
+  haveI : DecidableEq J' := Classical.decEq _
+  obtain ⟨j₀, hj₀⟩ := IsFiltered.sup_objs_exists (t.image j_all)
+  let g₀ : ∀ k, k ∈ t → (j_all k ⟶ j₀) :=
+    fun k hk => (hj₀ (Finset.mem_image_of_mem j_all hk)).some
+  -- Transport to j₀
+  let x' : ∀ k, k ∈ t → ToType ((Y'.obj j₀).val.obj (op (U k))) :=
+    fun k hk => ConcreteCategory.hom
+      (((Y' ⋙ sheafToPresheaf _ _).map (g₀ k hk)).app (op (U k))) (x_all k)
+  -- x' still maps to sf_k in the colimit
+  have hx' : ∀ k (hk : k ∈ t),
+      ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀) (x' k hk) = sf k := by
+    intro k hk; dsimp [x']
+    have hfac := congrArg (fun α => NatTrans.app α (op (U k))) (c.ι.naturality (g₀ k hk))
+    simp only [Functor.const_obj_map, NatTrans.comp_app, Category.comp_id] at hfac
+    change ConcreteCategory.hom ((((Y' ⋙ sheafToPresheaf _ _).map (g₀ k hk)).app (op (U k))) ≫
+      (c.ι.app j₀).app (op (U k))) (x_all k) = sf k
+    rw [hfac]; exact hx_all k
+  -- Pairwise compatibility after merging (sorry for now — same merge pattern)
+  obtain ⟨j₁, g₁, hg₁⟩ : ∃ (j₁ : J') (g₁ : j₀ ⟶ j₁),
+      ∀ (k : ι) (hk : k ∈ t) (l : ι) (hl : l ∈ t),
+        ConcreteCategory.hom ((Y'.obj j₁).val.map (Opens.infLELeft (U k) (U l)).op)
+          (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₁).app (op (U k))) (x' k hk)) =
+        ConcreteCategory.hom ((Y'.obj j₁).val.map (Opens.infLERight (U k) (U l)).op)
+          (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₁).app (op (U l))) (x' l hl)) := by
+    sorry
+  -- Glue in piece
+  let W : ↥t → Opens X := fun ⟨k, _⟩ => U k
+  let x'' : ∀ (k : ↥t), ToType ((Y'.obj j₁).val.obj (op (W k))) :=
+    fun ⟨k, hk⟩ => ConcreteCategory.hom
+      (((Y' ⋙ sheafToPresheaf _ _).map g₁).app (op (U k))) (x' k hk)
+  have hx''_compat : Presheaf.IsCompatible (Y'.obj j₁).val W x'' :=
+    fun ⟨k, hk⟩ ⟨l, hl⟩ => hg₁ k hk l hl
+  have hcov_W : iSup U ≤ iSup W := by
+    rw [show iSup W = ⨆ k ∈ t, U k from iSup_subtype (p := (· ∈ t))]; exact hsup_le
+  obtain ⟨s₀, hs₀, _⟩ := (Y'.obj j₁).existsUnique_gluing' W (iSup U)
+    (fun ⟨k, _⟩ => Opens.leSupr U k) hcov_W x'' hx''_compat
+  -- Map to colimit
+  let s : ToType (c.pt.obj (op (iSup U))) :=
+    ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U))) s₀
+  -- For k ∈ t: s|_{U_k} = sf_k
+  have hs_k : ∀ k (hk : k ∈ t), c.pt.map (Opens.leSupr U k).op s = sf k := by
+    intro k hk
+    change ConcreteCategory.hom (c.pt.map (Opens.leSupr U k).op)
+      (ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U))) s₀) = sf k
+    change ConcreteCategory.hom
+      ((c.ι.app j₁).app (op (iSup U)) ≫ c.pt.map (Opens.leSupr U k).op) s₀ = sf k
+    rw [show (c.ι.app j₁).app (op (iSup U)) ≫ c.pt.map (Opens.leSupr U k).op =
+      (Y'.obj j₁).val.map (Opens.leSupr U k).op ≫ (c.ι.app j₁).app (op (U k))
+      from ((c.ι.app j₁).naturality (Opens.leSupr U k).op).symm]
+    change ConcreteCategory.hom ((c.ι.app j₁).app (op (U k)))
+      (ConcreteCategory.hom ((Y'.obj j₁).val.map (Opens.leSupr U k).op) s₀) = sf k
+    rw [hs₀ ⟨k, hk⟩]; dsimp [x'']
+    have hfac := congrArg (fun α => NatTrans.app α (op (U k))) (c.ι.naturality g₁)
+    simp only [Functor.const_obj_map, NatTrans.comp_app, Category.comp_id] at hfac
+    change ConcreteCategory.hom ((((Y' ⋙ sheafToPresheaf _ _).map g₁).app (op (U k)) ≫
+      (c.ι.app j₁).app (op (U k)))) (x' k hk) = sf k
+    rw [hfac]; exact hx' k hk
+  -- For all i: s|_{U_i} = sf_i (by separation at U_i via hcompat)
+  refine ⟨s, fun i => ?_, fun s' hs' => ?_⟩
+  · -- s|_{U_i} = sf_i: show difference is 0 by checking on finite subcover of U_i
+    have h_diff_zero : ∀ k ∈ t,
+        ConcreteCategory.hom (c.pt.map (homOfLE (inf_le_left : U i ⊓ U k ≤ U i)).op)
+          (c.pt.map (Opens.leSupr U i).op s - sf i) = 0 := by
+      intro k hk; rw [map_sub, sub_eq_zero]
+      -- LHS = s|_{U_i ⊓ U_k} = s|_{U_k}|_{U_i ⊓ U_k} = sf_k|_{U_i ⊓ U_k}
+      -- RHS = sf_i|_{U_i ⊓ U_k} = sf_k|_{U_i ⊓ U_k} (by hcompat)
+      trans (ConcreteCategory.hom (c.pt.map (Opens.infLERight (U i) (U k)).op) (sf k))
+      · rw [← hs_k k hk, ← ConcreteCategory.comp_apply, ← c.pt.map_comp,
+            ← ConcreteCategory.comp_apply, ← c.pt.map_comp]; congr 1
+      · exact (hcompat i k).symm
+    -- Colimit separation at U_i (same hsep argument at U_i instead of iSup U)
+    sorry
+  · -- Uniqueness from hsep
+    have h0 : s' - s = 0 := hsep (s' - s) (fun k hk => by
+      show c.pt.map (Opens.leSupr U k).op (s' - s) = 0
+      rw [map_sub, sub_eq_zero]
+      exact (hs' k).trans (hs_k k hk).symm)
+    rwa [sub_eq_zero] at h0
 
 /-- On a Noetherian space, `sheafToPresheaf` creates filtered colimits of sheaves. -/
 private noncomputable def createsFilteredColimit
