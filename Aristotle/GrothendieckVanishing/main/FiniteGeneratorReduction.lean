@@ -336,10 +336,19 @@ private theorem isSheaf_presheaf_filtered_colimit
     change ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U))) b₁ = 0
     rw [hb₁_zero, map_zero]
   -- Existence: construct a gluing section
-  -- Strategy: lift sf_k (k ∈ t) to a common piece, glue there, map to colimit.
-  -- For i ∉ t: use compatibility + separation (generalized hsep at U_i).
   have hexist : ∃ s, Presheaf.IsGluing c.pt U sf s := by
-    sorry -- This is the dual of hsep: concrete colimit lifting + sheaf gluing + separation
+    -- Step 1: Set up evaluation colimits
+    let ev V := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op V)
+    have hcV : ∀ V, IsColimit ((ev V).mapCocone c) := fun V => isColimitOfPreserves (ev V) hc
+    -- Step 2: For each k ∈ t, lift sf_k to a representative in some piece
+    have hrep : ∀ k ∈ t, ∃ (j : J') (x : ToType ((Y'.obj j).val.obj (op (U k)))),
+        ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j) x = sf k := by
+      intro k _; exact Concrete.isColimit_exists_rep _ (hcV (U k)) (sf k)
+    -- Step 3-6: Lift finite sub-family to common piece, check compatibility,
+    -- glue using sheaf condition, map to colimit, extend to full cover.
+    -- Same machinery as hsep but constructive (needs IsFiltered merging,
+    -- sheaf gluing in the piece, section_ext for the i ∉ t extension).
+    sorry
   -- Assembly: existence + uniqueness from separation
   obtain ⟨s, hs⟩ := hexist
   refine ⟨s, hs, fun s' hs' => ?_⟩
