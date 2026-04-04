@@ -1,7 +1,7 @@
 # Adversarial Critique — Grothendieck Vanishing Formalization
 
-**Timestamp**: 2026-04-04T21:50Z
-**Verdict**: **REVISE** — 2 sorry's remain (documentation claims 1), blueprint 404, dead code present
+**Timestamp**: 2026-04-04T21:57Z
+**Verdict**: **REVISE** — 1 sorry remains, blueprint 404
 
 ---
 
@@ -98,11 +98,11 @@
 
 ## Open Issues (must fix)
 
-- **P0-1**: Close or remove `gabriel_injective_of_filtered_colimit` sorry (dead code — either connect it to the proof or delete it)
+- ~~**P0-1**: Close or remove `gabriel_injective_of_filtered_colimit` sorry~~ DONE (deleted in c2543f6)
 - **P0-2**: Close `hmono_transitions` sorry (the REAL gap — requires a fundamentally different proof approach)
 - **P1-1**: Fix blueprint deployment (404 on both URLs)
-- **P1-2**: Fix all documentation lies (CLAUDE.md, main.lean, FiniteGeneratorReduction.lean docstrings) — claim 1 sorry but there are 2
-- **P2-1**: Delete stale `aristotle-in/sheafH_colim.lean` (doesn't compile)
-- **P2-2**: Remove dead code `gabriel_injective_of_filtered_colimit` if not connecting it
+- ~~**P1-2**: Fix all documentation lies~~ DONE (fixed in c2543f6)
+- ~~**P2-1**: Delete stale `aristotle-in/sheafH_colim.lean`~~ DONE (was untracked)
+- ~~**P2-2**: Remove dead code `gabriel_injective_of_filtered_colimit`~~ DONE (deleted in c2543f6)
 
-**Verdict: REVISE** — The formalization has a sound mathematical structure but contains a sorry that is provably false at recursive levels. The documentation understates the gap. Fix the sorry count documentation, delete dead code, and either close the sorry or clearly document why the current proof strategy cannot work.
+**Verdict: REVISE** — 1 sorry remains (`hmono_transitions`). The dimension-shifting proof is fundamentally blocked at recursive levels. Aristotle job `6ecc7b79` is in progress.
