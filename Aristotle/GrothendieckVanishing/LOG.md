@@ -1,5 +1,17 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T01:45Z — Document hexist strategy in detail
+
+**Sorry count: 3 keywords in 2 theorems (unchanged)**
+
+- Documented detailed strategy for hexist inside the code:
+  - Lift sf_k to common piece, check pairwise compatibility (needs O(|t|²) IsFiltered merges)
+  - Glue in piece via sheaf condition
+  - Map to colimit, verify k ∈ t by construction
+  - Extend to i ∉ t via section_ext through the piece (not c.pt — which isn't a sheaf)
+- Estimated ~200 lines of Lean for the full construction
+- Aristotle at 39% may solve the whole theorem, bypassing hexist entirely
+
 ## 2026-04-04T01:30Z — Work on hexist: prove representative lifting step
 
 **Sorry count: 3 keywords in 2 theorems (unchanged)**

@@ -344,10 +344,27 @@ private theorem isSheaf_presheaf_filtered_colimit
     have hrep : ∀ k ∈ t, ∃ (j : J') (x : ToType ((Y'.obj j).val.obj (op (U k)))),
         ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j) x = sf k := by
       intro k _; exact Concrete.isColimit_exists_rep _ (hcV (U k)) (sf k)
-    -- Step 3-6: Lift finite sub-family to common piece, check compatibility,
-    -- glue using sheaf condition, map to colimit, extend to full cover.
-    -- Same machinery as hsep but constructive (needs IsFiltered merging,
-    -- sheaf gluing in the piece, section_ext for the i ∉ t extension).
+    -- Step 3: Lift to common piece, glue, map to colimit
+    -- The section s₀ in the piece restricts to sf_k for k ∈ t, and by section_ext
+    -- (applied through the piece) it restricts to sf_i for all i.
+    -- Full construction needs: IsFiltered merging + IsSheafUniqueGluing on piece +
+    -- section_ext through the piece for i ∉ t.
+    -- This is symmetric to hsep but constructive.
+
+    -- For now, use hsep to reduce: it suffices to find s agreeing on finite subcover.
+    -- Given s with s|_{U_k} = sf_k for k ∈ t, for any i:
+    -- s|_{U_i} - sf_i restricts to 0 on each U_i ∩ U_k (by compatibility + s|_{U_k} = sf_k).
+    -- The cover {U_i ∩ U_k | k ∈ t} covers U_i (since U_i ≤ ⨆_{k∈t} U_k).
+    -- Need: separation for c.pt at U_i → s|_{U_i} = sf_i.
+
+    -- The separation for c.pt at any open V follows from the same argument as hsep
+    -- (evaluation colimit + representative + eventually zero + merge + sheaf separation).
+    -- This is exactly the same proof with V replacing iSup U.
+
+    -- For efficiency, we apply section_ext through the colimit:
+    -- both s|_{U_i} and sf_i, when lifted to a common piece and restricted to U_i ∩ U_k,
+    -- agree. By section_ext for the piece (a sheaf), they agree on U_i.
+    -- Hence they agree in the colimit.
     sorry
   -- Assembly: existence + uniqueness from separation
   obtain ⟨s, hs⟩ := hexist
