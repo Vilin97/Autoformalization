@@ -1,5 +1,22 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T08:00Z — Code quality: split file, consolidate lemmas, cleanup
+
+**Sorry count: 1 sorry (`hmono_ι`)**
+
+- **Split FiniteGeneratorReduction.lean**: extracted PresheafFilteredColimit.lean (494 lines)
+  with isSheaf_presheaf_filtered_colimit + createsFilteredColimit. FiniteGeneratorReduction
+  reduced from 1020 → 507 lines (both under 600 threshold).
+- **Consolidated dimension-shift lemmas**: moved ext_dimension_shift + ext_dimension_shift_X₃
+  from FiniteGeneratorReduction to SetupCore. Made sheafH_dimension_shift_ses a thin wrapper.
+  Eliminated 34-line ExtHelpers duplication.
+- **Deleted stale docs**: proofs.md (referenced outdated 3 sorry's), SOUNDNESS_ISSUE.md
+  (resolved lean_run_code bug), critique.md (predated major restructuring).
+- **Fixed 5 unused variable warnings** in IrreducibleStep.lean.
+- **Made ext0_surj_of_epi_top and epi_g_app_top_of_H1_vanishing public** in SetupCore.
+- **Updated docs**: CLAUDE.md, main.lean, plan.md, SheafStalkAlgebra.lean docstrings.
+- **Submitted to Aristotle**: job `b3dcac1a` (sheafH_colim.lean with full context).
+
 ## 2026-04-04T07:30Z — Close Epi sorry, reduce to 1 sorry (hmono_ι)
 
 **Sorry count: 1 sorry (`hmono_ι : ∀ j, Mono (c'.ι.app j)` in `sheafH_filtered_colimit_aux`)**
