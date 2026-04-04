@@ -1,5 +1,21 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T21:55Z — Critique cycle: found 2nd sorry (dead code), submitted Aristotle v2
+
+**Sorry count: 2 sorry's (1 dead code, 1 load-bearing)**
+
+- **Found 2nd sorry**: `gabriel_injective_of_filtered_colimit` at FiniteGeneratorReduction.lean:43
+  is dead code — defined but never referenced. Documentation wrongly claims "1 sorry".
+- **Deep analysis of hmono_transitions sorry**: The sorry at line 223 is provably FALSE at
+  recursive levels. By the snake lemma, `ker(Q.map φ) ≅ coker(Y'.map φ) ≠ 0`, so the quotient
+  diagram Q has non-mono transitions. The dimension-shifting proof fundamentally cannot close
+  this sorry. Needs Čech cohomology, universal δ-functor, or Gabriel's theorem.
+- **Submitted Aristotle v2**: Job `6ecc7b79` (sheafH_colim_v2.lean) — clean standalone file
+  using Ext directly, compiles with only sorry warning. Prompted with 3 working approaches.
+  Status: IN_PROGRESS (6%).
+- **Wrote critique.md**: Full adversarial review. Verdict: REVISE.
+- **Updated plan.md**: Prioritized deleting dead code, fixing doc lies, cleanup.
+
 ## 2026-04-04T08:00Z — Code quality: split file, consolidate lemmas, cleanup
 
 **Sorry count: 1 sorry (`hmono_ι`)**
