@@ -1,5 +1,16 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T01:15Z — Analyze hexist, Aristotle at 39%
+
+**Sorry count: 3 keywords in 2 theorems (unchanged)**
+
+- Analyzed `hexist` (existence of gluing): needs same filtered colimit machinery
+  as hsep (lifting, merging, sheaf gluing) PLUS generalized separation for i ∉ t.
+  The i ∉ t extension requires `hsep`-like argument at c.pt(U_i) instead of c.pt(iSup U).
+  Would benefit from extracting general `colimit_presheaf_section_zero` lemma.
+- Aristotle at 39% — may solve the whole theorem
+- No code changes this cycle (hexist is structurally clear but mechanically complex)
+
 ## 2026-04-04T01:00Z — CLOSE hsep separation proof (major milestone)
 
 **Sorry count: 3 keywords in 2 theorems (down from 5 in 3)**
