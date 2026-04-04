@@ -713,11 +713,20 @@ private theorem sheafH_filtered_colimit_aux
       { obj := fun j => cokernel (c'.ι.app j ≫ ι')
         map := fun {j j'} f => cokernel.map _ _ (Y'.map f) (𝟙 I) (hnat_ι f)
         map_id := fun j => by ext; rw [cokernel.π_desc]; exact Category.id_comp _
-        map_comp := fun {j j' j''} f g => by ext; simp only [cokernel.π_desc, Category.assoc]; sorry }
+        map_comp := fun {j j' j''} f g => by
+          ext; show cokernel.π _ ≫ _ = cokernel.π _ ≫ _ ≫ _
+          dsimp only [cokernel.map]
+          conv_rhs => rw [← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
+          rw [cokernel.π_desc]; exact congrArg (𝟙 I ≫ ·) (Category.id_comp _).symm }
     -- Cocone on Q with vertex S.X₃ = cokernel ι'
     let qCocone : Cocone Q := Cocone.mk S.X₃
       { app := fun j => cokernel.map _ _ (c'.ι.app j) (𝟙 I) (by rw [Category.comp_id])
-        naturality := fun j j' f => by ext; sorry }
+        naturality := fun j j' f => by
+          ext; show cokernel.π _ ≫ _ ≫ _ = cokernel.π _ ≫ _ ≫ _
+          dsimp only [cokernel.map]; simp only [Functor.const_obj_map, Category.comp_id]
+          conv_lhs => rw [← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
+          conv_rhs => rw [← Category.assoc, cokernel.π_desc]
+          exact (Category.id_comp _).symm.trans (Category.comp_id _).symm }
     -- IsColimit: cokernel preserves filtered colimits
     have hqColim : IsColimit qCocone := by sorry
     -- Per-piece vanishing: H^n(Q_j) = 0
