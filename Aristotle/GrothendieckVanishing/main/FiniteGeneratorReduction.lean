@@ -37,6 +37,19 @@ private theorem ext_dimension_shift (Z : C') {S : ShortComplex C'} (hS : S.Short
   obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hS b hb rfl
   rw [← hc, ← hd, @Subsingleton.elim _ h₃ c d]
 
+/-- Reverse dimension shift: `Ext^n(Z, X₂) = 0` and `Ext^{n+1}(Z, X₁) = 0` imply
+    `Ext^n(Z, X₃) = 0`. Uses exactness at X₃ in the covariant LES. -/
+private theorem ext_dimension_shift_X₃ (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
+    (h₂ : Subsingleton (Ext Z S.X₂ n))
+    (h₁ : Subsingleton (Ext Z S.X₁ (n + 1))) :
+    Subsingleton (Ext Z S.X₃ n) := by
+  constructor; intro a b
+  have ha : a.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
+  have hb : b.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ _ hS a rfl ha
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ _ hS b rfl hb
+  rw [← hc, ← hd, @Subsingleton.elim _ h₂ c d]
+
 end ExtHelpers
 
 
@@ -690,13 +703,12 @@ private theorem sheafH_filtered_colimit_aux
       Ext.subsingleton_of_injective _ _ n
     -- Ext^n(Z, cokernel ι') = 0 by IH applied to the quotient diagram
     -- (Q = colim Q_j where Q_j = coker(F_j → I), each Ext^n(Z, Q_j) = 0 by LES)
-    have hQ : Subsingleton (Sheaf.H S.X₃ n) := by
-      -- S.X₃ = cokernel(c'.pt → I) is a filtered colimit of Q_j = cokernel(Y'.obj j → I).
-      -- For n ≥ 1: each H^n(Q_j) = 0 by dimension shift (H^n(I) = 0, H^{n+1}(Y'.obj j) = 0).
-      -- For n = 0: H^0(Q_j) ≠ 0 in general (quotient of Γ(I)), requires different argument.
-      -- Applying ih to the quotient diagram gives hQ.
-      -- Construction: Q_j functor + colimit = S.X₃ + AB5 exactness.
-      sorry
+    -- hQ: S.X₃ = cokernel(c'.pt → I) should have H^n(S.X₃) = 0.
+    -- Strategy: S.X₃ is a filtered colimit of Q_j = cokernel(c'.ι.app j ≫ ι').
+    -- For n ≥ 1: each H^n(Q_j) = 0 by ext_dimension_shift_X₃ (reverse dim shift).
+    -- Then ih gives H^n(S.X₃) = 0.
+    -- Requires: quotient functor construction + AB5 exactness + mono condition.
+    have hQ : Subsingleton (Sheaf.H S.X₃ n) := by sorry
     -- Dimension shift: Ext^{n+1}(Z, c'.pt) = 0
     exact ext_dimension_shift _ hSE n hQ hI
 
