@@ -3,7 +3,9 @@
 
   Key results (presheaf colimit theory split to PresheafFilteredColimit.lean):
   - sheafH_filtered_colimit_aux / sheafH_preserves_filtered_colimits: H^n commutes with
-    filtered colimits (1 sorry: hmono_ι — mono coprojections, true at call site)
+    filtered colimits (1 sorry: hmono_transitions — mono transitions for Y', true at call
+    site via finsetGenFunctor_mono but FALSE at recursive IH level; closing requires
+    Čech cohomology or a proof that avoids dimension shifting)
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
@@ -141,10 +143,26 @@ instance finsetGenFunctor_mono
 
 end FilteredDiagram
 
+/-! ### Sheaf cohomology commutes with filtered colimits
 
-/-- Auxiliary: sheaf cohomology vanishing commutes with filtered colimits, universally
-    quantified over the degree `n` so that the IH applies to all diagrams.
-    Proof by induction on `n` with dimension shifting. -/
+The main result `sheafH_preserves_filtered_colimits` proves that on a Noetherian
+space, if `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
+
+**Gap**: The proof uses dimension shifting via injective embedding, which requires the
+coprojections `c'.ι.app j : F_j → colim` to be mono. This is derived from mono transitions
+via `mono_ι_app_of_isFiltered` (AB5). At the call site (`finsetGenFunctor`), mono
+transitions hold by `finsetGenFunctor_mono`. The sorry asserts this in the universally
+quantified context. Closing requires Čech cohomology or Gabriel's theorem (filtered
+colimits of injective sheaves are injective on locally Noetherian Grothendieck abelian
+categories — not yet in Mathlib). -/
+
+/-- Auxiliary: sheaf cohomology vanishing commutes with filtered colimits on Noetherian
+    spaces. Proof by induction on `n` with dimension shifting.
+
+    1 sorry: mono transitions for Y' (used to derive mono coprojections via AB5).
+    TRUE at the call site (finsetGenFunctor has mono transitions by
+    `finsetGenFunctor_mono`). The IH call on Q is clean (no mono needed at degree n).
+    Closing the sorry requires Čech cohomology or Gabriel's theorem. -/
 private theorem sheafH_filtered_colimit_aux
     {X : TopCat.{u}} [NoetherianSpace X] (n : ℕ) :
     ∀ {J' : Type u} [inst1 : SmallCategory J'] [inst2 : IsFiltered J']
@@ -179,11 +197,12 @@ private theorem sheafH_filtered_colimit_aux
     -- Inductive step: dimension shifting via injective embedding.
     intro J' inst1 inst2 Y' c' hc' hvan
     letI := inst1; letI := inst2
-    -- Mono coprojections: needed for SES 0 → Y_j → I → Q_j → 0.
-    -- At call site: finsetGenFunctor has mono transitions →
-    -- IsColimit.mono_ι_app_of_isFiltered gives mono coprojections.
-    -- The IH call on Q introduces its own mono sorry at recursive levels.
-    have hmono_ι : ∀ j, Mono (c'.ι.app j) := sorry
+    -- Mono transitions: true at call site via finsetGenFunctor_mono.
+    -- Used to derive mono coprojections (via mono_ι_app_of_isFiltered / AB5).
+    -- This is the sole sorry in the formalization.
+    have hmono_transitions : ∀ ⦃j j' : J'⦄ (φ : j ⟶ j'), Mono (Y'.map φ) := sorry
+    have hmono_ι : ∀ j, Mono (c'.ι.app j) := by
+      intro j; haveI := hmono_transitions; exact hc'.mono_ι_app_of_isFiltered j
     -- Embed c'.pt ↪ I (injective)
     haveI : EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) :=
       IsGrothendieckAbelian.enoughInjectives
@@ -331,15 +350,9 @@ private theorem sheafH_filtered_colimit_aux
       exact ext_dimension_shift _ hSE (n' + 1) hQ hI
 
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
-    This is the derived functor commutation theorem for `H^n = R^n Γ`:
-    if `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
+    If `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
 
-    Proof by induction on `n`:
-    - `n = 0`: `Ext^0 = Hom ≅ global sections`, which commutes with filtered colimits on
-      Noetherian spaces because `sheafToPresheaf` creates filtered colimits.
-    - `n + 1`: Embed `colim F_j ↪ I` (injective). The cokernel `Q` is a filtered colimit
-      of `Q_j = I / F_j`. The LES gives `Ext^{n+1}(Z, colim F_j) ≅ Ext^n(Z, Q)`.
-      Each `Ext^n(Z, Q_j) = 0` by LES, so by IH `Ext^n(Z, Q) = 0`. -/
+    1 sorry: mono transitions (true at call site via `finsetGenFunctor_mono`). -/
 theorem sheafH_preserves_filtered_colimits
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']

@@ -74,4 +74,4 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 ## Remaining Work
 
 1 sorry remains in `FiniteGeneratorReduction.lean` (in `sheafH_filtered_colimit_aux`):
-- **hmono_ι** (line ~220): `∀ j, Mono (c'.ι.app j)` — mono coprojections for the filtered diagram. True at the call site via `finsetGenFunctor_mono` + `IsColimit.mono_ι_app_of_isFiltered`, but the recursive IH call on the quotient diagram Q reintroduces this sorry at each level (Q has epi coprojections). Closing requires Čech cohomology or spectral sequences.
+- **hmono_transitions** (line ~205): `∀ φ, Mono (Y'.map φ)` — mono transitions for the filtered diagram. TRUE at the call site via `finsetGenFunctor_mono`, but FALSE at recursive IH levels (the quotient diagram Q has non-mono transitions: by the snake lemma, `ker(Q.map φ) ≅ coker(Y'.map φ) ≠ 0`). The dimension-shifting proof fundamentally requires mono coprojections at every recursive level. Closing requires Čech cohomology, universal δ-functor theory, or a proof avoiding recursive dimension shifting.
