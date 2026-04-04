@@ -159,10 +159,10 @@ categories — not yet in Mathlib). -/
 /-- Auxiliary: sheaf cohomology vanishing commutes with filtered colimits on Noetherian
     spaces. Proof by induction on `n` with dimension shifting.
 
-    1 sorry: mono transitions for Y' (used to derive mono coprojections via AB5).
-    TRUE at the call site (finsetGenFunctor has mono transitions by
-    `finsetGenFunctor_mono`). The IH call on Q is clean (no mono needed at degree n).
-    Closing the sorry requires Čech cohomology or Gabriel's theorem. -/
+    1 sorry: `hmono_transitions` — mono transitions for Y'. TRUE at the call site
+    (`finsetGenFunctor_mono`) but FALSE at recursive IH levels (the quotient diagram Q
+    has non-mono transitions by the snake lemma: `ker(Q.map φ) ≅ coker(Y'.map φ) ≠ 0`).
+    Closing requires a proof that avoids recursive dimension shifting. -/
 private theorem sheafH_filtered_colimit_aux
     {X : TopCat.{u}} [NoetherianSpace X] (n : ℕ) :
     ∀ {J' : Type u} [inst1 : SmallCategory J'] [inst2 : IsFiltered J']
