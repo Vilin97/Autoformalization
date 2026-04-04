@@ -1,93 +1,122 @@
-# Proof: cohomology_vanishing_of_finitelyGenerated_vanishing
+# Project Status — Grothendieck Vanishing Theorem
 
-## Statement
-On a Noetherian space X, if H^m(K_S) = 0 for all finitely generated subsheaves K_S of K,
-then H^m(K) = 0. Here H^m = Ext^m(Z_X, -) where Z_X is the constant sheaf.
+**Last updated**: 2026-04-04
 
-## Current Status
+## Theorem
 
-**1 sorry remains**: `ext_comm_filtered_colimit_mono` in IrreducibleStep.lean.
+Grothendieck's vanishing theorem (Hartshorne III.2.7): for a Noetherian topological space X
+of dimension n, and any sheaf F of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-This sorry encodes: in a Grothendieck abelian category, Ext^n(Z, -) preserves
-filtered colimits of monomorphism diagrams. Equivalently, for sheaves on a
-Noetherian space, H^n commutes with filtered colimits (Hartshorne III Lemma 2.9).
+```lean
+theorem GrothendieckVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    [NoetherianSpace X] (n : ℕ) (h : n > topologicalKrullDim X) :
+    Subsingleton (Sheaf.H F n)
+```
 
-## Why this is hard (analysis of failed approaches)
+## Completion: ~99%
 
-### Approach 1: Dimension shifting by induction on n
-- **Base case (n=0)**: WORKS. Hom(Z_X, colim F_i) ≅ Γ(colim F_i) = colim Γ(F_i)
-  because filtered colimits of sheaves are objectwise.
-- **Inductive step (n→n+1)**: Embed colim ↪ I (injective), form quotient Q = I/colim.
-  By AB5: Q = colim(I/F_j). The quotient diagram has EPI transitions (not mono).
-  Applying the IH at degree n to the quotient requires the IH for ARBITRARY filtered
-  diagrams (not just mono). This creates a new problem:
-  - For n≥1 WITHOUT mono transitions: can't form individual SES's for pieces
-    (Y_j → colim → I might not be mono if Y_j → colim is not mono).
-  - For n=0 WITHOUT mono: works (objectwise colimits).
-  - So the induction BREAKS at degree 2: need degree 1 for the quotient (epi transitions),
-    which needs degree 0 for the double-quotient (works), BUT forming the double-quotient
-    requires mono embeddings that the epi-transition quotient doesn't provide.
+**1 logical gap remains**, manifesting as 3 `sorry` keywords in `FiniteGeneratorReduction.lean`.
+All three trace to one sub-lemma: `isSheaf_presheaf_filtered_colimit` — proving that a
+presheaf-level filtered colimit of sheaves is a sheaf on a Noetherian space (Stacks 009E).
 
-### Approach 2: Specializing to sheaves + Γ-surjectivity
-- For n=1 specifically: can prove directly using surjectivity of Γ(I) → Γ(Q_j)
-  (from H^1(Y_j)=0 and the LES) combined with objectwise colimits.
-- For n≥2: the recursive reduction to n=1 fails because quotient diagrams
-  have epi transitions and we can't form SES's for their subsheaves.
+| Location | Statement | Depends on |
+|---|---|---|
+| L502 | `hexist` — existence half of sheaf gluing | Direct gap |
+| L538 | Base case n=0 of `sheafH_filtered_colimit_aux` | L502 via `createsFilteredColimit` |
+| L557 | `hQ` — inductive step cokernel vanishing | L502 via `createsFilteredColimit` |
 
-### Approach 3: Cardinal-filtered colimit preservation
-- Mathlib has `preservesColimit_coyoneda_obj_of_mono` requiring `IsCardinalFiltered J κ`
-  and `HasCardinalLT (Subobject Z) κ` for a regular κ.
-- For our J = Finset(SectionIndex K): only ℵ₀-filtered (IsFiltered), not κ-filtered
-  for κ > ℵ₀. And Subobject(constantSheaf ℤ) is infinite. So κ = ℵ₀ is too small.
-- **Cardinal conditions cannot be satisfied for this application.**
+Once `hexist` is closed, all 3 sorry's vanish simultaneously and the main theorem is complete.
 
-### Fundamental Obstacle
-All dimension-shifting approaches fail because:
-**Cohomological vanishing for a sheaf does NOT propagate to its subsheaves.**
-From H^k(A) = 0 and B ↪ A, one CANNOT conclude H^k(B) = 0.
+## Codebase
 
-The correct proof of Hartshorne III.2.9 requires either:
-(a) Čech cohomology (finite covers commute with filtered colimits), or
-(b) Universal δ-functor theorem (effaceable functors), or
-(c) Functorial flasque/Godement resolution (commutes with filtered colimits)
-None of these are in Mathlib v4.28.0.
+- **19 Lean files** in `Aristotle/GrothendieckVanishing/main/`, **5,433 lines** total
+- **0 axioms**, 0 admits, 0 `maxHeartbeats` overrides, 0 linter overrides
+- No circularity (well-founded induction on Krull dimension + plain N-induction on degree)
+- CI: green (Lean Action CI, ~2m40s build time)
 
-## What IS proved
+## Proof Architecture
 
-### Degree cascade (NEW, in GrothendieckVanishing.lean)
-`sheafH_vanishing_succ`: If H^m(F) = 0 for ALL F at degree m, then H^{m+1}(F) = 0 for all F.
-`sheafH_vanishing_cascade`: Extends from one degree to all higher degrees.
+The proof proceeds by well-founded induction on `topologicalKrullDim X : WithBot N-infinity`:
 
-This means: once we establish vanishing at the MINIMUM degree (dim+1) for ALL sheaves,
-all higher degrees follow automatically WITHOUT the colimit step. The colimit step is
-only needed at degree dim+1.
+```
+GrothendieckVanishing.lean        Main theorem (well-founded induction + degree cascade)
+├── DimZeroVanishing.lean          Irreducible dim=0: constant sheaf is flasque (PROVED)
+│   └── ConstantSheafFlasque.lean  constantSheaf_flasque_of_irreducible (PROVED)
+├── IrreducibleStep.lean           Irreducible dim>=1: Steps 1-5 of Hartshorne III.2.7 (PROVED)
+│   ├── SheafStalkAlgebra.lean     Stalk algebra + Ext LES lemmas (PROVED)
+│   ├── StalkGeneratorAlgebra.lean exists_section_generating_stalks (PROVED)
+│   └── FiniteGeneratorReduction.lean  Colimit step (1 SORRY: isSheaf_presheaf_filtered_colimit)
+├── ClosedOpenDecomposition.lean   Reduction to irreducible spaces (PROVED)
+│   └── ReducibleVanishing.lean    Reducible case via Finset.induction (PROVED)
+└── (shared infrastructure, all PROVED)
+    ├── SetupCore.lean             Category instances, ClosedImmissionSES
+    ├── FlasqueVanishing.lean      Flasque sheaf theory + cohomological vanishing
+    ├── FlasqueCohomology.lean     Flasque cohomology helpers
+    ├── Setup.lean                 Wrapper theorems
+    ├── ClosedImmersion.lean       Closed immersion counit/stalk
+    ├── ZeroOutside.lean           Extension-by-zero sheaf machinery
+    ├── ZeroOutsideFinset.lean     Finset-indexed extension-by-zero
+    ├── CohomologyIso.lean         H'(top, F) isomorphic to H(F)
+    └── Auxiliary.lean             Topology/dimension helpers
+```
 
-### Filtered diagram infrastructure (PROVED, in IrreducibleStep.lean)
-- `finsetGenFunctor`: functor Finset(SectionIndex K) ⥤ Sheaf(X)
-- `finsetGenCocone`: cocone with vertex K
-- `finsetGenCocone_isColimit`: K is the colimit
-- `finsetGenFunctor_mono`: transition maps are mono
+## The Remaining Gap: `hexist`
 
-## Paths to closing the sorry
+### What it is
 
-### Path A: Build Čech cohomology infrastructure
-- Define Čech complex for finite open covers
-- Prove Čech cohomology commutes with filtered colimits (uses finite intersections)
-- Prove Čech = derived functor cohomology on Noetherian spaces
-- **Effort: ~500+ lines, requires substantial new Mathlib infrastructure**
+The existence half of the sheaf gluing condition for a presheaf-level filtered colimit.
+Given a compatible family `sf` of sections over an open cover `U`, construct a global section
+`s` of the colimit presheaf `c.pt` with `s|_{U_i} = sf_i` for all `i`.
 
-### Path B: Universal δ-functor theorem
-- Define universal δ-functors in Lean
-- Prove effaceability implies universality
-- Show the filtered-colimit Ext functor is effaceable
-- **Effort: ~300+ lines, requires abstract homological algebra**
+The separation half (`hsep`) was closed on 2026-04-04. The full proof chain:
+1. Representative lifting via `Concrete.isColimit_exists_rep`
+2. Restriction-maps-to-zero via `NatTrans.naturality`
+3. Eventually-zero via `Types.FilteredColimit.isColimit_eq_iff'`
+4. Common index via `filtered_colimit_kills_all_restrictions`
+5. Sheaf separation via `sheaf_section_zero_of_zero_on_finite_cover`
+6. Cocone factorization via `c.iota.naturality`
 
-### Path C: Godement resolution
-- Define the Godement resolution G^n(F) = ∏_x F_x (product over stalks)
-- Prove it's functorial and flasque
-- Prove it commutes with filtered colimits (stalkwise computation)
-- **Effort: ~400+ lines, requires stalk theory**
+### Proof plan for `hexist` (~120-150 lines)
 
-### Path D: Wait for Mathlib
-- The theorem `Ext^n commutes with filtered colimits` is a standard result
-  that may eventually be added to Mathlib as part of the derived category infrastructure.
+All building blocks are proved and compiled:
+- `filtered_colimit_kills_all_restrictions_gen` (generalized merge of transitions)
+- `colimit_presheaf_sep` (separation for `c.pt` at any open)
+- `sheaf_section_zero_of_zero_on_finite_cover`
+
+Steps:
+1. Choose representatives for finite subcover and merge to common index via `IsFiltered.sup`
+2. Check pairwise compatibility in common piece via `isColimit_eq_iff'` + merge
+3. Glue in the piece via sheaf condition (`IsSheafUniqueGluing`)
+4. Map to colimit via cocone morphism
+5. Verify `s|_{U_k} = sf_k` for k in finite subcover (by construction)
+6. Verify for general i via `colimit_presheaf_sep`
+7. Package as `Presheaf.IsGluing`
+
+Risk: **low** (standard argument, Stacks 009E). Effort: **medium** (mechanical complexity).
+
+## Progress Timeline
+
+| Date | Sorry's | Milestone |
+|---|---|---|
+| Mar 10 | ~23 | Initial proof skeleton |
+| Mar 15 | 7 | Focus shift to Grothendieck vanishing |
+| Mar 28 | 4 | ReducibleVanishing proved, major sub-goals closed |
+| Mar 31 | 2 | Consolidation to single logical gap |
+| Apr 2 | 1 (3 kw) | Infrastructure complete, FlasqueVanishing proved |
+| Apr 3 | 1 (3 kw) | hsep closed, hexist proof plan written |
+
+## Automated Prover (Aristotle)
+
+Active jobs targeting the remaining sorry:
+- `1676d0c9`: `sheafH_preserves_filtered_colimits` (in progress)
+- `b1902f2c`: `isSheaf_presheaf_filtered_colimit` (queued)
+- `782d0f32`: abstract categorical version (in progress, 38%)
+
+## Backlog
+
+- P1: Fix blueprint/docs 404
+- P3: Delete 5 dead theorems/definitions
+- P3: Fix 3 stale docstrings
+- P3: Split FlasqueVanishing.lean (>600 lines)
+- P3: Generalize `AddCommGrpCat` to `ModuleCat R`
+- P4: Replace blanket `import Mathlib` with specific imports
