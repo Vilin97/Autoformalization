@@ -308,8 +308,33 @@ private theorem isSheaf_presheaf_filtered_colimit
       rw [Types.FilteredColimit.isColimit_eq_iff' hcTyp] at h0
       obtain ⟨jk, fk, hfk⟩ := h0
       exact ⟨jk, fk, by simpa [map_zero] using hfk⟩
-    -- Build j₁ and g₀ : j₀ ⟶ j₁ killing all restrictions, then apply sheaf separation.
-    sorry
+    -- Build j₁ and g₀ killing all restrictions
+    -- Convert h_ev_zero from "restriction then transition" to "transition then restriction"
+    have h_ev' : ∀ k ∈ t, ∃ (jk : J') (fk : j₀ ⟶ jk),
+        ConcreteCategory.hom ((Y'.obj jk).val.map (Opens.leSupr U k).op)
+          (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op (iSup U))) b₀) = 0 := by
+      intro k hk; obtain ⟨jk, fk, hfk⟩ := h_ev_zero k hk; refine ⟨jk, fk, ?_⟩
+      -- Naturality: res ∘ transition = transition_at_U_k ∘ res
+      have hnat := ((Y' ⋙ sheafToPresheaf _ _).map fk).naturality (Opens.leSupr U k).op
+      change ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op (iSup U)) ≫
+        ((Y' ⋙ sheafToPresheaf _ _).obj jk).map (Opens.leSupr U k).op) b₀ = 0
+      rw [← hnat]; exact hfk
+    obtain ⟨j₁, g₀, hg₀⟩ := filtered_colimit_kills_all_restrictions Y' U j₀ b₀ t h_ev'
+    -- The transition of b₀ is 0 by sheaf separation
+    let b₁ := ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op (iSup U))) b₀
+    have hb₁_zero : b₁ = 0 :=
+      sheaf_section_zero_of_zero_on_finite_cover (Y'.obj j₁) U t hsup_le b₁ hg₀
+    -- Cocone factorization: a = ι_{j₀}(b₀) = ι_{j₁}(b₁) = 0
+    rw [← hb₀]
+    change ConcreteCategory.hom ((c.ι.app j₀).app (op (iSup U))) b₀ = 0
+    have hfac : (c.ι.app j₀).app (op (iSup U)) =
+        ((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op (iSup U)) ≫
+        (c.ι.app j₁).app (op (iSup U)) := by
+      have := congrArg (fun α => NatTrans.app α (op (iSup U))) (c.ι.naturality g₀)
+      simp [Functor.const_obj_map] at this; exact this.symm
+    conv_lhs => rw [hfac]
+    change ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U))) b₁ = 0
+    rw [hb₁_zero, map_zero]
   -- Existence: construct a gluing section
   have hexist : ∃ s, Presheaf.IsGluing c.pt U sf s := by
     sorry
