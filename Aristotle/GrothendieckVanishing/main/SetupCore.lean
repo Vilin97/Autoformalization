@@ -232,7 +232,7 @@ theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
 
 -- Base case: Γ comparison. Γ_X(i_*G') = G'(⊤_Z) = Γ_Z(G')
 private lemma PushforwardHVanishing_zero
-    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
+    {X : TopCat.{u}} {Z : Set X} (_hZ : IsClosed Z) [NoetherianSpace X]
     (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))
     (hG' : Subsingleton (Sheaf.H G' 0)) :
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
