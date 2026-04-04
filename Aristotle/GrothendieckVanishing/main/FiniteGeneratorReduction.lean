@@ -703,12 +703,26 @@ private theorem sheafH_filtered_colimit_aux
       Ext.subsingleton_of_injective _ _ n
     -- Ext^n(Z, cokernel ι') = 0 by IH applied to the quotient diagram
     -- (Q = colim Q_j where Q_j = coker(F_j → I), each Ext^n(Z, Q_j) = 0 by LES)
-    -- hQ: S.X₃ = cokernel(c'.pt → I) should have H^n(S.X₃) = 0.
-    -- Strategy: S.X₃ is a filtered colimit of Q_j = cokernel(c'.ι.app j ≫ ι').
-    -- For n ≥ 1: each H^n(Q_j) = 0 by ext_dimension_shift_X₃ (reverse dim shift).
-    -- Then ih gives H^n(S.X₃) = 0.
-    -- Requires: quotient functor construction + AB5 exactness + mono condition.
-    have hQ : Subsingleton (Sheaf.H S.X₃ n) := by sorry
+    -- Build quotient diagram Q_j = cokernel(c'.ι.app j ≫ ι') and apply IH
+    let I := Injective.under c'.pt
+    have hnat_ι : ∀ {j j' : J'} (f : j ⟶ j'),
+        (c'.ι.app j ≫ ι') ≫ (𝟙 I) = Y'.map f ≫ (c'.ι.app j' ≫ ι') := by
+      intro j j' f; rw [Category.comp_id, ← Category.assoc, Cocone.w]
+    -- Quotient functor Q.obj j = cokernel(c'.ι.app j ≫ ι')
+    let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
+      { obj := fun j => cokernel (c'.ι.app j ≫ ι')
+        map := fun {j j'} f => cokernel.map _ _ (Y'.map f) (𝟙 I) (hnat_ι f)
+        map_id := fun j => by ext; rw [cokernel.π_desc]; exact Category.id_comp _
+        map_comp := fun {j j' j''} f g => by ext; simp only [cokernel.π_desc, Category.assoc]; sorry }
+    -- Cocone on Q with vertex S.X₃ = cokernel ι'
+    let qCocone : Cocone Q := Cocone.mk S.X₃
+      { app := fun j => cokernel.map _ _ (c'.ι.app j) (𝟙 I) (by rw [Category.comp_id])
+        naturality := fun j j' f => by ext; sorry }
+    -- IsColimit: cokernel preserves filtered colimits
+    have hqColim : IsColimit qCocone := by sorry
+    -- Per-piece vanishing: H^n(Q_j) = 0
+    have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) n) := by sorry
+    have hQ : Subsingleton (Sheaf.H S.X₃ n) := ih Q qCocone hqColim h_van_Q
     -- Dimension shift: Ext^{n+1}(Z, c'.pt) = 0
     exact ext_dimension_shift _ hSE n hQ hI
 
