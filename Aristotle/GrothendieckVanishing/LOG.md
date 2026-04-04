@@ -1,5 +1,17 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T02:15Z — Fix PR merge conflict, write project status
+
+**Sorry count: 3 keywords in 2 theorems (unchanged)**
+
+- **Fixed PR #10 merge conflict**: `grothendieck-vanishing` had squash-merge commit f7c889e
+  from PR #9 diverging from `wip/grothendieck-vanishing`. Merged `origin/grothendieck-vanishing`
+  into wip, resolved 8 file conflicts (all ours — wip is strictly newer). PR now MERGEABLE,
+  CI running.
+- **Updated `proofs.md`**: rewrote as comprehensive project status document (was stale,
+  still referenced `ext_comm_filtered_colimit_mono`). Now documents: completion %, sorry
+  inventory, architecture, hexist proof plan, timeline, backlog.
+
 ## 2026-04-04T01:45Z — Document hexist strategy in detail
 
 **Sorry count: 3 keywords in 2 theorems (unchanged)**
