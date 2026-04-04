@@ -20,40 +20,6 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 
-/-! ### Ext LES helper lemmas -/
-
-section ExtHelpers
-variable {C' : Type*} [Category C'] [Abelian C'] [HasExt C']
-
-/-- Dimension shift for Ext via LES: given `0 → X₁ → X₂ → X₃ → 0` short exact,
-    `Ext^n(Z, X₃) = 0` and `Ext^{n+1}(Z, X₂) = 0` imply `Ext^{n+1}(Z, X₁) = 0`. -/
-private theorem ext_dimension_shift (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
-    (h₃ : Subsingleton (Ext Z S.X₃ n))
-    (h₂ : Subsingleton (Ext Z S.X₂ (n + 1))) :
-    Subsingleton (Ext Z S.X₁ (n + 1)) := by
-  constructor; intro a b
-  have ha : a.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
-  have hb : b.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hS a ha rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hS b hb rfl
-  rw [← hc, ← hd, @Subsingleton.elim _ h₃ c d]
-
-/-- Reverse dimension shift: `Ext^n(Z, X₂) = 0` and `Ext^{n+1}(Z, X₁) = 0` imply
-    `Ext^n(Z, X₃) = 0`. Uses exactness at X₃ in the covariant LES. -/
-private theorem ext_dimension_shift_X₃ (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
-    (h₂ : Subsingleton (Ext Z S.X₂ n))
-    (h₁ : Subsingleton (Ext Z S.X₁ (n + 1))) :
-    Subsingleton (Ext Z S.X₃ n) := by
-  constructor; intro a b
-  have ha : a.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
-  have hb : b.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ _ hS a rfl ha
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ _ hS b rfl hb
-  rw [← hc, ← hd, @Subsingleton.elim _ h₂ c d]
-
-end ExtHelpers
-
-
 /-! ### Filtered diagram of finitely generated subsheaves
 
 We build a functor `Finset(SectionIndex K) ⥤ Sheaf(X)` sending each finite set `S`
