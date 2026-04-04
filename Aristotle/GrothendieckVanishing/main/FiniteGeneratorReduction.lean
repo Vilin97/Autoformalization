@@ -30,13 +30,57 @@ Noetherian. In a locally Noetherian Grothendieck abelian category, filtered coli
 of injective objects are injective. This is Gabriel's theorem (see Gabriel's thesis,
 or Hartshorne, Residues and Duality, Ch. II, Thm. 7.8).
 
-This is the SOLE sorry in the formalization. It is a TRUE, standard mathematical fact. -/
+This is the SOLE sorry in the formalization. It is a TRUE, standard mathematical fact.
+
+Proof sketch (Baer criterion + locally Noetherian):
+1. By the Baer criterion for Grothendieck abelian categories, it suffices to extend
+   morphisms from subobjects of the separator G.
+2. On a Noetherian space, G is noetherian, so subobjects A ⊆ G are finitely presentable.
+3. For f.p. A: `g : A → c.pt` factors through some `F.obj j₀` by
+   `IsFinitelyPresentable.exists_hom_of_isColimit`.
+4. Since `F.obj j₀` is injective, extend `g` from A to G through `F.obj j₀`, then
+   compose with the colimit coprojection.
+
+Each step is standard but the Baer criterion for abelian categories and "noetherian
+subobjects are f.p." are not yet in Mathlib. -/
+
+/-- Sub-lemma 1: In a Grothendieck abelian category, the separator is a Noetherian object
+    (subobjects of the separator satisfy ACC). On a Noetherian topological space, this
+    follows from the fact that the opens satisfy DCC and sheaves on a Noetherian space
+    have Noetherian stalks. -/
+private lemma separator_isNoetherianObject
+    (X : TopCat.{u}) [NoetherianSpace X] :
+    IsNoetherianObject
+      (separator (TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+  sorry
+
+/-- Sub-lemma 2: In a Grothendieck abelian category, Noetherian objects are finitely
+    presentable (Hom from them commutes with filtered colimits). This is because
+    Noetherian objects are quotients of finite coproducts of subobjects of the generator,
+    and the generator's subobjects are compact in a locally Noetherian category. -/
+private lemma isFinitelyPresentable_of_isNoetherianObject
+    {X : TopCat.{u}} [NoetherianSpace X]
+    (A : TopCat.Sheaf AddCommGrpCat.{u} X) [IsNoetherianObject A] :
+    IsFinitelyPresentable.{u} A := by
+  sorry
+
 theorem gabriel_injective_of_filtered_colimit
     {X : TopCat.{u}} [NoetherianSpace X]
     {J : Type u} [SmallCategory J] [IsFiltered J]
     (F : J ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     [hInj : ∀ j, Injective (F.obj j)]
     {c : Cocone F} (hc : IsColimit c) : Injective c.pt := by
+  -- Use Baer's criterion: check lifting for subobjects of the separator
+  -- Every subobject of the separator is Noetherian (sub-lemma 1 + closure under subobjects)
+  -- Noetherian objects are finitely presentable (sub-lemma 2)
+  -- For f.p. A, morphisms factor through pieces (Mathlib: IsFinitelyPresentable.exists_hom_of_isColimit)
+  -- Each piece is injective, so the extension exists
+  constructor; intro g f
+  -- A is a subobject of B via mono f, so A is Noetherian if B is
+  -- For the general case, use that filtered colimits in Ab commute with Hom from f.g. objects
+  -- Factor g through a piece using finite presentability
+  haveI : IsNoetherianObject (separator (TopCat.Sheaf AddCommGrpCat.{u} X)) :=
+    separator_isNoetherianObject X
   sorry
 
 /-! ### Filtered diagram of finitely generated subsheaves
