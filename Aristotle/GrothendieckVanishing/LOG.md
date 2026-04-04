@@ -1,5 +1,15 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T01:30Z — Work on hexist: prove representative lifting step
+
+**Sorry count: 3 keywords in 2 theorems (unchanged)**
+
+- Proved `hrep` inside hexist: for each k ∈ t, sf_k lifts to a representative
+  in some piece via `Concrete.isColimit_exists_rep`
+- Remaining hexist sorry: compatibility checking in a common piece, sheaf gluing,
+  extension to full cover via section_ext on pieces
+- Aristotle at 39%
+
 ## 2026-04-04T01:15Z — Analyze hexist, Aristotle at 39%
 
 **Sorry count: 3 keywords in 2 theorems (unchanged)**
