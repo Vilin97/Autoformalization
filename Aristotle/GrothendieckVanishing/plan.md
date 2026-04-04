@@ -1,17 +1,14 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-04T21:55Z
+**Updated**: 2026-04-04T22:00Z
 
 ## Status Summary
 
-- **Sorry count**: 2 in `FiniteGeneratorReduction.lean`
-  - Line 43: `gabriel_injective_of_filtered_colimit` (dead code, never referenced)
-  - Line 223: `hmono_transitions` (load-bearing false — asserted for all diagrams but FALSE for the recursive quotient diagram Q)
-- **Files**: 16 `.lean` in `main/`, ~5760 total lines
-- **CI**: Green (all 3 recent runs pass)
-- **Docs**: Blueprint returns 404 (no deployment workflow exists)
-- **Documentation lies**: CLAUDE.md, main.lean, and FiniteGeneratorReduction.lean all claim "1 sorry" — actually 2
-- **Aristotle**: 1 job queued (`sheafH_colim_v2.lean`, job `6ecc7b79`), 1 expired
+- **Sorry count**: 1 in `FiniteGeneratorReduction.lean`
+  - Line 203: `hmono_transitions` (load-bearing false — asserted for all diagrams but FALSE for the recursive quotient diagram Q)
+- **Files**: 16 `.lean` in `main/`, ~5740 total lines
+- **CI**: Running (commit c2543f6)
+- **Aristotle**: 1 job IN_PROGRESS (`sheafH_colim_v2.lean`, job `6ecc7b79`, 6%), 1 expired
 
 ## Fundamental Obstacle (unchanged from prior cycle)
 
@@ -24,30 +21,18 @@ Valid alternative approaches (none yet in Mathlib):
 
 ## This Cycle's Work Items
 
-### 1. Delete dead code `gabriel_injective_of_filtered_colimit` (`/cleanup`)
-- File: `FiniteGeneratorReduction.lean:25-43`
-- This theorem is never referenced. It's dead code that inflates the sorry count.
-- Deleting it reduces sorry count from 2 → 1 and fixes the documentation lie.
-- **Immediate, < 1 min.**
+Items 1-3 from previous cycle are DONE (commit c2543f6).
 
-### 2. Fix documentation lies (`/cleanup`)
-- `CLAUDE.md:76`: Update sorry description to match reality after item 1
-- `main.lean:7-11`: Update sorry list
-- `FiniteGeneratorReduction.lean` docstrings: Remove "SOLE sorry" claims
-- **Immediate, < 5 min.**
+### 1. Check Aristotle results (`/check-aristotle`)
+- Job `6ecc7b79` IN_PROGRESS (6% as of 21:47Z). Check for completion.
 
-### 3. Delete stale `aristotle-in/sheafH_colim.lean` (`/cleanup`)
-- Doesn't compile (broken `constantSheaf` calling convention). Job expired.
-- `sheafH_colim_v2.lean` is the replacement (compiles, queued).
-- **Immediate, < 1 min.**
-
-### 4. Attempt to prove `hmono_transitions` via restructured proof (`/prove`)
-- The sorry at line 223 cannot be closed with the current dimension-shifting approach.
-- **Strategy**: Restructure `sheafH_filtered_colimit_aux` to add `hmono_transitions` as a hypothesis propagated from the call site. For the recursive IH call on Q, prove a SEPARATE helper that handles the case where all pieces have vanishing cohomology but coprojections need not be mono.
-- This is the hardest item. Spend at most 30 min attempting; if stuck, document the blocking issue and move on.
-
-### 5. Check Aristotle results (`/check-aristotle`)
-- Job `6ecc7b79` is queued. Check if completed.
+### 2. Attempt `hmono_transitions` via restructured proof (`/prove`)
+- Strategy: Add `hmono_transitions` as a hypothesis to the theorem signature.
+  At the call site, provide it via `finsetGenFunctor_mono`.
+  For the recursive IH call on Q, use a separate helper lemma.
+- The helper must prove H^n(colim Q_j) = 0 from H^n(Q_j) = 0 WITHOUT mono transitions.
+- This requires a fundamentally different proof (not dimension shifting).
+- Spend at most 20 min; if blocked, wait for Aristotle.
 
 ## Backlog
 
