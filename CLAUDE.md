@@ -73,6 +73,5 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 
 ## Remaining Work
 
-2 sorry's remain in `FiniteGeneratorReduction.lean` (both in `sheafH_filtered_colimit_aux`):
-1. **h_van_Q n=0** (line ~781): `H^0(Q_j) = 0` for quotient diagram. Needs direct surjectivity argument for H^1 (Γ(I) ↠ Γ(Q_j) when mono coprojections + H^1(Y_j) = 0).
-2. **h_van_Q n≥1** (line ~791): `Mono (c'.ι.app j ≫ ι')`. Provable when diagram has mono transitions (as at call site via `finsetGenFunctor_mono` + `IsColimit.mono_ι_app_of_isFiltered`), but adding the hypothesis breaks recursive IH call on Q (which has non-mono coprojections).
+1 sorry remains in `FiniteGeneratorReduction.lean` (in `sheafH_filtered_colimit_aux`):
+- **hmono_ι** (line ~220): `∀ j, Mono (c'.ι.app j)` — mono coprojections for the filtered diagram. True at the call site via `finsetGenFunctor_mono` + `IsColimit.mono_ι_app_of_isFiltered`, but the recursive IH call on the quotient diagram Q reintroduces this sorry at each level (Q has epi coprojections). Closing requires Čech cohomology or spectral sequences.
