@@ -692,6 +692,11 @@ private theorem sheafH_filtered_colimit_aux
     -- Inductive step: dimension shifting via injective embedding.
     intro J' inst1 inst2 Y' c' hc' hvan
     letI := inst1; letI := inst2
+    -- Mono coprojections: needed for SES 0 → Y_j → I → Q_j → 0.
+    -- At call site: finsetGenFunctor has mono transitions →
+    -- IsColimit.mono_ι_app_of_isFiltered gives mono coprojections.
+    -- The IH call on Q introduces its own mono sorry at recursive levels.
+    have hmono_ι : ∀ j, Mono (c'.ι.app j) := sorry
     -- Embed c'.pt ↪ I (injective)
     haveI : EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) :=
       IsGrothendieckAbelian.enoughInjectives
@@ -804,8 +809,8 @@ private theorem sheafH_filtered_colimit_aux
         have hSE_j : S_j.ShortExact := by
           refine ShortComplex.ShortExact.mk'
             (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) ?_ inferInstance
-          -- Mono (c'.ι.app j ≫ ι'): needs mono coprojections
-          sorry
+          haveI : Mono ι' := inferInstance
+          exact mono_comp (c'.ι.app j) ι'
         exact ext_dimension_shift_X₃ _ hSE_j (n' + 1)
           (Ext.subsingleton_of_injective _ _ n') (hvan j)
       have hQ : Subsingleton (Sheaf.H S.X₃ (n' + 1)) :=
