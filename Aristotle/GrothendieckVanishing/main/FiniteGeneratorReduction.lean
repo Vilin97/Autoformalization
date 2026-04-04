@@ -170,10 +170,9 @@ private theorem isSheaf_presheaf_filtered_colimit
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     (c : Cocone (Y' ⋙ sheafToPresheaf _ _)) (hc : IsColimit c) :
     TopCat.Presheaf.IsSheaf c.pt := by
-  let c' : Cocone Y' := colimit.cocone Y'
-  let hpres_c : IsColimit ((sheafToPresheaf _ _).mapCocone c') :=
-    isColimitOfPreserves (sheafToPresheaf _ _) (colimit.isColimit Y')
-  exact (Presheaf.isSheaf_of_iso_iff (hc.coconePointUniqueUpToIso hpres_c).symm).mp c'.pt.cond
+  -- Noetherian → finite subcovers → sheaf condition is a finite limit →
+  -- filtered colimits commute with finite limits → presheaf colimit is a sheaf
+  sorry
 
 /-- On a Noetherian space, `sheafToPresheaf` creates filtered colimits of sheaves. -/
 private noncomputable def createsFilteredColimit
@@ -201,6 +200,8 @@ private theorem sheafH_filtered_colimit_aux
     -- filtered colimits. If each piece has trivial global sections, so does the colimit.
     intro J' inst1 inst2 Y' c' hc' hvan
     letI := inst1; letI := inst2
+    -- H^0 ≅ global sections. Colimit of trivial sections is trivial.
+    -- Requires: sheafToPresheaf creates filtered colimits (isSheaf_presheaf_filtered_colimit)
     sorry
   | succ n ih =>
     -- Inductive step: dimension shifting via injective embedding.
