@@ -6,7 +6,15 @@
       "target": "sheafH_preserves_filtered_colimits (full theorem, Čech approach)",
       "status": "expired",
       "note": "Submitted 2026-04-04. Standalone file with ext_dimension_shift helpers. Asked Aristotle to avoid dimension-shifting and use Čech or functorial resolutions instead."
+    },
+    {
+      "id": "6ecc7b79-5629-4459-8d02-0802420f2505",
+      "submission": "aristotle-in/sheafH_colim_v2.lean",
+      "output": "aristotle-out/sheafH_colim_v2_aristotle.lean",
+      "target": "sheafH_preserves_filtered_colimits (Ext formulation, no mono needed)",
+      "status": "queued",
+      "note": "Submitted 2026-04-04T21:40Z. Clean standalone with Ext directly. Prompted with 3 approaches: Čech, universal δ-functor, element chase. File compiles (only sorry warning)."
     }
   ],
-  "note": "All previous jobs expired (500 errors). The sole remaining sorry is hmono_ι (mono coprojections) in sheafH_filtered_colimit_aux. True at call site via finsetGenFunctor_mono + IsColimit.mono_ι_app_of_isFiltered, but recursive IH on Q reintroduces it. Requires Čech cohomology or spectral sequences to close."
+  "note": "The sole remaining sorry is hmono_transitions in sheafH_filtered_colimit_aux. Dimension-shifting proof fails for recursive IH on Q (non-mono coprojections). Needs Čech cohomology, universal δ-functor, or element-chasing proof."
 }
