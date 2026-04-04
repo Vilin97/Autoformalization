@@ -4,14 +4,16 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  Sorry's (1 remaining):
-  - sheafH_preserves_filtered_colimits (FiniteGeneratorReduction.lean) — sheaf cohomology
-    H^n commutes with filtered colimits on Noetherian spaces (derived functor commutation).
+  Sorry's (1 remaining in sheafH_filtered_colimit_aux in FiniteGeneratorReduction.lean):
+  - hmono_ι: ∀ j, Mono (c'.ι.app j) — mono coprojections for filtered diagram.
+    True at call site (finsetGenFunctor has mono transitions → mono_ι_app_of_isFiltered),
+    but the recursive IH call on the quotient diagram Q reintroduces this sorry
+    (Q has epi, not mono, coprojections). Requires Čech cohomology to close.
 
   File structure:
-  - FlasqueVanishing.lean: category instances, IsFlasqueSheaf, FlasqueVanishing
-  - SetupCore.lean: PushforwardHVanishing, epi_unit_of_closedImmersion, ClosedImmersionSES
-  - Setup.lean: ReducibleVanishing, IrreduciblePosVanishing wrapper
+  - FlasqueVanishing.lean + FlasqueCohomology.lean: IsFlasqueSheaf, FlasqueVanishing, dim shift
+  - SetupCore.lean: PushforwardHVanishing, ClosedImmersionSES, dimension shift, epi lemmas
+  - Setup.lean: ReducibleVanishing, IrreduciblePosVanishing wrappers
   - Auxiliary.lean: topology/dimension helpers
   - ClosedImmersion.lean: closed immersion counit/stalk infrastructure
   - ZeroOutside.lean + ZeroOutsideFinset.lean: extension-by-zero sheaf machinery
@@ -20,8 +22,9 @@
   - DimZeroVanishing.lean: irreducible dim 0 case
   - ReducibleVanishing.lean: reducible case via Finset.induction
   - ClosedOpenDecomposition.lean: reduction to irreducible
-  - FiniteGeneratorReduction.lean: colimit step, filtered diagram, f.g. vanishing (1 sorry)
-  - SheafStalkAlgebra.lean + StalkGeneratorAlgebra.lean: stalk algebra, Ext LES
+  - PresheafFilteredColimit.lean: presheaf colimit is sheaf on Noetherian spaces (PROVED)
+  - FiniteGeneratorReduction.lean: colimit step, f.g. vanishing (1 sorry: hmono_ι)
+  - SheafStalkAlgebra.lean + StalkGeneratorAlgebra.lean: stalk algebra, generator section
   - IrreducibleStep.lean: irreducible step assembly
   - GrothendieckVanishing.lean: main theorem + cascade theorems
 -/
