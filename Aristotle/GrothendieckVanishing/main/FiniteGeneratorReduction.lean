@@ -727,8 +727,44 @@ private theorem sheafH_filtered_colimit_aux
           conv_lhs => rw [← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
           conv_rhs => rw [← Category.assoc, cokernel.π_desc]
           exact (Category.id_comp _).symm.trans (Category.comp_id _).symm }
-    -- IsColimit: cokernel preserves filtered colimits
-    have hqColim : IsColimit qCocone := by sorry
+    -- IsColimit: cokernel preserves filtered colimits (AB5)
+    have hqColim : IsColimit qCocone := by
+      haveI : Nonempty J' := IsFiltered.nonempty
+      -- cokernel.π(f_j) ≫ Q.map a = cokernel.π(f_{j'})
+      have hπQ : ∀ {j₁ j₂ : J'} (a : j₁ ⟶ j₂),
+          cokernel.π (c'.ι.app j₁ ≫ ι') ≫ Q.map a =
+          cokernel.π (c'.ι.app j₂ ≫ ι') := by
+        intro j₁ j₂ a
+        exact (cokernel.π_desc _ _ _).trans (Category.id_comp _)
+      -- cokernel.π(f_j) ≫ qCocone.ι.app j = cokernel.π(ι')
+      have hπC : ∀ j, cokernel.π (c'.ι.app j ≫ ι') ≫ qCocone.ι.app j =
+          cokernel.π ι' := by
+        intro j
+        exact (cokernel.π_desc _ _ _).trans (Category.id_comp _)
+      -- g_j := cokernel.π(f_j) ≫ s.ι.app j is independent of j
+      have g_eq : ∀ (s : Cocone Q) (j₁ j₂ : J'),
+          cokernel.π (c'.ι.app j₁ ≫ ι') ≫ s.ι.app j₁ =
+          cokernel.π (c'.ι.app j₂ ≫ ι') ≫ s.ι.app j₂ := by
+        intro s j₁ j₂
+        have h₁ : s.ι.app j₁ = Q.map (IsFiltered.leftToMax j₁ j₂) ≫
+            s.ι.app (IsFiltered.max j₁ j₂) := by rw [s.w]
+        have h₂ : s.ι.app j₂ = Q.map (IsFiltered.rightToMax j₁ j₂) ≫
+            s.ι.app (IsFiltered.max j₁ j₂) := by rw [s.w]
+        rw [h₁, h₂, ← Category.assoc, ← Category.assoc, hπQ, hπQ]
+      let j₀ := Classical.arbitrary J'
+      exact
+      { desc := fun s => cokernel.desc ι'
+            (cokernel.π (c'.ι.app j₀ ≫ ι') ≫ s.ι.app j₀)
+            (hc'.hom_ext (fun j => by
+              simp only [comp_zero, Category.assoc, g_eq _ j₀ j,
+                ← Category.assoc (c'.ι.app j), ← Category.assoc (c'.ι.app j ≫ ι'),
+                cokernel.condition, zero_comp]))
+        fac := fun s j => by
+          apply (cancel_epi (cokernel.π (c'.ι.app j ≫ ι'))).mp
+          rw [← Category.assoc, hπC, cokernel.π_desc, g_eq s j₀ j]
+        uniq := fun s m hm => by
+          apply (cancel_epi (cokernel.π ι')).mp
+          rw [cokernel.π_desc, ← hπC j₀, Category.assoc, hm j₀] }
     -- Per-piece vanishing: H^n(Q_j) = 0
     have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) n) := by sorry
     have hQ : Subsingleton (Sheaf.H S.X₃ n) := ih Q qCocone hqColim h_van_Q
