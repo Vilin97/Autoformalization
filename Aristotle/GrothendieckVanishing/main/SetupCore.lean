@@ -264,8 +264,8 @@ private lemma epi_g_app_top_of_H1_vanishing
   change (ConcreteCategory.hom (ψ_hom ≫ ip.shortComplex.g.val.app (op ⊤))) (ULift.up 1) = r
   rw [← hfact]; simp [φ_hom, one_zsmul]
 
--- Sub-lemma: surjectivity of Ext⁰ map from epi at ⊤ via adjunction + projectivity
-private lemma ext0_surj_of_epi_top
+-- Surjectivity of Ext⁰ map from epi at ⊤ via adjunction + projectivity of ULift ℤ
+theorem ext0_surj_of_epi_top
     {X : TopCat.{u}} [NoetherianSpace X]
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hg_epi_top : Epi (S.g.val.app (op ⊤))) :

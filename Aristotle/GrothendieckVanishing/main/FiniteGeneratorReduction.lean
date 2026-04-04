@@ -783,11 +783,9 @@ private theorem sheafH_filtered_colimit_aux
       -- β.comp hSE.extClass = 0 (by associativity + comp_extClass = 0).
       -- Ext^0 surjectivity: every element of Ext^0(Z, Q) lifts to Ext^0(Z, I)
       -- Ext^0 surjectivity: every element of Ext^0(Z, Q) lifts to Ext^0(Z, I).
-      -- Uses ext_zero_map_surjective which needs IsFlasqueSheaf for S.X₁ = c'.pt.
-      -- The flasque condition for c'.pt follows from: Γ(S.g) surjective (Q = colim Q_j,
-      -- each Γ(I) ↠ Γ(Q_j) by SES + mono + H^1=0, so Γ(I) ↠ Γ(Q)).
-      -- TODO: replace flasque sorry with direct surjectivity argument.
-      have h_surj := ext_zero_map_surjective hSE (sorry : IsFlasqueSheaf c'.pt)
+      -- Uses ext0_surj_of_epi_top with Epi (S.g.val.app (op ⊤)) = Γ(I) ↠ Γ(Q).
+      -- Proof: Q = colim Q_j, Γ(Q) = colim Γ(Q_j), each Γ(I) ↠ Γ(Q_j) by SES + mono + H^1=0.
+      have h_surj := ext0_surj_of_epi_top (S := S) (sorry : Epi (S.g.val.app (op ⊤)))
       constructor; intro a b
       have ha : a.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ hI _ _
       have hb : b.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ hI _ _
