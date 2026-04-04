@@ -808,7 +808,7 @@ private theorem sheafH_filtered_colimit_aux
         refine ⟨p, ?_⟩
         show (S.g.val.app (op ⊤)) p = q
         have hkey := congrArg (·.val.app (op ⊤)) hcomp
-        simp only [Sheaf.comp_val, NatTrans.comp_app] at hkey
+        simp only [] at hkey
         rw [hkey.symm]; exact hq₀ ▸ hp ▸ rfl
       have h_surj := ext0_surj_of_epi_top (S := S) hΓg_epi
       constructor; intro a b
