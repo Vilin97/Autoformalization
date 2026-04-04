@@ -6,7 +6,7 @@
     on Noetherian spaces (PROVED)
   - createsFilteredColimit: sheafToPresheaf creates filtered colimits (PROVED)
   - sheafH_filtered_colimit_aux / sheafH_preserves_filtered_colimits: H^n commutes with
-    filtered colimits (1 sorry: h_van_Q — per-piece vanishing for quotient diagram)
+    filtered colimits (1 sorry: hmono_ι — mono coprojections, true at call site)
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves

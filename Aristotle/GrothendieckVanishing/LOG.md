@@ -1,5 +1,31 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T07:30Z — Close Epi sorry, reduce to 1 sorry (hmono_ι)
+
+**Sorry count: 1 sorry (`hmono_ι : ∀ j, Mono (c'.ι.app j)` in `sheafH_filtered_colimit_aux`)**
+
+Major restructuring across multiple cycles:
+- **Eliminated FALSE sorry (H^0(Q_j)=0)**: Restructured n=0 case to use direct H^1 proof
+  via Ext LES element chasing (exact₁ + surjectivity + comp_extClass = 0), following
+  the pattern from `sheafH_one_of_flasque` in FlasqueCohomology.lean.
+- **Closed n≥1 Mono sorry**: Added local `hmono_ι := sorry`, proved `Mono S_j.f` via
+  `mono_comp (c'.ι.app j) ι'`.
+- **Eliminated FALSE sorry (IsFlasqueSheaf)**: Replaced `ext_zero_map_surjective` (needs
+  flasque) with `ext0_surj_of_epi_top` (needs only Epi on sections). Made
+  `ext0_surj_of_epi_top` public in SetupCore.lean.
+- **Closed Epi sorry**: Proved Γ(I) → Γ(Q) surjective via colimit element chasing:
+  construct per-piece InjectivePresentation, apply `epi_g_app_top_of_H1_vanishing` for
+  per-piece surjectivity, lift via `Concrete.isColimit_exists_rep`, compose through cocone.
+  Made `epi_g_app_top_of_H1_vanishing` public in SetupCore.lean.
+- **Fixed 5 unused variable warnings** in IrreducibleStep.lean.
+- **Updated docs**: CLAUDE.md, main.lean, plan.md, SheafStalkAlgebra.lean docstrings.
+
+Remaining sorry: `hmono_ι` — mono coprojections, true at call site via
+`finsetGenFunctor_mono` + `IsColimit.mono_ι_app_of_isFiltered`, but the recursive IH
+call on Q introduces the same sorry at each level (Q has epi coprojections).
+Requires either: restructuring to thread hmono as a parameter (breaks IH),
+or new proof infrastructure (Čech cohomology, spectral sequences).
+
 ## 2026-04-04T05:15Z — Prove hqColim (IsColimit for quotient cocone)
 
 **Sorry count: 1 sorry in 1 theorem (`sheafH_filtered_colimit_aux`)**
