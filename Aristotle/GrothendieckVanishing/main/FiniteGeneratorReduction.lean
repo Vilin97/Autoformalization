@@ -439,9 +439,15 @@ private theorem isSheaf_presheaf_filtered_colimit
           rw [this k₁ hk₁ (Opens.infLELeft (U k₁) (U l₁)),
               this l₁ hl₁ (Opens.infLERight (U k₁) (U l₁)), hfkl]
         intro m hm φ
-        -- F(f ≫ g) = F(f) ≫ F(g), naturality: res ∘ F(g) = F(g)|_{Ukl} ∘ res
-        -- So both sides = β.app(Ukl)(res(F(f)(x')))
-        sorry
+        -- F(f ≫ g) = F(f) ≫ β, then naturality: β(Um) ≫ res = res ≫ β(Ukl)
+        simp only [Functor.map_comp, NatTrans.comp_app,
+          AddCommGrpCat.hom_comp, AddMonoidHom.coe_comp, Function.comp_apply]
+        -- Goal: res_j'(β(Um)(F(f)(x'))) = β(Ukl)(res_j(F(f)(x')))
+        change ConcreteCategory.hom (β.app (op (U m)) ≫ (Y'.obj j').val.map φ.op) _ =
+          ConcreteCategory.hom ((Y'.obj j).val.map φ.op ≫ β.app (op (U k₁ ⊓ U l₁))) _
+        rw [show β.app (op (U m)) ≫ (Y'.obj j').val.map φ.op =
+          (Y'.obj j).val.map φ.op ≫ β.app (op (U k₁ ⊓ U l₁))
+          from (β.naturality φ.op).symm]; rfl
       -- Apply htrans to each case
       rw [Finset.mem_insert] at hp; rcases hp with rfl | hp
       · -- p = p₀: use coeq condition to equate transitions
