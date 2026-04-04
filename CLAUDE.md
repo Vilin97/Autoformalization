@@ -42,13 +42,13 @@ GrothendieckVanishing.lean    ← Main theorem (assembles all cases)
 ├── DimZeroVanishing.lean     ← Irreducible dim=0: constant sheaf is flasque
 │   └── ConstantSheafFlasque.lean
 ├── IrreducibleStep.lean      ← Irreducible dim≥1 (uses IrreduciblePosVanishing)
-│   └── FiniteGeneratorReduction.lean
+│   └── FiniteGeneratorReduction.lean ← Colimit step, filtered diagram, f.g. vanishing
 ├── ClosedOpenDecomposition.lean ← Reduction to irreducible spaces
 │   └── ReducibleVanishing.lean  ← Reducible case via Finset.induction
 └── (shared infrastructure)
     ├── SetupCore.lean         ← Core: category instances, ClosedImmersionSES
     ├── FlasqueVanishing.lean  ← Flasque sheaf theory and cohomological vanishing
-    ├── Setup.lean             ← Wrapper theorems (contains IrreduciblePosVanishing sorry)
+    ├── Setup.lean             ← Wrapper theorems (IrreduciblePosVanishing, ReducibleVanishing)
     ├── ClosedImmersion.lean   ← Closed immersion counit/stalk
     ├── ZeroOutside.lean       ← Extension-by-zero sheaf machinery
     ├── CohomologyIso.lean     ← H'(⊤, F) ≅ H(F) isomorphisms
@@ -73,5 +73,5 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 
 ## Remaining Work
 
-1 sorry remains in `IrreducibleStep.lean` (Mathlib API gap):
-1. `ext_comm_filtered_colimit_mono` — Ext^n(Z,-) preserves filtered colimits of mono diagrams in Grothendieck abelian categories. Not in Mathlib v4.28.0.
+1 sorry remains in `FiniteGeneratorReduction.lean`:
+1. `sheafH_preserves_filtered_colimits` — sheaf cohomology H^n commutes with filtered colimits on Noetherian spaces. This is the derived functor commutation theorem (R^n Γ preserves filtered colimits). Requires: (a) Γ preserves filtered colimits (AB5 for sheaves), (b) filtered colimits of injective resolutions are injective resolutions, (c) cohomology commutes with filtered colimits of abelian groups.

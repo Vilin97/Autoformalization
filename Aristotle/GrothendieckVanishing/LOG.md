@@ -1,5 +1,539 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-04T01:45Z — Document hexist strategy in detail
+
+**Sorry count: 3 keywords in 2 theorems (unchanged)**
+
+- Documented detailed strategy for hexist inside the code:
+  - Lift sf_k to common piece, check pairwise compatibility (needs O(|t|²) IsFiltered merges)
+  - Glue in piece via sheaf condition
+  - Map to colimit, verify k ∈ t by construction
+  - Extend to i ∉ t via section_ext through the piece (not c.pt — which isn't a sheaf)
+- Estimated ~200 lines of Lean for the full construction
+- Aristotle at 39% may solve the whole theorem, bypassing hexist entirely
+
+## 2026-04-04T01:30Z — Work on hexist: prove representative lifting step
+
+**Sorry count: 3 keywords in 2 theorems (unchanged)**
+
+- Proved `hrep` inside hexist: for each k ∈ t, sf_k lifts to a representative
+  in some piece via `Concrete.isColimit_exists_rep`
+- Remaining hexist sorry: compatibility checking in a common piece, sheaf gluing,
+  extension to full cover via section_ext on pieces
+- Aristotle at 39%
+
+## 2026-04-04T01:15Z — Analyze hexist, Aristotle at 39%
+
+**Sorry count: 3 keywords in 2 theorems (unchanged)**
+
+- Analyzed `hexist` (existence of gluing): needs same filtered colimit machinery
+  as hsep (lifting, merging, sheaf gluing) PLUS generalized separation for i ∉ t.
+  The i ∉ t extension requires `hsep`-like argument at c.pt(U_i) instead of c.pt(iSup U).
+  Would benefit from extracting general `colimit_presheaf_section_zero` lemma.
+- Aristotle at 39% — may solve the whole theorem
+- No code changes this cycle (hexist is structurally clear but mechanically complex)
+
+## 2026-04-04T01:00Z — CLOSE hsep separation proof (major milestone)
+
+**Sorry count: 3 keywords in 2 theorems (down from 5 in 3)**
+
+- **CLOSED** `hsep` — the separation sub-goal of `isSheaf_presheaf_filtered_colimit`!
+  This was the hardest remaining sub-goal. Full proof chain:
+  1. `Concrete.isColimit_exists_rep` → representative b₀
+  2. `NatTrans.naturality` → restriction-maps-to-zero (hres_zero)
+  3. `Types.FilteredColimit.isColimit_eq_iff'` → eventually-zero (h_ev_zero)
+  4. `filtered_colimit_kills_all_restrictions` → common index j₁ with all restrictions 0
+  5. `sheaf_section_zero_of_zero_on_finite_cover` → b₁ = 0
+  6. `c.ι.naturality` → cocone factorization → a = 0
+- Also proved conversion between "restrict-then-transition" and "transition-then-restrict"
+  using naturality of `(Y' ⋙ sheafToPresheaf _ _).map fk`
+- **Remaining sorry's**: `hexist` (existence of gluing) + n=0/hQ in `sheafH_filtered_colimit_aux`
+- Aristotle job 50689427 at 24%
+
+## 2026-04-04T00:45Z — PROVE 2 key lemmas: sheaf separation + filtered colimit kills all
+
+**Sorry count: 4 keywords in 2 theorems (same count, but 2 standalone lemmas CLOSED)**
+
+- **PROVED** `sheaf_section_zero_of_zero_on_finite_cover` (5 lines) using `IsSheaf.section_ext`
+- **PROVED** `filtered_colimit_kills_all_restrictions` (~40 lines) using:
+  - `Finset.induction` to iteratively merge transition morphisms
+  - `IsFiltered.max` + `IsFiltered.coeqHom` to equalize parallel morphisms
+  - Naturality of presheaf transition maps + `map_zero` to preserve zeros
+  - Key proof technique: `change ConcreteCategory.hom ...` to unify `AddCommGrpCat.Hom.hom` notation
+- Remaining sorry's in hsep and hexist now only need to CALL these proved lemmas
+  plus the cocone factorization (already proved last cycle)
+- Aristotle job 50689427 at 24%
+
+## 2026-04-04T00:20Z — PROVE sheaf_section_zero_of_zero_on_finite_cover (3→2 sorry warnings)
+
+**Sorry count: 4 keywords in 2 theorems (was 5 in 3)**
+
+- **PROVED** `sheaf_section_zero_of_zero_on_finite_cover` using `IsSheaf.section_ext`:
+  for each x ∈ iSup U, hcov gives k ∈ t with x ∈ U_k, then hzero + map_zero.
+  Clean 5-line proof. Key discovery: `F.cond` needs explicit type annotation
+  `TopCat.Presheaf.IsSheaf F.val` for dot notation to work.
+- Aristotle job 50689427 at 24%
+
+## 2026-04-04T00:10Z — Extract sheaf separation lemma, simplify hsep structure
+
+**Sorry count: 5 keywords in 3 theorems, 1 logical gap**
+
+- **Extracted** standalone `sheaf_section_zero_of_zero_on_finite_cover` (sorry):
+  a section of a sheaf that restricts to 0 on a finite open cover is 0.
+  Moved outside the main proof to avoid heartbeat issues.
+- **Simplified** hsep proof: removed broken common-index approach (g₀ = hj₀_le.some
+  can't prove hb₁_zero), replaced with single sorry + documented strategy:
+  Finset.induction to iteratively build transition, then apply sheaf separation.
+- **Proved** h_ev_zero remains: each restriction eventually 0 via isColimit_eq_iff'
+- Aristotle job 50689427 at 24%
+- **Architecture insight**: the iterative construction needs IsFiltered.coeq_hom to
+  equalize parallel morphisms from j₀ to j_next at each Finset.induction step.
+  Previous zeros are preserved since transition maps are group homomorphisms (map_zero).
+
+## 2026-04-03T23:50Z — Prove common index + cocone factorization in hsep
+
+**Sorry count: 4 keywords, 1 logical gap (same)**
+
+- **Proved** inside `hsep`:
+  - Common index `j₁` via `IsFiltered.sup_objs_exists` + `DecidableEq`
+  - Cocone factorization: `ι_{j₀}(b₀) = ι_{j₁}(b₁)` via `c.ι.naturality g₀`
+  - Final conclusion: `b₁ = 0 → a = 0` via `map_zero`
+- **Remaining 2 sorry's in hsep**:
+  - `hb₁_zero`: transition restricts to 0 (needs `Finset.induction` to merge paths)
+  - `hb₁_eq_zero`: sheaf separation (heartbeat-expensive inside complex proof context)
+- Aristotle job 50689427 at 12%
+
+## 2026-04-03T23:30Z — Prove "eventually zero" via isColimit_eq_iff' in hsep
+
+**Sorry count: 4 keywords, 1 logical gap (same)**
+
+- **Proved** `h_ev_zero` inside `hsep`: for each k ∈ t, restriction of b₀ eventually
+  becomes 0 via transition map. Uses `Types.FilteredColimit.isColimit_eq_iff'` composed
+  with `forget AddCommGrpCat`. Key bridge: `change` + `map_zero` for Type/AddCommGrpCat
+  conversion.
+- **Remaining gap in hsep**: common index via `IsFiltered.sup_objs_exists`, then
+  sheaf separation on the piece to conclude `transition(b₀) = 0`.
+- Aristotle job 50689427 still at 5%
+
+## 2026-04-03T23:15Z — Prove evaluation colimit + naturality in hsep; further decompose
+
+**Sorry count: 4 keywords, 1 logical gap (same)**
+
+- **Proved** inside `hsep` (separation sub-goal of `isSheaf_presheaf_filtered_colimit`):
+  - `hcV`: evaluation at each open V gives colimit in AddCommGrpCat (`isColimitOfPreserves`)
+  - `⟨j₀, b₀, hb₀⟩`: representative via `Concrete.isColimit_exists_rep`
+  - `hnat`: naturality — ι_{j₀}(res(b₀, U_k)) = res(a) (via `NatTrans.naturality`)
+  - `hres_zero`: restriction of b₀ maps to 0 in k-th evaluation colimit
+- **Remaining gap in hsep**: need "eventually zero" property of filtered colimits
+  (if ι_j(x) = 0 then ∃ f : j → k, F(f)(x) = 0), then common index, sheaf separation
+- Aristotle job 50689427 still at 5%
+
+## 2026-04-03T22:40Z — Decompose isSheaf sorry into separation + existence; submit to Aristotle
+
+**Sorry count: 4 keywords, 1 logical gap (same gap, finer decomposition)**
+
+- **Decomposed** `isSheaf_presheaf_filtered_colimit` sorry into 3 parts:
+  - `hsup_le` / `hbsup_le`: finite subcover equals full cover (PROVED)
+  - `hsep`: separation — section zero on finite subcover implies zero (sorry)
+  - `hexist`: existence — construct gluing section (sorry)
+  - Assembly: uniqueness from separation via `map_sub` + `sub_eq_zero` (PROVED)
+- **Updated critique.md**: new timestamp, found 5 dead theorems/defs, 3 stale docstrings,
+  `lean_verify` inconsistency (reports no axioms for `GrothendieckVanishing` — tool bug)
+- **Submitted** `isSheaf_filtered_colimit.lean` to Aristotle (job 50689427, 5% at check time)
+- Aristotle previous jobs expired (no jobs file existed)
+- CI: all green (3 latest runs)
+
+## 2026-04-03T20:32Z — Noetherian finite subcover step in isSheaf proof
+
+**Sorry count: 3 keywords, 1 logical gap (unchanged)**
+
+- Added finite subcover extraction to `isSheaf_presheaf_filtered_colimit` using
+  `NoetherianSpace.isCompact` + `IsCompact.elim_finite_subcover`. Gets `t : Finset ι`
+  with `ht : ↑(iSup U) ⊆ ⋃ i ∈ t, ↑(U i)`. Proof framework via `IsSheafUniqueGluing`.
+- Fixed stale docstrings (GrothendieckVanishing.lean, IrreducibleStep.lean, SheafStalkAlgebra.lean)
+- Fixed inconsistent `haveI`/`letI`
+- Aristotle jobs: 22%, 44%, 11%
+
+## 2026-04-03T20:20Z — Decomposed sorry + dimension shifting + docstring fixes
+
+**Sorry count: 3 keywords, 1 logical gap (unchanged)**
+
+- **Decomposed** `sheafH_preserves_filtered_colimits` into structured proof:
+  - `isSheaf_presheaf_filtered_colimit` — KEY sub-lemma (sorry)
+  - `createsFilteredColimit` — follows from above (proved)
+  - `sheafH_filtered_colimit_aux` — induction on n:
+    - Base case n=0: sorry (needs isSheaf)
+    - Inductive step n+1: dimension shifting via `Injective.ι`, `ext_dimension_shift`,
+      `Ext.subsingleton_of_injective` — PROVED modulo hQ sorry
+- **Submitted** `isSheaf_presheaf_filtered_colimit` to Aristotle (job b1902f2c, 11%)
+- **Fixed 3 stale docstrings** referencing deleted SheafHom.lean and nonexistent theorems:
+  - GrothendieckVanishing.lean:8
+  - IrreducibleStep.lean:9
+  - SheafStalkAlgebra.lean:319
+- **Critique updated** — found docs 404 (P1), stale docstrings (P2), dead code (P3)
+- **Aristotle status**: 1676d0c9 at 20%, 782d0f32 at 42%, b1902f2c at 11%
+
+## 2026-04-03T19:30Z — 1 sorry remains: sheafH_preserves_filtered_colimits
+
+**Sorry count: 1 (was 2 at start of session)**
+
+Major restructuring this session:
+- **Consolidated 2 sorry's → 1**: introduced `sheafH_preserves_filtered_colimits` at the sheaf
+  level, bypassing the abstract `ext_vanishing_of_colimit_aux` which had the hQprov circularity.
+- **Deleted SheafHom.lean** (entire file — sorry #1 subsumed by the new single sorry)
+- **Deleted ext_vanishing_of_colimit_aux + ext_comm_filtered_colimit_mono** (162 lines dead code)
+- **Removed m≥2 constraint** from directLimit_cohomology_vanishing and callers
+- **Split ZeroOutside.lean** (733 → 445 + 318 lines, new ZeroOutsideFinset.lean)
+- **Split SheafStalkAlgebra.lean** (688 → 432 + 277 lines, new StalkGeneratorAlgebra.lean)
+- Submitted 2 Aristotle jobs for the last sorry (abstract 782d0f32 at 38%, sheaf-specific 1676d0c9 at 4%)
+- Updated CLAUDE.md, main.lean docstrings
+
+Remaining sorry: `sheafH_preserves_filtered_colimits` — derived functor commutation (H^n
+commutes with filtered colimits on Noetherian spaces). Requires AB5 for sheaves.
+
+## 2026-04-03T16:30Z — Close sorry #3 (dead branch), reduce to 3 sorry's
+
+**Sorry count: 3 (was 4)**
+
+- **CLOSED sorry #3** (line 254): eliminated dead n'=0 branch in `ext_comm_filtered_colimit_mono` by adding `(hn_ge : n ≥ 2)` hypothesis. Propagated through `cohomology_vanishing_of_finitelyGenerated_vanishing` and `directLimit_cohomology_vanishing`. At call site in `irreduciblePos_kernel_subsingleton`, proved `n ≥ 2` from `n > topologicalKrullDim X > 0` via `Order.succ_le_of_lt`.
+- **Fixed CLAUDE.md**: updated sorry count from 1 (incorrect) to 3 (accurate after closing #3).
+- **Submitted** `ext_filtered_colimit.lean` to Aristotle (job `782d0f32`, IN_PROGRESS 5%). Would close all remaining sorry's if proved.
+- **Critique**: wrote full adversarial critique identifying 4 sorry's, documentation lies, 4 oversized files, blueprint 404.
+- Updated docstrings in FiniteGeneratorReduction.lean, GrothendieckVanishing.lean.
+
+Remaining sorry's:
+1. Line 207: Subsingleton(Hom(Z, Q)) — colimit factoring
+2. Line 215: hQprov — iterated quotient vanishing provider
+3. Line 597: section-level colimit factoring (sheafToPresheaf ⋙ evaluation preserves filtered colimits)
+
+## 2026-04-03T04:00Z — Final state: 3 sorry warnings, colimit chain built
+
+**Sorry count: 3 warnings (4 code sorry's, 1 dead)**
+
+Key achievements this session (starting from 1 opaque sorry):
+- PROVED: Quotient functor Qfun (all laws), quotient cocone Qcocone (all naturality)
+- PROVED: IsColimit hQcolim (desc + fac + uniq via hπ_cocone/hcompat)
+- PROVED: hQvan via hQvan_provider, ext_sandwich for n≥1
+- PROVED: Colimit chain at call site: CreatesColimit → isColimitOfPreserves →
+  Concrete.isColimit_exists_rep → element factoring → hGsub → x = 0
+- SPLIT: IrreducibleStep.lean (1263→688+594 lines) into SheafStalkAlgebra + IrreducibleStep
+- Fixed all stale documentation headers
+
+Remaining sorry's:
+1. IsSheaf of presheaf filtered colimit (line 567) — AB5 fact, not in Mathlib
+2. degree-1 Ext^0(Z,Q) (line 207) — same underlying issue
+3. hQprov iterated provider (line 215) — recursive
+4. DEAD n'=0 branch (line 254) — never evaluated
+
+## 2026-04-03T02:15Z — CLOSE hQcolim! fac + uniq proved via ext + hπ_cocone + hcompat
+
+**Sorry count: 1** (3 sub-sorry's: hQprov, hHom univ, n=0 dead)
+
+- **CLOSED hQcolim** — IsColimit for quotient cocone. The proof:
+  - desc_fun: cokernel.desc ι (cokernel.π(j₀≫ι) ≫ s.ι.app j₀) with ι ≫ g = 0
+  - fac: ext + show + simp [Category.assoc] + rw [hπ_cocone, cokernel.π_desc] + hcompat
+  - uniq: ext + show + rw [cokernel.π_desc, hm j₀, hπ_cocone]
+  - Helpers hπ_cocone, hcompat: PROVED via cokernel.π_desc + filtered compatibility
+- This was the main bottleneck for 5+ cycles (heartbeat issues with let-binding context).
+  Solved by using `show cokernel.π _ ≫ _ = cokernel.π _ ≫ _` to normalize after `ext`.
+
+## 2026-04-03T01:45Z — Extract hQprov, stabilize sorry inventory at 4
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux + ext_comm_filtered_colimit_mono, 4 sorry's)
+
+- Extracted `hQprov` as explicit sorry'd `have` (was implicit in `ih` call)
+- Attempted hQcolim via standalone lemma and inline IsColimit.mk — both fail on
+  heartbeats from associativity manipulation within let-binding context
+- Stabilized sorry inventory:
+  1. hQcolim (line 165) — IsColimit for quotient cocone
+  2. hQprov (line 173) — iterated provider for Q's sub-quotient
+  3. hHom universality (line 197) — abstract → universal hHom upgrade
+  4. hQvan_provider n=0 (line 223) — dead at call site (dim ≥ 1 ⟹ m ≥ 2)
+
+## 2026-04-03T01:15Z — PROVE desc_fun + ι ≫ g = 0 in hQcolim, fac/uniq outlined
+
+**Sorry count: 1** (sub-sorry's: hQcolim fac+uniq, iterated provider, hHom univ, n=0 dead)
+
+- desc_fun FULLY PROVED: cokernel.desc ι (cokernel.π ≫ s.ι.app j₀) with ι ≫ g = 0.
+- fac and uniq outlined: both reduce to cokernel.π_desc + filtered compatibility after ext,
+  but trigger heartbeat issues with simp/change. Left as sorry with detailed outlines.
+
+## 2026-04-03T01:00Z — PROVE ι ≫ g = 0 inside hQcolim via filtered compatibility
+
+**Sorry count: 1** (sub-sorry's: hQcolim fac+uniq, iterated provider, hHom univ, n=0 dead)
+
+- **PROVED `ι ≫ g = 0`** for the desc map: Used `hc.hom_ext` + `IsFiltered.max/leftToMax/rightToMax`
+  to show compatibility of cokernel.π maps, then `cokernel.condition` for the zero.
+  Key intermediate: `hπ_assoc` (reassociated version of `cokernel.π_desc`).
+- desc_fun is now FULLY PROVED (cokernel.desc with valid hg proof).
+- Remaining in hQcolim: `fac` (cocone factoring) and `uniq` (uniqueness).
+
+## 2026-04-03T00:45Z — Construct hQcolim desc_fun via cokernel.desc
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux, sub-sorry's in hQcolim + others)
+
+- Defined `desc_fun` for hQcolim: `cokernel.desc ι (cokernel.π ≫ s.ι.app j₀) (sorry)`
+- The desc MAP is now concrete — sorry's remain for:
+  1. `ι ≫ g = 0` condition (needs hc.hom_ext + cokernel.condition + filtered compatibility)
+  2. `fac` (factoring through cocone maps)
+  3. `uniq` (uniqueness)
+
+## 2026-04-03T00:30Z — Fix addCommGrpCat_exact_sandwich, simplify hQvan_provider via ext_sandwich
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux, 4 sub-sorry's)
+
+- Fixed `addCommGrpCat_exact_sandwich`: `AddCommGrpCat.exact_iff` → `ShortComplex.ab_exact_iff_range_eq_ker`
+  and updated field access to use `.hom` (for the underlying AddMonoidHom).
+- Simplified hQvan_provider n≥1 case: replaced 10 lines of manual LES handling with
+  single line `ext_sandwich Z hSEj (n'' + 1) (Ext.subsingleton_of_injective ...) (hvan j)`.
+- Remaining sorry's unchanged: hQcolim, iterated provider, hHom universality, hQvan_provider n=0.
+
+## 2026-04-03T00:20Z — Clean up hQcolim sorry, document colim.exact_mapShortComplex approach
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux, 4 sub-sorry's)
+
+- Researched colim.exact_mapShortComplex: found exact signature and usage pattern from
+  ColimCoyoneda.lean. The approach: build SES of functors Y → const(I) → Qfun, show
+  exact, apply exact_mapShortComplex + isColimitConstCocone. ~30 lines of plumbing.
+- Cleaned up hQcolim sorry with detailed roadmap comment.
+- No new proofs closed (hQcolim requires categorical infrastructure).
+
+## 2026-04-03T00:05Z — Analyze hQcolim, commit current state
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux with 4 sub-sorry's)
+
+- Analyzed hQcolim (IsColimit for quotient cocone): requires showing `colim` preserves
+  cokernels. Mathlib has `instPreservesColimitsOfSizeOfIsLeftAdjoint` for left adjoints,
+  but connecting it to our specific cocone construction requires significant plumbing.
+- No new proofs closed this cycle.
+- Current sorry inventory:
+  1. hQcolim — IsColimit (colim preserves cokernels, ~50 lines of categorical infrastructure)
+  2. Iterated hQvan_provider for IH (recursive/structural)
+  3. hHom universality upgrade (abstract → universal)
+  4. hQvan_provider n=0 (dead at call site)
+
+## 2026-04-02T23:55Z — PROVE hQvan and hQvan_provider (n≥1 case) via LES + AB5
+
+**Sorry count: 1** (with 4 sub-sorry's)
+
+- **PROVED hQvan** inside aux: `fun j => hQvan_provider n rfl ip j` (direct from provider)
+- **PROVED hQvan_provider n≥1 case** in wrapper via:
+  - `IsColimit.mono_ι_app_of_isFiltered` for Mono (c.ι.app j)
+  - `mono_comp` for Mono (c.ι.app j ≫ ip.f)
+  - ShortComplex.ShortExact.mk' for the SES
+  - `Ext.covariant_sequence_exact₃` for the LES extraction
+  - `Ext.subsingleton_of_injective` for Ext^n(Z,I) = 0 when n ≥ 1
+  - `hvan j` for Ext^{n+1}(Z, Y.obj j) = 0
+- **hQvan_provider n=0 case**: sorry (needs hHom_univ for Q_j, only arises at outer
+  degree 1 which doesn't occur at the call site since dim ≥ 1 implies m ≥ 2)
+- Remaining sorry's:
+  1. hQcolim — IsColimit for quotient cocone (AB5)
+  2. Iterated provider for IH (recursive)
+  3. hHom universality upgrade
+  4. hQvan_provider n=0 (dead code at call site)
+
+## 2026-04-02T23:40Z — Complete proof skeleton with hQvan_provider, all IH plumbing done
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux with 3 sub-sorry's + 2 in wrapper)
+
+- Added `hQvan_provider` hypothesis to aux: the caller provides per-j quotient vanishing
+  (from mono transitions + LES). The IH application at line 110 is now complete modulo sorry
+  for the iterated provider.
+- Full proof structure: dimension shift → quotient functor → cocone → IH application. ✓
+- Remaining sorry's:
+  - hQcolim: IsColimit for quotient cocone (AB5)
+  - hQvan: per-j Ext vanishing (needs mono of c.ι.app j, from AB5 + mono transitions)
+  - Iterated hQvan_provider for IH (recursive structure)
+  - Universality upgrade of hHom (in wrapper)
+  - hQvan_provider from mono transitions (in wrapper)
+
+## 2026-04-02T23:30Z — Prove cocone natural transformation, 2 sub-sorry's remain
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux, 2 sub-sorry's + universality upgrade)
+
+- **PROVED Qcocone.ι** via cokernel.map + naturality by ext/simp
+- Remaining sorry's in ext_vanishing_of_colimit_aux:
+  1. hQcolim — IsColimit for the quotient cocone (AB5)
+  2. hQvan — per-j Ext^n vanishing (needs mono transitions from caller)
+
+## 2026-04-02T23:20Z — Construct quotient functor Qfun, prove functor laws
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux, 3 sub-sorry's remaining)
+
+- **DEFINED quotient functor Qfun**: `j ↦ cokernel(c.ι.app j ≫ ι)` as a full `J ⥤ C`
+  with `obj`, `map` (cokernel.map with naturality square PROVED), `map_id` PROVED,
+  `map_comp` PROVED.
+- **DEFINED cocone structure**: Qcocone with `.pt = ip.shortComplex.X₃` and sorry'd `.ι`.
+- **Remaining sorry's** (all inside ext_vanishing_of_colimit_aux succ case):
+  1. Qcocone.ι — natural transformation for the cocone
+  2. hQcolim — colimit proof (by AB5)
+  3. hQvan — per-j Ext^n vanishing (by LES)
+- The proof skeleton is COMPLETE: dimension shift + apply ih to quotient diagram.
+
+## 2026-04-02T23:10Z — Restructure with universal IH via ext_vanishing_of_colimit_aux
+
+**Sorry count: 1** (ext_vanishing_of_colimit_aux succ case + universality upgrade)
+
+- **Created `ext_vanishing_of_colimit_aux`**: Puts `n` BEFORE `J` in quantification so
+  the IH at degree `n` is universal over all filtered diagrams (NO mono transitions in IH).
+  This is the correct proof structure — when the quotient diagram construction is filled in,
+  the IH can be applied to it even though it has epi transitions.
+- **Proved n=0 case** via Ext.homEquiv₀ + hHom_univ.
+- **Updated `ext_comm_filtered_colimit_mono`**: n=0 case proved directly, n≥1 delegates
+  to aux lemma. Sorry for universality upgrade of hHom (trivial at the call site).
+- The sorry is now in the RIGHT PLACE: the succ case of aux, where the IH is available
+  and universal. Filling it requires constructing the quotient functor Q_j, showing
+  Q = colim Q_j (AB5), proving per-j Ext vanishing (LES), and applying ih.
+
+## 2026-04-02T22:55Z — Prove n=0 case inside ext_vanishing_of_colimit_pieces, decompose n≥1
+
+**Sorry count: 1** (`ext_vanishing_of_colimit_pieces` succ case at FiniteGeneratorReduction.lean:84)
+
+- **PROVED n=0 case** of `ext_vanishing_of_colimit_pieces` via Ext.homEquiv₀ + hHom
+- Decomposed n≥1 case with explicit dimension-shift: InjectivePresentation + LES lifting
+  + Ext.eq_zero_of_injective. Sorry isolated to `ca = cb` for two Ext^n(Z, Q) elements.
+- Updated FiniteGeneratorReduction.lean header (P4 from critique)
+- Aristotle MCP unavailable; file ready for resubmission
+
+## 2026-04-02T22:40Z — Extract sorry into standalone lemma, clean up proof
+
+**Sorry count: 1** (`ext_vanishing_of_colimit_pieces` in FiniteGeneratorReduction.lean:56)
+
+- **Extracted `ext_vanishing_of_colimit_pieces`**: Standalone sorry'd lemma for the
+  colimit transfer. Does NOT require mono transitions — cleaner target for future work.
+- **Made `ext_comm_filtered_colimit_mono` sorry-free**: The succ case now delegates to
+  the extracted lemma instead of inlining the sorry. Proof is: base case via hHom +
+  Ext.homEquiv₀, succ case via `ext_vanishing_of_colimit_pieces`.
+- **Removed redundant dimension-shift code**: The prior version used InjectivePresentation
+  + covariant_sequence_exact₁ + Ext.eq_zero_of_injective to reduce to an equivalent sorry.
+  Since the reduction was circular (Ext^n(Q) ≅ Ext^{n+1}(c.pt)), the clean delegation
+  is simpler.
+- Extensive mathematical analysis confirmed the gap requires one of: universal δ-functor
+  theorem (~300 lines), Čech cohomology (~500 lines), or derived category colimit
+  preservation (~500 lines).
+- Aristotle MCP unavailable; kept `aristotle-in/ext_filtered_colimit.lean` for resubmission.
+- Updated critique.md, plan.md, all documentation headers.
+
+## 2026-04-02T21:00Z — Babysit cycles: CLOSE n=0 case, reduce to 1 sorry
+
+**Sorry count: 1** (n≥1 Ext case only)
+
+- **CLOSED the n=0 case** of ext_comm_filtered_colimit_mono. The full chain:
+  1. Added `hHom` hypothesis to ext_comm_filtered_colimit_mono (caller provides)
+  2. Used `constantSheafAdj` + `addCommGrpCat_subsingleton_of_subsingleton_hom`
+     to reduce Hom(Z_X, K) to Subsingleton(K(⊤))
+  3. Direct section argument: for any x ∈ K(⊤), finsetGeneratedSheaf({⟨⊤,x⟩})
+     has zero sections at ⊤ (from hypothesis), and finsetGeneratorMap factors
+     through this zero group via factorThruImage ≫ image.ι = 0, so x = 0
+  4. Used `sHom_app_generator` + `Sigma.ι_desc` to show x is in the image
+- **Eliminated the IsSheafPairwiseIntersections / CreatesColimit sorry**
+  that blocked progress for ~6 cycles, by replacing the abstract colimit
+  argument with a direct concrete section-level argument
+- **1 sorry remains**: n≥1 Ext case (genuine Mathlib API gap)
+- Updated all stale headers in main.lean, IrreducibleStep.lean, CLAUDE.md
+
+## 2026-04-02T20:30Z — Babysit cycles: narrow IsSheaf sorry, extensive analysis
+
+**Sorry count: 2** (IsSheafPairwiseIntersections + n≥1 Ext case)
+
+- Multiple babysit cycles working on the IsSheafPairwiseIntersections sorry.
+- Verified `PreservesFiniteLimits (colim (J := J) (C := AddCommGrpCat))` synthesizes,
+  confirming filtered colimits commute with finite limits in AddCommGrpCat.
+- The blocker is connecting `pc.pt.mapCone(Pairwise diagram)` (a limit in AddCommGrpCat)
+  to the colimit of `(F_j.val).mapCone(Pairwise diagram)` — requires `CreatesColimit`
+  for `sheafToPresheaf` which is circular (needs `IsSheaf` to prove `CreatesColimit`).
+- Explored: using Mathlib's sheaf colimit construction directly, transferring IsSheaf
+  across iso, bypassing CreatesColimit. All approaches lead to the same circular dependency.
+- The sorry is a well-known mathematical fact: "filtered colimits of sheaves are sheaves
+  (presheaf colimit is already a sheaf for filtered diagrams)". The Lean formalization
+  requires manual construction of the limit-colimit interchange at the presheaf level.
+- The n≥1 Ext sorry remains unchanged (deep Mathlib gap).
+
+## 2026-04-02T19:30Z — Babysit cycle: prove hHom infrastructure, narrow sorry
+
+**Sorry count: 2** (objectwise colimit eval + n≥1 Ext case)
+
+- **Added helper lemmas**: `addCommGrpCat_subsingleton_of_subsingleton_hom` and
+  `addCommGrpCat_subsingleton_hom_of_subsingleton` — bridge between `Subsingleton (Hom(ULift ℤ, G))`
+  and `Subsingleton G` in AddCommGrpCat. PROVED.
+- **Used `constantSheafAdj`** to reduce `Subsingleton (Z ⟶ K)` to
+  `Subsingleton (ULift ℤ ⟶ K(⊤))` and then to `Subsingleton (K(⊤))`. PROVED.
+- **Narrowed remaining sorry** to: `Subsingleton (K.val.obj (op ⊤))` given
+  `∀ j, Subsingleton ((finsetGeneratedSheaf j).val.obj (op ⊤))`.
+  This is: the colimit of zero section groups is zero. Requires the objectwise
+  filtered colimit property for sheaves.
+- n≥1 sorry remains unchanged (Mathlib gap).
+
+## 2026-04-02T19:15Z — Babysit cycle: PROVE n=0 case of ext_comm_filtered_colimit_mono
+
+**Sorry count: 2** (was 2, but sorry's MOVED — n=0 case now PROVED)
+
+- **PROVED n=0 case** of `ext_comm_filtered_colimit_mono`: added `hHom` hypothesis
+  (Hom(Z,-) preserves the colimit) which the caller provides. The theorem's n=0
+  induction case now closes by `Ext.homEquiv₀.subsingleton_congr` + `hHom`.
+  This is a structural improvement: the abstract theorem has one proved case.
+- **Sorry moved**: the old abstract n=0 sorry is replaced by a sheaf-specific sorry
+  at the call site (`cohomology_vanishing_of_finitelyGenerated_vanishing`), which is
+  a more tractable target: "Hom(constantSheaf(ULift ℤ), K) is subsingleton given
+  Hom(constantSheaf(ULift ℤ), finsetGeneratedSheaf j) is subsingleton for all j".
+  This follows from `constantSheafΓAdj` + objectwise filtered colimits.
+- 2 sorry's remain: n≥1 case (Mathlib gap) + hHom at call site (sheaf-specific).
+
+## 2026-04-02T19:00Z — Babysit cycle: universe fix, split file
+
+**Sorry count: 2** (both in FiniteGeneratorReduction.lean)
+
+- **Constrained universe parameters** in `hom_subsingleton_of_filtered_colimit_mono`
+  and `ext_comm_filtered_colimit_mono`: now `J : Type w` matches
+  `IsGrothendieckAbelian.{w}`, which is necessary for any proof attempt using Mathlib's
+  `preservesColimit_coyoneda_obj_of_mono`. Investigated: even with matching universes,
+  `IsCardinalFiltered` condition cannot be satisfied for `Finset(SectionIndex K)` at
+  κ > ℵ₀. Abstract n=0 case needs sheaf-specific proof via objectwise colimits.
+- Full build passes (8042 jobs).
+
+## 2026-04-02T18:50Z — Babysit cycle: split IrreducibleStep.lean
+
+**Sorry count: 2** (both in FiniteGeneratorReduction.lean)
+
+- **Split IrreducibleStep.lean** (1604 → 1263 lines): extracted colimit theorem,
+  filtered diagram infrastructure, and finitely generated vanishing into new
+  `FiniteGeneratorReduction.lean` (~340 lines). IrreducibleStep now imports it.
+  Resolves P2 file size issue from critique.
+- Updated CLAUDE.md code tree, main.lean header.
+- Full build passes (8042 jobs).
+
+## 2026-04-02T18:40Z — Babysit cycle: fix dead code, doc cleanup, sorry analysis
+
+**Sorry count: 2** (n=0 Hom case + n≥1 Ext case, both in IrreducibleStep.lean)
+
+- **Attempted n=0 sorry proof**: the abstract Grothendieck abelian version needs
+  `preservesColimit_coyoneda_obj_of_mono` with universe/cardinal conditions that
+  don't match in the general case. In the actual sheaf application, universes DO match.
+  Added detailed comment documenting this.
+- **Fixed dead cascade code issue (P2)**: added explanatory comments documenting that
+  cascade theorems are infrastructure for future restructuring.
+- **Updated critique.md**: reflected decomposition (2 sorry's), removed fixed doc issues.
+- No Aristotle submissions possible (MCP has no submit endpoint).
+
+## 2026-04-02T18:30Z — Babysit cycle: cascade theorems, decompose sorry, critique
+
+**Sorry count: 2** (decomposed: `hom_subsingleton_of_filtered_colimit_mono` + n≥1 step)
+
+- **Added `sheafH_vanishing_cascade`** (GrothendieckVanishing.lean): two new proved theorems
+  showing once vanishing holds at one degree for all sheaves, it cascades to all higher
+  degrees via injective presentation + dimension shifting. Currently unused but ready for
+  future restructuring.
+- **Re-decomposed `ext_comm_filtered_colimit_mono`** via `Nat.induction` into:
+  1. `hom_subsingleton_of_filtered_colimit_mono` (n=0): Hom preserves colimit vanishing
+  2. Inductive step (n≥1): sorry (genuine Mathlib gap)
+  The n=0 case is properly wired: proving the sub-lemma closes the zero case automatically.
+- **Extensive analysis** of proof approaches documented in `proofs.md`:
+  dimension shifting fails at degree ≥2 because vanishing doesn't propagate to subsheaves.
+  Correct proof requires Čech cohomology, universal δ-functors, or Godement resolution.
+- **Critique updated**: found docs 404, dead cascade code, stale CLAUDE.md entries,
+  misleading "axiom" comment.
+- **Aristotle**: MCP has no submit endpoint. Cannot submit.
+
 ## 2026-04-02T09:30Z — Babysit cycle: merged remote work (cohomology_vanishing proved)
 
 **Sorry count: 2** (decomposed from 1 — `ext_comm_filtered_colimit_mono_zero` + `_succ`)
