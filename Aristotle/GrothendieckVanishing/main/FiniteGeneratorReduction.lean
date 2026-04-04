@@ -769,7 +769,28 @@ private theorem sheafH_filtered_colimit_aux
           apply (cancel_epi (cokernel.π ι')).mp
           rw [cokernel.π_desc, ← hπC j₀, Category.assoc, hm j₀] }
     -- Per-piece vanishing: H^n(Q_j) = 0
-    have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) n) := by sorry
+    -- For n ≥ 1: dimension shift via SES 0 → Y_j → I → Q_j → 0 (needs Mono)
+    -- For n = 0: separate argument needed (H^0(I) ≠ 0 so dim shift fails)
+    have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) n) := by
+      intro j
+      match n with
+      | 0 =>
+        -- n = 0: proving H^1(colim Y_j) = 0 via H^0(Q_j) = 0.
+        -- H^0(Q_j) = Γ(Q_j) surjects from Γ(I) when mono, and H^1(Y_j) = 0
+        -- gives Γ(I) ↠ Γ(Q_j). Needs direct LES argument.
+        sorry
+      | n' + 1 =>
+        -- n = n' + 1 ≥ 1: dim shift works since H^{n'+1}(I) = 0
+        let S_j : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+          ShortComplex.mk (c'.ι.app j ≫ ι') (cokernel.π (c'.ι.app j ≫ ι'))
+            (cokernel.condition _)
+        have hSE_j : S_j.ShortExact := by
+          refine ShortComplex.ShortExact.mk'
+            (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) ?_ inferInstance
+          -- Mono (c'.ι.app j ≫ ι'): needs mono coprojections
+          sorry
+        exact ext_dimension_shift_X₃ _ hSE_j (n' + 1)
+          (Ext.subsingleton_of_injective _ _ n') (hvan j)
     have hQ : Subsingleton (Sheaf.H S.X₃ n) := ih Q qCocone hqColim h_van_Q
     -- Dimension shift: Ext^{n+1}(Z, c'.pt) = 0
     exact ext_dimension_shift _ hSE n hQ hI
