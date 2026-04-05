@@ -322,16 +322,11 @@ private theorem sheafH_filtered_colimit_aux
       have hπQ : ∀ {j₁ j₂ : J'} (a : j₁ ⟶ j₂),
           cokernel.π (η.app j₁) ≫ Q.map a =
           Inj.map a ≫ cokernel.π (η.app j₂) := fun a => cokernel.π_desc _ _ _
-      have liftCocone_nat : ∀ (s : Cocone Q) {j₁ j₂ : J'} (a : j₁ ⟶ j₂),
-          Inj.map a ≫ (cokernel.π (η.app j₂) ≫ s.ι.app j₂) =
-          cokernel.π (η.app j₁) ≫ s.ι.app j₁ := by
-        intro s j₁ j₂ a
-        rw [← Category.assoc, ← hπQ a, Category.assoc, s.w]
       let liftCocone : ∀ (s : Cocone Q), Cocone Inj := fun s =>
         Cocone.mk s.pt
           { app := fun j => cokernel.π (η.app j) ≫ s.ι.app j
             naturality := fun j j' a => by
-              dsimp; rw [Category.comp_id, liftCocone_nat s a] }
+              dsimp; rw [Category.comp_id, ← Category.assoc, ← hπQ a, Category.assoc, s.w] }
       -- Use injCocone as colimit of Inj to get d : injCocone.pt → s.pt
       let injColim := colimit.isColimit Inj
       -- desc: cokernel(ι') → s.pt
@@ -382,13 +377,9 @@ private theorem sheafH_filtered_colimit_aux
         show (S.g.val.app (op ⊤)) ((injCocone.ι.app j₀).val.app (op ⊤) p) = q
         have hcomp_sec : (injCocone.ι.app j₀ ≫ S.g).val.app (op ⊤) =
             (ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀).val.app (op ⊤) :=
-          congrArg (·.val.app (op ⊤)) (show ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀ =
+          congrArg (fun f => f.val.app (op ⊤)) (show ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀ =
             injCocone.ι.app j₀ ≫ S.g from cokernel.π_desc _ _ _).symm
-        -- Evaluate at p using comp_apply
-        rw [← hq₀, ← hp]
-        change ((injCocone.ι.app j₀ ≫ S.g).val.app (op ⊤)) p =
-          ((ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀).val.app (op ⊤)) p
-        exact congrArg (· p) (congrArg ConcreteCategory.hom hcomp_sec)
+        rw [← hq₀, ← hp]; exact congrArg (· p) (congrArg ConcreteCategory.hom hcomp_sec)
       have h_surj := ext0_surj_of_epi_top (S := S) hΓg_epi
       constructor; intro a b
       obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a (@Subsingleton.elim _ hI _ _) rfl
@@ -398,12 +389,9 @@ private theorem sheafH_filtered_colimit_aux
         hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
     | n' + 1 =>
       -- For n ≥ 1: dimension shift via h_van_Q + IH
-      have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) (n' + 1)) := by
-        intro j
+      have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) (n' + 1)) := fun j => by
         haveI : Mono (η.app j) := hη_mono j
-        have hSE_j : (ShortComplex.mk (η.app j) (cokernel.π (η.app j))
-          (cokernel.condition _)).ShortExact := shortExact_of_mono (η.app j)
-        exact ext_dimension_shift_X₃ _ hSE_j (n' + 1)
+        exact ext_dimension_shift_X₃ _ (shortExact_of_mono (η.app j)) (n' + 1)
           (Ext.subsingleton_of_injective _ _ n') (hvan j)
       have hQ : Subsingleton (Sheaf.H S.X₃ (n' + 1)) :=
         ih Q qCocone hqColim h_van_Q

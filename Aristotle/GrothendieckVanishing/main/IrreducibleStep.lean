@@ -248,18 +248,10 @@ private theorem exists_section_generating_stalks
               (ConcreteCategory.hom (i.val.app (op V₁)) s₁)
           exact TopCat.Presheaf.stalkFunctor_map_germ_apply V₁ x (hWV₁ hxW) i.val s₁
       _ = (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x (hWV₁ hxW) d_gen_res := by
-          -- is₁ and d_gen_res have equal germs at x (from hW_eq via germ_res)
-          have h_eq_sec : ConcreteCategory.hom
-              ((TopCat.Sheaf.zeroOutsideInt V).val.map iW1.op) is₁ =
-            ConcreteCategory.hom
-              ((TopCat.Sheaf.zeroOutsideInt V).val.map iW1.op) d_gen_res := by
-            rw [hW_eq, hiW]
-          -- Both sides are germ_res from V₁ to W; use germ_res_apply in reverse
-          have hg1 := TopCat.Presheaf.germ_res_apply
-            (TopCat.Sheaf.zeroOutsideInt V).val (homOfLE hWV₁) x hxW is₁
-          have hg2 := TopCat.Presheaf.germ_res_apply
-            (TopCat.Sheaf.zeroOutsideInt V).val (homOfLE hWV₁) x hxW d_gen_res
-          rw [← hg1, ← hg2]; congr 1
+          rw [← TopCat.Presheaf.germ_res_apply
+              (TopCat.Sheaf.zeroOutsideInt V).val (homOfLE hWV₁) x hxW is₁,
+            ← TopCat.Presheaf.germ_res_apply
+              (TopCat.Sheaf.zeroOutsideInt V).val (homOfLE hWV₁) x hxW d_gen_res]; congr 1
       _ = d.down • (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x (hWV₁ hxW) gen_V_res := by
           rw [hd_gen_res_def, map_zsmul]
       _ = d.down • gen_at x (hWV hxW) := by
