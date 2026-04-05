@@ -207,19 +207,24 @@ The success rate (23%) was significantly lower than the VML project (50%), refle
 
 Submissions peaked on March 28 (32 jobs) — the most productive day, when the flasque vanishing infrastructure and closed immersion machinery were being built. A second wave on March 30 (23 jobs) targeted the extension-by-zero stalk computations and finite generator reduction.
 
-Key Aristotle-proved results include:
-- `isFlasque_of_injective` (`8f42abaa`): injective sheaves are flasque — a foundational lemma used throughout
-- `epi_app_of_shortExact_flasque` (`dd09b095`, `6c9faa89`): the Zorn argument for surjectivity of flasque sections, the hardest single lemma in `FlasqueVanishing.lean`
-- `stalk_zero_outside_closed` (`6a120205`): pushforward stalks vanish outside the closed set
-- `adjunction_unit_epi` (`6c5e042f`, `5445b970`): the adjunction unit is epi for closed immersions — key to `ClosedImmersionSES`
-- `ReducibleCase` (`b29fab4f`): Grothendieck vanishing for reducible spaces via finite induction
-- `DimStrictInequality` (`72e670ee`): dim(Z) < dim(X) for proper closed subsets of irreducible spaces
-- `constantSheaf_flasque` (`dd77a8fe`): the constant sheaf on an irreducible space is flasque
-- `extension_by_zero_mono` (`5ec05d55`): extension-by-zero sheafifies to a mono — key to the filtration argument
+Five theorems in the final codebase carry explicit Aristotle attribution (**182 lines**, 3.2% of total):
 
-The most impactful Aristotle result was `epi_app_of_shortExact_flasque` — the Zorn argument that a short exact sequence with flasque first two terms has surjective sections. This 300-line proof was the technical core of `FlasqueVanishing.lean` and would have taken significant manual effort.
+| Job ID | Theorem | File | Lines |
+|--------|---------|------|-------|
+| `72e670ee` | `topologicalKrullDim_lt_of_isIrreducible_of_isClosed` | Auxiliary.lean | 15 |
+| `99a8a5d6` | `addMonoidHom_rat_int_eq_zero` + `not_injective_int` | Auxiliary.lean | 36 |
+| `8f42abaa` | `isFlasque_of_injective` + 6 helpers | FlasqueVanishing.lean | 72 |
+| `68d0f4f8` | `zmul_bijective_of_index_match` | IrreducibleStep.lean | 14 |
+| `5bca8de6` | `ulift_int_subgroup_cyclic` | StalkGeneratorAlgebra.lean | 45 |
 
-Aristotle was less effective on the later sorry's (Apr 3–4). Six submissions for the filtered colimit step (`782d0f32`, `b1902f2c`, `50689427`, `1676d0c9`, `b3dcac1a`, `6ecc7b79`) all returned with sorry — the presheaf-to-sheaf colimit argument required manual element chasing and sheaf separation lemmas that required deep understanding of the proof structure. The final submission (`2507e172`, Gabriel's theorem) was canceled when the flasque bypass was discovered.
+Beyond directly integrated code, several Aristotle results provided critical **architectural insights**:
+- **`99a8a5d6` (flasque ≠ injective counterexample)**: Aristotle proved that `flasque → injective` is FALSE by constructing a counterexample (ℤ on a point). This was one of the most impactful contributions — it prevented pursuing a dead-end proof strategy on March 28, forcing the restructuring that led to `FlasqueVanishing` becoming an independent theorem.
+- **`8d809cf1` (GrothendieckVanishingFull)**: Confirmed that extension-by-zero (`j_!`) infrastructure is required for the full theorem, validating the decision to build 760 lines of `ZeroOutside` machinery.
+- **`b29fab4f` (ReducibleCase)**: Provided the Finset.induction structure for the reducible case.
+
+Submissions peaked on March 28 (32 jobs) and March 30 (23 jobs). Of 23 retried jobs (resumed-* filenames), only a handful succeeded — suggesting that if Aristotle fails on the first attempt, retries rarely help.
+
+Aristotle was less effective on the later sorry's (Apr 3–4). Six submissions for the filtered colimit step (`782d0f32`, `b1902f2c`, `50689427`, `1676d0c9`, `b3dcac1a`, `6ecc7b79`) all returned with sorry — these required deep Mathlib API navigation (filtered colimit preservation, sheafification internals, derived category computations) that exceeded Aristotle's capabilities. The final submission (`2507e172`, Gabriel's theorem) was canceled when the flasque bypass was discovered.
 
 ### Lines of Code Over Time
 
