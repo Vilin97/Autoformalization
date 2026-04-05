@@ -163,7 +163,7 @@ private theorem exists_section_generating_stalks
       exact ⟨k, by have := congrArg ULift.down hk; simp at this; linarith⟩
   -- d_nat is the minimal positive generator among all points of V
   have hP_dec : DecidablePred P := Classical.decPred P
-  set d_nat := Nat.find (p := P) hP with hd_nat_def
+  set d_nat := Nat.find (p := P) hP
   obtain ⟨hd_nat_pos, x₀, hx₀V, hd_in_range, hd_divides⟩ := Nat.find_spec (p := P) hP
   -- Minimality of d_nat
   have h_minimal : ∀ n, P n → d_nat ≤ n := fun n hn => Nat.find_min' (p := P) hP hn

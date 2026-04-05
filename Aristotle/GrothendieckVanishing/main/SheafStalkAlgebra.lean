@@ -81,7 +81,7 @@ private theorem presheaf_stalk_surj_openHom
   intro g
   obtain ⟨W, hxW, s, rfl⟩ := (TopCat.Presheaf.constZ.zeroOutside U).germ_exist x g
   -- Restrict to W ⊓ V, where both presheaves agree with constZ
-  set WV := W ⊓ V with hWV_def
+  set WV := W ⊓ V
   have hWV_le_V : WV ≤ V := inf_le_right
   have hWV_le_W : WV ≤ W := inf_le_left
   have hxWV : x ∈ WV := ⟨hxW, hx⟩

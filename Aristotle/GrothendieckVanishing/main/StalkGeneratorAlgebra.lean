@@ -60,17 +60,12 @@ theorem exists_nonzero_stalk_in_V
   apply sheaf_isZero_of_zero_stalks; intro x a
   by_cases hx : (x : X) ∈ (V : Set X)
   · exact h x hx a
-  · let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
-        TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-    have h_img : ConcreteCategory.hom (FT.map i) a = 0 :=
-      stalk_zeroOutsideInt_zero_outside V x hx _
-    haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
+  · haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
       (C := AddCommGrpCat.{u}) (X := X) x
-    haveI : Mono (FT.map i) := Functor.map_mono FT i
-    have hinj := (ConcreteCategory.mono_iff_injective_of_preservesPullback
-      (FT.map i)).mp inferInstance
-    rw [← map_zero (ConcreteCategory.hom (FT.map i))] at h_img
-    exact hinj h_img
+    let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
+        TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+    exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono FT i)
+      ((stalk_zeroOutsideInt_zero_outside V x hx _).trans (map_zero _).symm)
 
 /-- A sheaf morphism is mono if all its stalk maps are injective. -/
 theorem sheaf_mono_of_stalk_injective
@@ -86,10 +81,8 @@ theorem sheaf_mono_of_stalk_injective
 
 /-- Every additive subgroup of `ℤ` is of the form `nℤ`. -/
 private theorem int_addSubgroup_eq_zmultiples (H : AddSubgroup ℤ) :
-    ∃ n : ℤ, H = AddSubgroup.zmultiples n := by
-  obtain ⟨n, hn⟩ := Int.subgroup_cyclic H
-  refine ⟨n, ?_⟩
-  simpa [AddSubgroup.zmultiples_eq_closure] using hn
+    ∃ n : ℤ, H = AddSubgroup.zmultiples n :=
+  (Int.subgroup_cyclic H).imp fun _ hn => by simpa [AddSubgroup.zmultiples_eq_closure] using hn
 
 /-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
     is an integer multiple of the germ of the distinguished generator over `V`. -/
@@ -229,7 +222,7 @@ theorem zsmul_generator_injective
     TopCat.Presheaf.stalkFunctor_map_germ_apply V x hx
       (toSheafify J P) (TopCat.Presheaf.zeroOutside.generator V)
   -- Transfer to presheaf stalk via injectivity of toSheafify stalk map
-  set gen_P := TopCat.Presheaf.zeroOutside.generator V with hgen_P_def
+  set gen_P := TopCat.Presheaf.zeroOutside.generator V
   have h' : P.germ V x hx (n • gen_P) = P.germ V x hx (m • gen_P) := by
     rw [map_zsmul, map_zsmul]
     apply hbij.1; simp only [map_zsmul, hgen_eq]; exact h
@@ -247,7 +240,7 @@ theorem zsmul_generator_injective
   have hObjW : P.obj (op W) = AddCommGrpCat.of (ULift ℤ) := by
     simp [P, TopCat.Presheaf.zeroOutside, hWV, TopCat.Presheaf.constZ]
   -- The restricted generator maps to 1 in ULift ℤ (reuse pattern from line 491)
-  set resGen := ConcreteCategory.hom (P.map (homOfLE hWV).op) gen_P with hresGen_def
+  set resGen := ConcreteCategory.hom (P.map (homOfLE hWV).op) gen_P
   -- resGen maps to 1 ∈ ULift ℤ via eqToHom (same calculation as line ~491)
   have hresGen_val : (AddCommGrpCat.Hom.hom (eqToHom hObjW)) resGen = (1 : ULift ℤ) := by
     -- resGen = (P.map (homOfLE hWV).op) gen_P where P = constZ.zeroOutside V

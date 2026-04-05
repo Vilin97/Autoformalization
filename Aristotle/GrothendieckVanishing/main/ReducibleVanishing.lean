@@ -69,10 +69,9 @@ theorem stalk_zero_of_ses_g_iso
   haveI : Mono S.f := hSE.mono_f
   haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
     (C := AddCommGrpCat.{u}) (X := X) x
-  haveI : Mono ((TopCat.Sheaf.forget _ _ ⋙ T).map S.f) :=
-    Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f
-  rw [AddCommGrpCat.mono_iff_injective] at this
-  exact this (hfa_zero.trans (map_zero _).symm)
+  exact (AddCommGrpCat.mono_iff_injective _).mp
+    (Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f)
+    (hfa_zero.trans (map_zero _).symm)
 
 /-! ## Main proof -/
 
