@@ -316,9 +316,9 @@ private theorem exists_section_generating_stalks
       have h1 : (d_nat : ℤ) ≤ d_x.down := by
         rw [← Int.toNat_of_nonneg (le_of_lt hd_x_pos)]; exact_mod_cast h_le
       have hk_pos : 0 < k_div := by
-        by_contra hle; push_neg at hle; linarith [mul_nonpos_of_nonpos_of_nonneg hle (le_of_lt hd_x_pos)]
+        by_contra! hle; linarith [mul_nonpos_of_nonpos_of_nonneg hle (le_of_lt hd_x_pos)]
       have hk_le1 : k_div ≤ 1 := by
-        by_contra hgt; push_neg at hgt; linarith [mul_lt_mul_of_pos_right hgt hd_x_pos]
+        by_contra! hgt; linarith [mul_lt_mul_of_pos_right hgt hd_x_pos]
       have hk_eq : k_div = 1 := le_antisymm hk_le1 hk_pos
       rw [hk_eq, one_mul] at hd_eq_k_dx; linarith
     -- Now d.down | n (since d_x generates at x and d_x.down = d.down)
