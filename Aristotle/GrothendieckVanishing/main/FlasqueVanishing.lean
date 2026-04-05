@@ -109,10 +109,9 @@ private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
       exact (cancel_mono S.f).mp this
     haveI : Epi h.f' := hS.exact.epi_f' h
     haveI : IsIso h.f' := isIso_of_mono_of_epi h.f'
-    haveI hz1 : IsZero (cokernel h.f') := isZero_cokernel_of_epi h.f'
     haveI hz2 : IsZero
         ((sectionsAt (X := X) V).obj (cokernel h.f')) :=
-      Functor.map_isZero _ hz1
+      Functor.map_isZero _ (isZero_cokernel_of_epi h.f')
     haveI hz3 : IsZero
         (cokernel ((sectionsAt (X := X) V).map h.f')) :=
       isZero_cokernel_of_epi _
@@ -326,7 +325,7 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
         exact ⟨false, h⟩; exact ⟨true, h⟩)
   have hcompat_glue : TopCat.Presheaf.IsCompatible S.X₂.val BU Bsf := by
     intro i j; match i, j with
-    | false, false => rfl
+    | false, false | true, true => rfl
     | false, true => exact hcompat_patch.symm
     | true, false =>
       show S.X₂.val.map (W.infLELeft V₀).op t'' = S.X₂.val.map (W.infLERight V₀).op t₀
@@ -337,7 +336,6 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
         op_comp, Functor.map_comp, CategoryTheory.comp_apply,
           op_comp, Functor.map_comp, CategoryTheory.comp_apply,
           hcompat_patch]
-    | true, true => rfl
   obtain ⟨t_new, ht_new, _⟩ := TopCat.Sheaf.existsUnique_gluing' S.X₂ BU (V₀ ⊔ W)
     (fun b => homOfLE (by cases b <;> simp [BU])) (hsup_eq ▸ le_rfl) Bsf hcompat_glue
   have h_new_inP : IsPartialLift (S := S) U s ⟨V₀ ⊔ W, t_new⟩ := by

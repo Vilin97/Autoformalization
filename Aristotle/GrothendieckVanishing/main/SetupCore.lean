@@ -214,12 +214,11 @@ theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
     Subsingleton (Sheaf.H S.X₂ n) := by
   let Z := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
     (AddCommGrpCat.of (ULift ℤ))
-  constructor
-  intro a b
-  have ha : a.comp (Ext.mk₀ S.g) (add_zero n) = 0 := @Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _
-  have hb : b.comp (Ext.mk₀ S.g) (add_zero n) = 0 := @Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ Z hS a ha
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ Z hS b hb
+  constructor; intro a b
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ Z hS a
+    (@Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _)
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ Z hS b
+    (@Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _)
   rw [← hc, ← hd, @Subsingleton.elim _ h₁ c d]
 
 /-! ### PushforwardHVanishing sub-lemmas -/
@@ -345,27 +344,13 @@ private lemma PushforwardHVanishing_one
     rw [htop]; exact hg_epi
   have hsurj_X := ext0_surj_of_epi_top hg_epi_X
   constructor; intro a b
-  have ha : a.comp (Ext.mk₀ (ip.shortComplex.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 :=
-    @Subsingleton.elim _ hJ _ 0
-  have hb : b.comp (Ext.mk₀ (ip.shortComplex.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 :=
-    @Subsingleton.elim _ hJ _ 0
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a ha rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE_X b hb rfl
-  have zero_c : c.comp hSE_X.extClass rfl = 0 := by
-    obtain ⟨c', hc'⟩ := hsurj_X c
-    rw [← hc', Ext.comp_assoc_of_second_deg_zero c' (Ext.mk₀
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a (@Subsingleton.elim _ hJ _ 0) rfl
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE_X b (@Subsingleton.elim _ hJ _ 0) rfl
+  obtain ⟨c', hc'⟩ := hsurj_X c; obtain ⟨d', hd'⟩ := hsurj_X d
+  simp only [← hc, ← hd, ← hc', ← hd',
+    Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀
       (ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).g)
-      hSE_X.extClass rfl, hSE_X.comp_extClass,
-      Ext.comp_zero c' _ 1 1 rfl]
-  have zero_d : d.comp hSE_X.extClass rfl = 0 := by
-    obtain ⟨d', hd'⟩ := hsurj_X d
-    rw [← hd', Ext.comp_assoc_of_second_deg_zero d' (Ext.mk₀
-      (ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).g)
-      hSE_X.extClass rfl, hSE_X.comp_extClass,
-      Ext.comp_zero d' _ 1 1 rfl]
-  rw [← hc, ← hd, zero_c, zero_d]
+      hSE_X.extClass rfl, hSE_X.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
 
 -- n = m+2 ≥ 2: use pushed-forward injective presentation + FlasqueVanishing + LES
 private lemma PushforwardHVanishing_succ
