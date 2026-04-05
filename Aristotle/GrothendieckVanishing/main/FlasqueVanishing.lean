@@ -421,20 +421,16 @@ theorem isFlasque_of_injective {X : TopCat.{u}}
   intro U V i
   rw [AddCommGrpCat.epi_iff_surjective]
   intro s
-  set g := (freeAbSheafHomEquiv U I).symm s
-  obtain ⟨h, hh⟩ : ∃ h : freeAbSheaf V ⟶ I, freeAbSheafMap i ≫ h = g :=
-    Injective.factors g (freeAbSheafMap i)
-  refine ⟨freeAbSheafHomEquiv V I h, ?_⟩
-  rw [← freeAbSheafHomEquiv_naturality i I h, hh]
-  simp [g]
+  obtain ⟨h, hh⟩ := Injective.factors ((freeAbSheafHomEquiv U I).symm s) (freeAbSheafMap i)
+  exact ⟨freeAbSheafHomEquiv V I h, by rw [← freeAbSheafHomEquiv_naturality i I h, hh]; simp⟩
 
 theorem epi_of_natIso_epi {C D : Type*} [Category C] [Category D]
     {F G : C ⥤ D} (α : F ≅ G) {X Y : C} (f : X ⟶ Y)
     (h : Epi (F.map f)) : Epi (G.map f) := by
-  have : G.map f = α.inv.app X ≫ F.map f ≫ α.hom.app Y := by
+  rw [show G.map f = α.inv.app X ≫ F.map f ≫ α.hom.app Y from by
     conv_lhs => rw [← Category.id_comp (G.map f), ← Iso.inv_hom_id_app α X]
-    rw [Category.assoc, ← α.hom.naturality f, ← Category.assoc]
-  rw [this]; exact epi_comp _ _
+    rw [Category.assoc, ← α.hom.naturality f, ← Category.assoc]]
+  exact epi_comp _ _
 
 -- Surjectivity of Ext map at degree 0 (base case input).
 -- For a SES 0 -> F -> I -> Q -> 0 with F flasque, the induced map

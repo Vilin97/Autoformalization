@@ -67,17 +67,11 @@ private theorem sHom_stalk_bijective_at
     obtain ⟨m, rfl⟩ := stalk_zeroOutsideInt_eq_zsmul_generator U x hxU b
     simp only [map_zsmul, h_sHom_gen] at hab
     -- hab : n • germ(s, x) = m • germ(s, x) in stalk(R, x)
-    -- Apply i_x: n • i_x(germ(s,x)) = m • i_x(germ(s,x))
+    -- Apply i_x then use torsion-freeness: n • c • gen_V = m • c • gen_V → n = m
     have h_i : n • i_x (R.presheaf.germ U x hxU s) =
-        m • i_x (R.presheaf.germ U x hxU s) := by
-      rw [← map_zsmul i_x, ← map_zsmul i_x, hab]
-    -- Substitute i_x(germ(s,x)) = c • gen_V: n • (c • gen_V) = m • (c • gen_V)
+        m • i_x (R.presheaf.germ U x hxU s) := by rw [← map_zsmul, ← map_zsmul, hab]
     rw [hc, smul_comm n, smul_comm m, ← mul_smul, ← mul_smul] at h_i
-    -- h_i : (c * n) • gen_V = (c * m) • gen_V, so c * n = c * m
-    have h_cn : c * n = c * m := zsmul_generator_injective V x (hUV hxU) h_i
-    -- c ≠ 0, so n = m
-    have h_nm : n = m := mul_left_cancel₀ hc_ne h_cn
-    rw [h_nm]
+    rw [mul_left_cancel₀ hc_ne (zsmul_generator_injective V x (hUV hxU) h_i)]
   exact ⟨h_inj, h_surj⟩
 
 /-- At each point `x ∈ V`, the image of the stalk of `R` under `i` is a subgroup of

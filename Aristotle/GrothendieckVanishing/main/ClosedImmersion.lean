@@ -39,19 +39,11 @@ theorem locallyInjective_stalkFunctor_map_injective
   rw [← hsV] at hst ⊢
   rw [TopCat.Presheaf.stalkFunctor_map_germ_apply, TopCat.Presheaf.stalkFunctor_map_germ_apply] at hst
   obtain ⟨W, hxW, iWU, iWV, hEq⟩ := G.germ_eq x hxU hxV _ _ hst
-  have hEqWU :
-      T.app (Opposite.op W) (F.map iWU.op sU) =
-        G.map iWU.op (T.app (Opposite.op U) sU) := by
+  have hnat (Y : Opens X) (iWY : W ⟶ Y) (sY : F.obj (op Y)) :
+      T.app (op W) (F.map iWY.op sY) = G.map iWY.op (T.app (op Y) sY) := by
     rw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply, T.naturality]
-  have hEqWV :
-      T.app (Opposite.op W) (F.map iWV.op sV) =
-        G.map iWV.op (T.app (Opposite.op V) sV) := by
-    rw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply, T.naturality]
-  have hEq' :
-      T.app (Opposite.op W) (F.map iWU.op sU) =
-        T.app (Opposite.op W) (F.map iWV.op sV) := by
-    rw [hEqWU, hEqWV]
-    exact hEq
+  have hEq' : T.app (op W) (F.map iWU.op sU) =
+      T.app (op W) (F.map iWV.op sV) := by rw [hnat _ iWU, hnat _ iWV]; exact hEq
   have hloc := CategoryTheory.Presheaf.equalizerSieve_mem
     (J := Opens.grothendieckTopology X) (φ := T)
     (x := F.map iWU.op sU) (y := F.map iWV.op sV) hEq'
