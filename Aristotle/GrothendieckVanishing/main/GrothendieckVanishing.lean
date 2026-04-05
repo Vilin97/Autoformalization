@@ -5,7 +5,7 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  The proof assembles (1 sorry in FiniteGeneratorReduction.lean: Gabriel's theorem):
+  The proof assembles (FULLY PROVED — 0 sorry's):
   - DimZeroVanishing: irreducible dim 0 case
   - IrreducibleStep + FiniteGeneratorReduction: irreducible dim >= 1 case
   - ClosedOpenDecomposition: reduction to irreducible
