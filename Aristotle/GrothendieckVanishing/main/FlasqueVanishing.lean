@@ -42,10 +42,9 @@ instance {C : Type*} [Category C] {D : Type*} [Category D] [Preadditive D] :
     (Functor.const Cᵒᵖ : D ⥤ Cᵒᵖ ⥤ D).Additive where
 
 instance {X : TopCat.{u}} :
-    (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive := by
-  show ((Functor.const (Opens X)ᵒᵖ) ⋙
-    presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive
-  infer_instance
+    (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive :=
+  inferInstanceAs ((Functor.const (Opens X)ᵒᵖ ⋙
+    presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive)
 
 -- Cache expensive typeclass resolutions to avoid re-synthesizing in every proof.
 -- The chain IsGrothendieckAbelian → EnoughInjectives → HasDerivedCategory is very

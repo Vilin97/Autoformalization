@@ -53,9 +53,8 @@ private theorem filtered_colimit_kills_all_restrictions
         (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
     have heq : g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq =
         fk₀ ≫ IsFiltered.rightToMax j_cur jk₀ ≫ h_eq := by
-      have := IsFiltered.coeq_condition (g_cur ≫ IsFiltered.leftToMax j_cur jk₀)
-        (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
-      simp only [Category.assoc] at this; exact this
+      simpa only [Category.assoc] using IsFiltered.coeq_condition
+        (g_cur ≫ IsFiltered.leftToMax j_cur jk₀) (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
     refine ⟨j₁, g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq, fun k hk => ?_⟩
     have htrans : ∀ {j j' : J'} (f : j₀ ⟶ j) (g : j ⟶ j') (k' : ι),
         ConcreteCategory.hom ((Y'.obj j).val.map (Opens.leSupr U k').op)
@@ -159,7 +158,7 @@ private theorem isSheaf_presheaf_filtered_colimit
         ((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op (iSup U)) ≫
         (c.ι.app j₁).app (op (iSup U)) := by
       have := congrArg (fun α => NatTrans.app α (op (iSup U))) (c.ι.naturality g₀)
-      simp [Functor.const_obj_map] at this; exact this.symm
+      simpa [Functor.const_obj_map] using this.symm
     conv_lhs => rw [hfac]
     change ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U))) b₁ = 0
     rw [hb₁_zero, map_zero]
@@ -307,9 +306,9 @@ private theorem isSheaf_presheaf_filtered_colimit
       · -- p = p₀: use coeq condition to equate transitions
         have heq : g_cur ≫ IsFiltered.leftToMax j_cur j_new ≫ h_coeq =
             f_new ≫ IsFiltered.rightToMax j_cur j_new ≫ h_coeq := by
-          have := IsFiltered.coeq_condition (g_cur ≫ IsFiltered.leftToMax j_cur j_new)
+          simpa only [Category.assoc] using IsFiltered.coeq_condition
+            (g_cur ≫ IsFiltered.leftToMax j_cur j_new)
             (f_new ≫ IsFiltered.rightToMax j_cur j_new)
-          simp only [Category.assoc] at this; exact this
         rw [heq]
         exact htrans f_new (IsFiltered.rightToMax j_cur j_new ≫ h_coeq)
           _ ((Finset.mem_product.mp hp₀t).1)
@@ -429,9 +428,9 @@ private theorem isSheaf_presheaf_filtered_colimit
             (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
         have heq : g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq =
             fk₀ ≫ IsFiltered.rightToMax j_cur jk₀ ≫ h_eq := by
-          have := IsFiltered.coeq_condition (g_cur ≫ IsFiltered.leftToMax j_cur jk₀)
+          simpa only [Category.assoc] using IsFiltered.coeq_condition
+            (g_cur ≫ IsFiltered.leftToMax j_cur jk₀)
             (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
-          simp only [Category.assoc] at this; exact this
         refine ⟨j', g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq, fun k hk => ?_⟩
         -- htrans: if res(F(f)(d₀)) = 0 then res(F(f ≫ g)(d₀)) = 0
         have htrans_d : ∀ {ja jb : J'} (fa : j₂ ⟶ ja) (ga : ja ⟶ jb) (k' : ι),
@@ -474,7 +473,7 @@ private theorem isSheaf_presheaf_filtered_colimit
         ((Y' ⋙ sheafToPresheaf _ _).map g₃).app (op (U i)) ≫
         (c.ι.app j₃).app (op (U i)) := by
       have := congrArg (fun α => NatTrans.app α (op (U i))) (c.ι.naturality g₃)
-      simp [Functor.const_obj_map] at this; exact this.symm
+      simpa [Functor.const_obj_map] using this.symm
     conv_lhs => rw [hfac_d]
     change ConcreteCategory.hom ((c.ι.app j₃).app (op (U i))) b₃ = 0
     rw [hb₃_zero, map_zero]
