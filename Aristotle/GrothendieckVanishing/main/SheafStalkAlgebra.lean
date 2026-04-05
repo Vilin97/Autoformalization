@@ -187,8 +187,6 @@ theorem cokernel_openHom_vanishing
     topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne_univ
       (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
         (lt_of_lt_of_le hn le_top))
-  have hn_Y : ↑n > topologicalKrullDim (TopCat.of Y) :=
-    lt_trans hY_dim_lt hn
   -- Build SES via ClosedImmersionSES on Vᶜ with C (use let-bindings for dsimp)
   let i : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
   let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
@@ -203,7 +201,7 @@ theorem cokernel_openHom_vanishing
   -- Pushforward vanishing by IH
   have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
     rw [hS₃]
-    exact PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ n _ hY_dim_lt hn_Y)
+    exact PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ n _ hY_dim_lt (lt_trans hY_dim_lt hn))
   -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
   have hKer : Subsingleton (Sheaf.H S.X₁ n) := by
     apply subsingleton_sheafH_of_isZero'
