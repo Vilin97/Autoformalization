@@ -73,9 +73,8 @@ theorem sheaf_mono_of_stalk_injective
     (h : ∀ x : X, Function.Injective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val))) :
     Mono f := by
-  have : ∀ x, Mono ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val) := by
-    intro x
-    exact (ConcreteCategory.mono_iff_injective_of_preservesPullback _).mpr (h x)
+  have : ∀ x, Mono ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val) :=
+    fun x => (ConcreteCategory.mono_iff_injective_of_preservesPullback _).mpr (h x)
   exact TopCat.Presheaf.mono_of_stalk_mono f
 
 /-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
@@ -228,9 +227,9 @@ theorem zsmul_generator_injective
   -- P.obj(op W) = ULift ℤ since W ≤ V
   have hObjW : P.obj (op W) = AddCommGrpCat.of (ULift ℤ) := by
     simp [P, TopCat.Presheaf.zeroOutside, hWV, TopCat.Presheaf.constZ]
-  -- The restricted generator maps to 1 in ULift ℤ (reuse pattern from line 491)
+  -- The restricted generator maps to 1 in ULift ℤ
   set resGen := ConcreteCategory.hom (P.map (homOfLE hWV).op) gen_P
-  -- resGen maps to 1 ∈ ULift ℤ via eqToHom (same calculation as line ~491)
+  -- resGen maps to 1 ∈ ULift ℤ via eqToHom
   have hresGen_val : (AddCommGrpCat.Hom.hom (eqToHom hObjW)) resGen = (1 : ULift ℤ) := by
     -- resGen = (P.map (homOfLE hWV).op) gen_P where P = constZ.zeroOutside V
     -- Under eqToHom to ULift ℤ, this composition sends gen to 1

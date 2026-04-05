@@ -156,6 +156,11 @@ theorem topologicalKrullDim_lt_of_isIrreducible_of_isClosed {X : Type u} [Topolo
       ⟨⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩⟩
     exact (WithBot.bot_lt_coe _).trans_le Order.krullDim_nonneg
 
+/-- The complement of a nonempty open is not the whole space. -/
+theorem compl_ne_univ_of_ne_bot {X : Type*} [TopologicalSpace X] {V : Opens X} (hV : V ≠ ⊥) :
+    (V : Set X)ᶜ ≠ Set.univ :=
+  Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV))
+
 /-! ## Projective ULift ℤ in AddCommGrpCat -/
 
 /-- `ULift ℤ` is projective in `AddCommGrpCat` (via the equivalence with `ModuleCat ℤ`). -/

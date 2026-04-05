@@ -84,8 +84,8 @@ private theorem filtered_colimit_kills_all_restrictions
     · exact htrans g_cur (IsFiltered.leftToMax j_cur jk₀ ≫ h_eq) k (hg_cur k hk)
 
 /-- On a Noetherian space, the presheaf-level filtered colimit of sheaves is a sheaf.
-    The sheaf category has filtered colimits and `sheafToPresheaf` preserves them,
-    so the presheaf colimit is isomorphic to the presheaf underlying the sheaf colimit. -/
+    Proof: Noetherian compactness reduces the sheaf condition to finite covers, then
+    filtered colimit merging passes from per-piece data to glued data. -/
 private theorem isSheaf_presheaf_filtered_colimit
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']

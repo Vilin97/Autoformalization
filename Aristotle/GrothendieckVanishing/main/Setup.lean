@@ -37,8 +37,7 @@ theorem exists_closed_subset_lt_dim_of_irreducible_pos
   rw [Order.krullDim_pos_iff] at hpos
   obtain ⟨a, b, hab⟩ := hpos
   have hZ_ne_univ : a.carrier ≠ Set.univ := by
-    intro h
-    exact lt_irrefl a (lt_of_lt_of_le hab
+    intro h; exact lt_irrefl a (lt_of_lt_of_le hab
       (show b.carrier ⊆ a.carrier from by rw [h]; exact Set.subset_univ _))
   have hZ_dim : topologicalKrullDim (TopCat.of a.carrier) < topologicalKrullDim X :=
     topologicalKrullDim_lt_of_isIrreducible_of_isClosed a.isClosed' hZ_ne_univ
@@ -72,6 +71,6 @@ theorem irreduciblePos_pushforward_subsingleton
 
 /-! ## Remaining sub-lemmas and main theorem
 
-The sorry lemmas and `IrreduciblePosVanishing` are now in `IrreducibleStep.lean`
+The auxiliary lemmas and `IrreduciblePosVanishing` are now in `IrreducibleStep.lean`
 where they have access to `zeroOutsideInt_vanishing`, `cokernel_openHom_vanishing`,
 and the stalk computation tools needed for their proofs. -/

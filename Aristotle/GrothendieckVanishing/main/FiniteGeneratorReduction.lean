@@ -427,7 +427,7 @@ theorem sheafH_preserves_filtered_colimits
     Subsingleton (Sheaf.H c'.pt n) :=
   sheafH_filtered_colimit_aux n Y' c' hc' hvan
 
-/-- **Hartshorne 2.9 core**: on a Noetherian space, if `H^m = 0` for all finitely generated
+/-- **Hartshorne III, Ex. 2.9 core**: on a Noetherian space, if `H^m = 0` for all finitely generated
     subsheaves of `K`, then `H^m(K) = 0`. Applies `sheafH_preserves_filtered_colimits`
     to the filtered diagram of finitely generated subsheaves. -/
 theorem cohomology_vanishing_of_finitelyGenerated_vanishing
