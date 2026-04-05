@@ -223,7 +223,7 @@ Beyond directly integrated code, several Aristotle results provided critical **a
 - **`8d809cf1` (GrothendieckVanishingFull)**: Confirmed that extension-by-zero (`j_!`) infrastructure is required for the full theorem, validating the decision to build 760 lines of `ZeroOutside` machinery.
 - **`b29fab4f` (ReducibleCase)**: Provided the Finset.induction structure for the reducible case.
 
-Submissions peaked on March 28 (32 jobs) and March 30 (23 jobs). Of 23 retried jobs (resumed-* filenames), only a handful succeeded — suggesting that if Aristotle fails on the first attempt, retries rarely help.
+Submissions peaked on March 28 (32 jobs) and March 30 (23 jobs). Of 23 retried jobs (resumed-* filenames), only 5 succeeded (22%) — suggesting that if Aristotle fails on the first attempt, retries rarely help.
 
 Aristotle was less effective on the later sorry's (Apr 3–4). Six submissions for the filtered colimit step (`782d0f32`, `b1902f2c`, `50689427`, `1676d0c9`, `b3dcac1a`, `6ecc7b79`) all returned with sorry — these required deep Mathlib API navigation (filtered colimit preservation, sheafification internals, derived category computations) that exceeded Aristotle's capabilities. The final submission (`2507e172`, Gabriel's theorem) was canceled when the flasque bypass was discovered.
 
