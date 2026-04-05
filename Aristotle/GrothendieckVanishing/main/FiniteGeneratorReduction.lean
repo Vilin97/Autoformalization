@@ -47,8 +47,8 @@ private lemma isFlasque_filtered_colimit
   intro b
   haveI := createsFilteredColimit F
   have hc_psh := isColimitOfPreserves (sheafToPresheaf _ _) hc
-  let ev_U := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op U)
-  have hc_U := isColimitOfPreserves ev_U hc_psh
+  have hc_U := isColimitOfPreserves
+    ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op U)) hc_psh
   obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ hc_U b
   have hflq : Function.Surjective (ConcreteCategory.hom ((F.obj j₀).val.map i.op)) := by
     rw [← AddCommGrpCat.epi_iff_surjective]; exact hFlasque j₀ i

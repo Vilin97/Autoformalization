@@ -440,11 +440,9 @@ theorem subsheaf_zeroOutsideInt_vanishing
       let S' := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
       have hSE' : S'.ShortExact := ShortComplex.ShortExact.mk'
         (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
-      have hS'₃ : S'.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u} ci).obj
-          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} ci).obj CJ) := rfl
-      -- Pushforward vanishing by IH
       have hPush : Subsingleton (Sheaf.H S'.X₃ m) := by
-        rw [hS'₃]
+        show Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} ci).obj
+          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} ci).obj CJ)) m)
         exact PushforwardHVanishing Y hYcl _ m (@ih (TopCat.of Y) _ m _ hY_dim_lt (lt_trans hY_dim_lt hm))
       -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
       have hKer : Subsingleton (Sheaf.H S'.X₁ m) := by
