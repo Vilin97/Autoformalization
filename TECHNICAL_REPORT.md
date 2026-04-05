@@ -9,7 +9,7 @@ A complete formalization of **Grothendieck's vanishing theorem** (Hartshorne III
 ## Contents
 
 - [The Mathematics](#the-mathematics) — [Main Theorem](#the-main-theorem) | [Proof Architecture](#proof-architecture) | [Key Innovation](#key-innovation-flasque-sheaves-replace-gabriels-theorem)
-- [Development Process](#development-process) — [Narrative](#narrative) | [Session Activity](#session-activity) | [Token Usage](#token-usage) | [Babysit Loop](#the-babysit-loop) | [Aristotle Integration](#aristotle-integration) | [LOC Over Time](#lines-of-code-over-time) | [Git Churn](#git-churn) | [Sorry Elimination](#sorry-elimination) | [Tool Usage](#tool-usage)
+- [Development Process](#development-process) — [Narrative](#narrative) | [Session Activity](#session-activity) | [Token Usage](#token-usage) | [Babysit Loop](#the-babysit-loop) | [Aristotle Integration](#aristotle-integration) | [LOC Over Time](#lines-of-code-over-time) | [LOC by File Group](#lines-of-code-over-time) | [Git Churn](#git-churn) | [Sorry Elimination](#sorry-elimination) | [Tool Usage](#tool-usage)
 - [Technical Stack](#technical-stack)
 
 | Metric | Value |
@@ -30,6 +30,10 @@ A complete formalization of **Grothendieck's vanishing theorem** (Hartshorne III
 | Tokens consumed | ~8.8 billion input, ~10 million output |
 | Estimated API cost | ~$15,000 |
 | Aristotle ATP submissions | ~20 |
+
+![Dependency graph](artifacts/dep_graph_gv.png)
+
+**Proof dependency graph.** All nodes are green (fully proved). Definitions (boxes) flow into lemmas and theorems (ellipses). The graph flows from primitive definitions (`isFlasqueSheaf`, `zeroOutside`, `zeroOutsideInt`) through intermediate results (`FlasqueVanishing`, `PushforwardHVanishing`, `ReducibleVanishing`, `IrreduciblePosVanishing`) down to `GrothendieckVanishing` at the bottom.
 
 ## The Mathematics
 
@@ -208,6 +212,14 @@ The success rate (23%) was significantly lower than the VML project (50%), refle
 
 Submissions peaked on March 28 (32 jobs) — the most productive day, when the flasque vanishing infrastructure and closed immersion machinery were being built. A second wave on March 30 (23 jobs) targeted the extension-by-zero stalk computations and finite generator reduction.
 
+![Aristotle outcomes](artifacts/aristotle_outcomes_gv.png)
+
+**Figure: Outcomes of 94 Aristotle submissions.** Aristotle proved 22 lemmas cleanly (23%), returned 66 with sorry's still present (70%), canceled 5 (superseded by proof restructuring, 5%), and 1 failed on infrastructure errors (1%). The stacked bar chart shows peak submission activity on Mar 28 (32 jobs) when the flasque vanishing infrastructure was being built. The high "returned with sorry" rate reflects the difficulty of category-theoretic proofs: filtered colimit commutativity, sheafification internals, and derived category computations all exceeded Aristotle's current capabilities.
+
+![Aristotle turnaround](artifacts/aristotle_turnaround_gv.png)
+
+**Figure: Aristotle turnaround times for 94 GV-related submissions, colored by outcome.** Left: histogram of turnaround times. Most jobs cluster near the maximum time budget (~120 hours), reflecting the difficulty of the submissions — unlike the VML project where proved lemmas were fast (median 9 minutes), GV's category-theoretic lemmas required Aristotle's full time budget regardless of outcome. Right: median turnaround by outcome category.
+
 Five theorems in the final codebase carry explicit Aristotle attribution (**182 lines**, 3.2% of total):
 
 | Job ID | Theorem | File | Lines |
@@ -232,6 +244,10 @@ Aristotle was less effective on the later sorry's (Apr 3–4). Six submissions f
 ![Lean LOC over time](artifacts/loc_history_gv.png)
 
 **Figure: Lean lines of code in `Aristotle/GrothendieckVanishing/main/` over time.** The project progressed in four phases: (1) **Skeleton + infrastructure** (Mar 27–28): the proof structure, flasque vanishing, constant sheaf flasque, reducible case, and pushforward vanishing — reaching ~3,500 lines. (2) **Extension-by-zero machinery** (Mar 29–30): ZeroOutside.lean, stalk computations, and the finite generator reduction framework — reaching ~4,500 lines. (3) **Filtered colimit battle** (Apr 1–3): presheaf colimit is sheaf, element chasing, functorial injective embeddings — reaching ~5,800 lines. (4) **Final breakthrough + cleanup** (Apr 4): flasque bypass eliminates Gabriel's theorem, hitting 5,844 lines final.
+
+![LOC by file group](artifacts/loc_breakdown_gv.png)
+
+**Figure: LOC by file group over time.** Warm shades (top) are the proof chain: main theorem, irreducible step, closed-open decomposition, dim 0 case. Cool shades (bottom) are infrastructure: flasque vanishing, setup/core, closed immersion, extension-by-zero, stalk/generator algebra, filtered colimit. The sharp blue/cyan growth on Mar 29–30 is the extension-by-zero machinery (`ZeroOutside.lean`, ~760 lines) — constructing Z_V, proving stalk computations, and establishing the closed-open short exact sequence. The teal growth on Apr 2–3 is the stalk generator algebra and filtered colimit infrastructure for the final sorry.
 
 ### Git Churn
 
