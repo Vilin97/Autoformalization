@@ -79,16 +79,6 @@ theorem topologicalKrullDim_nonneg_of_irreducible {X : Type u} [TopologicalSpace
   rw [topologicalKrullDim, ge_iff_le, Order.krullDim_nonneg_iff]
   exact ⟨⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩⟩
 
-/-- The image of the map from IrreducibleCloseds Y to IrreducibleCloseds X
-    is contained in Y when Y is closed. -/
-private lemma map_subtype_carrier_subset {X : Type u} [TopologicalSpace X]
-    {Y : Set X} (hY : IsClosed Y) (s : IrreducibleCloseds Y) :
-    (IrreducibleCloseds.map (Subtype.val : Y → X) continuous_subtype_val s).carrier ⊆ Y := by
-  show closure (Subtype.val '' s.carrier) ⊆ Y
-  apply closure_minimal _ hY
-  rintro x ⟨⟨y, hy⟩, _, rfl⟩
-  exact hy
-
 /-- Every element in the image of IrreducibleCloseds Y → IrreducibleCloseds X
     is strictly below the whole space X, when Y ⊊ X. -/
 private lemma map_subtype_lt_top {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
