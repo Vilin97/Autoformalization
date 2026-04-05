@@ -164,94 +164,79 @@ def make_chart(data):
     ax.set_axisbelow(True)
 
     # --- Annotations ---
+    def _annotate(label, xy, xytext, color="#666666", bold=False, fontsize=8):
+        ax.annotate(
+            label, xy=xy, xytext=xytext, fontsize=fontsize,
+            fontweight="bold" if bold else "normal", color=color,
+            arrowprops=dict(arrowstyle="->", color=color, lw=1),
+            ha="center", va="bottom",
+        )
 
-    # Find the peak (24 sorry's on Apr 1)
-    peak_idx = max(range(len(counts)), key=lambda i: counts[i])
-    peak_date = dates[peak_idx]
-    peak_val = counts[peak_idx]
+    def _find(date_str, hour_ge=0, count_pred=None):
+        """Find first data point matching criteria."""
+        d = datetime.fromisoformat(date_str).date()
+        for dt, c in data:
+            if dt.date() == d and dt.hour >= hour_ge:
+                if count_pred is None or count_pred(c):
+                    return (dt, c)
+        return None
 
-    ax.annotate(
-        f"Regression: automated prover\n(peak {peak_val} sorry\u2019s)",
-        xy=(peak_date, peak_val),
-        xytext=(datetime(2026, 4, 1, 20, 0, tzinfo=PDT), peak_val - 1),
-        fontsize=8,
-        color="#990000",
-        arrowprops=dict(arrowstyle="->", color="#990000", lw=1),
-        ha="left", va="top",
-    )
+    # 1. Skeleton (Mar 27, ~2 sorry's)
+    p = _find("2026-03-27")
+    if p:
+        _annotate("Skeleton\n(2 sorry\u2019s)",
+                  xy=p, xytext=(datetime(2026, 3, 27, 6, 0, tzinfo=PDT), 8))
 
-    # Find the "decompose sorry's" peak on Mar 28 (~7)
-    mar28_data = [(d, c) for d, c in data
-                  if d.date() == datetime(2026, 3, 28).date()]
+    # 2. FlasqueVanishing + epi_app proved (Mar 28, drops from ~7 to ~3)
+    mar28_data = [(d, c) for d, c in data if d.date() == datetime(2026, 3, 28).date()]
     if mar28_data:
-        mar28_peak = max(mar28_data, key=lambda x: x[1])
-        ax.annotate(
-            f"Sub-lemma decomposition\n({mar28_peak[1]} sorry\u2019s)",
-            xy=(mar28_peak[0], mar28_peak[1]),
-            xytext=(datetime(2026, 3, 28, 18, 0, tzinfo=PDT), mar28_peak[1] + 4),
-            fontsize=8,
-            color="#666666",
-            arrowprops=dict(arrowstyle="->", color="#666666", lw=1),
-            ha="center", va="bottom",
-        )
+        peak28 = max(mar28_data, key=lambda x: x[1])
+        _annotate(f"FlasqueVanishing\ninfrastructure\n(peak {peak28[1]})",
+                  xy=(peak28[0], peak28[1]),
+                  xytext=(datetime(2026, 3, 28, 12, 0, tzinfo=PDT), peak28[1] + 5))
 
-    # Drop to 2 around Mar 30
-    mar30_data = [(d, c) for d, c in data
-                  if d.date() == datetime(2026, 3, 30).date()]
+    # 3. ReducibleVanishing proved (Mar 28 evening)
+    p = _find("2026-03-28", hour_ge=20, count_pred=lambda c: c <= 4)
+    if p:
+        _annotate("ReducibleVanishing\nPROVED", xy=p, color="#336633",
+                  xytext=(datetime(2026, 3, 29, 6, 0, tzinfo=PDT), 10))
+
+    # 4. Down to 2: subsheaf + colimit remain (Mar 30)
+    mar30_data = [(d, c) for d, c in data if d.date() == datetime(2026, 3, 30).date()]
     if mar30_data:
-        mar30_point = mar30_data[-1]
-        ax.annotate(
-            f"Stable at {mar30_point[1]}",
-            xy=(mar30_point[0], mar30_point[1]),
-            xytext=(datetime(2026, 3, 30, 18, 0, tzinfo=PDT), mar30_point[1] + 5),
-            fontsize=8,
-            color="#666666",
-            arrowprops=dict(arrowstyle="->", color="#666666", lw=1),
-            ha="center", va="bottom",
-        )
+        mar30_end = mar30_data[-1]
+        _annotate(f"Extension-by-zero\nmachinery built\n({mar30_end[1]} sorry\u2019s remain)",
+                  xy=mar30_end,
+                  xytext=(datetime(2026, 3, 30, 12, 0, tzinfo=PDT), mar30_end[1] + 6))
 
-    # Restored to 2 on Apr 1 afternoon
+    # 5. Regression: automated prover breaks 14 proofs (Apr 1 peak)
+    peak_idx = max(range(len(counts)), key=lambda i: counts[i])
+    peak_date, peak_val = dates[peak_idx], counts[peak_idx]
+    _annotate(f"Heartbeat regression\n(automated prover\nbreaks 14 proofs)",
+              xy=(peak_date, peak_val), color="#990000",
+              xytext=(datetime(2026, 4, 1, 18, 0, tzinfo=PDT), peak_val - 2))
+
+    # 6. Restored (Apr 1)
     apr1_restored = [(d, c) for d, c in data
                      if d.date() == datetime(2026, 4, 1).date()
                      and d.hour >= 13 and c <= 3]
     if apr1_restored:
-        restore_point = apr1_restored[0]
-        ax.annotate(
-            f"Restored to {restore_point[1]}",
-            xy=(restore_point[0], restore_point[1]),
-            xytext=(datetime(2026, 4, 1, 7, 0, tzinfo=PDT), 10),
-            fontsize=8,
-            color="#336633",
-            arrowprops=dict(arrowstyle="->", color="#336633", lw=1),
-            ha="center", va="bottom",
-        )
+        _annotate("Proofs restored", xy=apr1_restored[0], color="#336633",
+                  xytext=(datetime(2026, 4, 1, 6, 0, tzinfo=PDT), 10))
 
-    # Drop to 1 on Apr 2
-    apr2_1 = [(d, c) for d, c in data
-              if d.date() == datetime(2026, 4, 2).date() and c == 1]
-    if apr2_1:
-        ax.annotate(
-            "Down to 1",
-            xy=(apr2_1[0][0], 1),
-            xytext=(datetime(2026, 4, 2, 6, 0, tzinfo=PDT), 7),
-            fontsize=8,
-            color="#336633",
-            arrowprops=dict(arrowstyle="->", color="#336633", lw=1),
-            ha="center", va="bottom",
-        )
+    # 7. Consolidated to 1 sorry: filtered colimit (Apr 2-3)
+    apr3_1 = [(d, c) for d, c in data
+              if d.date() == datetime(2026, 4, 3).date() and c == 1]
+    if apr3_1:
+        _annotate("isSheaf for\nfiltered colimits\nPROVED",
+                  xy=apr3_1[0], color="#336633",
+                  xytext=(datetime(2026, 4, 3, 4, 0, tzinfo=PDT), 7))
 
-    # Final 0 on Apr 4
+    # 8. Final: 0 sorry's via flasque bypass (Apr 4)
     final = data[-1]
-    ax.annotate(
-        "0 sorry\u2019s \u2014 DONE",
-        xy=(final[0], final[1]),
-        xytext=(datetime(2026, 4, 4, 6, 0, tzinfo=PDT), 4),
-        fontsize=9,
-        fontweight="bold",
-        color="#006600",
-        arrowprops=dict(arrowstyle="->", color="#006600", lw=1.2),
-        ha="center", va="bottom",
-    )
+    _annotate("Flasque bypass\neliminates Gabriel\u2019s\ntheorem \u2014 DONE",
+              xy=(final[0], final[1]), color="#006600", bold=True, fontsize=9,
+              xytext=(datetime(2026, 4, 4, 8, 0, tzinfo=PDT), 5))
 
     # Horizontal line at y=0
     ax.axhline(y=0, color="green", linewidth=0.8, alpha=0.5, linestyle="--")
