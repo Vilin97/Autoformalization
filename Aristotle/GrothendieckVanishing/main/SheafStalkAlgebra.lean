@@ -170,10 +170,8 @@ theorem cokernel_stalk_zero_of_stalk_surj
   simp only [TopCat.Presheaf.stalkFunctor_map_germ_apply]
   have hcond : f.val ≫ (cokernel.π f).val = (0 : F ⟶ cokernel f).val :=
     congr_arg Sheaf.Hom.val (cokernel.condition f)
-  have h1 : ConcreteCategory.hom ((f.val ≫ (cokernel.π f).val).app (op U)) s = 0 := by
-    rw [hcond]; rfl
-  simp only [NatTrans.comp_app, ConcreteCategory.comp_apply] at h1
-  rw [h1, map_zero]
+  have h1 : ConcreteCategory.hom ((f.val ≫ (cokernel.π f).val).app (op U)) s = 0 := by rw [hcond]; rfl
+  simp only [NatTrans.comp_app, ConcreteCategory.comp_apply] at h1; rw [h1, map_zero]
 
 /-- The cokernel of `openHom(le_top)` has zero stalks at points of `V`.
     Uses: sheaf stalk surjectivity + section_ext + local surjectivity of `cokernel.π`

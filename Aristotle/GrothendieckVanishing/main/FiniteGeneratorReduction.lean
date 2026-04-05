@@ -221,7 +221,6 @@ private theorem sheafH_filtered_colimit_aux
     letI := inst1; letI := inst2
     -- H^0 ≅ global sections, colimit of trivial sections is trivial
     haveI := createsFilteredColimit Y'
-    let c_psh := (sheafToPresheaf _ _).mapCocone c'
     have hc_psh := isColimitOfPreserves (sheafToPresheaf _ _) hc'
     let ev_top := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)
     have hc_top := isColimitOfPreserves ev_top hc_psh
@@ -538,8 +537,7 @@ private theorem imageIncl_cokernel_epi
           finsetCoproductIncl hσ₀ =
         Sigma.ι (fun τ : {τ // τ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ, hσ⟩ := by
         simp [finsetCoproductIncl]
-      rw [← hι, Category.assoc, reassoc_of% heq]
-      simp [cokernel.condition]
+      rw [← hι, Category.assoc, reassoc_of% heq]; simp [cokernel.condition]
   exact epi_of_epi_fac hfac
 
 /-- **Step 3B–3C**: vanishing for `finsetGeneratedSheaf S` by `Finset.induction`. -/
