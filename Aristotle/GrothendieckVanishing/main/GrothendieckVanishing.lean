@@ -39,19 +39,6 @@ theorem sheafH_vanishing_succ (X : TopCat.{u})
   exact sheafH_dimension_shift_ses ip.shortExact_shortComplex m
     (hall ip.shortComplex.X₃) hInj
 
-/-- Once vanishing holds at degree `m₀` for all sheaves, it holds at all degrees `≥ m₀`.
-    This means the colimit step (`ext_vanishing_of_colimit_pieces`) is only needed at `dim(X)+1`;
-    all higher degrees follow for free. -/
-theorem sheafH_vanishing_cascade (X : TopCat.{u})
-    (m₀ : ℕ)
-    (hbase : ∀ (F : TopCat.Sheaf AddCommGrpCat.{u} X), Subsingleton (Sheaf.H F m₀))
-    (n : ℕ) (hn : n ≥ m₀) :
-    ∀ (F : TopCat.Sheaf AddCommGrpCat.{u} X), Subsingleton (Sheaf.H F n) := by
-  obtain ⟨k, rfl⟩ : ∃ k, n = m₀ + k := ⟨n - m₀, (Nat.add_sub_cancel' hn).symm⟩
-  induction k with
-  | zero => exact hbase
-  | succ k ih => exact sheafH_vanishing_succ X (m₀ + k) (ih (Nat.le_add_right m₀ k))
-
 /-! ## Main induction -/
 
 /-- The core induction step: vanishing at dimension d, given vanishing at all d' < d. -/

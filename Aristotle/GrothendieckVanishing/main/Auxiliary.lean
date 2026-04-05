@@ -170,22 +170,4 @@ noncomputable instance ulift_int_projective :
   simp only [he, Functor.asEquivalence, ModuleCat.forget₂_obj] at hp
   exact hp
 
-/-! ## Covering sieve lemma for dim 0 -/
-
-/-- On a dim 0 irreducible nonempty space, every covering sieve of ⊤ contains the identity.
-    This is because the only nonempty open is ⊤ itself. -/
-theorem covering_sieve_top_has_id {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
-    (hdim : topologicalKrullDim X ≤ 0) [Nonempty X]
-    (S : Sieve (⊤ : Opens X)) (hS : S ∈ Opens.grothendieckTopology X ⊤) :
-    S.arrows (𝟙 ⊤) := by
-  obtain ⟨x⟩ := ‹Nonempty X›
-  obtain ⟨V, f, hfS, hxV⟩ := hS x trivial
-  have hVtop : V = ⊤ := by
-    rcases opens_eq_bot_or_top_of_irreducibleSpace_dim_zero hdim V with rfl | rfl
-    · simp at hxV
-    · rfl
-  subst hVtop
-  rwa [show f = 𝟙 ⊤ from Subsingleton.elim _ _] at hfS
-
-/-! ## Epi → surjective at ⊤ on dim 0 irreducible -/
 
