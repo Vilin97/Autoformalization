@@ -51,7 +51,6 @@ GrothendieckVanishing.lean    ← Main theorem (assembles all cases)
     ├── Setup.lean             ← Wrapper theorems (IrreduciblePosVanishing, ReducibleVanishing)
     ├── ClosedImmersion.lean   ← Closed immersion counit/stalk
     ├── ZeroOutside.lean       ← Extension-by-zero sheaf machinery
-    ├── CohomologyIso.lean     ← H'(⊤, F) ≅ H(F) isomorphisms
     └── Auxiliary.lean         ← Topology/dimension helpers
 ```
 
