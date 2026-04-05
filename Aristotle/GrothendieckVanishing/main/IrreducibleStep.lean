@@ -344,9 +344,7 @@ private theorem exists_section_generating_stalks
     have hn_mem : (⟨n⟩ : ULift.{u} ℤ) ∈ H_at x (hWV hxW) :=
       ⟨a, show i_x x a = (⟨n⟩ : ULift.{u} ℤ).down • gen_at x (hWV hxW) from hn⟩
     obtain ⟨k₀, hk₀⟩ := hd_x_gen ⟨n⟩ hn_mem
-    have hn_eq : n = k₀ * d.down := by
-      have h1 := congrArg ULift.down hk₀
-      simp at h1; rw [hd_x_eq] at h1; linarith
+    have hn_eq : n = k₀ * d.down := by simpa [hd_x_eq] using congrArg ULift.down hk₀
     exact ⟨k₀, hi_inj x (by rw [map_zsmul, hn, hn_eq, mul_smul, ← hcoeff_x])⟩
 
 /-- Core construction for Step 4: find V' ≤ V, V' ≠ ⊥, and a section s ∈ R(V') such that
@@ -390,9 +388,8 @@ theorem subsheaf_contains_zeroOutsideInt
   by_cases hy : y ∈ V'
   · exact (hbij y hy).1
   · intro a b _
-    have ha := stalk_zeroOutsideInt_zero_outside V' y hy a
-    have hb := stalk_zeroOutsideInt_zero_outside V' y hy b
-    rw [ha, hb]
+    exact (stalk_zeroOutsideInt_zero_outside V' y hy a).trans
+      (stalk_zeroOutsideInt_zero_outside V' y hy b).symm
 
 /-- **Step 4** (Hartshorne III.2.7): any subsheaf of `zeroOutsideInt V` has vanishing
     cohomology in degree `m > dim X`. Uses `subsheaf_contains_zeroOutsideInt` to find
@@ -435,8 +432,6 @@ theorem subsheaf_zeroOutsideInt_vanishing
         topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne_univ
           (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
             (lt_of_lt_of_le hm le_top))
-      have hm_Y : ↑m > topologicalKrullDim (TopCat.of Y) :=
-        lt_trans hY_dim_lt hm
       -- Build SES via ClosedImmersionSES on (V')^c with CJ
       let ci : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
       let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} ci
@@ -450,7 +445,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
       -- Pushforward vanishing by IH
       have hPush : Subsingleton (Sheaf.H S'.X₃ m) := by
         rw [hS'₃]
-        exact PushforwardHVanishing Y hYcl _ m (@ih (TopCat.of Y) _ m _ hY_dim_lt hm_Y)
+        exact PushforwardHVanishing Y hYcl _ m (@ih (TopCat.of Y) _ m _ hY_dim_lt (lt_trans hY_dim_lt hm))
       -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
       have hKer : Subsingleton (Sheaf.H S'.X₁ m) := by
         apply subsingleton_sheafH_of_isZero'
