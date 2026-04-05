@@ -380,12 +380,9 @@ private lemma PushforwardHVanishing_succ
   have hR : Subsingleton (Sheaf.H ip.shortComplex.X₃ (m + 1)) := by
     constructor; intro c d
     have hSE_Z := ip.shortExact_shortComplex
-    have heq : c.comp hSE_Z.extClass rfl = d.comp hSE_Z.extClass rfl :=
-      @Subsingleton.elim _ hG' _ _
-    have hker : (c - d).comp hSE_Z.extClass rfl = 0 := by
+    obtain ⟨e, he⟩ := Ext.covariant_sequence_exact₃ _ hSE_Z (c - d) rfl (by
       change (Ext.postcomp hSE_Z.extClass _ rfl) (c - d) = 0
-      rw [map_sub, sub_eq_zero]; exact heq
-    obtain ⟨e, he⟩ := Ext.covariant_sequence_exact₃ _ hSE_Z (c - d) rfl hker
+      rw [map_sub, sub_eq_zero]; exact @Subsingleton.elim _ hG' _ _)
     rw [Ext.eq_zero_of_injective e, Ext.zero_comp] at he
     exact sub_eq_zero.mp he.symm
   exact @Subsingleton.elim _ (ih_push ip.shortComplex.X₃ hR) c d

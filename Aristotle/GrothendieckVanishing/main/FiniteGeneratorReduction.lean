@@ -400,18 +400,12 @@ private theorem sheafH_filtered_colimit_aux
         obtain ⟨p, hp⟩ := hπ_epi q₀
         -- Composition: Inj.obj j₀ →[π_{j₀}] Q_{j₀} →[cocone] Q
         -- = Inj.obj j₀ →[ι_{j₀}] colim Inj →[S.g] Q
-        have hcomp : ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀ =
-            injCocone.ι.app j₀ ≫ S.g := by
-          show cokernel.π _ ≫ _ = _
-          exact cokernel.π_desc _ _ _
-        -- Push p ∈ Γ(Inj.obj j₀) through injCocone.ι to Γ(S.X₂)
         refine ⟨(injCocone.ι.app j₀).val.app (op ⊤) p, ?_⟩
         show (S.g.val.app (op ⊤)) ((injCocone.ι.app j₀).val.app (op ⊤) p) = q
-        -- hcomp: ip_j₀.shortComplex.g ≫ qCocone.ι j₀ = injCocone.ι j₀ ≫ S.g
-        -- Section-level: S.g(ι_j₀(p)) = qCocone.ι(j₀)(ip_j₀.shortComplex.g(p)) = qCocone.ι(j₀)(q₀) = q
         have hcomp_sec : (injCocone.ι.app j₀ ≫ S.g).val.app (op ⊤) =
             (ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀).val.app (op ⊤) :=
-          congrArg (·.val.app (op ⊤)) hcomp.symm
+          congrArg (·.val.app (op ⊤)) (show ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀ =
+            injCocone.ι.app j₀ ≫ S.g from cokernel.π_desc _ _ _).symm
         -- Evaluate at p using comp_apply
         rw [← hq₀, ← hp]
         change ((injCocone.ι.app j₀ ≫ S.g).val.app (op ⊤)) p =
@@ -419,19 +413,11 @@ private theorem sheafH_filtered_colimit_aux
         exact congrArg (· p) (congrArg ConcreteCategory.hom hcomp_sec)
       have h_surj := ext0_surj_of_epi_top (S := S) hΓg_epi
       constructor; intro a b
-      have ha : a.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ hI _ _
-      have hb : b.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ hI _ _
-      obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a ha rfl
-      obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b hb rfl
-      obtain ⟨c', hc'⟩ := h_surj c
-      obtain ⟨d', hd'⟩ := h_surj d
-      have zero_c : c.comp hSE.extClass rfl = 0 := by
-        rw [← hc', Ext.comp_assoc_of_second_deg_zero c' (Ext.mk₀ S.g)
-          hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero c' _ 1 1 rfl]
-      have zero_d : d.comp hSE.extClass rfl = 0 := by
-        rw [← hd', Ext.comp_assoc_of_second_deg_zero d' (Ext.mk₀ S.g)
-          hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero d' _ 1 1 rfl]
-      rw [← hc, ← hd, zero_c, zero_d]
+      obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a (@Subsingleton.elim _ hI _ _) rfl
+      obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b (@Subsingleton.elim _ hI _ _) rfl
+      obtain ⟨c', hc'⟩ := h_surj c; obtain ⟨d', hd'⟩ := h_surj d
+      simp only [← hc, ← hd, ← hc', ← hd', Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀ S.g)
+        hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
     | n' + 1 =>
       -- For n ≥ 1: dimension shift via h_van_Q + IH
       have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) (n' + 1)) := by
