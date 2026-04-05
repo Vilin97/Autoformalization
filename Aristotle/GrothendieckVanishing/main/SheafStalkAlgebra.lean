@@ -44,8 +44,6 @@ theorem zeroOutsideInt_vanishing
       inferInstance inferInstance
   have hFlasque : IsFlasqueSheaf S.X₂ := by
     intro U W i
-    -- S.X₂ = zeroOutsideInt ⊤ ≅ constantSheaf ℤ (via presheaf NatIso + sheafification)
-    -- Build NatIso at presheaf level
     let J := Opens.grothendieckTopology (T := X)
     let A := AddCommGrpCat.of (ULift.{u} ℤ)
     let α : TopCat.Presheaf.constZ.zeroOutside (⊤ : Opens X) ≅
@@ -53,27 +51,19 @@ theorem zeroOutsideInt_vanishing
       CategoryTheory.NatIso.ofComponents
         (fun W => eqToIso (by show _ = A; simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ, A]))
         (by intro W₁ W₂ f; simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ, A])
-    -- Sheafify to get sheaf iso β : S.X₂ ≅ constantSheaf(A)
     let β : S.X₂ ≅ (constantSheaf J AddCommGrpCat.{u}).obj A :=
       (presheafToSheaf J AddCommGrpCat.{u}).mapIso α
-    -- β is an iso in the Sheaf category; its val is a natural iso of presheaves
-    have hβ_iso : IsIso β.hom := Iso.isIso_hom β
-    -- β.hom is an iso in Sheaf, so β.hom.val is iso as a nat trans
     haveI : IsIso β.hom.val :=
       (sheafToPresheaf J AddCommGrpCat.{u}).map_isIso β.hom
     haveI : IsIso (β.hom.val.app (op W)) :=
       CategoryTheory.NatIso.isIso_app_of_isIso β.hom.val (op W)
     haveI : IsIso (β.hom.val.app (op U)) :=
       CategoryTheory.NatIso.isIso_app_of_isIso β.hom.val (op U)
-    -- From naturality: S.X₂.val.map i.op = inv(β_W) ≫ C.val.map i.op ≫ β_U
-    have h_nat := β.hom.val.naturality i.op
-    have hEpi_const := constantSheaf_flasque_of_irreducible X i
-    -- S.X₂.map = β_W⁻¹ ≫ C.map ≫ β_U, so epi (iso ∘ epi ∘ iso = epi)
     have hrw : S.X₂.val.map i.op = β.hom.val.app (op W) ≫
         ((constantSheaf J AddCommGrpCat.{u}).obj A).val.map i.op ≫
         inv (β.hom.val.app (op U)) := by
-      have := h_nat
-      rw [← Category.assoc, ← this, Category.assoc, IsIso.hom_inv_id, Category.comp_id]
+      rw [← Category.assoc, ← β.hom.val.naturality i.op, Category.assoc,
+        IsIso.hom_inv_id, Category.comp_id]
     rw [hrw]
     haveI := constantSheaf_flasque_of_irreducible X i
     exact inferInstance
