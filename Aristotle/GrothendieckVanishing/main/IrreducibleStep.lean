@@ -220,8 +220,7 @@ private theorem exists_section_generating_stalks
   have hWV₁ : W ≤ V₁ := leOfHom iW1
   have hWV : W ≤ V := le_trans hWV₁ hV₁V
   -- W ≠ ⊥ (contains x₀)
-  have hW_ne : W ≠ ⊥ := by
-    intro h; exact (Opens.mem_bot (x := x₀)).mp (h ▸ hx₀W)
+  have hW_ne : W ≠ ⊥ := fun h => (Opens.mem_bot (x := x₀)).mp (h ▸ hx₀W)
   -- On W, the sections is₁|_W and d_gen_res|_W agree (from hW_eq)
   have hiW := Subsingleton.elim iW1 iW2
   -- Key: at every x ∈ W, i_x(germ(s₁|_W, x)) = d.down • gen_at x
