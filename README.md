@@ -37,6 +37,7 @@ Fully verified formalizations of research-level mathematics in Lean 4, achieved 
 ## The Team
 
 - [Vasily Ilin](https://github.com/Vilin97) (Human): Architect & Reviewer
+- [Brian Nugent](https://github.com/brian-nugent) (Human): Theorem statement, proof reference, flasque vanishing architecture (Grothendieck only)
 - [Claude Code](https://claude.com/claude-code) (Agent): Engineer & Prover
 - [Aristotle](https://aristotle.harmonic.fun/) (ATP): Lemma Specialist
 - [Gemini DeepThink](https://gemini.google.com) (Reasoning Model): Mathematician (VML only)
