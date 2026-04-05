@@ -17,12 +17,10 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 
-/-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology
-    on irreducible X with dim ≥ 1 when n > dim X.
-    Uses the SES `0 → zeroOutsideInt V → zeroOutsideInt ⊤ → cokernel → 0`
-    where `zeroOutsideInt ⊤ = Z_X` (constant sheaf, flasque on irreducible spaces).
-    The cokernel vanishing at degree `m = n-1` is assumed (from IH on the
-    closed complement `Vᶜ`). -/
+/-- **Step 5** (Hartshorne III.2.7): given vanishing of the cokernel of
+    `openHom(V ≤ ⊤)` at degree `m`, deduce vanishing of `zeroOutsideInt V` at
+    degree `m + 1`. Uses the SES `0 → zeroOutsideInt V → zeroOutsideInt ⊤ → cokernel → 0`
+    where `zeroOutsideInt ⊤ = Z_X` (constant sheaf, flasque on irreducible spaces). -/
 theorem zeroOutsideInt_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) (m : ℕ)
@@ -98,7 +96,7 @@ private theorem presheaf_stalk_surj_openHom
   convert ((TopCat.Presheaf.constZ.zeroOutside U).germ_res_apply
     (homOfLE hWV_le_W) x hxWV s) using 1
 
-/-- The sheaf stalk map of `openHom(le_top)` at `x ∈ V` is surjective.
+/-- The sheaf stalk map of `openHom(h)` at `x ∈ V` is surjective.
     Transfers presheaf stalk surjectivity via `toSheafify_naturality` and
     the fact that `stalk(toSheafify)` is an isomorphism. -/
 private theorem sheaf_stalk_surj_openHom
@@ -125,8 +123,8 @@ private theorem sheaf_stalk_surj_openHom
     rw [← ConcreteCategory.comp_apply, hnat.symm, ConcreteCategory.comp_apply, hp]⟩
 
 /-- Cokernel stalk vanishes at points where the map is stalk-surjective.
-    Since the stalk functor on sheaves of abelian groups is exact, `stalk(cokernel f, x) =
-    cokernel(stalk(f, x))`, which is zero when `stalk(f, x)` is surjective. -/
+    Proof: `cokernel.π` is epi hence stalk-surjective, so every stalk element lifts to `G`,
+    then to `F` by hypothesis; `cokernel.condition` gives zero. -/
 theorem cokernel_stalk_zero_of_stalk_surj
     {X : TopCat.{u}}
     {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
@@ -151,8 +149,7 @@ theorem cokernel_stalk_zero_of_stalk_surj
   simp only [NatTrans.comp_app, ConcreteCategory.comp_apply] at h1; rw [h1, map_zero]
 
 /-- The cokernel of `openHom(le_top)` has zero stalks at points of `V`.
-    Uses: sheaf stalk surjectivity + section_ext + local surjectivity of `cokernel.π`
-    + `cokernel.condition`. -/
+    Delegates to `cokernel_stalk_zero_of_stalk_surj` via `sheaf_stalk_surj_openHom`. -/
 private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
       (Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))).val) :
@@ -182,7 +179,7 @@ theorem cokernel_openHom_vanishing
   set Y := (V : Set X)ᶜ with hY_def
   have hYcl : IsClosed Y := V.2.isClosed_compl
   have hY_ne_univ : Y ≠ Set.univ :=
-    Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV))
+    compl_ne_univ_of_ne_bot hV
   have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
     topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne_univ
       (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
@@ -213,24 +210,16 @@ theorem cokernel_openHom_vanishing
       exact stalk_zero_of_ses_g_iso hSE x inferInstance a
     · -- At points in V: C has zero stalks, so S.X₂ = C has zero stalk, mono gives kernel = 0
       have hxV : x ∈ V := by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY
-      have hstalk_zero :
-          ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₂.val),
-          b = 0 := fun b => cokernel_stalk_zero_V V x hxV b
-      haveI : Mono S.f := hSE.mono_f
-      haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
-        (C := AddCommGrpCat.{u}) (X := X) x
-      exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
-        (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) S.f)
-        ((hstalk_zero _).trans (map_zero _).symm)
+      exact stalk_zero_of_shortExact_kernel hSE x (fun b => cokernel_stalk_zero_V V x hxV b) a
   rw [← hS₂]
   exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
 
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
 
 These lemmas decompose the kernel vanishing argument.
-`zeroOutsideInt_cohomology_vanishing` is proved. `exists_good_section` is proved.
-`sheafH_preserves_filtered_colimits` is FULLY PROVED (flasque vanishing replaces Gabriel).
-`cohomology_vanishing_of_finitelyGenerated_vanishing` is fully proved via the filtered diagram.
+`exists_good_section` is in `IrreducibleStep.lean`.
+`sheafH_preserves_filtered_colimits` and `cohomology_vanishing_of_finitelyGenerated_vanishing`
+are in `FiniteGeneratorReduction.lean`.
 -/
 
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
@@ -260,7 +249,7 @@ theorem zeroOutsideInt_cohomology_vanishing
   set Y := (V : Set X)ᶜ with hY_def
   have hYcl : IsClosed Y := V.2.isClosed_compl
   have hY_ne_univ : Y ≠ Set.univ :=
-    Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV))
+    compl_ne_univ_of_ne_bot hV
   have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
     topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne_univ
       (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
@@ -303,15 +292,7 @@ theorem zeroOutsideInt_cohomology_vanishing
       exact stalk_zero_of_ses_g_iso hSE x inferInstance a
     · -- At points in V: C has zero stalks, so S.X₂ = C has zero stalk, mono gives kernel = 0
       have hxV : x ∈ V := by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY
-      have hstalk_zero :
-          ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₂.val),
-          b = 0 := fun b => cokernel_stalk_zero_V V x hxV b
-      haveI : Mono S.f := hSE.mono_f
-      haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
-        (C := AddCommGrpCat.{u}) (X := X) x
-      exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
-        (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) S.f)
-        ((hstalk_zero _).trans (map_zero _).symm)
+      exact stalk_zero_of_shortExact_kernel hSE x (fun b => cokernel_stalk_zero_V V x hxV b) a
   rw [← hS₂]
   exact subsingleton_sheafH_of_shortExact_middle hSE m' hKer hPush
 
