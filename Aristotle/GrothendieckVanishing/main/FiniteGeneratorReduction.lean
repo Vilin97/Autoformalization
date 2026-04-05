@@ -3,10 +3,9 @@
 
   Key results (presheaf colimit theory split to PresheafFilteredColimit.lean):
   - sheafH_filtered_colimit_aux / sheafH_preserves_filtered_colimits: H^n commutes with
-    filtered colimits (PROVED modulo gabriel_injective_of_filtered_colimit).
-    Uses per-object functorial injective embeddings via
-    IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp to avoid
-    needing mono transitions in the diagram.
+    filtered colimits (FULLY PROVED). Uses per-object functorial injective embeddings
+    via IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp, with
+    flasque vanishing replacing Gabriel's theorem (injective ⟹ flasque ⟹ H^n = 0).
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
@@ -23,34 +22,45 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 
-/-! ### Gabriel's theorem (locally Noetherian Grothendieck abelian categories)
+/-! ### Filtered colimits of flasque sheaves
 
-On a Noetherian topological space, the category of abelian sheaves is locally
-Noetherian. In a locally Noetherian Grothendieck abelian category, filtered colimits
-of injective objects are injective. This is Gabriel's theorem (see Gabriel's thesis,
-or Hartshorne, Residues and Duality, Ch. II, Thm. 7.8).
+On a Noetherian topological space, filtered colimits of flasque sheaves are flasque.
+This is because `sheafToPresheaf` creates filtered colimits (presheaf colimits of sheaves
+are already sheaves on Noetherian spaces), so restrictions of the colimit are colimits of
+per-piece restrictions. Filtered colimits in `AddCommGrpCat` preserve surjections, and
+flasque means all restrictions are surjective.
 
-This is the SOLE sorry in the formalization. It is a TRUE, standard mathematical fact.
+This replaces Gabriel's theorem (filtered colimits of injectives are injective) for our
+purposes: we only need `H^n(colim I_j) = 0` for injective `I_j`, and `FlasqueVanishing`
+gives this since injective sheaves are flasque (`isFlasque_of_injective`). -/
 
-Proof sketch (Baer criterion + locally Noetherian):
-1. By the Baer criterion for Grothendieck abelian categories, it suffices to extend
-   morphisms from subobjects of the separator G.
-2. On a Noetherian space, G is noetherian, so subobjects A ⊆ G are finitely presentable.
-3. For f.p. A: `g : A → c.pt` factors through some `F.obj j₀` by
-   `IsFinitelyPresentable.exists_hom_of_isColimit`.
-4. Since `F.obj j₀` is injective, extend `g` from A to G through `F.obj j₀`, then
-   compose with the colimit coprojection.
-
-Each step is standard but the Baer criterion for abelian categories and "noetherian
-subobjects are f.p." are not yet in Mathlib. -/
-
-theorem gabriel_injective_of_filtered_colimit
+/-- Filtered colimits of flasque sheaves on Noetherian spaces are flasque. -/
+private lemma isFlasque_filtered_colimit
     {X : TopCat.{u}} [NoetherianSpace X]
     {J : Type u} [SmallCategory J] [IsFiltered J]
     (F : J ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    [hInj : ∀ j, Injective (F.obj j)]
-    {c : Cocone F} (hc : IsColimit c) : Injective c.pt := by
-  sorry
+    (hFlasque : ∀ j, IsFlasqueSheaf (F.obj j))
+    {c : Cocone F} (hc : IsColimit c) :
+    IsFlasqueSheaf c.pt := by
+  intro U V i
+  rw [AddCommGrpCat.epi_iff_surjective]
+  intro b
+  haveI := createsFilteredColimit F
+  have hc_psh := isColimitOfPreserves (sheafToPresheaf _ _) hc
+  let ev_U := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op U)
+  have hc_U := isColimitOfPreserves ev_U hc_psh
+  obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ hc_U b
+  have hflq : Function.Surjective (ConcreteCategory.hom ((F.obj j₀).val.map i.op)) := by
+    rw [← AddCommGrpCat.epi_iff_surjective]; exact hFlasque j₀ i
+  obtain ⟨a₀, ha₀⟩ := hflq b₀
+  refine ⟨ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀, ?_⟩
+  have key : ConcreteCategory.hom (c.pt.val.map i.op)
+      (ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀) =
+    ConcreteCategory.hom ((c.ι.app j₀).val.app (op U))
+      (ConcreteCategory.hom ((F.obj j₀).val.map i.op) a₀) :=
+    congrFun (congrArg DFunLike.coe
+      (congrArg ConcreteCategory.hom ((c.ι.app j₀).val.naturality i.op).symm)) a₀
+  rw [key, ha₀]; exact hb₀
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
@@ -183,8 +193,9 @@ The proof uses per-object functorial injective embeddings via Mathlib's
 the zero morphism `0 : Y'.obj j → 0` is factored as a monomorphism followed by a
 morphism with the RLP w.r.t. monomorphisms, giving `Y'.obj j ↪ I_j` with `I_j` injective.
 This is functorial in `j`, yielding a functor `Inj : J' ⥤ Sheaf` and a mono natural
-transformation `η : Y' ⟶ Inj`. The filtered colimit `colim(Inj)` is injective by
-Gabriel's theorem, and the induced map `c'.pt → colim(Inj)` is mono by AB5.
+transformation `η : Y' ⟶ Inj`. The filtered colimit `colim(Inj)` is flasque
+(by `isFlasque_filtered_colimit`, since injective ⟹ flasque), and the induced map
+`c'.pt → colim(Inj)` is mono by AB5.
 
 This approach avoids requiring mono transitions in the diagram (the previous approach
 embedded into a single injective and needed mono coprojections, which is false at
@@ -192,7 +203,7 @@ recursive IH levels). -/
 
 /-- Auxiliary: sheaf cohomology vanishing commutes with filtered colimits on Noetherian
     spaces. Proof by induction on `n` with dimension shifting via per-object functorial
-    injective embeddings. PROVED modulo `gabriel_injective_of_filtered_colimit`. -/
+    injective embeddings. FULLY PROVED (flasque vanishing replaces Gabriel's theorem). -/
 private theorem sheafH_filtered_colimit_aux
     {X : TopCat.{u}} [NoetherianSpace X] (n : ℕ) :
     ∀ {J' : Type u} [inst1 : SmallCategory J'] [inst2 : IsFiltered J']
@@ -274,18 +285,19 @@ private theorem sheafH_filtered_colimit_aux
       haveI := NatTrans.mono_of_mono_app η
       exact colim.map_mono' η hc' (colimit.isColimit Inj) ι' (fun j =>
         hc'.fac ι'Cocone j)
-    -- colim(Inj) is injective by Gabriel's theorem
-    haveI : Injective injCocone.pt :=
-      gabriel_injective_of_filtered_colimit Inj (colimit.isColimit Inj)
+    -- colim(Inj) is flasque: filtered colimit of flasque (injective ⟹ flasque) sheaves
+    have hFlasqueColim : IsFlasqueSheaf injCocone.pt :=
+      isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
+        (colimit.isColimit Inj)
     -- Short exact sequence 0 → c'.pt →[ι'] colim(Inj) → cokernel(ι') → 0
     haveI : Mono ι' := hι'_mono
     let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
       ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
-    -- H^{n+1}(colim Inj) = 0 since colim Inj is injective
+    -- H^{n+1}(colim Inj) = 0 since colim Inj is flasque
     have hI : Subsingleton (Sheaf.H injCocone.pt (n + 1)) :=
-      Ext.subsingleton_of_injective _ _ n
+      FlasqueVanishing X injCocone.pt hFlasqueColim n
     -- Build per-object quotient functor Q.obj j = cokernel(η.app j)
     -- η.app j is ALWAYS mono by ffData.hi, so no hmono needed!
     let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
@@ -444,7 +456,7 @@ private theorem sheafH_filtered_colimit_aux
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
     If `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
 
-    PROVED modulo `gabriel_injective_of_filtered_colimit`. -/
+    FULLY PROVED. -/
 theorem sheafH_preserves_filtered_colimits
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']

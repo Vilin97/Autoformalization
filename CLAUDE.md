@@ -71,7 +71,8 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 - **Aristotle I/O**: `aristotle-in/` (submissions), `aristotle-out/` (results), `aristotle-jobs.json` (tracking)
 - **Slash commands**: `/prove` (hands-on proving), `/plan` (work planning), `/critique` (adversarial review), `/check-aristotle` (poll job status), `/submit-aristotle` (submit to prover)
 
-## Remaining Work
+## Status
 
-1 sorry remains in `FiniteGeneratorReduction.lean`:
-1. `gabriel_injective_of_filtered_colimit` — filtered colimits of injective sheaves are injective on Noetherian spaces (Gabriel's theorem). TRUE standard fact. Requires: locally Noetherian Grothendieck abelian category theory (Baer's criterion + finitely presentable subobjects of the generator).
+**FULLY PROVED — 0 sorry's, 0 axioms, 0 admits.**
+
+The last sorry (Gabriel's theorem: filtered colimits of injectives are injective) was eliminated by observing that we only need `H^n(colim I_j) = 0`, not full injectivity. Since injective sheaves are flasque (`isFlasque_of_injective`), filtered colimits of flasque sheaves are flasque (`isFlasque_filtered_colimit` in `FiniteGeneratorReduction.lean`), and flasque sheaves have vanishing higher cohomology (`FlasqueVanishing`), the result follows without Gabriel's theorem.

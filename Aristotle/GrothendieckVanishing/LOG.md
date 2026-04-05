@@ -1,5 +1,20 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-05T00:20Z — COMPLETE: 0 sorry's, flasque approach eliminates Gabriel dependency
+
+**Sorry count: 0 — FULLY PROVED**
+
+- **Key breakthrough**: replaced Gabriel's theorem (`gabriel_injective_of_filtered_colimit`) with
+  `isFlasque_filtered_colimit` — filtered colimits of flasque sheaves are flasque on Noetherian
+  spaces. Since injective ⟹ flasque (`isFlasque_of_injective`) and flasque ⟹ H^n = 0
+  (`FlasqueVanishing`), this gives H^n(colim I_j) = 0 without needing Injective(colim I_j).
+- **`isFlasque_filtered_colimit` proof**: uses `createsFilteredColimit` (presheaf colimits of sheaves
+  are sheaves on Noetherian spaces) to reduce to presheaf level, then factors through sections
+  and uses surjectivity of filtered colimits in `AddCommGrpCat`.
+- **Verified**: `lean_verify GrothendieckVanishing` → 0 axioms, 0 warnings. Clean.
+- **Canceled Aristotle job** `2507e172` (Gabriel's theorem, 19%) — no longer needed.
+- **Updated**: critique.md (CONDITIONAL ACCEPT), plan.md, CLAUDE.md, all docstrings.
+
 ## 2026-04-04T23:00Z — Major: eliminated FALSE sorry, rewrote to per-object functorial injectives
 
 **Sorry count: 1 sorry (gabriel_injective_of_filtered_colimit — TRUE)**

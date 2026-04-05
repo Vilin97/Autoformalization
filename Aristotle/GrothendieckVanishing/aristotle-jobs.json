@@ -19,9 +19,9 @@
       "submission": "aristotle-in/gabriel_injective.lean",
       "output": "aristotle-out/gabriel_injective_aristotle.lean",
       "target": "gabriel_injective_of_filtered_colimit (Gabriel's theorem)",
-      "status": "queued",
-      "note": "Submitted 2026-04-04T23:17Z. The sole remaining sorry. TRUE mathematical fact. Proof via Baer's criterion + locally Noetherian + f.p. subobjects."
+      "status": "canceled",
+      "note": "Canceled 2026-04-05. Gabriel's theorem no longer needed — proof restructured to use flasque vanishing instead."
     }
   ],
-  "note": "Proof restructured in commit f0bf7ad. The sole sorry is now gabriel_injective_of_filtered_colimit (TRUE). Previous sorry (hmono_transitions) was FALSE at recursive levels and has been eliminated."
+  "note": "All sorry's eliminated. Gabriel's theorem bypassed via flasque vanishing. All jobs expired/superseded/canceled."
 }

@@ -4,11 +4,10 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  Sorry's (1 remaining — gabriel_injective_of_filtered_colimit in FiniteGeneratorReduction.lean):
-  - Gabriel's theorem: filtered colimits of injective sheaves are injective on Noetherian
-    spaces. TRUE standard mathematical fact (Gabriel's thesis; Hartshorne, Residues and
-    Duality, Ch. II, Thm. 7.8). Proof requires Baer's criterion + locally Noetherian
-    subobjects are finitely presentable. All other sorry's have been eliminated.
+  FULLY PROVED — 0 sorry's, 0 axioms, 0 admits.
+  The last sorry (Gabriel's theorem) was eliminated by replacing "filtered colimits of
+  injectives are injective" with "filtered colimits of flasque sheaves are flasque"
+  (isFlasque_filtered_colimit) + FlasqueVanishing, since injective ⟹ flasque.
 
   File structure:
   - FlasqueVanishing.lean + FlasqueCohomology.lean: IsFlasqueSheaf, FlasqueVanishing, dim shift
@@ -23,7 +22,7 @@
   - ReducibleVanishing.lean: reducible case via Finset.induction
   - ClosedOpenDecomposition.lean: reduction to irreducible
   - PresheafFilteredColimit.lean: presheaf colimit is sheaf on Noetherian spaces (PROVED)
-  - FiniteGeneratorReduction.lean: colimit step, f.g. vanishing (1 sorry: Gabriel's theorem)
+  - FiniteGeneratorReduction.lean: colimit step, f.g. vanishing (FULLY PROVED)
   - SheafStalkAlgebra.lean + StalkGeneratorAlgebra.lean: stalk algebra, generator section
   - IrreducibleStep.lean: irreducible step assembly
   - GrothendieckVanishing.lean: main theorem + cascade theorems
