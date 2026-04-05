@@ -35,9 +35,8 @@ theorem toPlus_injective_of_const
   obtain ⟨W, _, _, heq⟩ := h
   obtain ⟨p, hp⟩ := hU
   obtain ⟨V, f, hf, _⟩ := W.2 p hp
-  have := congr_fun (congr_arg Subtype.val heq) (⟨V, f, hf⟩ : W.Arrow)
-  simp only [Functor.const_obj_obj, Meq.refine, Meq.mk] at this
-  exact this
+  simpa [Meq.refine, Meq.mk] using
+    congr_fun (congr_arg Subtype.val heq) (⟨V, f, hf⟩ : W.Arrow)
 
 private lemma cover_nonempty_arrow
     {X : Type u} [TopologicalSpace X]
@@ -51,8 +50,8 @@ private lemma cover_nonempty_arrow
 private lemma cover_arrows_related
     {X : Type u} [TopologicalSpace X]
     {U : Opens X} (S : (opensGT X).Cover U) (I₁ I₂ : S.Arrow) :
-    ∃ R : S.Relation, R.fst = I₁ ∧ R.snd = I₂ := by
-  exact ⟨Cover.Relation.mk' (fst := I₁) (snd := I₂)
+    ∃ R : S.Relation, R.fst = I₁ ∧ R.snd = I₂ :=
+  ⟨Cover.Relation.mk' (fst := I₁) (snd := I₂)
     ⟨I₁.Y ⊓ I₂.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩, rfl, rfl⟩
 
 private lemma meq_const_values_eq
@@ -87,19 +86,12 @@ private lemma toPlus_naturality_const
       ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map i.op)
         (ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op V)) a) := by
   have nat := ((opensGT X).toPlus (constPresheaf X)).naturality i.op
-  have lhs : ConcreteCategory.hom ((constPresheaf X).map i.op ≫
-      ((opensGT X).toPlus (constPresheaf X)).app (op U)) a =
-    ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a := by
-    simp
-  have rhs : ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op V) ≫
-      ((opensGT X).plusObj (constPresheaf X)).map i.op) a =
-    ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map i.op)
-      (ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op V)) a) := by
-    rw [ConcreteCategory.comp_apply]
-  rw [← lhs, show (constPresheaf X).map i.op ≫
-      ((opensGT X).toPlus (constPresheaf X)).app (op U) =
-    ((opensGT X).toPlus (constPresheaf X)).app (op V) ≫
-      ((opensGT X).plusObj (constPresheaf X)).map i.op from nat, rhs]
+  calc ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a
+      = ConcreteCategory.hom ((constPresheaf X).map i.op ≫
+          ((opensGT X).toPlus (constPresheaf X)).app (op U)) a := by simp
+    _ = ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op V) ≫
+          ((opensGT X).plusObj (constPresheaf X)).map i.op) a := by rw [nat]
+    _ = _ := ConcreteCategory.comp_apply _ _ _
 
 -- Plus construction API requires extra heartbeats for typeclass resolution
 /-- Key lemma extracted from toPlus_surjective_of_firstPlus: preimages at different
@@ -198,20 +190,11 @@ private theorem presheafToSheaf_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
     {U V : Opens X} (i : U ⟶ V) :
     Epi (((presheafToSheaf (opensGT X) AddCommGrpCat.{u}).obj (constPresheaf X)).val.map i.op) := by
-  let e : ((opensGT X).sheafify (constPresheaf X)) ≅
-      CategoryTheory.sheafify (opensGT X) (constPresheaf X) :=
-    plusPlusIsoSheafify (J := opensGT X) (D := AddCommGrpCat.{u}) (P := constPresheaf X)
-  haveI : Epi (((opensGT X).sheafify (constPresheaf X)).map i.op) :=
-    sheafify_constPresheaf_flasque_of_irreducible (X := X) (i := i)
-  haveI : Epi ((((opensGT X).sheafify (constPresheaf X)).map i.op) ≫ e.hom.app (op U)) := by
-    infer_instance
-  have hnat := e.hom.naturality i.op
-  have hcomp : Epi (e.hom.app (op V) ≫
+  let e := plusPlusIsoSheafify (J := opensGT X) (D := AddCommGrpCat.{u}) (P := constPresheaf X)
+  haveI := sheafify_constPresheaf_flasque_of_irreducible (X := X) (i := i)
+  haveI : Epi (e.hom.app (op V) ≫
       (CategoryTheory.sheafify (opensGT X) (constPresheaf X)).map i.op) := by
-    rw [← hnat]
-    infer_instance
-  letI : Epi (e.hom.app (op V) ≫
-      (CategoryTheory.sheafify (opensGT X) (constPresheaf X)).map i.op) := hcomp
+    rw [← e.hom.naturality i.op]; infer_instance
   exact epi_of_epi (e.hom.app (op V))
     ((CategoryTheory.sheafify (opensGT X) (constPresheaf X)).map i.op)
 

@@ -38,14 +38,11 @@ theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
 theorem subsingleton_sheafH_of_isZero' {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsZero F) (n : ℕ) :
     Subsingleton (Sheaf.H F n) := by
-  constructor; intro a b
   have hid : (𝟙 F : F ⟶ F) = 0 := hF.eq_of_src _ _
-  calc a = a.comp (Ext.mk₀ (𝟙 F)) (add_zero n) := (Ext.comp_mk₀_id a).symm
-    _ = a.comp 0 (add_zero n) := by rw [hid, Ext.mk₀_zero]
-    _ = 0 := Ext.comp_zero a F 0 n (add_zero n)
-    _ = b.comp 0 (add_zero n) := (Ext.comp_zero b F 0 n (add_zero n)).symm
-    _ = b.comp (Ext.mk₀ (𝟙 F)) (add_zero n) := by rw [hid, Ext.mk₀_zero]
-    _ = b := Ext.comp_mk₀_id b
+  have : ∀ x : Sheaf.H F n, x = 0 := fun x => by
+    have h := Ext.comp_mk₀_id x; rw [hid, Ext.mk₀_zero] at h
+    exact h.symm.trans (Ext.comp_zero x F 0 n (add_zero n))
+  exact ⟨fun a b => (this a).trans (this b).symm⟩
 
 theorem stalk_zero_of_ses_g_iso
     {X : TopCat.{u}}
@@ -72,10 +69,9 @@ theorem stalk_zero_of_ses_g_iso
   haveI : Mono S.f := hSE.mono_f
   haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
     (C := AddCommGrpCat.{u}) (X := X) x
-  haveI : Mono ((TopCat.Sheaf.forget _ _ ⋙ T).map S.f) :=
-    Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f
-  rw [AddCommGrpCat.mono_iff_injective] at this
-  exact this (hfa_zero.trans (map_zero _).symm)
+  exact (AddCommGrpCat.mono_iff_injective _).mp
+    (Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f)
+    (hfa_zero.trans (map_zero _).symm)
 
 /-! ## Main proof -/
 
@@ -118,17 +114,14 @@ theorem ReducibleVanishing'
     have hZ_closed := isClosed_of_mem_irreducibleComponents Z hZ_comp
     have hZ_irred := hZ_comp.1
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-    let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
-    let η := adj.unit.app G
+    let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i).unit.app G
     haveI : Epi η := epi_unit_of_closedImmersion Z hZ_closed G
     let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
-    have hX₂ : S.X₂ = G := rfl
-    have hX₃ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
-        ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj G) := rfl
     have hpush : Subsingleton (Sheaf.H S.X₃ n) := by
-      rw [hX₃]
+      show Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
+        ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj G)) n)
       apply PushforwardHVanishing Z hZ_closed
       haveI : IrreducibleSpace (TopCat.of Z) :=
         isIrreducible_iff_irreducibleSpace.mp hZ_irred
@@ -141,7 +134,6 @@ theorem ReducibleVanishing'
       by_cases hxZ : x ∈ Z
       · -- closedIncl_unit_stalk_isIso: iso on stalks at z ∈ Z
         haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
-          dsimp [S, η]
           exact TopCat.closedIncl_unit_stalk_isIso hZ_closed G ⟨x, hxZ⟩
         exact stalk_zero_of_ses_g_iso hSE x inferInstance a
       · have hx' : x ∉ ⋃₀ ((insert Z s' : Finset (Set X)) : Set (Set X)) := by
@@ -150,12 +142,10 @@ theorem ReducibleVanishing'
         have hX₂_stalk :
             ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₂.val),
             b = 0 := fun b => hG_stalks x hx' b
-        let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
         haveI : Mono S.f := hSE.mono_f
         haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
           (C := AddCommGrpCat.{u}) (X := X) x
-        haveI : Mono ((TopCat.Sheaf.forget _ _ ⋙ T).map S.f) :=
-          Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f
-        rw [AddCommGrpCat.mono_iff_injective] at this
-        exact this ((hX₂_stalk _).trans (map_zero _).symm)
-    exact hX₂ ▸ subsingleton_sheafH_of_shortExact_middle hSE n hker hpush
+        exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
+          (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) S.f)
+          ((hX₂_stalk _).trans (map_zero _).symm)
+    exact subsingleton_sheafH_of_shortExact_middle hSE n hker hpush

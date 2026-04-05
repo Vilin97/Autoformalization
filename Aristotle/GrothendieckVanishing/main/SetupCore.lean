@@ -27,10 +27,8 @@ theorem ext_dimension_shift (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (
     (h₂ : Subsingleton (Ext Z S.X₂ (n + 1))) :
     Subsingleton (Ext Z S.X₁ (n + 1)) := by
   constructor; intro a b
-  have ha : a.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
-  have hb : b.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hS a ha rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hS b hb rfl
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hS a (@Subsingleton.elim _ h₂ _ _) rfl
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hS b (@Subsingleton.elim _ h₂ _ _) rfl
   rw [← hc, ← hd, @Subsingleton.elim _ h₃ c d]
 
 /-- Reverse dimension shift: `Ext^n(Z, X₂) = 0` and `Ext^{n+1}(Z, X₁) = 0` imply
@@ -40,10 +38,8 @@ theorem ext_dimension_shift_X₃ (Z : C') {S : ShortComplex C'} (hS : S.ShortExa
     (h₁ : Subsingleton (Ext Z S.X₁ (n + 1))) :
     Subsingleton (Ext Z S.X₃ n) := by
   constructor; intro a b
-  have ha : a.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
-  have hb : b.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ _ hS a rfl ha
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ _ hS b rfl hb
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ _ hS a rfl (@Subsingleton.elim _ h₁ _ _)
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ _ hS b rfl (@Subsingleton.elim _ h₁ _ _)
   rw [← hc, ← hd, @Subsingleton.elim _ h₂ c d]
 
 end ExtDimShift
@@ -92,11 +88,9 @@ private theorem pushforward_stalk_zero_closedIncl
     rw [hW_bot]; exact (isTerminal_sheaf_bot G).isZero
   let sW := ConcreteCategory.hom (F.map (homOfLE (show W ≤ U from inf_le_left)).op) sU
   have hsW_eq : sW = 0 := by
-    calc sW = ConcreteCategory.hom (𝟙 (F.obj (op W))) sW :=
-              (ConcreteCategory.id_apply sW).symm
-      _ = ConcreteCategory.hom (0 : F.obj (op W) ⟶ F.obj (op W)) sW := by
-              rw [hFW_zero.eq_of_src (𝟙 _) 0]
-      _ = 0 := AddMonoidHom.zero_apply _
+    have h0 : (𝟙 (F.obj (op W)) : _ ⟶ _) = 0 := hFW_zero.eq_of_src _ _
+    calc sW = ConcreteCategory.hom (𝟙 (F.obj (op W))) sW := (ConcreteCategory.id_apply sW).symm
+      _ = 0 := by rw [h0]; exact AddMonoidHom.zero_apply _
   rw [← TopCat.Presheaf.germ_res_apply F
     (homOfLE (show W ≤ U from inf_le_left)) x hxW sU]
   change ConcreteCategory.hom (F.germ W x hxW) sW = 0
@@ -205,11 +199,6 @@ theorem closedIncl_pushforward_shortExact
     exact closedIncl_pushforward_epi_g hs ip hSE
   exact ShortComplex.ShortExact.mk' hExact ‹_› ‹_›
 
--- Pushforward preserves flasqueness for any continuous map.
-theorem pushforward_preserves_flasque {Y : TopCat.{u}} (f : TopCat.of Y ⟶ X)
-    (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Y)) (hG : IsFlasqueSheaf G) :
-    IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} f).obj G) :=
-  fun i => by change Epi (G.val.map ((Opens.map f).op.map i.op)); exact hG _
 
 -- If both ends of a short exact sequence have vanishing H^n, so does the middle.
 theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
@@ -220,12 +209,11 @@ theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
     Subsingleton (Sheaf.H S.X₂ n) := by
   let Z := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
     (AddCommGrpCat.of (ULift ℤ))
-  constructor
-  intro a b
-  have ha : a.comp (Ext.mk₀ S.g) (add_zero n) = 0 := @Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _
-  have hb : b.comp (Ext.mk₀ S.g) (add_zero n) = 0 := @Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ Z hS a ha
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ Z hS b hb
+  constructor; intro a b
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ Z hS a
+    (@Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _)
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ Z hS b
+    (@Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _)
   rw [← hc, ← hd, @Subsingleton.elim _ h₁ c d]
 
 /-! ### PushforwardHVanishing sub-lemmas -/
@@ -244,7 +232,7 @@ private lemma PushforwardHVanishing_zero
   have htop : ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ := by ext; simp [Opens.map]
   have hobj : F'.val.obj (op ⊤) = G'.val.obj (op ⊤) := by
     change G'.val.obj (op ((Opens.map i).obj ⊤)) = G'.val.obj (op ⊤)
-    simpa [TopCat.Sheaf.pushforward, TopCat.Presheaf.pushforward, htop]
+    simp [htop]
   constructor; intro a b
   apply (sheafH0EquivSections F').injective
   exact @Subsingleton.elim (F'.val.obj (op ⊤)) (hobj ▸ hsec) _ _
@@ -295,7 +283,7 @@ theorem epi_g_app_top_of_H1_vanishing
   change φ_hom = ψ_hom ≫ ip.shortComplex.g.val.app (op ⊤) at hfact
   refine ⟨ψ_hom (ULift.up 1), ?_⟩
   change (ConcreteCategory.hom (ψ_hom ≫ ip.shortComplex.g.val.app (op ⊤))) (ULift.up 1) = r
-  rw [← hfact]; simp [φ_hom, one_zsmul]
+  rw [← hfact]; simp [φ_hom]
 
 -- Surjectivity of Ext⁰ map from epi at ⊤ via adjunction + projectivity of ULift ℤ
 theorem ext0_surj_of_epi_top
@@ -335,13 +323,11 @@ private lemma PushforwardHVanishing_one
       (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
     closedIncl_pushforward_shortExact hZ ip
   have hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-      ip.shortComplex.X₂) :=
-    fun {U V} j => by
-      change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
-      exact isFlasque_of_injective ip.shortComplex.X₂ _
+      ip.shortComplex.X₂) := fun {U V} j => by
+    change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
+    exact isFlasque_of_injective ip.shortComplex.X₂ _
   have hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-      ip.shortComplex.X₂) 1) :=
-    FlasqueVanishing _ _ hFlasque 0
+      ip.shortComplex.X₂) 1) := FlasqueVanishing _ _ hFlasque 0
   have htop : ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ := by ext; simp [Opens.map]
   have hg_epi : Epi (ip.shortComplex.g.val.app (op ⊤)) :=
     epi_g_app_top_of_H1_vanishing ip hG'
@@ -351,27 +337,13 @@ private lemma PushforwardHVanishing_one
     rw [htop]; exact hg_epi
   have hsurj_X := ext0_surj_of_epi_top hg_epi_X
   constructor; intro a b
-  have ha : a.comp (Ext.mk₀ (ip.shortComplex.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 :=
-    @Subsingleton.elim _ hJ _ 0
-  have hb : b.comp (Ext.mk₀ (ip.shortComplex.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 :=
-    @Subsingleton.elim _ hJ _ 0
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a ha rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE_X b hb rfl
-  have zero_c : c.comp hSE_X.extClass rfl = 0 := by
-    obtain ⟨c', hc'⟩ := hsurj_X c
-    rw [← hc', Ext.comp_assoc_of_second_deg_zero c' (Ext.mk₀
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a (@Subsingleton.elim _ hJ _ 0) rfl
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE_X b (@Subsingleton.elim _ hJ _ 0) rfl
+  obtain ⟨c', hc'⟩ := hsurj_X c; obtain ⟨d', hd'⟩ := hsurj_X d
+  simp only [← hc, ← hd, ← hc', ← hd',
+    Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀
       (ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).g)
-      hSE_X.extClass rfl, hSE_X.comp_extClass,
-      Ext.comp_zero c' _ 1 1 rfl]
-  have zero_d : d.comp hSE_X.extClass rfl = 0 := by
-    obtain ⟨d', hd'⟩ := hsurj_X d
-    rw [← hd', Ext.comp_assoc_of_second_deg_zero d' (Ext.mk₀
-      (ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).g)
-      hSE_X.extClass rfl, hSE_X.comp_extClass,
-      Ext.comp_zero d' _ 1 1 rfl]
-  rw [← hc, ← hd, zero_c, zero_d]
+      hSE_X.extClass rfl, hSE_X.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
 
 -- n = m+2 ≥ 2: use pushed-forward injective presentation + FlasqueVanishing + LES
 private lemma PushforwardHVanishing_succ
@@ -391,32 +363,21 @@ private lemma PushforwardHVanishing_succ
       (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
     closedIncl_pushforward_shortExact hZ ip
   have hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-      ip.shortComplex.X₂) :=
-    fun {U V} j => by
-      change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
-      exact isFlasque_of_injective ip.shortComplex.X₂ _
+      ip.shortComplex.X₂) := fun {U V} j => by
+    change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
+    exact isFlasque_of_injective ip.shortComplex.X₂ _
   haveI hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-      ip.shortComplex.X₂) (m + 2)) :=
-    FlasqueVanishing _ _ hFlasque (m + 1)
+      ip.shortComplex.X₂) (m + 2)) := FlasqueVanishing _ _ hFlasque (m + 1)
   constructor; intro a b
-  have ha : a.comp (Ext.mk₀ (ip.shortComplex.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 :=
-    @Subsingleton.elim _ hJ _ 0
-  have hb : b.comp (Ext.mk₀ (ip.shortComplex.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 :=
-    @Subsingleton.elim _ hJ _ 0
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a ha rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE_X b hb rfl
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a (@Subsingleton.elim _ hJ _ 0) rfl
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE_X b (@Subsingleton.elim _ hJ _ 0) rfl
   rw [← hc, ← hd]; congr 1
   have hR : Subsingleton (Sheaf.H ip.shortComplex.X₃ (m + 1)) := by
     constructor; intro c d
     have hSE_Z := ip.shortExact_shortComplex
-    have heq : c.comp hSE_Z.extClass rfl = d.comp hSE_Z.extClass rfl :=
-      @Subsingleton.elim _ hG' _ _
-    have hker : (c - d).comp hSE_Z.extClass rfl = 0 := by
+    obtain ⟨e, he⟩ := Ext.covariant_sequence_exact₃ _ hSE_Z (c - d) rfl (by
       change (Ext.postcomp hSE_Z.extClass _ rfl) (c - d) = 0
-      rw [map_sub, sub_eq_zero]; exact heq
-    obtain ⟨e, he⟩ := Ext.covariant_sequence_exact₃ _ hSE_Z (c - d) rfl hker
+      rw [map_sub, sub_eq_zero]; exact @Subsingleton.elim _ hG' _ _)
     rw [Ext.eq_zero_of_injective e, Ext.zero_comp] at he
     exact sub_eq_zero.mp he.symm
   exact @Subsingleton.elim _ (ih_push ip.shortComplex.X₃ hR) c d

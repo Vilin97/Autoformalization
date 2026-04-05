@@ -56,21 +56,15 @@ theorem exists_nonzero_stalk_in_V
     ∃ (x : X) (_ : x ∈ V)
       (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R.val),
       a ≠ 0 := by
-  by_contra h; push_neg at h; apply hR
+  by_contra! h; apply hR
   apply sheaf_isZero_of_zero_stalks; intro x a
   by_cases hx : (x : X) ∈ (V : Set X)
   · exact h x hx a
-  · let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
-        TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-    have h_img : ConcreteCategory.hom (FT.map i) a = 0 :=
-      stalk_zeroOutsideInt_zero_outside V x hx _
-    haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
+  · haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
       (C := AddCommGrpCat.{u}) (X := X) x
-    haveI : Mono (FT.map i) := Functor.map_mono FT i
-    have hinj := (ConcreteCategory.mono_iff_injective_of_preservesPullback
-      (FT.map i)).mp inferInstance
-    rw [← map_zero (ConcreteCategory.hom (FT.map i))] at h_img
-    exact hinj h_img
+    exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
+      (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) i)
+      ((stalk_zeroOutsideInt_zero_outside V x hx _).trans (map_zero _).symm)
 
 /-- A sheaf morphism is mono if all its stalk maps are injective. -/
 theorem sheaf_mono_of_stalk_injective
@@ -83,13 +77,6 @@ theorem sheaf_mono_of_stalk_injective
     intro x
     exact (ConcreteCategory.mono_iff_injective_of_preservesPullback _).mpr (h x)
   exact TopCat.Presheaf.mono_of_stalk_mono f
-
-/-- Every additive subgroup of `ℤ` is of the form `nℤ`. -/
-private theorem int_addSubgroup_eq_zmultiples (H : AddSubgroup ℤ) :
-    ∃ n : ℤ, H = AddSubgroup.zmultiples n := by
-  obtain ⟨n, hn⟩ := Int.subgroup_cyclic H
-  refine ⟨n, ?_⟩
-  simpa [AddSubgroup.zmultiples_eq_closure] using hn
 
 /-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
     is an integer multiple of the germ of the distinguished generator over `V`. -/
@@ -133,8 +120,7 @@ private theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
     have hs_zsmul : s = w.down • genW := by
       apply hinj
       rw [map_zsmul, hgenW_val]
-      show w = w.down • (1 : ULift ℤ)
-      ext; simp
+      show w = w.down • (1 : ULift ℤ); ext; simp
     refine ⟨w.down, ?_⟩
     rw [hs_zsmul, map_zsmul (ConcreteCategory.hom
       ((TopCat.Presheaf.constZ.zeroOutside V).germ W x hxW))]
@@ -230,25 +216,20 @@ theorem zsmul_generator_injective
     TopCat.Presheaf.stalkFunctor_map_germ_apply V x hx
       (toSheafify J P) (TopCat.Presheaf.zeroOutside.generator V)
   -- Transfer to presheaf stalk via injectivity of toSheafify stalk map
-  set gen_P := TopCat.Presheaf.zeroOutside.generator V with hgen_P_def
+  set gen_P := TopCat.Presheaf.zeroOutside.generator V
   have h' : P.germ V x hx (n • gen_P) = P.germ V x hx (m • gen_P) := by
     rw [map_zsmul, map_zsmul]
     apply hbij.1; simp only [map_zsmul, hgen_eq]; exact h
   -- Use germ_eq: equal germs agree on a refinement W ≤ V
   obtain ⟨W, hxW, iU, iV, hEq⟩ := P.germ_eq x hx hx _ _ h'
-  -- Both iU, iV are maps W → V; they're equal by subsingleton
-  have hiUiV : iU = iV := Subsingleton.elim _ _
-  rw [hiUiV, map_zsmul, map_zsmul] at hEq
-  -- Now: n • P.map iV.op gen_V = m • P.map iV.op gen_V in P.obj(op W)
+  rw [Subsingleton.elim iU iV, map_zsmul, map_zsmul] at hEq
   have hWV : W ≤ V := leOfHom iV
-  -- Replace iV.op by (homOfLE hWV).op (subsingleton)
-  have hiV_eq : iV = homOfLE hWV := Subsingleton.elim _ _
-  rw [hiV_eq] at hEq
+  rw [Subsingleton.elim iV (homOfLE hWV)] at hEq
   -- P.obj(op W) = ULift ℤ since W ≤ V
   have hObjW : P.obj (op W) = AddCommGrpCat.of (ULift ℤ) := by
     simp [P, TopCat.Presheaf.zeroOutside, hWV, TopCat.Presheaf.constZ]
   -- The restricted generator maps to 1 in ULift ℤ (reuse pattern from line 491)
-  set resGen := ConcreteCategory.hom (P.map (homOfLE hWV).op) gen_P with hresGen_def
+  set resGen := ConcreteCategory.hom (P.map (homOfLE hWV).op) gen_P
   -- resGen maps to 1 ∈ ULift ℤ via eqToHom (same calculation as line ~491)
   have hresGen_val : (AddCommGrpCat.Hom.hom (eqToHom hObjW)) resGen = (1 : ULift ℤ) := by
     -- resGen = (P.map (homOfLE hWV).op) gen_P where P = constZ.zeroOutside V
@@ -262,16 +243,8 @@ theorem zsmul_generator_injective
       eqToHom_trans, Functor.const_obj_map, Category.id_comp]
     have : hObjW.symm.trans hObjW = rfl := Subsingleton.elim _ _
     simp [this]
-  -- eqToHom is injective
-  have hinj_eqToHom : Function.Injective (AddCommGrpCat.Hom.hom (eqToHom hObjW)) := by
-    intro a b hab
-    have := TopCat.Presheaf.zeroOutside.hom_eqToHom_symm_hom_eqToHom hObjW
-    exact (this a).symm.trans (congrArg _ hab |>.trans (this b))
-  -- Transfer hEq to ULift ℤ
+  -- Transfer hEq to ULift ℤ and extract n = m
   have hEq_ULift : n • (1 : ULift ℤ) = m • (1 : ULift ℤ) := by
     have := congrArg (AddCommGrpCat.Hom.hom (eqToHom hObjW)) hEq
     rwa [map_zsmul, map_zsmul, hresGen_val] at this
-  -- n • (1 : ULift ℤ) = m • (1 : ULift ℤ) → n = m
-  have := congrArg ULift.down hEq_ULift
-  simp at this
-  exact this
+  simpa using congrArg ULift.down hEq_ULift
