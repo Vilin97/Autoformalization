@@ -127,8 +127,7 @@ private noncomputable def finsetGenCocone :
   Cocone.mk K
     { app := fun S => Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S)
       naturality := fun S S' h => by
-        dsimp [finsetGenFunctor]
-        rw [finsetImageInclGen_comp_ι, Category.comp_id] }
+        simp [finsetGenFunctor, finsetImageInclGen_comp_ι] }
 
 /-- The cocone is a colimit: `K` is the filtered colimit of its finitely generated subsheaves.
     Proof: the canonical map `colim → K` is mono (by AB5 + mono transitions) and epi
@@ -144,8 +143,7 @@ private noncomputable def finsetGenCocone_isColimit :
     let α : finsetGenFunctor K ⟶ (Functor.const _).obj K :=
       { app := fun S => Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S)
         naturality := fun S S' h => by
-          dsimp [finsetGenFunctor]
-          rw [finsetImageInclGen_comp_ι, Category.comp_id] }
+          simp [finsetGenFunctor, finsetImageInclGen_comp_ι] }
     haveI : ∀ j, Mono (α.app j) := fun _ => inferInstance
     haveI := NatTrans.mono_of_mono_app α
     exact colim.map_mono' α (colimit.isColimit _) (isColimitConstCocone _ _) d
@@ -164,9 +162,8 @@ private noncomputable def finsetGenCocone_isColimit :
       apply Sigma.hom_ext; intro σ
       simp only [← Category.assoc, Sigma.ι_desc]
       simp only [Category.assoc, colimit.ι_desc]
-      dsimp [finsetGenCocone]
-      rw [Limits.image.fac]
-      simp [TopCat.Sheaf.finsetGeneratorMap, TopCat.Sheaf.familyGeneratorMap]
+      simp [finsetGenCocone, Limits.image.fac, TopCat.Sheaf.finsetGeneratorMap,
+        TopCat.Sheaf.familyGeneratorMap]
     haveI := TopCat.Sheaf.allSectionMap_epi K
     exact epi_of_epi_fac hfac
   -- mono + epi → iso in abelian category

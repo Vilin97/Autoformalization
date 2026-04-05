@@ -209,7 +209,6 @@ theorem cokernel_openHom_vanishing
     by_cases hxY : x ∈ Y
     · -- At points in Vᶜ: closedIncl_unit_stalk_isIso gives S.g iso → kernel stalk = 0
       haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
-        dsimp [S, η]
         exact closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
       exact stalk_zero_of_ses_g_iso hSE x inferInstance a
     · -- At points in V: C has zero stalks, so S.X₂ = C has zero stalk, mono gives kernel = 0
@@ -300,7 +299,6 @@ theorem zeroOutsideInt_cohomology_vanishing
     by_cases hxY : x ∈ Y
     · -- At points in Vᶜ: closedIncl_unit_stalk_isIso gives S.g iso → kernel stalk = 0
       haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
-        dsimp [S, η]
         exact closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
       exact stalk_zero_of_ses_g_iso hSE x inferInstance a
     · -- At points in V: C has zero stalks, so S.X₂ = C has zero stalk, mono gives kernel = 0
