@@ -20,8 +20,8 @@ theorem AddCommGrpCat.uliftZMultiplesHom_add (G : Type u) [AddCommGroup G] (x y 
 
 /-- The additive equivalence `(ULift ℤ ⟶ G) ≃+ G`. -/
 def AddCommGrpCat.uliftZMultiplesAddEquiv (G : AddCommGrpCat.{u}) :
-    (AddCommGrpCat.of (ULift ℤ) ⟶ G) ≃+ G := by
-  exact AddEquiv.trans
+    (AddCommGrpCat.of (ULift ℤ) ⟶ G) ≃+ G :=
+  AddEquiv.trans
     (@AddCommGrpCat.homAddEquiv (AddCommGrpCat.of (ULift ℤ)) G)
     (AddEquiv.mk' (uliftZMultiplesHom G) (AddCommGrpCat.uliftZMultiplesHom_add G)).symm
 
@@ -228,8 +228,8 @@ theorem sHom_eq_of_app_generator {F : Presheaf AddCommGrpCat.{u} X}
           simpa [generator, zeroOutside_openHom, zeroOutside, constZ, hW, hObjW₀, hmid] using
             hcollapse
     have hgW :
-        (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) (1 : ULift ℤ) = gW := by
-      exact hgW_transport.symm
+        (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) (1 : ULift ℤ) = gW :=
+      hgW_transport.symm
     have hw : w = (w.down : ℤ) • (1 : ULift ℤ) := by
       ext
       simp [w]

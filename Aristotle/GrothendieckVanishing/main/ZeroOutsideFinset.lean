@@ -91,8 +91,8 @@ theorem oldGeneratedToAdjoinGenerated_comp {X : TopCat.{u}} {ι : Type*}
     oldGeneratedToAdjoinGenerated U s U₀ s₀ ≫
         Limits.image.ι (familyGeneratorMap (adjoinGeneratorOpens U U₀)
           (adjoinGeneratorSections U s s₀)) =
-      Limits.image.ι (familyGeneratorMap U s) := by
-  exact Limits.image.lift_fac _
+      Limits.image.ι (familyGeneratorMap U s) :=
+  Limits.image.lift_fac _
 
 instance oldGeneratedToAdjoinGenerated_mono {X : TopCat.{u}} {ι : Type*}
     {F : Sheaf AddCommGrpCat.{u} X}
@@ -180,8 +180,8 @@ instance adjoinedGeneratorToCokernel_epi {X : TopCat.{u}} {ι : Type*}
     (U₀ : Opens X) (s₀ : F.presheaf.obj (op U₀))
     [HasCoproduct fun i => zeroOutsideInt (U i)]
     [HasCoproduct fun j : ι ⊕ Unit => zeroOutsideInt (adjoinGeneratorOpens U U₀ j)] :
-    Epi (adjoinedGeneratorToCokernel U s U₀ s₀) := by
-  exact epi_of_epi_fac (adjoinGeneratorProjection_comp_adjoinedGeneratorToCokernel U s U₀ s₀)
+    Epi (adjoinedGeneratorToCokernel U s U₀ s₀) :=
+  epi_of_epi_fac (adjoinGeneratorProjection_comp_adjoinedGeneratorToCokernel U s U₀ s₀)
 
 /-- The short complex attached to adjoining one generator. -/
 abbrev adjoinGeneratorShortComplex {X : TopCat.{u}} {ι : Type*}
@@ -201,8 +201,8 @@ theorem adjoinGeneratorShortComplex_exact {X : TopCat.{u}} {ι : Type*}
     (U₀ : Opens X) (s₀ : F.presheaf.obj (op U₀))
     [HasCoproduct fun i => zeroOutsideInt (U i)]
     [HasCoproduct fun j : ι ⊕ Unit => zeroOutsideInt (adjoinGeneratorOpens U U₀ j)] :
-    (adjoinGeneratorShortComplex U s U₀ s₀).Exact := by
-  exact ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)
+    (adjoinGeneratorShortComplex U s U₀ s₀).Exact :=
+  ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)
 
 theorem adjoinGeneratorShortComplex_shortExact {X : TopCat.{u}} {ι : Type*}
     {F : Sheaf AddCommGrpCat.{u} X}
