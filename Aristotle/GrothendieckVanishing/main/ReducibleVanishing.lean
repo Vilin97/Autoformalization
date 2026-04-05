@@ -114,8 +114,7 @@ theorem ReducibleVanishing'
     have hZ_closed := isClosed_of_mem_irreducibleComponents Z hZ_comp
     have hZ_irred := hZ_comp.1
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-    let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
-    let η := adj.unit.app G
+    let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i).unit.app G
     haveI : Epi η := epi_unit_of_closedImmersion Z hZ_closed G
     let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'

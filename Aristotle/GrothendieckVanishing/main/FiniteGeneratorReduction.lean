@@ -221,8 +221,8 @@ private theorem sheafH_filtered_colimit_aux
     -- H^0 ≅ global sections, colimit of trivial sections is trivial
     haveI := createsFilteredColimit Y'
     have hc_psh := isColimitOfPreserves (sheafToPresheaf _ _) hc'
-    let ev_top := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)
-    have hc_top := isColimitOfPreserves ev_top hc_psh
+    have hc_top := isColimitOfPreserves
+      ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)) hc_psh
     have h_sec : ∀ j, Subsingleton ((Y'.obj j).val.obj (op ⊤)) := fun j => by
       haveI := hvan j; exact subsingleton_of_addEquiv (sheafH0EquivSections (Y'.obj j))
     have : Subsingleton (c'.pt.val.obj (op ⊤)) := by
