@@ -538,9 +538,9 @@ theorem finsetGeneratedSheaf_vanishing
     let SC := ShortComplex.mk (imageIncl hσ₀) (cokernel.π (imageIncl hσ₀))
       (cokernel.condition _)
     have hSE : SC.ShortExact := shortExact_of_mono (imageIncl hσ₀)
-    have hCoker : Subsingleton (Sheaf.H SC.X₃ m) := by
+    have hCoker : Subsingleton (Sheaf.H SC.X₃ m) :=
       haveI := imageIncl_cokernel_epi hσ₀
-      exact hzero (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} =>
+      hzero (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} =>
             TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
           factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫
           cokernel.π (imageIncl hσ₀)) inferInstance

@@ -407,24 +407,12 @@ theorem epi_unit_of_closedImmersion
     TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
   intro x
   by_cases hxZ : (x : X) ∈ Z
-  · -- x ∈ Z: stalk map is surjective
-    let y : TopCat.of Z := ⟨x, hxZ⟩
-    change Function.Surjective
-      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} ((TopCat.closedIncl hZ) y)).map
-        ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} (TopCat.closedIncl hZ)).unit.app F).val)
-    haveI :
-        IsIso
-          ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} ((TopCat.closedIncl hZ) y)).map
-            ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
-              (TopCat.closedIncl hZ)).unit.app F).val) :=
-      TopCat.closedIncl_unit_stalk_isIso hZ F y
-    intro b
-    refine
-      ⟨inv
-          ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} ((TopCat.closedIncl hZ) y)).map
-            ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
-              (TopCat.closedIncl hZ)).unit.app F).val) b, ?_⟩
-    simp
+  · -- x ∈ Z: stalk map is surjective (it's an iso)
+    haveI := TopCat.closedIncl_unit_stalk_isIso hZ F ⟨x, hxZ⟩
+    exact (ConcreteCategory.bijective_of_isIso
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} ((TopCat.closedIncl hZ) ⟨x, hxZ⟩)).map
+        ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
+          (TopCat.closedIncl hZ)).unit.app F).val)).2
   · -- x ∉ Z: target stalk is 0 (pushforward has zero stalk outside closed Z)
     -- Show stalk is IsZero by showing all colimit injections (germs) are 0.
     -- Each germ_V factors through V' = V ∩ (X\Z) where the source is 0.
@@ -444,13 +432,8 @@ theorem epi_unit_of_closedImmersion
         rw [this.eq_zero_of_src (colimit.ι D (op V'_nhd)), comp_zero]
       change IsZero (((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F).val.obj
         (op ((Opens.map i).obj V'_nhd.1)))
-      have : (Opens.map i).obj V'_nhd.1 = ⊥ := by
-        apply le_antisymm
-        · intro ⟨y, hy⟩ hmem
-          simp only [Opens.map, Opens.mem_mk] at hmem
-          exact absurd hy (hmem.2 ·)
-        · exact bot_le
-      rw [this]
+      rw [show (Opens.map i).obj V'_nhd.1 = ⊥ from le_antisymm (fun ⟨_, hy⟩ hmem => by
+        simp only [Opens.map, Opens.mem_mk] at hmem; exact absurd hy (hmem.2 ·)) bot_le]
       exact (isTerminal_sheaf_bot _).isZero
     -- The stalk is IsZero → surjective
     exact fun b => ⟨0, by simp [(@Subsingleton.elim _
