@@ -104,9 +104,7 @@ private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
     haveI : Mono S.f := hS.mono_f
     haveI : Mono h.f' := by
       constructor; intro Z a b hab
-      have : a ≫ S.f = b ≫ S.f := by
-        rw [← h.f'_i, ← Category.assoc, hab, Category.assoc]
-      exact (cancel_mono S.f).mp this
+      exact (cancel_mono S.f).mp (by rw [← h.f'_i, ← Category.assoc, hab, Category.assoc])
     haveI : Epi h.f' := hS.exact.epi_f' h
     haveI : IsIso h.f' := isIso_of_mono_of_epi h.f'
     haveI hz2 : IsZero
