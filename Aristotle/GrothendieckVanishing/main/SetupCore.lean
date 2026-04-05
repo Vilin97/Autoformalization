@@ -199,11 +199,6 @@ theorem closedIncl_pushforward_shortExact
     exact closedIncl_pushforward_epi_g hs ip hSE
   exact ShortComplex.ShortExact.mk' hExact ‹_› ‹_›
 
--- Pushforward preserves flasqueness for any continuous map.
-theorem pushforward_preserves_flasque {Y : TopCat.{u}} (f : TopCat.of Y ⟶ X)
-    (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Y)) (hG : IsFlasqueSheaf G) :
-    IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} f).obj G) :=
-  fun i => by change Epi (G.val.map ((Opens.map f).op.map i.op)); exact hG _
 
 -- If both ends of a short exact sequence have vanishing H^n, so does the middle.
 theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}

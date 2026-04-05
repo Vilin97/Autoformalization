@@ -64,13 +64,6 @@ theorem opens_eq_bot_or_top_of_irreducibleSpace_dim_zero
     exact this (Set.mem_univ hne.some) hne.some_mem
   · exact Or.inl (Opens.ext (Set.not_nonempty_iff_eq_empty.mp hne))
 
-/-- Every nonempty open subset of an irreducible space is irreducible. -/
-theorem isIrreducible_of_nonempty_open {X : Type u} [TopologicalSpace X]
-    [IrreducibleSpace X] (W : Opens X) (hW : (W : Set X).Nonempty) :
-    IsIrreducible (W : Set X) :=
-  (IrreducibleSpace.isIrreducible_univ X).isPreirreducible.subset_irreducible
-    hW W.isOpen le_rfl (Set.subset_univ _)
-
 /-! ## Dimension helpers -/
 
 /-- On an irreducible space, the topological Krull dimension is ≥ 0. -/
@@ -196,54 +189,3 @@ theorem covering_sieve_top_has_id {X : Type u} [TopologicalSpace X] [Irreducible
 
 /-! ## Epi → surjective at ⊤ on dim 0 irreducible -/
 
--- IsLocallySurjective typeclass resolution needs extra heartbeats
-/-- On a dim 0 irreducible nonempty space, an epi sheaf morphism is surjective at ⊤.
-    Proof: epi ↔ IsLocallySurjective → imageSieve covers ⊤ → id ∈ imageSieve → surjective. -/
-theorem epi_app_top_surjective {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
-    (hdim : topologicalKrullDim X ≤ 0) [Nonempty X]
-    {F G : Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}} (φ : F ⟶ G) [Epi φ] :
-    Function.Surjective (ConcreteCategory.hom (φ.val.app (Opposite.op ⊤))) := by
-  have hls : Sheaf.IsLocallySurjective φ :=
-    (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} φ).mpr inferInstance
-  intro s
-  have hmem := hls.imageSieve_mem (U := ⊤) s
-  have hid := covering_sieve_top_has_id hdim _ hmem
-  obtain ⟨t, ht⟩ := hid
-  exact ⟨t, by simpa using ht⟩
-
-/-! ## Counterexample: flasque does NOT imply injective
-
-   On X = point, every sheaf is flasque (only restriction is F(X) → F(∅) = 0),
-   but ℤ is not injective in Ab (not divisible). So flasque ⟹ injective is FALSE.
-   The correct result is: flasque ⟹ Γ-acyclic (Bredon).
-   Proved by Aristotle (99a8a5d6). -/
-
-/-- Every group homomorphism ℚ →+ ℤ is zero (ℤ is not divisible). -/
-theorem addMonoidHom_rat_int_eq_zero (f : ℚ →+ ℤ) : f = 0 := by
-  ext q; simp only [AddMonoidHom.zero_apply]
-  by_contra hfq
-  have key : ∀ (n : ℕ) (hn : 0 < n), (n : ℤ) ∣ f q := by
-    intro n hn
-    exact ⟨f (q / n), by
-      have h1 : (n : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
-      calc f q = f (n • (q / n)) := by congr 1; rw [nsmul_eq_mul]; field_simp
-        _ = n • f (q / n) := map_nsmul f n _
-        _ = n * f (q / n) := nsmul_eq_mul n _⟩
-  have h1 : (0 : ℤ) < |f q| := abs_pos.mpr hfq
-  have h2 := key (|f q|.toNat + 1) (by omega)
-  rw [show ((|f q|.toNat + 1 : ℕ) : ℤ) = |f q| + 1 from by omega] at h2
-  exact absurd (Int.le_of_dvd h1 ((dvd_abs _ _).mpr h2)) (by omega)
-
-/-- ℤ is not injective in AddCommGrpCat (counterexample to flasque → injective). -/
-theorem not_injective_int : ¬ Injective (AddCommGrpCat.of ℤ) := by
-  intro ⟨hext⟩
-  let inc : AddCommGrpCat.of ℤ ⟶ AddCommGrpCat.of ℚ :=
-    AddCommGrpCat.ofHom (Int.castRingHom ℚ).toAddMonoidHom
-  have hinc_mono : Mono inc := by
-    rw [AddCommGrpCat.mono_iff_injective]
-    intro a b hab; simp [inc, AddCommGrpCat.ofHom] at hab; exact_mod_cast hab
-  obtain ⟨h, hh⟩ := @hext _ _ (𝟙 (AddCommGrpCat.of ℤ)) inc hinc_mono
-  have h_zero : ConcreteCategory.hom h = 0 :=
-    addMonoidHom_rat_int_eq_zero (ConcreteCategory.hom h)
-  have h1 : (ConcreteCategory.hom (inc ≫ h)) (1 : ℤ) = (1 : ℤ) := by rw [hh]; rfl
-  simp [AddCommGrpCat.hom_comp, h_zero] at h1
