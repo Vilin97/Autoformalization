@@ -202,14 +202,8 @@ theorem sHom_eq_of_app_generator {F : Presheaf AddCommGrpCat.{u} X}
         (AddCommGrpCat.Hom.hom (eqToHom hmid))
             ((AddCommGrpCat.Hom.hom (eqToHom hObjW₀.symm)) (1 : ULift ℤ)) =
           (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) (1 : ULift ℤ) := by
-      have hcollapse' :
-          (AddCommGrpCat.Hom.hom (eqToHom hmid))
-              ((AddCommGrpCat.Hom.hom (eqToHom hObjW₀.symm)) (1 : ULift ℤ)) =
-            (AddCommGrpCat.Hom.hom (eqToHom (hObjW₀.symm.trans hmid))) (1 : ULift ℤ) := by
-        simpa using hom_eqToHom_hom_eqToHom hObjW₀.symm hmid (1 : ULift ℤ)
-      have hsingle : hObjW₀.symm.trans hmid = hObjW.symm := by
-        apply Subsingleton.elim
-      simpa [hsingle] using hcollapse'
+      rw [show hmid = hObjW₀.symm.symm.trans hObjW.symm from Subsingleton.elim _ _]
+      simpa using hom_eqToHom_hom_eqToHom hObjW₀.symm (hObjW₀.symm.symm.trans hObjW.symm) 1
     have hgW_transport :
         gW = (eqToHom hObjW.symm :
           AddCommGrpCat.of (ULift ℤ) ⟶ (zeroOutside U constZ).obj W) (1 : ULift ℤ) := by
@@ -245,13 +239,11 @@ theorem sHom_eq_of_app_generator {F : Presheaf AddCommGrpCat.{u} X}
             F.map (homOfLE hW).op
               ((sHom (f.app (op U) (generator U))).app (op U) (generator U)) := by
         simpa [gW, Presheaf.restrictOpen, Presheaf.restrict] using hs_nat
-      rw [sHom_app_generator] at hs_nat'
-      exact hs_nat'
+      rw [sHom_app_generator] at hs_nat'; exact hs_nat'
     have hf_restrict :
         f.app W gW = F.map (homOfLE hW).op (f.app (op U) (generator U)) := by
       simpa [gW, Presheaf.restrictOpen, Presheaf.restrict] using
-        (congrArg (fun g => g (generator U))
-          (NatTrans.naturality f (homOfLE hW).op))
+        congrArg (fun g => g (generator U)) (NatTrans.naturality f (homOfLE hW).op)
     calc
       (sHom (f.app (op U) (generator U))).app W x
           = (sHom (f.app (op U) (generator U))).app W ((w.down : ℤ) • gW) := by rw [hx]
@@ -261,10 +253,9 @@ theorem sHom_eq_of_app_generator {F : Presheaf AddCommGrpCat.{u} X}
       _ = (w.down : ℤ) • f.app W gW := by rw [hf_restrict]
       _ = f.app W ((w.down : ℤ) • gW) := by simp
       _ = f.app W x := by rw [hx]
-  · have hs : (sHom (f.app (op U) (generator U))).app W = 0 :=
-        (zeroOutside_isZero (F := constZ) hW).eq_of_src _ _
-    have hf : f.app W = 0 := (zeroOutside_isZero (F := constZ) hW).eq_of_src _ _
-    rw [hs, hf]
+  · rw [(zeroOutside_isZero (F := constZ) hW).eq_of_src
+      ((sHom (f.app (op U) (generator U))).app W) 0,
+      (zeroOutside_isZero (F := constZ) hW).eq_of_src (f.app W) 0]
 
 end zeroOutside
 
