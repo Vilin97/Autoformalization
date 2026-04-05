@@ -206,8 +206,7 @@ theorem closedIncl_counit_isIso
             ((CategoryTheory.Functor.sheafPullbackConstruction.sheafAdjunctionContinuous
               (G := Opens.map (closedIncl hs)) AddCommGrpCat
               (Opens.grothendieckTopology X) K).counit.app F).val) := by
-      intro x
-      rw [hval]
+      intro x; rw [hval]
       let T := TopCat.Presheaf.stalkFunctor (X := TopCat.of s) AddCommGrpCat x
       have hcomp0 :
           CategoryTheory.toSheafify K P ≫ CategoryTheory.sheafifyLift K η F.cond = η := by

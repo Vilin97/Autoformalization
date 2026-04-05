@@ -212,8 +212,7 @@ private lemma PushforwardHVanishing_zero
     (hG' : Subsingleton (Sheaf.H G' 0)) :
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') 0) := by
-  intro i
-  let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G'
+  intro i; let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G'
   have hsec : Subsingleton (G'.val.obj (op ⊤)) := by
     letI := hG'; exact subsingleton_of_addEquiv (sheafH0EquivSections G')
   have hobj : F'.val.obj (op ⊤) = G'.val.obj (op ⊤) := by
@@ -277,8 +276,7 @@ theorem ext0_surj_of_epi_top
     ∀ y : Sheaf.H S.X₃ 0,
       ∃ z : Sheaf.H S.X₂ 0,
         z.comp (Ext.mk₀ S.g) (add_zero 0) = y := by
-  intro y
-  suffices ∃ ψ : _ ⟶ S.X₂, ψ ≫ S.g = Ext.addEquiv₀ y by
+  intro y; suffices ∃ ψ : _ ⟶ S.X₂, ψ ≫ S.g = Ext.addEquiv₀ y by
     obtain ⟨ψ, hψ⟩ := this
     exact ⟨Ext.mk₀ ψ, by rw [Ext.mk₀_comp_mk₀, hψ, Ext.mk₀_addEquiv₀_apply]⟩
   have hΓg : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map S.g) :=
@@ -300,8 +298,7 @@ private lemma PushforwardHVanishing_one
     (hG' : Subsingleton (Sheaf.H G' 1)) :
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') 1) := by
-  intro i
-  obtain ⟨ip⟩ := EnoughInjectives.presentation G'
+  intro i; obtain ⟨ip⟩ := EnoughInjectives.presentation G'
   have hSE_Z := ip.shortExact_shortComplex
   have hSE_X : (ip.shortComplex.map
       (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
@@ -339,8 +336,7 @@ private lemma PushforwardHVanishing_succ
     (hG' : Subsingleton (Sheaf.H G' (m + 2))) :
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') (m + 2)) := by
-  intro i
-  obtain ⟨ip⟩ := EnoughInjectives.presentation G'
+  intro i; obtain ⟨ip⟩ := EnoughInjectives.presentation G'
   have hSE_X : (ip.shortComplex.map
       (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
     closedIncl_pushforward_shortExact hZ ip
@@ -372,13 +368,11 @@ theorem PushforwardHVanishing
     (h : Subsingleton (Sheaf.H G n)) :
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G) n) := by
-  intro i
-  suffices ∀ (m : ℕ) (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)),
+  intro i; suffices ∀ (m : ℕ) (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)),
       Subsingleton (Sheaf.H G' m) →
       Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') m) from
     this n G h
-  intro m
-  induction m with
+  intro m; induction m with
   | zero => exact PushforwardHVanishing_zero hZ
   | succ k ih_push =>
     intro G' hG'

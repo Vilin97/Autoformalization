@@ -100,8 +100,7 @@ theorem ReducibleVanishing'
         a = 0) →
       Subsingleton (Sheaf.H G n) by
     exact this comps hcomp_irred F (fun x hx => absurd (hcover x) hx)
-  intro s
-  induction s using Finset.induction_on with
+  intro s; induction s using Finset.induction_on with
   | empty =>
     intro _ G hG
     exact subsingleton_sheafH_of_isZero' G

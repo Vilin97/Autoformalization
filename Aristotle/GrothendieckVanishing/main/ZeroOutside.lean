@@ -83,8 +83,7 @@ def zeroOutside_openHom [HasPullbacks C] : zeroOutside V F ⟶ zeroOutside U F w
 
 instance zeroOutside_hom_mono [HasPullbacks C] : Mono (zeroOutside_openHom (F := F) h) := by
   erw [NatTrans.mono_iff_mono_app]
-  intro W
-  by_cases hWV : (unop W) ≤ V
+  intro W; by_cases hWV : (unop W) ≤ V
   · have : unop W ≤ U := le_trans hWV h
     simp [zeroOutside_openHom, hWV, this, IsIso.mono_of_iso]
   · simp [zeroOutside_openHom, hWV, zeroOutside_isZero (F := F) hWV, IsZero.mono, isZero_zero C]

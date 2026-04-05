@@ -252,8 +252,7 @@ private theorem exists_section_generating_stalks
   rw [hs_W_def] at hcoeff_x ⊢
   constructor
   · -- germ(s_W, x) ≠ 0: since i_x(germ(s_W, x)) = d.down • gen_at x ≠ 0, and i_x injective
-    intro h_zero
-    rw [h_zero, map_zero] at hcoeff_x
+    intro h_zero; rw [h_zero, map_zero] at hcoeff_x
     exact absurd (zsmul_generator_injective V x (hWV hxW)
       ((zero_smul _ _).trans hcoeff_x)).symm (by omega)
   · -- Every stalk element a is a multiple of germ(s_W, x).
@@ -261,8 +260,7 @@ private theorem exists_section_generating_stalks
     -- because d_nat was chosen MINIMAL via Nat.find. At x, the generator d_x
     -- satisfies d_x | d.down (since d.down ∈ image at x from hcoeff_x) and
     -- d.down ≤ d_x (minimality), forcing d_x = d.down.
-    intro a
-    obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x (hWV hxW) (i_x x a)
+    intro a; obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x (hWV hxW) (i_x x a)
     -- d.down • gen_at x ∈ range(i_x x) (from hcoeff_x)
     have hd_in_Hx : d.down • gen_at x (hWV hxW) ∈ Set.range (i_x x) := ⟨_, hcoeff_x⟩
     have hHx_ne : H_at x (hWV hxW) ≠ ⊥ := by

@@ -349,8 +349,7 @@ theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
   have hg_U : Epi (S.g.val.app (op U)) := epi_app_of_shortExact_flasque hS h₁ U
   have hres₂ : Epi (S.X₂.val.map j.op) := h₂ j
   rw [AddCommGrpCat.epi_iff_surjective] at hg_U hres₂ ⊢
-  intro z
-  obtain ⟨w, hw⟩ := hg_U z
+  intro z; obtain ⟨w, hw⟩ := hg_U z
   obtain ⟨x, hx⟩ := hres₂ w
   exact ⟨ConcreteCategory.hom (S.g.val.app (op V)) x, by
     have := congrArg (· x) (S.g.val.naturality j.op)
@@ -419,8 +418,7 @@ theorem isFlasque_of_injective {X : TopCat.{u}}
     (I : TopCat.Sheaf AddCommGrpCat.{u} X) [Injective I] : IsFlasqueSheaf I := by
   intro U V i
   rw [AddCommGrpCat.epi_iff_surjective]
-  intro s
-  obtain ⟨h, hh⟩ := Injective.factors ((freeAbSheafHomEquiv U I).symm s) (freeAbSheafMap i)
+  intro s; obtain ⟨h, hh⟩ := Injective.factors ((freeAbSheafHomEquiv U I).symm s) (freeAbSheafMap i)
   exact ⟨freeAbSheafHomEquiv V I h, by rw [← freeAbSheafHomEquiv_naturality i I h, hh]; simp⟩
 
 theorem epi_of_natIso_epi {C D : Type*} [Category C] [Category D]

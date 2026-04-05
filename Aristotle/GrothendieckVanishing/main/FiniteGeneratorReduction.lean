@@ -44,8 +44,7 @@ private lemma isFlasque_filtered_colimit
     IsFlasqueSheaf c.pt := by
   intro U V i
   rw [AddCommGrpCat.epi_iff_surjective]
-  intro b
-  haveI := createsFilteredColimit F
+  intro b; haveI := createsFilteredColimit F
   have hc_psh := isColimitOfPreserves (sheafToPresheaf _ _) hc
   have hc_U := isColimitOfPreserves
     ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op U)) hc_psh
@@ -527,8 +526,7 @@ theorem finsetGeneratedSheaf_vanishing
     Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m) := by
   suffices h : ∀ (T : Finset (TopCat.Sheaf.SectionIndex K)),
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf T) m) from h S
-  intro T
-  induction T using Finset.induction with
+  intro T; induction T using Finset.induction with
   | empty =>
     apply subsingleton_sheafH_of_isZero'
     apply IsZero.of_iso (isZero_zero _) (imageZero' _)
