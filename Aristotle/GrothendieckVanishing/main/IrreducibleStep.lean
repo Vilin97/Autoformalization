@@ -13,22 +13,6 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 
-/-- If `i : A →+ ULift ℤ` is injective, `j : ULift ℤ →+ A`, `i ∘ j` is multiplication by
-    `c ≠ 0`, and `range(i) = c·ℤ`, then `j` is bijective.
-    Proved by Aristotle (job 68d0f4f8). -/
-private theorem zmul_bijective_of_index_match
-    {A : Type u} [AddCommGroup A]
-    (i : A →+ ULift.{u} ℤ) (hi : Function.Injective i)
-    (j : ULift.{u} ℤ →+ A)
-    (c : ℤ) (hc : c ≠ 0)
-    (hcomp : ∀ n : ULift.{u} ℤ, i (j n) = ⟨c * n.down⟩)
-    (himg : ∀ z : ULift.{u} ℤ, z ∈ Set.range i ↔ ∃ k : ℤ, z = ⟨c * k⟩) :
-    Function.Bijective j := by
-  refine' ⟨_, _⟩
-  · intro n m hnm; have := hcomp n; aesop
-  · intro a; specialize himg (i a); aesop
-
-
 /-- The stalk map of `sHom s` at `x ∈ U` is bijective when every stalk element of R at x
     is an integer multiple of `germ(s, x)`, and R embeds into `zeroOutsideInt V`
     (providing torsion-freeness needed for injectivity). -/

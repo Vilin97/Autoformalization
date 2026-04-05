@@ -143,15 +143,6 @@ private lemma eval_comp_zero {X : TopCat.{u}}
     S.f.val.app (op V) ≫ S.g.val.app (op V) = 0 := by
   change (S.f ≫ S.g).val.app (op V) = 0; rw [S.zero]; aesop_cat
 
-private lemma mono_f_app {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (V : Opens X) :
-    Mono (S.f.val.app (op V)) := by
-  haveI : Mono S.f := hS.mono_f
-  haveI : Mono S.f.val := by
-    change Mono ((sheafToPresheaf _ _).map S.f); infer_instance
-  exact (NatTrans.mono_iff_mono_app S.f.val).mp ‹_› (op V)
-
 -- In a thin category (Opens X), any two parallel morphisms are equal,
 -- so presheaf restriction maps agree regardless of which morphism is used.
 private lemma presheaf_map_eq {X : TopCat.{u}}
@@ -174,41 +165,6 @@ private noncomputable instance sigmaPreorder {X : TopCat.{u}}
           (homOfLE h₂).op ≫ (homOfLE h₁).op := rfl
       simp only [this, Functor.map_comp, AddCommGrpCat.hom_comp,
         AddMonoidHom.coe_comp, Function.comp_apply, ht₂, ht₁]⟩
-
--- Binary gluing: given compatible sections on V₀ and W, produce a section on V₀ ⊔ W.
-private lemma binaryGlue_exists {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    {V₀ W : Opens X} (t₀ : F.val.obj (op V₀)) (t'' : F.val.obj (op W))
-    (hcompat : ConcreteCategory.hom (F.val.map (homOfLE inf_le_right).op) t'' =
-      ConcreteCategory.hom (F.val.map (homOfLE inf_le_left).op) t₀) :
-    ∃ t_new : F.val.obj (op (V₀ ⊔ W)),
-      ConcreteCategory.hom (F.val.map (homOfLE le_sup_left).op) t_new = t₀ ∧
-      ConcreteCategory.hom (F.val.map (homOfLE le_sup_right).op) t_new = t'' := by
-  let BU : Bool → Opens X := fun | false => V₀ | true => W
-  let Bsf : (b : Bool) → F.val.obj (op (BU b)) := fun | false => t₀ | true => t''
-  have hcover : V₀ ⊔ W ≤ ⨆ b, BU b := by
-    intro y hy; simp only [Opens.mem_iSup]
-    rcases hy with h | h
-    · exact ⟨false, h⟩
-    · exact ⟨true, h⟩
-  have hsup_eq : ⨆ b, BU b = V₀ ⊔ W :=
-    le_antisymm (iSup_le fun b => by cases b <;> simp [BU]) hcover
-  have hcompat_glue : TopCat.Presheaf.IsCompatible F.val BU Bsf := by
-    intro i j; match i, j with
-    | false, false => rfl
-    | false, true => exact hcompat.symm
-    | true, false =>
-      rw [show (W).infLELeft V₀ = eqToHom (inf_comm W V₀) ≫ homOfLE inf_le_right
-            from Subsingleton.elim _ _,
-          show (W).infLERight V₀ = eqToHom (inf_comm W V₀) ≫ homOfLE inf_le_left
-            from Subsingleton.elim _ _,
-          op_comp, Functor.map_comp, CategoryTheory.comp_apply,
-          op_comp, Functor.map_comp, CategoryTheory.comp_apply, hcompat]
-    | true, true => rfl
-  obtain ⟨t_new, ht_new, _⟩ := TopCat.Sheaf.existsUnique_gluing' F BU (V₀ ⊔ W)
-    (fun b => homOfLE (by cases b <;> simp [BU])) (hsup_eq ▸ le_rfl) Bsf hcompat_glue
-  have h0 := ht_new false; simp only [BU, Bsf] at h0
-  have h1 := ht_new true; simp only [BU, Bsf] at h1
-  exact ⟨t_new, h0, h1⟩
 
 /-! ### Partial lift sub-lemmas for the Zorn surjectivity argument -/
 

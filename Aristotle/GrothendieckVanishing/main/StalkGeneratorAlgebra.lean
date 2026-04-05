@@ -79,11 +79,6 @@ theorem sheaf_mono_of_stalk_injective
     exact (ConcreteCategory.mono_iff_injective_of_preservesPullback _).mpr (h x)
   exact TopCat.Presheaf.mono_of_stalk_mono f
 
-/-- Every additive subgroup of `ℤ` is of the form `nℤ`. -/
-private theorem int_addSubgroup_eq_zmultiples (H : AddSubgroup ℤ) :
-    ∃ n : ℤ, H = AddSubgroup.zmultiples n :=
-  (Int.subgroup_cyclic H).imp fun _ hn => by simpa [AddSubgroup.zmultiples_eq_closure] using hn
-
 /-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
     is an integer multiple of the germ of the distinguished generator over `V`. -/
 private theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
