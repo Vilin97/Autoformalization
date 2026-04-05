@@ -1,28 +1,36 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-05T00:25Z
+**Updated**: 2026-04-05T01:15Z
 
 ## Status Summary
 
 - **Sorry count**: 0 — FULLY PROVED
 - **Axioms**: 0 (verified by `lean_verify`)
-- **Files**: 16 `.lean` in `main/`, ~5844 total lines
-- **CI**: Commit `08c3529` pushed, CI in progress. PR #13 open with auto-merge.
-- **Critique verdict**: ACCEPT
+- **Files**: 20 `.lean` in `main/`, ~5844 total lines
+- **CI**: Last run PASSED. PR #13 open with auto-merge.
+- **Critique verdict**: CONDITIONAL ACCEPT — code quality issues remain
+- **Blueprint**: Infrastructure created (content.tex, deploy.yml updated), not yet live (deploys on merge to `grothendieck-vanishing`)
 
 ## This Cycle's Work Items
 
-All previous items (commit, cleanup, cancel Aristotle) are DONE. No sorry's to prove, no code quality issues.
+### 1. Delete dead code: `CohomologyIso.lean` (`/cleanup`)
+- File is not imported by any other file in the project.
+- Contains `cohomologyPresheafTopEquiv` which is never referenced.
+- Remove the file entirely and remove it from `main.lean` file listing comment.
 
-### 1. Verify CI passes
-- Wait for CI run `23990584135` to complete.
-- If it passes, PR #13 will auto-merge into `grothendieck-vanishing`.
+### 2. Clean stale Aristotle tracking (`/cleanup`)
+- `aristotle-jobs.json` has a completed job entry. Clear it.
 
-### 2. Update critique with CI result
-- Update critique.md with final CI status.
+### 3. Fix MEMORY.md stale Mathlib version (`/simplify`)
+- MEMORY.md says `v4.24.0`, actual is `v4.28.0`. Update.
+
+### 4. Commit and push (`/commit`)
+- Commit blueprint + cleanup + critique + plan.
 
 ## Backlog
 
-- **P1**: Blueprint deployment — returns 404. No deployment workflow exists.
+- **P3**: `FiniteGeneratorReduction.lean` at 624 lines (exceeds 600 soft limit). Split into two files. Not urgent — the file is well-organized with clear section markers.
+- **P3**: 3 files use blanket `import Mathlib`. Replace with targeted imports. Risk: may break if we miss a dependency. Defer to a dedicated cleanup cycle.
 - **P4**: Generalize coefficient category from `AddCommGrpCat` to arbitrary Grothendieck abelian.
-- **P4**: Upstream `isFlasque_filtered_colimit`, `PresheafFilteredColimit`, `FlasqueVanishing`, `ConstantSheafFlasque` to Mathlib.
+- **P4**: Strengthen `Subsingleton` to `IsZero`.
+- **P4**: Upstream lemmas to Mathlib (`FlasqueVanishing`, `isFlasque_filtered_colimit`, `PresheafFilteredColimit`, `ConstantSheafFlasque`).

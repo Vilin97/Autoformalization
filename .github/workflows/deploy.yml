@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - grothendieck-vanishing
   workflow_dispatch:
 
 permissions:
@@ -54,9 +55,39 @@ jobs:
           name: docs
           path: docbuild/.lake/build/doc
 
+  build_blueprint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Build blueprint
+        uses: xu-cheng/texlive-action@v2
+        with:
+          docker_image: ghcr.io/xu-cheng/texlive-full:20231201
+          run: |
+            export PIP_BREAK_SYSTEM_PACKAGES=1
+            apk update
+            apk add --update py3-pip git pkgconfig graphviz graphviz-dev gcc musl-dev
+            git config --global --add safe.directory $GITHUB_WORKSPACE
+            python3 -m venv env
+            source env/bin/activate
+            pip install --upgrade pip requests wheel
+            CFLAGS="-I/usr/include/graphviz" LDFLAGS="-L/usr/lib/graphviz" pip install pygraphviz
+            pip install leanblueprint
+            leanblueprint web
+
+      - name: Upload blueprint artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: blueprint
+          path: blueprint/web
+
   deploy:
-    if: github.ref == 'refs/heads/main'
-    needs: [build_docs]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/grothendieck-vanishing'
+    needs: [build_docs, build_blueprint]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -70,6 +101,12 @@ jobs:
         with:
           name: docs
           path: _site/docs
+
+      - name: Download blueprint artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: blueprint
+          path: _site/blueprint
 
       - name: Prepare site
         run: |
@@ -85,9 +122,10 @@ jobs:
             </style>
           </head>
           <body>
-            <h1>Aristotle Project</h1>
-            <p>Formal mathematics in Lean 4.</p>
+            <h1>Grothendieck's Vanishing Theorem</h1>
+            <p>Formalization of Grothendieck's vanishing theorem (Hartshorne III, Theorem 2.7) in Lean 4 with Mathlib: for a Noetherian topological space X of dimension n and any sheaf F of abelian groups on X, H<sup>i</sup>(X, F) = 0 for all i &gt; n.</p>
             <ul>
+              <li><a href="blueprint/">Blueprint</a> -- dependency graph and formalization status</li>
               <li><a href="docs/">Lean Documentation</a> -- API documentation</li>
               <li><a href="https://github.com/Vilin97/aristotle">GitHub repository</a></li>
             </ul>
