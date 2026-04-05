@@ -110,10 +110,8 @@ private theorem surj_transfer_closedIncl {A B C D : AddCommGrpCat.{u}}
       ConcreteCategory.hom (inv h ≫ f) d from
         (ConcreteCategory.comp_apply _ _ _).symm,
     show inv h ≫ f = k ≫ inv g by
-      have : f = h ≫ k ≫ inv g := by
-        rw [← Category.assoc, ← hnat, Category.assoc,
-          IsIso.hom_inv_id, Category.comp_id]
-      rw [this]; simp,
+      rw [show f = h ≫ k ≫ inv g from by
+        rw [← Category.assoc, ← hnat, Category.assoc, IsIso.hom_inv_id, Category.comp_id]]; simp,
     ConcreteCategory.comp_apply, hd, ← ConcreteCategory.comp_apply,
     IsIso.hom_inv_id, ConcreteCategory.id_apply]
 

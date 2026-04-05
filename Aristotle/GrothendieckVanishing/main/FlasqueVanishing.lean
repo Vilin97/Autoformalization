@@ -261,11 +261,9 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
   obtain ⟨ahat, hahat⟩ := hfl a
   set t'' := t' + S.f.val.app (op W) ahat with ht''_def
   have hgt'' : S.g.val.app (op W) t'' = S.X₃.val.map (homOfLE hWU).op s := by
-    simp only [ht''_def, map_add]
-    have hgf : S.g.val.app (op W) (S.f.val.app (op W) ahat) = 0 := by
-      change (S.f.val.app (op W) ≫ S.g.val.app (op W)) ahat = 0
-      rw [eval_comp_zero]; simp
-    rw [hgf, add_zero, ht']; exact presheaf_map_eq S.X₃.val _ _ s
+    simp only [ht''_def, map_add, show S.g.val.app (op W) (S.f.val.app (op W) ahat) = 0 from by
+      change (S.f.val.app (op W) ≫ S.g.val.app (op W)) ahat = 0; rw [eval_comp_zero]; simp,
+      add_zero, ht']; exact presheaf_map_eq S.X₃.val _ _ s
   have hcompat_patch : S.X₂.val.map (homOfLE inf_le_right).op t'' =
       S.X₂.val.map (homOfLE inf_le_left).op t₀ := by
     simp only [ht''_def, map_add]

@@ -158,11 +158,9 @@ private noncomputable def finsetGenCocone_isColimit :
           factorThruImage (TopCat.Sheaf.finsetGeneratorMap {σ}) ≫
           colimit.ι (finsetGenFunctor K) {σ}
     have hfac : g ≫ d = TopCat.Sheaf.allSectionMap K := by
-      dsimp only [g, d]
-      apply Sigma.hom_ext; intro σ
-      simp only [← Category.assoc, Sigma.ι_desc]
-      simp only [Category.assoc, colimit.ι_desc]
-      simp [finsetGenCocone, Limits.image.fac, TopCat.Sheaf.finsetGeneratorMap,
+      dsimp only [g, d]; apply Sigma.hom_ext; intro σ
+      simp [← Category.assoc, Sigma.ι_desc, Category.assoc, colimit.ι_desc,
+        finsetGenCocone, Limits.image.fac, TopCat.Sheaf.finsetGeneratorMap,
         TopCat.Sheaf.familyGeneratorMap]
     haveI := TopCat.Sheaf.allSectionMap_epi K
     exact epi_of_epi_fac hfac
