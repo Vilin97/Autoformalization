@@ -223,12 +223,8 @@ private lemma partialLift_chain_ub {X : TopCat.{u}}
     exact presheaf_map_eq S.X₃.val _ _ s
   · refine ⟨⟨⊥, 0⟩, ?_, fun _ hz => absurd ⟨_, hz⟩ hc⟩
     refine ⟨bot_le, ?_⟩
-    have h0 : ∀ (a : S.X₃.val.obj (op ⊥)), a = 0 := fun a => by
-      have := congr_arg (fun f => (ConcreteCategory.hom f) a)
-        (show (𝟙 _ : S.X₃.val.obj (op ⊥) ⟶ _) = 0 from
-          (isTerminal_sheaf_bot S.X₃).hom_ext _ _)
-      simpa using this
-    exact (h0 _).trans (h0 _).symm
+    exact @Subsingleton.elim _
+      (AddCommGrpCat.subsingleton_of_isZero (isTerminal_sheaf_bot S.X₃).isZero) _ _
 
 -- Maximal partial lift must cover all of U.
 -- If V₀ < U, find x ∈ U \ V₀, get a local lift on W ∋ x, adjust for compatibility
@@ -449,21 +445,19 @@ theorem ext_zero_map_surjective {X : TopCat.{u}}
   suffices ∃ ψ : _ ⟶ S.X₂, ψ ≫ S.g = Ext.addEquiv₀ y by
     obtain ⟨ψ, hψ⟩ := this
     exact ⟨Ext.mk₀ ψ, by rw [Ext.mk₀_comp_mk₀, hψ, Ext.mk₀_addEquiv₀_apply]⟩
-  -- Γ(g) is epi (from g epi at ⊤, via Γ ≅ sheafSections at ⊤)
   have hΓg : Epi ((Sheaf.Γ (Opens.grothendieckTopology X)
       AddCommGrpCat.{u}).map S.g) :=
     epi_of_natIso_epi (Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).symm S.g
       (epi_app_of_shortExact_flasque hS hFlasque₁ ⊤)
-  -- Lift through adjunction + projectivity of ULift ℤ
   let adj := constantSheafΓAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
   let M := AddCommGrpCat.of (ULift.{u} ℤ)
   haveI : Projective M := ulift_int_projective
-  refine ⟨(adj.homEquiv M S.X₂).symm (Projective.factorThru
+  exact ⟨(adj.homEquiv M S.X₂).symm (Projective.factorThru
     ((adj.homEquiv M S.X₃) (Ext.addEquiv₀ y))
-    ((Sheaf.Γ _ _).map S.g)), ?_⟩
-  apply (adj.homEquiv M S.X₃).injective
-  rw [Adjunction.homEquiv_naturality_right, Equiv.apply_symm_apply,
-    Projective.factorThru_comp]
+    ((Sheaf.Γ _ _).map S.g)), by
+    apply (adj.homEquiv M S.X₃).injective
+    rw [Adjunction.homEquiv_naturality_right, Equiv.apply_symm_apply,
+      Projective.factorThru_comp]⟩
 
 -- Cohomological vanishing theorems (sheafH0EquivSections, FlasqueVanishing)
 -- are in FlasqueCohomology.lean.

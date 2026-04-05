@@ -223,10 +223,9 @@ private lemma PushforwardHVanishing_zero
   let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G'
   have hsec : Subsingleton (G'.val.obj (op ⊤)) := by
     letI := hG'; exact subsingleton_of_addEquiv (sheafH0EquivSections G')
-  have htop : ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ := by ext; simp [Opens.map]
   have hobj : F'.val.obj (op ⊤) = G'.val.obj (op ⊤) := by
     change G'.val.obj (op ((Opens.map i).obj ⊤)) = G'.val.obj (op ⊤)
-    simp [htop]
+    simp [show ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ from by ext; simp [Opens.map]]
   constructor; intro a b
   apply (sheafH0EquivSections F').injective
   exact @Subsingleton.elim (F'.val.obj (op ⊤)) (hobj ▸ hsec) _ _
