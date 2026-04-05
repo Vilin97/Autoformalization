@@ -146,8 +146,7 @@ private lemma eval_comp_zero {X : TopCat.{u}}
 private lemma presheaf_map_eq {X : TopCat.{u}}
     (F : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
     {U V : Opens X} (f g : U ⟶ V) (s : F.obj (op V)) :
-    F.map f.op s = F.map g.op s := by
-  rw [Subsingleton.elim f g]
+    F.map f.op s = F.map g.op s := congr_arg (F.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim f g))
 
 -- Extension preorder on partial lifts (V, t):
 -- (V₁,t₁) ≤ (V₂,t₂) iff V₁ ≤ V₂ and t₂|_{V₁} = t₁.
