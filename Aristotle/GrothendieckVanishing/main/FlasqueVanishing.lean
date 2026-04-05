@@ -396,13 +396,12 @@ private lemma freeAbSheafHomEquiv_naturality {U V : Opens X} (i : U ⟶ V)
       ((sheafificationAdjunction (Opens.grothendieckTopology X)
         AddCommGrpCat).homEquiv (freeAbPresheaf V) I f))
     i.op) using 1
-  constructor <;> intro h
-  · exact (NatTrans.naturality
+  exact ⟨fun _ => (NatTrans.naturality
       ((Adjunction.whiskerRight (Opens X)ᵒᵖ AddCommGrpCat.adj).homEquiv
         (yoneda.obj V) I.val
         ((sheafificationAdjunction (Opens.grothendieckTopology X)
-          AddCommGrpCat).homEquiv (freeAbPresheaf V) I f)) i.op)
-  · convert congr_arg (fun g => g (𝟙 V)) h using 1
+          AddCommGrpCat).homEquiv (freeAbPresheaf V) I f)) i.op),
+    fun h => by convert congr_arg (fun g => g (𝟙 V)) h using 1⟩
 
 private instance freeAbSheafMap_mono {U V : Opens X} (i : U ⟶ V) :
     Mono (freeAbSheafMap i) := by

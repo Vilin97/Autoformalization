@@ -394,10 +394,8 @@ theorem subsheaf_zeroOutsideInt_vanishing
       haveI : Epi η := epi_unit_of_closedImmersion Y hYcl CJ
       let S' := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
       have hSE' : S'.ShortExact := shortExact_of_epi η
-      have hPush : Subsingleton (Sheaf.H S'.X₃ m) := by
-        show Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} ci).obj
-          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} ci).obj CJ)) m)
-        exact PushforwardHVanishing Y hYcl _ m (@ih (TopCat.of Y) _ m _ hY_dim_lt (lt_trans hY_dim_lt hm))
+      have hPush : Subsingleton (Sheaf.H S'.X₃ m) :=
+        PushforwardHVanishing Y hYcl _ m (@ih (TopCat.of Y) _ m _ hY_dim_lt (lt_trans hY_dim_lt hm))
       -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
       have hKer : Subsingleton (Sheaf.H S'.X₁ m) := by
         apply subsingleton_sheafH_of_isZero'; apply sheaf_isZero_of_zero_stalks X; intro x a
@@ -406,10 +404,9 @@ theorem subsheaf_zeroOutsideInt_vanishing
           haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S'.g.val) :=
             closedIncl_unit_stalk_isIso hYcl CJ ⟨x, hxY⟩
           exact stalk_zero_of_ses_g_iso hSE' x inferInstance a
-        · -- At points in V': cokernel j has zero stalks (j is stalk-surjective)
-          have hxV' : x ∈ V' := by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY
-          exact stalk_zero_of_shortExact_kernel hSE' x
-            (fun b => cokernel_stalk_zero_of_stalk_surj j x (hj_stalk x hxV').2 b) a
+        · exact stalk_zero_of_shortExact_kernel hSE' x (fun b =>
+            cokernel_stalk_zero_of_stalk_surj j x
+              (hj_stalk x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY)).2 b) a
       exact subsingleton_sheafH_of_shortExact_middle hSE' m hKer hPush
     -- Step 5: Middle-term LES gives H^m(R) = 0
     exact subsingleton_sheafH_of_shortExact_middle hSE m hV'van hCoker
