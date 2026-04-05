@@ -35,9 +35,8 @@ theorem toPlus_injective_of_const
   obtain ⟨W, _, _, heq⟩ := h
   obtain ⟨p, hp⟩ := hU
   obtain ⟨V, f, hf, _⟩ := W.2 p hp
-  have := congr_fun (congr_arg Subtype.val heq) (⟨V, f, hf⟩ : W.Arrow)
-  simp only [Functor.const_obj_obj, Meq.refine, Meq.mk] at this
-  exact this
+  simpa [Meq.refine, Meq.mk] using
+    congr_fun (congr_arg Subtype.val heq) (⟨V, f, hf⟩ : W.Arrow)
 
 private lemma cover_nonempty_arrow
     {X : Type u} [TopologicalSpace X]

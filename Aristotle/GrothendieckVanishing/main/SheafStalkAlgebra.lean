@@ -105,13 +105,6 @@ private theorem presheaf_stalk_surj_openHom
   convert ((TopCat.Presheaf.constZ.zeroOutside U).germ_res_apply
     (homOfLE hWV_le_W) x hxWV s) using 1
 
-/-- The presheaf stalk map of `zeroOutside_openHom(le_top)` at `x ∈ V` is surjective. -/
-private theorem presheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V) :
-    Function.Surjective (ConcreteCategory.hom
-      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-        (TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) (le_top : V ≤ ⊤)))) :=
-  presheaf_stalk_surj_openHom (le_top : V ≤ ⊤) x hx
-
 /-- The sheaf stalk map of `openHom(le_top)` at `x ∈ V` is surjective.
     Transfers presheaf stalk surjectivity via `toSheafify_naturality` and
     the fact that `stalk(toSheafify)` is an isomorphism. -/
@@ -137,13 +130,6 @@ private theorem sheaf_stalk_surj_openHom
     change ConcreteCategory.hom (T.map (sheafifyMap J φ))
       (ConcreteCategory.hom (T.map (toSheafify J _)) p) = _
     rw [← ConcreteCategory.comp_apply, hnat.symm, ConcreteCategory.comp_apply, hp]⟩
-
-/-- The sheaf stalk map of `openHom(le_top)` at `x ∈ V` is surjective. -/
-private theorem sheaf_stalk_surj {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V) :
-    Function.Surjective (ConcreteCategory.hom
-      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-        (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)).val)) :=
-  sheaf_stalk_surj_openHom (le_top : V ≤ ⊤) x hx
 
 /-- On points of the smaller open, `zeroOutsideInt.openHom h` induces a stalk bijection. -/
 private theorem sheaf_stalk_bijective_openHom
@@ -196,7 +182,7 @@ private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
       (Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))).val) :
     a = 0 :=
-  cokernel_stalk_zero_of_stalk_surj _ x (sheaf_stalk_surj V x hx) a
+  cokernel_stalk_zero_of_stalk_surj _ x (sheaf_stalk_surj_openHom le_top x hx) a
 
 /-- Cokernel of `openHom(le_top)` has vanishing cohomology on irreducible X.
     The cokernel C has zero stalks on V (since openHom is stalkwise iso there).
