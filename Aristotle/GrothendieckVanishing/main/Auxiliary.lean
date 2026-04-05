@@ -69,8 +69,7 @@ theorem opens_eq_bot_or_top_of_irreducibleSpace_dim_zero
 /-- On an irreducible space, the topological Krull dimension is ≥ 0. -/
 theorem topologicalKrullDim_nonneg_of_irreducible {X : Type u} [TopologicalSpace X]
     [IrreducibleSpace X] : topologicalKrullDim X ≥ 0 := by
-  rw [topologicalKrullDim, ge_iff_le, Order.krullDim_nonneg_iff]
-  exact ⟨⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩⟩
+  rw [topologicalKrullDim, ge_iff_le, Order.krullDim_nonneg_iff]; exact ⟨⟨_, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩⟩
 
 /-- Every element in the image of IrreducibleCloseds Y → IrreducibleCloseds X
     is strictly below the whole space X, when Y ⊊ X. -/
