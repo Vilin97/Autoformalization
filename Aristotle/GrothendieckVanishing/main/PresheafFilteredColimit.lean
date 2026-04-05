@@ -124,9 +124,6 @@ private theorem isSheaf_presheaf_filtered_colimit
           ConcreteCategory.hom
           ((c.ι.app j₀).app _ ≫ (((Functor.const J').obj c.pt).obj j₀).map _) b₀
         rw [(c.ι.app j₀).naturality (Opens.leSupr U k).op]
-      have hres_zero : ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀)
-          (ConcreteCategory.hom ((Y'.obj j₀).val.map (Opens.leSupr U k).op) b₀) = 0 :=
-        hnat_k.trans (ha k hk)
       have h0 : ((CategoryTheory.forget AddCommGrpCat).mapCocone
           ((ev (U k)).mapCocone c)).ι.app j₀
           (ConcreteCategory.hom ((Y'.obj j₀).val.map (Opens.leSupr U k).op) b₀) =
@@ -134,33 +131,25 @@ private theorem isSheaf_presheaf_filtered_colimit
           ((ev (U k)).mapCocone c)).ι.app j₀ 0 := by
         change ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀) _ =
           ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀) 0
-        rw [hres_zero, map_zero]
+        rw [hnat_k.trans (ha k hk), map_zero]
       rw [Types.FilteredColimit.isColimit_eq_iff' hcTyp] at h0
       obtain ⟨jk, fk, hfk⟩ := h0
       exact ⟨jk, fk, by simpa [map_zero] using hfk⟩
-    -- Convert to transition-then-restrict form
-    have h_ev' : ∀ k ∈ t, ∃ (jk : J') (fk : j₀ ⟶ jk),
-        ConcreteCategory.hom ((Y'.obj jk).val.map (Opens.leSupr U k).op)
-          (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op (iSup U))) b₀) = 0 := by
+    -- Merge via filtered_colimit_kills_all_restrictions
+    obtain ⟨j₁, g₀, hg₀⟩ := filtered_colimit_kills_all_restrictions Y' U j₀ b₀ t (by
       intro k hk; obtain ⟨jk, fk, hfk⟩ := h_ev_zero k hk; refine ⟨jk, fk, ?_⟩
-      have hnat' := ((Y' ⋙ sheafToPresheaf _ _).map fk).naturality (Opens.leSupr U k).op
       change ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op (iSup U)) ≫
         ((Y' ⋙ sheafToPresheaf _ _).obj jk).map (Opens.leSupr U k).op) b₀ = 0
-      rw [← hnat']; exact hfk
-    -- Merge via filtered_colimit_kills_all_restrictions
-    obtain ⟨j₁, g₀, hg₀⟩ := filtered_colimit_kills_all_restrictions Y' U j₀ b₀ t h_ev'
-    let b₁ := ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op (iSup U))) b₀
-    have hb₁_zero : b₁ = 0 :=
-      sheaf_section_zero_of_zero_on_finite_cover (Y'.obj j₁) U t hsup_le b₁ hg₀
+      rw [← ((Y' ⋙ sheafToPresheaf _ _).map fk).naturality (Opens.leSupr U k).op]; exact hfk)
     rw [← hb₀]; change ConcreteCategory.hom ((c.ι.app j₀).app (op (iSup U))) b₀ = 0
-    have hfac : (c.ι.app j₀).app (op (iSup U)) =
+    conv_lhs => rw [show (c.ι.app j₀).app (op (iSup U)) =
         ((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op (iSup U)) ≫
-        (c.ι.app j₁).app (op (iSup U)) := by
-      have := congrArg (fun α => NatTrans.app α (op (iSup U))) (c.ι.naturality g₀)
-      simpa [Functor.const_obj_map] using this.symm
-    conv_lhs => rw [hfac]
-    change ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U))) b₁ = 0
-    rw [hb₁_zero, map_zero]
+        (c.ι.app j₁).app (op (iSup U)) from by
+      simpa [Functor.const_obj_map] using
+        (congrArg (fun α => NatTrans.app α (op (iSup U))) (c.ι.naturality g₀)).symm]
+    change ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U)))
+      (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op (iSup U))) b₀) = 0
+    rw [sheaf_section_zero_of_zero_on_finite_cover (Y'.obj j₁) U t hsup_le _ hg₀, map_zero]
   -- Existence: construct a gluing section
   classical
   choose j_all x_all hx_all using fun k =>
