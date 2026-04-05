@@ -143,9 +143,7 @@ private lemma sections_exact_of_shortExact {X : TopCat.{u}}
 private lemma eval_comp_zero {X : TopCat.{u}}
     (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)) (V : Opens X) :
     S.f.val.app (op V) ≫ S.g.val.app (op V) = 0 := by
-  have h1 : S.f.val.app (op V) ≫ S.g.val.app (op V) =
-      (S.f.val ≫ S.g.val).app (op V) := by simp
-  rw [h1]; change (S.f ≫ S.g).val.app (op V) = 0; rw [S.zero]; aesop_cat
+  change (S.f ≫ S.g).val.app (op V) = 0; rw [S.zero]; aesop_cat
 
 private lemma mono_f_app {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
@@ -162,7 +160,7 @@ private lemma presheaf_map_eq {X : TopCat.{u}}
     (F : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
     {U V : Opens X} (f g : U ⟶ V) (s : F.obj (op V)) :
     F.map f.op s = F.map g.op s := by
-  have : f = g := Subsingleton.elim _ _; rw [this]
+  rw [Subsingleton.elim f g]
 
 -- Extension preorder on partial lifts (V, t):
 -- (V₁,t₁) ≤ (V₂,t₂) iff V₁ ≤ V₂ and t₂|_{V₁} = t₁.
@@ -266,19 +264,12 @@ private lemma partialLift_chain_ub {X : TopCat.{u}}
     exact presheaf_map_eq S.X₃.val _ _ s
   · refine ⟨⟨⊥, 0⟩, ?_, fun _ hz => absurd ⟨_, hz⟩ hc⟩
     refine ⟨bot_le, ?_⟩
-    have ht := isTerminal_sheaf_bot S.X₃
-    have hsub : ∀ (a b : S.X₃.val.obj (op ⊥)), a = b := by
-      intro a b
-      have h₁ : a = (0 : S.X₃.val.obj (op ⊥)) := by
-        have := congr_arg (fun f => (ConcreteCategory.hom f) a)
-          (show (𝟙 _ : S.X₃.val.obj (op ⊥) ⟶ _) = 0 from ht.hom_ext _ _)
-        simpa using this
-      have h₂ : b = (0 : S.X₃.val.obj (op ⊥)) := by
-        have := congr_arg (fun f => (ConcreteCategory.hom f) b)
-          (show (𝟙 _ : S.X₃.val.obj (op ⊥) ⟶ _) = 0 from ht.hom_ext _ _)
-        simpa using this
-      rw [h₁, h₂]
-    exact hsub _ _
+    have h0 : ∀ (a : S.X₃.val.obj (op ⊥)), a = 0 := fun a => by
+      have := congr_arg (fun f => (ConcreteCategory.hom f) a)
+        (show (𝟙 _ : S.X₃.val.obj (op ⊥) ⟶ _) = 0 from
+          (isTerminal_sheaf_bot S.X₃).hom_ext _ _)
+      simpa using this
+    exact (h0 _).trans (h0 _).symm
 
 -- Maximal partial lift must cover all of U.
 -- If V₀ < U, find x ∈ U \ V₀, get a local lift on W ∋ x, adjust for compatibility
@@ -355,12 +346,12 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     apply TopCat.Sheaf.eq_of_locally_eq' S.X₃ BU (V₀ ⊔ W)
       (fun b => homOfLE (by cases b <;> simp [BU])) (hsup_eq ▸ le_rfl)
     intro b; cases b
-    · rw [← S.g.val.naturality_apply _ t_new]; simp only [BU, Bsf]
-      have h0 := ht_new false; simp only [BU, Bsf] at h0; rw [h0, ht₀]
+    · rw [← S.g.val.naturality_apply _ t_new]; simp only [BU]
+      have h0 := ht_new false; simp only [BU] at h0; rw [h0, ht₀]
       simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
       exact presheaf_map_eq S.X₃.val _ _ s
-    · rw [← S.g.val.naturality_apply _ t_new]; simp only [BU, Bsf]
-      have h1 := ht_new true; simp only [BU, Bsf] at h1; rw [h1, hgt'']
+    · rw [← S.g.val.naturality_apply _ t_new]; simp only [BU]
+      have h1 := ht_new true; simp only [BU] at h1; rw [h1, hgt'']
       simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
       exact presheaf_map_eq S.X₃.val _ _ s
   have h_ext : (sigmaPreorder S).le ⟨V₀, t₀⟩ ⟨V₀ ⊔ W, t_new⟩ := by

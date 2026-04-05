@@ -180,8 +180,8 @@ theorem topologicalKrullDim_lt_of_isIrreducible_of_isClosed {X : Type u} [Topolo
 noncomputable instance ulift_int_projective :
     Projective (AddCommGrpCat.of (ULift.{u} ℤ)) := by
   set e := (forget₂ (ModuleCat.{u} ℤ) AddCommGrpCat.{u}).asEquivalence with he
-  have : e.inverse.PreservesEpimorphisms := by
-    constructor; intro X Y f hf; exact e.symm.functor.map_epi f
+  have : e.inverse.PreservesEpimorphisms :=
+    ⟨fun f _ => e.symm.functor.map_epi f⟩
   have hp := e.toAdjunction.map_projective _
     (inferInstance : Projective (ModuleCat.of ℤ (ULift.{u} ℤ)))
   simp only [he, Functor.asEquivalence, ModuleCat.forget₂_obj] at hp
