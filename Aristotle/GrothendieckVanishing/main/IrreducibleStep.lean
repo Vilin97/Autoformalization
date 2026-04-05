@@ -326,31 +326,18 @@ private theorem exists_section_generating_stalks
     -- Minimality: d_nat ≤ d_x.down.toNat
     have h_le : d_nat ≤ d_x.down.toNat := h_minimal _ hP_dx
     -- Also d_x | d.down (since d.down ∈ image subgroup at x)
-    have hd_mem_Hx : (d : ULift.{u} ℤ) ∈ H_at x (hWV hxW) := hd_in_Hx
-    obtain ⟨k_div, hk_div⟩ := hd_x_gen d hd_mem_Hx
+    obtain ⟨k_div, hk_div⟩ := hd_x_gen d hd_in_Hx
     have hd_eq_k_dx : d.down = k_div * d_x.down := by
-      have := congrArg ULift.down hk_div; simp at this; linarith
+      simpa using congrArg ULift.down hk_div
     -- d.down ≤ d_x.down (from minimality) and d.down = k_div * d_x.down
     -- Forces k_div = 1 and d_x.down = d.down
     have hd_x_eq : d_x.down = d.down := by
       have h1 : (d_nat : ℤ) ≤ d_x.down := by
-        have := Int.toNat_of_nonneg (le_of_lt hd_x_pos)
-        rw [← this]; exact_mod_cast h_le
-      -- h1 : d.down ≤ d_x.down (since d.down = ↑d_nat)
-      -- hd_eq_k_dx : d.down = k_div * d_x.down
-      -- hd_x_pos : d_x.down > 0, hd_pos : d.down > 0
-      -- k_div > 0 (since d.down > 0 and d_x.down > 0)
-      -- k_div * d_x.down ≤ d_x.down, so (k_div - 1) * d_x.down ≤ 0
-      -- combined with d_x.down > 0 gives k_div ≤ 1, so k_div = 1
+        rw [← Int.toNat_of_nonneg (le_of_lt hd_x_pos)]; exact_mod_cast h_le
       have hk_pos : 0 < k_div := by
-        by_contra hle; push_neg at hle
-        have := mul_nonpos_of_nonpos_of_nonneg hle (le_of_lt hd_x_pos)
-        linarith
+        by_contra hle; push_neg at hle; linarith [mul_nonpos_of_nonpos_of_nonneg hle (le_of_lt hd_x_pos)]
       have hk_le1 : k_div ≤ 1 := by
-        by_contra hgt; push_neg at hgt
-        have : 1 * d_x.down < k_div * d_x.down :=
-          mul_lt_mul_of_pos_right hgt hd_x_pos
-        linarith
+        by_contra hgt; push_neg at hgt; linarith [mul_lt_mul_of_pos_right hgt hd_x_pos]
       have hk_eq : k_div = 1 := le_antisymm hk_le1 hk_pos
       rw [hk_eq, one_mul] at hd_eq_k_dx; linarith
     -- Now d.down | n (since d_x generates at x and d_x.down = d.down)
