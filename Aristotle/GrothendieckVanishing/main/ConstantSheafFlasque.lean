@@ -67,8 +67,7 @@ private theorem toPlus_surjective_of_const
     (U : Opens X) (hU : (U : Set X).Nonempty) :
     Function.Surjective
       (ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U))) := by
-  intro y
-  obtain ⟨S, x, hx⟩ := exists_rep y
+  intro y; obtain ⟨S, x, hx⟩ := exists_rep y
   obtain ⟨I₀, hI₀⟩ := cover_nonempty_arrow U hU S
   let a : (constPresheaf X).obj (op U) := x I₀
   have ha : ∀ I : S.Arrow, x I = a := fun I => meq_const_values_eq S x I I₀
@@ -126,8 +125,7 @@ private theorem toPlus_surjective_of_firstPlus
     (U : Opens X) (hU : (U : Set X).Nonempty) :
     Function.Surjective (ConcreteCategory.hom
       (((opensGT X).toPlus ((opensGT X).plusObj (constPresheaf X))).app (op U))) := by
-  intro y
-  obtain ⟨S, x, hx⟩ := exists_rep y
+  intro y; obtain ⟨S, x, hx⟩ := exists_rep y
   obtain ⟨I₀, hI₀⟩ := cover_nonempty_arrow U hU S
   obtain ⟨a, ha⟩ := toPlus_surjective_of_const I₀.Y hI₀ (x I₀)
   use ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a
@@ -170,8 +168,7 @@ private theorem sheafify_constPresheaf_flasque_of_irreducible
           ((opensGT X).toPlus (constPresheaf X)).app (op U) ≫
           ((opensGT X).toPlus ((opensGT X).plusObj (constPresheaf X))).app (op U) from by
         simp only [GrothendieckTopology.toSheafify, (opensGT X).plusMap_toPlus, NatTrans.comp_app]]
-      intro y
-      obtain ⟨z, hz⟩ := toPlus_surjective_of_firstPlus (X := X) U hUne y
+      intro y; obtain ⟨z, hz⟩ := toPlus_surjective_of_firstPlus (X := X) U hUne y
       obtain ⟨a, ha⟩ := toPlus_surjective_of_const (X := X) U hUne z
       exact ⟨a, by rw [ConcreteCategory.comp_apply, ha]; exact hz⟩
     exact epi_of_epi_fac hfac

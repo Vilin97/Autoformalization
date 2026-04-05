@@ -65,8 +65,7 @@ private theorem presheaf_stalk_surj_openHom
     Function.Surjective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
         (TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) h))) := by
-  intro g
-  obtain ⟨W, hxW, s, rfl⟩ := (TopCat.Presheaf.constZ.zeroOutside U).germ_exist x g
+  intro g; obtain ⟨W, hxW, s, rfl⟩ := (TopCat.Presheaf.constZ.zeroOutside U).germ_exist x g
   -- Restrict to W ⊓ V, where both presheaves agree with constZ
   set WV := W ⊓ V
   have hWV_le_V : WV ≤ V := inf_le_right
@@ -110,8 +109,7 @@ private theorem sheaf_stalk_surj_openHom
     stalkFunctor_map_iso_toSheafify _ x
   haveI : IsIso (T.map (toSheafify J (TopCat.Presheaf.constZ.zeroOutside U))) :=
     stalkFunctor_map_iso_toSheafify _ x
-  intro g
-  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J _))).2 g
+  intro g; obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J _))).2 g
   obtain ⟨p, hp⟩ := presheaf_stalk_surj_openHom h x hx q
   exact ⟨ConcreteCategory.hom (T.map (toSheafify J _)) p, by
     change ConcreteCategory.hom (T.map (sheafifyMap J φ))

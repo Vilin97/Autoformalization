@@ -75,8 +75,7 @@ private theorem pushforward_stalk_zero_closedIncl
     ∀ a : ((TopCat.Presheaf.pushforward AddCommGrpCat.{u}
         (TopCat.closedIncl hs)).obj G.val).stalk x, a = 0 := by
   let F := (TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G.val
-  intro a
-  obtain ⟨U, hxU, sU, rfl⟩ := F.germ_exist x a
+  intro a; obtain ⟨U, hxU, sU, rfl⟩ := F.germ_exist x a
   let W : Opens X := U ⊓ ⟨sᶜ, hs.isOpen_compl⟩
   have hxW : x ∈ W := ⟨hxU, hx⟩
   have hW_bot : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ := by
@@ -103,8 +102,7 @@ private theorem surj_transfer_closedIncl {A B C D : AddCommGrpCat.{u}}
     (hnat : f ≫ g = h ≫ k)
     (hk : Function.Surjective (ConcreteCategory.hom k)) :
     Function.Surjective (ConcreteCategory.hom f) := by
-  intro b
-  obtain ⟨d, hd⟩ := hk (ConcreteCategory.hom g b)
+  intro b; obtain ⟨d, hd⟩ := hk (ConcreteCategory.hom g b)
   refine ⟨ConcreteCategory.hom (inv h) d, ?_⟩
   rw [show ConcreteCategory.hom f (ConcreteCategory.hom (inv h) d) =
       ConcreteCategory.hom (inv h ≫ f) d from
@@ -139,8 +137,7 @@ private theorem closedIncl_pushforward_epi_g
     ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
       (TopCat.closedIncl hs)).map ip.shortComplex.g).val
   rw [TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
-  intro x
-  by_cases hx : (x : X) ∈ s
+  intro x; by_cases hx : (x : X) ∈ s
   · let z : TopCat.of s := ⟨x, hx⟩
     haveI : IsIso (TopCat.Presheaf.stalkPushforward
         AddCommGrpCat.{u} (TopCat.closedIncl hs)
@@ -405,8 +402,7 @@ theorem epi_unit_of_closedImmersion
     show Sheaf.IsLocallySurjective (adj.unit.app F) =
       TopCat.Presheaf.IsLocallySurjective (adj.unit.app F).val from rfl,
     TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
-  intro x
-  by_cases hxZ : (x : X) ∈ Z
+  intro x; by_cases hxZ : (x : X) ∈ Z
   · -- x ∈ Z: stalk map is surjective (it's an iso)
     haveI := TopCat.closedIncl_unit_stalk_isIso hZ F ⟨x, hxZ⟩
     exact (ConcreteCategory.bijective_of_isIso

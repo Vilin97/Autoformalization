@@ -55,11 +55,9 @@ private theorem sHom_stalk_bijective_at
     congr 1; exact TopCat.Sheaf.zeroOutsideInt.sHom_app_generator s
   -- Surjectivity
   have h_surj : Function.Surjective sHom_x := by
-    intro a
-    obtain ⟨k, hk⟩ := hgen a
-    refine ⟨k • (TopCat.Sheaf.zeroOutsideInt U).presheaf.germ U x hxU
-      (TopCat.Sheaf.zeroOutsideInt.generator U), ?_⟩
-    rw [map_zsmul, h_sHom_gen, hk]
+    intro a; obtain ⟨k, hk⟩ := hgen a
+    exact ⟨k • (TopCat.Sheaf.zeroOutsideInt U).presheaf.germ U x hxU
+      (TopCat.Sheaf.zeroOutsideInt.generator U), by rw [map_zsmul, h_sHom_gen, hk]⟩
   -- Injectivity: n • germ(s,x) = m • germ(s,x) → n = m (using torsion-freeness via i)
   have h_inj : Function.Injective sHom_x := by
     intro a b hab
@@ -166,8 +164,7 @@ private theorem exists_section_generating_stalks
       (by omega)
   have ha₁_gen : ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x₀).obj R.val),
       ∃ k : ℤ, a = k • a₁ := by
-    intro a
-    obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x₀ hx₀V (i_x x₀ a)
+    intro a; obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x₀ hx₀V (i_x x₀ a)
     obtain ⟨k, hk⟩ := hd_gen ⟨n⟩
       (show (⟨n⟩ : ULift.{u} ℤ) ∈ H from ⟨a, show i_x x₀ a = (⟨n⟩ : ULift.{u} ℤ).down •
         gen_at x₀ hx₀V from hn⟩)
@@ -341,8 +338,7 @@ theorem subsheaf_contains_zeroOutsideInt
   obtain ⟨V', hle, hne, s, hbij⟩ := exists_good_section V R i hR
   refine ⟨V', hle, hne, TopCat.Sheaf.zeroOutsideInt.sHom s, ?_, hbij⟩
   apply sheaf_mono_of_stalk_injective
-  intro y
-  by_cases hy : y ∈ V'
+  intro y; by_cases hy : y ∈ V'
   · exact (hbij y hy).1
   · intro a b _
     exact (stalk_zeroOutsideInt_zero_outside V' y hy a).trans
