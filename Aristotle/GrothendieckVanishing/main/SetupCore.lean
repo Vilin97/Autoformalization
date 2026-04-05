@@ -92,11 +92,9 @@ private theorem pushforward_stalk_zero_closedIncl
     rw [hW_bot]; exact (isTerminal_sheaf_bot G).isZero
   let sW := ConcreteCategory.hom (F.map (homOfLE (show W ≤ U from inf_le_left)).op) sU
   have hsW_eq : sW = 0 := by
-    calc sW = ConcreteCategory.hom (𝟙 (F.obj (op W))) sW :=
-              (ConcreteCategory.id_apply sW).symm
-      _ = ConcreteCategory.hom (0 : F.obj (op W) ⟶ F.obj (op W)) sW := by
-              rw [hFW_zero.eq_of_src (𝟙 _) 0]
-      _ = 0 := AddMonoidHom.zero_apply _
+    have h0 : (𝟙 (F.obj (op W)) : _ ⟶ _) = 0 := hFW_zero.eq_of_src _ _
+    calc sW = ConcreteCategory.hom (𝟙 (F.obj (op W))) sW := (ConcreteCategory.id_apply sW).symm
+      _ = 0 := by rw [h0]; exact AddMonoidHom.zero_apply _
   rw [← TopCat.Presheaf.germ_res_apply F
     (homOfLE (show W ≤ U from inf_le_left)) x hxW sU]
   change ConcreteCategory.hom (F.germ W x hxW) sW = 0
@@ -244,7 +242,7 @@ private lemma PushforwardHVanishing_zero
   have htop : ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ := by ext; simp [Opens.map]
   have hobj : F'.val.obj (op ⊤) = G'.val.obj (op ⊤) := by
     change G'.val.obj (op ((Opens.map i).obj ⊤)) = G'.val.obj (op ⊤)
-    simpa [TopCat.Sheaf.pushforward, TopCat.Presheaf.pushforward, htop]
+    simp [htop]
   constructor; intro a b
   apply (sheafH0EquivSections F').injective
   exact @Subsingleton.elim (F'.val.obj (op ⊤)) (hobj ▸ hsec) _ _
@@ -295,7 +293,7 @@ theorem epi_g_app_top_of_H1_vanishing
   change φ_hom = ψ_hom ≫ ip.shortComplex.g.val.app (op ⊤) at hfact
   refine ⟨ψ_hom (ULift.up 1), ?_⟩
   change (ConcreteCategory.hom (ψ_hom ≫ ip.shortComplex.g.val.app (op ⊤))) (ULift.up 1) = r
-  rw [← hfact]; simp [φ_hom, one_zsmul]
+  rw [← hfact]; simp [φ_hom]
 
 -- Surjectivity of Ext⁰ map from epi at ⊤ via adjunction + projectivity of ULift ℤ
 theorem ext0_surj_of_epi_top

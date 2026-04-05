@@ -17,14 +17,9 @@ open CategoryTheory TopologicalSpace Limits
 /-- In an abelian category, any morphism to a terminal (= zero) object is epi. -/
 theorem epi_of_isTerminal_tgt {C : Type*} [Category C] [Abelian C] {X Y : C}
     (t : IsTerminal Y) (f : X ⟶ Y) : Epi f := by
-  have hzero : IsZero Y := by
-    rw [IsZero.iff_id_eq_zero]
-    exact t.hom_ext _ _
-  constructor
-  intro Z g h _
-  have hg : g = 0 := hzero.eq_of_src g 0
-  have hh : h = 0 := hzero.eq_of_src h 0
-  rw [hg, hh]
+  have hzero : IsZero Y := by rw [IsZero.iff_id_eq_zero]; exact t.hom_ext _ _
+  constructor; intro Z g h _
+  exact (hzero.eq_of_src g 0).trans (hzero.eq_of_src h 0).symm
 
 /-! ## Sheaf at the empty open set -/
 
@@ -43,11 +38,11 @@ noncomputable def isTerminal_sheaf_bot {X : Type u} [TopologicalSpace X]
     equals the whole space. -/
 theorem irreducibleCloseds_unique_of_dim_zero {X : Type u} [TopologicalSpace X]
     [IrreducibleSpace X] (hdim : topologicalKrullDim X ≤ 0)
-    (S : IrreducibleCloseds X) : (S : Set X) = Set.univ := by
-  have hmax := (Order.krullDim_nonpos_iff_forall_isMax).mp hdim S
-  have hle : S ≤ ⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩ :=
-    Set.subset_univ _
-  exact le_antisymm (Set.subset_univ _) (hmax hle)
+    (S : IrreducibleCloseds X) : (S : Set X) = Set.univ :=
+  le_antisymm (Set.subset_univ _)
+    ((Order.krullDim_nonpos_iff_forall_isMax).mp hdim S
+      (show S ≤ ⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩ from
+        Set.subset_univ _))
 
 /-- On an irreducible space of dimension 0, every point is dense. -/
 theorem closure_singleton_eq_univ_of_dim_zero {X : Type u} [TopologicalSpace X]
@@ -63,20 +58,11 @@ theorem opens_eq_bot_or_top_of_irreducibleSpace_dim_zero
     (hdim : topologicalKrullDim X ≤ 0) (U : Opens X) :
     U = ⊥ ∨ U = ⊤ := by
   by_cases hne : (U : Set X).Nonempty
-  · right
-    ext x
-    constructor
-    · exact fun _ => trivial
-    · intro _
-      by_contra hx
-      have hcl := closure_singleton_eq_univ_of_dim_zero hdim x
-      have hsub : closure ({x} : Set X) ⊆ (U : Set X)ᶜ :=
-        closure_minimal (Set.singleton_subset_iff.mpr hx) U.isOpen.isClosed_compl
-      rw [hcl] at hsub
-      obtain ⟨y, hy⟩ := hne
-      exact hsub (Set.mem_univ y) hy
-  · left
-    exact Opens.ext (Set.not_nonempty_iff_eq_empty.mp hne)
+  · right; ext x; refine ⟨fun _ => trivial, fun _ => by_contra fun hx => ?_⟩
+    have := closure_singleton_eq_univ_of_dim_zero hdim x ▸
+      closure_minimal (Set.singleton_subset_iff.mpr hx) U.isOpen.isClosed_compl
+    exact this (Set.mem_univ hne.some) hne.some_mem
+  · exact Or.inl (Opens.ext (Set.not_nonempty_iff_eq_empty.mp hne))
 
 /-- Every nonempty open subset of an irreducible space is irreducible. -/
 theorem isIrreducible_of_nonempty_open {X : Type u} [TopologicalSpace X]
@@ -157,8 +143,8 @@ private lemma wbot_lt_of_add_one_le_of_lt_top {x y : WithBot ℕ∞}
   rcases x with _ | v
   · exact h3
   · have hv_ne_top : v ≠ ⊤ := by intro h; subst h; exact absurd h2 (lt_irrefl _)
-    have hlt : v < v + 1 := (ENat.lt_add_one_iff hv_ne_top).mpr le_rfl
-    calc (↑v : WithBot ℕ∞) < ↑(v + 1) := WithBot.coe_lt_coe.mpr hlt
+    calc (↑v : WithBot ℕ∞) < ↑(v + 1) :=
+          WithBot.coe_lt_coe.mpr ((ENat.lt_add_one_iff hv_ne_top).mpr le_rfl)
       _ = ↑v + 1 := by push_cast; ring
       _ ≤ y := h1
 
@@ -168,13 +154,10 @@ theorem topologicalKrullDim_add_one_le_of_isIrreducible_of_isClosed {X : Type u}
     [TopologicalSpace X] [IrreducibleSpace X] {Y : Set X} (hY : IsClosed Y)
     (hne : Y ≠ Set.univ) :
     topologicalKrullDim Y + 1 ≤ topologicalKrullDim X := by
-  have h_le : ∀ s : IrreducibleCloseds Y,
-      (Order.height s : WithBot ℕ∞) + 1 ≤ topologicalKrullDim X :=
-    fun s => height_add_one_le_dim hY hne s
   rcases isEmpty_or_nonempty (IrreducibleCloseds Y) with h | h
   · simp [topologicalKrullDim, Order.krullDim_eq_iSup_height]
   · rw [topologicalKrullDim, Order.krullDim_eq_iSup_height, iSup_height_add_one_eq]
-    exact iSup_le fun s => h_le s
+    exact iSup_le (fun s => height_add_one_le_dim hY hne s)
 
 /-- On an irreducible space, a proper closed subset with finite Krull dimension has
     strictly smaller Krull dimension. The finiteness hypothesis excludes the case where
@@ -216,7 +199,7 @@ theorem covering_sieve_top_has_id {X : Type u} [TopologicalSpace X] [Irreducible
   obtain ⟨V, f, hfS, hxV⟩ := hS x trivial
   have hVtop : V = ⊤ := by
     rcases opens_eq_bot_or_top_of_irreducibleSpace_dim_zero hdim V with rfl | rfl
-    · simp [Opens.coe_bot] at hxV
+    · simp at hxV
     · rfl
   subst hVtop
   rwa [show f = 𝟙 ⊤ from Subsingleton.elim _ _] at hfS

@@ -38,14 +38,11 @@ theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
 theorem subsingleton_sheafH_of_isZero' {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsZero F) (n : ℕ) :
     Subsingleton (Sheaf.H F n) := by
-  constructor; intro a b
   have hid : (𝟙 F : F ⟶ F) = 0 := hF.eq_of_src _ _
-  calc a = a.comp (Ext.mk₀ (𝟙 F)) (add_zero n) := (Ext.comp_mk₀_id a).symm
-    _ = a.comp 0 (add_zero n) := by rw [hid, Ext.mk₀_zero]
-    _ = 0 := Ext.comp_zero a F 0 n (add_zero n)
-    _ = b.comp 0 (add_zero n) := (Ext.comp_zero b F 0 n (add_zero n)).symm
-    _ = b.comp (Ext.mk₀ (𝟙 F)) (add_zero n) := by rw [hid, Ext.mk₀_zero]
-    _ = b := Ext.comp_mk₀_id b
+  have : ∀ x : Sheaf.H F n, x = 0 := fun x => by
+    have h := Ext.comp_mk₀_id x; rw [hid, Ext.mk₀_zero] at h
+    exact h.symm.trans (Ext.comp_zero x F 0 n (add_zero n))
+  exact ⟨fun a b => (this a).trans (this b).symm⟩
 
 theorem stalk_zero_of_ses_g_iso
     {X : TopCat.{u}}

@@ -87,19 +87,12 @@ private lemma toPlus_naturality_const
       ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map i.op)
         (ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op V)) a) := by
   have nat := ((opensGT X).toPlus (constPresheaf X)).naturality i.op
-  have lhs : ConcreteCategory.hom ((constPresheaf X).map i.op ≫
-      ((opensGT X).toPlus (constPresheaf X)).app (op U)) a =
-    ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a := by
-    simp
-  have rhs : ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op V) ≫
-      ((opensGT X).plusObj (constPresheaf X)).map i.op) a =
-    ConcreteCategory.hom (((opensGT X).plusObj (constPresheaf X)).map i.op)
-      (ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op V)) a) := by
-    rw [ConcreteCategory.comp_apply]
-  rw [← lhs, show (constPresheaf X).map i.op ≫
-      ((opensGT X).toPlus (constPresheaf X)).app (op U) =
-    ((opensGT X).toPlus (constPresheaf X)).app (op V) ≫
-      ((opensGT X).plusObj (constPresheaf X)).map i.op from nat, rhs]
+  calc ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a
+      = ConcreteCategory.hom ((constPresheaf X).map i.op ≫
+          ((opensGT X).toPlus (constPresheaf X)).app (op U)) a := by simp
+    _ = ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op V) ≫
+          ((opensGT X).plusObj (constPresheaf X)).map i.op) a := by rw [nat]
+    _ = _ := ConcreteCategory.comp_apply _ _ _
 
 -- Plus construction API requires extra heartbeats for typeclass resolution
 /-- Key lemma extracted from toPlus_surjective_of_firstPlus: preimages at different
@@ -198,20 +191,11 @@ private theorem presheafToSheaf_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
     {U V : Opens X} (i : U ⟶ V) :
     Epi (((presheafToSheaf (opensGT X) AddCommGrpCat.{u}).obj (constPresheaf X)).val.map i.op) := by
-  let e : ((opensGT X).sheafify (constPresheaf X)) ≅
-      CategoryTheory.sheafify (opensGT X) (constPresheaf X) :=
-    plusPlusIsoSheafify (J := opensGT X) (D := AddCommGrpCat.{u}) (P := constPresheaf X)
-  haveI : Epi (((opensGT X).sheafify (constPresheaf X)).map i.op) :=
-    sheafify_constPresheaf_flasque_of_irreducible (X := X) (i := i)
-  haveI : Epi ((((opensGT X).sheafify (constPresheaf X)).map i.op) ≫ e.hom.app (op U)) := by
-    infer_instance
-  have hnat := e.hom.naturality i.op
-  have hcomp : Epi (e.hom.app (op V) ≫
+  let e := plusPlusIsoSheafify (J := opensGT X) (D := AddCommGrpCat.{u}) (P := constPresheaf X)
+  haveI := sheafify_constPresheaf_flasque_of_irreducible (X := X) (i := i)
+  haveI : Epi (e.hom.app (op V) ≫
       (CategoryTheory.sheafify (opensGT X) (constPresheaf X)).map i.op) := by
-    rw [← hnat]
-    infer_instance
-  letI : Epi (e.hom.app (op V) ≫
-      (CategoryTheory.sheafify (opensGT X) (constPresheaf X)).map i.op) := hcomp
+    rw [← e.hom.naturality i.op]; infer_instance
   exact epi_of_epi (e.hom.app (op V))
     ((CategoryTheory.sheafify (opensGT X) (constPresheaf X)).map i.op)
 

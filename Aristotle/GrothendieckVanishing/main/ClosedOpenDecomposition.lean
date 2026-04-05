@@ -13,55 +13,12 @@ universe u
 
 open CategoryTheory TopologicalSpace Limits
 
-/-! ## Helper lemmas -/
-
-private lemma subsingleton_of_isSheafFor_empty
-    {C : Type*} [Category C] {U : C} {P : Cᵒᵖ ⥤ Type*}
-    (h : Presieve.IsSheafFor P (⊥ : Presieve U)) :
-    Subsingleton (P.obj (Opposite.op U)) := by
-  constructor; intro a b
-  have hemp : Presieve.FamilyOfElements P (⊥ : Presieve U) := fun _ _ hf => absurd hf id
-  obtain ⟨t, _, huniq⟩ := h hemp (fun _ _ _ _ _ _ _ hf => absurd hf id)
-  exact (huniq a (fun _ _ hf => absurd hf id)).trans
-    (huniq b (fun _ _ hf => absurd hf id)).symm
-
-private lemma addCommGrpCat_subsingleton_of_end_subsingleton
-    (G : AddCommGrpCat.{u}) (h : Subsingleton (G ⟶ G)) :
-    Subsingleton G := by
-  have : ∀ (g : G), g = 0 := by
-    intro g
-    have := AddCommGrpCat.ext_iff.mp (Subsingleton.elim (𝟙 G : G ⟶ G) 0) g
-    simp at this; exact this
-  exact ⟨fun a b => (this a).trans (this b).symm⟩
-
 /-! ## Empty space vanishing -/
 
 theorem sheaf_isZero_of_isEmpty (X : TopCat.{u}) [hE : IsEmpty X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
-    IsZero F := by
-  have hom_sub : ∀ (E : AddCommGrpCat.{u}) (U : Opens X),
-      Subsingleton (E ⟶ F.val.obj (Opposite.op U)) := by
-    intro E U
-    have hmem : (⊥ : Sieve U) ∈ Opens.grothendieckTopology X U := by
-      rw [Opens.grothendieckTopology]; intro x; exact IsEmpty.elim hE x
-    have hsf := (F.cond E) (⊥ : Sieve U) hmem
-    rw [show (⊥ : Sieve U).arrows = ⊥ from rfl] at hsf
-    exact subsingleton_of_isSheafFor_empty hsf
-  have val_sub : ∀ (U : Opens X), Subsingleton (F.val.obj (Opposite.op U)) :=
-    fun U => addCommGrpCat_subsingleton_of_end_subsingleton _ (hom_sub _ U)
-  have val_isZero : ∀ (U : (Opens X)ᵒᵖ), IsZero (F.val.obj U) := by
-    intro ⟨U⟩; exact @AddCommGrpCat.isZero_of_subsingleton _ (val_sub U)
-  apply IsZero.mk
-  · intro G; exact ⟨{
-      default := 0
-      uniq := fun f => by
-        apply Sheaf.Hom.ext; apply NatTrans.ext; funext U
-        exact (val_isZero U).eq_zero_of_src (f.val.app U) }⟩
-  · intro G; exact ⟨{
-      default := 0
-      uniq := fun f => by
-        apply Sheaf.Hom.ext; apply NatTrans.ext; funext U
-        exact (val_isZero U).eq_zero_of_tgt (f.val.app U) }⟩
+    IsZero F :=
+  sheaf_isZero_of_zero_stalks X F (fun x _ => (hE.false x).elim)
 
 theorem sheaf_H_subsingleton_of_isEmpty'
     (X : TopCat.{u}) [IsEmpty X]
