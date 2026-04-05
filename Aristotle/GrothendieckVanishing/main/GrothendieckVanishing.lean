@@ -18,27 +18,6 @@ universe u
 
 open CategoryTheory TopologicalSpace Order Limits
 
-/-! ## Degree cascade: vanishing at one degree implies vanishing at all higher degrees
-
-Once we establish `H^m₀(F) = 0` for ALL sheaves `F` on `X` at a single degree `m₀`,
-we get `H^n(F) = 0` for all `n ≥ m₀` by injective presentation + dimension shifting:
-embed `F ↪ I` (injective), form `0 → F → I → Q → 0`, then `H^n(Q) = 0` by the inductive
-hypothesis and `H^{n+1}(I) = 0` since `I` is injective. -/
-
-/-- Vanishing cascades upward: `H^m = 0` for all sheaves implies `H^{m+1} = 0` for all
-    sheaves, via injective presentation + dimension shifting. -/
-theorem sheafH_vanishing_succ (X : TopCat.{u})
-    (m : ℕ)
-    (hall : ∀ (F : TopCat.Sheaf AddCommGrpCat.{u} X), Subsingleton (Sheaf.H F m))
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
-    Subsingleton (Sheaf.H F (m + 1)) := by
-  obtain ⟨ip⟩ := EnoughInjectives.presentation F
-  have hInj : Subsingleton (Sheaf.H ip.shortComplex.X₂ (m + 1)) :=
-    ⟨fun a b => (Abelian.Ext.eq_zero_of_injective a).trans
-      (Abelian.Ext.eq_zero_of_injective b).symm⟩
-  exact sheafH_dimension_shift_ses ip.shortExact_shortComplex m
-    (hall ip.shortComplex.X₃) hInj
-
 /-! ## Main induction -/
 
 /-- The core induction step: vanishing at dimension d, given vanishing at all d' < d. -/

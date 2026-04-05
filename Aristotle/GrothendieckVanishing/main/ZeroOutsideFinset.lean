@@ -195,15 +195,6 @@ abbrev adjoinGeneratorShortComplex {X : TopCat.{u}} {ι : Type*}
     (cokernel.π (oldGeneratedToAdjoinGenerated U s U₀ s₀))
     (cokernel.condition _)
 
-theorem adjoinGeneratorShortComplex_exact {X : TopCat.{u}} {ι : Type*}
-    {F : Sheaf AddCommGrpCat.{u} X}
-    (U : ι → Opens X) (s : ∀ i, F.presheaf.obj (op (U i)))
-    (U₀ : Opens X) (s₀ : F.presheaf.obj (op U₀))
-    [HasCoproduct fun i => zeroOutsideInt (U i)]
-    [HasCoproduct fun j : ι ⊕ Unit => zeroOutsideInt (adjoinGeneratorOpens U U₀ j)] :
-    (adjoinGeneratorShortComplex U s U₀ s₀).Exact :=
-  ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)
-
 /-- Indexing type for all local sections of a sheaf. -/
 abbrev SectionIndex {X : TopCat.{u}}
     (F : Sheaf AddCommGrpCat.{u} X) :=
