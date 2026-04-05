@@ -228,14 +228,9 @@ theorem zsmul_generator_injective
     apply hbij.1; simp only [map_zsmul, hgen_eq]; exact h
   -- Use germ_eq: equal germs agree on a refinement W ≤ V
   obtain ⟨W, hxW, iU, iV, hEq⟩ := P.germ_eq x hx hx _ _ h'
-  -- Both iU, iV are maps W → V; they're equal by subsingleton
-  have hiUiV : iU = iV := Subsingleton.elim _ _
-  rw [hiUiV, map_zsmul, map_zsmul] at hEq
-  -- Now: n • P.map iV.op gen_V = m • P.map iV.op gen_V in P.obj(op W)
+  rw [Subsingleton.elim iU iV, map_zsmul, map_zsmul] at hEq
   have hWV : W ≤ V := leOfHom iV
-  -- Replace iV.op by (homOfLE hWV).op (subsingleton)
-  have hiV_eq : iV = homOfLE hWV := Subsingleton.elim _ _
-  rw [hiV_eq] at hEq
+  rw [Subsingleton.elim iV (homOfLE hWV)] at hEq
   -- P.obj(op W) = ULift ℤ since W ≤ V
   have hObjW : P.obj (op W) = AddCommGrpCat.of (ULift ℤ) := by
     simp [P, TopCat.Presheaf.zeroOutside, hWV, TopCat.Presheaf.constZ]

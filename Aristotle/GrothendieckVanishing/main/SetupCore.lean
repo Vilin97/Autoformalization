@@ -27,10 +27,8 @@ theorem ext_dimension_shift (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (
     (h₂ : Subsingleton (Ext Z S.X₂ (n + 1))) :
     Subsingleton (Ext Z S.X₁ (n + 1)) := by
   constructor; intro a b
-  have ha : a.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
-  have hb : b.comp (Ext.mk₀ S.f) rfl = 0 := @Subsingleton.elim _ h₂ _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hS a ha rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hS b hb rfl
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hS a (@Subsingleton.elim _ h₂ _ _) rfl
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hS b (@Subsingleton.elim _ h₂ _ _) rfl
   rw [← hc, ← hd, @Subsingleton.elim _ h₃ c d]
 
 /-- Reverse dimension shift: `Ext^n(Z, X₂) = 0` and `Ext^{n+1}(Z, X₁) = 0` imply
@@ -40,10 +38,8 @@ theorem ext_dimension_shift_X₃ (Z : C') {S : ShortComplex C'} (hS : S.ShortExa
     (h₁ : Subsingleton (Ext Z S.X₁ (n + 1))) :
     Subsingleton (Ext Z S.X₃ n) := by
   constructor; intro a b
-  have ha : a.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
-  have hb : b.comp hS.extClass rfl = 0 := @Subsingleton.elim _ h₁ _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ _ hS a rfl ha
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ _ hS b rfl hb
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ _ hS a rfl (@Subsingleton.elim _ h₁ _ _)
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ _ hS b rfl (@Subsingleton.elim _ h₁ _ _)
   rw [← hc, ← hd, @Subsingleton.elim _ h₂ c d]
 
 end ExtDimShift

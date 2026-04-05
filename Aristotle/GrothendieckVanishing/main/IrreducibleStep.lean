@@ -185,10 +185,8 @@ private theorem exists_section_generating_stalks
   obtain ⟨a₁, ha₁⟩ : d.down • gen_at x₀ hx₀V ∈ Set.range (i_x x₀) := hd_mem
   have ha₁_ne : a₁ ≠ 0 := by
     intro h; rw [h, map_zero] at ha₁
-    -- ha₁ : 0 = d.down • gen_at x₀ hx₀V
-    have : (0 : ℤ) = d.down :=
-      zsmul_generator_injective V x₀ hx₀V ((zero_smul _ _).trans ha₁)
-    linarith
+    exact absurd (zsmul_generator_injective V x₀ hx₀V ((zero_smul _ _).trans ha₁)).symm
+      (by omega)
   have ha₁_gen : ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x₀).obj R.val),
       ∃ k : ℤ, a = k • a₁ := by
     intro a
@@ -242,7 +240,7 @@ private theorem exists_section_generating_stalks
   have hW_ne : W ≠ ⊥ := by
     intro h; exact (Opens.mem_bot (x := x₀)).mp (h ▸ hx₀W)
   -- On W, the sections is₁|_W and d_gen_res|_W agree (from hW_eq)
-  have hiW : iW1 = iW2 := Subsingleton.elim _ _
+  have hiW := Subsingleton.elim iW1 iW2
   -- Key: at every x ∈ W, i_x(germ(s₁|_W, x)) = d.down • gen_at x
   -- This follows because is₁|_W = d_gen_res|_W (from hW_eq), and germs respect restriction
   have hcoeff_const : ∀ (x : X) (hxW : x ∈ W),
