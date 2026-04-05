@@ -1,12 +1,13 @@
 /-
-  FlasqueVanishing.lean -- Flasque sheaf theory and cohomological vanishing
+  FlasqueVanishing.lean -- Flasque sheaf theory and infrastructure
 
   Provides:
   1. Categorical infrastructure for sheaf cohomology on `AddCommGrpCat`
   2. `IsFlasqueSheaf`, `epi_app_of_shortExact_flasque`, `isFlasque_X₃_of_shortExact`
   3. `isFlasque_of_injective` (injective sheaves are flasque)
-  4. `FlasqueVanishing` (flasque sheaves have vanishing higher cohomology)
+  4. `ext_zero_map_surjective` (base case for flasque vanishing)
 
+  `FlasqueVanishing` itself is in `FlasqueCohomology.lean`.
   Split from SetupCore.lean for compilation performance.
 -/
 import Mathlib
@@ -61,10 +62,24 @@ noncomputable instance sheafHasExt (X : TopCat.{u}) :
     HasExt.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   hasExt_of_enoughInjectives _
 
+/-- In a short exact sequence `X₁ → X₂ → X₃`, if all stalks of `X₂` at `x` vanish, then
+    all stalks of `X₁` at `x` vanish (by mono-injectivity of `f`). -/
+theorem stalk_zero_of_shortExact_kernel
+    {X : TopCat.{u}} {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hSE : S.ShortExact) (x : X)
+    (hX₂ : ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₂.val), b = 0)
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₁.val) :
+    a = 0 := by
+  haveI : Mono S.f := hSE.mono_f
+  haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
+  exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
+    (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) S.f)
+    ((hX₂ _).trans (map_zero _).symm)
+
 /-! ## Flasque sheaf sub-lemmas
 
 The four sub-lemmas below are adapted from Brian Nugent's Mathlib PR #35790.
-Together they imply `FlasqueVanishing` (proved below). Each is a self-contained
+Together they imply `FlasqueVanishing` (proved in FlasqueCohomology.lean). Each is a self-contained
 statement that can be attacked independently.
 -/
 
@@ -80,7 +95,7 @@ private noncomputable def sectionsAt {X : TopCat.{u}} (V : Opens X) :
     TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
   sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)
 
--- Typeclass resolution for the composite functor needs extra heartbeats.
+-- Provide explicitly to avoid expensive typeclass resolution on the composite functor.
 private noncomputable instance sectionsAt_preservesZeroMorphisms
     {X : TopCat.{u}} (V : Opens X) :
     (sectionsAt (X := X) V).PreservesZeroMorphisms :=

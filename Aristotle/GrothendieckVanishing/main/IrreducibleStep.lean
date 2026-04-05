@@ -1,7 +1,7 @@
 /-
   IrreducibleStep.lean — Assembly: irreducible positive-dimension vanishing
 
-  Key results (unique to this file; stalk algebra lemmas are in SheafStalkAlgebra.lean):
+  Key results (unique to this file; stalk algebra lemmas are in StalkGeneratorAlgebra.lean):
   - exists_section_generating_stalks: PROVED — uses Nat.find to choose x₀ with minimal
     image subgroup generator d, then divisibility d | d_x follows from minimality.
   - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
@@ -407,7 +407,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
       set Y := (V' : Set X)ᶜ with hY_def
       have hYcl : IsClosed Y := V'.isOpen.isClosed_compl
       have hY_ne_univ : Y ≠ Set.univ :=
-        Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV'ne))
+        compl_ne_univ_of_ne_bot hV'ne
       have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
         topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne_univ
           (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
@@ -434,16 +434,8 @@ theorem subsheaf_zeroOutsideInt_vanishing
           exact stalk_zero_of_ses_g_iso hSE' x inferInstance a
         · -- At points in V': cokernel j has zero stalks (j is stalk-surjective)
           have hxV' : x ∈ V' := by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY
-          have hstalk_zero :
-              ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S'.X₂.val),
-              b = 0 := fun b =>
-            cokernel_stalk_zero_of_stalk_surj j x (hj_stalk x hxV').2 b
-          haveI : Mono S'.f := hSE'.mono_f
-          haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
-            (C := AddCommGrpCat.{u}) (X := X) x
-          exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
-            (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) S'.f)
-            ((hstalk_zero _).trans (map_zero _).symm)
+          exact stalk_zero_of_shortExact_kernel hSE' x
+            (fun b => cokernel_stalk_zero_of_stalk_surj j x (hj_stalk x hxV').2 b) a
       exact subsingleton_sheafH_of_shortExact_middle hSE' m hKer hPush
     -- Step 5: Middle-term LES gives H^m(R) = 0
     exact subsingleton_sheafH_of_shortExact_middle hSE m hV'van hCoker
@@ -480,8 +472,8 @@ theorem epiImage_zeroOutsideInt_vanishing
         (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
     exact subsingleton_sheafH_of_shortExact_third hSE m hZV hKer
 
--- ext_comm_filtered_colimit_mono, filtered diagram infrastructure, finitely generated
--- vanishing, and directLimit_cohomology_vanishing are in FiniteGeneratorReduction.lean.
+-- Filtered diagram infrastructure, finitely generated vanishing, and
+-- directLimit_cohomology_vanishing are in FiniteGeneratorReduction.lean.
 
 /-- Kernel vanishing via assembly of Steps 3-5. -/
 theorem irreduciblePos_kernel_subsingleton

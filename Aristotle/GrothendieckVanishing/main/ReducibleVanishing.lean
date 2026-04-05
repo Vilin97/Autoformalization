@@ -1,8 +1,8 @@
 /-
   ReducibleVanishing.lean -- Proof of ReducibleVanishing
 
-  Fills in the sorry in Setup.lean for ReducibleVanishing by iterating
-  ClosedImmersionSES over the finitely many irreducible components.
+  Proves ReducibleVanishing' (re-exported by Setup.lean as ReducibleVanishing)
+  by iterating ClosedImmersionSES over the finitely many irreducible components.
 -/
 import Aristotle.GrothendieckVanishing.main.SetupCore
 
@@ -139,13 +139,5 @@ theorem ReducibleVanishing'
       · have hx' : x ∉ ⋃₀ ((insert Z s' : Finset (Set X)) : Set (Set X)) := by
           simp only [Finset.coe_insert, Set.sUnion_insert, Set.mem_union] at hx ⊢
           push_neg; exact ⟨hxZ, hx⟩
-        have hX₂_stalk :
-            ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₂.val),
-            b = 0 := fun b => hG_stalks x hx' b
-        haveI : Mono S.f := hSE.mono_f
-        haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
-          (C := AddCommGrpCat.{u}) (X := X) x
-        exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
-          (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) S.f)
-          ((hX₂_stalk _).trans (map_zero _).symm)
+        exact stalk_zero_of_shortExact_kernel hSE x (fun b => hG_stalks x hx' b) a
     exact subsingleton_sheafH_of_shortExact_middle hSE n hker hpush
