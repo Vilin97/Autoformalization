@@ -62,9 +62,8 @@ theorem exists_nonzero_stalk_in_V
   · exact h x hx a
   · haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
       (C := AddCommGrpCat.{u}) (X := X) x
-    let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
-        TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-    exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono FT i)
+    exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
+      (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) i)
       ((stalk_zeroOutsideInt_zero_outside V x hx _).trans (map_zero _).symm)
 
 /-- A sheaf morphism is mono if all its stalk maps are injective. -/
