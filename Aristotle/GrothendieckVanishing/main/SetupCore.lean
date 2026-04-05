@@ -199,12 +199,10 @@ theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
     (h₁ : Subsingleton (Sheaf.H S.X₁ n))
     (h₃ : Subsingleton (Sheaf.H S.X₃ n)) :
     Subsingleton (Sheaf.H S.X₂ n) := by
-  let Z := (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-    (AddCommGrpCat.of (ULift ℤ))
   constructor; intro a b
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ Z hS a
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ _ hS a
     (@Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _)
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ Z hS b
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ _ hS b
     (@Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _)
   rw [← hc, ← hd, @Subsingleton.elim _ h₁ c d]
 
@@ -319,13 +317,11 @@ private lemma PushforwardHVanishing_one
     exact isFlasque_of_injective ip.shortComplex.X₂ _
   have hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
       ip.shortComplex.X₂) 1) := FlasqueVanishing _ _ hFlasque 0
-  have htop : ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ := by ext; simp [Opens.map]
-  have hg_epi : Epi (ip.shortComplex.g.val.app (op ⊤)) :=
-    epi_g_app_top_of_H1_vanishing ip hG'
   have hg_epi_X : Epi ((ip.shortComplex.map
       (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).g.val.app (op ⊤)) := by
     show Epi (ip.shortComplex.g.val.app (op ((Opens.map i).obj ⊤)))
-    rw [htop]; exact hg_epi
+    rw [show ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ from by ext; simp [Opens.map]]
+    exact epi_g_app_top_of_H1_vanishing ip hG'
   have hsurj_X := ext0_surj_of_epi_top hg_epi_X
   constructor; intro a b
   obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a (@Subsingleton.elim _ hJ _ 0) rfl

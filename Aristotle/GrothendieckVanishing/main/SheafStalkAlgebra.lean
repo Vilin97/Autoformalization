@@ -225,7 +225,7 @@ theorem zeroOutsideInt_cohomology_vanishing
     (V : Opens X) (hV : V ≠ ⊥)
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) m) := by
-  -- Step 1: m ≠ 0 (since m > dim X > 0), write m = m' + 1
+  -- m ≠ 0 (since m > dim X > 0), write m = m' + 1
   have hm_ne : m ≠ 0 := by intro h; subst h; simp at hm; exact not_lt.mpr (le_of_lt hpos) hm
   obtain ⟨m', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
   -- Step 2: apply zeroOutsideInt_vanishing, reducing to cokernel vanishing at m'
