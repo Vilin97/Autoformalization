@@ -203,8 +203,7 @@ private theorem exists_section_generating_stalks
   have hd_gen_res_germ :
       (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁ d_gen_res =
       d.down • gen_at x₀ hx₀V := by
-    rw [hd_gen_res_def, map_zsmul, hgen_V_res_def]
-    congr 1
+    rw [hd_gen_res_def, map_zsmul, hgen_V_res_def]; congr 1
     exact TopCat.Presheaf.germ_res_apply (TopCat.Sheaf.zeroOutsideInt V).val
       (homOfLE hV₁V) x₀ hx₀V₁ (TopCat.Sheaf.zeroOutsideInt.generator V)
   obtain ⟨W, hx₀W, iW1, _, _⟩ :=
@@ -244,10 +243,8 @@ private theorem exists_section_generating_stalks
               (TopCat.Sheaf.zeroOutsideInt V).val (homOfLE hWV₁) x hxW is₁,
             ← TopCat.Presheaf.germ_res_apply
               (TopCat.Sheaf.zeroOutsideInt V).val (homOfLE hWV₁) x hxW d_gen_res]; congr 1
-      _ = d.down • (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x (hWV₁ hxW) gen_V_res := by
-          rw [hd_gen_res_def, map_zsmul]
       _ = d.down • gen_at x (hWV hxW) := by
-          congr 1; rw [hgen_V_res_def]
+          rw [hd_gen_res_def, map_zsmul, hgen_V_res_def]; congr 1
           exact TopCat.Presheaf.germ_res_apply (TopCat.Sheaf.zeroOutsideInt V).val
             (homOfLE hV₁V) x (hWV₁ hxW) (TopCat.Sheaf.zeroOutsideInt.generator V)
   -- Restrict s₁ to W

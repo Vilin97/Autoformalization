@@ -50,17 +50,15 @@ private lemma isFlasque_filtered_colimit
   have hc_U := isColimitOfPreserves
     ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op U)) hc_psh
   obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ hc_U b
-  have hflq : Function.Surjective (ConcreteCategory.hom ((F.obj j₀).val.map i.op)) :=
-    (AddCommGrpCat.epi_iff_surjective _).mp (hFlasque j₀ i)
-  obtain ⟨a₀, ha₀⟩ := hflq b₀
+  obtain ⟨a₀, ha₀⟩ := (AddCommGrpCat.epi_iff_surjective _).mp (hFlasque j₀ i) b₀
   refine ⟨ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀, ?_⟩
-  have key : ConcreteCategory.hom (c.pt.val.map i.op)
+  rw [show ConcreteCategory.hom (c.pt.val.map i.op)
       (ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀) =
     ConcreteCategory.hom ((c.ι.app j₀).val.app (op U))
-      (ConcreteCategory.hom ((F.obj j₀).val.map i.op) a₀) :=
+      (ConcreteCategory.hom ((F.obj j₀).val.map i.op) a₀) from
     congrFun (congrArg DFunLike.coe
-      (congrArg ConcreteCategory.hom ((c.ι.app j₀).val.naturality i.op).symm)) a₀
-  rw [key, ha₀]; exact hb₀
+      (congrArg ConcreteCategory.hom ((c.ι.app j₀).val.naturality i.op).symm)) a₀,
+    ha₀]; exact hb₀
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
