@@ -279,17 +279,14 @@ private theorem sheafH_filtered_colimit_aux
     -- ι' : c'.pt → colim(Inj) is the desc of ι'Cocone
     let ι' : c'.pt ⟶ injCocone.pt := hc'.desc ι'Cocone
     -- ι' is mono: η is mono nat trans, and filtered colimits preserve monos (AB5)
-    have hι'_mono : Mono ι' := by
+    haveI : Mono ι' := by
       haveI : ∀ j, Mono (η.app j) := hη_mono
       haveI := NatTrans.mono_of_mono_app η
       exact colim.map_mono' η hc' (colimit.isColimit Inj) ι' (fun j =>
         hc'.fac ι'Cocone j)
-    -- colim(Inj) is flasque: filtered colimit of flasque (injective ⟹ flasque) sheaves
     have hFlasqueColim : IsFlasqueSheaf injCocone.pt :=
       isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
         (colimit.isColimit Inj)
-    -- Short exact sequence 0 → c'.pt →[ι'] colim(Inj) → cokernel(ι') → 0
-    haveI : Mono ι' := hι'_mono
     let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
       ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'

@@ -328,13 +328,11 @@ private lemma PushforwardHVanishing_one
       (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
     closedIncl_pushforward_shortExact hZ ip
   have hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-      ip.shortComplex.X₂) :=
-    fun {U V} j => by
-      change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
-      exact isFlasque_of_injective ip.shortComplex.X₂ _
+      ip.shortComplex.X₂) := fun {U V} j => by
+    change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
+    exact isFlasque_of_injective ip.shortComplex.X₂ _
   have hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-      ip.shortComplex.X₂) 1) :=
-    FlasqueVanishing _ _ hFlasque 0
+      ip.shortComplex.X₂) 1) := FlasqueVanishing _ _ hFlasque 0
   have htop : ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ := by ext; simp [Opens.map]
   have hg_epi : Epi (ip.shortComplex.g.val.app (op ⊤)) :=
     epi_g_app_top_of_H1_vanishing ip hG'
@@ -370,22 +368,14 @@ private lemma PushforwardHVanishing_succ
       (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
     closedIncl_pushforward_shortExact hZ ip
   have hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-      ip.shortComplex.X₂) :=
-    fun {U V} j => by
-      change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
-      exact isFlasque_of_injective ip.shortComplex.X₂ _
+      ip.shortComplex.X₂) := fun {U V} j => by
+    change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
+    exact isFlasque_of_injective ip.shortComplex.X₂ _
   haveI hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-      ip.shortComplex.X₂) (m + 2)) :=
-    FlasqueVanishing _ _ hFlasque (m + 1)
+      ip.shortComplex.X₂) (m + 2)) := FlasqueVanishing _ _ hFlasque (m + 1)
   constructor; intro a b
-  have ha : a.comp (Ext.mk₀ (ip.shortComplex.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 :=
-    @Subsingleton.elim _ hJ _ 0
-  have hb : b.comp (Ext.mk₀ (ip.shortComplex.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).f) rfl = 0 :=
-    @Subsingleton.elim _ hJ _ 0
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a ha rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE_X b hb rfl
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a (@Subsingleton.elim _ hJ _ 0) rfl
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE_X b (@Subsingleton.elim _ hJ _ 0) rfl
   rw [← hc, ← hd]; congr 1
   have hR : Subsingleton (Sheaf.H ip.shortComplex.X₃ (m + 1)) := by
     constructor; intro c d
