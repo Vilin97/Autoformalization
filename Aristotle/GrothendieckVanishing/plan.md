@@ -1,57 +1,28 @@
 # Work Plan — Grothendieck Vanishing
 
-**Updated**: 2026-04-04T21:55Z
+**Updated**: 2026-04-05T00:25Z
 
 ## Status Summary
 
-- **Sorry count**: 2 in `FiniteGeneratorReduction.lean`
-  - Line 43: `gabriel_injective_of_filtered_colimit` (dead code, never referenced)
-  - Line 223: `hmono_transitions` (load-bearing false — asserted for all diagrams but FALSE for the recursive quotient diagram Q)
-- **Files**: 16 `.lean` in `main/`, ~5760 total lines
-- **CI**: Green (all 3 recent runs pass)
-- **Docs**: Blueprint returns 404 (no deployment workflow exists)
-- **Documentation lies**: CLAUDE.md, main.lean, and FiniteGeneratorReduction.lean all claim "1 sorry" — actually 2
-- **Aristotle**: 1 job queued (`sheafH_colim_v2.lean`, job `6ecc7b79`), 1 expired
-
-## Fundamental Obstacle (unchanged from prior cycle)
-
-The dimension-shifting proof for "H^n commutes with filtered colimits" creates a quotient diagram Q with non-mono coprojections (`ker(Q.map φ) ≅ coker(Y'.map φ) ≠ 0` by the snake lemma). The recursive IH call requires `hmono_transitions` for Q, which is provably FALSE. The sorry at line 223 is "load-bearing false" — it makes a false assertion that is accepted by `sorry`.
-
-Valid alternative approaches (none yet in Mathlib):
-1. Čech cohomology (Čech = derived on Noetherian spaces)
-2. Universal δ-functor (T^0 = Hom preserves colimits → T^n = Ext^n)
-3. Gabriel's theorem (filtered colimits of injectives are injective in locally Noetherian categories)
+- **Sorry count**: 0 — FULLY PROVED
+- **Axioms**: 0 (verified by `lean_verify`)
+- **Files**: 16 `.lean` in `main/`, ~5844 total lines
+- **CI**: Commit `08c3529` pushed, CI in progress. PR #13 open with auto-merge.
+- **Critique verdict**: ACCEPT
 
 ## This Cycle's Work Items
 
-### 1. Delete dead code `gabriel_injective_of_filtered_colimit` (`/cleanup`)
-- File: `FiniteGeneratorReduction.lean:25-43`
-- This theorem is never referenced. It's dead code that inflates the sorry count.
-- Deleting it reduces sorry count from 2 → 1 and fixes the documentation lie.
-- **Immediate, < 1 min.**
+All previous items (commit, cleanup, cancel Aristotle) are DONE. No sorry's to prove, no code quality issues.
 
-### 2. Fix documentation lies (`/cleanup`)
-- `CLAUDE.md:76`: Update sorry description to match reality after item 1
-- `main.lean:7-11`: Update sorry list
-- `FiniteGeneratorReduction.lean` docstrings: Remove "SOLE sorry" claims
-- **Immediate, < 5 min.**
+### 1. Verify CI passes
+- Wait for CI run `23990584135` to complete.
+- If it passes, PR #13 will auto-merge into `grothendieck-vanishing`.
 
-### 3. Delete stale `aristotle-in/sheafH_colim.lean` (`/cleanup`)
-- Doesn't compile (broken `constantSheaf` calling convention). Job expired.
-- `sheafH_colim_v2.lean` is the replacement (compiles, queued).
-- **Immediate, < 1 min.**
-
-### 4. Attempt to prove `hmono_transitions` via restructured proof (`/prove`)
-- The sorry at line 223 cannot be closed with the current dimension-shifting approach.
-- **Strategy**: Restructure `sheafH_filtered_colimit_aux` to add `hmono_transitions` as a hypothesis propagated from the call site. For the recursive IH call on Q, prove a SEPARATE helper that handles the case where all pieces have vanishing cohomology but coprojections need not be mono.
-- This is the hardest item. Spend at most 30 min attempting; if stuck, document the blocking issue and move on.
-
-### 5. Check Aristotle results (`/check-aristotle`)
-- Job `6ecc7b79` is queued. Check if completed.
+### 2. Update critique with CI result
+- Update critique.md with final CI status.
 
 ## Backlog
 
-- **P1**: Blueprint deployment — no workflow exists. Not blocking correctness.
-- **P2**: Strengthen `Subsingleton (Sheaf.H F n)` to `IsZero (Sheaf.H F n)`.
-- **P3**: Upstream `PresheafFilteredColimit.lean` to Mathlib.
-- **P3**: Upstream `ConstantSheafFlasque.lean` to Mathlib.
+- **P1**: Blueprint deployment — returns 404. No deployment workflow exists.
+- **P4**: Generalize coefficient category from `AddCommGrpCat` to arbitrary Grothendieck abelian.
+- **P4**: Upstream `isFlasque_filtered_colimit`, `PresheafFilteredColimit`, `FlasqueVanishing`, `ConstantSheafFlasque` to Mathlib.

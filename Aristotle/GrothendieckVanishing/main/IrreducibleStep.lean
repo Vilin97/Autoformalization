@@ -5,8 +5,7 @@
   - exists_section_generating_stalks: PROVED — uses Nat.find to choose x₀ with minimal
     image subgroup generator d, then divisibility d | d_x follows from minimality.
   - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
-  - IrreduciblePosVanishing: assembles all pieces
-    (1 sorry in FiniteGeneratorReduction.lean: hmono_ι — mono coprojections)
+  - IrreduciblePosVanishing: assembles all pieces (FULLY PROVED)
 -/
 import Aristotle.GrothendieckVanishing.main.StalkGeneratorAlgebra
 

@@ -5,16 +5,23 @@
       "submission": "aristotle-in/sheafH_colim.lean",
       "target": "sheafH_preserves_filtered_colimits (full theorem, Čech approach)",
       "status": "expired",
-      "note": "Submitted 2026-04-04. Standalone file with ext_dimension_shift helpers. Asked Aristotle to avoid dimension-shifting and use Čech or functorial resolutions instead."
+      "note": "Superseded by proof restructuring. The full theorem is now proved modulo gabriel_injective_of_filtered_colimit."
     },
     {
       "id": "6ecc7b79-5629-4459-8d02-0802420f2505",
       "submission": "aristotle-in/sheafH_colim_v2.lean",
-      "output": "aristotle-out/sheafH_colim_v2_aristotle.lean",
-      "target": "sheafH_preserves_filtered_colimits (Ext formulation, no mono needed)",
-      "status": "queued",
-      "note": "Submitted 2026-04-04T21:40Z. Clean standalone with Ext directly. Prompted with 3 approaches: Čech, universal δ-functor, element chase. File compiles (only sorry warning)."
+      "target": "sheafH_preserves_filtered_colimits (Ext formulation)",
+      "status": "superseded",
+      "note": "Superseded by proof restructuring (commit f0bf7ad). The full theorem is now proved using per-object functorial injectives."
+    },
+    {
+      "id": "2507e172-cea1-448d-8a29-7f9ce45af776",
+      "submission": "aristotle-in/gabriel_injective.lean",
+      "output": "aristotle-out/gabriel_injective_aristotle.lean",
+      "target": "gabriel_injective_of_filtered_colimit (Gabriel's theorem)",
+      "status": "canceled",
+      "note": "Canceled 2026-04-05. Gabriel's theorem no longer needed — proof restructured to use flasque vanishing instead."
     }
   ],
-  "note": "The sole remaining sorry is hmono_transitions in sheafH_filtered_colimit_aux. Dimension-shifting proof fails for recursive IH on Q (non-mono coprojections). Needs Čech cohomology, universal δ-functor, or element-chasing proof."
+  "note": "All sorry's eliminated. Gabriel's theorem bypassed via flasque vanishing. All jobs expired/superseded/canceled."
 }

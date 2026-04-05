@@ -4,13 +4,10 @@
   For a Noetherian topological space X of dimension n, and any sheaf F
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-  Sorry's (1 remaining in sheafH_filtered_colimit_aux in FiniteGeneratorReduction.lean):
-  - hmono_transitions: ∀ φ, Mono (Y'.map φ) — mono transitions for the filtered diagram.
-    TRUE at the call site (finsetGenFunctor_mono), but FALSE at recursive IH levels
-    (the quotient diagram Q has non-mono transitions by the snake lemma). The dimension-
-    shifting proof fundamentally requires mono coprojections at every recursive level.
-    Closing requires either Čech cohomology, universal δ-functor theory, or a proof
-    that avoids recursive dimension shifting.
+  FULLY PROVED — 0 sorry's, 0 axioms, 0 admits.
+  The last sorry (Gabriel's theorem) was eliminated by replacing "filtered colimits of
+  injectives are injective" with "filtered colimits of flasque sheaves are flasque"
+  (isFlasque_filtered_colimit) + FlasqueVanishing, since injective ⟹ flasque.
 
   File structure:
   - FlasqueVanishing.lean + FlasqueCohomology.lean: IsFlasqueSheaf, FlasqueVanishing, dim shift
@@ -25,7 +22,7 @@
   - ReducibleVanishing.lean: reducible case via Finset.induction
   - ClosedOpenDecomposition.lean: reduction to irreducible
   - PresheafFilteredColimit.lean: presheaf colimit is sheaf on Noetherian spaces (PROVED)
-  - FiniteGeneratorReduction.lean: colimit step, f.g. vanishing (1 sorry: hmono_transitions)
+  - FiniteGeneratorReduction.lean: colimit step, f.g. vanishing (FULLY PROVED)
   - SheafStalkAlgebra.lean + StalkGeneratorAlgebra.lean: stalk algebra, generator section
   - IrreducibleStep.lean: irreducible step assembly
   - GrothendieckVanishing.lean: main theorem + cascade theorems
