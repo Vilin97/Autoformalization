@@ -145,12 +145,10 @@ theorem ReducibleVanishing'
         have hX₂_stalk :
             ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₂.val),
             b = 0 := fun b => hG_stalks x hx' b
-        let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
         haveI : Mono S.f := hSE.mono_f
         haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
           (C := AddCommGrpCat.{u}) (X := X) x
-        haveI : Mono ((TopCat.Sheaf.forget _ _ ⋙ T).map S.f) :=
-          Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f
-        rw [AddCommGrpCat.mono_iff_injective] at this
-        exact this ((hX₂_stalk _).trans (map_zero _).symm)
+        exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
+          (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) S.f)
+          ((hX₂_stalk _).trans (map_zero _).symm)
     exact subsingleton_sheafH_of_shortExact_middle hSE n hker hpush

@@ -258,14 +258,12 @@ theorem cokernel_openHom_vanishing
       have hstalk_zero :
           ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₂.val),
           b = 0 := fun b => cokernel_stalk_zero_V V x hxV b
-      let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
-          TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
       haveI : Mono S.f := hSE.mono_f
       haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
         (C := AddCommGrpCat.{u}) (X := X) x
-      haveI : Mono (FT.map S.f) := Functor.map_mono FT S.f
-      rw [AddCommGrpCat.mono_iff_injective] at this
-      exact this ((hstalk_zero _).trans (map_zero _).symm)
+      exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
+        (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) S.f)
+        ((hstalk_zero _).trans (map_zero _).symm)
   rw [← hS₂]
   exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
 
@@ -351,14 +349,12 @@ theorem zeroOutsideInt_cohomology_vanishing
       have hstalk_zero :
           ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₂.val),
           b = 0 := fun b => cokernel_stalk_zero_V V x hxV b
-      let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
-          TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
       haveI : Mono S.f := hSE.mono_f
       haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
         (C := AddCommGrpCat.{u}) (X := X) x
-      haveI : Mono (FT.map S.f) := Functor.map_mono FT S.f
-      rw [AddCommGrpCat.mono_iff_injective] at this
-      exact this ((hstalk_zero _).trans (map_zero _).symm)
+      exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
+        (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) S.f)
+        ((hstalk_zero _).trans (map_zero _).symm)
   rw [← hS₂]
   exact subsingleton_sheafH_of_shortExact_middle hSE m' hKer hPush
 
