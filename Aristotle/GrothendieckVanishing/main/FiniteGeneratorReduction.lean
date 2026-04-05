@@ -166,8 +166,7 @@ private noncomputable def finsetGenCocone_isColimit :
       simp only [Category.assoc, colimit.ι_desc]
       dsimp [finsetGenCocone]
       rw [Limits.image.fac]
-      simp [TopCat.Sheaf.finsetGeneratorMap, TopCat.Sheaf.familyGeneratorMap,
-            TopCat.Sheaf.allSectionMap]
+      simp [TopCat.Sheaf.finsetGeneratorMap, TopCat.Sheaf.familyGeneratorMap]
     haveI := TopCat.Sheaf.allSectionMap_epi K
     exact epi_of_epi_fac hfac
   -- mono + epi → iso in abelian category
@@ -206,10 +205,10 @@ recursive IH levels). -/
     injective embeddings. FULLY PROVED (flasque vanishing replaces Gabriel's theorem). -/
 private theorem sheafH_filtered_colimit_aux
     {X : TopCat.{u}} [NoetherianSpace X] (n : ℕ) :
-    ∀ {J' : Type u} [inst1 : SmallCategory J'] [inst2 : IsFiltered J']
+    ∀ {J' : Type u} [SmallCategory J'] [IsFiltered J']
       (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-      (c' : Cocone Y') (hc' : IsColimit c')
-      (hvan : ∀ j, Subsingleton (Sheaf.H (Y'.obj j) n)),
+      (c' : Cocone Y') (_ : IsColimit c')
+      (_ : ∀ j, Subsingleton (Sheaf.H (Y'.obj j) n)),
     Subsingleton (Sheaf.H c'.pt n) := by
   induction n with
   | zero =>
@@ -298,7 +297,7 @@ private theorem sheafH_filtered_colimit_aux
     let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
       { obj := fun j => cokernel (η.app j)
         map := fun {j j'} f => cokernel.map _ _ (Y'.map f) (Inj.map f) (η.naturality f).symm
-        map_id := fun j => by ext; simp [cokernel.map, Functor.map_id]
+        map_id := fun j => by ext; simp [cokernel.map]
         map_comp := fun {j j' j''} f g => by ext; simp [cokernel.map, Functor.map_comp] }
     -- Factoring lemma: c'.ι.app j ≫ ι' = η.app j ≫ injCocone.ι.app j
     have hfac_ι : ∀ j, c'.ι.app j ≫ ι' = η.app j ≫ injCocone.ι.app j :=
@@ -316,7 +315,7 @@ private theorem sheafH_filtered_colimit_aux
         naturality := fun j j' f => by
           ext; show cokernel.π _ ≫ Q.map f ≫ _ = cokernel.π _ ≫ _ ≫ _
           rw [← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
-          simp [cokernel.π_desc, Category.assoc, Functor.const_obj_map, injCocone.w] }
+          simp [cokernel.π_desc, Functor.const_obj_map] }
     -- IsColimit: qCocone is a colimit.
     -- Strategy: lift a cocone s on Q to a cocone on Inj, use colimit of Inj to descend.
     have hqColim : IsColimit qCocone := by
@@ -524,7 +523,7 @@ private theorem imageIncl_cokernel_epi
     factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫
       cokernel.π (imageIncl hσ₀) := by
     ext ⟨σ, hσ⟩
-    simp only [proj, Category.assoc, colimit.ι_desc, Cofan.mk_pt, Cofan.mk_ι_app]
+    simp only [proj]
     by_cases h : σ = σ₀
     · subst h; simp
     · rw [← Category.assoc
