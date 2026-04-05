@@ -1,5 +1,21 @@
 # Log — Grothendieck Vanishing
 
+## 2026-04-05T01:15Z — Blueprint infrastructure + code quality cycle
+
+**Sorry count: 0 — FULLY PROVED**
+
+- **Created full leanblueprint**: `blueprint/src/` with 10 files (content.tex, web.tex, print.tex,
+  macros, config files). 44 `\lean{}` references, 31 `\uses{}` dependency annotations.
+- **Dependency extraction via Lean meta-program**: wrote `scripts/dep_graph_gv.lean` which imports
+  all GV modules and extracts both direct and transitive dependencies through private helpers
+  (BFS). All `\uses{}` in content.tex are machine-verified, not hand-written.
+- **Updated deploy workflow**: `.github/workflows/deploy.yml` now triggers on `grothendieck-vanishing`
+  branch, adds `build_blueprint` job using `leanblueprint web`, serves at `/blueprint/`.
+- **Critique updated**: CONDITIONAL ACCEPT. Flagged: dead code (`CohomologyIso.lean`), blanket
+  `import Mathlib` in 3 files, `FiniteGeneratorReduction.lean` exceeds 600-line limit, stale
+  MEMORY.md Mathlib version.
+- **Plan updated**: cleanup items for this cycle (delete dead code, clean Aristotle tracking).
+
 ## 2026-04-05T00:20Z — COMPLETE: 0 sorry's, flasque approach eliminates Gabriel dependency
 
 **Sorry count: 0 — FULLY PROVED**
