@@ -56,7 +56,7 @@ theorem exists_nonzero_stalk_in_V
     ∃ (x : X) (_ : x ∈ V)
       (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R.val),
       a ≠ 0 := by
-  by_contra h; push_neg at h; apply hR
+  by_contra! h; apply hR
   apply sheaf_isZero_of_zero_stalks; intro x a
   by_cases hx : (x : X) ∈ (V : Set X)
   · exact h x hx a
