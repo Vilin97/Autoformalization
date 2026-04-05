@@ -12,6 +12,10 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: pages-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build_docs:
     runs-on: ubuntu-latest
@@ -86,7 +90,10 @@ jobs:
           path: blueprint/web
 
   deploy:
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/grothendieck-vanishing'
+    if: >-
+      always() &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/grothendieck-vanishing') &&
+      needs.build_blueprint.result == 'success'
     needs: [build_docs, build_blueprint]
     runs-on: ubuntu-latest
     environment:
@@ -98,6 +105,7 @@ jobs:
 
       - name: Download documentation artifact
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: docs
           path: _site/docs
@@ -110,6 +118,13 @@ jobs:
 
       - name: Prepare site
         run: |
+          # Determine if docs were successfully downloaded
+          if [ -d "_site/docs" ] && [ "$(ls -A _site/docs 2>/dev/null)" ]; then
+            DOCS_LINK='<li><a href="docs/">Lean Documentation</a> &mdash; API documentation (doc-gen4)</li>'
+          else
+            DOCS_LINK='<li><em>Lean Documentation</em> &mdash; not yet built for this branch</li>'
+          fi
+
           cat > _site/index.html <<EOF
           <!DOCTYPE html>
           <html>
@@ -125,8 +140,8 @@ jobs:
             <h1>Grothendieck's Vanishing Theorem</h1>
             <p>Formalization of Grothendieck's vanishing theorem (Hartshorne III, Theorem 2.7) in Lean 4 with Mathlib: for a Noetherian topological space X of dimension n and any sheaf F of abelian groups on X, H<sup>i</sup>(X, F) = 0 for all i &gt; n.</p>
             <ul>
-              <li><a href="blueprint/">Blueprint</a> -- dependency graph and formalization status</li>
-              <li><a href="docs/">Lean Documentation</a> -- API documentation</li>
+              <li><a href="blueprint/">Blueprint</a> &mdash; dependency graph and formalization status</li>
+              ${DOCS_LINK}
               <li><a href="https://github.com/Vilin97/aristotle">GitHub repository</a></li>
             </ul>
           </body>
