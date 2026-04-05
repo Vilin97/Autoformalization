@@ -25,11 +25,8 @@ theorem sheaf_restriction_epi_of_irreducible_dim_zero
     Epi (F.val.map i.op) := by
   rcases opens_eq_bot_or_top_of_irreducibleSpace_dim_zero hdim U with rfl | rfl
   · exact epi_of_isTerminal_tgt (isTerminal_sheaf_bot F) _
-  · have hV := le_antisymm le_top (homOfLE le_top ≫ i |>.le)
-    subst hV
-    have : i = 𝟙 ⊤ := Subsingleton.elim _ _
-    rw [this, op_id, F.val.map_id]
-    infer_instance
+  · have hV := le_antisymm le_top (homOfLE le_top ≫ i |>.le); subst hV
+    rw [Subsingleton.elim i (𝟙 ⊤), op_id, F.val.map_id]; infer_instance
 
 /-- On an irreducible Noetherian space of dim ≤ 0, all higher cohomology vanishes.
     Hartshorne III.2.7, Step 2. Uses FlasqueVanishing applied to sheaves that are

@@ -91,8 +91,8 @@ theorem oldGeneratedToAdjoinGenerated_comp {X : TopCat.{u}} {ι : Type*}
     oldGeneratedToAdjoinGenerated U s U₀ s₀ ≫
         Limits.image.ι (familyGeneratorMap (adjoinGeneratorOpens U U₀)
           (adjoinGeneratorSections U s s₀)) =
-      Limits.image.ι (familyGeneratorMap U s) := by
-  exact Limits.image.lift_fac _
+      Limits.image.ι (familyGeneratorMap U s) :=
+  Limits.image.lift_fac _
 
 instance oldGeneratedToAdjoinGenerated_mono {X : TopCat.{u}} {ι : Type*}
     {F : Sheaf AddCommGrpCat.{u} X}
@@ -100,10 +100,8 @@ instance oldGeneratedToAdjoinGenerated_mono {X : TopCat.{u}} {ι : Type*}
     (U₀ : Opens X) (s₀ : F.presheaf.obj (op U₀))
     [HasCoproduct fun i => zeroOutsideInt (U i)]
     [HasCoproduct fun j : ι ⊕ Unit => zeroOutsideInt (adjoinGeneratorOpens U U₀ j)] :
-    Mono (oldGeneratedToAdjoinGenerated U s U₀ s₀) := by
-  let m := image.ι (familyGeneratorMap (adjoinGeneratorOpens U U₀) (adjoinGeneratorSections U s s₀))
-  haveI : Mono m := inferInstance
-  exact mono_of_mono_fac (oldGeneratedToAdjoinGenerated_comp U s U₀ s₀)
+    Mono (oldGeneratedToAdjoinGenerated U s U₀ s₀) :=
+  mono_of_mono_fac (oldGeneratedToAdjoinGenerated_comp U s U₀ s₀)
 
 lemma old_familyGeneratedSheafι_comp_oldGeneratedToAdjoinGenerated {X : TopCat.{u}} {ι : Type*}
     {F : Sheaf AddCommGrpCat.{u} X}
@@ -182,8 +180,8 @@ instance adjoinedGeneratorToCokernel_epi {X : TopCat.{u}} {ι : Type*}
     (U₀ : Opens X) (s₀ : F.presheaf.obj (op U₀))
     [HasCoproduct fun i => zeroOutsideInt (U i)]
     [HasCoproduct fun j : ι ⊕ Unit => zeroOutsideInt (adjoinGeneratorOpens U U₀ j)] :
-    Epi (adjoinedGeneratorToCokernel U s U₀ s₀) := by
-  exact epi_of_epi_fac (adjoinGeneratorProjection_comp_adjoinedGeneratorToCokernel U s U₀ s₀)
+    Epi (adjoinedGeneratorToCokernel U s U₀ s₀) :=
+  epi_of_epi_fac (adjoinGeneratorProjection_comp_adjoinedGeneratorToCokernel U s U₀ s₀)
 
 /-- The short complex attached to adjoining one generator. -/
 abbrev adjoinGeneratorShortComplex {X : TopCat.{u}} {ι : Type*}
@@ -196,54 +194,6 @@ abbrev adjoinGeneratorShortComplex {X : TopCat.{u}} {ι : Type*}
   ShortComplex.mk (oldGeneratedToAdjoinGenerated U s U₀ s₀)
     (cokernel.π (oldGeneratedToAdjoinGenerated U s U₀ s₀))
     (cokernel.condition _)
-
-theorem adjoinGeneratorShortComplex_exact {X : TopCat.{u}} {ι : Type*}
-    {F : Sheaf AddCommGrpCat.{u} X}
-    (U : ι → Opens X) (s : ∀ i, F.presheaf.obj (op (U i)))
-    (U₀ : Opens X) (s₀ : F.presheaf.obj (op U₀))
-    [HasCoproduct fun i => zeroOutsideInt (U i)]
-    [HasCoproduct fun j : ι ⊕ Unit => zeroOutsideInt (adjoinGeneratorOpens U U₀ j)] :
-    (adjoinGeneratorShortComplex U s U₀ s₀).Exact := by
-  exact ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)
-
-theorem adjoinGeneratorShortComplex_shortExact {X : TopCat.{u}} {ι : Type*}
-    {F : Sheaf AddCommGrpCat.{u} X}
-    (U : ι → Opens X) (s : ∀ i, F.presheaf.obj (op (U i)))
-    (U₀ : Opens X) (s₀ : F.presheaf.obj (op U₀))
-    [HasCoproduct fun i => zeroOutsideInt (U i)]
-    [HasCoproduct fun j : ι ⊕ Unit => zeroOutsideInt (adjoinGeneratorOpens U U₀ j)] :
-    (adjoinGeneratorShortComplex U s U₀ s₀).ShortExact where
-  mono_f := inferInstance
-  exact := adjoinGeneratorShortComplex_exact U s U₀ s₀
-  epi_g := inferInstance
-
-/-- In an abelian category, the image of an epimorphism is canonically isomorphic to its target. -/
-abbrev isoToImageOfEpi {X : TopCat.{u}} {A B : Sheaf AddCommGrpCat.{u} X}
-    (f : A ⟶ B) [Epi f] : image f ≅ B := by
-  haveI : Epi (image.ι f) := epi_of_epi_fac (image.fac f)
-  haveI : IsIso (image.ι f) := isIso_of_mono_of_epi (image.ι f)
-  exact asIso (image.ι f)
-
-/-- The quotient obtained by adjoining one extra section is canonically a one-generator image of
-`zeroOutsideInt U₀`. -/
-abbrev adjoinedGeneratorCokernelIso {X : TopCat.{u}} {ι : Type*}
-    {F : Sheaf AddCommGrpCat.{u} X}
-    (U : ι → Opens X) (s : ∀ i, F.presheaf.obj (op (U i)))
-    (U₀ : Opens X) (s₀ : F.presheaf.obj (op U₀))
-    [HasCoproduct fun i => zeroOutsideInt (U i)]
-    [HasCoproduct fun j : ι ⊕ Unit => zeroOutsideInt (adjoinGeneratorOpens U U₀ j)] :
-    image (adjoinedGeneratorToCokernel U s U₀ s₀) ≅
-      cokernel (oldGeneratedToAdjoinGenerated U s U₀ s₀) :=
-  isoToImageOfEpi (adjoinedGeneratorToCokernel U s U₀ s₀)
-
-/-- If a family of local sections generates `F` epimorphically, then the corresponding generated
-subsheaf is canonically isomorphic to `F`. -/
-abbrev familyGeneratedSheafIsoOfEpi {X : TopCat.{u}} {ι : Type*}
-    (U : ι → Opens X) {F : Sheaf AddCommGrpCat.{u} X}
-    (s : ∀ i, F.presheaf.obj (op (U i)))
-    [HasCoproduct fun i => zeroOutsideInt (U i)]
-    [Epi (familyGeneratorMap U s)] : familyGeneratedSheaf U s ≅ F :=
-  isoToImageOfEpi (familyGeneratorMap U s)
 
 /-- Indexing type for all local sections of a sheaf. -/
 abbrev SectionIndex {X : TopCat.{u}}
@@ -272,15 +222,6 @@ instance finsetGeneratorMap_epi_to_image {X : TopCat.{u}}
     [HasCoproduct fun σ : {σ // σ ∈ S} => zeroOutsideInt σ.1.1] :
     Epi (factorThruImage (finsetGeneratorMap S)) :=
   inferInstance
-
-/-- If a finite set of local sections generates `F` epimorphically, then the corresponding
-finite generated subsheaf is canonically isomorphic to `F`. -/
-abbrev finsetGeneratedSheafIsoOfEpi {X : TopCat.{u}}
-    {F : Sheaf AddCommGrpCat.{u} X}
-    (S : Finset (SectionIndex F))
-    [HasCoproduct fun σ : {σ // σ ∈ S} => zeroOutsideInt σ.1.1]
-    [Epi (finsetGeneratorMap S)] : finsetGeneratedSheaf S ≅ F :=
-  isoToImageOfEpi (finsetGeneratorMap S)
 
 /-- The canonical map from the coproduct of all `zeroOutsideInt U` indexed by local sections
 of `F` onto `F`. This is the formal Step 3A starting point for building finitely generated

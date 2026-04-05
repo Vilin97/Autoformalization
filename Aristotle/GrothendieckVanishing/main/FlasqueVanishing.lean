@@ -42,10 +42,9 @@ instance {C : Type*} [Category C] {D : Type*} [Category D] [Preadditive D] :
     (Functor.const Cᵒᵖ : D ⥤ Cᵒᵖ ⥤ D).Additive where
 
 instance {X : TopCat.{u}} :
-    (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive := by
-  show ((Functor.const (Opens X)ᵒᵖ) ⋙
-    presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive
-  infer_instance
+    (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive :=
+  inferInstanceAs ((Functor.const (Opens X)ᵒᵖ ⋙
+    presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive)
 
 -- Cache expensive typeclass resolutions to avoid re-synthesizing in every proof.
 -- The chain IsGrothendieckAbelian → EnoughInjectives → HasDerivedCategory is very
@@ -105,15 +104,12 @@ private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
     haveI : Mono S.f := hS.mono_f
     haveI : Mono h.f' := by
       constructor; intro Z a b hab
-      have : a ≫ S.f = b ≫ S.f := by
-        rw [← h.f'_i, ← Category.assoc, hab, Category.assoc]
-      exact (cancel_mono S.f).mp this
+      exact (cancel_mono S.f).mp (by rw [← h.f'_i, ← Category.assoc, hab, Category.assoc])
     haveI : Epi h.f' := hS.exact.epi_f' h
     haveI : IsIso h.f' := isIso_of_mono_of_epi h.f'
-    haveI hz1 : IsZero (cokernel h.f') := isZero_cokernel_of_epi h.f'
     haveI hz2 : IsZero
         ((sectionsAt (X := X) V).obj (cokernel h.f')) :=
-      Functor.map_isZero _ hz1
+      Functor.map_isZero _ (isZero_cokernel_of_epi h.f')
     haveI hz3 : IsZero
         (cokernel ((sectionsAt (X := X) V).map h.f')) :=
       isZero_cokernel_of_epi _
@@ -143,26 +139,14 @@ private lemma sections_exact_of_shortExact {X : TopCat.{u}}
 private lemma eval_comp_zero {X : TopCat.{u}}
     (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)) (V : Opens X) :
     S.f.val.app (op V) ≫ S.g.val.app (op V) = 0 := by
-  have h1 : S.f.val.app (op V) ≫ S.g.val.app (op V) =
-      (S.f.val ≫ S.g.val).app (op V) := by simp
-  rw [h1]; change (S.f ≫ S.g).val.app (op V) = 0; rw [S.zero]; aesop_cat
-
-private lemma mono_f_app {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (V : Opens X) :
-    Mono (S.f.val.app (op V)) := by
-  haveI : Mono S.f := hS.mono_f
-  haveI : Mono S.f.val := by
-    change Mono ((sheafToPresheaf _ _).map S.f); infer_instance
-  exact (NatTrans.mono_iff_mono_app S.f.val).mp ‹_› (op V)
+  change (S.f ≫ S.g).val.app (op V) = 0; rw [S.zero]; aesop_cat
 
 -- In a thin category (Opens X), any two parallel morphisms are equal,
 -- so presheaf restriction maps agree regardless of which morphism is used.
 private lemma presheaf_map_eq {X : TopCat.{u}}
     (F : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
     {U V : Opens X} (f g : U ⟶ V) (s : F.obj (op V)) :
-    F.map f.op s = F.map g.op s := by
-  have : f = g := Subsingleton.elim _ _; rw [this]
+    F.map f.op s = F.map g.op s := congr_arg (F.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim f g))
 
 -- Extension preorder on partial lifts (V, t):
 -- (V₁,t₁) ≤ (V₂,t₂) iff V₁ ≤ V₂ and t₂|_{V₁} = t₁.
@@ -178,41 +162,6 @@ private noncomputable instance sigmaPreorder {X : TopCat.{u}}
           (homOfLE h₂).op ≫ (homOfLE h₁).op := rfl
       simp only [this, Functor.map_comp, AddCommGrpCat.hom_comp,
         AddMonoidHom.coe_comp, Function.comp_apply, ht₂, ht₁]⟩
-
--- Binary gluing: given compatible sections on V₀ and W, produce a section on V₀ ⊔ W.
-private lemma binaryGlue_exists {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    {V₀ W : Opens X} (t₀ : F.val.obj (op V₀)) (t'' : F.val.obj (op W))
-    (hcompat : ConcreteCategory.hom (F.val.map (homOfLE inf_le_right).op) t'' =
-      ConcreteCategory.hom (F.val.map (homOfLE inf_le_left).op) t₀) :
-    ∃ t_new : F.val.obj (op (V₀ ⊔ W)),
-      ConcreteCategory.hom (F.val.map (homOfLE le_sup_left).op) t_new = t₀ ∧
-      ConcreteCategory.hom (F.val.map (homOfLE le_sup_right).op) t_new = t'' := by
-  let BU : Bool → Opens X := fun | false => V₀ | true => W
-  let Bsf : (b : Bool) → F.val.obj (op (BU b)) := fun | false => t₀ | true => t''
-  have hcover : V₀ ⊔ W ≤ ⨆ b, BU b := by
-    intro y hy; simp only [Opens.mem_iSup]
-    rcases hy with h | h
-    · exact ⟨false, h⟩
-    · exact ⟨true, h⟩
-  have hsup_eq : ⨆ b, BU b = V₀ ⊔ W :=
-    le_antisymm (iSup_le fun b => by cases b <;> simp [BU]) hcover
-  have hcompat_glue : TopCat.Presheaf.IsCompatible F.val BU Bsf := by
-    intro i j; match i, j with
-    | false, false => rfl
-    | false, true => exact hcompat.symm
-    | true, false =>
-      rw [show (W).infLELeft V₀ = eqToHom (inf_comm W V₀) ≫ homOfLE inf_le_right
-            from Subsingleton.elim _ _,
-          show (W).infLERight V₀ = eqToHom (inf_comm W V₀) ≫ homOfLE inf_le_left
-            from Subsingleton.elim _ _,
-          op_comp, Functor.map_comp, CategoryTheory.comp_apply,
-          op_comp, Functor.map_comp, CategoryTheory.comp_apply, hcompat]
-    | true, true => rfl
-  obtain ⟨t_new, ht_new, _⟩ := TopCat.Sheaf.existsUnique_gluing' F BU (V₀ ⊔ W)
-    (fun b => homOfLE (by cases b <;> simp [BU])) (hsup_eq ▸ le_rfl) Bsf hcompat_glue
-  have h0 := ht_new false; simp only [BU, Bsf] at h0
-  have h1 := ht_new true; simp only [BU, Bsf] at h1
-  exact ⟨t_new, h0, h1⟩
 
 /-! ### Partial lift sub-lemmas for the Zorn surjectivity argument -/
 
@@ -266,19 +215,12 @@ private lemma partialLift_chain_ub {X : TopCat.{u}}
     exact presheaf_map_eq S.X₃.val _ _ s
   · refine ⟨⟨⊥, 0⟩, ?_, fun _ hz => absurd ⟨_, hz⟩ hc⟩
     refine ⟨bot_le, ?_⟩
-    have ht := isTerminal_sheaf_bot S.X₃
-    have hsub : ∀ (a b : S.X₃.val.obj (op ⊥)), a = b := by
-      intro a b
-      have h₁ : a = (0 : S.X₃.val.obj (op ⊥)) := by
-        have := congr_arg (fun f => (ConcreteCategory.hom f) a)
-          (show (𝟙 _ : S.X₃.val.obj (op ⊥) ⟶ _) = 0 from ht.hom_ext _ _)
-        simpa using this
-      have h₂ : b = (0 : S.X₃.val.obj (op ⊥)) := by
-        have := congr_arg (fun f => (ConcreteCategory.hom f) b)
-          (show (𝟙 _ : S.X₃.val.obj (op ⊥) ⟶ _) = 0 from ht.hom_ext _ _)
-        simpa using this
-      rw [h₁, h₂]
-    exact hsub _ _
+    have h0 : ∀ (a : S.X₃.val.obj (op ⊥)), a = 0 := fun a => by
+      have := congr_arg (fun f => (ConcreteCategory.hom f) a)
+        (show (𝟙 _ : S.X₃.val.obj (op ⊥) ⟶ _) = 0 from
+          (isTerminal_sheaf_bot S.X₃).hom_ext _ _)
+      simpa using this
+    exact (h0 _).trans (h0 _).symm
 
 -- Maximal partial lift must cover all of U.
 -- If V₀ < U, find x ∈ U \ V₀, get a local lift on W ∋ x, adjust for compatibility
@@ -336,7 +278,7 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
         exact ⟨false, h⟩; exact ⟨true, h⟩)
   have hcompat_glue : TopCat.Presheaf.IsCompatible S.X₂.val BU Bsf := by
     intro i j; match i, j with
-    | false, false => rfl
+    | false, false | true, true => rfl
     | false, true => exact hcompat_patch.symm
     | true, false =>
       show S.X₂.val.map (W.infLELeft V₀).op t'' = S.X₂.val.map (W.infLERight V₀).op t₀
@@ -347,7 +289,6 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
         op_comp, Functor.map_comp, CategoryTheory.comp_apply,
           op_comp, Functor.map_comp, CategoryTheory.comp_apply,
           hcompat_patch]
-    | true, true => rfl
   obtain ⟨t_new, ht_new, _⟩ := TopCat.Sheaf.existsUnique_gluing' S.X₂ BU (V₀ ⊔ W)
     (fun b => homOfLE (by cases b <;> simp [BU])) (hsup_eq ▸ le_rfl) Bsf hcompat_glue
   have h_new_inP : IsPartialLift (S := S) U s ⟨V₀ ⊔ W, t_new⟩ := by
@@ -355,12 +296,12 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     apply TopCat.Sheaf.eq_of_locally_eq' S.X₃ BU (V₀ ⊔ W)
       (fun b => homOfLE (by cases b <;> simp [BU])) (hsup_eq ▸ le_rfl)
     intro b; cases b
-    · rw [← S.g.val.naturality_apply _ t_new]; simp only [BU, Bsf]
-      have h0 := ht_new false; simp only [BU, Bsf] at h0; rw [h0, ht₀]
+    · rw [← S.g.val.naturality_apply _ t_new]; simp only [BU]
+      have h0 := ht_new false; simp only [BU] at h0; rw [h0, ht₀]
       simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
       exact presheaf_map_eq S.X₃.val _ _ s
-    · rw [← S.g.val.naturality_apply _ t_new]; simp only [BU, Bsf]
-      have h1 := ht_new true; simp only [BU, Bsf] at h1; rw [h1, hgt'']
+    · rw [← S.g.val.naturality_apply _ t_new]; simp only [BU]
+      have h1 := ht_new true; simp only [BU] at h1; rw [h1, hgt'']
       simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
       exact presheaf_map_eq S.X₃.val _ _ s
   have h_ext : (sigmaPreorder S).le ⟨V₀, t₀⟩ ⟨V₀ ⊔ W, t_new⟩ := by
@@ -398,12 +339,10 @@ theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
   intro z
   obtain ⟨w, hw⟩ := hg_U z
   obtain ⟨x, hx⟩ := hres₂ w
-  refine ⟨ConcreteCategory.hom (S.g.val.app (op V)) x, ?_⟩
-  have : ConcreteCategory.hom (S.X₂.val.map j.op ≫ S.g.val.app (op U)) x =
-         ConcreteCategory.hom (S.g.val.app (op V) ≫ S.X₃.val.map j.op) x := by
-    rw [S.g.val.naturality j.op]
-  simp only [AddCommGrpCat.hom_comp] at this
-  exact this.symm.trans (by simp [hx, hw])
+  exact ⟨ConcreteCategory.hom (S.g.val.app (op V)) x, by
+    have := congrArg (· x) (S.g.val.naturality j.op)
+    simp only [AddCommGrpCat.hom_comp, Function.comp_apply] at this
+    exact this.symm.trans (by simp [hx, hw])⟩
 
 /-! ### Free abelian sheaf construction for injective → flasque (Aristotle 8f42abaa) -/
 
@@ -456,12 +395,9 @@ private instance freeAbSheafMap_mono {U V : Opens X} (i : U ⟶ V) :
     Mono (freeAbSheafMap i) := by
   haveI : PreservesFiniteLimits (presheafToSheaf (Opens.grothendieckTopology (T := X))
       AddCommGrpCat.{u}) := HasSheafify.isLeftExact
-  have : ∀ (F G : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}) (f : F ⟶ G),
-      Mono f → Mono ((presheafToSheaf (Opens.grothendieckTopology (T := X))
-        AddCommGrpCat).map f) :=
-    fun _ _ f _ => Functor.map_mono _ f
-  exact this _ _ _ (instMonoFunctorWhiskerRightOfPreservesMonomorphisms
-    (yoneda.map i) AddCommGrpCat.free)
+  haveI := instMonoFunctorWhiskerRightOfPreservesMonomorphisms
+    (yoneda.map i) AddCommGrpCat.free
+  exact Functor.map_mono _ _
 
 end FreeAbSheaf
 

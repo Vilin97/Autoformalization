@@ -39,14 +39,12 @@ theorem exists_closed_subset_lt_dim_of_irreducible_pos
   have hZ_ne_univ : a.carrier ≠ Set.univ := by
     intro h
     exact lt_irrefl a (lt_of_lt_of_le hab
-      (show b.carrier ⊆ a.carrier from by
-        rw [show a.carrier = Set.univ from h]
-        exact Set.subset_univ _))
-  have hZ_dim : topologicalKrullDim (TopCat.of a.carrier) < topologicalKrullDim X := by
-    exact topologicalKrullDim_lt_of_isIrreducible_of_isClosed a.isClosed' hZ_ne_univ
+      (show b.carrier ⊆ a.carrier from by rw [h]; exact Set.subset_univ _))
+  have hZ_dim : topologicalKrullDim (TopCat.of a.carrier) < topologicalKrullDim X :=
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed a.isClosed' hZ_ne_univ
       (lt_of_le_of_lt (topologicalKrullDim_subspace_le X a.carrier)
-        (lt_of_lt_of_le (show topologicalKrullDim X < ⊤ from by
-          exact lt_of_lt_of_le hn le_top) le_top))
+        (lt_of_lt_of_le (show topologicalKrullDim X < ⊤ from
+          lt_of_lt_of_le hn le_top) le_top))
   refine ⟨a.carrier, a.isClosed', hZ_ne_univ, hZ_dim, lt_trans hZ_dim hn⟩
 
 /-- In the irreducible positive-dimensional case, once a proper closed subset `Z` of smaller

@@ -111,22 +111,7 @@ theorem closedIncl_presheaf_counit_stalk_comp
           (op ((Opens.map (closedIncl hs)).obj U)) =
       𝟙 (F.obj (op ((Opens.map (closedIncl hs)).obj U))) := by
     simpa [TopCat.Presheaf.pushforwardPullbackAdjunction, TopCat.Presheaf.pushforward] using htri
-  calc
-    ((TopCat.Presheaf.pushforwardPullbackAdjunction AddCommGrpCat (closedIncl hs)).unit.app
-          ((TopCat.Presheaf.pushforward AddCommGrpCat (closedIncl hs)).obj F)).app (op U) ≫
-        ((TopCat.Presheaf.pushforwardPullbackAdjunction AddCommGrpCat
-            (closedIncl hs)).counit.app F).app
-          (op ((Opens.map (closedIncl hs)).obj U)) ≫
-        F.germ ((Opens.map (closedIncl hs)).obj U) x hU =
-      (((TopCat.Presheaf.pushforwardPullbackAdjunction AddCommGrpCat
-            (closedIncl hs)).unit.app
-          ((TopCat.Presheaf.pushforward AddCommGrpCat (closedIncl hs)).obj F)).app (op U) ≫
-        ((TopCat.Presheaf.pushforwardPullbackAdjunction AddCommGrpCat
-            (closedIncl hs)).counit.app F).app
-          (op ((Opens.map (closedIncl hs)).obj U))) ≫
-        F.germ ((Opens.map (closedIncl hs)).obj U) x hU := by simp [Category.assoc]
-    _ = (𝟙 _) ≫ F.germ ((Opens.map (closedIncl hs)).obj U) x hU := by rw [htri']
-    _ = F.germ ((Opens.map (closedIncl hs)).obj U) x hU := by simp
+  rw [← Category.assoc, htri']; simp
 
 theorem closedIncl_counit_isIso
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
@@ -248,17 +233,8 @@ theorem closedIncl_counit_isIso
               (closedIncl hs)).counit.app F.val) =
               e.inv ≫ TopCat.Presheaf.stalkPushforward AddCommGrpCat
                 (closedIncl hs) F.val x := by
-          calc
-            T.map ((TopCat.Presheaf.pushforwardPullbackAdjunction AddCommGrpCat
-                (closedIncl hs)).counit.app F.val) =
-                (𝟙 _) ≫ T.map ((TopCat.Presheaf.pushforwardPullbackAdjunction AddCommGrpCat
-                  (closedIncl hs)).counit.app F.val) := by simp
-            _ = e.inv ≫
-                  (e.hom ≫ T.map ((TopCat.Presheaf.pushforwardPullbackAdjunction AddCommGrpCat
-                    (closedIncl hs)).counit.app F.val)) := by simp [Category.assoc]
-            _ = e.inv ≫ TopCat.Presheaf.stalkPushforward AddCommGrpCat
-                  (closedIncl hs) F.val x := by
-                rw [closedIncl_presheaf_counit_stalk_comp hs F.val x]
+          conv_lhs => rw [← e.inv_hom_id_assoc (T.map _)]
+          rw [closedIncl_presheaf_counit_stalk_comp hs F.val x]
         rw [hη_eq]
         haveI := TopCat.Presheaf.stalkPushforward.stalkPushforward_iso_of_isInducing
           (f := closedIncl hs) AddCommGrpCat hs.isClosedEmbedding_subtypeVal.isInducing F.val x
@@ -266,16 +242,9 @@ theorem closedIncl_counit_isIso
       have hsheafifyLift_eq :
           T.map (CategoryTheory.sheafifyLift K η F.cond) =
             inv (T.map (CategoryTheory.toSheafify K P)) ≫ T.map η := by
-        calc
-          T.map (CategoryTheory.sheafifyLift K η F.cond) =
-              (𝟙 _) ≫ T.map (CategoryTheory.sheafifyLift K η F.cond) := by simp
-          _ = inv (T.map (CategoryTheory.toSheafify K P)) ≫
-              (T.map (CategoryTheory.toSheafify K P) ≫
-                T.map (CategoryTheory.sheafifyLift K η F.cond)) := by simp [Category.assoc]
-          _ = inv (T.map (CategoryTheory.toSheafify K P)) ≫
-              T.map (CategoryTheory.toSheafify K P ≫ CategoryTheory.sheafifyLift K η F.cond) := by
-                rw [Functor.map_comp]
-          _ = inv (T.map (CategoryTheory.toSheafify K P)) ≫ T.map η := by rw [hcomp0]
+        conv_lhs => rw [← IsIso.inv_hom_id_assoc (T.map (CategoryTheory.toSheafify K P))
+          (T.map (CategoryTheory.sheafifyLift K η F.cond))]
+        rw [← Functor.map_comp, hcomp0]
       rw [hsheafifyLift_eq]
       infer_instance
     letI (x : TopCat.of s) := hstalk x

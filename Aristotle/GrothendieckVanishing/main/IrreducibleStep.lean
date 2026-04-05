@@ -13,22 +13,6 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 
-/-- If `i : A →+ ULift ℤ` is injective, `j : ULift ℤ →+ A`, `i ∘ j` is multiplication by
-    `c ≠ 0`, and `range(i) = c·ℤ`, then `j` is bijective.
-    Proved by Aristotle (job 68d0f4f8). -/
-private theorem zmul_bijective_of_index_match
-    {A : Type u} [AddCommGroup A]
-    (i : A →+ ULift.{u} ℤ) (hi : Function.Injective i)
-    (j : ULift.{u} ℤ →+ A)
-    (c : ℤ) (hc : c ≠ 0)
-    (hcomp : ∀ n : ULift.{u} ℤ, i (j n) = ⟨c * n.down⟩)
-    (himg : ∀ z : ULift.{u} ℤ, z ∈ Set.range i ↔ ∃ k : ℤ, z = ⟨c * k⟩) :
-    Function.Bijective j := by
-  refine' ⟨_, _⟩
-  · intro n m hnm; have := hcomp n; aesop
-  · intro a; specialize himg (i a); aesop
-
-
 /-- The stalk map of `sHom s` at `x ∈ U` is bijective when every stalk element of R at x
     is an integer multiple of `germ(s, x)`, and R embeds into `zeroOutsideInt V`
     (providing torsion-freeness needed for injectivity). -/
@@ -57,23 +41,18 @@ private theorem sHom_stalk_bijective_at
   have hi_inj : Function.Injective i_x :=
     (ConcreteCategory.mono_iff_injective_of_preservesPullback (FT.map i)).mp inferInstance
   -- i_x(germ(s,x)) ≠ 0
-  have hi_s_ne : i_x (R.presheaf.germ U x hxU s) ≠ 0 := by
-    intro h; exact hs_ne (hi_inj (h.trans (map_zero i_x).symm))
+  have hi_s_ne : i_x (R.presheaf.germ U x hxU s) ≠ 0 :=
+    fun h => hs_ne (hi_inj (h.trans (map_zero i_x).symm))
   -- i_x(germ(s,x)) = c • gen_V for some c ≠ 0
   obtain ⟨c, hc⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x (hUV hxU)
     (i_x (R.presheaf.germ U x hxU s))
-  have hc_ne : c ≠ 0 := by
-    intro hc0; rw [hc0, zero_smul] at hc; exact hi_s_ne hc
+  have hc_ne : c ≠ 0 := fun hc0 => by rw [hc0, zero_smul] at hc; exact hi_s_ne hc
   -- Key: sHom_x(germ(gen_U, x)) = germ(s, x)
   have h_sHom_gen : sHom_x ((TopCat.Sheaf.zeroOutsideInt U).presheaf.germ U x hxU
       (TopCat.Sheaf.zeroOutsideInt.generator U)) = R.presheaf.germ U x hxU s := by
-    show T.map (TopCat.Sheaf.zeroOutsideInt.sHom s).val
-      ((TopCat.Sheaf.zeroOutsideInt U).presheaf.germ U x hxU
-        (TopCat.Sheaf.zeroOutsideInt.generator U)) =
-      R.presheaf.germ U x hxU s
+    show T.map (TopCat.Sheaf.zeroOutsideInt.sHom s).val _ = _
     rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
-    congr 1
-    exact TopCat.Sheaf.zeroOutsideInt.sHom_app_generator s
+    congr 1; exact TopCat.Sheaf.zeroOutsideInt.sHom_app_generator s
   -- Surjectivity
   have h_surj : Function.Surjective sHom_x := by
     intro a
@@ -165,10 +144,10 @@ private theorem exists_section_generating_stalks
     · intro m hm
       obtain ⟨k, hk⟩ := hd'_gen ⟨m⟩ hm
       rw [Int.toNat_of_nonneg (le_of_lt hd'_pos)]
-      exact ⟨k, by have := congrArg ULift.down hk; simp at this; linarith⟩
+      exact ⟨k, by simpa [mul_comm] using congrArg ULift.down hk⟩
   -- d_nat is the minimal positive generator among all points of V
-  have hP_dec : DecidablePred P := Classical.decPred P
-  set d_nat := Nat.find (p := P) hP with hd_nat_def
+  haveI : DecidablePred P := Classical.decPred P
+  set d_nat := Nat.find (p := P) hP
   obtain ⟨hd_nat_pos, x₀, hx₀V, hd_in_range, hd_divides⟩ := Nat.find_spec (p := P) hP
   -- Minimality of d_nat
   have h_minimal : ∀ n, P n → d_nat ≤ n := fun n hn => Nat.find_min' (p := P) hP hn
@@ -181,19 +160,16 @@ private theorem exists_section_generating_stalks
     rw [ne_eq, AddSubgroup.eq_bot_iff_forall]; push_neg
     refine ⟨d, hd_in_range, ?_⟩
     rw [ne_eq, ULift.ext_iff, ULift.zero_down]; omega
-  have hd_mem : d.down • gen_at x₀ hx₀V ∈ Set.range (i_x x₀) := hd_in_range
   have hd_gen : ∀ h ∈ H, ∃ k : ℤ, h = ⟨k * d.down⟩ := by
     intro h hh
     obtain ⟨k, hk⟩ := hd_divides h.down hh
     exact ⟨k, by ext; simp only [hd_def]; rw [hk, mul_comm]⟩
   -- Step 3: Find a₁ generating stalk(R, x₀)
-  obtain ⟨a₁, ha₁⟩ : d.down • gen_at x₀ hx₀V ∈ Set.range (i_x x₀) := hd_mem
+  obtain ⟨a₁, ha₁⟩ : d.down • gen_at x₀ hx₀V ∈ Set.range (i_x x₀) := hd_in_range
   have ha₁_ne : a₁ ≠ 0 := by
     intro h; rw [h, map_zero] at ha₁
-    -- ha₁ : 0 = d.down • gen_at x₀ hx₀V
-    have : (0 : ℤ) = d.down :=
-      zsmul_generator_injective V x₀ hx₀V ((zero_smul _ _).trans ha₁)
-    linarith
+    exact absurd (zsmul_generator_injective V x₀ hx₀V ((zero_smul _ _).trans ha₁)).symm
+      (by omega)
   have ha₁_gen : ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x₀).obj R.val),
       ∃ k : ℤ, a = k • a₁ := by
     intro a
@@ -201,7 +177,7 @@ private theorem exists_section_generating_stalks
     obtain ⟨k, hk⟩ := hd_gen ⟨n⟩
       (show (⟨n⟩ : ULift.{u} ℤ) ∈ H from ⟨a, show i_x x₀ a = (⟨n⟩ : ULift.{u} ℤ).down •
         gen_at x₀ hx₀V from hn⟩)
-    have hn_eq : n = k * d.down := by simpa using congrArg ULift.down hk
+    have hn_eq : n = k * d.down := by simpa [mul_comm] using congrArg ULift.down hk
     exact ⟨k, hi_inj x₀ (by rw [map_zsmul, hn, hn_eq, mul_smul, ← ha₁])⟩
   -- Step 4: Represent a₁ by section s, restrict to W₀ ⊓ V
   obtain ⟨W₀, hx₀W₀, s₀, hs₀⟩ := TopCat.Presheaf.germ_exist R.val x₀ a₁
@@ -237,21 +213,16 @@ private theorem exists_section_generating_stalks
     congr 1
     exact TopCat.Presheaf.germ_res_apply (TopCat.Sheaf.zeroOutsideInt V).val
       (homOfLE hV₁V) x₀ hx₀V₁ (TopCat.Sheaf.zeroOutsideInt.generator V)
-  -- Equal germs at x₀ → agree on some W ≤ V₁
-  have hgerms_eq : (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁ is₁ =
-      (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁ d_gen_res := by
-    rw [his₁_germ, hd_gen_res_germ]
   obtain ⟨W, hx₀W, iW1, iW2, hW_eq⟩ :=
     TopCat.Presheaf.germ_eq (TopCat.Sheaf.zeroOutsideInt V).val x₀ hx₀V₁ hx₀V₁
-      is₁ d_gen_res hgerms_eq
+      is₁ d_gen_res (his₁_germ.trans hd_gen_res_germ.symm)
   -- W ≤ V₁ ≤ V
   have hWV₁ : W ≤ V₁ := leOfHom iW1
   have hWV : W ≤ V := le_trans hWV₁ hV₁V
   -- W ≠ ⊥ (contains x₀)
-  have hW_ne : W ≠ ⊥ := by
-    intro h; exact (Opens.mem_bot (x := x₀)).mp (h ▸ hx₀W)
+  have hW_ne : W ≠ ⊥ := fun h => (Opens.mem_bot (x := x₀)).mp (h ▸ hx₀W)
   -- On W, the sections is₁|_W and d_gen_res|_W agree (from hW_eq)
-  have hiW : iW1 = iW2 := Subsingleton.elim _ _
+  have hiW := Subsingleton.elim iW1 iW2
   -- Key: at every x ∈ W, i_x(germ(s₁|_W, x)) = d.down • gen_at x
   -- This follows because is₁|_W = d_gen_res|_W (from hW_eq), and germs respect restriction
   have hcoeff_const : ∀ (x : X) (hxW : x ∈ W),
@@ -305,10 +276,8 @@ private theorem exists_section_generating_stalks
   · -- germ(s_W, x) ≠ 0: since i_x(germ(s_W, x)) = d.down • gen_at x ≠ 0, and i_x injective
     intro h_zero
     rw [h_zero, map_zero] at hcoeff_x
-    -- hcoeff_x : 0 = d.down • gen_at x (hWV hxW)
-    have : (0 : ℤ) = d.down :=
-      zsmul_generator_injective V x (hWV hxW) ((zero_smul _ _).trans hcoeff_x)
-    linarith
+    exact absurd (zsmul_generator_injective V x (hWV hxW)
+      ((zero_smul _ _).trans hcoeff_x)).symm (by omega)
   · -- Every stalk element a is a multiple of germ(s_W, x).
     -- Strategy: d.down generates the image subgroup at x (not just at x₀),
     -- because d_nat was chosen MINIMAL via Nat.find. At x, the generator d_x
@@ -333,44 +302,29 @@ private theorem exists_section_generating_stalks
       · intro m hm
         obtain ⟨k, hk⟩ := hd_x_gen ⟨m⟩ hm
         rw [Int.toNat_of_nonneg (le_of_lt hd_x_pos)]
-        exact ⟨k, by have := congrArg ULift.down hk; simp at this; linarith⟩
+        exact ⟨k, by simpa [mul_comm] using congrArg ULift.down hk⟩
     -- Minimality: d_nat ≤ d_x.down.toNat
     have h_le : d_nat ≤ d_x.down.toNat := h_minimal _ hP_dx
     -- Also d_x | d.down (since d.down ∈ image subgroup at x)
-    have hd_mem_Hx : (d : ULift.{u} ℤ) ∈ H_at x (hWV hxW) := hd_in_Hx
-    obtain ⟨k_div, hk_div⟩ := hd_x_gen d hd_mem_Hx
+    obtain ⟨k_div, hk_div⟩ := hd_x_gen d hd_in_Hx
     have hd_eq_k_dx : d.down = k_div * d_x.down := by
-      have := congrArg ULift.down hk_div; simp at this; linarith
+      simpa using congrArg ULift.down hk_div
     -- d.down ≤ d_x.down (from minimality) and d.down = k_div * d_x.down
     -- Forces k_div = 1 and d_x.down = d.down
     have hd_x_eq : d_x.down = d.down := by
       have h1 : (d_nat : ℤ) ≤ d_x.down := by
-        have := Int.toNat_of_nonneg (le_of_lt hd_x_pos)
-        rw [← this]; exact_mod_cast h_le
-      -- h1 : d.down ≤ d_x.down (since d.down = ↑d_nat)
-      -- hd_eq_k_dx : d.down = k_div * d_x.down
-      -- hd_x_pos : d_x.down > 0, hd_pos : d.down > 0
-      -- k_div > 0 (since d.down > 0 and d_x.down > 0)
-      -- k_div * d_x.down ≤ d_x.down, so (k_div - 1) * d_x.down ≤ 0
-      -- combined with d_x.down > 0 gives k_div ≤ 1, so k_div = 1
+        rw [← Int.toNat_of_nonneg (le_of_lt hd_x_pos)]; exact_mod_cast h_le
       have hk_pos : 0 < k_div := by
-        by_contra hle; push_neg at hle
-        have := mul_nonpos_of_nonpos_of_nonneg hle (le_of_lt hd_x_pos)
-        linarith
+        by_contra! hle; linarith [mul_nonpos_of_nonpos_of_nonneg hle (le_of_lt hd_x_pos)]
       have hk_le1 : k_div ≤ 1 := by
-        by_contra hgt; push_neg at hgt
-        have : 1 * d_x.down < k_div * d_x.down :=
-          mul_lt_mul_of_pos_right hgt hd_x_pos
-        linarith
+        by_contra! hgt; linarith [mul_lt_mul_of_pos_right hgt hd_x_pos]
       have hk_eq : k_div = 1 := le_antisymm hk_le1 hk_pos
       rw [hk_eq, one_mul] at hd_eq_k_dx; linarith
     -- Now d.down | n (since d_x generates at x and d_x.down = d.down)
     have hn_mem : (⟨n⟩ : ULift.{u} ℤ) ∈ H_at x (hWV hxW) :=
       ⟨a, show i_x x a = (⟨n⟩ : ULift.{u} ℤ).down • gen_at x (hWV hxW) from hn⟩
     obtain ⟨k₀, hk₀⟩ := hd_x_gen ⟨n⟩ hn_mem
-    have hn_eq : n = k₀ * d.down := by
-      have h1 := congrArg ULift.down hk₀
-      simp at h1; rw [hd_x_eq] at h1; linarith
+    have hn_eq : n = k₀ * d.down := by simpa [hd_x_eq] using congrArg ULift.down hk₀
     exact ⟨k₀, hi_inj x (by rw [map_zsmul, hn, hn_eq, mul_smul, ← hcoeff_x])⟩
 
 /-- Core construction for Step 4: find V' ≤ V, V' ≠ ⊥, and a section s ∈ R(V') such that
@@ -414,9 +368,8 @@ theorem subsheaf_contains_zeroOutsideInt
   by_cases hy : y ∈ V'
   · exact (hbij y hy).1
   · intro a b _
-    have ha := stalk_zeroOutsideInt_zero_outside V' y hy a
-    have hb := stalk_zeroOutsideInt_zero_outside V' y hy b
-    rw [ha, hb]
+    exact (stalk_zeroOutsideInt_zero_outside V' y hy a).trans
+      (stalk_zeroOutsideInt_zero_outside V' y hy b).symm
 
 /-- **Step 4** (Hartshorne III.2.7): any subsheaf of `zeroOutsideInt V` has vanishing
     cohomology in degree `m > dim X`. Uses `subsheaf_contains_zeroOutsideInt` to find
@@ -459,23 +412,17 @@ theorem subsheaf_zeroOutsideInt_vanishing
         topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne_univ
           (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
             (lt_of_lt_of_le hm le_top))
-      have hm_Y : ↑m > topologicalKrullDim (TopCat.of Y) :=
-        lt_trans hY_dim_lt hm
       -- Build SES via ClosedImmersionSES on (V')^c with CJ
       let ci : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-      let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} ci
-      let η := adj.unit.app CJ
+      let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} ci).unit.app CJ
       haveI : Epi η := epi_unit_of_closedImmersion Y hYcl CJ
       let S' := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
       have hSE' : S'.ShortExact := ShortComplex.ShortExact.mk'
         (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
-      have hS'₂ : S'.X₂ = CJ := rfl
-      have hS'₃ : S'.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u} ci).obj
-          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} ci).obj CJ) := rfl
-      -- Pushforward vanishing by IH
       have hPush : Subsingleton (Sheaf.H S'.X₃ m) := by
-        rw [hS'₃]
-        exact PushforwardHVanishing Y hYcl _ m (@ih (TopCat.of Y) _ m _ hY_dim_lt hm_Y)
+        show Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} ci).obj
+          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} ci).obj CJ)) m)
+        exact PushforwardHVanishing Y hYcl _ m (@ih (TopCat.of Y) _ m _ hY_dim_lt (lt_trans hY_dim_lt hm))
       -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
       have hKer : Subsingleton (Sheaf.H S'.X₁ m) := by
         apply subsingleton_sheafH_of_isZero'
@@ -483,7 +430,6 @@ theorem subsheaf_zeroOutsideInt_vanishing
         by_cases hxY : x ∈ Y
         · -- At points in (V')^c: closedIncl_unit_stalk_isIso gives S'.g iso → kernel stalk = 0
           haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S'.g.val) := by
-            dsimp [S', η]
             exact closedIncl_unit_stalk_isIso hYcl CJ ⟨x, hxY⟩
           exact stalk_zero_of_ses_g_iso hSE' x inferInstance a
         · -- At points in V': cokernel j has zero stalks (j is stalk-surjective)
@@ -492,16 +438,12 @@ theorem subsheaf_zeroOutsideInt_vanishing
               ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S'.X₂.val),
               b = 0 := fun b =>
             cokernel_stalk_zero_of_stalk_surj j x (hj_stalk x hxV').2 b
-          let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
-              TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
           haveI : Mono S'.f := hSE'.mono_f
           haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
             (C := AddCommGrpCat.{u}) (X := X) x
-          haveI : Mono (FT.map S'.f) := Functor.map_mono FT S'.f
-          rw [AddCommGrpCat.mono_iff_injective] at this
-          exact this ((hstalk_zero _).trans (map_zero _).symm)
-      have hS₃_eq : S.X₃ = S'.X₂ := rfl
-      rw [hS₃_eq]
+          exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
+            (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) S'.f)
+            ((hstalk_zero _).trans (map_zero _).symm)
       exact subsingleton_sheafH_of_shortExact_middle hSE' m hKer hPush
     -- Step 5: Middle-term LES gives H^m(R) = 0
     exact subsingleton_sheafH_of_shortExact_middle hSE m hV'van hCoker
