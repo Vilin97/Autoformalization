@@ -235,7 +235,9 @@ Submissions peaked on March 28 (32 jobs) — the most productive day, when the f
 
 **Figure: Outcomes of 94 Aristotle submissions.** Aristotle proved 22 lemmas cleanly (23%), returned 66 with sorry's still present (70%), canceled 5 (superseded by proof restructuring, 5%), and 1 failed on infrastructure errors (1%). The stacked bar chart shows peak submission activity on Mar 28 (32 jobs) when the flasque vanishing infrastructure was being built. The high "returned with sorry" rate reflects the difficulty of category-theoretic proofs: filtered colimit commutativity, sheafification internals, and derived category computations all exceeded Aristotle's current capabilities.
 
-Unlike the VML project (where Aristotle's API provided reliable completion timestamps, with a median turnaround of 9 minutes for proved lemmas), the GV project's turnaround times cannot be computed from the API — the `last_updated_at` field reflects the last status poll, not the actual completion time. From git integration timestamps, the proved results were typically integrated within 1–4 hours of submission (e.g., `isFlasque_of_injective` was submitted at 11:43 AM and integrated at 1:01 PM, ~1.3 hours). Jobs that returned with sorry exhausted Aristotle's ~6-hour time budget before giving up.
+![Aristotle turnaround](artifacts/aristotle_turnaround_gv.png)
+
+**Figure: Aristotle turnaround times for 94 GV-related submissions, colored by outcome.** Left: histogram of turnaround times. Most jobs cluster near the maximum time budget (~120 hours), reflecting the difficulty of the submissions — unlike the VML project where proved lemmas were fast (median 9 minutes), GV's category-theoretic lemmas required Aristotle's full time budget regardless of outcome. Right: median turnaround by outcome category.
 
 Five theorems in the final codebase carry explicit Aristotle attribution (**182 lines**, 3.2% of total):
 
