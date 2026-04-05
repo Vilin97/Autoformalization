@@ -258,5 +258,4 @@ theorem zsmul_generator_injective
   have hEq_ULift : n • (1 : ULift ℤ) = m • (1 : ULift ℤ) := by
     have := congrArg (AddCommGrpCat.Hom.hom (eqToHom hObjW)) hEq
     rwa [map_zsmul, map_zsmul, hresGen_val] at this
-  have := congrArg ULift.down hEq_ULift
-  simp at this; exact this
+  simpa using congrArg ULift.down hEq_ULift
