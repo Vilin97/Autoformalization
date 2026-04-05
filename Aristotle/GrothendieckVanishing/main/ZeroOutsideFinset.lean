@@ -100,10 +100,8 @@ instance oldGeneratedToAdjoinGenerated_mono {X : TopCat.{u}} {ι : Type*}
     (U₀ : Opens X) (s₀ : F.presheaf.obj (op U₀))
     [HasCoproduct fun i => zeroOutsideInt (U i)]
     [HasCoproduct fun j : ι ⊕ Unit => zeroOutsideInt (adjoinGeneratorOpens U U₀ j)] :
-    Mono (oldGeneratedToAdjoinGenerated U s U₀ s₀) := by
-  let m := image.ι (familyGeneratorMap (adjoinGeneratorOpens U U₀) (adjoinGeneratorSections U s s₀))
-  haveI : Mono m := inferInstance
-  exact mono_of_mono_fac (oldGeneratedToAdjoinGenerated_comp U s U₀ s₀)
+    Mono (oldGeneratedToAdjoinGenerated U s U₀ s₀) :=
+  mono_of_mono_fac (oldGeneratedToAdjoinGenerated_comp U s U₀ s₀)
 
 lemma old_familyGeneratedSheafι_comp_oldGeneratedToAdjoinGenerated {X : TopCat.{u}} {ι : Type*}
     {F : Sheaf AddCommGrpCat.{u} X}

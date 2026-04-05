@@ -341,14 +341,12 @@ private theorem sheafH_filtered_colimit_aux
       haveI : Nonempty J' := IsFiltered.nonempty
       -- cokernel.π(η.app j) ≫ qCocone.ι.app j = injCocone.ι.app j ≫ cokernel.π(ι')
       have hπC : ∀ j, cokernel.π (η.app j) ≫ qCocone.ι.app j =
-          injCocone.ι.app j ≫ cokernel.π ι' := by
-        intro j; exact cokernel.π_desc _ _ _
+          injCocone.ι.app j ≫ cokernel.π ι' := fun j => cokernel.π_desc _ _ _
       -- For a cocone s on Q, the maps Inj.obj j →[cokernel.π ≫ s.ι] s.pt form a cocone on Inj
       -- cokernel.π(η.app j) ≫ Q.map a = Inj.map a ≫ cokernel.π(η.app j')
       have hπQ : ∀ {j₁ j₂ : J'} (a : j₁ ⟶ j₂),
           cokernel.π (η.app j₁) ≫ Q.map a =
-          Inj.map a ≫ cokernel.π (η.app j₂) := by
-        intro j₁ j₂ a; exact cokernel.π_desc _ _ _
+          Inj.map a ≫ cokernel.π (η.app j₂) := fun a => cokernel.π_desc _ _ _
       have liftCocone_nat : ∀ (s : Cocone Q) {j₁ j₂ : J'} (a : j₁ ⟶ j₂),
           Inj.map a ≫ (cokernel.π (η.app j₂) ≫ s.ι.app j₂) =
           cokernel.π (η.app j₁) ≫ s.ι.app j₁ := by
