@@ -139,9 +139,7 @@ private theorem toPlus_surjective_of_firstPlus
   · exact (toPlus_firstPlus_key S x I₀ hI₀ a ha I hI).symm
   · rw [Set.not_nonempty_iff_eq_empty] at hI
     have hIbot : I.Y = ⊥ := Opens.ext (by simpa using hI)
-    have hsub : Subsingleton (ToType (((opensGT X).plusObj (constPresheaf X)).obj (op I.Y))) := by
-      rw [hIbot]; exact plusObj_bot_subsingleton _
-    exact @Subsingleton.elim _ hsub _ _
+    exact @Subsingleton.elim _ (hIbot ▸ plusObj_bot_subsingleton _) _ _
 
 private theorem sheafify_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
@@ -152,13 +150,11 @@ private theorem sheafify_constPresheaf_flasque_of_irreducible
     subst this
     rw [AddCommGrpCat.epi_iff_surjective]
     intro y
-    refine ⟨0, ?_⟩
     have hsub : Subsingleton
         (ToType (((opensGT X).sheafify (constPresheaf X)).obj (op ⊥))) := by
       simpa [GrothendieckTopology.toSheafify] using
-        (plusObj_bot_subsingleton (X := X)
-          (P := (opensGT X).plusObj (constPresheaf X)))
-    exact @Subsingleton.elim _ hsub _ _
+        plusObj_bot_subsingleton (X := X) (P := (opensGT X).plusObj (constPresheaf X))
+    exact ⟨0, @Subsingleton.elim _ hsub _ _⟩
   · have hUne : (U : Set X).Nonempty := Set.nonempty_iff_ne_empty.mpr hU
     have hnat := ((opensGT X).toSheafify (constPresheaf X)).naturality i.op
     have hid : (constPresheaf X).map i.op = 𝟙 _ := by

@@ -192,8 +192,7 @@ theorem cokernel_openHom_vanishing
     PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ n _ hY_dim_lt (lt_trans hY_dim_lt hn))
   -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
   have hKer : Subsingleton (Sheaf.H S.X₁ n) := by
-    apply subsingleton_sheafH_of_isZero'
-    apply sheaf_isZero_of_zero_stalks X; intro x a
+    apply subsingleton_sheafH_of_isZero'; apply sheaf_isZero_of_zero_stalks X; intro x a
     by_cases hxY : x ∈ Y
     · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
         closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
@@ -266,8 +265,7 @@ theorem zeroOutsideInt_cohomology_vanishing
     PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim_lt hm'_Y)
   -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
   have hKer : Subsingleton (Sheaf.H S.X₁ m') := by
-    apply subsingleton_sheafH_of_isZero'
-    apply sheaf_isZero_of_zero_stalks X; intro x a
+    apply subsingleton_sheafH_of_isZero'; apply sheaf_isZero_of_zero_stalks X; intro x a
     by_cases hxY : x ∈ Y
     · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
         closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩

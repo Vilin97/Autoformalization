@@ -134,8 +134,7 @@ private theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
   · -- ¬(W ≤ V): the object at W is zero
     have hIsZero := TopCat.Presheaf.zeroOutside_isZero (F := TopCat.Presheaf.constZ) hWV
     haveI := AddCommGrpCat.subsingleton_of_isZero hIsZero
-    refine ⟨0, ?_⟩
-    simp [Subsingleton.eq_zero s, map_zero]
+    exact ⟨0, by simp [Subsingleton.eq_zero s, map_zero]⟩
 
 /-- At a point inside the support open, every stalk element of `zeroOutsideInt V` is an integer
     multiple of the germ of the distinguished generator over `V`. -/

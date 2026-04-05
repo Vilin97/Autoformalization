@@ -123,8 +123,7 @@ private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
     (sectionsAt V).PreservesLeftHomologyOf S := by
   constructor; intro h; constructor
   · -- sectionsAt V preserves the kernel of S.g (it preserves all limits)
-    show PreservesLimit _ (sheafToPresheaf _ _ ⋙ _)
-    infer_instance
+    show PreservesLimit _ (sheafToPresheaf _ _ ⋙ _); infer_instance
   · -- sectionsAt V preserves the cokernel of h.f'
     -- Since S is exact with mono f, h.f' is an iso (epi + mono),
     -- so its cokernel is 0, which is trivially preserved.
