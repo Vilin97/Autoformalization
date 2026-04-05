@@ -41,10 +41,8 @@ theorem sheafH_dimension_shift {X : TopCat.{u}}
     Subsingleton (Sheaf.H F (n + 1)) := by
   have hSE := ip.shortExact_shortComplex
   constructor; intro a b
-  have ha : a.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
-  have hb : b.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a ha rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b hb rfl
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a (Ext.eq_zero_of_injective _) rfl
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b (Ext.eq_zero_of_injective _) rfl
   rw [← hc, ← hd]; congr 1; exact @Subsingleton.elim _ hQ c d
 
 /-- **Base case**: `H^1(F) = 0` for flasque `F`. -/
@@ -55,10 +53,8 @@ private theorem sheafH_one_of_flasque {X : TopCat.{u}}
   have hSE := ip.shortExact_shortComplex
   have h_surj := ext_zero_map_surjective hSE h
   constructor; intro a b
-  have ha : a.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
-  have hb : b.comp (Ext.mk₀ ip.shortComplex.f) rfl = 0 := Ext.eq_zero_of_injective _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a ha rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b hb rfl
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a (Ext.eq_zero_of_injective _) rfl
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b (Ext.eq_zero_of_injective _) rfl
   obtain ⟨c', hc'⟩ := h_surj c
   obtain ⟨d', hd'⟩ := h_surj d
   simp only [← hc, ← hd, ← hc', ← hd', Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀
