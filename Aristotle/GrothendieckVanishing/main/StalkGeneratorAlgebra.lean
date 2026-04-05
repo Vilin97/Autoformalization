@@ -133,8 +133,7 @@ private theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
     have hs_zsmul : s = w.down • genW := by
       apply hinj
       rw [map_zsmul, hgenW_val]
-      show w = w.down • (1 : ULift ℤ)
-      ext; simp
+      show w = w.down • (1 : ULift ℤ); ext; simp
     refine ⟨w.down, ?_⟩
     rw [hs_zsmul, map_zsmul (ConcreteCategory.hom
       ((TopCat.Presheaf.constZ.zeroOutside V).germ W x hxW))]
@@ -262,16 +261,9 @@ theorem zsmul_generator_injective
       eqToHom_trans, Functor.const_obj_map, Category.id_comp]
     have : hObjW.symm.trans hObjW = rfl := Subsingleton.elim _ _
     simp [this]
-  -- eqToHom is injective
-  have hinj_eqToHom : Function.Injective (AddCommGrpCat.Hom.hom (eqToHom hObjW)) := by
-    intro a b hab
-    have := TopCat.Presheaf.zeroOutside.hom_eqToHom_symm_hom_eqToHom hObjW
-    exact (this a).symm.trans (congrArg _ hab |>.trans (this b))
-  -- Transfer hEq to ULift ℤ
+  -- Transfer hEq to ULift ℤ and extract n = m
   have hEq_ULift : n • (1 : ULift ℤ) = m • (1 : ULift ℤ) := by
     have := congrArg (AddCommGrpCat.Hom.hom (eqToHom hObjW)) hEq
     rwa [map_zsmul, map_zsmul, hresGen_val] at this
-  -- n • (1 : ULift ℤ) = m • (1 : ULift ℤ) → n = m
   have := congrArg ULift.down hEq_ULift
-  simp at this
-  exact this
+  simp at this; exact this
