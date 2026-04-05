@@ -181,22 +181,16 @@ theorem closedIncl_pushforward_shortExact
       (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
         (TopCat.closedIncl hs))).ShortExact := by
   have hSE := ip.shortExact_shortComplex
-  haveI : Mono (ip.shortComplex.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-        (TopCat.closedIncl hs))).f := by
-    change Mono ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hs)).map _)
-    exact Functor.map_mono _ _
+  haveI : Mono ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hs)).map ip.shortComplex.f) :=
+    Functor.map_mono _ _
   have hExact : (ip.shortComplex.map
       (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
         (TopCat.closedIncl hs))).Exact :=
     hSE.exact.map_of_mono_of_preservesKernel _ hSE.mono_f inferInstance
-  haveI : Epi (ip.shortComplex.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-        (TopCat.closedIncl hs))).g := by
-    change Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hs)).map _)
-    exact closedIncl_pushforward_epi_g hs ip hSE
+  haveI : Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hs)).map ip.shortComplex.g) :=
+    closedIncl_pushforward_epi_g hs ip hSE
   exact ShortComplex.ShortExact.mk' hExact ‹_› ‹_›
 
 
@@ -416,10 +410,10 @@ theorem epi_unit_of_closedImmersion
     let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
     Epi (adj.unit.app F) := by
   intro i adj
-  rw [← (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} (adj.unit.app F))]
-  rw [show Sheaf.IsLocallySurjective (adj.unit.app F) =
-    TopCat.Presheaf.IsLocallySurjective (adj.unit.app F).val from rfl]
-  rw [TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
+  rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} (adj.unit.app F),
+    show Sheaf.IsLocallySurjective (adj.unit.app F) =
+      TopCat.Presheaf.IsLocallySurjective (adj.unit.app F).val from rfl,
+    TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
   intro x
   by_cases hxZ : (x : X) ∈ Z
   · -- x ∈ Z: stalk map is surjective
@@ -468,9 +462,8 @@ theorem epi_unit_of_closedImmersion
       rw [this]
       exact (isTerminal_sheaf_bot _).isZero
     -- The stalk is IsZero → surjective
-    intro b; refine ⟨0, ?_⟩; simp only [map_zero]
-    have hsub := AddCommGrpCat.subsingleton_of_isZero hstalk_zero
-    exact (@Subsingleton.elim _ hsub b 0).symm
+    exact fun b => ⟨0, by simp [(@Subsingleton.elim _
+      (AddCommGrpCat.subsingleton_of_isZero hstalk_zero) b 0).symm]⟩
 
 -- Short exact sequence from closed immersion.
 -- Uses epi_unit_of_closedImmersion to form 0 → ker(η) → F → i_*(i^*F) → 0.
@@ -485,10 +478,9 @@ theorem ClosedImmersionSES
       S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
         ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F) := by
   intro Y i
-  have hE := epi_unit_of_closedImmersion Z hZ F
   let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
   let η := adj.unit.app F
-  haveI : Epi η := hE
+  haveI : Epi η := epi_unit_of_closedImmersion Z hZ F
   exact ⟨ShortComplex.mk (kernel.ι η) η (kernel.condition η),
     ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η))

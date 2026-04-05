@@ -429,8 +429,8 @@ theorem subsheaf_zeroOutsideInt_vanishing
         apply sheaf_isZero_of_zero_stalks X; intro x a
         by_cases hxY : x ∈ Y
         · -- At points in (V')^c: closedIncl_unit_stalk_isIso gives S'.g iso → kernel stalk = 0
-          haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S'.g.val) := by
-            exact closedIncl_unit_stalk_isIso hYcl CJ ⟨x, hxY⟩
+          haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S'.g.val) :=
+            closedIncl_unit_stalk_isIso hYcl CJ ⟨x, hxY⟩
           exact stalk_zero_of_ses_g_iso hSE' x inferInstance a
         · -- At points in V': cokernel j has zero stalks (j is stalk-surjective)
           have hxV' : x ∈ V' := by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY

@@ -56,8 +56,7 @@ theorem zeroOutsideInt_vanishing
       rw [← Category.assoc, ← β.hom.val.naturality i.op, Category.assoc,
         IsIso.hom_inv_id, Category.comp_id]
     rw [hrw]
-    haveI := constantSheaf_flasque_of_irreducible X i
-    exact inferInstance
+    haveI := constantSheaf_flasque_of_irreducible X i; exact inferInstance
   exact sheafH_dimension_shift_ses hSE m hCoker
     (FlasqueVanishing X S.X₂ hFlasque m)
 
@@ -192,26 +191,19 @@ theorem cokernel_openHom_vanishing
   let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
   have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
     (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
-  have hS₂ : S.X₂ = C := rfl
-  have hS₃ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
-      ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj C) := rfl
   -- Pushforward vanishing by IH
-  have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
-    rw [hS₃]
-    exact PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ n _ hY_dim_lt (lt_trans hY_dim_lt hn))
+  have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
+    PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ n _ hY_dim_lt (lt_trans hY_dim_lt hn))
   -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
   have hKer : Subsingleton (Sheaf.H S.X₁ n) := by
     apply subsingleton_sheafH_of_isZero'
     apply sheaf_isZero_of_zero_stalks X; intro x a
     by_cases hxY : x ∈ Y
-    · -- At points in Vᶜ: closedIncl_unit_stalk_isIso gives S.g iso → kernel stalk = 0
-      haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
-        exact closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
+    · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
+        closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
       exact stalk_zero_of_ses_g_iso hSE x inferInstance a
-    · -- At points in V: C has zero stalks, so S.X₂ = C has zero stalk, mono gives kernel = 0
-      have hxV : x ∈ V := by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY
-      exact stalk_zero_of_shortExact_kernel hSE x (fun b => cokernel_stalk_zero_V V x hxV b) a
-  rw [← hS₂]
+    · exact stalk_zero_of_shortExact_kernel hSE x
+        (fun b => cokernel_stalk_zero_V V x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY) b) a
   exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
 
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
@@ -274,26 +266,19 @@ theorem zeroOutsideInt_cohomology_vanishing
   let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
   have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
     (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
-  have hS₂ : S.X₂ = C := rfl
-  have hS₃ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
-      ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj C) := rfl
   -- Pushforward vanishing by IH
-  have hPush : Subsingleton (Sheaf.H S.X₃ m') := by
-    rw [hS₃]
-    exact PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim_lt hm'_Y)
+  have hPush : Subsingleton (Sheaf.H S.X₃ m') :=
+    PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim_lt hm'_Y)
   -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
   have hKer : Subsingleton (Sheaf.H S.X₁ m') := by
     apply subsingleton_sheafH_of_isZero'
     apply sheaf_isZero_of_zero_stalks X; intro x a
     by_cases hxY : x ∈ Y
-    · -- At points in Vᶜ: closedIncl_unit_stalk_isIso gives S.g iso → kernel stalk = 0
-      haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
-        exact closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
+    · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
+        closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
       exact stalk_zero_of_ses_g_iso hSE x inferInstance a
-    · -- At points in V: C has zero stalks, so S.X₂ = C has zero stalk, mono gives kernel = 0
-      have hxV : x ∈ V := by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY
-      exact stalk_zero_of_shortExact_kernel hSE x (fun b => cokernel_stalk_zero_V V x hxV b) a
-  rw [← hS₂]
+    · exact stalk_zero_of_shortExact_kernel hSE x
+        (fun b => cokernel_stalk_zero_V V x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY) b) a
   exact subsingleton_sheafH_of_shortExact_middle hSE m' hKer hPush
 
 /-- Third-term LES: for 0 → X₁ → X₂ → X₃ → 0, H^n(X₂)=0 ∧ H^{n+1}(X₁)=0 ⟹ H^n(X₃)=0. -/

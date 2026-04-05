@@ -17,12 +17,11 @@ theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
     (hstalk : ∀ (x : X)
       (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F.val), a = 0) :
     IsZero F := by
-  have val_sub : ∀ (U : Opens X), Subsingleton (F.val.obj (op U)) := by
-    intro U; constructor; intro s t
-    apply TopCat.Presheaf.section_ext F U s t
-    intro x hx; exact (hstalk x _).trans (hstalk x _).symm
-  have val_isZero : ∀ (U : (Opens X)ᵒᵖ), IsZero (F.val.obj U) := by
-    intro ⟨U⟩; exact @AddCommGrpCat.isZero_of_subsingleton _ (val_sub U)
+  have val_sub : ∀ (U : Opens X), Subsingleton (F.val.obj (op U)) := fun U =>
+    ⟨fun s t => TopCat.Presheaf.section_ext F U s t fun x hx =>
+      (hstalk x _).trans (hstalk x _).symm⟩
+  have val_isZero : ∀ (U : (Opens X)ᵒᵖ), IsZero (F.val.obj U) :=
+    fun ⟨U⟩ => @AddCommGrpCat.isZero_of_subsingleton _ (val_sub U)
   apply IsZero.mk
   · intro G; exact ⟨{
       default := 0
@@ -38,9 +37,8 @@ theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
 theorem subsingleton_sheafH_of_isZero' {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsZero F) (n : ℕ) :
     Subsingleton (Sheaf.H F n) := by
-  have hid : (𝟙 F : F ⟶ F) = 0 := hF.eq_of_src _ _
   have : ∀ x : Sheaf.H F n, x = 0 := fun x => by
-    have h := Ext.comp_mk₀_id x; rw [hid, Ext.mk₀_zero] at h
+    have h := Ext.comp_mk₀_id x; rw [show (𝟙 F : F ⟶ F) = 0 from hF.eq_of_src _ _, Ext.mk₀_zero] at h
     exact h.symm.trans (Ext.comp_zero x F 0 n (add_zero n))
   exact ⟨fun a b => (this a).trans (this b).symm⟩
 
@@ -133,8 +131,8 @@ theorem ReducibleVanishing'
       intro x hx a
       by_cases hxZ : x ∈ Z
       · -- closedIncl_unit_stalk_isIso: iso on stalks at z ∈ Z
-        haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
-          exact TopCat.closedIncl_unit_stalk_isIso hZ_closed G ⟨x, hxZ⟩
+        haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
+          TopCat.closedIncl_unit_stalk_isIso hZ_closed G ⟨x, hxZ⟩
         exact stalk_zero_of_ses_g_iso hSE x inferInstance a
       · have hx' : x ∉ ⋃₀ ((insert Z s' : Finset (Set X)) : Set (Set X)) := by
           simp only [Finset.coe_insert, Set.sUnion_insert, Set.mem_union] at hx ⊢

@@ -122,17 +122,10 @@ private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
       exact (cancel_mono S.f).mp (by rw [← h.f'_i, ← Category.assoc, hab, Category.assoc])
     haveI : Epi h.f' := hS.exact.epi_f' h
     haveI : IsIso h.f' := isIso_of_mono_of_epi h.f'
-    haveI hz2 : IsZero
-        ((sectionsAt (X := X) V).obj (cokernel h.f')) :=
-      Functor.map_isZero _ (isZero_cokernel_of_epi h.f')
-    haveI hz3 : IsZero
-        (cokernel ((sectionsAt (X := X) V).map h.f')) :=
-      isZero_cokernel_of_epi _
-    -- cokernelComparison : cokernel(F(f')) ⟶ F(cokernel(f'))
-    -- Both sides are zero, so it's an iso.
-    haveI : IsIso
-        (cokernelComparison h.f' (sectionsAt (X := X) V)) :=
-      ⟨⟨hz2.to_ _, hz3.eq_of_src _ _, hz2.eq_of_src _ _⟩⟩
+    haveI : IsIso (cokernelComparison h.f' (sectionsAt (X := X) V)) :=
+      let hz2 := Functor.map_isZero (sectionsAt (X := X) V) (isZero_cokernel_of_epi h.f')
+      ⟨⟨hz2.to_ _, (isZero_cokernel_of_epi
+        (f := (sectionsAt (X := X) V).map h.f')).eq_of_src _ _, hz2.eq_of_src _ _⟩⟩
     exact PreservesCokernel.of_iso_comparison _ _
 
 -- For a SES of sheaves, the evaluated sequence at V is exact:

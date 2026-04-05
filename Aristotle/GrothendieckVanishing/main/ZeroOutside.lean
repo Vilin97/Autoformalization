@@ -102,28 +102,21 @@ variable {X : TopCat.{u}} (U : Opens X)
 
 @[simp] theorem hom_eqToHom_symm_hom_eqToHom {A B : AddCommGrpCat.{u}} (e : A = B) (x : A) :
     (AddCommGrpCat.Hom.hom (eqToHom e.symm)) ((AddCommGrpCat.Hom.hom (eqToHom e)) x) = x := by
-  cases e
-  rfl
+  cases e; rfl
 
 @[simp] theorem hom_eqToHom_hom_eqToHom_symm {A B : AddCommGrpCat.{u}} (e : A = B) (x : B) :
     (AddCommGrpCat.Hom.hom (eqToHom e)) ((AddCommGrpCat.Hom.hom (eqToHom e.symm)) x) = x := by
-  cases e
-  rfl
+  cases e; rfl
 
 @[simp] theorem hom_eqToHom_hom_eqToHom {A B C : AddCommGrpCat.{u}}
     (e₁ : A = B) (e₂ : B = C) (x : A) :
     (AddCommGrpCat.Hom.hom (eqToHom e₂)) ((AddCommGrpCat.Hom.hom (eqToHom e₁)) x) =
       (AddCommGrpCat.Hom.hom (eqToHom (e₁.trans e₂))) x := by
-  cases e₁
-  cases e₂
-  rfl
+  cases e₁; cases e₂; rfl
 
 @[simp] theorem uliftZMultiplesAddEquiv_symm_apply (G : AddCommGrpCat.{u}) (x : G) (n : ULift ℤ) :
     AddCommGrpCat.Hom.hom ((TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv G).symm x) n =
-      (n.down : ℤ) • x := by
-  change (((zmultiplesHom ↑G) x).comp (AddEquiv.ulift : ULift ℤ ≃+ ℤ).toAddMonoidHom) n =
-    (n.down : ℤ) • x
-  rfl
+      (n.down : ℤ) • x := rfl
 
 def generator : (constZ.zeroOutside U).obj (op U) :=
   (eqToHom (by simp) : AddCommGrpCat.of (ULift ℤ) ⟶ (constZ.zeroOutside U).obj (op U)) 1
