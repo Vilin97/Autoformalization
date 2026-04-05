@@ -131,22 +131,6 @@ private theorem sheaf_stalk_surj_openHom
       (ConcreteCategory.hom (T.map (toSheafify J _)) p) = _
     rw [← ConcreteCategory.comp_apply, hnat.symm, ConcreteCategory.comp_apply, hp]⟩
 
-/-- On points of the smaller open, `zeroOutsideInt.openHom h` induces a stalk bijection. -/
-private theorem sheaf_stalk_bijective_openHom
-    {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
-    Function.Bijective (ConcreteCategory.hom
-      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-        (TopCat.Sheaf.zeroOutsideInt.openHom h).val)) :=
-  by
-  refine ⟨?_, sheaf_stalk_surj_openHom h x hx⟩
-  let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
-    TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
-  haveI : Mono (FT.map (TopCat.Sheaf.zeroOutsideInt.openHom h)) :=
-    Functor.map_mono FT (TopCat.Sheaf.zeroOutsideInt.openHom h)
-  exact (ConcreteCategory.mono_iff_injective_of_preservesPullback
-    (FT.map (TopCat.Sheaf.zeroOutsideInt.openHom h))).mp inferInstance
-
 /-- Cokernel stalk vanishes at points where the map is stalk-surjective.
     Since the stalk functor on sheaves of abelian groups is exact, `stalk(cokernel f, x) =
     cokernel(stalk(f, x))`, which is zero when `stalk(f, x)` is surjective. -/
