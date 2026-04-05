@@ -407,9 +407,8 @@ private theorem sheafH_filtered_colimit_aux
       have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) (n' + 1)) := by
         intro j
         haveI : Mono (η.app j) := hη_mono j
-        let S_j : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-          ShortComplex.mk (η.app j) (cokernel.π (η.app j)) (cokernel.condition _)
-        have hSE_j : S_j.ShortExact := ShortComplex.ShortExact.mk'
+        have hSE_j : (ShortComplex.mk (η.app j) (cokernel.π (η.app j))
+          (cokernel.condition _)).ShortExact := ShortComplex.ShortExact.mk'
           (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
         exact ext_dimension_shift_X₃ _ hSE_j (n' + 1)
           (Ext.subsingleton_of_injective _ _ n') (hvan j)
