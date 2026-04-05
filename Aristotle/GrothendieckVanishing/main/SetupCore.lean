@@ -260,14 +260,12 @@ theorem epi_g_app_top_of_H1_vanishing
   let adj_Z := constantSheafAdj (Opens.grothendieckTopology Z)
     AddCommGrpCat.{u} Limits.isTerminalTop
   let φ := (adj_Z.homEquiv _ ip.shortComplex.X₃).symm φ_hom
-  have hy : (Ext.addEquiv₀.symm φ).comp hSE_Z.extClass rfl = 0 :=
-    @Subsingleton.elim _ hG' _ _
-  obtain ⟨z, hz⟩ := Ext.covariant_sequence_exact₃ _ hSE_Z _ rfl hy
-  let ψ := Ext.addEquiv₀ z
-  have hψ : ψ ≫ ip.shortComplex.g = φ :=
+  obtain ⟨z, hz⟩ := Ext.covariant_sequence_exact₃ _ hSE_Z _ rfl
+    (@Subsingleton.elim _ hG' _ _)
+  have hψ : Ext.addEquiv₀ z ≫ ip.shortComplex.g = φ :=
     ext0_comp_eq_of_covariant ip.shortComplex.g z φ hz
-  let ψ_hom := (adj_Z.homEquiv _ ip.shortComplex.X₂) ψ
-  have hfact := Adjunction.homEquiv_naturality_right adj_Z ψ ip.shortComplex.g
+  let ψ_hom := (adj_Z.homEquiv _ ip.shortComplex.X₂) (Ext.addEquiv₀ z)
+  have hfact := Adjunction.homEquiv_naturality_right adj_Z (Ext.addEquiv₀ z) ip.shortComplex.g
   rw [hψ, Equiv.apply_symm_apply] at hfact
   change φ_hom = ψ_hom ≫ ip.shortComplex.g.val.app (op ⊤) at hfact
   refine ⟨ψ_hom (ULift.up 1), ?_⟩

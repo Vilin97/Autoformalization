@@ -267,13 +267,10 @@ private theorem exists_section_generating_stalks
     intro a
     obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x (hWV hxW) (i_x x a)
     -- d.down • gen_at x ∈ range(i_x x) (from hcoeff_x)
-    have hd_in_Hx : d.down • gen_at x (hWV hxW) ∈ Set.range (i_x x) :=
-      ⟨_, hcoeff_x⟩
-    -- Image subgroup at x is nonzero (contains d.down)
+    have hd_in_Hx : d.down • gen_at x (hWV hxW) ∈ Set.range (i_x x) := ⟨_, hcoeff_x⟩
     have hHx_ne : H_at x (hWV hxW) ≠ ⊥ := by
       rw [ne_eq, AddSubgroup.eq_bot_iff_forall]; push_neg
-      refine ⟨d, hd_in_Hx, ?_⟩
-      rw [ne_eq, ULift.ext_iff, ULift.zero_down]; omega
+      exact ⟨d, hd_in_Hx, by rw [ne_eq, ULift.ext_iff, ULift.zero_down]; omega⟩
     -- Get generator d_x of image subgroup at x
     obtain ⟨d_x, hd_x_mem, hd_x_pos, hd_x_gen⟩ := ulift_int_subgroup_cyclic _ hHx_ne
     -- d_x generates image subgroup at x, so P(d_x.down.toNat) holds
@@ -297,10 +294,9 @@ private theorem exists_section_generating_stalks
         rw [← Int.toNat_of_nonneg (le_of_lt hd_x_pos)]; exact_mod_cast h_le
       have hk_pos : 0 < k_div := by
         by_contra! hle; linarith [mul_nonpos_of_nonpos_of_nonneg hle (le_of_lt hd_x_pos)]
-      have hk_le1 : k_div ≤ 1 := by
-        by_contra! hgt; linarith [mul_lt_mul_of_pos_right hgt hd_x_pos]
-      have hk_eq : k_div = 1 := le_antisymm hk_le1 hk_pos
-      rw [hk_eq, one_mul] at hd_eq_k_dx; linarith
+      have : k_div = 1 := le_antisymm (by
+        by_contra! hgt; linarith [mul_lt_mul_of_pos_right hgt hd_x_pos]) hk_pos
+      rw [this, one_mul] at hd_eq_k_dx; linarith
     -- Now d.down | n (since d_x generates at x and d_x.down = d.down)
     have hn_mem : (⟨n⟩ : ULift.{u} ℤ) ∈ H_at x (hWV hxW) :=
       ⟨a, show i_x x a = (⟨n⟩ : ULift.{u} ℤ).down • gen_at x (hWV hxW) from hn⟩
