@@ -144,7 +144,7 @@ private theorem exists_section_generating_stalks
     · intro m hm
       obtain ⟨k, hk⟩ := hd'_gen ⟨m⟩ hm
       rw [Int.toNat_of_nonneg (le_of_lt hd'_pos)]
-      exact ⟨k, by have := congrArg ULift.down hk; simp at this; linarith⟩
+      exact ⟨k, by simpa [mul_comm] using congrArg ULift.down hk⟩
   -- d_nat is the minimal positive generator among all points of V
   haveI : DecidablePred P := Classical.decPred P
   set d_nat := Nat.find (p := P) hP
@@ -177,7 +177,7 @@ private theorem exists_section_generating_stalks
     obtain ⟨k, hk⟩ := hd_gen ⟨n⟩
       (show (⟨n⟩ : ULift.{u} ℤ) ∈ H from ⟨a, show i_x x₀ a = (⟨n⟩ : ULift.{u} ℤ).down •
         gen_at x₀ hx₀V from hn⟩)
-    have hn_eq : n = k * d.down := by simpa using congrArg ULift.down hk
+    have hn_eq : n = k * d.down := by simpa [mul_comm] using congrArg ULift.down hk
     exact ⟨k, hi_inj x₀ (by rw [map_zsmul, hn, hn_eq, mul_smul, ← ha₁])⟩
   -- Step 4: Represent a₁ by section s, restrict to W₀ ⊓ V
   obtain ⟨W₀, hx₀W₀, s₀, hs₀⟩ := TopCat.Presheaf.germ_exist R.val x₀ a₁
@@ -277,10 +277,8 @@ private theorem exists_section_generating_stalks
   · -- germ(s_W, x) ≠ 0: since i_x(germ(s_W, x)) = d.down • gen_at x ≠ 0, and i_x injective
     intro h_zero
     rw [h_zero, map_zero] at hcoeff_x
-    -- hcoeff_x : 0 = d.down • gen_at x (hWV hxW)
-    have : (0 : ℤ) = d.down :=
-      zsmul_generator_injective V x (hWV hxW) ((zero_smul _ _).trans hcoeff_x)
-    linarith
+    exact absurd (zsmul_generator_injective V x (hWV hxW)
+      ((zero_smul _ _).trans hcoeff_x)).symm (by omega)
   · -- Every stalk element a is a multiple of germ(s_W, x).
     -- Strategy: d.down generates the image subgroup at x (not just at x₀),
     -- because d_nat was chosen MINIMAL via Nat.find. At x, the generator d_x
@@ -305,7 +303,7 @@ private theorem exists_section_generating_stalks
       · intro m hm
         obtain ⟨k, hk⟩ := hd_x_gen ⟨m⟩ hm
         rw [Int.toNat_of_nonneg (le_of_lt hd_x_pos)]
-        exact ⟨k, by have := congrArg ULift.down hk; simp at this; linarith⟩
+        exact ⟨k, by simpa [mul_comm] using congrArg ULift.down hk⟩
     -- Minimality: d_nat ≤ d_x.down.toNat
     have h_le : d_nat ≤ d_x.down.toNat := h_minimal _ hP_dx
     -- Also d_x | d.down (since d.down ∈ image subgroup at x)
