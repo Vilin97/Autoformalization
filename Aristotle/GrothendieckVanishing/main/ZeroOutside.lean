@@ -145,12 +145,11 @@ def sHom {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U)) :
     · have hYU : (unop Y) ≤ U := le_trans (leOfHom i.unop) hWU
       apply AddCommGrpCat.hom_ext
       ext z
-      have hi : (homOfLE hWU).op ≫ i = (homOfLE hYU).op := by
-        apply Subsingleton.elim
       have hmap :
           F.map (homOfLE hYU).op s = F.map i (F.map (homOfLE hWU).op s) := by
         simpa [FunctorToTypes.map_comp_apply] using
-          (congrArg (fun j => F.map j s) hi).symm
+          (congrArg (fun j => F.map j s) (Subsingleton.elim ((homOfLE hWU).op ≫ i)
+            (homOfLE hYU).op)).symm
       have hObjW : (zeroOutside U constZ).obj W = AddCommGrpCat.of (ULift ℤ) := by
         simp [zeroOutside, hWU, constZ]
       let w : ULift ℤ :=

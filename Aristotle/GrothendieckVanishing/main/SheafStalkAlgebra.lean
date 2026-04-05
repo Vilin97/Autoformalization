@@ -366,10 +366,8 @@ theorem subsingleton_ext_of_ses_third {C : Type*} [Category C] [Abelian C] [HasE
     Subsingleton (Ext Z S.X₃ n) := by
   constructor
   intro a b
-  have h_a_δ : a.comp hS.extClass rfl = 0 := Subsingleton.elim _ _
-  have h_b_δ : b.comp hS.extClass rfl = 0 := Subsingleton.elim _ _
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ Z hS a rfl h_a_δ
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ Z hS b rfl h_b_δ
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ Z hS a rfl (Subsingleton.elim _ _)
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ Z hS b rfl (Subsingleton.elim _ _)
   rw [← hc, ← hd, Subsingleton.elim c d]
 
 theorem subsingleton_sheafH_of_shortExact_third {X : TopCat.{u}}
