@@ -386,12 +386,10 @@ theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
   intro z
   obtain ⟨w, hw⟩ := hg_U z
   obtain ⟨x, hx⟩ := hres₂ w
-  refine ⟨ConcreteCategory.hom (S.g.val.app (op V)) x, ?_⟩
-  have : ConcreteCategory.hom (S.X₂.val.map j.op ≫ S.g.val.app (op U)) x =
-         ConcreteCategory.hom (S.g.val.app (op V) ≫ S.X₃.val.map j.op) x := by
-    rw [S.g.val.naturality j.op]
-  simp only [AddCommGrpCat.hom_comp] at this
-  exact this.symm.trans (by simp [hx, hw])
+  exact ⟨ConcreteCategory.hom (S.g.val.app (op V)) x, by
+    have := congrArg (· x) (S.g.val.naturality j.op)
+    simp only [AddCommGrpCat.hom_comp, Function.comp_apply] at this
+    exact this.symm.trans (by simp [hx, hw])⟩
 
 /-! ### Free abelian sheaf construction for injective → flasque (Aristotle 8f42abaa) -/
 
@@ -444,12 +442,9 @@ private instance freeAbSheafMap_mono {U V : Opens X} (i : U ⟶ V) :
     Mono (freeAbSheafMap i) := by
   haveI : PreservesFiniteLimits (presheafToSheaf (Opens.grothendieckTopology (T := X))
       AddCommGrpCat.{u}) := HasSheafify.isLeftExact
-  have : ∀ (F G : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}) (f : F ⟶ G),
-      Mono f → Mono ((presheafToSheaf (Opens.grothendieckTopology (T := X))
-        AddCommGrpCat).map f) :=
-    fun _ _ f _ => Functor.map_mono _ f
-  exact this _ _ _ (instMonoFunctorWhiskerRightOfPreservesMonomorphisms
-    (yoneda.map i) AddCommGrpCat.free)
+  haveI := instMonoFunctorWhiskerRightOfPreservesMonomorphisms
+    (yoneda.map i) AddCommGrpCat.free
+  exact Functor.map_mono _ _
 
 end FreeAbSheaf
 
