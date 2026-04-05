@@ -23,7 +23,7 @@ A complete formalization of **Grothendieck's vanishing theorem** (Hartshorne III
 | Development period | 9 days (Mar 27 – Apr 4, 2026) |
 | Git commits | 341 |
 | Claude Code sessions | 22 (across 2 machines) |
-| Interactive human prompts | ~1,200 |
+| Interactive human prompts | 287 |
 | `/babysit` invocations | 648 |
 | Assistant turns | 27,000+ |
 | Tool calls | 16,200+ |
@@ -152,7 +152,7 @@ The sorry count fluctuated between 1 and 3 during this phase, with the main bloc
 
 **Codex involvement.** Codex (OpenAI's coding agent) ran alongside Claude Code on the university server via cron every 30 minutes. Its contributions were net negative: a `codex-file.lean` with scratch code introduced instance declarations that leaked into the LSP environment, causing false `Subsingleton(Ext)` synthesis in `lean_run_code`. The file was deleted on April 3. The automated prover PRs (#3–#8) sometimes introduced regressions that required manual restoration.
 
-All 96 interactive human prompts (from the locally logged sessions) are archived in [`artifacts/human_prompts_gv.txt`](artifacts/human_prompts_gv.txt).
+All 287 interactive human prompts (from both local and university server sessions) are archived in [`artifacts/human_prompts_gv.txt`](artifacts/human_prompts_gv.txt).
 
 **The filtered colimit breakthrough (Apr 2–4).** The final sorry — that sheaf cohomology commutes with filtered colimits — was the most technically demanding. Multiple approaches were attempted:
 - **Abstract categorical approach** (Apr 2): Ext^n(Z, -) preserves filtered colimits in Grothendieck abelian categories. This hit a Mathlib API gap: the machinery for filtered colimit preservation of derived functors doesn't exist.
