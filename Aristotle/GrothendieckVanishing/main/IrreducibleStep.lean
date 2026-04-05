@@ -162,7 +162,7 @@ private theorem exists_section_generating_stalks
       rw [Int.toNat_of_nonneg (le_of_lt hd'_pos)]
       exact ⟨k, by have := congrArg ULift.down hk; simp at this; linarith⟩
   -- d_nat is the minimal positive generator among all points of V
-  have hP_dec : DecidablePred P := Classical.decPred P
+  haveI : DecidablePred P := Classical.decPred P
   set d_nat := Nat.find (p := P) hP
   obtain ⟨hd_nat_pos, x₀, hx₀V, hd_in_range, hd_divides⟩ := Nat.find_spec (p := P) hP
   -- Minimality of d_nat
@@ -176,13 +176,12 @@ private theorem exists_section_generating_stalks
     rw [ne_eq, AddSubgroup.eq_bot_iff_forall]; push_neg
     refine ⟨d, hd_in_range, ?_⟩
     rw [ne_eq, ULift.ext_iff, ULift.zero_down]; omega
-  have hd_mem : d.down • gen_at x₀ hx₀V ∈ Set.range (i_x x₀) := hd_in_range
   have hd_gen : ∀ h ∈ H, ∃ k : ℤ, h = ⟨k * d.down⟩ := by
     intro h hh
     obtain ⟨k, hk⟩ := hd_divides h.down hh
     exact ⟨k, by ext; simp only [hd_def]; rw [hk, mul_comm]⟩
   -- Step 3: Find a₁ generating stalk(R, x₀)
-  obtain ⟨a₁, ha₁⟩ : d.down • gen_at x₀ hx₀V ∈ Set.range (i_x x₀) := hd_mem
+  obtain ⟨a₁, ha₁⟩ : d.down • gen_at x₀ hx₀V ∈ Set.range (i_x x₀) := hd_in_range
   have ha₁_ne : a₁ ≠ 0 := by
     intro h; rw [h, map_zero] at ha₁
     exact absurd (zsmul_generator_injective V x₀ hx₀V ((zero_smul _ _).trans ha₁)).symm
