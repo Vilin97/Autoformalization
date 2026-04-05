@@ -125,10 +125,9 @@ private lemma wbot_lt_of_add_one_le_of_lt_top {x y : WithBot ℕ∞}
   rcases x with _ | v
   · exact h3
   · have hv_ne_top : v ≠ ⊤ := by intro h; subst h; exact absurd h2 (lt_irrefl _)
-    calc (↑v : WithBot ℕ∞) < ↑(v + 1) :=
-          WithBot.coe_lt_coe.mpr ((ENat.lt_add_one_iff hv_ne_top).mpr le_rfl)
-      _ = ↑v + 1 := by push_cast; ring
-      _ ≤ y := h1
+    exact lt_of_lt_of_le (show (↑v : WithBot ℕ∞) < ↑v + 1 by
+      rw [← show (↑(v + 1) : WithBot ℕ∞) = ↑v + 1 from by push_cast; ring]
+      exact WithBot.coe_lt_coe.mpr ((ENat.lt_add_one_iff hv_ne_top).mpr le_rfl)) h1
 
 /-- Unconditional: topologicalKrullDim Y + 1 ≤ topologicalKrullDim X for
     Y ⊊ X closed in irreducible X. -/

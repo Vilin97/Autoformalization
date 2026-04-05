@@ -24,10 +24,8 @@ noncomputable def sheafH0EquivSections {X : TopCat.{u}}
 
 /-- Transport subsingletons across an additive equivalence. -/
 theorem subsingleton_of_addEquiv {A B : Type*} [Add A] [Add B]
-    (e : A ≃+ B) [Subsingleton A] : Subsingleton B := by
-  constructor
-  intro x y
-  simpa using congrArg e (Subsingleton.elim (e.symm x) (e.symm y))
+    (e : A ≃+ B) [Subsingleton A] : Subsingleton B :=
+  ⟨fun x y => by simpa using congrArg e (Subsingleton.elim (e.symm x) (e.symm y))⟩
 
 /-- **Dimension shifting** via injective presentation.
     For `0 -> F -> I -> Q -> 0` with `I` injective, `Subsingleton (H Q n)`

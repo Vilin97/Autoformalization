@@ -25,10 +25,8 @@ theorem sheaf_H_subsingleton_of_isEmpty'
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (n : ℕ) : Subsingleton (Sheaf.H F n) := by
   unfold Sheaf.H
-  have hZ := sheaf_isZero_of_isEmpty X
-    ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-      (AddCommGrpCat.of (ULift ℤ)))
-  have := hZ.hasProjectiveDimensionLT_zero
+  have := (sheaf_isZero_of_isEmpty X ((constantSheaf (Opens.grothendieckTopology X)
+    AddCommGrpCat.{u}).obj (AddCommGrpCat.of (ULift ℤ)))).hasProjectiveDimensionLT_zero
   exact HasProjectiveDimensionLT.subsingleton _ 0 n (Nat.zero_le n) F
 
 /-! ## Reducible case (proved via ReducibleVanishing') -/

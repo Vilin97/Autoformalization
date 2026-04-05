@@ -213,7 +213,7 @@ private theorem exists_section_generating_stalks
     congr 1
     exact TopCat.Presheaf.germ_res_apply (TopCat.Sheaf.zeroOutsideInt V).val
       (homOfLE hV₁V) x₀ hx₀V₁ (TopCat.Sheaf.zeroOutsideInt.generator V)
-  obtain ⟨W, hx₀W, iW1, iW2, hW_eq⟩ :=
+  obtain ⟨W, hx₀W, iW1, _, _⟩ :=
     TopCat.Presheaf.germ_eq (TopCat.Sheaf.zeroOutsideInt V).val x₀ hx₀V₁ hx₀V₁
       is₁ d_gen_res (his₁_germ.trans hd_gen_res_germ.symm)
   -- W ≤ V₁ ≤ V
@@ -221,8 +221,6 @@ private theorem exists_section_generating_stalks
   have hWV : W ≤ V := le_trans hWV₁ hV₁V
   -- W ≠ ⊥ (contains x₀)
   have hW_ne : W ≠ ⊥ := fun h => (Opens.mem_bot (x := x₀)).mp (h ▸ hx₀W)
-  -- On W, the sections is₁|_W and d_gen_res|_W agree (from hW_eq)
-  have hiW := Subsingleton.elim iW1 iW2
   -- Key: at every x ∈ W, i_x(germ(s₁|_W, x)) = d.down • gen_at x
   -- This follows because is₁|_W = d_gen_res|_W (from hW_eq), and germs respect restriction
   have hcoeff_const : ∀ (x : X) (hxW : x ∈ W),
