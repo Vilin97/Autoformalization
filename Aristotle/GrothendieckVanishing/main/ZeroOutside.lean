@@ -337,31 +337,9 @@ theorem sHom_eq_of_app_generator {X : TopCat.{u}} {U : Opens X}
     (Presheaf.zeroOutside.sHom_eq_of_app_generator
       (f := CategoryTheory.toSheafify _ (Presheaf.constZ.zeroOutside U) ≫ f.val)).symm
 
-/-- Two morphisms out of `zeroOutsideInt U` agree as soon as they agree on the
-distinguished generator over `U`. -/
-theorem hom_ext_from_generator {X : TopCat.{u}} {U : Opens X}
-    {F : Sheaf AddCommGrpCat.{u} X} (f g : zeroOutsideInt U ⟶ F)
-    (h :
-      f.val.app (op U) (generator U) =
-        g.val.app (op U) (generator U)) :
-    f = g := by
-  rw [← sHom_eq_of_app_generator f, ← sHom_eq_of_app_generator g, h]
-
 end zeroOutsideInt
 
 open zeroOutsideInt
-
-theorem epi_map_of_injective {X : TopCat.{u}} (I : Sheaf AddCommGrpCat.{u} X) [Injective I]
-    {U V : Opens X} (h : V ≤ U) : Epi (I.presheaf.map (homOfLE h).op) := by
-  rw [AddCommGrpCat.epi_iff_surjective]
-  intro s
-  let f := Injective.factorThru (zeroOutsideInt.sHom s) (zeroOutsideInt.openHom h)
-  refine ⟨f.val.app (op U) (zeroOutsideInt.generator U), ?_⟩
-  change Presheaf.restrictOpen (F := I.presheaf)
-      (f.val.app (op U) (zeroOutsideInt.generator U)) V h = s
-  rw [← Presheaf.map_restrict, ← zeroOutsideInt.openHom_generator]
-  change (zeroOutsideInt.openHom h ≫ f).val.app (op V) (zeroOutsideInt.generator V) = s
-  rw [Injective.comp_factorThru, zeroOutsideInt.sHom_app_generator]
 
 /-- The canonical map from `zeroOutsideInt U` to `F` associated to a section `s ∈ F(U)`. -/
 abbrev singleGeneratorMap {X : TopCat.{u}} {U : Opens X}

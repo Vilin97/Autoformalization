@@ -17,13 +17,6 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 
-/-- The constant sheaf on an irreducible space has vanishing higher cohomology. -/
-theorem constantSheaf_cohomology_vanishing
-    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X] (n : ℕ) :
-    Subsingleton (Sheaf.H ((constantSheaf (Opens.grothendieckTopology X)
-      AddCommGrpCat.{u}).obj (AddCommGrpCat.of (ULift ℤ))) (n + 1)) :=
-  FlasqueVanishing X _ (fun i => constantSheaf_flasque_of_irreducible X i) n
-
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology
     on irreducible X with dim ≥ 1 when n > dim X.
     Uses the SES `0 → zeroOutsideInt V → zeroOutsideInt ⊤ → cokernel → 0`
