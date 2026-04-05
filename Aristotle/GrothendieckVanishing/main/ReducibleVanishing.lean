@@ -134,7 +134,6 @@ theorem ReducibleVanishing'
       by_cases hxZ : x ∈ Z
       · -- closedIncl_unit_stalk_isIso: iso on stalks at z ∈ Z
         haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
-          dsimp [S, η]
           exact TopCat.closedIncl_unit_stalk_isIso hZ_closed G ⟨x, hxZ⟩
         exact stalk_zero_of_ses_g_iso hSE x inferInstance a
       · have hx' : x ∉ ⋃₀ ((insert Z s' : Finset (Set X)) : Set (Set X)) := by
