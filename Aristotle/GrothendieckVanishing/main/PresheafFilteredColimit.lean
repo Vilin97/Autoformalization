@@ -110,9 +110,8 @@ private theorem isSheaf_presheaf_filtered_colimit
     intro a ha
     obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ (hcV (iSup U)) a
     -- For each k: ι(b₀|_{Uk}) = a|_{Uk} = 0, so eventually zero
-    let F_k k := (Y' ⋙ sheafToPresheaf _ _) ⋙ ev (U k)
     have h_ev_zero : ∀ k ∈ t, ∃ (jk : J') (fk : j₀ ⟶ jk),
-        ConcreteCategory.hom ((F_k k).map fk)
+        ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _) ⋙ ev (U k)).map fk)
           (ConcreteCategory.hom ((Y'.obj j₀).val.map (Opens.leSupr U k).op) b₀) = 0 := by
       intro k hk
       have hcTyp := isColimitOfPreserves (CategoryTheory.forget AddCommGrpCat) (hcV (U k))
