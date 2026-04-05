@@ -166,18 +166,14 @@ private theorem sheafify_constPresheaf_flasque_of_irreducible
         ((opensGT X).toSheafify (constPresheaf X)).app (op U) := hnat.symm
     haveI : Epi (((opensGT X).toSheafify (constPresheaf X)).app (op U)) := by
       apply ConcreteCategory.epi_of_surjective
-      have hfact : ((opensGT X).toSheafify (constPresheaf X)).app (op U) =
+      rw [show ((opensGT X).toSheafify (constPresheaf X)).app (op U) =
           ((opensGT X).toPlus (constPresheaf X)).app (op U) ≫
-          ((opensGT X).toPlus ((opensGT X).plusObj (constPresheaf X))).app (op U) := by
-        simp only [GrothendieckTopology.toSheafify, (opensGT X).plusMap_toPlus,
-          NatTrans.comp_app]
-      rw [hfact]
+          ((opensGT X).toPlus ((opensGT X).plusObj (constPresheaf X))).app (op U) from by
+        simp only [GrothendieckTopology.toSheafify, (opensGT X).plusMap_toPlus, NatTrans.comp_app]]
       intro y
       obtain ⟨z, hz⟩ := toPlus_surjective_of_firstPlus (X := X) U hUne y
       obtain ⟨a, ha⟩ := toPlus_surjective_of_const (X := X) U hUne z
-      refine ⟨a, ?_⟩
-      rw [ConcreteCategory.comp_apply, ha]
-      exact hz
+      exact ⟨a, by rw [ConcreteCategory.comp_apply, ha]; exact hz⟩
     exact epi_of_epi_fac hfac
 
 private theorem presheafToSheaf_constPresheaf_flasque_of_irreducible

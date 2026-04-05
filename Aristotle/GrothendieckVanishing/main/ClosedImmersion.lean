@@ -288,9 +288,7 @@ private lemma stalkPull_nat {X Y : TopCat.{u}} (f : X ⟶ Y)
         (Opposite.op ((TopologicalSpace.Opens.map f).obj U)) := by
     have h := congr_arg (fun β => NatTrans.app β (Opposite.op U))
       ((Presheaf.pushforwardPullbackAdjunction AddCommGrpCat f).unit.naturality α)
-    simp only [CategoryTheory.Functor.id_obj, CategoryTheory.Functor.id_map,
-      CategoryTheory.Functor.comp_obj, CategoryTheory.Functor.comp_map] at h
-    exact h
+    simpa only [Functor.id_obj, Functor.id_map, Functor.comp_obj, Functor.comp_map] using h
   rw [← CategoryTheory.Category.assoc, key, CategoryTheory.Category.assoc]
 
 -- Unit stalk is iso for closed immersions.
