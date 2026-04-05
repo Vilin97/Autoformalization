@@ -61,13 +61,8 @@ private theorem sheafH_one_of_flasque {X : TopCat.{u}}
   obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b hb rfl
   obtain ⟨c', hc'⟩ := h_surj c
   obtain ⟨d', hd'⟩ := h_surj d
-  have zero_c : c.comp hSE.extClass rfl = 0 := by
-    rw [← hc', Ext.comp_assoc_of_second_deg_zero c' (Ext.mk₀ ip.shortComplex.g)
-      hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero c' _ 1 1 rfl]
-  have zero_d : d.comp hSE.extClass rfl = 0 := by
-    rw [← hd', Ext.comp_assoc_of_second_deg_zero d' (Ext.mk₀ ip.shortComplex.g)
-      hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero d' _ 1 1 rfl]
-  rw [← hc, ← hd, zero_c, zero_d]
+  simp only [← hc, ← hd, ← hc', ← hd', Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀
+    ip.shortComplex.g) hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
 
 /-- **Flasque sheaves have vanishing higher cohomology** (Nugent, PR #35790).
 

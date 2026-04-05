@@ -274,9 +274,8 @@ private theorem sheafH_filtered_colimit_aux
     let ι'Cocone : Cocone Y' := Cocone.mk injCocone.pt
       { app := fun j => η.app j ≫ injCocone.ι.app j
         naturality := fun j j' f => by
-          have h1 := η.naturality f; have h2 := injCocone.w f
           simp only [Functor.const_obj_obj, Functor.const_obj_map, Category.comp_id,
-            ← h2, ← Category.assoc, h1] }
+            ← injCocone.w f, ← Category.assoc, η.naturality f] }
     -- ι' : c'.pt → colim(Inj) is the desc of ι'Cocone
     let ι' : c'.pt ⟶ injCocone.pt := hc'.desc ι'Cocone
     -- ι' is mono: η is mono nat trans, and filtered colimits preserve monos (AB5)
