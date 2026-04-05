@@ -299,15 +299,8 @@ private theorem sheafH_filtered_colimit_aux
     let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
       { obj := fun j => cokernel (η.app j)
         map := fun {j j'} f => cokernel.map _ _ (Y'.map f) (Inj.map f) (η.naturality f).symm
-        map_id := fun j => by
-          ext; show cokernel.π _ ≫ _ = cokernel.π _ ≫ _
-          rw [cokernel.π_desc, Category.comp_id]
-          show (Inj.map (𝟙 j)) ≫ _ = _
-          rw [Inj.map_id, Category.id_comp]
-        map_comp := fun {j j' j''} f g => by
-          ext; show cokernel.π _ ≫ _ = cokernel.π _ ≫ _ ≫ _
-          simp only [cokernel.map, cokernel.π_desc_assoc, cokernel.π_desc, Category.assoc,
-            Functor.map_comp] }
+        map_id := fun j => by ext; simp [cokernel.map, Functor.map_id]
+        map_comp := fun {j j' j''} f g => by ext; simp [cokernel.map, Functor.map_comp] }
     -- Factoring lemma: c'.ι.app j ≫ ι' = η.app j ≫ injCocone.ι.app j
     have hfac_ι : ∀ j, c'.ι.app j ≫ ι' = η.app j ≫ injCocone.ι.app j :=
       fun j => hc'.fac ι'Cocone j
@@ -322,16 +315,9 @@ private theorem sheafH_filtered_colimit_aux
       { app := fun j => cokernel.map (η.app j) ι' (c'.ι.app j) (injCocone.ι.app j)
             (hfac_ι j).symm
         naturality := fun j j' f => by
-          -- Goal: Q.map f ≫ qCocone.ι j' = qCocone.ι j ≫ const.map f
-          ext
-          -- After ext: cokernel.π(η j) ≫ LHS = cokernel.π(η j) ≫ RHS
-          show cokernel.π _ ≫ Q.map f ≫ _ = cokernel.π _ ≫ _ ≫ _
-          -- LHS: cokernel.π(η j) ≫ Q.map f = Inj.map f ≫ cokernel.π(η j')
+          ext; show cokernel.π _ ≫ Q.map f ≫ _ = cokernel.π _ ≫ _ ≫ _
           rw [← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
-          -- RHS: cokernel.π(η j) ≫ qCocone.ι j = injCocone.ι j ≫ cokernel.π(ι')
-          simp only [cokernel.π_desc, Category.assoc,
-            Functor.const_obj_map, ← Category.assoc, injCocone.w]
-          exact (Category.comp_id _).symm }
+          simp [cokernel.π_desc, Category.assoc, Functor.const_obj_map, injCocone.w] }
     -- IsColimit: qCocone is a colimit.
     -- Strategy: lift a cocone s on Q to a cocone on Inj, use colimit of Inj to descend.
     have hqColim : IsColimit qCocone := by
