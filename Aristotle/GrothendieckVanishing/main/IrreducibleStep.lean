@@ -395,8 +395,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
     haveI : Mono j := hj_mono
     -- Step 2: Build SES  0 → zeroOutsideInt V' → R → cokernel j → 0
     let S := ShortComplex.mk j (cokernel.π j) (cokernel.condition j)
-    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel j)) inferInstance inferInstance
+    have hSE : S.ShortExact := shortExact_of_mono j
     -- Step 3: First-term vanishing: H^m(zeroOutsideInt V') = 0
     have hV'van : Subsingleton (Sheaf.H S.X₁ m) :=
       zeroOutsideInt_cohomology_vanishing X ih hpos V' hV'ne m hm
@@ -417,8 +416,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
       let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} ci).unit.app CJ
       haveI : Epi η := epi_unit_of_closedImmersion Y hYcl CJ
       let S' := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
-      have hSE' : S'.ShortExact := ShortComplex.ShortExact.mk'
-        (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
+      have hSE' : S'.ShortExact := shortExact_of_epi η
       have hPush : Subsingleton (Sheaf.H S'.X₃ m) := by
         show Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} ci).obj
           ((TopCat.Sheaf.pullback AddCommGrpCat.{u} ci).obj CJ)) m)
@@ -463,8 +461,7 @@ theorem epiImage_zeroOutsideInt_vanishing
     exact subsingleton_sheafH_of_isZero' G hZero m
   · -- V ≠ ⊥: use kernel-cokernel SES  0 → ker f → zeroOutsideInt V → G → 0
     let S := ShortComplex.mk (kernel.ι f) f (kernel.condition f)
-    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
+    have hSE : S.ShortExact := shortExact_of_epi f
     have hZV : Subsingleton (Sheaf.H S.X₂ m) :=
       zeroOutsideInt_cohomology_vanishing X ih hpos V hV m hm
     have hKer : Subsingleton (Sheaf.H S.X₁ (m + 1)) :=

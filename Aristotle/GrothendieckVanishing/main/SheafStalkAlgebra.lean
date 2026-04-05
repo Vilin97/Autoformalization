@@ -29,10 +29,7 @@ theorem zeroOutsideInt_vanishing
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) (m + 1)) := by
   let f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
   let S := ShortComplex.mk f (cokernel.π f) (cokernel.condition f)
-  have hSE : S.ShortExact :=
-    ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _))
-      inferInstance inferInstance
+  have hSE : S.ShortExact := shortExact_of_mono f
   have hFlasque : IsFlasqueSheaf S.X₂ := by
     intro U W i
     let J := Opens.grothendieckTopology (T := X)
@@ -189,8 +186,7 @@ theorem cokernel_openHom_vanishing
   let η := adj.unit.app C
   haveI : Epi η := epi_unit_of_closedImmersion Y hYcl C
   let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
-  have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
-    (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
+  have hSE : S.ShortExact := shortExact_of_epi η
   -- Pushforward vanishing by IH
   have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
     PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ n _ hY_dim_lt (lt_trans hY_dim_lt hn))
@@ -264,8 +260,7 @@ theorem zeroOutsideInt_cohomology_vanishing
   let η := adj.unit.app C
   haveI : Epi η := epi_unit_of_closedImmersion Y hYcl C
   let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
-  have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
-    (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
+  have hSE : S.ShortExact := shortExact_of_epi η
   -- Pushforward vanishing by IH
   have hPush : Subsingleton (Sheaf.H S.X₃ m') :=
     PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim_lt hm'_Y)

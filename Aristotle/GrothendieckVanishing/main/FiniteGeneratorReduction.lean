@@ -282,8 +282,7 @@ private theorem sheafH_filtered_colimit_aux
         (colimit.isColimit Inj)
     let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
       ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
-    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
+    have hSE : S.ShortExact := shortExact_of_mono ι'
     -- H^{n+1}(colim Inj) = 0 since colim Inj is flasque
     have hI : Subsingleton (Sheaf.H injCocone.pt (n + 1)) :=
       FlasqueVanishing X injCocone.pt hFlasqueColim n
@@ -403,8 +402,7 @@ private theorem sheafH_filtered_colimit_aux
         intro j
         haveI : Mono (η.app j) := hη_mono j
         have hSE_j : (ShortComplex.mk (η.app j) (cokernel.π (η.app j))
-          (cokernel.condition _)).ShortExact := ShortComplex.ShortExact.mk'
-          (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
+          (cokernel.condition _)).ShortExact := shortExact_of_mono (η.app j)
         exact ext_dimension_shift_X₃ _ hSE_j (n' + 1)
           (Ext.subsingleton_of_injective _ _ n') (hvan j)
       have hQ : Subsingleton (Sheaf.H S.X₃ (n' + 1)) :=
@@ -553,8 +551,7 @@ theorem finsetGeneratedSheaf_vanishing
     haveI : Mono (imageIncl hσ₀) := imageIncl_mono hσ₀
     let SC := ShortComplex.mk (imageIncl hσ₀) (cokernel.π (imageIncl hσ₀))
       (cokernel.condition _)
-    have hSE : SC.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
+    have hSE : SC.ShortExact := shortExact_of_mono (imageIncl hσ₀)
     have hCoker : Subsingleton (Sheaf.H SC.X₃ m) := by
       haveI := imageIncl_cokernel_epi hσ₀
       exact hzero (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} =>

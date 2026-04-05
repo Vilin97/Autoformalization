@@ -115,8 +115,7 @@ theorem ReducibleVanishing'
     let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i).unit.app G
     haveI : Epi η := epi_unit_of_closedImmersion Z hZ_closed G
     let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
-    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
+    have hSE : S.ShortExact := shortExact_of_epi η
     have hpush : Subsingleton (Sheaf.H S.X₃ n) := by
       show Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
         ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj G)) n)

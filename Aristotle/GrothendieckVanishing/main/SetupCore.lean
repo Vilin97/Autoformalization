@@ -478,11 +478,7 @@ theorem ClosedImmersionSES
   let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
   let η := adj.unit.app F
   haveI : Epi η := epi_unit_of_closedImmersion Z hZ F
-  exact ⟨ShortComplex.mk (kernel.ι η) η (kernel.condition η),
-    ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η))
-      inferInstance inferInstance,
-    rfl, rfl⟩
+  exact ⟨ShortComplex.mk (kernel.ι η) η (kernel.condition η), shortExact_of_epi η, rfl, rfl⟩
 
 /-- Dimension shift via SES: specialization of `ext_dimension_shift` to sheaves. -/
 theorem sheafH_dimension_shift_ses {X : TopCat.{u}}
