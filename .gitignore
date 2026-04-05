@@ -13,7 +13,7 @@
 *-output.lean
 blueprint/web/
 blueprint/print/
-blueprint/lean_decls
+# blueprint/lean_decls is tracked so leanblueprint web shows formalization status
 blueprint/env/
 *.paux
 
