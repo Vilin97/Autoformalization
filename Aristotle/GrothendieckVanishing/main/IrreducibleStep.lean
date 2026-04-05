@@ -57,23 +57,18 @@ private theorem sHom_stalk_bijective_at
   have hi_inj : Function.Injective i_x :=
     (ConcreteCategory.mono_iff_injective_of_preservesPullback (FT.map i)).mp inferInstance
   -- i_x(germ(s,x)) ≠ 0
-  have hi_s_ne : i_x (R.presheaf.germ U x hxU s) ≠ 0 := by
-    intro h; exact hs_ne (hi_inj (h.trans (map_zero i_x).symm))
+  have hi_s_ne : i_x (R.presheaf.germ U x hxU s) ≠ 0 :=
+    fun h => hs_ne (hi_inj (h.trans (map_zero i_x).symm))
   -- i_x(germ(s,x)) = c • gen_V for some c ≠ 0
   obtain ⟨c, hc⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x (hUV hxU)
     (i_x (R.presheaf.germ U x hxU s))
-  have hc_ne : c ≠ 0 := by
-    intro hc0; rw [hc0, zero_smul] at hc; exact hi_s_ne hc
+  have hc_ne : c ≠ 0 := fun hc0 => by rw [hc0, zero_smul] at hc; exact hi_s_ne hc
   -- Key: sHom_x(germ(gen_U, x)) = germ(s, x)
   have h_sHom_gen : sHom_x ((TopCat.Sheaf.zeroOutsideInt U).presheaf.germ U x hxU
       (TopCat.Sheaf.zeroOutsideInt.generator U)) = R.presheaf.germ U x hxU s := by
-    show T.map (TopCat.Sheaf.zeroOutsideInt.sHom s).val
-      ((TopCat.Sheaf.zeroOutsideInt U).presheaf.germ U x hxU
-        (TopCat.Sheaf.zeroOutsideInt.generator U)) =
-      R.presheaf.germ U x hxU s
+    show T.map (TopCat.Sheaf.zeroOutsideInt.sHom s).val _ = _
     rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
-    congr 1
-    exact TopCat.Sheaf.zeroOutsideInt.sHom_app_generator s
+    congr 1; exact TopCat.Sheaf.zeroOutsideInt.sHom_app_generator s
   -- Surjectivity
   have h_surj : Function.Surjective sHom_x := by
     intro a
@@ -237,13 +232,9 @@ private theorem exists_section_generating_stalks
     congr 1
     exact TopCat.Presheaf.germ_res_apply (TopCat.Sheaf.zeroOutsideInt V).val
       (homOfLE hV₁V) x₀ hx₀V₁ (TopCat.Sheaf.zeroOutsideInt.generator V)
-  -- Equal germs at x₀ → agree on some W ≤ V₁
-  have hgerms_eq : (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁ is₁ =
-      (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁ d_gen_res := by
-    rw [his₁_germ, hd_gen_res_germ]
   obtain ⟨W, hx₀W, iW1, iW2, hW_eq⟩ :=
     TopCat.Presheaf.germ_eq (TopCat.Sheaf.zeroOutsideInt V).val x₀ hx₀V₁ hx₀V₁
-      is₁ d_gen_res hgerms_eq
+      is₁ d_gen_res (his₁_germ.trans hd_gen_res_germ.symm)
   -- W ≤ V₁ ≤ V
   have hWV₁ : W ≤ V₁ := leOfHom iW1
   have hWV : W ≤ V := le_trans hWV₁ hV₁V
@@ -469,7 +460,6 @@ theorem subsheaf_zeroOutsideInt_vanishing
       let S' := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
       have hSE' : S'.ShortExact := ShortComplex.ShortExact.mk'
         (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
-      have hS'₂ : S'.X₂ = CJ := rfl
       have hS'₃ : S'.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u} ci).obj
           ((TopCat.Sheaf.pullback AddCommGrpCat.{u} ci).obj CJ) := rfl
       -- Pushforward vanishing by IH
@@ -500,8 +490,6 @@ theorem subsheaf_zeroOutsideInt_vanishing
           haveI : Mono (FT.map S'.f) := Functor.map_mono FT S'.f
           rw [AddCommGrpCat.mono_iff_injective] at this
           exact this ((hstalk_zero _).trans (map_zero _).symm)
-      have hS₃_eq : S.X₃ = S'.X₂ := rfl
-      rw [hS₃_eq]
       exact subsingleton_sheafH_of_shortExact_middle hSE' m hKer hPush
     -- Step 5: Middle-term LES gives H^m(R) = 0
     exact subsingleton_sheafH_of_shortExact_middle hSE m hV'van hCoker

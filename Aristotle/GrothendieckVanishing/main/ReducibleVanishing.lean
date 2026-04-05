@@ -121,11 +121,9 @@ theorem ReducibleVanishing'
     let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel η)) inferInstance inferInstance
-    have hX₂ : S.X₂ = G := rfl
-    have hX₃ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
-        ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj G) := rfl
     have hpush : Subsingleton (Sheaf.H S.X₃ n) := by
-      rw [hX₃]
+      show Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
+        ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj G)) n)
       apply PushforwardHVanishing Z hZ_closed
       haveI : IrreducibleSpace (TopCat.of Z) :=
         isIrreducible_iff_irreducibleSpace.mp hZ_irred
@@ -155,4 +153,4 @@ theorem ReducibleVanishing'
           Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f
         rw [AddCommGrpCat.mono_iff_injective] at this
         exact this ((hX₂_stalk _).trans (map_zero _).symm)
-    exact hX₂ ▸ subsingleton_sheafH_of_shortExact_middle hSE n hker hpush
+    exact subsingleton_sheafH_of_shortExact_middle hSE n hker hpush
