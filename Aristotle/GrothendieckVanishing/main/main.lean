@@ -17,7 +17,6 @@
   - ClosedImmersion.lean: closed immersion counit/stalk infrastructure
   - ZeroOutside.lean + ZeroOutsideFinset.lean: extension-by-zero sheaf machinery
   - ConstantSheafFlasque.lean: constant sheaf on irreducible space is flasque
-  - CohomologyIso.lean: H'(⊤, F) ≅ H(F) isomorphisms
   - DimZeroVanishing.lean: irreducible dim 0 case
   - ReducibleVanishing.lean: reducible case via Finset.induction
   - ClosedOpenDecomposition.lean: reduction to irreducible
