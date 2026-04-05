@@ -417,8 +417,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
             (lt_of_lt_of_le hm le_top))
       -- Build SES via ClosedImmersionSES on (V')^c with CJ
       let ci : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-      let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} ci
-      let η := adj.unit.app CJ
+      let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} ci).unit.app CJ
       haveI : Epi η := epi_unit_of_closedImmersion Y hYcl CJ
       let S' := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
       have hSE' : S'.ShortExact := ShortComplex.ShortExact.mk'
