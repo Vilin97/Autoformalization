@@ -51,8 +51,8 @@ private lemma cover_nonempty_arrow
 private lemma cover_arrows_related
     {X : Type u} [TopologicalSpace X]
     {U : Opens X} (S : (opensGT X).Cover U) (I₁ I₂ : S.Arrow) :
-    ∃ R : S.Relation, R.fst = I₁ ∧ R.snd = I₂ := by
-  exact ⟨Cover.Relation.mk' (fst := I₁) (snd := I₂)
+    ∃ R : S.Relation, R.fst = I₁ ∧ R.snd = I₂ :=
+  ⟨Cover.Relation.mk' (fst := I₁) (snd := I₂)
     ⟨I₁.Y ⊓ I₂.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩, rfl, rfl⟩
 
 private lemma meq_const_values_eq

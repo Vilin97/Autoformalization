@@ -68,9 +68,8 @@ private theorem grothendieck_vanishing_aux (d : WithBot ℕ∞)
   intro Y _ _ m G hle hY
   by_cases hdim : topologicalKrullDim Y ≤ 0
   · -- dim Y ≤ 0: use DimZeroVanishing
-    have hm0 : m ≠ 0 := by
-      intro heq; subst heq
-      exact not_lt.mpr (topologicalKrullDim_nonneg_of_irreducible (X := Y)) (by exact_mod_cast hY)
+    have hm0 : m ≠ 0 := fun heq => by
+      subst heq; exact not_lt.mpr topologicalKrullDim_nonneg_of_irreducible (by exact_mod_cast hY)
     obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm0
     exact grothendieck_vanishing_dim_zero Y hdim G k
   · -- dim Y > 0: use IrreducibleStep
