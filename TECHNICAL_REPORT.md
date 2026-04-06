@@ -66,8 +66,8 @@ Step 4: Each f.g. subsheaf has finite filtration by extension-by-zero sheaves
     ↓ (SheafStalkAlgebra + StalkGeneratorAlgebra + ZeroOutside)
 Step 5: Extension-by-zero sheaves vanish by closed-open SES + IH on lower dim
     ↓ (IrreducibleStep + SetupCore)
-Step 6: Cascade — vanishing at one degree gives vanishing at all higher degrees
-    ↓ (GrothendieckVanishing: sheafH_vanishing_cascade)
+Step 6: Assemble via well-founded induction on Krull dimension
+    ↓ (GrothendieckVanishing)
 ```
 
 **Step 1: Reduction to irreducible spaces.** A Noetherian space has finitely many irreducible components Z₁, ..., Zₖ. The Mayer-Vietoris long exact sequence (via closed-open decomposition) reduces vanishing on X to vanishing on each Zᵢ. The reducible case is handled by `Finset.induction` over the components.
