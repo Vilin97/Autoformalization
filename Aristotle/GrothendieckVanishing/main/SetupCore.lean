@@ -333,10 +333,9 @@ private lemma PushforwardHVanishing_succ
     exact isFlasque_of_injective ip.shortComplex.X₂ _
   have hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
       ip.shortComplex.X₂) (m + 2)) := FlasqueVanishing _ _ hFlasque (m + 1)
-  have hR : Subsingleton (Sheaf.H ip.shortComplex.X₃ (m + 1)) :=
-    ext_dimension_shift_X₃ _ ip.shortExact_shortComplex (m + 1)
-      (Ext.subsingleton_of_injective _ _ m) hG'
-  exact ext_dimension_shift _ hSE_X (m + 1) (ih_push ip.shortComplex.X₃ hR) hJ
+  exact ext_dimension_shift _ hSE_X (m + 1)
+    (ih_push ip.shortComplex.X₃ (ext_dimension_shift_X₃ _ ip.shortExact_shortComplex (m + 1)
+      (Ext.subsingleton_of_injective _ _ m) hG')) hJ
 
 -- Pushforward along closed immersion preserves cohomological vanishing.
 theorem PushforwardHVanishing

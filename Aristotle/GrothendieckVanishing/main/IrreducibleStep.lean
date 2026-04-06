@@ -367,15 +367,10 @@ theorem subsheaf_zeroOutsideInt_vanishing
     -- Step 2: Build SES  0 → zeroOutsideInt V' → R → cokernel j → 0
     let S := ShortComplex.mk j (cokernel.π j) (cokernel.condition j)
     have hSE : S.ShortExact := shortExact_of_mono j
-    -- Step 3: First-term vanishing: H^m(zeroOutsideInt V') = 0
-    have hV'van : Subsingleton (Sheaf.H S.X₁ m) :=
-      zeroOutsideInt_cohomology_vanishing X ih hpos V' hV'ne m hm
-    -- Step 4: Third-term (cokernel) vanishing via ClosedImmersionSES on (V')^c
-    have hCoker : Subsingleton (Sheaf.H S.X₃ m) :=
-      closedComplementVanishing V' hV'ne _ m hm ih
-        (fun x hxV' b => cokernel_stalk_zero_of_stalk_surj j x (hj_stalk x hxV').2 b)
-    -- Step 5: Middle-term LES gives H^m(R) = 0
-    exact subsingleton_sheafH_of_shortExact_middle hSE m hV'van hCoker
+    exact subsingleton_sheafH_of_shortExact_middle hSE m
+      (zeroOutsideInt_cohomology_vanishing X ih hpos V' hV'ne m hm)
+      (closedComplementVanishing V' hV'ne _ m hm ih
+        (fun x hxV' b => cokernel_stalk_zero_of_stalk_surj j x (hj_stalk x hxV').2 b))
 
 /-- **Steps 3C + 4 + LES** (Hartshorne III.2.7): any epi image of `zeroOutsideInt V` has
     vanishing cohomology in degree `m > dim X`. Uses third-term LES with
@@ -401,12 +396,10 @@ theorem epiImage_zeroOutsideInt_vanishing
   · -- V ≠ ⊥: use kernel-cokernel SES  0 → ker f → zeroOutsideInt V → G → 0
     let S := ShortComplex.mk (kernel.ι f) f (kernel.condition f)
     have hSE : S.ShortExact := shortExact_of_epi f
-    have hZV : Subsingleton (Sheaf.H S.X₂ m) :=
-      zeroOutsideInt_cohomology_vanishing X ih hpos V hV m hm
-    have hKer : Subsingleton (Sheaf.H S.X₁ (m + 1)) :=
-      subsheaf_zeroOutsideInt_vanishing X ih hpos V (kernel f) (kernel.ι f) (m + 1)
-        (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
-    exact ext_dimension_shift_X₃ _ hSE m hZV hKer
+    exact ext_dimension_shift_X₃ _ hSE m
+      (zeroOutsideInt_cohomology_vanishing X ih hpos V hV m hm)
+      (subsheaf_zeroOutsideInt_vanishing X ih hpos V (kernel f) (kernel.ι f) (m + 1)
+        (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl)))
 
 -- Filtered diagram infrastructure, finitely generated vanishing, and
 -- directLimit_cohomology_vanishing are in FiniteGeneratorReduction.lean.
