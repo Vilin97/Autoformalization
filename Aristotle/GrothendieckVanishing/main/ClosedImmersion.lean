@@ -312,8 +312,6 @@ theorem closedIncl_unit_stalk_isIso
   let piT := pi.hom.app ((Sheaf.pushforward AddCommGrpCat (closedIncl hs)).obj (pb.obj F))
   haveI : IsIso piF.val := by show IsIso ((sheafToPresheaf _ _).map piF); infer_instance
   haveI : IsIso piT.val := by show IsIso ((sheafToPresheaf _ _).map piT); infer_instance
-  haveI : IsIso (Tz.map piF.val) := inferInstance
-  haveI : IsIso (Tz.map piT.val) := inferInstance
   have hnat : (pb.map η).val ≫ piT.val = piF.val ≫
       (presheafToSheaf _ _ |>.map ((Presheaf.pullback AddCommGrpCat (closedIncl hs)).map η.val)).val :=
     congr_arg Sheaf.Hom.val (pi.hom.naturality η)
