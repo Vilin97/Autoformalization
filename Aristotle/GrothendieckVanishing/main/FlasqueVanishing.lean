@@ -67,21 +67,15 @@ theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
     (hstalk : ∀ (x : X)
       (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F.val), a = 0) :
     IsZero F := by
-  have val_isZero : ∀ (U : (Opens X)ᵒᵖ), IsZero (F.val.obj U) := fun ⟨U⟩ =>
+  have hZ : IsZero F.val := Functor.isZero F.val (fun ⟨U⟩ =>
     @AddCommGrpCat.isZero_of_subsingleton _
       ⟨fun s t => TopCat.Presheaf.section_ext F U s t fun x hx =>
-        (hstalk x _).trans (hstalk x _).symm⟩
-  apply IsZero.mk
-  · intro G; exact ⟨{
-      default := 0
-      uniq := fun f => by
-        apply Sheaf.Hom.ext; apply NatTrans.ext; funext U
-        exact (val_isZero U).eq_zero_of_src (f.val.app U) }⟩
-  · intro G; exact ⟨{
-      default := 0
-      uniq := fun f => by
-        apply Sheaf.Hom.ext; apply NatTrans.ext; funext U
-        exact (val_isZero U).eq_zero_of_tgt (f.val.app U) }⟩
+        (hstalk x _).trans (hstalk x _).symm⟩)
+  exact IsZero.mk
+    (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
+      fun U => (hZ.obj U).eq_zero_of_src (f.val.app U))) }⟩)
+    (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
+      fun U => (hZ.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
 
 theorem subsingleton_sheafH_of_isZero' {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsZero F) (n : ℕ) :
