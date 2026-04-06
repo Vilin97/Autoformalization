@@ -72,8 +72,7 @@ private theorem presheaf_stalk_surj_openHom
   -- On WV, openHom is an iso (eqToHom)
   have happ_iso : IsIso ((TopCat.Presheaf.zeroOutside_openHom
     (F := TopCat.Presheaf.constZ) h).app (op WV)) := by
-    simp only [TopCat.Presheaf.zeroOutside_openHom, hWV_le_V, ↓reduceDIte]
-    infer_instance
+    simp only [TopCat.Presheaf.zeroOutside_openHom, hWV_le_V, ↓reduceDIte]; infer_instance
   -- Use the iso to find a preimage of the restricted section
   let s_res := ConcreteCategory.hom
     ((TopCat.Presheaf.constZ.zeroOutside U).map (homOfLE hWV_le_W).op) s
@@ -211,14 +210,6 @@ theorem zeroOutsideInt_cohomology_vanishing
         · exact stalk_zero_of_shortExact_kernel hSE x
             (fun b => cokernel_stalk_zero_V V x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY) b) a)
     (PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim_lt hm'_Y))
-
-theorem subsingleton_sheafH_of_shortExact_third {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (n : ℕ)
-    (h₂ : Subsingleton (Sheaf.H S.X₂ n))
-    (h₁ : Subsingleton (Sheaf.H S.X₁ (n + 1))) :
-    Subsingleton (Sheaf.H S.X₃ n) :=
-  ext_dimension_shift_X₃ _ hS n h₂ h₁
 
 
 -- Stalk generator algebra, subgroup theory, and generator injectivity

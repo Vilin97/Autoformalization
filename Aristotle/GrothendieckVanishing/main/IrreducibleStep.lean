@@ -406,7 +406,7 @@ theorem epiImage_zeroOutsideInt_vanishing
     have hKer : Subsingleton (Sheaf.H S.X₁ (m + 1)) :=
       subsheaf_zeroOutsideInt_vanishing X ih hpos V (kernel f) (kernel.ι f) (m + 1)
         (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
-    exact subsingleton_sheafH_of_shortExact_third hSE m hZV hKer
+    exact ext_dimension_shift_X₃ _ hSE m hZV hKer
 
 -- Filtered diagram infrastructure, finitely generated vanishing, and
 -- directLimit_cohomology_vanishing are in FiniteGeneratorReduction.lean.

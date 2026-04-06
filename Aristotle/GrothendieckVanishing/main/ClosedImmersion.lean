@@ -233,8 +233,7 @@ theorem closedIncl_counit_isIso
         conv_lhs => rw [← IsIso.inv_hom_id_assoc (T.map (CategoryTheory.toSheafify K P))
           (T.map (CategoryTheory.sheafifyLift K η F.cond))]
         rw [← Functor.map_comp, hcomp0]
-      rw [hsheafifyLift_eq]
-      infer_instance
+      rw [hsheafifyLift_eq]; infer_instance
     letI (x : TopCat.of s) := hstalk x
     exact TopCat.Presheaf.isIso_of_stalkFunctor_map_iso
       (f := (CategoryTheory.Functor.sheafPullbackConstruction.sheafAdjunctionContinuous
@@ -253,8 +252,7 @@ theorem closedIncl_counit_isIso
         (CategoryTheory.Functor.sheafPullbackConstruction.sheafAdjunctionContinuous
           (G := Opens.map (closedIncl hs)) AddCommGrpCat
           (Opens.grothendieckTopology X) K) F) using 1
-  rw [← hcompare]
-  infer_instance
+  rw [← hcompare]; infer_instance
 
 private lemma isIso_left {C : Type*} [CategoryTheory.Category C] {A B D : C}
     {f : A ⟶ B} {g : B ⟶ D} {h : A ⟶ D} [CategoryTheory.IsIso g] [CategoryTheory.IsIso h]
@@ -303,8 +301,7 @@ theorem closedIncl_unit_stalk_isIso
   haveI : IsIso (pb.map η) := by
     have htri : pb.map η ≫ adj.counit.app (pb.obj F) = 𝟙 _ := adj.left_triangle_components F
     rw [show pb.map η = inv (adj.counit.app (pb.obj F)) from by
-      apply (cancel_mono (adj.counit.app (pb.obj F))).mp; simp [htri]]
-    infer_instance
+      apply (cancel_mono (adj.counit.app (pb.obj F))).mp; simp [htri]]; infer_instance
   -- Step 2: val stalk of pb.map(η) is iso
   haveI : IsIso (pb.map η).val := by
     show IsIso (sheafToPresheaf _ _ |>.map (pb.map η)); infer_instance
