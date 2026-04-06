@@ -54,10 +54,6 @@ noncomputable instance sheafEnoughInjectives (X : TopCat.{u}) :
     EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   IsGrothendieckAbelian.enoughInjectives
 
-noncomputable instance sheafHasDerivedCategory (X : TopCat.{u}) :
-    HasDerivedCategory (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-  HasDerivedCategory.standard _
-
 noncomputable instance sheafHasExt (X : TopCat.{u}) :
     HasExt.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   hasExt_of_enoughInjectives _

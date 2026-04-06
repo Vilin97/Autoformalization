@@ -174,88 +174,6 @@ theorem sHom_app_generator {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U))
   rw [congrArg ULift.down h1]
   simpa using one_zsmul s
 
-theorem openHom_generator {V : Opens X} (h : V ≤ U) :
-    (zeroOutside_openHom (F := constZ) h).app (op V) (generator V) =
-      Presheaf.restrictOpen (F := constZ.zeroOutside U) (generator U) V h := by
-  simp [generator, Presheaf.restrictOpen, Presheaf.restrict, ← comp_apply]
-
-/-- A morphism out of `constZ.zeroOutside U` is determined by the image of the
-distinguished generator over `U`. -/
-theorem sHom_eq_of_app_generator {F : Presheaf AddCommGrpCat.{u} X}
-    (f : constZ.zeroOutside U ⟶ F) :
-    sHom (f.app (op U) (generator U)) = f := by
-  apply NatTrans.ext
-  funext W
-  ext x
-  by_cases hW : unop W ≤ U
-  · let gW : (constZ.zeroOutside U).obj W :=
-      Presheaf.restrictOpen (F := constZ.zeroOutside U) (generator U) (unop W) hW
-    have hObjW : (zeroOutside U constZ).obj W = AddCommGrpCat.of (ULift ℤ) := by
-      simp [zeroOutside, hW, constZ]
-    let w : ULift ℤ := (AddCommGrpCat.Hom.hom (eqToHom hObjW) x)
-    have hObjW₀ : (zeroOutside (unop W) constZ).obj W = AddCommGrpCat.of (ULift ℤ) := by
-      simp [zeroOutside, constZ]
-    have hmid : (zeroOutside (unop W) constZ).obj W = (zeroOutside U constZ).obj W := by
-      rw [hObjW₀, hObjW]
-    have hcollapse :
-        (AddCommGrpCat.Hom.hom (eqToHom hmid))
-            ((AddCommGrpCat.Hom.hom (eqToHom hObjW₀.symm)) (1 : ULift ℤ)) =
-          (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) (1 : ULift ℤ) := by
-      rw [show hmid = hObjW₀.symm.symm.trans hObjW.symm from Subsingleton.elim _ _]
-      simpa using hom_eqToHom_hom_eqToHom hObjW₀.symm (hObjW₀.symm.symm.trans hObjW.symm) 1
-    have hgW_transport :
-        gW = (eqToHom hObjW.symm :
-          AddCommGrpCat.of (ULift ℤ) ⟶ (zeroOutside U constZ).obj W) (1 : ULift ℤ) := by
-      calc
-        gW = (zeroOutside_openHom (F := constZ) hW).app (op (unop W)) (generator (unop W)) := by
-          simpa [gW] using (openHom_generator (U := U) (V := unop W) hW).symm
-        _ = (eqToHom hObjW.symm :
-            AddCommGrpCat.of (ULift ℤ) ⟶ (zeroOutside U constZ).obj W) (1 : ULift ℤ) := by
-          simpa [generator, zeroOutside_openHom, zeroOutside, constZ, hW, hObjW₀, hmid] using
-            hcollapse
-    have hgW :
-        (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) (1 : ULift ℤ) = gW :=
-      hgW_transport.symm
-    have hw : w = (w.down : ℤ) • (1 : ULift ℤ) := by
-      ext
-      simp [w]
-    have hx : x = (w.down : ℤ) • gW := by
-      calc
-        x = (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) w := by
-              simpa [w] using (hom_eqToHom_symm_hom_eqToHom (e := hObjW) x).symm
-        _ = (w.down : ℤ) • (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) (1 : ULift ℤ) := by
-              rw [hw]
-              simpa using
-                (map_zsmul (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) w.down (1 : ULift ℤ))
-        _ = (w.down : ℤ) • gW := by rw [hgW]
-    have hs_restrict :
-        (sHom (f.app (op U) (generator U))).app W gW =
-          F.map (homOfLE hW).op (f.app (op U) (generator U)) := by
-      have hs_nat := congrArg (fun g => g (generator U))
-        (NatTrans.naturality (sHom (f.app (op U) (generator U))) (homOfLE hW).op)
-      have hs_nat' :
-          (sHom (f.app (op U) (generator U))).app W gW =
-            F.map (homOfLE hW).op
-              ((sHom (f.app (op U) (generator U))).app (op U) (generator U)) := by
-        simpa [gW, Presheaf.restrictOpen, Presheaf.restrict] using hs_nat
-      rw [sHom_app_generator] at hs_nat'; exact hs_nat'
-    have hf_restrict :
-        f.app W gW = F.map (homOfLE hW).op (f.app (op U) (generator U)) := by
-      simpa [gW, Presheaf.restrictOpen, Presheaf.restrict] using
-        congrArg (fun g => g (generator U)) (NatTrans.naturality f (homOfLE hW).op)
-    calc
-      (sHom (f.app (op U) (generator U))).app W x
-          = (sHom (f.app (op U) (generator U))).app W ((w.down : ℤ) • gW) := by rw [hx]
-      _ = (w.down : ℤ) • (sHom (f.app (op U) (generator U))).app W gW := by simp
-      _ = (w.down : ℤ) • F.map (homOfLE hW).op (f.app (op U) (generator U)) := by
-            rw [hs_restrict]
-      _ = (w.down : ℤ) • f.app W gW := by rw [hf_restrict]
-      _ = f.app W ((w.down : ℤ) • gW) := by simp
-      _ = f.app W x := by rw [hx]
-  · rw [(zeroOutside_isZero (F := constZ) hW).eq_of_src
-      ((sHom (f.app (op U) (generator U))).app W) 0,
-      (zeroOutside_isZero (F := constZ) hW).eq_of_src (f.app W) 0]
-
 end zeroOutside
 
 end Presheaf
@@ -281,15 +199,6 @@ def openHom {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) :
     zeroOutsideInt V ⟶ zeroOutsideInt U where
   val := sheafifyMap _ (Presheaf.zeroOutside_openHom (F := Presheaf.constZ) h)
 
-theorem openHom_generator {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) :
-    (openHom h).val.app (op V) (generator V) =
-      Presheaf.restrictOpen (F := (zeroOutsideInt U).presheaf) (generator U) V h := by
-  simp only [openHom, generator, Presheaf.zeroOutside_obj, Functor.const_obj_obj]
-  erw [← ConcreteCategory.comp_apply, ← NatTrans.comp_app, ← toSheafify_naturality,
-    NatTrans.comp_app, ConcreteCategory.comp_apply, Presheaf.zeroOutside.openHom_generator,
-    Presheaf.map_restrict]
-  rfl
-
 instance {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) : Mono (openHom h) := by
   have := Presheaf.zeroOutside_hom_mono
     (F := (Functor.const _).obj (AddCommGrpCat.of (ULift.{u, 0} ℤ))) h
@@ -308,34 +217,9 @@ theorem sHom_app_generator {X : TopCat.{u}} {U : Opens X}
   erw [sHom_val, ← ConcreteCategory.comp_apply, ← NatTrans.comp_app, toSheafify_sheafifyLift]
   exact Presheaf.zeroOutside.sHom_app_generator s
 
-/-- A morphism out of `zeroOutsideInt U` is determined by the image of the
-distinguished generator over `U`. -/
-theorem sHom_eq_of_app_generator {X : TopCat.{u}} {U : Opens X}
-    {F : Sheaf AddCommGrpCat.{u} X} (f : zeroOutsideInt U ⟶ F) :
-    sHom (f.val.app (op U) (generator U)) = f := by
-  apply Sheaf.Hom.ext
-  symm
-  apply CategoryTheory.sheafifyLift_unique
-  simpa [generator, Category.assoc, ConcreteCategory.comp_apply] using
-    (Presheaf.zeroOutside.sHom_eq_of_app_generator
-      (f := CategoryTheory.toSheafify _ (Presheaf.constZ.zeroOutside U) ≫ f.val)).symm
-
 end zeroOutsideInt
 
 open zeroOutsideInt
-
-/-- The canonical map from `zeroOutsideInt U` to `F` associated to a section `s ∈ F(U)`. -/
-abbrev singleGeneratorMap {X : TopCat.{u}} {U : Opens X}
-    {F : Sheaf AddCommGrpCat.{u} X}
-    (s : F.presheaf.obj (op U)) :
-    zeroOutsideInt U ⟶ F :=
-  zeroOutsideInt.sHom s
-
-instance singleGeneratorMap_epi_to_image {X : TopCat.{u}} {U : Opens X}
-    {F : Sheaf AddCommGrpCat.{u} X}
-    (s : F.presheaf.obj (op U)) :
-    Epi (factorThruImage (singleGeneratorMap s)) :=
-  inferInstance
 
 /-- For a family of local sections, the universal map from the coproduct of the corresponding
 `zeroOutsideInt (U i)` into `F`. This packages the "generated by a family of sections"
@@ -363,26 +247,7 @@ instance familyGeneratorMap_epi_to_image {X : TopCat.{u}} {ι : Type*}
     Epi (factorThruImage (familyGeneratorMap U s)) :=
   inferInstance
 
-/-- The map from the `i`-th generator `zeroOutsideInt (U i)` into the subsheaf generated by
-the family `(s i)`. -/
-abbrev familyGeneratedSheafι {X : TopCat.{u}} {ι : Type*}
-    (U : ι → Opens X) {F : Sheaf AddCommGrpCat.{u} X}
-    (s : ∀ i, F.presheaf.obj (op (U i)))
-    [HasCoproduct fun i => zeroOutsideInt (U i)] (i : ι) :
-    zeroOutsideInt (U i) ⟶ familyGeneratedSheaf U s :=
-  Sigma.ι (fun i => zeroOutsideInt (U i)) i ≫ factorThruImage (familyGeneratorMap U s)
-
-@[reassoc]
-theorem familyGeneratedSheafι_comp_image_ι {X : TopCat.{u}} {ι : Type*}
-    (U : ι → Opens X) {F : Sheaf AddCommGrpCat.{u} X}
-    (s : ∀ i, F.presheaf.obj (op (U i)))
-    [HasCoproduct fun i => zeroOutsideInt (U i)] (i : ι) :
-    familyGeneratedSheafι U s i ≫ image.ι (familyGeneratorMap U s) =
-      zeroOutsideInt.sHom (s i) := by
-  simp [familyGeneratedSheafι, familyGeneratorMap]
-
--- Adjoin generator machinery, SectionIndex, finsetGeneratedSheaf, and allSectionMap
--- are in ZeroOutsideFinset.lean.
+-- SectionIndex, finsetGeneratedSheaf, and allSectionMap are in ZeroOutsideFinset.lean.
 
 end Sheaf
 

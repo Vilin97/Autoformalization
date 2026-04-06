@@ -113,14 +113,6 @@ The formalization is fully proved with 0 sorry's, 0 axioms, and 0 admits.
   Pushforward along a closed immersion preserves short exact sequences.
 \end{lemma}
 
-\begin{lemma}[Pushforward preserves flasqueness]\label{lem:pushforward_preserves_flasque}
-  \lean{pushforward_preserves_flasque}
-  \leanok
-  \uses{def:isFlasqueSheaf}
-  If $\FF$ is a flasque sheaf on $Y$ and $f : Y \to X$ is continuous,
-  then $f_*\FF$ is flasque on $X$.
-\end{lemma}
-
 \begin{theorem}[Pushforward preserves cohomological vanishing]\label{thm:PushforwardHVanishing}
   \lean{PushforwardHVanishing}
   \leanok
@@ -160,16 +152,6 @@ The formalization is fully proved with 0 sorry's, 0 axioms, and 0 admits.
   \]
   where $K = \ker(\eta)$ is a sheaf supported on $X \setminus Z$.
 \end{theorem}
-
-\begin{lemma}[SES dimension shift for cohomology]\label{lem:sheafH_dimension_shift_ses}
-  \lean{sheafH_dimension_shift_ses}
-  \leanok
-  \uses{lem:ext_dimension_shift}
-  Given a short exact sequence $0 \to \FF_1 \to \FF_2 \to \FF_3 \to 0$,
-  if $H^n(\FF_3) = 0$ and $H^{n+1}(\FF_2) = 0$, then $H^{n+1}(\FF_1) = 0$.
-  Specialization of Ext dimension shift to sheaf cohomology.
-\end{lemma}
-
 
 \chapter{Topology and Dimension Helpers}\label{ch:auxiliary}
 
@@ -247,13 +229,6 @@ The formalization is fully proved with 0 sorry's, 0 axioms, and 0 admits.
   On an irreducible topological space, the constant sheaf $\Z_X$ is flasque.
 \end{theorem}
 
-\begin{corollary}[Constant sheaf cohomology vanishing]\label{cor:constantSheaf_cohomology_vanishing}
-  \lean{constantSheaf_cohomology_vanishing}
-  \leanok
-  \uses{thm:FlasqueVanishing, thm:constantSheaf_flasque}
-  On a Noetherian irreducible space, $H^n(\Z_X) = 0$ for all $n \ge 1$.
-\end{corollary}
-
 \begin{lemma}[Every sheaf is flasque in dimension 0]\label{lem:sheaf_restriction_epi_dim_zero}
   \lean{sheaf_restriction_epi_of_irreducible_dim_zero}
   \leanok
@@ -311,21 +286,12 @@ The formalization is fully proved with 0 sorry's, 0 axioms, and 0 admits.
 \begin{theorem}[$\Z_V$ vanishing via constant sheaf]\label{thm:zeroOutsideInt_vanishing}
   \lean{zeroOutsideInt_vanishing}
   \leanok
-  \uses{def:isFlasqueSheaf, def:zeroOutside, def:zeroOutsideInt, lem:sheafH_dimension_shift_ses, thm:FlasqueVanishing, thm:constantSheaf_flasque}
+  \uses{def:isFlasqueSheaf, def:zeroOutside, def:zeroOutsideInt, thm:FlasqueVanishing, thm:constantSheaf_flasque}
   On an irreducible Noetherian space with $\KrullDim \ge 1$ and $n > \KrullDim(X)$:
   given $H^m(\coker(j)) = 0$ for the cokernel of $\Z_V \to \Z_X$,
   we have $H^{m+1}(\Z_V) = 0$. Uses the short exact sequence
   $0 \to \Z_V \to \Z_X \to \coker \to 0$, where $\Z_X$ is flasque (hence has
   vanishing cohomology), and dimension shifting.
-\end{theorem}
-
-\begin{theorem}[Cokernel of openHom vanishing]\label{thm:cokernel_openHom_vanishing}
-  \lean{cokernel_openHom_vanishing}
-  \leanok
-  \uses{def:zeroOutside, def:zeroOutsideInt, lem:closedIncl_counit_isIso, lem:dim_lt_of_closed, lem:epi_unit_of_closedImmersion, thm:PushforwardHVanishing}
-  The cokernel of $\Z_V \hookrightarrow \Z_U$ (for $V \subseteq U$) has vanishing
-  cohomology, proved via stalk analysis using that stalks of $\Z_U$ are cyclic
-  and stalk surjectivity of the open inclusion.
 \end{theorem}
 
 \begin{theorem}[$\Z_V$ complete cohomology vanishing]\label{thm:zeroOutsideInt_cohomology_vanishing}
@@ -421,27 +387,6 @@ The formalization is fully proved with 0 sorry's, 0 axioms, and 0 admits.
 
 
 \chapter{Main Theorem}\label{ch:main}
-
-\begin{theorem}[Vanishing step]\label{thm:sheafH_vanishing_succ}
-  \lean{sheafH_vanishing_succ}
-  \leanok
-  \uses{lem:sheafH_dimension_shift_ses}
-  If $H^m(\FF) = 0$ for all sheaves $\FF$ on $X$, then $H^{m+1}(\FF) = 0$
-  for all $\FF$. Uses injective presentation and dimension shifting.
-\end{theorem}
-
-\begin{theorem}[Vanishing cascade]\label{thm:sheafH_vanishing_cascade}
-  \lean{sheafH_vanishing_cascade}
-  \leanok
-  \uses{thm:sheafH_vanishing_succ}
-  Once $H^{m_0}(\FF) = 0$ for all sheaves $\FF$ on $X$ at a single degree $m_0$,
-  then $H^n(\FF) = 0$ for all $n \ge m_0$ and all $\FF$.
-
-  \emph{Proof.} By induction on $n - m_0$: embed $\FF$ into injective $\II$,
-  form $0 \to \FF \to \II \to Q \to 0$. By the induction hypothesis
-  $H^n(Q) = 0$, and $H^{n+1}(\II) = 0$ since $\II$ is injective.
-  Dimension shifting gives $H^{n+1}(\FF) = 0$.
-\end{theorem}
 
 \begin{lemma}[Reduction to irreducible spaces]\label{lem:grothendieck_vanishing_of_irreducible}
   \lean{grothendieck_vanishing_of_irreducible}
