@@ -150,8 +150,7 @@ theorem stalk_zeroOutsideInt_eq_zsmul_generator
   obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J P))).2 a
   obtain ⟨n, hn⟩ := presheaf_stalk_zeroOutside_eq_zsmul_generator V x hx q
   refine ⟨n, ?_⟩
-  rw [hn, map_zsmul]
-  congr 1
+  rw [hn, map_zsmul]; congr 1
   exact TopCat.Presheaf.stalkFunctor_map_germ_apply V x hx
     (toSheafify J P) (TopCat.Presheaf.zeroOutside.generator V)
 

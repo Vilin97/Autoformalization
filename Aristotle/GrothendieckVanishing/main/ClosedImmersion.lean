@@ -334,8 +334,7 @@ theorem closedIncl_unit_stalk_isIso
     Tz.map (CategoryTheory.toSheafify K P₁) ≫ Tz.map
       (presheafToSheaf K AddCommGrpCat.{u} |>.map
         ((Presheaf.pullback AddCommGrpCat (closedIncl hs)).map η.val)).val := by
-    rw [← Functor.map_comp, ← Functor.map_comp]
-    congr 1
+    rw [← Functor.map_comp, ← Functor.map_comp]; congr 1
     exact CategoryTheory.toSheafify_naturality K _
   haveI : IsIso (Tz.map (CategoryTheory.toSheafify K P₁)) := stalkFunctor_map_iso_toSheafify P₁ x
   haveI : IsIso (Tz.map (CategoryTheory.toSheafify K P₂)) := stalkFunctor_map_iso_toSheafify P₂ x

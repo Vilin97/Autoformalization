@@ -223,9 +223,8 @@ private theorem exists_section_generating_stalks
     -- Simplify via: everything factors through germ_res_apply + stalkFunctor_map_germ
     calc i_x x (R.presheaf.germ W x hxW
           (ConcreteCategory.hom (R.val.map (homOfLE hWV₁).op) s₁))
-        = i_x x (R.presheaf.germ V₁ x (hWV₁ hxW) s₁) := by
-          congr 1
-          exact TopCat.Presheaf.germ_res_apply R.val (homOfLE hWV₁) x hxW s₁
+        = i_x x (R.presheaf.germ V₁ x (hWV₁ hxW) s₁) :=
+          congrArg _ (TopCat.Presheaf.germ_res_apply R.val (homOfLE hWV₁) x hxW s₁)
       _ = (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x (hWV₁ hxW) is₁ := by
           rw [his₁_def]
           show ConcreteCategory.hom
