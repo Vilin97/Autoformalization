@@ -406,39 +406,24 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
 section FinsetGenerated
 open scoped Classical
 
--- `imageIncl` and `imageIncl_mono` are specializations of the general versions above.
-private noncomputable abbrev finsetCoproductIncl
-    {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
+variable {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
     {S' : Finset (TopCat.Sheaf.SectionIndex K)}
-    {σ₀ : TopCat.Sheaf.SectionIndex K} (_ : σ₀ ∉ S')
+    {σ₀ : TopCat.Sheaf.SectionIndex K}
     [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
-    [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :=
+    [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
+
+private noncomputable abbrev finsetCoproductIncl (_ : σ₀ ∉ S') :=
   finsetCoproductInclGen K (Finset.subset_insert σ₀ S')
 
-private noncomputable abbrev imageIncl
-    {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
-    {S' : Finset (TopCat.Sheaf.SectionIndex K)}
-    {σ₀ : TopCat.Sheaf.SectionIndex K} (_ : σ₀ ∉ S')
-    [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
-    [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :=
+private noncomputable abbrev imageIncl (_ : σ₀ ∉ S') :=
   finsetImageInclGen K (Finset.subset_insert σ₀ S')
 
-private instance imageIncl_mono
-    {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
-    {S' : Finset (TopCat.Sheaf.SectionIndex K)}
-    {σ₀ : TopCat.Sheaf.SectionIndex K} (hσ₀ : σ₀ ∉ S')
-    [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
-    [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
+private instance imageIncl_mono (hσ₀ : σ₀ ∉ S') :
     Mono (imageIncl hσ₀ : TopCat.Sheaf.finsetGeneratedSheaf S' ⟶ _) :=
   finsetImageInclGen_mono K (Finset.subset_insert σ₀ S')
 
 /-- The `σ₀`-component maps epi onto the cokernel of `imageIncl`. -/
-private theorem imageIncl_cokernel_epi
-    {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
-    {S' : Finset (TopCat.Sheaf.SectionIndex K)}
-    {σ₀ : TopCat.Sheaf.SectionIndex K} (hσ₀ : σ₀ ∉ S')
-    [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
-    [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
+private theorem imageIncl_cokernel_epi (hσ₀ : σ₀ ∉ S') :
     Epi (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1)
       ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
       factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫

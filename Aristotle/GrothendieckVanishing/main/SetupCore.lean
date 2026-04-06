@@ -15,6 +15,15 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
+/-- The induction hypothesis for Grothendieck vanishing: vanishing holds for all
+    sheaves on all spaces of strictly smaller Krull dimension than X. -/
+abbrev VanishingIH {X : TopCat.{u}} (dimX := topologicalKrullDim X) : Prop :=
+  ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+    (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+    topologicalKrullDim Y < dimX →
+    m > topologicalKrullDim Y →
+    Subsingleton (Sheaf.H G m)
+
 /-! ## Abstract Ext dimension shift helpers -/
 
 section ExtDimShift
@@ -436,11 +445,7 @@ theorem closedComplementVanishing
     (V : Opens X) (hV : V ≠ ⊥)
     (C : TopCat.Sheaf AddCommGrpCat.{u} X) (n : ℕ)
     (hn : ↑n > topologicalKrullDim X)
-    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
-      topologicalKrullDim Y < topologicalKrullDim X →
-      m > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G m))
+    (ih : VanishingIH (X := X))
     (hStalksOnV : ∀ x ∈ V,
       ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj C.val), a = 0) :
     Subsingleton (Sheaf.H C n) := by
