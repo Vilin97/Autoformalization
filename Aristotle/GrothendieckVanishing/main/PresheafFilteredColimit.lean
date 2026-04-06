@@ -50,19 +50,19 @@ private theorem sheaf_section_zero_of_zero_on_finite_cover
     obtain ⟨hkt, hxk⟩ := Opens.mem_iSup.mp hk
     exact ⟨U k, le_iSup U k, hxk, (hzero k hkt).trans (map_zero _).symm⟩
 
-/-- Merge finitely many eventually-zero transitions into one. -/
+/-- Merge finitely many eventually-zero restrictions into a common index. -/
 private theorem filtered_colimit_kills_all_restrictions
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     {X : TopCat.{u}} (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    {ι : Type u} (U : ι → Opens X) (j₀ : J')
-    (b₀ : ToType ((Y'.obj j₀).val.obj (op (iSup U))))
+    {ι : Type u} {V : Opens X} {W : ι → Opens X} (hW : ∀ k, W k ≤ V) (j₀ : J')
+    (b₀ : ToType ((Y'.obj j₀).val.obj (op V)))
     (t : Finset ι)
     (h_ev : ∀ k ∈ t, ∃ (jk : J') (fk : j₀ ⟶ jk),
-      ConcreteCategory.hom ((Y'.obj jk).val.map (Opens.leSupr U k).op)
-        (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op (iSup U))) b₀) = 0) :
+      ConcreteCategory.hom ((Y'.obj jk).val.map (homOfLE (hW k)).op)
+        (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op V)) b₀) = 0) :
     ∃ (j₁ : J') (g₀ : j₀ ⟶ j₁),
-      ∀ k ∈ t, ConcreteCategory.hom ((Y'.obj j₁).val.map (Opens.leSupr U k).op)
-        (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op (iSup U))) b₀) = 0 := by
+      ∀ k ∈ t, ConcreteCategory.hom ((Y'.obj j₁).val.map (homOfLE (hW k)).op)
+        (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op V)) b₀) = 0 := by
   classical
   induction t using Finset.induction with
   | empty => exact ⟨j₀, 𝟙 j₀, fun _ hk => absurd hk (by simp)⟩
@@ -80,9 +80,9 @@ private theorem filtered_colimit_kills_all_restrictions
     refine ⟨j₁, g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq, fun k hk => ?_⟩
     rw [Finset.mem_insert] at hk; rcases hk with rfl | hk
     · rw [heq]; exact transition_preserves_zero Y' fk₀
-        (IsFiltered.rightToMax j_cur jk₀ ≫ h_eq) (Opens.leSupr U k) b₀ hfk₀
+        (IsFiltered.rightToMax j_cur jk₀ ≫ h_eq) (homOfLE (hW k)) b₀ hfk₀
     · exact transition_preserves_zero Y' g_cur
-        (IsFiltered.leftToMax j_cur jk₀ ≫ h_eq) (Opens.leSupr U k) b₀ (hg_cur k hk)
+        (IsFiltered.leftToMax j_cur jk₀ ≫ h_eq) (homOfLE (hW k)) b₀ (hg_cur k hk)
 
 /-- On a Noetherian space, the presheaf-level filtered colimit of sheaves is a sheaf.
     Proof: Noetherian compactness reduces the sheaf condition to finite covers, then
@@ -137,7 +137,8 @@ private theorem isSheaf_presheaf_filtered_colimit
       obtain ⟨jk, fk, hfk⟩ := h0
       exact ⟨jk, fk, by simpa [map_zero] using hfk⟩
     -- Merge via filtered_colimit_kills_all_restrictions
-    obtain ⟨j₁, g₀, hg₀⟩ := filtered_colimit_kills_all_restrictions Y' U j₀ b₀ t (by
+    obtain ⟨j₁, g₀, hg₀⟩ := filtered_colimit_kills_all_restrictions Y'
+        (fun k => le_iSup U k) j₀ b₀ t (by
       intro k hk; obtain ⟨jk, fk, hfk⟩ := h_ev_zero k hk; refine ⟨jk, fk, ?_⟩
       change ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op (iSup U)) ≫
         ((Y' ⋙ sheafToPresheaf _ _).obj jk).map (Opens.leSupr U k).op) b₀ = 0
@@ -390,41 +391,9 @@ private theorem isSheaf_presheaf_filtered_colimit
       change ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op (U i)) ≫
         ((Y' ⋙ sheafToPresheaf _ _).obj jk).map (homOfLE inf_le_left).op) d₀ = 0
       rw [← hnat']; exact hfk.trans (map_zero _)
-    -- Merge all to common index (suffices + Finset.induction)
-    obtain ⟨j₃, g₃, hg₃⟩ : ∃ (j₃ : J') (g₃ : j₂ ⟶ j₃),
-        ∀ k ∈ t, ConcreteCategory.hom ((Y'.obj j₃).val.map (homOfLE (inf_le_left : U i ⊓ U k ≤ U i)).op)
-          (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₃).app (op (U i))) d₀) = 0 := by
-      suffices ∀ (S : Finset ι) (_ : S ⊆ t),
-          (∀ k ∈ S, ∃ (jk : J') (fk : j₂ ⟶ jk),
-            ConcreteCategory.hom ((Y'.obj jk).val.map (homOfLE (inf_le_left : U i ⊓ U k ≤ U i)).op)
-              (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op (U i))) d₀) = 0) →
-          ∃ (j₃ : J') (g₃ : j₂ ⟶ j₃),
-            ∀ k ∈ S, ConcreteCategory.hom ((Y'.obj j₃).val.map (homOfLE (inf_le_left : U i ⊓ U k ≤ U i)).op)
-              (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₃).app (op (U i))) d₀) = 0 by
-        exact this t (fun _ hx => hx) h_ev_d
-      intro S hSt h_ev_S
-      induction S using Finset.induction with
-      | empty => exact ⟨j₂, 𝟙 j₂, fun _ hk => absurd hk (by simp)⟩
-      | @insert k₀ t₁ hk₀ ih =>
-        obtain ⟨j_cur, g_cur, hg_cur⟩ := ih
-          (fun k hk => hSt (Finset.mem_insert_of_mem hk))
-          (fun k hk => h_ev_S k (Finset.mem_insert_of_mem hk))
-        obtain ⟨jk₀, fk₀, hfk₀⟩ := h_ev_S k₀ (Finset.mem_insert_self k₀ t₁)
-        let j' := IsFiltered.coeq (g_cur ≫ IsFiltered.leftToMax j_cur jk₀)
-            (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
-        let h_eq := IsFiltered.coeqHom (g_cur ≫ IsFiltered.leftToMax j_cur jk₀)
-            (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
-        have heq : g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq =
-            fk₀ ≫ IsFiltered.rightToMax j_cur jk₀ ≫ h_eq := by
-          simpa only [Category.assoc] using IsFiltered.coeq_condition
-            (g_cur ≫ IsFiltered.leftToMax j_cur jk₀)
-            (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
-        refine ⟨j', g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq, fun k hk => ?_⟩
-        rw [Finset.mem_insert] at hk; rcases hk with rfl | hk
-        · rw [heq]; exact transition_preserves_zero Y' fk₀
-            (IsFiltered.rightToMax j_cur jk₀ ≫ h_eq) (homOfLE inf_le_left) d₀ hfk₀
-        · exact transition_preserves_zero Y' g_cur
-            (IsFiltered.leftToMax j_cur jk₀ ≫ h_eq) (homOfLE inf_le_left) d₀ (hg_cur k hk)
+    -- Merge all to common index
+    obtain ⟨j₃, g₃, hg₃⟩ := filtered_colimit_kills_all_restrictions Y'
+      (fun k => inf_le_left (a := U i) (b := U k)) j₂ d₀ t h_ev_d
     -- Sheaf separation in piece: F(g₃)(d₀) = 0
     let b₃ := ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₃).app (op (U i))) d₀
     have hb₃_zero : b₃ = 0 := by

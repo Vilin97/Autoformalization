@@ -16,21 +16,6 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 
-/-- `zeroOutsideInt ⊥` is the zero sheaf (all stalks vanish). -/
-theorem isZero_zeroOutsideInt_bot (X : TopCat.{u}) :
-    IsZero (TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X)) := by
-  apply sheaf_isZero_of_zero_stalks X; intro x a
-  let P := TopCat.Presheaf.constZ.zeroOutside (⊥ : Opens X)
-  let J := Opens.grothendieckTopology (T := X)
-  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  haveI : IsIso (T.map (toSheafify J P)) := stalkFunctor_map_iso_toSheafify P x
-  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J P))).2 a
-  obtain ⟨W, hxW, s, rfl⟩ := P.germ_exist x q
-  have hW : ¬ (W ≤ ⊥) := fun h => Opens.mem_bot.mp (h hxW)
-  have hIsZero := TopCat.Presheaf.zeroOutside_isZero (F := TopCat.Presheaf.constZ) hW
-  haveI := AddCommGrpCat.subsingleton_of_isZero hIsZero
-  simp [Subsingleton.eq_zero s, map_zero]
-
 /-- Stalks of `zeroOutsideInt V` vanish outside `V`. -/
 theorem stalk_zeroOutsideInt_zero_outside
     {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∉ V)
@@ -42,10 +27,15 @@ theorem stalk_zeroOutsideInt_zero_outside
   haveI : IsIso (T.map (toSheafify J P)) := stalkFunctor_map_iso_toSheafify P x
   obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J P))).2 a
   obtain ⟨W, hxW, s, rfl⟩ := P.germ_exist x q
-  have hW : ¬ (W ≤ V) := fun h => hx (h hxW)
-  have hIsZero := TopCat.Presheaf.zeroOutside_isZero (F := TopCat.Presheaf.constZ) hW
-  haveI := AddCommGrpCat.subsingleton_of_isZero hIsZero
+  haveI := AddCommGrpCat.subsingleton_of_isZero
+    (TopCat.Presheaf.zeroOutside_isZero (F := TopCat.Presheaf.constZ) (fun h => hx (h hxW)))
   simp [Subsingleton.eq_zero s, map_zero]
+
+/-- `zeroOutsideInt ⊥` is the zero sheaf (all stalks vanish). -/
+theorem isZero_zeroOutsideInt_bot (X : TopCat.{u}) :
+    IsZero (TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X)) :=
+  sheaf_isZero_of_zero_stalks X _ fun x a =>
+    stalk_zeroOutsideInt_zero_outside ⊥ x (Opens.mem_bot.not.mpr (fun h => h.elim)) a
 
 /-- A nonzero subsheaf of `zeroOutsideInt V` has a nonzero stalk at some point of `V`. -/
 theorem exists_nonzero_stalk_in_V
