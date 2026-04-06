@@ -305,7 +305,6 @@ theorem closedIncl_unit_stalk_isIso
   haveI : IsIso (pb.map η).val := by
     show IsIso (sheafToPresheaf _ _ |>.map (pb.map η)); infer_instance
   let Tz := Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  haveI : IsIso (Tz.map (pb.map η).val) := inferInstance
   -- Step 3: pullbackIso naturality
   let pi := Sheaf.pullbackIso AddCommGrpCat.{u} (closedIncl hs)
   let piF := pi.hom.app F
@@ -317,7 +316,6 @@ theorem closedIncl_unit_stalk_isIso
     congr_arg Sheaf.Hom.val (pi.hom.naturality η)
   have hnat_stalk := congr_arg Tz.map hnat
   simp only [Functor.map_comp] at hnat_stalk
-  haveI : IsIso (Tz.map (pb.map η).val ≫ Tz.map piT.val) := inferInstance
   -- Step 4: presheafToSheaf.map(pull.map(η.val)).val stalk is iso
   haveI : IsIso (Tz.map
       (presheafToSheaf _ _ |>.map ((Presheaf.pullback AddCommGrpCat (closedIncl hs)).map η.val)).val) :=
