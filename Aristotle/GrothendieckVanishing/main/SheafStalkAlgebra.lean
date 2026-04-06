@@ -53,8 +53,7 @@ theorem zeroOutsideInt_vanishing
         IsIso.hom_inv_id, Category.comp_id]
     rw [hrw]
     haveI := constantSheaf_flasque_of_irreducible X i; exact inferInstance
-  exact sheafH_dimension_shift_ses hSE m hCoker
-    (FlasqueVanishing X S.X₂ hFlasque m)
+  exact ext_dimension_shift _ hSE m hCoker (FlasqueVanishing X S.X₂ hFlasque m)
 
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
     any germ in the larger zero-outside presheaf can be lifted by restricting to `W ∩ V ≤ V`

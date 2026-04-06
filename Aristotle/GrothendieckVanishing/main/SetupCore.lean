@@ -438,15 +438,6 @@ theorem ClosedImmersionSES
   haveI : Epi η := epi_unit_of_closedImmersion Z hZ F
   exact ⟨ShortComplex.mk (kernel.ι η) η (kernel.condition η), shortExact_of_epi η, rfl, rfl⟩
 
-/-- Dimension shift via SES: specialization of `ext_dimension_shift` to sheaves. -/
-theorem sheafH_dimension_shift_ses {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (n : ℕ)
-    (h₃ : Subsingleton (Sheaf.H S.X₃ n))
-    (h₂ : Subsingleton (Sheaf.H S.X₂ (n + 1))) :
-    Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
-  ext_dimension_shift _ hS n h₃ h₂
-
 /-- Vanishing for a sheaf supported on the complement of an open V, via closed-immersion SES.
     Given:
     - C is a sheaf on irreducible Noetherian X
