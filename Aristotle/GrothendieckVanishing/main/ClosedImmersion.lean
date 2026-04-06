@@ -76,8 +76,7 @@ theorem closedIncl_presheaf_counit_stalk_comp
         ((TopCat.Presheaf.pushforwardPullbackAdjunction AddCommGrpCat
           (closedIncl hs)).counit.app F) =
       F.stalkPushforward AddCommGrpCat (closedIncl hs) x := by
-  apply TopCat.Presheaf.stalk_hom_ext
-  intro U hU
+  apply TopCat.Presheaf.stalk_hom_ext; intro U hU
   change ((TopCat.Presheaf.pushforward AddCommGrpCat (closedIncl hs)).obj F).germ U
       ((closedIncl hs) x) hU ≫
         TopCat.Presheaf.stalkPullbackHom AddCommGrpCat (closedIncl hs)

@@ -28,9 +28,7 @@ theorem epi_of_isTerminal_tgt {C : Type*} [Category C] [Abelian C] {X Y : C}
 noncomputable def isTerminal_sheaf_bot {X : Type u} [TopologicalSpace X]
     (F : Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :
     IsTerminal (F.val.obj (Opposite.op ⊥)) := by
-  apply Sheaf.isTerminalOfBotCover
-  intro x hx
-  exact (Opens.mem_bot.mp hx).elim
+  apply Sheaf.isTerminalOfBotCover; intro x hx; exact (Opens.mem_bot.mp hx).elim
 
 /-! ## Irreducible spaces of dimension 0 -/
 

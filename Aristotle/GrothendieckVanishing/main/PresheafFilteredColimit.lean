@@ -388,9 +388,7 @@ private theorem isSheaf_presheaf_filtered_colimit
         (homOfLE (inf_le_left : U i ⊓ U k ≤ U i)).op
       change ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op (U i)) ≫
         ((Y' ⋙ sheafToPresheaf _ _).obj jk).map (homOfLE inf_le_left).op) d₀ = 0
-      rw [← hnat']
-      have := hfk.trans (map_zero _)
-      exact this
+      rw [← hnat']; exact hfk.trans (map_zero _)
     -- Merge all to common index (suffices + Finset.induction)
     obtain ⟨j₃, g₃, hg₃⟩ : ∃ (j₃ : J') (g₃ : j₂ ⟶ j₃),
         ∀ k ∈ t, ConcreteCategory.hom ((Y'.obj j₃).val.map (homOfLE (inf_le_left : U i ⊓ U k ≤ U i)).op)
