@@ -353,15 +353,11 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     refine ⟨sup_le hV₀U hWU, ?_⟩
     apply TopCat.Sheaf.eq_of_locally_eq' S.X₃ BU (V₀ ⊔ W)
       (fun b => homOfLE (by cases b <;> simp [BU])) (hsup_eq ▸ le_rfl)
-    intro b; cases b
-    · rw [← S.g.val.naturality_apply _ t_new]; simp only [BU]
-      have h0 := ht_new false; simp only [BU] at h0; rw [h0, ht₀]
-      simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
-      exact presheaf_map_eq S.X₃.val _ _ s
-    · rw [← S.g.val.naturality_apply _ t_new]; simp only [BU]
-      have h1 := ht_new true; simp only [BU] at h1; rw [h1, hgt'']
-      simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
-      exact presheaf_map_eq S.X₃.val _ _ s
+    intro b; rw [← S.g.val.naturality_apply _ t_new]
+    have hb := ht_new b; cases b <;>
+      (simp only [BU, Bsf] at hb ⊢; rw [hb]; first | rw [ht₀] | rw [hgt'']
+       simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
+       exact presheaf_map_eq S.X₃.val _ _ s)
   have h_ext : (sigmaPreorder S).le ⟨V₀, t₀⟩ ⟨V₀ ⊔ W, t_new⟩ := by
     refine ⟨le_sup_left, ?_⟩
     have h0 := ht_new false; simp only [BU, Bsf] at h0; exact h0
