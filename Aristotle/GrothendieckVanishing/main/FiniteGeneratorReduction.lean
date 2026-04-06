@@ -481,8 +481,8 @@ private theorem imageIncl_cokernel_epi
         (Sigma.desc _)]
       rw [colimit.ι_desc, Cofan.mk_ι_app, dif_neg h, zero_comp]
       symm
-      have hσ' : σ ∈ S' := Finset.mem_of_mem_insert_of_ne hσ h
-      have hι : Sigma.ι (fun τ : {τ // τ ∈ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ, hσ'⟩ ≫
+      have hι : Sigma.ι (fun τ : {τ // τ ∈ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1)
+          ⟨σ, Finset.mem_of_mem_insert_of_ne hσ h⟩ ≫
           finsetCoproductIncl hσ₀ =
         Sigma.ι (fun τ : {τ // τ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ, hσ⟩ := by
         simp [finsetCoproductIncl, finsetCoproductInclGen]

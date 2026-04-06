@@ -311,9 +311,8 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
     exact presheaf_map_eq S.X₃.val _ _ s
   obtain ⟨a, ha⟩ := sections_exact_of_shortExact hS (V₀ ⊓ W) _ hdiff_ker
-  have hfl := hFlasque₁ (homOfLE inf_le_right : V₀ ⊓ W ⟶ W)
-  rw [AddCommGrpCat.epi_iff_surjective] at hfl
-  obtain ⟨ahat, hahat⟩ := hfl a
+  obtain ⟨ahat, hahat⟩ := (AddCommGrpCat.epi_iff_surjective _).mp
+    (hFlasque₁ (homOfLE inf_le_right : V₀ ⊓ W ⟶ W)) a
   set t'' := t' + S.f.val.app (op W) ahat with ht''_def
   have hgt'' : S.g.val.app (op W) t'' = S.X₃.val.map (homOfLE hWU).op s := by
     simp only [ht''_def, map_add, show S.g.val.app (op W) (S.f.val.app (op W) ahat) = 0 from by
@@ -358,10 +357,8 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
       (simp only [BU, Bsf] at hb ⊢; rw [hb]; first | rw [ht₀] | rw [hgt'']
        simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
        exact presheaf_map_eq S.X₃.val _ _ s)
-  have h_ext : (sigmaPreorder S).le ⟨V₀, t₀⟩ ⟨V₀ ⊔ W, t_new⟩ := by
-    refine ⟨le_sup_left, ?_⟩
-    have h0 := ht_new false; simp only [BU, Bsf] at h0; exact h0
-  exact hxV₀ ((hmax _ h_new_inP h_ext).1 (Or.inr hxW))
+  exact hxV₀ ((hmax _ h_new_inP ⟨le_sup_left, by
+    have h0 := ht_new false; simp only [BU, Bsf] at h0; exact h0⟩).1 (Or.inr hxW))
 
 -- Zorn argument for surjectivity of sections (Nugent, PR #35790).
 theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
