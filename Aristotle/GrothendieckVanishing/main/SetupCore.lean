@@ -455,3 +455,45 @@ theorem sheafH_dimension_shift_ses {X : TopCat.{u}}
     (h₂ : Subsingleton (Sheaf.H S.X₂ (n + 1))) :
     Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
   ext_dimension_shift _ hS n h₃ h₂
+
+/-- Vanishing for a sheaf supported on the complement of an open V, via closed-immersion SES.
+    Given:
+    - C is a sheaf on irreducible Noetherian X
+    - V ≠ ⊥ is an open with n > dim X
+    - IH gives vanishing on all spaces of smaller dimension
+    - Stalks of C vanish at all points of V (the `hStalksOnV` hypothesis)
+    Concludes H^n(C) = 0 by building the SES on Y = Vᶜ. -/
+theorem closedComplementVanishing
+    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
+    (V : Opens X) (hV : V ≠ ⊥)
+    (C : TopCat.Sheaf AddCommGrpCat.{u} X) (n : ℕ)
+    (hn : ↑n > topologicalKrullDim X)
+    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+      topologicalKrullDim Y < topologicalKrullDim X →
+      m > topologicalKrullDim Y →
+      Subsingleton (Sheaf.H G m))
+    (hStalksOnV : ∀ x ∈ V,
+      ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj C.val), a = 0) :
+    Subsingleton (Sheaf.H C n) := by
+  set Y := (V : Set X)ᶜ
+  have hYcl : IsClosed Y := V.2.isClosed_compl
+  have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl (compl_ne_univ_of_ne_bot hV)
+      (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
+        (lt_of_lt_of_le hn le_top))
+  let i : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
+  let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i).unit.app C
+  haveI : Epi η := epi_unit_of_closedImmersion Y hYcl C
+  let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
+  have hSE : S.ShortExact := shortExact_of_epi η
+  exact subsingleton_sheafH_of_shortExact_middle hSE n
+    (by apply subsingleton_sheafH_of_isZero'; apply sheaf_isZero_of_zero_stalks X; intro x a
+        by_cases hxY : x ∈ Y
+        · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
+            TopCat.closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
+          exact stalk_zero_of_ses_g_iso hSE x inferInstance a
+        · exact stalk_zero_of_shortExact_kernel hSE x
+            (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b) a)
+    (PushforwardHVanishing Y hYcl _ n
+      (@ih (TopCat.of Y) _ n _ hY_dim_lt (lt_trans hY_dim_lt hn)))

@@ -62,6 +62,63 @@ noncomputable instance sheafHasExt (X : TopCat.{u}) :
     HasExt.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   hasExt_of_enoughInjectives _
 
+theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (hstalk : ∀ (x : X)
+      (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F.val), a = 0) :
+    IsZero F := by
+  have val_isZero : ∀ (U : (Opens X)ᵒᵖ), IsZero (F.val.obj U) := fun ⟨U⟩ =>
+    @AddCommGrpCat.isZero_of_subsingleton _
+      ⟨fun s t => TopCat.Presheaf.section_ext F U s t fun x hx =>
+        (hstalk x _).trans (hstalk x _).symm⟩
+  apply IsZero.mk
+  · intro G; exact ⟨{
+      default := 0
+      uniq := fun f => by
+        apply Sheaf.Hom.ext; apply NatTrans.ext; funext U
+        exact (val_isZero U).eq_zero_of_src (f.val.app U) }⟩
+  · intro G; exact ⟨{
+      default := 0
+      uniq := fun f => by
+        apply Sheaf.Hom.ext; apply NatTrans.ext; funext U
+        exact (val_isZero U).eq_zero_of_tgt (f.val.app U) }⟩
+
+theorem subsingleton_sheafH_of_isZero' {X : TopCat.{u}}
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsZero F) (n : ℕ) :
+    Subsingleton (Sheaf.H F n) := by
+  have : ∀ x : Sheaf.H F n, x = 0 := fun x => by
+    have h := Ext.comp_mk₀_id x
+    rw [show (𝟙 F : F ⟶ F) = 0 from hF.eq_of_src _ _, Ext.mk₀_zero] at h
+    exact h.symm.trans (Ext.comp_zero x F 0 n (add_zero n))
+  exact ⟨fun a b => (this a).trans (this b).symm⟩
+
+theorem stalk_zero_of_ses_g_iso
+    {X : TopCat.{u}} {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hSE : S.ShortExact) (x : X)
+    (hiso : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val))
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₁.val) :
+    a = 0 := by
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  have hcomp_elem : ConcreteCategory.hom (T.map S.g.val)
+      (ConcreteCategory.hom (T.map S.f.val) a) = 0 := by
+    rw [← ConcreteCategory.comp_apply, ← T.map_comp]
+    obtain ⟨U, hxU, s, rfl⟩ := S.X₁.presheaf.germ_exist x a
+    rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
+    have : ConcreteCategory.hom ((S.f.val ≫ S.g.val).app (op U)) s = 0 := by
+      change ConcreteCategory.hom ((S.f ≫ S.g).val.app (op U)) s = 0
+      rw [S.zero]; exact AddMonoidHom.zero_apply s
+    change ConcreteCategory.hom (S.X₃.presheaf.germ U x hxU)
+      (ConcreteCategory.hom ((S.f.val ≫ S.g.val).app (op U)) s) = 0
+    rw [this]; exact map_zero _
+  have hfa_zero : ConcreteCategory.hom (T.map S.f.val) a = 0 :=
+    (ConcreteCategory.bijective_of_isIso (T.map S.g.val)).1
+      (hcomp_elem.trans (map_zero _).symm)
+  haveI : Mono S.f := hSE.mono_f
+  haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
+  exact (AddCommGrpCat.mono_iff_injective _).mp
+    (Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f)
+    (hfa_zero.trans (map_zero _).symm)
+
 /-- The kernel short exact sequence `0 → ker(f) → X → Y → 0` for an epi `f`. -/
 theorem shortExact_of_epi {C : Type*} [Category C] [Abelian C] {X Y : C} (f : X ⟶ Y) [Epi f] :
     (ShortComplex.mk (kernel.ι f) f (kernel.condition f)).ShortExact :=

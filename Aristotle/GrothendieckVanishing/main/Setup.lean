@@ -46,29 +46,6 @@ theorem exists_closed_subset_lt_dim_of_irreducible_pos
           lt_of_lt_of_le hn le_top) le_top))
   refine ⟨a.carrier, a.isClosed', hZ_ne_univ, hZ_dim, lt_trans hZ_dim hn⟩
 
-/-- In the irreducible positive-dimensional case, once a proper closed subset `Z` of smaller
-dimension has been chosen, the pushforward term `i_*(i^*F)` in the closed-immersion short exact
-sequence vanishes in degree `n` by the induction hypothesis on `Z`. -/
-theorem irreduciblePos_pushforward_subsingleton
-    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (n : ℕ) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
-      topologicalKrullDim Y < topologicalKrullDim X →
-      m > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G m))
-    (Z : Set X) (hZ_closed : IsClosed Z)
-    (hZ_dim : topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X)
-    (hn_Z : ↑n > topologicalKrullDim (TopCat.of Z))
-    (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X))
-    (hS₃ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hZ_closed)).obj
-        ((TopCat.Sheaf.pullback AddCommGrpCat.{u}
-          (TopCat.closedIncl hZ_closed)).obj F)) :
-    Subsingleton (Sheaf.H S.X₃ n) := by
-  rw [hS₃]
-  exact PushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ n _ hZ_dim hn_Z)
-
 /-! ## Remaining sub-lemmas and main theorem
 
 The auxiliary lemmas and `IrreduciblePosVanishing` are now in `IrreducibleStep.lean`

@@ -371,37 +371,9 @@ theorem subsheaf_zeroOutsideInt_vanishing
     have hV'van : Subsingleton (Sheaf.H S.X₁ m) :=
       zeroOutsideInt_cohomology_vanishing X ih hpos V' hV'ne m hm
     -- Step 4: Third-term (cokernel) vanishing via ClosedImmersionSES on (V')^c
-    have hCoker : Subsingleton (Sheaf.H S.X₃ m) := by
-      set CJ := Limits.cokernel j
-      -- Y = (V')^c is closed, proper, has dim < dim X
-      set Y := (V' : Set X)ᶜ with hY_def
-      have hYcl : IsClosed Y := V'.isOpen.isClosed_compl
-      have hY_ne_univ : Y ≠ Set.univ :=
-        compl_ne_univ_of_ne_bot hV'ne
-      have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
-        topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne_univ
-          (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
-            (lt_of_lt_of_le hm le_top))
-      -- Build SES via ClosedImmersionSES on (V')^c with CJ
-      let ci : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-      let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} ci).unit.app CJ
-      haveI : Epi η := epi_unit_of_closedImmersion Y hYcl CJ
-      let S' := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
-      have hSE' : S'.ShortExact := shortExact_of_epi η
-      have hPush : Subsingleton (Sheaf.H S'.X₃ m) :=
-        PushforwardHVanishing Y hYcl _ m (@ih (TopCat.of Y) _ m _ hY_dim_lt (lt_trans hY_dim_lt hm))
-      -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
-      have hKer : Subsingleton (Sheaf.H S'.X₁ m) := by
-        apply subsingleton_sheafH_of_isZero'; apply sheaf_isZero_of_zero_stalks X; intro x a
-        by_cases hxY : x ∈ Y
-        · -- At points in (V')^c: closedIncl_unit_stalk_isIso gives S'.g iso → kernel stalk = 0
-          haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S'.g.val) :=
-            closedIncl_unit_stalk_isIso hYcl CJ ⟨x, hxY⟩
-          exact stalk_zero_of_ses_g_iso hSE' x inferInstance a
-        · exact stalk_zero_of_shortExact_kernel hSE' x (fun b =>
-            cokernel_stalk_zero_of_stalk_surj j x
-              (hj_stalk x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY)).2 b) a
-      exact subsingleton_sheafH_of_shortExact_middle hSE' m hKer hPush
+    have hCoker : Subsingleton (Sheaf.H S.X₃ m) :=
+      closedComplementVanishing V' hV'ne _ m hm ih
+        (fun x hxV' b => cokernel_stalk_zero_of_stalk_surj j x (hj_stalk x hxV').2 b)
     -- Step 5: Middle-term LES gives H^m(R) = 0
     exact subsingleton_sheafH_of_shortExact_middle hSE m hV'van hCoker
 
@@ -439,29 +411,6 @@ theorem epiImage_zeroOutsideInt_vanishing
 -- Filtered diagram infrastructure, finitely generated vanishing, and
 -- directLimit_cohomology_vanishing are in FiniteGeneratorReduction.lean.
 
-/-- Kernel vanishing via assembly of Steps 3-5. -/
-theorem irreduciblePos_kernel_subsingleton
-    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
-      topologicalKrullDim Y < topologicalKrullDim X →
-      m > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G m))
-    (_Z : Set X) (_hZ_closed : IsClosed _Z) (_ : _Z ≠ Set.univ)
-    (_ : topologicalKrullDim (TopCat.of _Z) < topologicalKrullDim X)
-    (_ : ↑n > topologicalKrullDim (TopCat.of _Z))
-    (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X))
-    (_ : S.ShortExact) (_ : S.X₂ = F)
-    (_ : S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl _hZ_closed)).obj
-        ((TopCat.Sheaf.pullback AddCommGrpCat.{u}
-          (TopCat.closedIncl _hZ_closed)).obj F)) :
-    Subsingleton (Sheaf.H S.X₁ n) :=
-  directLimit_cohomology_vanishing S.X₁ n
-    (fun f hf => epiImage_zeroOutsideInt_vanishing X ih hpos _ f hf n hn)
-
 /-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case). -/
 theorem IrreduciblePosVanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
@@ -473,14 +422,14 @@ theorem IrreduciblePosVanishing
       m > topologicalKrullDim Y →
       Subsingleton (Sheaf.H G m)) :
     Subsingleton (Sheaf.H F n) := by
-  obtain ⟨Z, hZ_closed, hZ_ne_univ, hZ_dim, hn_Z⟩ :=
+  obtain ⟨Z, hZ_closed, _, hZ_dim, hn_Z⟩ :=
     exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos
   obtain ⟨S, hSE, hS₂, hS₃⟩ := ClosedImmersionSES Z hZ_closed F
-  have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
-    irreduciblePos_pushforward_subsingleton X n F ih Z hZ_closed hZ_dim hn_Z S hS₃
+  have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
+    rw [hS₃]; exact PushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ n _ hZ_dim hn_Z)
   have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
-    irreduciblePos_kernel_subsingleton X n hn hpos F ih Z hZ_closed hZ_ne_univ hZ_dim hn_Z
-      S hSE hS₂ hS₃
+    directLimit_cohomology_vanishing S.X₁ n
+      (fun f hf => epiImage_zeroOutsideInt_vanishing X ih hpos _ f hf n hn)
   rw [← hS₂]
   exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
 

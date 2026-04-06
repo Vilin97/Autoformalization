@@ -167,37 +167,8 @@ theorem cokernel_openHom_vanishing
       Subsingleton (Sheaf.H G m)) :
     let f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
     Subsingleton (Sheaf.H (Limits.cokernel f) n) := by
-  intro f
-  set C := Limits.cokernel f
-  -- Y = Vᶜ is closed, proper, has dim < dim X
-  set Y := (V : Set X)ᶜ with hY_def
-  have hYcl : IsClosed Y := V.2.isClosed_compl
-  have hY_ne_univ : Y ≠ Set.univ :=
-    compl_ne_univ_of_ne_bot hV
-  have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne_univ
-      (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
-        (lt_of_lt_of_le hn le_top))
-  -- Build SES via ClosedImmersionSES on Vᶜ with C (use let-bindings for dsimp)
-  let i : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-  let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
-  let η := adj.unit.app C
-  haveI : Epi η := epi_unit_of_closedImmersion Y hYcl C
-  let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
-  have hSE : S.ShortExact := shortExact_of_epi η
-  -- Pushforward vanishing by IH
-  have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
-    PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ n _ hY_dim_lt (lt_trans hY_dim_lt hn))
-  -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
-  have hKer : Subsingleton (Sheaf.H S.X₁ n) := by
-    apply subsingleton_sheafH_of_isZero'; apply sheaf_isZero_of_zero_stalks X; intro x a
-    by_cases hxY : x ∈ Y
-    · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
-        closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
-      exact stalk_zero_of_ses_g_iso hSE x inferInstance a
-    · exact stalk_zero_of_shortExact_kernel hSE x
-        (fun b => cokernel_stalk_zero_V V x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY) b) a
-  exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
+  intro f; exact closedComplementVanishing V hV _ n hn ih
+    (fun x hxV a => cokernel_stalk_zero_V V x hxV a)
 
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
 
@@ -228,49 +199,40 @@ theorem zeroOutsideInt_cohomology_vanishing
   -- Step 2: apply zeroOutsideInt_vanishing, reducing to cokernel vanishing at m'
   apply zeroOutsideInt_vanishing X V m'
   -- Goal: Subsingleton (Sheaf.H (Limits.cokernel (openHom le_top)) m')
-  -- Step 3: ClosedImmersionSES on Y = Vᶜ applied to the cokernel C
-  set f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
-  set C := Limits.cokernel f
+  -- Cokernel vanishing at m': dim Vᶜ < dim X ≤ m' (since m'+1 > dim X > 0)
+  set C := Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))
   set Y := (V : Set X)ᶜ with hY_def
   have hYcl : IsClosed Y := V.2.isClosed_compl
-  have hY_ne_univ : Y ≠ Set.univ :=
-    compl_ne_univ_of_ne_bot hV
   have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl hY_ne_univ
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl (compl_ne_univ_of_ne_bot hV)
       (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
         (lt_of_lt_of_le hm le_top))
-  -- Dimension arithmetic: m' > dim Y
   have hm'_Y : ↑m' > topologicalKrullDim (TopCat.of Y) := by
     show topologicalKrullDim Y < ↑m'
     have hd_ne_bot : topologicalKrullDim X ≠ ⊥ := ne_bot_of_gt hpos
     lift topologicalKrullDim X to ℕ∞ using hd_ne_bot with d
-    have hm' : (d : WithBot ℕ∞) < ↑((m'.succ : ℕ) : ℕ∞) := hm
-    rw [WithBot.coe_lt_coe] at hm'
-    have hd_ne_top : d ≠ ⊤ := ne_top_of_lt hm'
+    have hd_lt : (d : WithBot ℕ∞) < ↑((m'.succ : ℕ) : ℕ∞) := hm
+    rw [WithBot.coe_lt_coe] at hd_lt
+    have hd_ne_top : d ≠ ⊤ := ne_top_of_lt hd_lt
     lift d to ℕ using hd_ne_top with d'
-    rw [ENat.coe_lt_coe] at hm'
+    rw [ENat.coe_lt_coe] at hd_lt
     calc topologicalKrullDim Y < ↑↑d' := hY_dim_lt
-      _ ≤ ↑↑m' := by exact_mod_cast Nat.lt_succ_iff.mp hm'
-  -- Build SES via ClosedImmersionSES on Vᶜ with C
+      _ ≤ ↑↑m' := by exact_mod_cast Nat.lt_succ_iff.mp hd_lt
+  -- Build SES on Vᶜ, apply middle-term vanishing
   let i : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-  let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
-  let η := adj.unit.app C
+  let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i).unit.app C
   haveI : Epi η := epi_unit_of_closedImmersion Y hYcl C
   let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
   have hSE : S.ShortExact := shortExact_of_epi η
-  -- Pushforward vanishing by IH
-  have hPush : Subsingleton (Sheaf.H S.X₃ m') :=
-    PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim_lt hm'_Y)
-  -- Kernel vanishing: zero stalks everywhere → IsZero → vanishing
-  have hKer : Subsingleton (Sheaf.H S.X₁ m') := by
-    apply subsingleton_sheafH_of_isZero'; apply sheaf_isZero_of_zero_stalks X; intro x a
-    by_cases hxY : x ∈ Y
-    · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
-        closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
-      exact stalk_zero_of_ses_g_iso hSE x inferInstance a
-    · exact stalk_zero_of_shortExact_kernel hSE x
-        (fun b => cokernel_stalk_zero_V V x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY) b) a
-  exact subsingleton_sheafH_of_shortExact_middle hSE m' hKer hPush
+  exact subsingleton_sheafH_of_shortExact_middle hSE m'
+    (by apply subsingleton_sheafH_of_isZero'; apply sheaf_isZero_of_zero_stalks X; intro x a
+        by_cases hxY : x ∈ Y
+        · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
+            closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
+          exact stalk_zero_of_ses_g_iso hSE x inferInstance a
+        · exact stalk_zero_of_shortExact_kernel hSE x
+            (fun b => cokernel_stalk_zero_V V x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY) b) a)
+    (PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim_lt hm'_Y))
 
 /-- Third-term LES: for 0 → X₁ → X₂ → X₃ → 0, H^n(X₂)=0 ∧ H^{n+1}(X₁)=0 ⟹ H^n(X₃)=0. -/
 theorem subsingleton_ext_of_ses_third {C : Type*} [Category C] [Abelian C] [HasExt C]
