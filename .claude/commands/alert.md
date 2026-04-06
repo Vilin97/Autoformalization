@@ -7,7 +7,7 @@ Steps:
    git log -1 --format="%H %s"
    ```
 
-2. Build the GitHub diff URL: `https://github.com/Vilin97/aristotle/commit/<full-hash>`
+2. Build the GitHub diff URL: `https://github.com/Vilin97/Clawristotle/commit/<full-hash>`
 
 3. Compose a 1-2 sentence summary of what was done (e.g. "Closed 1 sorry, submitted 2 lemmas to Aristotle").
 
