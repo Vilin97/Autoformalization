@@ -329,14 +329,11 @@ private theorem sheafH_filtered_colimit_aux
       -- desc: cokernel(ι') → s.pt
       -- Factor through: injCocone.pt →[d] s.pt where d = injColim.desc(liftCocone s)
       -- Then cokernel.desc ι' d (condition)
-      have hd_cond : ∀ (s : Cocone Q),
-          ι' ≫ injColim.desc (liftCocone s) = 0 := by
-        intro s
-        apply hc'.hom_ext; intro j
-        rw [comp_zero]; conv_lhs => rw [← Category.assoc, hfac_ι j, Category.assoc]
-        rw [injColim.fac, ← Category.assoc, cokernel.condition, zero_comp]
       exact
-      { desc := fun s => cokernel.desc ι' (injColim.desc (liftCocone s)) (hd_cond s)
+      { desc := fun s => cokernel.desc ι' (injColim.desc (liftCocone s)) (by
+          apply hc'.hom_ext; intro j
+          rw [comp_zero]; conv_lhs => rw [← Category.assoc, hfac_ι j, Category.assoc]
+          rw [injColim.fac, ← Category.assoc, cokernel.condition, zero_comp])
         fac := fun s j => by
           apply (cancel_epi (cokernel.π (η.app j))).mp
           rw [← Category.assoc, hπC, Category.assoc, cokernel.π_desc, injColim.fac]

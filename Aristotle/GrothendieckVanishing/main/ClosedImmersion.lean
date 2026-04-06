@@ -60,11 +60,9 @@ theorem stalkFunctor_map_iso_toSheafify
   constructor
   · exact locallyInjective_stalkFunctor_map_injective
       (T := CategoryTheory.toSheafify (Opens.grothendieckTopology X) P) x
-  · have hls :
-        TopCat.Presheaf.IsLocallySurjective
+  · have hls : TopCat.Presheaf.IsLocallySurjective
           (CategoryTheory.toSheafify (Opens.grothendieckTopology X) P) := by
-        dsimp [TopCat.Presheaf.IsLocallySurjective]
-        infer_instance
+        dsimp [TopCat.Presheaf.IsLocallySurjective]; infer_instance
     exact
       ((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
         (T := CategoryTheory.toSheafify (Opens.grothendieckTopology X) P)).mp hls) x

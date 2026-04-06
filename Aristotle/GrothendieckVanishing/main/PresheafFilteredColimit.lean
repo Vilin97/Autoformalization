@@ -167,11 +167,12 @@ private theorem isSheaf_presheaf_filtered_colimit
   have hx' : ∀ k (hk : k ∈ t),
       ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀) (x' k hk) = sf k := by
     intro k hk; dsimp [x']
-    have hfac := congrArg (fun α => NatTrans.app α (op (U k))) (c.ι.naturality (g₀ k hk))
-    simp only [Functor.const_obj_map, NatTrans.comp_app, Category.comp_id] at hfac
     change ConcreteCategory.hom ((((Y' ⋙ sheafToPresheaf _ _).map (g₀ k hk)).app (op (U k))) ≫
       (c.ι.app j₀).app (op (U k))) (x_all k) = sf k
-    rw [hfac]; exact hx_all k
+    rw [show ((Y' ⋙ sheafToPresheaf _ _).map (g₀ k hk)).app (op (U k)) ≫
+        (c.ι.app j₀).app (op (U k)) = (c.ι.app (j_all k)).app (op (U k)) from by
+      simpa using congrArg (fun α => NatTrans.app α (op (U k))) (c.ι.naturality (g₀ k hk))]
+    exact hx_all k
   -- Pairwise compatibility after merging via IsFiltered
   obtain ⟨j₁, g₁, hg₁⟩ : ∃ (j₁ : J') (g₁ : j₀ ⟶ j₁),
       ∀ (k : ι) (hk : k ∈ t) (l : ι) (hl : l ∈ t),
