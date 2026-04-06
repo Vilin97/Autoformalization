@@ -159,11 +159,7 @@ are in `FiniteGeneratorReduction.lean`.
     cokernel vanishing at `m'` via `ClosedImmersionSES` on `Vᶜ` + `PushforwardHVanishing`. -/
 theorem zeroOutsideInt_cohomology_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
-      topologicalKrullDim Y < topologicalKrullDim X →
-      m > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G m))
+    (ih : VanishingIH (X := X))
     (hpos : topologicalKrullDim X > 0)
     (V : Opens X) (hV : V ≠ ⊥)
     (m : ℕ) (hm : m > topologicalKrullDim X) :

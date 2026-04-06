@@ -343,11 +343,7 @@ theorem subsheaf_contains_zeroOutsideInt
     (dim < dim X), so vanishes by the IH. Middle-term LES gives `H^m(R) = 0`. -/
 theorem subsheaf_zeroOutsideInt_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
-      topologicalKrullDim Y < topologicalKrullDim X →
-      m > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G m))
+    (ih : VanishingIH (X := X))
     (hpos : topologicalKrullDim X > 0)
     (V : Opens X) (R : TopCat.Sheaf AddCommGrpCat.{u} X)
     (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
@@ -373,11 +369,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
     `subsheaf_zeroOutsideInt_vanishing` (Step 4). -/
 theorem epiImage_zeroOutsideInt_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
-      topologicalKrullDim Y < topologicalKrullDim X →
-      m > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G m))
+    (ih : VanishingIH (X := X))
     (hpos : topologicalKrullDim X > 0)
     (V : Opens X) {G : TopCat.Sheaf AddCommGrpCat.{u} X}
     (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G) (hf : Epi f)
@@ -404,11 +396,7 @@ theorem IrreduciblePosVanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
-      topologicalKrullDim Y < topologicalKrullDim X →
-      m > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G m)) :
+    (ih : VanishingIH (X := X)) :
     Subsingleton (Sheaf.H F n) := by
   obtain ⟨Z, hZ_closed, _, hZ_dim, hn_Z⟩ :=
     exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos
