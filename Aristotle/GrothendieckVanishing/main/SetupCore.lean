@@ -299,7 +299,6 @@ private lemma PushforwardHVanishing_one
     let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') 1) := by
   intro i; obtain ⟨ip⟩ := EnoughInjectives.presentation G'
-  have hSE_Z := ip.shortExact_shortComplex
   have hSE_X : (ip.shortComplex.map
       (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
     closedIncl_pushforward_shortExact hZ ip
@@ -314,15 +313,7 @@ private lemma PushforwardHVanishing_one
     show Epi (ip.shortComplex.g.val.app (op ((Opens.map i).obj ⊤)))
     rw [show ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ from by ext; simp [Opens.map]]
     exact epi_g_app_top_of_H1_vanishing ip hG'
-  have hsurj_X := ext0_surj_of_epi_top hg_epi_X
-  constructor; intro a b
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a (@Subsingleton.elim _ hJ _ 0) rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE_X b (@Subsingleton.elim _ hJ _ 0) rfl
-  obtain ⟨c', hc'⟩ := hsurj_X c; obtain ⟨d', hd'⟩ := hsurj_X d
-  simp only [← hc, ← hd, ← hc', ← hd',
-    Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀
-      (ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).g)
-      hSE_X.extClass rfl, hSE_X.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
+  exact subsingleton_H1_via_surj _ hSE_X hJ (ext0_surj_of_epi_top hg_epi_X)
 
 -- n = m+2 ≥ 2: use pushed-forward injective presentation + FlasqueVanishing + LES
 private lemma PushforwardHVanishing_succ

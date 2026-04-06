@@ -374,13 +374,7 @@ private theorem sheafH_filtered_colimit_aux
           congrArg (fun f => f.val.app (op ⊤)) (show ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀ =
             injCocone.ι.app j₀ ≫ S.g from cokernel.π_desc _ _ _).symm
         rw [← hq₀, ← hp]; exact congrArg (· p) (congrArg ConcreteCategory.hom hcomp_sec)
-      have h_surj := ext0_surj_of_epi_top (S := S) hΓg_epi
-      constructor; intro a b
-      obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a (@Subsingleton.elim _ hI _ _) rfl
-      obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b (@Subsingleton.elim _ hI _ _) rfl
-      obtain ⟨c', hc'⟩ := h_surj c; obtain ⟨d', hd'⟩ := h_surj d
-      simp only [← hc, ← hd, ← hc', ← hd', Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀ S.g)
-        hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
+      exact subsingleton_H1_via_surj _ hSE hI (ext0_surj_of_epi_top (S := S) hΓg_epi)
     | n' + 1 =>
       -- For n ≥ 1: dimension shift via h_van_Q + IH
       have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) (n' + 1)) := fun j => by
