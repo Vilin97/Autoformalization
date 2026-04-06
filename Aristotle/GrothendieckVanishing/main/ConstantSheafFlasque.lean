@@ -69,11 +69,9 @@ private theorem toPlus_surjective_of_const
       (ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U))) := by
   intro y; obtain ⟨S, x, hx⟩ := exists_rep y
   obtain ⟨I₀, hI₀⟩ := cover_nonempty_arrow U hU S
-  let a : (constPresheaf X).obj (op U) := x I₀
-  have ha : ∀ I : S.Arrow, x I = a := fun I => meq_const_values_eq S x I I₀
-  have hx_eq : x = Meq.mk S a := by ext I; exact ha I
-  refine ⟨a, ?_⟩
-  rw [hx, hx_eq, toPlus_eq_mk, eq_mk_iff_exists]
+  refine ⟨x I₀, ?_⟩
+  rw [hx, show x = Meq.mk S (x I₀) from Meq.ext _ _ fun I => meq_const_values_eq S x I I₀,
+      toPlus_eq_mk, eq_mk_iff_exists]
   refine ⟨S, homOfLE le_top, 𝟙 S, ?_⟩
   apply Meq.ext; intro I
   simp [Meq.refine, Meq.mk, constPresheaf]
@@ -148,17 +146,14 @@ private theorem sheafify_constPresheaf_flasque_of_irreducible
     subst this
     rw [AddCommGrpCat.epi_iff_surjective]
     intro y
-    have hsub : Subsingleton
-        (ToType (((opensGT X).sheafify (constPresheaf X)).obj (op ⊥))) := by
+    haveI : Subsingleton (ToType (((opensGT X).sheafify (constPresheaf X)).obj (op ⊥))) := by
       simpa [GrothendieckTopology.toSheafify] using
         plusObj_bot_subsingleton (X := X) (P := (opensGT X).plusObj (constPresheaf X))
-    exact ⟨0, @Subsingleton.elim _ hsub _ _⟩
+    exact ⟨0, Subsingleton.elim _ _⟩
   · have hUne : (U : Set X).Nonempty := Set.nonempty_iff_ne_empty.mpr hU
     have hnat := ((opensGT X).toSheafify (constPresheaf X)).naturality i.op
-    have hid : (constPresheaf X).map i.op = 𝟙 _ := by
-      ext a
-      simp [constPresheaf]
-    rw [hid, Category.id_comp] at hnat
+    rw [show (constPresheaf X).map i.op = 𝟙 _ from by ext; simp [constPresheaf],
+        Category.id_comp] at hnat
     have hfac : ((opensGT X).toSheafify (constPresheaf X)).app (op V) ≫
         ((opensGT X).sheafify (constPresheaf X)).map i.op =
         ((opensGT X).toSheafify (constPresheaf X)).app (op U) := hnat.symm

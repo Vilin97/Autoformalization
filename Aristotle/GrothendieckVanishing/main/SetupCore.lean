@@ -296,57 +296,8 @@ theorem ext0_surj_of_epi_top
     rw [Adjunction.homEquiv_naturality_right, Equiv.apply_symm_apply,
       Projective.factorThru_comp]⟩
 
--- n = 1: from H^1(G')=0 on Z, show H^1(i_*G')=0 on X
-private lemma PushforwardHVanishing_one
-    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
-    (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))
-    (hG' : Subsingleton (Sheaf.H G' 1)) :
-    let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-    Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') 1) := by
-  intro i; obtain ⟨ip⟩ := EnoughInjectives.presentation G'
-  have hSE_X : (ip.shortComplex.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
-    closedIncl_pushforward_shortExact hZ ip
-  have hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-      ip.shortComplex.X₂) := fun {U V} j => by
-    change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
-    exact isFlasque_of_injective ip.shortComplex.X₂ _
-  have hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-      ip.shortComplex.X₂) 1) := FlasqueVanishing _ _ hFlasque 0
-  have hg_epi_X : Epi ((ip.shortComplex.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).g.val.app (op ⊤)) := by
-    show Epi (ip.shortComplex.g.val.app (op ((Opens.map i).obj ⊤)))
-    rw [show ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ from by ext; simp [Opens.map]]
-    exact epi_g_app_top_of_H1_vanishing ip hG'
-  exact subsingleton_H1_via_surj _ hSE_X hJ (ext0_surj_of_epi_top hg_epi_X)
-
--- n = m+2 ≥ 2: use pushed-forward injective presentation + FlasqueVanishing + LES
-private lemma PushforwardHVanishing_succ
-    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
-    (m : ℕ)
-    (ih_push : ∀ (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)),
-      Subsingleton (Sheaf.H G' (m + 1)) →
-      let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-      Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') (m + 1)))
-    (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))
-    (hG' : Subsingleton (Sheaf.H G' (m + 2))) :
-    let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-    Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') (m + 2)) := by
-  intro i; obtain ⟨ip⟩ := EnoughInjectives.presentation G'
-  have hSE_X : (ip.shortComplex.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
-    closedIncl_pushforward_shortExact hZ ip
-  have hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-      ip.shortComplex.X₂) := fun {U V} j => by
-    change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
-    exact isFlasque_of_injective ip.shortComplex.X₂ _
-  have hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-      ip.shortComplex.X₂) (m + 2)) := FlasqueVanishing _ _ hFlasque (m + 1)
-  exact ext_dimension_shift _ hSE_X (m + 1)
-    (ih_push ip.shortComplex.X₃ (ext_dimension_shift_X₃ _ ip.shortExact_shortComplex (m + 1)
-      (Ext.subsingleton_of_injective _ _ m) hG')) hJ
-
 -- Pushforward along closed immersion preserves cohomological vanishing.
+-- Proof by induction: n=0 via sections, n=1 via Ext^0 surjectivity, n≥2 via LES dimension shift.
 theorem PushforwardHVanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
@@ -362,9 +313,26 @@ theorem PushforwardHVanishing
   | zero => exact PushforwardHVanishing_zero hZ
   | succ k ih_push =>
     intro G' hG'
+    obtain ⟨ip⟩ := EnoughInjectives.presentation G'
+    have hSE_X : (ip.shortComplex.map
+        (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
+      closedIncl_pushforward_shortExact hZ ip
+    have hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
+        ip.shortComplex.X₂) := fun {U V} j => by
+      change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
+      exact isFlasque_of_injective ip.shortComplex.X₂ _
     cases k with
-    | zero => exact PushforwardHVanishing_one hZ G' hG'
-    | succ m => exact PushforwardHVanishing_succ hZ m ih_push G' hG'
+    | zero =>
+      exact subsingleton_H1_via_surj _ hSE_X (FlasqueVanishing _ _ hFlasque 0)
+        (ext0_surj_of_epi_top (by
+          show Epi (ip.shortComplex.g.val.app (op ((Opens.map i).obj ⊤)))
+          rw [show ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ from by ext; simp [Opens.map]]
+          exact epi_g_app_top_of_H1_vanishing ip hG'))
+    | succ m =>
+      exact ext_dimension_shift _ hSE_X (m + 1)
+        (ih_push ip.shortComplex.X₃ (ext_dimension_shift_X₃ _ ip.shortExact_shortComplex (m + 1)
+          (Ext.subsingleton_of_injective _ _ m) hG'))
+        (FlasqueVanishing _ _ hFlasque (m + 1))
 
 -- The adjunction unit F → i_*(i^*F) is epi for closed immersions.
 -- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).
