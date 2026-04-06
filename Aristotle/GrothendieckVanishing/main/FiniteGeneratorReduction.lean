@@ -281,8 +281,7 @@ private theorem sheafH_filtered_colimit_aux
       ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
     have hSE : S.ShortExact := shortExact_of_mono ι'
     -- H^{n+1}(colim Inj) = 0 since colim Inj is flasque
-    have hI : Subsingleton (Sheaf.H injCocone.pt (n + 1)) :=
-      FlasqueVanishing X injCocone.pt hFlasqueColim n
+    have hI := FlasqueVanishing X injCocone.pt hFlasqueColim n
     -- Build per-object quotient functor Q.obj j = cokernel(η.app j)
     -- η.app j is ALWAYS mono by ffData.hi, so no hmono needed!
     let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
@@ -291,8 +290,7 @@ private theorem sheafH_filtered_colimit_aux
         map_id := fun j => by ext; simp [cokernel.map]
         map_comp := fun {j j' j''} f g => by ext; simp [cokernel.map, Functor.map_comp] }
     -- Factoring lemma: c'.ι.app j ≫ ι' = η.app j ≫ injCocone.ι.app j
-    have hfac_ι : ∀ j, c'.ι.app j ≫ ι' = η.app j ≫ injCocone.ι.app j :=
-      fun j => hc'.fac ι'Cocone j
+    have hfac_ι : ∀ j, c'.ι.app j ≫ ι' = η.app j ≫ injCocone.ι.app j := hc'.fac ι'Cocone
     -- Cocone on Q with vertex S.X₃ = cokernel(ι')
     -- Map: cokernel(η.app j) → cokernel(ι') via the commutative square
     --   Y'.obj j --c'.ι.app j-→ c'.pt
@@ -381,9 +379,7 @@ private theorem sheafH_filtered_colimit_aux
         haveI : Mono (η.app j) := hη_mono j
         exact ext_dimension_shift_X₃ _ (shortExact_of_mono (η.app j)) (n' + 1)
           (Ext.subsingleton_of_injective _ _ n') (hvan j)
-      have hQ : Subsingleton (Sheaf.H S.X₃ (n' + 1)) :=
-        ih Q qCocone hqColim h_van_Q
-      exact ext_dimension_shift _ hSE (n' + 1) hQ hI
+      exact ext_dimension_shift _ hSE (n' + 1) (ih Q qCocone hqColim h_van_Q) hI
 
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
     If `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
