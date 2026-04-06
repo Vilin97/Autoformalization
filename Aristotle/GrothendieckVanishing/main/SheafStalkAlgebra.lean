@@ -3,7 +3,6 @@
 
   Split from IrreducibleStep.lean. Contains:
   - Stalk surjectivity/bijectivity for zeroOutsideInt
-  - Cokernel vanishing (cokernel_openHom_vanishing)
   - zeroOutsideInt cohomology vanishing (zeroOutsideInt_cohomology_vanishing)
 
   Note: stalk_zeroOutsideInt_eq_zsmul_generator, ulift_int_subgroup_cyclic,
@@ -150,26 +149,6 @@ private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx
     a = 0 :=
   cokernel_stalk_zero_of_stalk_surj _ x (sheaf_stalk_surj_openHom le_top x hx) a
 
-/-- Cokernel of `openHom(le_top)` has vanishing cohomology on irreducible X.
-    The cokernel C has zero stalks on V (since openHom is stalkwise iso there).
-    Apply ClosedImmersionSES to C with `Y = Vᶜ`:
-    - kernel K has zero stalks everywhere → IsZero → vanishing
-    - pushforward from Vᶜ vanishes by IH (dim Vᶜ < dim X)
-    - middle-term vanishing gives H^n(C) = 0. -/
-theorem cokernel_openHom_vanishing
-    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (V : Opens X) (hV : V ≠ ⊥)
-    (n : ℕ) (hn : n > topologicalKrullDim X) (_ : topologicalKrullDim X > 0)
-    (ih : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
-      topologicalKrullDim Y < topologicalKrullDim X →
-      m > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H G m)) :
-    let f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
-    Subsingleton (Sheaf.H (Limits.cokernel f) n) := by
-  intro f; exact closedComplementVanishing V hV _ n hn ih
-    (fun x hxV a => cokernel_stalk_zero_V V x hxV a)
-
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
 
 These lemmas decompose the kernel vanishing argument.
@@ -234,25 +213,13 @@ theorem zeroOutsideInt_cohomology_vanishing
             (fun b => cokernel_stalk_zero_V V x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY) b) a)
     (PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim_lt hm'_Y))
 
-/-- Third-term LES: for 0 → X₁ → X₂ → X₃ → 0, H^n(X₂)=0 ∧ H^{n+1}(X₁)=0 ⟹ H^n(X₃)=0. -/
-theorem subsingleton_ext_of_ses_third {C : Type*} [Category C] [Abelian C] [HasExt C]
-    {S : ShortComplex C} (hS : S.ShortExact) (Z : C) (n : ℕ)
-    (h₂ : Subsingleton (Ext Z S.X₂ n))
-    (h₁ : Subsingleton (Ext Z S.X₁ (n + 1))) :
-    Subsingleton (Ext Z S.X₃ n) := by
-  constructor
-  intro a b
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₃ Z hS a rfl (Subsingleton.elim _ _)
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ Z hS b rfl (Subsingleton.elim _ _)
-  rw [← hc, ← hd, Subsingleton.elim c d]
-
 theorem subsingleton_sheafH_of_shortExact_third {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (n : ℕ)
     (h₂ : Subsingleton (Sheaf.H S.X₂ n))
     (h₁ : Subsingleton (Sheaf.H S.X₁ (n + 1))) :
     Subsingleton (Sheaf.H S.X₃ n) :=
-  subsingleton_ext_of_ses_third hS _ n h₂ h₁
+  ext_dimension_shift_X₃ _ hS n h₂ h₁
 
 
 -- Stalk generator algebra, subgroup theory, and generator injectivity
