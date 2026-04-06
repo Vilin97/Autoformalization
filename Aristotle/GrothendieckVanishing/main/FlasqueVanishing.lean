@@ -62,6 +62,69 @@ noncomputable instance sheafHasExt (X : TopCat.{u}) :
     HasExt.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   hasExt_of_enoughInjectives _
 
+theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (hstalk : ∀ (x : X)
+      (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F.val), a = 0) :
+    IsZero F := by
+  have hZ : IsZero F.val := Functor.isZero F.val (fun ⟨U⟩ =>
+    @AddCommGrpCat.isZero_of_subsingleton _
+      ⟨fun s t => TopCat.Presheaf.section_ext F U s t fun x hx =>
+        (hstalk x _).trans (hstalk x _).symm⟩)
+  exact IsZero.mk
+    (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
+      fun U => (hZ.obj U).eq_zero_of_src (f.val.app U))) }⟩)
+    (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
+      fun U => (hZ.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
+
+theorem subsingleton_sheafH_of_isZero' {X : TopCat.{u}}
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsZero F) (n : ℕ) :
+    Subsingleton (Sheaf.H F n) := by
+  have : ∀ x : Sheaf.H F n, x = 0 := fun x => by
+    have h := Ext.comp_mk₀_id x
+    rw [show (𝟙 F : F ⟶ F) = 0 from hF.eq_of_src _ _, Ext.mk₀_zero] at h
+    exact h.symm.trans (Ext.comp_zero x F 0 n (add_zero n))
+  exact ⟨fun a b => (this a).trans (this b).symm⟩
+
+theorem stalk_zero_of_ses_g_iso
+    {X : TopCat.{u}} {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hSE : S.ShortExact) (x : X)
+    (hiso : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val))
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₁.val) :
+    a = 0 := by
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  have hcomp_elem : ConcreteCategory.hom (T.map S.g.val)
+      (ConcreteCategory.hom (T.map S.f.val) a) = 0 := by
+    rw [← ConcreteCategory.comp_apply, ← T.map_comp]
+    obtain ⟨U, hxU, s, rfl⟩ := S.X₁.presheaf.germ_exist x a
+    rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
+    have : ConcreteCategory.hom ((S.f.val ≫ S.g.val).app (op U)) s = 0 := by
+      change ConcreteCategory.hom ((S.f ≫ S.g).val.app (op U)) s = 0
+      rw [S.zero]; exact AddMonoidHom.zero_apply s
+    change ConcreteCategory.hom (S.X₃.presheaf.germ U x hxU)
+      (ConcreteCategory.hom ((S.f.val ≫ S.g.val).app (op U)) s) = 0
+    rw [this]; exact map_zero _
+  have hfa_zero : ConcreteCategory.hom (T.map S.f.val) a = 0 :=
+    (ConcreteCategory.bijective_of_isIso (T.map S.g.val)).1
+      (hcomp_elem.trans (map_zero _).symm)
+  haveI : Mono S.f := hSE.mono_f
+  haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
+  exact (AddCommGrpCat.mono_iff_injective _).mp
+    (Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f)
+    (hfa_zero.trans (map_zero _).symm)
+
+/-- The kernel short exact sequence `0 → ker(f) → X → Y → 0` for an epi `f`. -/
+theorem shortExact_of_epi {C : Type*} [Category C] [Abelian C] {X Y : C} (f : X ⟶ Y) [Epi f] :
+    (ShortComplex.mk (kernel.ι f) f (kernel.condition f)).ShortExact :=
+  ShortComplex.ShortExact.mk'
+    (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
+
+/-- The cokernel short exact sequence `0 → X → Y → coker(f) → 0` for a mono `f`. -/
+theorem shortExact_of_mono {C : Type*} [Category C] [Abelian C] {X Y : C} (f : X ⟶ Y) [Mono f] :
+    (ShortComplex.mk f (cokernel.π f) (cokernel.condition f)).ShortExact :=
+  ShortComplex.ShortExact.mk'
+    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel f)) inferInstance inferInstance
+
 /-- In a short exact sequence `X₁ → X₂ → X₃`, if all stalks of `X₂` at `x` vanish, then
     all stalks of `X₁` at `x` vanish (by mono-injectivity of `f`). -/
 theorem stalk_zero_of_shortExact_kernel
@@ -111,28 +174,18 @@ private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
     (sectionsAt V).PreservesLeftHomologyOf S := by
   constructor; intro h; constructor
   · -- sectionsAt V preserves the kernel of S.g (it preserves all limits)
-    show PreservesLimit _ (sheafToPresheaf _ _ ⋙ _)
-    infer_instance
+    show PreservesLimit _ (sheafToPresheaf _ _ ⋙ _); infer_instance
   · -- sectionsAt V preserves the cokernel of h.f'
     -- Since S is exact with mono f, h.f' is an iso (epi + mono),
     -- so its cokernel is 0, which is trivially preserved.
     haveI : Mono S.f := hS.mono_f
-    haveI : Mono h.f' := by
-      constructor; intro Z a b hab
-      exact (cancel_mono S.f).mp (by rw [← h.f'_i, ← Category.assoc, hab, Category.assoc])
+    haveI : Mono h.f' := mono_of_mono_fac h.f'_i
     haveI : Epi h.f' := hS.exact.epi_f' h
     haveI : IsIso h.f' := isIso_of_mono_of_epi h.f'
-    haveI hz2 : IsZero
-        ((sectionsAt (X := X) V).obj (cokernel h.f')) :=
-      Functor.map_isZero _ (isZero_cokernel_of_epi h.f')
-    haveI hz3 : IsZero
-        (cokernel ((sectionsAt (X := X) V).map h.f')) :=
-      isZero_cokernel_of_epi _
-    -- cokernelComparison : cokernel(F(f')) ⟶ F(cokernel(f'))
-    -- Both sides are zero, so it's an iso.
-    haveI : IsIso
-        (cokernelComparison h.f' (sectionsAt (X := X) V)) :=
-      ⟨⟨hz2.to_ _, hz3.eq_of_src _ _, hz2.eq_of_src _ _⟩⟩
+    haveI : IsIso (cokernelComparison h.f' (sectionsAt (X := X) V)) :=
+      let hz2 := Functor.map_isZero (sectionsAt (X := X) V) (isZero_cokernel_of_epi h.f')
+      ⟨⟨hz2.to_ _, (isZero_cokernel_of_epi
+        (f := (sectionsAt (X := X) V).map h.f')).eq_of_src _ _, hz2.eq_of_src _ _⟩⟩
     exact PreservesCokernel.of_iso_comparison _ _
 
 -- For a SES of sheaves, the evaluated sequence at V is exact:
@@ -150,11 +203,6 @@ private lemma sections_exact_of_shortExact {X : TopCat.{u}}
   exact (ShortComplex.ab_exact_iff _).mp hexact x hx
 
 /-! ### Zero condition and mono for the evaluated short complex -/
-
-private lemma eval_comp_zero {X : TopCat.{u}}
-    (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)) (V : Opens X) :
-    S.f.val.app (op V) ≫ S.g.val.app (op V) = 0 := by
-  change (S.f ≫ S.g).val.app (op V) = 0; rw [S.zero]; aesop_cat
 
 -- In a thin category (Opens X), any two parallel morphisms are equal,
 -- so presheaf restriction maps agree regardless of which morphism is used.
@@ -230,12 +278,8 @@ private lemma partialLift_chain_ub {X : TopCat.{u}}
     exact presheaf_map_eq S.X₃.val _ _ s
   · refine ⟨⟨⊥, 0⟩, ?_, fun _ hz => absurd ⟨_, hz⟩ hc⟩
     refine ⟨bot_le, ?_⟩
-    have h0 : ∀ (a : S.X₃.val.obj (op ⊥)), a = 0 := fun a => by
-      have := congr_arg (fun f => (ConcreteCategory.hom f) a)
-        (show (𝟙 _ : S.X₃.val.obj (op ⊥) ⟶ _) = 0 from
-          (isTerminal_sheaf_bot S.X₃).hom_ext _ _)
-      simpa using this
-    exact (h0 _).trans (h0 _).symm
+    exact @Subsingleton.elim _
+      (AddCommGrpCat.subsingleton_of_isZero (isTerminal_sheaf_bot S.X₃).isZero) _ _
 
 -- Maximal partial lift must cover all of U.
 -- If V₀ < U, find x ∈ U \ V₀, get a local lift on W ∋ x, adjust for compatibility
@@ -267,16 +311,14 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
     exact presheaf_map_eq S.X₃.val _ _ s
   obtain ⟨a, ha⟩ := sections_exact_of_shortExact hS (V₀ ⊓ W) _ hdiff_ker
-  have hfl := hFlasque₁ (homOfLE inf_le_right : V₀ ⊓ W ⟶ W)
-  rw [AddCommGrpCat.epi_iff_surjective] at hfl
-  obtain ⟨ahat, hahat⟩ := hfl a
+  obtain ⟨ahat, hahat⟩ := (AddCommGrpCat.epi_iff_surjective _).mp
+    (hFlasque₁ (homOfLE inf_le_right : V₀ ⊓ W ⟶ W)) a
   set t'' := t' + S.f.val.app (op W) ahat with ht''_def
   have hgt'' : S.g.val.app (op W) t'' = S.X₃.val.map (homOfLE hWU).op s := by
-    simp only [ht''_def, map_add]
-    have hgf : S.g.val.app (op W) (S.f.val.app (op W) ahat) = 0 := by
-      change (S.f.val.app (op W) ≫ S.g.val.app (op W)) ahat = 0
-      rw [eval_comp_zero]; simp
-    rw [hgf, add_zero, ht']; exact presheaf_map_eq S.X₃.val _ _ s
+    simp only [ht''_def, map_add, show S.g.val.app (op W) (S.f.val.app (op W) ahat) = 0 from by
+      show (S.f.val.app (op W) ≫ S.g.val.app (op W)) ahat = 0
+      change (S.f ≫ S.g).val.app (op W) ahat = 0; rw [S.zero]; aesop_cat,
+      add_zero, ht']; exact presheaf_map_eq S.X₃.val _ _ s
   have hcompat_patch : S.X₂.val.map (homOfLE inf_le_right).op t'' =
       S.X₂.val.map (homOfLE inf_le_left).op t₀ := by
     simp only [ht''_def, map_add]
@@ -284,9 +326,8 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
       S.f.val.app (op (V₀ ⊓ W)) (S.X₁.val.map (homOfLE inf_le_right).op ahat) from
       (S.f.val.naturality_apply (homOfLE inf_le_right).op ahat).symm, hahat, ha]; abel
   -- Binary glue t₀ and t'' to get t_new on V₀ ⊔ W
-  let BU : Bool → Opens X := fun b => match b with | false => V₀ | true => W
-  let Bsf : (b : Bool) → S.X₂.val.obj (op (BU b)) :=
-    fun b => match b with | false => t₀ | true => t''
+  let BU : Bool → Opens X | false => V₀ | true => W
+  let Bsf : (b : Bool) → S.X₂.val.obj (op (BU b)) | false => t₀ | true => t''
   have hsup_eq : ⨆ b, BU b = V₀ ⊔ W := le_antisymm
     (iSup_le fun b => by cases b <;> simp [BU])
     (by intro y hy; simp only [Opens.mem_iSup]; rcases hy with h | h;
@@ -310,19 +351,13 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     refine ⟨sup_le hV₀U hWU, ?_⟩
     apply TopCat.Sheaf.eq_of_locally_eq' S.X₃ BU (V₀ ⊔ W)
       (fun b => homOfLE (by cases b <;> simp [BU])) (hsup_eq ▸ le_rfl)
-    intro b; cases b
-    · rw [← S.g.val.naturality_apply _ t_new]; simp only [BU]
-      have h0 := ht_new false; simp only [BU] at h0; rw [h0, ht₀]
-      simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
-      exact presheaf_map_eq S.X₃.val _ _ s
-    · rw [← S.g.val.naturality_apply _ t_new]; simp only [BU]
-      have h1 := ht_new true; simp only [BU] at h1; rw [h1, hgt'']
-      simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
-      exact presheaf_map_eq S.X₃.val _ _ s
-  have h_ext : (sigmaPreorder S).le ⟨V₀, t₀⟩ ⟨V₀ ⊔ W, t_new⟩ := by
-    refine ⟨le_sup_left, ?_⟩
-    have h0 := ht_new false; simp only [BU, Bsf] at h0; exact h0
-  exact hxV₀ ((hmax _ h_new_inP h_ext).1 (Or.inr hxW))
+    intro b; rw [← S.g.val.naturality_apply _ t_new]
+    have hb := ht_new b; cases b <;>
+      (simp only [BU, Bsf] at hb ⊢; rw [hb]; first | rw [ht₀] | rw [hgt'']
+       simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
+       exact presheaf_map_eq S.X₃.val _ _ s)
+  exact hxV₀ ((hmax _ h_new_inP ⟨le_sup_left, by
+    have h0 := ht_new false; simp only [BU, Bsf] at h0; exact h0⟩).1 (Or.inr hxW))
 
 -- Zorn argument for surjectivity of sections (Nugent, PR #35790).
 theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
@@ -351,8 +386,7 @@ theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
   have hg_U : Epi (S.g.val.app (op U)) := epi_app_of_shortExact_flasque hS h₁ U
   have hres₂ : Epi (S.X₂.val.map j.op) := h₂ j
   rw [AddCommGrpCat.epi_iff_surjective] at hg_U hres₂ ⊢
-  intro z
-  obtain ⟨w, hw⟩ := hg_U z
+  intro z; obtain ⟨w, hw⟩ := hg_U z
   obtain ⟨x, hx⟩ := hres₂ w
   exact ⟨ConcreteCategory.hom (S.g.val.app (op V)) x, by
     have := congrArg (· x) (S.g.val.naturality j.op)
@@ -398,13 +432,12 @@ private lemma freeAbSheafHomEquiv_naturality {U V : Opens X} (i : U ⟶ V)
       ((sheafificationAdjunction (Opens.grothendieckTopology X)
         AddCommGrpCat).homEquiv (freeAbPresheaf V) I f))
     i.op) using 1
-  constructor <;> intro h
-  · exact (NatTrans.naturality
+  exact ⟨fun _ => (NatTrans.naturality
       ((Adjunction.whiskerRight (Opens X)ᵒᵖ AddCommGrpCat.adj).homEquiv
         (yoneda.obj V) I.val
         ((sheafificationAdjunction (Opens.grothendieckTopology X)
-          AddCommGrpCat).homEquiv (freeAbPresheaf V) I f)) i.op)
-  · convert congr_arg (fun g => g (𝟙 V)) h using 1
+          AddCommGrpCat).homEquiv (freeAbPresheaf V) I f)) i.op),
+    fun h => by convert congr_arg (fun g => g (𝟙 V)) h using 1⟩
 
 private instance freeAbSheafMap_mono {U V : Opens X} (i : U ⟶ V) :
     Mono (freeAbSheafMap i) := by
@@ -422,21 +455,16 @@ theorem isFlasque_of_injective {X : TopCat.{u}}
     (I : TopCat.Sheaf AddCommGrpCat.{u} X) [Injective I] : IsFlasqueSheaf I := by
   intro U V i
   rw [AddCommGrpCat.epi_iff_surjective]
-  intro s
-  set g := (freeAbSheafHomEquiv U I).symm s
-  obtain ⟨h, hh⟩ : ∃ h : freeAbSheaf V ⟶ I, freeAbSheafMap i ≫ h = g :=
-    Injective.factors g (freeAbSheafMap i)
-  refine ⟨freeAbSheafHomEquiv V I h, ?_⟩
-  rw [← freeAbSheafHomEquiv_naturality i I h, hh]
-  simp [g]
+  intro s; obtain ⟨h, hh⟩ := Injective.factors ((freeAbSheafHomEquiv U I).symm s) (freeAbSheafMap i)
+  exact ⟨freeAbSheafHomEquiv V I h, by rw [← freeAbSheafHomEquiv_naturality i I h, hh]; simp⟩
 
 theorem epi_of_natIso_epi {C D : Type*} [Category C] [Category D]
     {F G : C ⥤ D} (α : F ≅ G) {X Y : C} (f : X ⟶ Y)
     (h : Epi (F.map f)) : Epi (G.map f) := by
-  have : G.map f = α.inv.app X ≫ F.map f ≫ α.hom.app Y := by
-    conv_lhs => rw [← Category.id_comp (G.map f), ← Iso.inv_hom_id_app α X]
-    rw [Category.assoc, ← α.hom.naturality f, ← Category.assoc]
-  rw [this]; exact epi_comp _ _
+  rw [show G.map f = α.inv.app X ≫ F.map f ≫ α.hom.app Y from by
+    rw [← Category.assoc, ← α.inv.naturality, Category.assoc, Iso.inv_hom_id_app,
+      Category.comp_id]]
+  exact epi_comp _ _
 
 -- Surjectivity of Ext map at degree 0 (base case input).
 -- For a SES 0 -> F -> I -> Q -> 0 with F flasque, the induced map
@@ -456,21 +484,19 @@ theorem ext_zero_map_surjective {X : TopCat.{u}}
   suffices ∃ ψ : _ ⟶ S.X₂, ψ ≫ S.g = Ext.addEquiv₀ y by
     obtain ⟨ψ, hψ⟩ := this
     exact ⟨Ext.mk₀ ψ, by rw [Ext.mk₀_comp_mk₀, hψ, Ext.mk₀_addEquiv₀_apply]⟩
-  -- Γ(g) is epi (from g epi at ⊤, via Γ ≅ sheafSections at ⊤)
   have hΓg : Epi ((Sheaf.Γ (Opens.grothendieckTopology X)
       AddCommGrpCat.{u}).map S.g) :=
     epi_of_natIso_epi (Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).symm S.g
       (epi_app_of_shortExact_flasque hS hFlasque₁ ⊤)
-  -- Lift through adjunction + projectivity of ULift ℤ
   let adj := constantSheafΓAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
   let M := AddCommGrpCat.of (ULift.{u} ℤ)
   haveI : Projective M := ulift_int_projective
-  refine ⟨(adj.homEquiv M S.X₂).symm (Projective.factorThru
+  exact ⟨(adj.homEquiv M S.X₂).symm (Projective.factorThru
     ((adj.homEquiv M S.X₃) (Ext.addEquiv₀ y))
-    ((Sheaf.Γ _ _).map S.g)), ?_⟩
-  apply (adj.homEquiv M S.X₃).injective
-  rw [Adjunction.homEquiv_naturality_right, Equiv.apply_symm_apply,
-    Projective.factorThru_comp]
+    ((Sheaf.Γ _ _).map S.g)), by
+    apply (adj.homEquiv M S.X₃).injective
+    rw [Adjunction.homEquiv_naturality_right, Equiv.apply_symm_apply,
+      Projective.factorThru_comp]⟩
 
 -- Cohomological vanishing theorems (sheafH0EquivSections, FlasqueVanishing)
 -- are in FlasqueCohomology.lean.

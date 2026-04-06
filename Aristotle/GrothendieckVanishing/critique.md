@@ -8,8 +8,8 @@
 ## 0. CI Status
 
 - **Build CI**: Last commit on `wip/grothendieck-vanishing` — 2 runs in progress, last completed run **PASSED**.
-- **Blueprint**: `curl -Is https://vilin97.github.io/aristotle/blueprint/` returns **HTTP 404**. The `deploy.yml` workflow has never run on `grothendieck-vanishing` — it only triggers on `main`. The blueprint infrastructure was just added but is not deployed. **P1: Blueprint is not live.**
-- **Dependency graph**: `curl -Is https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html` returns **404**. Same root cause.
+- **Blueprint**: `curl -Is https://vilin97.github.io/Clawristotle/blueprint/` returns **HTTP 404**. The `deploy.yml` workflow has never run on `grothendieck-vanishing` — it only triggers on `main`. The blueprint infrastructure was just added but is not deployed. **P1: Blueprint is not live.**
+- **Dependency graph**: `curl -Is https://vilin97.github.io/Clawristotle/blueprint/dep_graph_document.html` returns **404**. Same root cause.
 - The `deploy.yml` on this branch has been updated to trigger on `grothendieck-vanishing`, but the deploy job condition (`github.ref == 'refs/heads/grothendieck-vanishing'`) means it will only deploy when changes land on `grothendieck-vanishing` itself (not on `wip/grothendieck-vanishing`). This is by design (wip branch merges into protected branch), but **the blueprint will not go live until the next merge**.
 
 ## 1. Sorry's
