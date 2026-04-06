@@ -24,10 +24,8 @@ noncomputable def sheafH0EquivSections {X : TopCat.{u}}
 
 /-- Transport subsingletons across an additive equivalence. -/
 theorem subsingleton_of_addEquiv {A B : Type*} [Add A] [Add B]
-    (e : A ≃+ B) [Subsingleton A] : Subsingleton B := by
-  constructor
-  intro x y
-  simpa using congrArg e (Subsingleton.elim (e.symm x) (e.symm y))
+    (e : A ≃+ B) [Subsingleton A] : Subsingleton B :=
+  ⟨fun x y => by simpa using congrArg e (Subsingleton.elim (e.symm x) (e.symm y))⟩
 
 /-- **Dimension shifting** via injective presentation.
     For `0 -> F -> I -> Q -> 0` with `I` injective, `Subsingleton (H Q n)`
@@ -45,20 +43,28 @@ theorem sheafH_dimension_shift {X : TopCat.{u}}
   obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b (Ext.eq_zero_of_injective _) rfl
   rw [← hc, ← hd]; congr 1; exact @Subsingleton.elim _ hQ c d
 
+/-- H^1 vanishing via Ext^0 surjectivity: if H^1(X₂)=0 and every Ext^0 element
+    of X₃ lifts to X₂, then H^1(X₁)=0. Used in flasque, pushforward, and colimit proofs. -/
+theorem subsingleton_H1_via_surj {C' : Type*} [Category C'] [Abelian C'] [HasExt C']
+    (Z : C') {S : ShortComplex C'} (hSE : S.ShortExact)
+    (hJ : Subsingleton (Ext Z S.X₂ 1))
+    (h_surj : ∀ y : Ext Z S.X₃ 0,
+      ∃ z : Ext Z S.X₂ 0, z.comp (Ext.mk₀ S.g) (add_zero 0) = y) :
+    Subsingleton (Ext Z S.X₁ 1) := by
+  constructor; intro a b
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a (@Subsingleton.elim _ hJ _ _) rfl
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b (@Subsingleton.elim _ hJ _ _) rfl
+  obtain ⟨c', hc'⟩ := h_surj c; obtain ⟨d', hd'⟩ := h_surj d
+  simp only [← hc, ← hd, ← hc', ← hd', Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀ S.g)
+    hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
+
 /-- **Base case**: `H^1(F) = 0` for flasque `F`. -/
 private theorem sheafH_one_of_flasque {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (h : IsFlasqueSheaf F) :
     Subsingleton (Sheaf.H F 1) := by
   obtain ⟨ip⟩ := EnoughInjectives.presentation F
-  have hSE := ip.shortExact_shortComplex
-  have h_surj := ext_zero_map_surjective hSE h
-  constructor; intro a b
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a (Ext.eq_zero_of_injective _) rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b (Ext.eq_zero_of_injective _) rfl
-  obtain ⟨c', hc'⟩ := h_surj c
-  obtain ⟨d', hd'⟩ := h_surj d
-  simp only [← hc, ← hd, ← hc', ← hd', Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀
-    ip.shortComplex.g) hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
+  exact subsingleton_H1_via_surj _ ip.shortExact_shortComplex
+    (Ext.subsingleton_of_injective _ _ 0) (ext_zero_map_surjective ip.shortExact_shortComplex h)
 
 /-- **Flasque sheaves have vanishing higher cohomology** (Nugent, PR #35790).
 

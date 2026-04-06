@@ -28,9 +28,7 @@ theorem epi_of_isTerminal_tgt {C : Type*} [Category C] [Abelian C] {X Y : C}
 noncomputable def isTerminal_sheaf_bot {X : Type u} [TopologicalSpace X]
     (F : Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :
     IsTerminal (F.val.obj (Opposite.op ⊥)) := by
-  apply Sheaf.isTerminalOfBotCover
-  intro x hx
-  exact (Opens.mem_bot.mp hx).elim
+  apply Sheaf.isTerminalOfBotCover; intro x hx; exact (Opens.mem_bot.mp hx).elim
 
 /-! ## Irreducible spaces of dimension 0 -/
 
@@ -114,8 +112,7 @@ private lemma iSup_height_add_one_eq {Y : Type u} [TopologicalSpace Y]
       (WithBot.coe_iSup (f := fun s => Order.height s) bdd).symm]
   rw [show (↑(⨆ s, Order.height s) : WithBot ℕ∞) + 1 = ↑((⨆ s, Order.height s) + 1) from
     by push_cast; ring]
-  rw [ENat.iSup_add]
-  rw [WithBot.coe_iSup (f := fun s => Order.height s + 1) (OrderTop.bddAbove _)]
+  rw [ENat.iSup_add, WithBot.coe_iSup (f := fun s => Order.height s + 1) (OrderTop.bddAbove _)]
   simp_rw [show ∀ s : IrreducibleCloseds Y,
       (↑(Order.height s + 1 : ℕ∞) : WithBot ℕ∞) = (↑(Order.height s) : WithBot ℕ∞) + 1 from
     by intro s; push_cast; ring]
@@ -125,10 +122,9 @@ private lemma wbot_lt_of_add_one_le_of_lt_top {x y : WithBot ℕ∞}
   rcases x with _ | v
   · exact h3
   · have hv_ne_top : v ≠ ⊤ := by intro h; subst h; exact absurd h2 (lt_irrefl _)
-    calc (↑v : WithBot ℕ∞) < ↑(v + 1) :=
-          WithBot.coe_lt_coe.mpr ((ENat.lt_add_one_iff hv_ne_top).mpr le_rfl)
-      _ = ↑v + 1 := by push_cast; ring
-      _ ≤ y := h1
+    exact lt_of_lt_of_le (show (↑v : WithBot ℕ∞) < ↑v + 1 by
+      rw [← show (↑(v + 1) : WithBot ℕ∞) = ↑v + 1 from by push_cast; ring]
+      exact WithBot.coe_lt_coe.mpr ((ENat.lt_add_one_iff hv_ne_top).mpr le_rfl)) h1
 
 /-- Unconditional: topologicalKrullDim Y + 1 ≤ topologicalKrullDim X for
     Y ⊊ X closed in irreducible X. -/

@@ -44,23 +44,20 @@ private lemma isFlasque_filtered_colimit
     IsFlasqueSheaf c.pt := by
   intro U V i
   rw [AddCommGrpCat.epi_iff_surjective]
-  intro b
-  haveI := createsFilteredColimit F
+  intro b; haveI := createsFilteredColimit F
   have hc_psh := isColimitOfPreserves (sheafToPresheaf _ _) hc
   have hc_U := isColimitOfPreserves
     ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op U)) hc_psh
   obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ hc_U b
-  have hflq : Function.Surjective (ConcreteCategory.hom ((F.obj j₀).val.map i.op)) :=
-    (AddCommGrpCat.epi_iff_surjective _).mp (hFlasque j₀ i)
-  obtain ⟨a₀, ha₀⟩ := hflq b₀
+  obtain ⟨a₀, ha₀⟩ := (AddCommGrpCat.epi_iff_surjective _).mp (hFlasque j₀ i) b₀
   refine ⟨ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀, ?_⟩
-  have key : ConcreteCategory.hom (c.pt.val.map i.op)
+  rw [show ConcreteCategory.hom (c.pt.val.map i.op)
       (ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀) =
     ConcreteCategory.hom ((c.ι.app j₀).val.app (op U))
-      (ConcreteCategory.hom ((F.obj j₀).val.map i.op) a₀) :=
+      (ConcreteCategory.hom ((F.obj j₀).val.map i.op) a₀) from
     congrFun (congrArg DFunLike.coe
-      (congrArg ConcreteCategory.hom ((c.ι.app j₀).val.naturality i.op).symm)) a₀
-  rw [key, ha₀]; exact hb₀
+      (congrArg ConcreteCategory.hom ((c.ι.app j₀).val.naturality i.op).symm)) a₀,
+    ha₀]; exact hb₀
 
 /-! ### Filtered diagram of finitely generated subsheaves
 
@@ -158,11 +155,9 @@ private noncomputable def finsetGenCocone_isColimit :
           factorThruImage (TopCat.Sheaf.finsetGeneratorMap {σ}) ≫
           colimit.ι (finsetGenFunctor K) {σ}
     have hfac : g ≫ d = TopCat.Sheaf.allSectionMap K := by
-      dsimp only [g, d]
-      apply Sigma.hom_ext; intro σ
-      simp only [← Category.assoc, Sigma.ι_desc]
-      simp only [Category.assoc, colimit.ι_desc]
-      simp [finsetGenCocone, Limits.image.fac, TopCat.Sheaf.finsetGeneratorMap,
+      dsimp only [g, d]; apply Sigma.hom_ext; intro σ
+      simp [← Category.assoc, Sigma.ι_desc, Category.assoc, colimit.ι_desc,
+        finsetGenCocone, Limits.image.fac, TopCat.Sheaf.finsetGeneratorMap,
         TopCat.Sheaf.familyGeneratorMap]
     haveI := TopCat.Sheaf.allSectionMap_epi K
     exact epi_of_epi_fac hfac
@@ -284,11 +279,9 @@ private theorem sheafH_filtered_colimit_aux
         (colimit.isColimit Inj)
     let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
       ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
-    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
+    have hSE : S.ShortExact := shortExact_of_mono ι'
     -- H^{n+1}(colim Inj) = 0 since colim Inj is flasque
-    have hI : Subsingleton (Sheaf.H injCocone.pt (n + 1)) :=
-      FlasqueVanishing X injCocone.pt hFlasqueColim n
+    have hI := FlasqueVanishing X injCocone.pt hFlasqueColim n
     -- Build per-object quotient functor Q.obj j = cokernel(η.app j)
     -- η.app j is ALWAYS mono by ffData.hi, so no hmono needed!
     let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
@@ -297,8 +290,7 @@ private theorem sheafH_filtered_colimit_aux
         map_id := fun j => by ext; simp [cokernel.map]
         map_comp := fun {j j' j''} f g => by ext; simp [cokernel.map, Functor.map_comp] }
     -- Factoring lemma: c'.ι.app j ≫ ι' = η.app j ≫ injCocone.ι.app j
-    have hfac_ι : ∀ j, c'.ι.app j ≫ ι' = η.app j ≫ injCocone.ι.app j :=
-      fun j => hc'.fac ι'Cocone j
+    have hfac_ι : ∀ j, c'.ι.app j ≫ ι' = η.app j ≫ injCocone.ι.app j := hc'.fac ι'Cocone
     -- Cocone on Q with vertex S.X₃ = cokernel(ι')
     -- Map: cokernel(η.app j) → cokernel(ι') via the commutative square
     --   Y'.obj j --c'.ι.app j-→ c'.pt
@@ -325,29 +317,21 @@ private theorem sheafH_filtered_colimit_aux
       have hπQ : ∀ {j₁ j₂ : J'} (a : j₁ ⟶ j₂),
           cokernel.π (η.app j₁) ≫ Q.map a =
           Inj.map a ≫ cokernel.π (η.app j₂) := fun a => cokernel.π_desc _ _ _
-      have liftCocone_nat : ∀ (s : Cocone Q) {j₁ j₂ : J'} (a : j₁ ⟶ j₂),
-          Inj.map a ≫ (cokernel.π (η.app j₂) ≫ s.ι.app j₂) =
-          cokernel.π (η.app j₁) ≫ s.ι.app j₁ := by
-        intro s j₁ j₂ a
-        rw [← Category.assoc, ← hπQ a, Category.assoc, s.w]
       let liftCocone : ∀ (s : Cocone Q), Cocone Inj := fun s =>
         Cocone.mk s.pt
           { app := fun j => cokernel.π (η.app j) ≫ s.ι.app j
             naturality := fun j j' a => by
-              dsimp; rw [Category.comp_id, liftCocone_nat s a] }
+              dsimp; rw [Category.comp_id, ← Category.assoc, ← hπQ a, Category.assoc, s.w] }
       -- Use injCocone as colimit of Inj to get d : injCocone.pt → s.pt
       let injColim := colimit.isColimit Inj
       -- desc: cokernel(ι') → s.pt
       -- Factor through: injCocone.pt →[d] s.pt where d = injColim.desc(liftCocone s)
       -- Then cokernel.desc ι' d (condition)
-      have hd_cond : ∀ (s : Cocone Q),
-          ι' ≫ injColim.desc (liftCocone s) = 0 := by
-        intro s
-        apply hc'.hom_ext; intro j
-        rw [comp_zero]; conv_lhs => rw [← Category.assoc, hfac_ι j, Category.assoc]
-        rw [injColim.fac, ← Category.assoc, cokernel.condition, zero_comp]
       exact
-      { desc := fun s => cokernel.desc ι' (injColim.desc (liftCocone s)) (hd_cond s)
+      { desc := fun s => cokernel.desc ι' (injColim.desc (liftCocone s)) (by
+          apply hc'.hom_ext; intro j
+          rw [comp_zero]; conv_lhs => rw [← Category.assoc, hfac_ι j, Category.assoc]
+          rw [injColim.fac, ← Category.assoc, cokernel.condition, zero_comp])
         fac := fun s j => by
           apply (cancel_epi (cokernel.π (η.app j))).mp
           rw [← Category.assoc, hπC, Category.assoc, cokernel.π_desc, injColim.fac]
@@ -385,33 +369,17 @@ private theorem sheafH_filtered_colimit_aux
         show (S.g.val.app (op ⊤)) ((injCocone.ι.app j₀).val.app (op ⊤) p) = q
         have hcomp_sec : (injCocone.ι.app j₀ ≫ S.g).val.app (op ⊤) =
             (ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀).val.app (op ⊤) :=
-          congrArg (·.val.app (op ⊤)) (show ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀ =
+          congrArg (fun f => f.val.app (op ⊤)) (show ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀ =
             injCocone.ι.app j₀ ≫ S.g from cokernel.π_desc _ _ _).symm
-        -- Evaluate at p using comp_apply
-        rw [← hq₀, ← hp]
-        change ((injCocone.ι.app j₀ ≫ S.g).val.app (op ⊤)) p =
-          ((ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀).val.app (op ⊤)) p
-        exact congrArg (· p) (congrArg ConcreteCategory.hom hcomp_sec)
-      have h_surj := ext0_surj_of_epi_top (S := S) hΓg_epi
-      constructor; intro a b
-      obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a (@Subsingleton.elim _ hI _ _) rfl
-      obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b (@Subsingleton.elim _ hI _ _) rfl
-      obtain ⟨c', hc'⟩ := h_surj c; obtain ⟨d', hd'⟩ := h_surj d
-      simp only [← hc, ← hd, ← hc', ← hd', Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀ S.g)
-        hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
+        rw [← hq₀, ← hp]; exact congrArg (· p) (congrArg ConcreteCategory.hom hcomp_sec)
+      exact subsingleton_H1_via_surj _ hSE hI (ext0_surj_of_epi_top (S := S) hΓg_epi)
     | n' + 1 =>
       -- For n ≥ 1: dimension shift via h_van_Q + IH
-      have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) (n' + 1)) := by
-        intro j
+      have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) (n' + 1)) := fun j => by
         haveI : Mono (η.app j) := hη_mono j
-        have hSE_j : (ShortComplex.mk (η.app j) (cokernel.π (η.app j))
-          (cokernel.condition _)).ShortExact := ShortComplex.ShortExact.mk'
-          (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
-        exact ext_dimension_shift_X₃ _ hSE_j (n' + 1)
+        exact ext_dimension_shift_X₃ _ (shortExact_of_mono (η.app j)) (n' + 1)
           (Ext.subsingleton_of_injective _ _ n') (hvan j)
-      have hQ : Subsingleton (Sheaf.H S.X₃ (n' + 1)) :=
-        ih Q qCocone hqColim h_van_Q
-      exact ext_dimension_shift _ hSE (n' + 1) hQ hI
+      exact ext_dimension_shift _ hSE (n' + 1) (ih Q qCocone hqColim h_van_Q) hI
 
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
     If `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
@@ -443,35 +411,22 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
 section FinsetGenerated
 open scoped Classical
 
-/-- Coproduct inclusion from `S'` to `insert σ₀ S'`. -/
-private noncomputable def finsetCoproductIncl
+-- `imageIncl` and `imageIncl_mono` are specializations of the general versions above.
+private noncomputable abbrev finsetCoproductIncl
     {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
     {S' : Finset (TopCat.Sheaf.SectionIndex K)}
     {σ₀ : TopCat.Sheaf.SectionIndex K} (_ : σ₀ ∉ S')
     [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
-    [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
-    (∐ fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟶
-    (∐ fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1) :=
-  Sigma.desc fun σ =>
-    Sigma.ι (fun τ : {τ // τ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1)
-      ⟨σ.1, Finset.mem_insert_of_mem σ.2⟩
+    [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :=
+  finsetCoproductInclGen K (Finset.subset_insert σ₀ S')
 
-/-- Mono from `image(S')` to `image(insert σ₀ S')` via coproduct inclusion. -/
-private noncomputable def imageIncl
+private noncomputable abbrev imageIncl
     {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
     {S' : Finset (TopCat.Sheaf.SectionIndex K)}
-    {σ₀ : TopCat.Sheaf.SectionIndex K} (hσ₀ : σ₀ ∉ S')
+    {σ₀ : TopCat.Sheaf.SectionIndex K} (_ : σ₀ ∉ S')
     [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
-    [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
-    TopCat.Sheaf.finsetGeneratedSheaf S' ⟶ TopCat.Sheaf.finsetGeneratedSheaf (insert σ₀ S') :=
-  Limits.image.lift
-    { I := TopCat.Sheaf.finsetGeneratedSheaf (insert σ₀ S')
-      m := Limits.image.ι _
-      e := finsetCoproductIncl hσ₀ ≫ factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S'))
-      fac := by
-        rw [Category.assoc, Limits.image.fac]
-        ext ⟨σ, hσ⟩
-        simp [finsetCoproductIncl, TopCat.Sheaf.finsetGeneratorMap, TopCat.Sheaf.familyGeneratorMap] }
+    [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :=
+  finsetImageInclGen K (Finset.subset_insert σ₀ S')
 
 private instance imageIncl_mono
     {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
@@ -480,7 +435,7 @@ private instance imageIncl_mono
     [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
     [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
     Mono (imageIncl hσ₀ : TopCat.Sheaf.finsetGeneratedSheaf S' ⟶ _) :=
-  mono_of_mono_fac (Limits.image.lift_fac _)
+  finsetImageInclGen_mono K (Finset.subset_insert σ₀ S')
 
 /-- The `σ₀`-component maps epi onto the cokernel of `imageIncl`. -/
 private theorem imageIncl_cokernel_epi
@@ -508,7 +463,8 @@ private theorem imageIncl_cokernel_epi
         Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S') := Limits.image.lift_fac _
     rw [Category.assoc, hlf, Limits.image.fac]
     ext ⟨σ', hσ'⟩
-    simp [finsetCoproductIncl, TopCat.Sheaf.finsetGeneratorMap, TopCat.Sheaf.familyGeneratorMap]
+    simp [finsetCoproductIncl, finsetCoproductInclGen, TopCat.Sheaf.finsetGeneratorMap,
+      TopCat.Sheaf.familyGeneratorMap]
   have hfac : proj ≫
       (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1)
         ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
@@ -525,11 +481,11 @@ private theorem imageIncl_cokernel_epi
         (Sigma.desc _)]
       rw [colimit.ι_desc, Cofan.mk_ι_app, dif_neg h, zero_comp]
       symm
-      have hσ' : σ ∈ S' := Finset.mem_of_mem_insert_of_ne hσ h
-      have hι : Sigma.ι (fun τ : {τ // τ ∈ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ, hσ'⟩ ≫
+      have hι : Sigma.ι (fun τ : {τ // τ ∈ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1)
+          ⟨σ, Finset.mem_of_mem_insert_of_ne hσ h⟩ ≫
           finsetCoproductIncl hσ₀ =
         Sigma.ι (fun τ : {τ // τ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ, hσ⟩ := by
-        simp [finsetCoproductIncl]
+        simp [finsetCoproductIncl, finsetCoproductInclGen]
       rw [← hι, Category.assoc, reassoc_of% heq]; simp [cokernel.condition]
   exact epi_of_epi_fac hfac
 
@@ -545,8 +501,7 @@ theorem finsetGeneratedSheaf_vanishing
     Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m) := by
   suffices h : ∀ (T : Finset (TopCat.Sheaf.SectionIndex K)),
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf T) m) from h S
-  intro T
-  induction T using Finset.induction with
+  intro T; induction T using Finset.induction with
   | empty =>
     apply subsingleton_sheafH_of_isZero'
     apply IsZero.of_iso (isZero_zero _) (imageZero' _)
@@ -555,11 +510,10 @@ theorem finsetGeneratedSheaf_vanishing
     haveI : Mono (imageIncl hσ₀) := imageIncl_mono hσ₀
     let SC := ShortComplex.mk (imageIncl hσ₀) (cokernel.π (imageIncl hσ₀))
       (cokernel.condition _)
-    have hSE : SC.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)) inferInstance inferInstance
-    have hCoker : Subsingleton (Sheaf.H SC.X₃ m) := by
+    have hSE : SC.ShortExact := shortExact_of_mono (imageIncl hσ₀)
+    have hCoker : Subsingleton (Sheaf.H SC.X₃ m) :=
       haveI := imageIncl_cokernel_epi hσ₀
-      exact hzero (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} =>
+      hzero (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} =>
             TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
           factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫
           cokernel.π (imageIncl hσ₀)) inferInstance
