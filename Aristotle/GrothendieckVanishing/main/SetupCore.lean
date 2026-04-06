@@ -344,21 +344,12 @@ private lemma PushforwardHVanishing_succ
       ip.shortComplex.X₂) := fun {U V} j => by
     change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
     exact isFlasque_of_injective ip.shortComplex.X₂ _
-  haveI hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
+  have hJ : Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
       ip.shortComplex.X₂) (m + 2)) := FlasqueVanishing _ _ hFlasque (m + 1)
-  constructor; intro a b
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE_X a (@Subsingleton.elim _ hJ _ 0) rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE_X b (@Subsingleton.elim _ hJ _ 0) rfl
-  rw [← hc, ← hd]; congr 1
-  have hR : Subsingleton (Sheaf.H ip.shortComplex.X₃ (m + 1)) := by
-    constructor; intro c d
-    have hSE_Z := ip.shortExact_shortComplex
-    obtain ⟨e, he⟩ := Ext.covariant_sequence_exact₃ _ hSE_Z (c - d) rfl (by
-      change (Ext.postcomp hSE_Z.extClass _ rfl) (c - d) = 0
-      rw [map_sub, sub_eq_zero]; exact @Subsingleton.elim _ hG' _ _)
-    rw [Ext.eq_zero_of_injective e, Ext.zero_comp] at he
-    exact sub_eq_zero.mp he.symm
-  exact @Subsingleton.elim _ (ih_push ip.shortComplex.X₃ hR) c d
+  have hR : Subsingleton (Sheaf.H ip.shortComplex.X₃ (m + 1)) :=
+    ext_dimension_shift_X₃ _ ip.shortExact_shortComplex (m + 1)
+      (Ext.subsingleton_of_injective _ _ m) hG'
+  exact ext_dimension_shift _ hSE_X (m + 1) (ih_push ip.shortComplex.X₃ hR) hJ
 
 -- Pushforward along closed immersion preserves cohomological vanishing.
 theorem PushforwardHVanishing
