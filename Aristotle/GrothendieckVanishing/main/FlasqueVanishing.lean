@@ -185,9 +185,7 @@ private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
     -- Since S is exact with mono f, h.f' is an iso (epi + mono),
     -- so its cokernel is 0, which is trivially preserved.
     haveI : Mono S.f := hS.mono_f
-    haveI : Mono h.f' := by
-      constructor; intro Z a b hab
-      exact (cancel_mono S.f).mp (by rw [← h.f'_i, ← Category.assoc, hab, Category.assoc])
+    haveI : Mono h.f' := mono_of_mono_fac h.f'_i
     haveI : Epi h.f' := hS.exact.epi_f' h
     haveI : IsIso h.f' := isIso_of_mono_of_epi h.f'
     haveI : IsIso (cokernelComparison h.f' (sectionsAt (X := X) V)) :=
@@ -478,8 +476,8 @@ theorem epi_of_natIso_epi {C D : Type*} [Category C] [Category D]
     {F G : C ⥤ D} (α : F ≅ G) {X Y : C} (f : X ⟶ Y)
     (h : Epi (F.map f)) : Epi (G.map f) := by
   rw [show G.map f = α.inv.app X ≫ F.map f ≫ α.hom.app Y from by
-    conv_lhs => rw [← Category.id_comp (G.map f), ← Iso.inv_hom_id_app α X]
-    rw [Category.assoc, ← α.hom.naturality f, ← Category.assoc]]
+    rw [← Category.assoc, ← α.inv.naturality, Category.assoc, Iso.inv_hom_id_app,
+      Category.comp_id]]
   exact epi_comp _ _
 
 -- Surjectivity of Ext map at degree 0 (base case input).
