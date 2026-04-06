@@ -87,9 +87,8 @@ theorem closedIncl_presheaf_counit_stalk_comp
             (closedIncl hs)).counit.app F) =
       ((TopCat.Presheaf.pushforward AddCommGrpCat (closedIncl hs)).obj F).germ U
         ((closedIncl hs) x) hU ≫ F.stalkPushforward AddCommGrpCat (closedIncl hs) x
-  rw [TopCat.Presheaf.germ_stalkPullbackHom_assoc]
-  rw [TopCat.Presheaf.stalkFunctor_map_germ]
-  rw [TopCat.Presheaf.stalkPushforward_germ]
+  rw [TopCat.Presheaf.germ_stalkPullbackHom_assoc, TopCat.Presheaf.stalkFunctor_map_germ,
+    TopCat.Presheaf.stalkPushforward_germ]
   have htri :=
     CategoryTheory.Functor.lanUnit_app_app_lanAdjunction_counit_app_app
       ((TopologicalSpace.Opens.map (closedIncl hs)).op) F (op U)

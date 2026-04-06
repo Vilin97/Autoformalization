@@ -114,8 +114,7 @@ private lemma iSup_height_add_one_eq {Y : Type u} [TopologicalSpace Y]
       (WithBot.coe_iSup (f := fun s => Order.height s) bdd).symm]
   rw [show (↑(⨆ s, Order.height s) : WithBot ℕ∞) + 1 = ↑((⨆ s, Order.height s) + 1) from
     by push_cast; ring]
-  rw [ENat.iSup_add]
-  rw [WithBot.coe_iSup (f := fun s => Order.height s + 1) (OrderTop.bddAbove _)]
+  rw [ENat.iSup_add, WithBot.coe_iSup (f := fun s => Order.height s + 1) (OrderTop.bddAbove _)]
   simp_rw [show ∀ s : IrreducibleCloseds Y,
       (↑(Order.height s + 1 : ℕ∞) : WithBot ℕ∞) = (↑(Order.height s) : WithBot ℕ∞) + 1 from
     by intro s; push_cast; ring]

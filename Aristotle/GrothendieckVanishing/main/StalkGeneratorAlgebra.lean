@@ -105,11 +105,9 @@ private theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
           (TopCat.Presheaf.zeroOutside.generator V)) = 1
       -- Unfold map and generator, reduce dite, compose eqToHoms
       simp only [TopCat.Presheaf.zeroOutside.generator, TopCat.Presheaf.zeroOutside_map,
-        dif_pos hWV, dif_pos (le_refl V)]
-      simp only [← ConcreteCategory.comp_apply, ← CategoryTheory.comp_apply,
-        eqToHom_trans, Functor.const_obj_map, Category.id_comp]
-      have : hObjW.symm.trans hObjW = rfl := Subsingleton.elim _ _
-      simp [this]
+        dif_pos hWV, dif_pos (le_refl V), ← ConcreteCategory.comp_apply,
+        ← CategoryTheory.comp_apply, eqToHom_trans, Functor.const_obj_map, Category.id_comp]
+      simp [show hObjW.symm.trans hObjW = rfl from Subsingleton.elim _ _]
     -- eqToHom is injective (it's an iso)
     have hinj : Function.Injective (AddCommGrpCat.Hom.hom (eqToHom hObjW)) := by
       intro a b h
@@ -236,11 +234,10 @@ theorem zsmul_generator_injective
     simp only [resGen, gen_P, P]
     -- Now the goal is explicit: unfold generator and zeroOutside_map
     unfold TopCat.Presheaf.zeroOutside.generator
-    simp only [TopCat.Presheaf.zeroOutside_map, dif_pos hWV, dif_pos (le_refl V)]
-    simp only [← ConcreteCategory.comp_apply, ← CategoryTheory.comp_apply,
-      eqToHom_trans, Functor.const_obj_map, Category.id_comp]
-    have : hObjW.symm.trans hObjW = rfl := Subsingleton.elim _ _
-    simp [this]
+    simp only [TopCat.Presheaf.zeroOutside_map, dif_pos hWV, dif_pos (le_refl V),
+      ← ConcreteCategory.comp_apply, ← CategoryTheory.comp_apply, eqToHom_trans,
+      Functor.const_obj_map, Category.id_comp]
+    simp [show hObjW.symm.trans hObjW = rfl from Subsingleton.elim _ _]
   -- Transfer hEq to ULift ℤ and extract n = m
   have hEq_ULift : n • (1 : ULift ℤ) = m • (1 : ULift ℤ) := by
     have := congrArg (AddCommGrpCat.Hom.hom (eqToHom hObjW)) hEq

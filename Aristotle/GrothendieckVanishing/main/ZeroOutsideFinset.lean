@@ -115,9 +115,8 @@ lemma old_familyGeneratedSheafι_comp_oldGeneratedToAdjoinGenerated {X : TopCat.
         (Sum.inl i) := by
   apply (cancel_mono (image.ι (familyGeneratorMap (adjoinGeneratorOpens U U₀)
     (adjoinGeneratorSections U s s₀)))).1
-  rw [Category.assoc, oldGeneratedToAdjoinGenerated_comp]
-  rw [familyGeneratedSheafι_comp_image_ι]
-  rw [familyGeneratedSheafι_comp_image_ι]
+  rw [Category.assoc, oldGeneratedToAdjoinGenerated_comp,
+    familyGeneratedSheafι_comp_image_ι, familyGeneratedSheafι_comp_image_ι]
 
 /-- The projection from the enlarged coproduct onto the newly adjoined generator, killing the
 old summands. -/
