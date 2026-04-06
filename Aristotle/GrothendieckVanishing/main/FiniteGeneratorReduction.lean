@@ -167,11 +167,6 @@ private noncomputable def finsetGenCocone_isColimit :
     isIso_of_mono_of_epi d
   exact (colimit.isColimit (finsetGenFunctor K)).ofPointIso
 
-instance finsetGenFunctor_mono
-    (j j' : Finset (TopCat.Sheaf.SectionIndex K))
-    (φ : j ⟶ j') : Mono ((finsetGenFunctor K).map φ) :=
-  finsetImageInclGen_mono K φ.le
-
 end FilteredDiagram
 
 /-! ### Sheaf cohomology commutes with filtered colimits

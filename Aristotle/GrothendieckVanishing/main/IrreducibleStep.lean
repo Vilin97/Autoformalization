@@ -119,6 +119,15 @@ private theorem exists_section_generating_stalks
   let P : ℕ → Prop := fun n => 0 < n ∧ ∃ (x : X) (hx : x ∈ V),
     (↑n : ℤ) • gen_at x hx ∈ Set.range (i_x x) ∧
     ∀ (m : ℤ), m • gen_at x hx ∈ Set.range (i_x x) → (↑n : ℤ) ∣ m
+  -- Helper: convert ulift_int_subgroup_cyclic output to P
+  have mk_P : ∀ (x : X) (hx : x ∈ V) (d : ULift.{u} ℤ),
+      d.down > 0 → d.down • gen_at x hx ∈ Set.range (i_x x) →
+      (∀ h ∈ H_at x hx, ∃ k : ℤ, h = ⟨k * d.down⟩) → P d.down.toNat := by
+    intro x hx d hpos hrange hgen
+    refine ⟨Int.pos_iff_toNat_pos.mp hpos, x, hx, by rwa [Int.toNat_of_nonneg (le_of_lt hpos)],
+      fun m hm => by rw [Int.toNat_of_nonneg (le_of_lt hpos)]
+                     obtain ⟨k, hk⟩ := hgen ⟨m⟩ hm
+                     exact ⟨k, by simpa [mul_comm] using congrArg ULift.down hk⟩⟩
   have hP : ∃ n, P n := by
     obtain ⟨x₀', hx₀'V, a₀', ha₀'⟩ := exists_nonzero_stalk_in_V V R i hR
     have hH'_ne : H_at x₀' hx₀'V ≠ ⊥ := by
@@ -128,12 +137,7 @@ private theorem exists_section_generating_stalks
         simp only [ULift.ext_iff, ULift.zero_down] at h
         rw [h, zero_smul] at hn; exact ha₀' (hi_inj x₀' (hn.trans (map_zero (i_x x₀')).symm))⟩
     obtain ⟨d', hd'_mem, hd'_pos, hd'_gen⟩ := ulift_int_subgroup_cyclic _ hH'_ne
-    refine ⟨d'.down.toNat, Int.pos_iff_toNat_pos.mp hd'_pos, x₀', hx₀'V, ?_, ?_⟩
-    · rwa [Int.toNat_of_nonneg (le_of_lt hd'_pos)]
-    · intro m hm
-      obtain ⟨k, hk⟩ := hd'_gen ⟨m⟩ hm
-      rw [Int.toNat_of_nonneg (le_of_lt hd'_pos)]
-      exact ⟨k, by simpa [mul_comm] using congrArg ULift.down hk⟩
+    exact ⟨_, mk_P x₀' hx₀'V d' hd'_pos hd'_mem hd'_gen⟩
   -- d_nat is the minimal positive generator among all points of V
   haveI : DecidablePred P := Classical.decPred P
   set d_nat := Nat.find (p := P) hP
@@ -265,13 +269,8 @@ private theorem exists_section_generating_stalks
     -- Get generator d_x of image subgroup at x
     obtain ⟨d_x, hd_x_mem, hd_x_pos, hd_x_gen⟩ := ulift_int_subgroup_cyclic _ hHx_ne
     -- d_x generates image subgroup at x, so P(d_x.down.toNat) holds
-    have hP_dx : P d_x.down.toNat := by
-      refine ⟨Int.pos_iff_toNat_pos.mp hd_x_pos, x, hWV hxW, ?_, ?_⟩
-      · rwa [Int.toNat_of_nonneg (le_of_lt hd_x_pos)]
-      · intro m hm
-        obtain ⟨k, hk⟩ := hd_x_gen ⟨m⟩ hm
-        rw [Int.toNat_of_nonneg (le_of_lt hd_x_pos)]
-        exact ⟨k, by simpa [mul_comm] using congrArg ULift.down hk⟩
+    have hP_dx : P d_x.down.toNat :=
+      mk_P x (hWV hxW) d_x hd_x_pos hd_x_mem hd_x_gen
     -- Minimality: d_nat ≤ d_x.down.toNat
     have h_le : d_nat ≤ d_x.down.toNat := h_minimal _ hP_dx
     -- Also d_x | d.down (since d.down ∈ image subgroup at x)
