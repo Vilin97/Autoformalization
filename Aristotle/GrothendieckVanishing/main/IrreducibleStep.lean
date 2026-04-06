@@ -96,13 +96,10 @@ private theorem exists_section_generating_stalks
   let i_x (x : X) := ConcreteCategory.hom
     ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map i.val)
   -- i_x is injective at all points
-  have hi_inj : ∀ (x : X), Function.Injective (i_x x) := by
-    intro x
-    let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
-      TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  have hi_inj : ∀ (x : X), Function.Injective (i_x x) := fun x => by
     haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
-    haveI : Mono (FT.map i) := Functor.map_mono FT i
-    exact (ConcreteCategory.mono_iff_injective_of_preservesPullback (FT.map i)).mp inferInstance
+    exact (ConcreteCategory.mono_iff_injective_of_preservesPullback
+      ((TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x).map i)).mp inferInstance
   -- Abbreviation for germ of generator at x ∈ V
   let gen_at (x : X) (hx : x ∈ V) := (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V x hx
     (TopCat.Sheaf.zeroOutsideInt.generator V)
