@@ -5,24 +5,6 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
-/-! ## Main vanishing theorems -/
-
-/-- **Reducible vanishing** (Hartshorne III.2.7, reducible case).
-    This is proved in `ReducibleVanishing.lean`; `Setup.lean` re-exports the
-    finished theorem so downstream files do not depend on the auxiliary primed
-    name. -/
-theorem ReducibleVanishing
-    (X : TopCat.{u}) [NoetherianSpace X]
-    (n : ℕ) (hn : n > topologicalKrullDim X)
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (hNotIrred : ¬ IrreducibleSpace X) [Nonempty X]
-    (ih_irred : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      [IrreducibleSpace Y] (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
-      topologicalKrullDim Y ≤ topologicalKrullDim X →
-      n > topologicalKrullDim Y → Subsingleton (Sheaf.H G n)) :
-    Subsingleton (Sheaf.H F n) :=
-  ReducibleVanishing' X n hn F hNotIrred ih_irred
-
 /-- On an irreducible noetherian space of positive Krull dimension, one can choose a proper
 closed subset `Z ⊊ X` of strictly smaller Krull dimension, and the ambient cohomological bound
 `n > dim X` automatically implies `n > dim Z`. This isolates the closed-subset selection used at
