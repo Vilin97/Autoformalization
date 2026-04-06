@@ -42,10 +42,8 @@ theorem zeroOutsideInt_vanishing
       (presheafToSheaf J AddCommGrpCat.{u}).mapIso α
     haveI : IsIso β.hom.val :=
       (sheafToPresheaf J AddCommGrpCat.{u}).map_isIso β.hom
-    haveI : IsIso (β.hom.val.app (op W)) :=
-      CategoryTheory.NatIso.isIso_app_of_isIso β.hom.val (op W)
-    haveI : IsIso (β.hom.val.app (op U)) :=
-      CategoryTheory.NatIso.isIso_app_of_isIso β.hom.val (op U)
+    haveI := CategoryTheory.NatIso.isIso_app_of_isIso β.hom.val (op W)
+    haveI := CategoryTheory.NatIso.isIso_app_of_isIso β.hom.val (op U)
     have hrw : S.X₂.val.map i.op = β.hom.val.app (op W) ≫
         ((constantSheaf J AddCommGrpCat.{u}).obj A).val.map i.op ≫
         inv (β.hom.val.app (op U)) := by
