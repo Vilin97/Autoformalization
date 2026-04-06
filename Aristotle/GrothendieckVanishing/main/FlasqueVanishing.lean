@@ -326,9 +326,8 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
       S.f.val.app (op (V₀ ⊓ W)) (S.X₁.val.map (homOfLE inf_le_right).op ahat) from
       (S.f.val.naturality_apply (homOfLE inf_le_right).op ahat).symm, hahat, ha]; abel
   -- Binary glue t₀ and t'' to get t_new on V₀ ⊔ W
-  let BU : Bool → Opens X := fun b => match b with | false => V₀ | true => W
-  let Bsf : (b : Bool) → S.X₂.val.obj (op (BU b)) :=
-    fun b => match b with | false => t₀ | true => t''
+  let BU : Bool → Opens X | false => V₀ | true => W
+  let Bsf : (b : Bool) → S.X₂.val.obj (op (BU b)) | false => t₀ | true => t''
   have hsup_eq : ⨆ b, BU b = V₀ ⊔ W := le_antisymm
     (iSup_le fun b => by cases b <;> simp [BU])
     (by intro y hy; simp only [Opens.mem_iSup]; rcases hy with h | h;
