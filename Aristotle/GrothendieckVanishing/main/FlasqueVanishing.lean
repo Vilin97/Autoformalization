@@ -7,7 +7,7 @@
   3. `isFlasque_of_injective` (injective sheaves are flasque)
   4. `ext_zero_map_surjective` (base case for flasque vanishing)
 
-  `FlasqueVanishing` itself is in `FlasqueCohomology.lean`.
+  `flasqueVanishing` itself is in `FlasqueCohomology.lean`.
   Split from SetupCore.lean for compilation performance.
 -/
 import Aristotle.GrothendieckVanishing.main.Auxiliary
@@ -143,7 +143,7 @@ theorem stalk_zero_of_shortExact_kernel
 /-! ## Flasque sheaf sub-lemmas
 
 The four sub-lemmas below are adapted from Brian Nugent's Mathlib PR #35790.
-Together they imply `FlasqueVanishing` (proved in FlasqueCohomology.lean). Each is a self-contained
+Together they imply `flasqueVanishing` (proved in FlasqueCohomology.lean). Each is a self-contained
 statement that can be attacked independently.
 -/
 
@@ -155,12 +155,12 @@ def IsFlasqueSheaf {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X) : Pro
 /-! ### Helper: sections functor and evaluated exactness -/
 
 /-- The sections-at-V functor: Sheaf → AddCommGrpCat. -/
-private noncomputable def sectionsAt {X : TopCat.{u}} (V : Opens X) :
+noncomputable def sectionsAt {X : TopCat.{u}} (V : Opens X) :
     TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
   sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)
 
 -- Provide explicitly to avoid expensive typeclass resolution on the composite functor.
-private noncomputable instance sectionsAt_preservesZeroMorphisms
+noncomputable instance sectionsAt_preservesZeroMorphisms
     {X : TopCat.{u}} (V : Opens X) :
     (sectionsAt (X := X) V).PreservesZeroMorphisms :=
   inferInstanceAs
@@ -169,7 +169,7 @@ private noncomputable instance sectionsAt_preservesZeroMorphisms
 -- The sections functor preserves left homology of a SES with mono f:
 -- it preserves the kernel of g (limit-preserving) and the coimage of f
 -- (f is mono ⟹ the coimage map is an iso, whose cokernel is trivially preserved).
-private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
+lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (V : Opens X) :
     (sectionsAt V).PreservesLeftHomologyOf S := by
@@ -189,7 +189,7 @@ private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
 
 -- For a SES of sheaves, the evaluated sequence at V is exact:
 -- if g_V(x) = 0, then x is in the image of f_V.
-private lemma sections_exact_of_shortExact {X : TopCat.{u}}
+lemma sections_exact_of_shortExact {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (V : Opens X)
     (x : S.X₂.val.obj (op V))
@@ -205,14 +205,14 @@ private lemma sections_exact_of_shortExact {X : TopCat.{u}}
 
 -- In a thin category (Opens X), any two parallel morphisms are equal,
 -- so presheaf restriction maps agree regardless of which morphism is used.
-private lemma presheaf_map_eq {X : TopCat.{u}}
+lemma presheaf_map_eq {X : TopCat.{u}}
     (F : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
     {U V : Opens X} (f g : U ⟶ V) (s : F.obj (op V)) :
     F.map f.op s = F.map g.op s := congr_arg (F.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim f g))
 
 -- Extension preorder on partial lifts (V, t):
 -- (V₁,t₁) ≤ (V₂,t₂) iff V₁ ≤ V₂ and t₂|_{V₁} = t₁.
-private noncomputable instance sigmaPreorder {X : TopCat.{u}}
+noncomputable instance sigmaPreorder {X : TopCat.{u}}
     (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)) :
     Preorder (Σ V : Opens X, S.X₂.val.obj (op V)) where
   le p q := ∃ h : p.1 ≤ q.1,
@@ -227,7 +227,7 @@ private noncomputable instance sigmaPreorder {X : TopCat.{u}}
 /-! ### Partial lift sub-lemmas for the Zorn surjectivity argument -/
 
 /-- A partial lift: `(V, t)` with `V ≤ U` and `g(t) = s|_V`. -/
-private def IsPartialLift {X : TopCat.{u}}
+def IsPartialLift {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (U : Opens X) (s : S.X₃.val.obj (op U))
     (p : Σ V : Opens X, S.X₂.val.obj (op V)) : Prop :=
@@ -235,7 +235,7 @@ private def IsPartialLift {X : TopCat.{u}}
     ConcreteCategory.hom (S.X₃.val.map (homOfLE h).op) s
 
 -- Chain of partial lifts has an upper bound via sheaf gluing.
-private lemma partialLift_chain_ub {X : TopCat.{u}}
+lemma partialLift_chain_ub {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     {U : Opens X} {s : S.X₃.val.obj (op U)}
     {c : Set (Σ V : Opens X, S.X₂.val.obj (op V))}
@@ -272,7 +272,7 @@ private lemma partialLift_chain_ub {X : TopCat.{u}}
 -- Maximal partial lift must cover all of U.
 -- If V₀ < U, find x ∈ U \ V₀, get a local lift on W ∋ x, adjust for compatibility
 -- using exactness + flasqueness, glue to get a strictly larger partial lift.
-private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
+lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁)
     {U : Opens X} {s : S.X₃.val.obj (op U)}
@@ -387,18 +387,18 @@ noncomputable section FreeAbSheaf
 
 variable {X : TopCat.{u}}
 
-private def freeAbPresheaf (U : Opens X) : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} :=
+def freeAbPresheaf (U : Opens X) : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} :=
   yoneda.obj U ⋙ AddCommGrpCat.free
 
-private def freeAbSheaf (U : Opens X) : TopCat.Sheaf AddCommGrpCat.{u} X :=
+def freeAbSheaf (U : Opens X) : TopCat.Sheaf AddCommGrpCat.{u} X :=
   (presheafToSheaf (Opens.grothendieckTopology (T := X)) AddCommGrpCat.{u}).obj
     (freeAbPresheaf U)
 
-private def freeAbSheafMap {U V : Opens X} (i : U ⟶ V) : freeAbSheaf U ⟶ freeAbSheaf V :=
+def freeAbSheafMap {U V : Opens X} (i : U ⟶ V) : freeAbSheaf U ⟶ freeAbSheaf V :=
   (presheafToSheaf (Opens.grothendieckTopology (T := X)) AddCommGrpCat.{u}).map
     (Functor.whiskerRight (yoneda.map i) AddCommGrpCat.free)
 
-private def freeAbSheafHomEquiv (U : Opens X) (I : TopCat.Sheaf AddCommGrpCat.{u} X) :
+def freeAbSheafHomEquiv (U : Opens X) (I : TopCat.Sheaf AddCommGrpCat.{u} X) :
     (freeAbSheaf U ⟶ I) ≃ (forget AddCommGrpCat).obj (I.val.obj (op U)) :=
   ((sheafificationAdjunction (Opens.grothendieckTopology (T := X)) AddCommGrpCat.{u}).homEquiv
     (freeAbPresheaf U) I).trans <|
@@ -406,7 +406,7 @@ private def freeAbSheafHomEquiv (U : Opens X) (I : TopCat.Sheaf AddCommGrpCat.{u
     (sheafToPresheaf _ _ |>.obj I)).trans <|
   yonedaEquiv
 
-private lemma freeAbSheafHomEquiv_naturality {U V : Opens X} (i : U ⟶ V)
+lemma freeAbSheafHomEquiv_naturality {U V : Opens X} (i : U ⟶ V)
     (I : TopCat.Sheaf AddCommGrpCat.{u} X) (f : freeAbSheaf V ⟶ I) :
     freeAbSheafHomEquiv U I (freeAbSheafMap i ≫ f) =
       (I.val.map i.op) (freeAbSheafHomEquiv V I f) := by
@@ -427,7 +427,7 @@ private lemma freeAbSheafHomEquiv_naturality {U V : Opens X} (i : U ⟶ V)
           AddCommGrpCat).homEquiv (freeAbPresheaf V) I f)) i.op),
     fun h => by convert congr_arg (fun g => g (𝟙 V)) h using 1⟩
 
-private instance freeAbSheafMap_mono {U V : Opens X} (i : U ⟶ V) :
+instance freeAbSheafMap_mono {U V : Opens X} (i : U ⟶ V) :
     Mono (freeAbSheafMap i) := by
   haveI : PreservesFiniteLimits (presheafToSheaf (Opens.grothendieckTopology (T := X))
       AddCommGrpCat.{u}) := HasSheafify.isLeftExact
@@ -492,6 +492,6 @@ theorem ext_zero_map_surjective {X : TopCat.{u}}
     rw [Adjunction.homEquiv_naturality_right, Equiv.apply_symm_apply,
       Projective.factorThru_comp]⟩
 
--- Cohomological vanishing theorems (sheafH0EquivSections, FlasqueVanishing)
+-- Cohomological vanishing theorems (sheafH0EquivSections, flasqueVanishing)
 -- are in FlasqueCohomology.lean.
 

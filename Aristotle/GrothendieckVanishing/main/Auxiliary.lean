@@ -76,7 +76,7 @@ theorem topologicalKrullDim_nonneg_of_irreducible {X : Type u} [TopologicalSpace
 
 /-- Every element in the image of IrreducibleCloseds Y → IrreducibleCloseds X
     is strictly below the whole space X, when Y ⊊ X. -/
-private lemma map_subtype_lt_top {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
+lemma map_subtype_lt_top {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
     {Y : Set X} (hY : IsClosed Y) (hne : Y ≠ Set.univ)
     (s : IrreducibleCloseds Y) :
     IrreducibleCloseds.map (Subtype.val : Y → X) continuous_subtype_val s <
@@ -86,7 +86,7 @@ private lemma map_subtype_lt_top {X : Type u} [TopologicalSpace X] [IrreducibleS
   · rw [Set.eq_univ_iff_forall] at *; contrapose! hne; aesop
 
 /-- For each s : IrreducibleCloseds Y, height(s) + 1 ≤ topologicalKrullDim X. -/
-private lemma height_add_one_le_dim {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
+lemma height_add_one_le_dim {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
     {Y : Set X} (hY : IsClosed Y) (hne : Y ≠ Set.univ)
     (s : IrreducibleCloseds Y) :
     (Order.height s : WithBot ℕ∞) + 1 ≤ topologicalKrullDim X := by
@@ -105,7 +105,7 @@ private lemma height_add_one_le_dim {X : Type u} [TopologicalSpace X] [Irreducib
   · gcongr; norm_cast
   · convert Order.height_le_krullDim _
 
-private lemma iSup_height_add_one_eq {Y : Type u} [TopologicalSpace Y]
+lemma iSup_height_add_one_eq {Y : Type u} [TopologicalSpace Y]
     [Nonempty (IrreducibleCloseds Y)] :
     (⨆ s : IrreducibleCloseds Y, (Order.height s : WithBot ℕ∞)) + 1 =
     ⨆ s : IrreducibleCloseds Y, ((Order.height s : WithBot ℕ∞) + 1) := by
@@ -122,7 +122,7 @@ private lemma iSup_height_add_one_eq {Y : Type u} [TopologicalSpace Y]
       (↑(Order.height s + 1 : ℕ∞) : WithBot ℕ∞) = (↑(Order.height s) : WithBot ℕ∞) + 1 from
     by intro s; push_cast; ring]
 
-private lemma wbot_lt_of_add_one_le_of_lt_top {x y : WithBot ℕ∞}
+lemma wbot_lt_of_add_one_le_of_lt_top {x y : WithBot ℕ∞}
     (h1 : x + 1 ≤ y) (h2 : x < ⊤) (h3 : ⊥ < y) : x < y := by
   rcases x with _ | v
   · exact h3

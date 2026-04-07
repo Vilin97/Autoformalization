@@ -4,7 +4,7 @@
   Provides:
   1. `sheafH0EquivSections`: H^0(F) ≃+ F(⊤) (sections on ⊤)
   2. `subsingleton_of_addEquiv`: transport subsingletons across additive equivalences
-  3. `FlasqueVanishing`: flasque sheaves have vanishing higher cohomology
+  3. `flasqueVanishing`: flasque sheaves have vanishing higher cohomology
 
   Split from FlasqueVanishing.lean (flasque infrastructure) for file size.
 -/
@@ -60,7 +60,7 @@ theorem subsingleton_H1_via_surj {C' : Type*} [Category C'] [Abelian C'] [HasExt
     hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
 
 /-- **Base case**: `H^1(F) = 0` for flasque `F`. -/
-private theorem sheafH_one_of_flasque {X : TopCat.{u}}
+theorem sheafH_one_of_flasque {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (h : IsFlasqueSheaf F) :
     Subsingleton (Sheaf.H F 1) := by
   obtain ⟨ip⟩ := EnoughInjectives.presentation F
@@ -75,7 +75,7 @@ private theorem sheafH_one_of_flasque {X : TopCat.{u}}
       Since `I` is injective hence flasque, and `F` is flasque, `Q` is also flasque
       by `isFlasque_X₃_of_shortExact`. By dimension shifting, `H^{n+2}(F) = H^{n+1}(Q)`,
       and the latter vanishes by the induction hypothesis. -/
-theorem FlasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+theorem flasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (h : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op))
     (n : ℕ) :
     Subsingleton (Sheaf.H F (n + 1)) := by

@@ -253,18 +253,18 @@ theorem closedIncl_counit_isIso
           (Opens.grothendieckTopology X) K) F) using 1
   rw [← hcompare]; infer_instance
 
-private lemma isIso_left {C : Type*} [CategoryTheory.Category C] {A B D : C}
+lemma isIso_left {C : Type*} [CategoryTheory.Category C] {A B D : C}
     {f : A ⟶ B} {g : B ⟶ D} {h : A ⟶ D} [CategoryTheory.IsIso g] [CategoryTheory.IsIso h]
     (e : f ≫ g = h) : CategoryTheory.IsIso f := by
   rw [show f = h ≫ CategoryTheory.inv g from by simp [← e]]; infer_instance
 
-private lemma isIso_right {C : Type*} [CategoryTheory.Category C] {A B D : C}
+lemma isIso_right {C : Type*} [CategoryTheory.Category C] {A B D : C}
     {f : A ⟶ B} {g : B ⟶ D} {h : A ⟶ D} [CategoryTheory.IsIso f] [CategoryTheory.IsIso h]
     (e : f ≫ g = h) : CategoryTheory.IsIso g := by
   rw [show g = CategoryTheory.inv f ≫ h from by simp [← e]]; infer_instance
 
 -- Stalk pullback hom naturality
-private lemma stalkPull_nat {X Y : TopCat.{u}} (f : X ⟶ Y)
+lemma stalkPull_nat {X Y : TopCat.{u}} (f : X ⟶ Y)
     {F G : Y.Presheaf AddCommGrpCat.{u}} (α : F ⟶ G) (x : ↑X) :
     (Presheaf.stalkFunctor AddCommGrpCat.{u} (ConcreteCategory.hom f x)).map α ≫
       Presheaf.stalkPullbackHom AddCommGrpCat f G x =

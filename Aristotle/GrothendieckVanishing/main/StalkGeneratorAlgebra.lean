@@ -71,7 +71,7 @@ theorem sheaf_mono_of_stalk_injective
 /-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
     is an integer multiple of the germ of the distinguished generator over `V`. -/
 -- The restricted generator of `constZ.zeroOutside V` maps to `1` under `eqToHom`.
-private theorem resGen_eqToHom_eq_one
+theorem resGen_eqToHom_eq_one
     {X : TopCat.{u}} (V : Opens X) {W : Opens X} (hWV : W ≤ V)
     (hObjW : (TopCat.Presheaf.constZ.zeroOutside V).obj (op W) =
         AddCommGrpCat.of (ULift ℤ)) :
@@ -84,7 +84,7 @@ private theorem resGen_eqToHom_eq_one
     Functor.const_obj_map, Category.id_comp]
   simp [show hObjW.symm.trans hObjW = rfl from Subsingleton.elim _ _]
 
-private theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
+theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
     {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
       (TopCat.Presheaf.constZ.zeroOutside V)) :

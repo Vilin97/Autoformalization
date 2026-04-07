@@ -3,7 +3,7 @@
 
   On an irreducible space of dimension 0, the only open sets are ∅ and X.
   Therefore every sheaf has surjective (epi) restriction maps, i.e., is flasque.
-  By FlasqueVanishing, all higher cohomology vanishes.
+  By flasqueVanishing, all higher cohomology vanishes.
 
   This is Hartshorne III.2.7 Step 2.
 -/
@@ -29,7 +29,7 @@ theorem sheaf_restriction_epi_of_irreducible_dim_zero
     rw [Subsingleton.elim i (𝟙 ⊤), op_id, F.val.map_id]; infer_instance
 
 /-- On an irreducible Noetherian space of dim ≤ 0, all higher cohomology vanishes.
-    Hartshorne III.2.7, Step 2. Uses FlasqueVanishing applied to sheaves that are
+    Hartshorne III.2.7, Step 2. Uses flasqueVanishing applied to sheaves that are
     flasque because the only opens are ⊥ and ⊤. -/
 theorem grothendieck_vanishing_dim_zero
     (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X] [IrreducibleSpace X]
@@ -37,5 +37,5 @@ theorem grothendieck_vanishing_dim_zero
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (n : ℕ) :
     Subsingleton (Sheaf.H F (n + 1)) :=
-  FlasqueVanishing X F
+  flasqueVanishing X F
     (fun i => sheaf_restriction_epi_of_irreducible_dim_zero X hdim F i) n
