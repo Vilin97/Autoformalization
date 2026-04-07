@@ -8,6 +8,7 @@
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
 import Aristotle.GrothendieckVanishing.main.Auxiliary
+import Mathlib.CategoryTheory.Abelian.Projective.Dimension
 
 universe u
 

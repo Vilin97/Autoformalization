@@ -11,6 +11,7 @@
   - zsmul_generator_injective: generator coefficient uniqueness
 -/
 import Aristotle.GrothendieckVanishing.main.SheafStalkAlgebra
+import Mathlib.Data.Int.LeastGreatest
 
 universe u
 
@@ -172,10 +173,10 @@ theorem ulift_int_subgroup_cyclic
         · exact ⟨0, fun z hz => by obtain ⟨e, he, rfl⟩ := hz; exact le_of_lt he.2⟩
         · exact ⟨_, ⟨d, ⟨hd_pos, hd_gen⟩, rfl⟩⟩
       aesop
-    refine' ⟨d, hd_pos, hd_gen.1, fun h hh => _⟩
+    refine ⟨d, hd_pos, hd_gen.1, fun h hh => ?_⟩
     contrapose! hd_gen
     intro hd_pos'
-    refine' ⟨h - ⌊h.down / d.down⌋ • d, _, _, _⟩ <;> simp_all +decide [Int.emod_def]
+    refine ⟨h - (h.down / d.down) • d, ?_, ?_, ?_⟩ <;> simp_all +decide [Int.emod_def]
     · convert H.sub_mem hh (H.zsmul_mem hd_pos (h.down / d.down)) using 1
     · cases lt_or_gt_of_ne hd_gen <;>
         linarith [Int.mul_ediv_add_emod h.down d.down,
