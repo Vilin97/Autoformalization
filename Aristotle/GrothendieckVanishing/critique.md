@@ -74,8 +74,8 @@ These theorems prove "if one side vanishes, the other vanishes" when the natural
 | Declaration | File:Line | Current statement | Natural statement | Difficulty |
 |-------------|-----------|-------------------|-------------------|------------|
 | `PushforwardHVanishing` | SetupCore.lean:301 | H^n(G) = 0 → H^n(i_\*G) = 0 | H^n(X, i_\*G) ≅ H^n(Z, G) for closed immersion i | Hard |
-| `sheafH_preserves_filtered_colimits` | FiniteGeneratorReduction.lean:383 | ∀j, H^n(F_j) = 0 → H^n(colim F_j) = 0 | colim H^n(F_j) ≅ H^n(colim F_j) | Hard |
-| `cohomology_vanishing_of_finitelyGenerated_vanishing` | FiniteGeneratorReduction.lean:396 | H^m(K_S) = 0 for all f.g. K_S → H^m(K) = 0 | (consequence of the above) | Hard |
+| ~~`sheafH_preserves_filtered_colimits`~~ | ~~FiniteGeneratorReduction.lean~~ | ~~∀j, H^n(F_j) = 0 → H^n(colim F_j) = 0~~ | ~~colim H^n(F_j) ≅ H^n(colim F_j)~~ | **RESOLVED** — `sheafH_filtered_colimit_surj` proves surjectivity; `extClass_naturality` in SetupCore.lean |
+| ~~`cohomology_vanishing_of_finitelyGenerated_vanishing`~~ | ~~FiniteGeneratorReduction.lean~~ | ~~H^m(K_S) = 0 ∀ f.g. K_S → H^m(K) = 0~~ | ~~(consequence of the above)~~ | **RESOLVED** (consequence of surjectivity) |
 
 **Why it matters**: The isomorphism versions are standard, independently useful results. `H^n(X, i_*G) ≅ H^n(Z, G)` is a fundamental property of closed immersions. Commutation of cohomology with filtered colimits is used throughout algebraic geometry.
 
@@ -164,7 +164,7 @@ The mathematical content is sound and the proof structure is clean. The gap to M
 |-------|-----------|
 | Generalize from `AddCommGrpCat` to arbitrary Grothendieck abelian categories | Medium |
 | Full isomorphisms for pushforward cohomology H^n(X, i_*G) ≅ H^n(Z, G) | Hard |
-| Full filtered colimit commutation colim H^n(F_j) ≅ H^n(colim F_j) | Hard |
+| ~~Full filtered colimit commutation colim H^n(F_j) ≅ H^n(colim F_j)~~ | **RESOLVED** — `sheafH_filtered_colimit_surj` + `extClass_naturality` |
 
 ### Assessment
 
@@ -196,7 +196,7 @@ Each piece would need: docstrings, snake_case names, no `private`, targeted impo
 | ~~P3~~ | ~~`closedIncl_pushforward_shortExact` unnecessarily requires `InjectivePresentation`~~ | **RESOLVED** — Now takes `S.ShortExact` |
 | ~~P3~~ | ~~`epi_g_app_top_of_H1_vanishing` unnecessarily requires `InjectivePresentation`~~ | **RESOLVED** — Now takes `S.ShortExact` |
 | ~~P3~~ | ~~`pushforwardHIso`: H^n(X,i_\*G) ≃+ H^n(Z,G)~~ | **RESOLVED** — fully proved for all n (0 sorry's) |
-| P3 | `sheafH_preserves_filtered_colimits` proves vanishing propagation, not colim commutation | **Blocked** — requires delta-functor formalism or Ext naturality (not in Mathlib) |
+| ~~P3~~ | ~~`sheafH_preserves_filtered_colimits` proves vanishing propagation, not colim commutation~~ | **RESOLVED** — `extClass_naturality` proved (via TR3 + singleFunctor fullness), `sheafH_filtered_colimit_surj` proved (surjectivity of colim H^n → H^n(colim)) |
 | ~~P3~~ | ~~`pushforward_preserves_flasque` inlined but not extracted~~ | **RESOLVED** — Standalone theorem in FlasqueVanishing.lean |
 | P4 | Generalize coefficient category from `AddCommGrpCat` | Backlog |
 | ~~P4~~ | ~~Strengthen `Subsingleton` to `IsZero`~~ | **N/A** — `Sheaf.H F n` is a `Type` (Ext group), not a categorical object; `Subsingleton` is correct |
