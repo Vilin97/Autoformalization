@@ -63,7 +63,7 @@ reducibleVanishing and irreduciblePosVanishing require two building blocks:
 2. closedImmersionSES: the adjunction unit F -> i_*(i^*F) gives a short exact sequence
 -/
 
--- stalkPushforward naturality w.r.t. presheaf morphisms
+/-- Naturality of `stalkPushforward` with respect to presheaf morphisms. -/
 theorem stalkPush_nat_closedIncl
     {X Y : TopCat.{u}} (f : X ⟶ Y)
     {F G : X.Presheaf AddCommGrpCat.{u}} (α : F ⟶ G) (x : X) :
@@ -78,7 +78,7 @@ theorem stalkPush_nat_closedIncl
     TopCat.Presheaf.stalkPushforward_germ_assoc,
     TopCat.Presheaf.stalkFunctor_map_germ]; rfl
 
--- Stalk of pushforward is zero outside the closed set
+/-- The stalk of a pushforward sheaf `i_* G` vanishes at points outside the closed set `s`. -/
 theorem pushforward_stalk_zero_closedIncl
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) (x : X) (hx : x ∉ s)
     (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) :
@@ -103,7 +103,8 @@ theorem pushforward_stalk_zero_closedIncl
   change ConcreteCategory.hom (F.germ W x hxW) sW = 0
   rw [hsW_eq]; exact AddMonoidHom.map_zero _
 
--- Surjectivity transfer: f ≫ g = h ≫ k with g, h iso and k surj → f surj
+/-- Surjectivity transfer: if `f ≫ g = h ≫ k` with `g`, `h` isomorphisms and `k` surjective,
+then `f` is surjective. -/
 theorem surj_transfer_closedIncl {A B C D : AddCommGrpCat.{u}}
     {f : A ⟶ B} {g : B ⟶ C} {h : A ⟶ D} {k : D ⟶ C}
     [IsIso g] [IsIso h]
@@ -121,17 +122,18 @@ theorem surj_transfer_closedIncl {A B C D : AddCommGrpCat.{u}}
     ConcreteCategory.comp_apply, hd, ← ConcreteCategory.comp_apply,
     IsIso.hom_inv_id, ConcreteCategory.id_apply]
 
--- Cache Balanced to avoid expensive synthesis chain
--- (Abelian → IsNormalEpiCategory → StrongEpiCategory → Balanced)
+/-- Sheaves of abelian groups form a strong epi category. Cached to avoid expensive synthesis. -/
 noncomputable instance sheafStrongEpiCategory (X : TopCat.{u}) :
     StrongEpiCategory (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   strongEpiCategory_of_regularEpiCategory
 
+/-- Sheaves of abelian groups form a balanced category. Cached to avoid expensive synthesis. -/
 noncomputable instance sheafBalanced (X : TopCat.{u}) :
     Balanced (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   balanced_of_strongEpiCategory
 
--- Stalkwise surjectivity of pushed-forward g
+/-- Pushforward of the epi `g` in a short exact sequence along a closed inclusion is epi.
+Proved by checking stalkwise surjectivity (identity on `s`, maps to `0` outside). -/
 theorem closedIncl_pushforward_epi_g
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s))}
@@ -170,7 +172,7 @@ theorem closedIncl_pushforward_epi_g
     rw [pushforward_stalk_zero_closedIncl hs x hx S.X₃ b]
     exact ⟨0, AddMonoidHom.map_zero _⟩
 
--- Pushforward along closed immersion preserves ShortExact.
+/-- Pushforward along a closed immersion preserves short exactness. -/
 theorem closedIncl_pushforward_shortExact
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s))}
@@ -192,7 +194,7 @@ theorem closedIncl_pushforward_shortExact
   exact ShortComplex.ShortExact.mk' hExact ‹_› ‹_›
 
 
--- If both ends of a short exact sequence have vanishing H^n, so does the middle.
+/-- If both ends of a short exact sequence have vanishing `H^n`, so does the middle term. -/
 theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (n : ℕ)
@@ -208,7 +210,8 @@ theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
 
 /-! ### pushforwardHVanishing sub-lemmas -/
 
--- Base case: Γ comparison. Γ_X(i_*G') = G'(⊤_Z) = Γ_Z(G')
+/-- Base case of `pushforwardHVanishing`: the pushforward preserves `H^0` vanishing
+by comparing global sections `Γ_X(i_* G') = G'(⊤_Z) = Γ_Z(G')`. -/
 lemma pushforwardHVanishing_zero
     {X : TopCat.{u}} {Z : Set X} (_hZ : IsClosed Z) [NoetherianSpace X]
     (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))
@@ -225,7 +228,7 @@ lemma pushforwardHVanishing_zero
   apply (sheafH0EquivSections F').injective
   exact @Subsingleton.elim (F'.val.obj (op ⊤)) (hobj ▸ hsec) _ _
 
--- Helper: Ext₀ composition identity used in epi_g_app_top_of_H1_vanishing
+/-- Helper: if `z.comp(mk₀(g)) = mk₀(φ)` in `Ext^0`, then `addEquiv₀(z) ≫ g = φ` as morphisms. -/
 lemma ext0_comp_eq_of_covariant
     {Z : TopCat.{u}} [NoetherianSpace Z]
     {A B C : TopCat.Sheaf AddCommGrpCat.{u} Z}
@@ -242,7 +245,8 @@ lemma ext0_comp_eq_of_covariant
       (Ext.mk₀ g) _ = Ext.addEquiv₀.symm φ
   rw [AddEquiv.symm_apply_apply]; exact hz
 
--- Epi of g at ⊤ from H^1(X₁)=0 via LES + adj + separator
+/-- If `H^1(S.X₁) = 0` in a short exact sequence, then `g` evaluated at `⊤` is epi.
+Proved via the covariant Ext LES, adjunction, and projectivity of `ULift ℤ`. -/
 theorem epi_g_app_top_of_H1_vanishing
     {Z : TopCat.{u}} [NoetherianSpace Z]
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} Z)}
@@ -270,7 +274,8 @@ theorem epi_g_app_top_of_H1_vanishing
   change (ConcreteCategory.hom (ψ_hom ≫ S.g.val.app (op ⊤))) (ULift.up 1) = r
   rw [← hfact]; simp [φ_hom]
 
--- Surjectivity of Ext⁰ map from epi at ⊤ via adjunction + projectivity of ULift ℤ
+/-- Surjectivity of the `Ext^0` map from epimorphism of `g` at global sections,
+via adjunction and projectivity of `ULift ℤ`. -/
 theorem ext0_surj_of_epi_top
     {X : TopCat.{u}} [NoetherianSpace X]
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
@@ -293,8 +298,9 @@ theorem ext0_surj_of_epi_top
     rw [Adjunction.homEquiv_naturality_right, Equiv.apply_symm_apply,
       Projective.factorThru_comp]⟩
 
--- Pushforward along closed immersion preserves cohomological vanishing.
--- Proof by induction: n=0 via sections, n=1 via Ext^0 surjectivity, n≥2 via LES dimension shift.
+/-- **Pushforward preserves cohomological vanishing.** If `H^n(G) = 0` on the closed subspace `Z`,
+then `H^n(i_* G) = 0` on `X`. Proved by induction: `n=0` via sections, `n=1` via Ext^0
+surjectivity, `n ≥ 2` via LES dimension shift. -/
 theorem pushforwardHVanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
@@ -330,10 +336,9 @@ theorem pushforwardHVanishing
           (Ext.subsingleton_of_injective _ _ m) hG'))
         (flasqueVanishing _ _ hFlasque (m + 1))
 
--- The adjunction unit F → i_*(i^*F) is epi for closed immersions.
--- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).
--- Requires: stalkPushforward_iso_of_isInducing + stalk of i_*G = 0 outside Z.
--- epi via surjective on stalks
+/-- The adjunction unit `F → i_*(i^*F)` is epi for closed immersions. Stalkwise:
+on `Z` the stalk map is an iso (by `closedIncl_unit_stalk_isIso`), and outside `Z`
+the target stalk is zero. -/
 theorem epi_unit_of_closedImmersion
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
@@ -379,8 +384,8 @@ theorem epi_unit_of_closedImmersion
     exact fun b => ⟨0, by simp [(@Subsingleton.elim _
       (AddCommGrpCat.subsingleton_of_isZero hstalk_zero) b 0).symm]⟩
 
--- Short exact sequence from closed immersion.
--- Uses epi_unit_of_closedImmersion to form 0 → ker(η) → F → i_*(i^*F) → 0.
+/-- Short exact sequence from a closed immersion: `0 → ker(η) → F → i_*(i^*F) → 0`
+where `η` is the adjunction unit. -/
 theorem closedImmersionSES
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]

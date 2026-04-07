@@ -15,9 +15,11 @@ namespace TopCat
 
 namespace Sheaf
 
+/-- Category of sheaves of abelian groups on a topological space is abelian. -/
 instance (X : TopCat.{u}) : Abelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   inferInstanceAs (Abelian (CategoryTheory.Sheaf _ _))
 
+/-- `uliftZMultiplesHom` preserves addition. -/
 theorem AddCommGrpCat.uliftZMultiplesHom_add (G : Type u) [AddCommGroup G] (x y : G) :
     (uliftZMultiplesHom G) (x + y) = ((uliftZMultiplesHom G) x) + ((uliftZMultiplesHom G) y) := by
   ext
@@ -42,6 +44,8 @@ variable {C : Type*} [Category C] [HasZeroObject C] {X : TopCat.{u}}
     (U : Opens X) (F : Presheaf C X)
 
 open Classical in
+/-- The extension-by-zero presheaf: agrees with `F` on opens contained in `U`,
+and is zero elsewhere. -/
 @[simps]
 def zeroOutside : Presheaf C X where
   obj W := if (unop W) ≤ U then F.obj W else 0
@@ -62,10 +66,12 @@ def zeroOutside : Presheaf C X where
 
 variable {U F}
 
+/-- The extension-by-zero presheaf is zero on opens not contained in `U`. -/
 lemma zeroOutside_isZero {W : Opens X} (h : ¬ W ≤ U) :
     IsZero ((zeroOutside U F).obj (op W)) := by
   simp [zeroOutside, h, isZero_zero C]
 
+/-- On opens contained in `U`, the extension-by-zero presheaf agrees with `F`. -/
 lemma zeroOutside_le {W : Opens X} (h : W ≤ U) :
     (zeroOutside U F).obj (op W) = F.obj (op W) := by
   simp [zeroOutside, h]
@@ -73,6 +79,7 @@ lemma zeroOutside_le {W : Opens X} (h : W ≤ U) :
 variable {V : Opens X} (h : V ≤ U)
 
 open Classical in
+/-- The canonical inclusion `zeroOutside V F ⟶ zeroOutside U F` for `V ≤ U`. -/
 @[simps]
 def zeroOutside_openHom [HasPullbacks C] : zeroOutside V F ⟶ zeroOutside U F where
   app W := if hW : (unop W) ≤ V then
@@ -86,6 +93,7 @@ def zeroOutside_openHom [HasPullbacks C] : zeroOutside V F ⟶ zeroOutside U F w
       simp [zeroOutside, hWV, hYV, hWU, hYU]
     · apply (zeroOutside_isZero (F := F) hWV).eq_of_src
 
+/-- The canonical inclusion `zeroOutside_openHom` is a monomorphism. -/
 instance zeroOutside_hom_mono [HasPullbacks C] : Mono (zeroOutside_openHom (F := F) h) := by
   erw [NatTrans.mono_iff_mono_app]
   intro W; by_cases hWV : (unop W) ≤ V
@@ -97,6 +105,7 @@ end
 
 open AddCommGrpCat
 
+/-- The constant presheaf with value `ULift ℤ`. -/
 abbrev constZ {X : TopCat.{u}} : Presheaf AddCommGrpCat.{u} X :=
   (Functor.const _).obj (AddCommGrpCat.of (ULift ℤ))
 
@@ -122,12 +131,15 @@ variable {X : TopCat.{u}} (U : Opens X)
     AddCommGrpCat.Hom.hom ((TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv G).symm x) n =
       (n.down : ℤ) • x := rfl
 
+/-- The distinguished generator `1 ∈ (constZ.zeroOutside U)(U) ≅ ULift ℤ`. -/
 def generator : (constZ.zeroOutside U).obj (op U) :=
   (eqToHom (by simp) : AddCommGrpCat.of (ULift ℤ) ⟶ (constZ.zeroOutside U).obj (op U)) 1
 
 variable {U}
 
 open Classical in
+/-- The presheaf morphism `constZ.zeroOutside U ⟶ F` determined by a section `s ∈ F(U)`,
+sending the generator to `s` and extending by zero. -/
 @[simps]
 def sHom {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U)) :
     constZ.zeroOutside U ⟶ F where
@@ -160,6 +172,7 @@ def sHom {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U)) :
         (map_zsmul (AddCommGrpCat.Hom.hom (F.map i)) w.down (F.map (homOfLE hWU).op s)).symm
     · apply (zeroOutside_isZero (F := constZ) hWU).eq_of_src
 
+/-- Evaluating `sHom s` at the generator recovers the section `s`. -/
 theorem sHom_app_generator {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U)) :
     (sHom s).app (op U) (generator U) = s := by
   have hObjU : (zeroOutside U constZ).obj (op U) = AddCommGrpCat.of (ULift ℤ) := by
@@ -187,6 +200,8 @@ namespace Sheaf
 
 open Presheaf
 
+/-- The sheafification of `constZ.zeroOutside U`: the extension-by-zero sheaf of `ℤ`
+supported on `U`. -/
 def zeroOutsideInt {X : TopCat.{u}} (U : Opens X) : Sheaf AddCommGrpCat.{u} X :=
   (presheafToSheaf _ _).obj (Presheaf.constZ.zeroOutside U)
 
@@ -194,27 +209,32 @@ namespace zeroOutsideInt
 
 variable {X : TopCat.{u}} (U : Opens X)
 
+/-- The distinguished generator of the sheaf `zeroOutsideInt U` at the open `U`. -/
 def generator : (zeroOutsideInt U).presheaf.obj (op U) :=
   (toSheafify _ (Presheaf.constZ.zeroOutside U)).app (op U) (Presheaf.zeroOutside.generator U)
 
 variable {U}
 
+/-- The canonical monomorphism `zeroOutsideInt V ⟶ zeroOutsideInt U` for `V ≤ U`. -/
 @[simps]
 def openHom {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) :
     zeroOutsideInt V ⟶ zeroOutsideInt U where
   val := sheafifyMap _ (Presheaf.zeroOutside_openHom (F := Presheaf.constZ) h)
 
+/-- `openHom h` is a monomorphism. -/
 instance {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) : Mono (openHom h) := by
   have := Presheaf.zeroOutside_hom_mono
     (F := (Functor.const _).obj (AddCommGrpCat.of (ULift.{u, 0} ℤ))) h
   delta openHom
   apply Functor.map_mono (presheafToSheaf _ _)
 
+/-- The sheaf morphism `zeroOutsideInt U ⟶ F` determined by a section `s ∈ F(U)`. -/
 @[simps]
 def sHom {X : TopCat.{u}} {U : Opens X} {F : Sheaf AddCommGrpCat.{u} X}
     (s : F.presheaf.obj (op U)) : zeroOutsideInt U ⟶ F where
   val := sheafifyLift _ (Presheaf.zeroOutside.sHom s) F.cond
 
+/-- Evaluating `sHom s` at the generator recovers the section `s`. -/
 theorem sHom_app_generator {X : TopCat.{u}} {U : Opens X}
     {F : Sheaf AddCommGrpCat.{u} X} (s : F.presheaf.obj (op U)) :
     (sHom s).val.app (op U) (generator U) = s := by
@@ -236,6 +256,7 @@ abbrev familyGeneratorMap {X : TopCat.{u}} {ι : Type*}
     (∐ fun i => zeroOutsideInt (U i)) ⟶ F :=
   Sigma.desc fun i => zeroOutsideInt.sHom (s i)
 
+/-- The factor-through-image of `familyGeneratorMap` is always epi. -/
 instance familyGeneratorMap_epi_to_image {X : TopCat.{u}} {ι : Type*}
     (U : ι → Opens X) {F : Sheaf AddCommGrpCat.{u} X}
     (s : ∀ i, F.presheaf.obj (op (U i)))

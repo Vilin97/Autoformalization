@@ -16,6 +16,7 @@ open CategoryTheory TopologicalSpace Limits
 
 /-! ## Empty space vanishing -/
 
+/-- On an empty space, all sheaf cohomology vanishes. -/
 theorem sheaf_H_subsingleton_of_isEmpty'
     (X : TopCat.{u}) [hE : IsEmpty X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -28,6 +29,8 @@ theorem sheaf_H_subsingleton_of_isEmpty'
 
 /-! ## Main theorem -/
 
+/-- Reduction from general Noetherian spaces to irreducible ones: handles empty, irreducible,
+and reducible cases separately. -/
 theorem grothendieck_vanishing_of_irreducible
     (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)

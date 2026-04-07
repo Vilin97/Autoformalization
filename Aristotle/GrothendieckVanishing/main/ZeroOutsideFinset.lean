@@ -44,6 +44,7 @@ abbrev finsetGeneratedSheaf {X : TopCat.{u}}
     Sheaf AddCommGrpCat.{u} X :=
   Limits.image (finsetGeneratorMap S)
 
+/-- The factor-through-image of `finsetGeneratorMap` is always epi. -/
 instance finsetGeneratorMap_epi_to_image {X : TopCat.{u}}
     {F : Sheaf AddCommGrpCat.{u} X}
     (S : Finset (SectionIndex F))
@@ -60,6 +61,7 @@ abbrev allSectionMap {X : TopCat.{u}}
     (∐ fun σ : SectionIndex F => zeroOutsideInt σ.1) ⟶ F :=
   Sigma.desc (fun σ => zeroOutsideInt.sHom σ.2)
 
+/-- The canonical map from the coproduct of all `zeroOutsideInt` onto `F` is epi. -/
 instance allSectionMap_epi {X : TopCat.{u}}
     (F : Sheaf AddCommGrpCat.{u} X)
     [HasCoproduct (fun σ : SectionIndex F => zeroOutsideInt σ.1)] :

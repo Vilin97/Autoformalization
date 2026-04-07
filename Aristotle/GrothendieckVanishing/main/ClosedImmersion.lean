@@ -29,6 +29,7 @@ namespace TopCat
 def closedIncl {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) : TopCat.of s ⟶ X :=
   TopCat.ofHom ⟨Subtype.val, hs.isClosedEmbedding_subtypeVal.continuous⟩
 
+/-- A locally injective presheaf morphism induces injective maps on all stalks. -/
 theorem locallyInjective_stalkFunctor_map_injective
     {X : TopCat.{u}} {F G : X.Presheaf AddCommGrpCat} (T : F ⟶ G)
     [CategoryTheory.Presheaf.IsLocallyInjective (Opens.grothendieckTopology X) T] :
@@ -52,6 +53,7 @@ theorem locallyInjective_stalkFunctor_map_injective
   apply F.germ_ext Z hxZ (iZW ≫ iWU) (iZW ≫ iWV)
   simpa using hEqZ
 
+/-- The stalk map of `toSheafify` is an isomorphism for any presheaf. -/
 theorem stalkFunctor_map_iso_toSheafify
     {X : TopCat.{u}} (P : X.Presheaf AddCommGrpCat) (x : X) :
     IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat x).map
@@ -67,6 +69,8 @@ theorem stalkFunctor_map_iso_toSheafify
       ((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
         (T := CategoryTheory.toSheafify (Opens.grothendieckTopology X) P)).mp hls) x
 
+/-- Composition identity: the stalk pullback isomorphism composed with the counit stalk map
+equals the stalk pushforward for closed inclusions. -/
 theorem closedIncl_presheaf_counit_stalk_comp
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     (F : TopCat.Presheaf AddCommGrpCat (TopCat.of s)) (x : TopCat.of s) :
@@ -101,6 +105,8 @@ theorem closedIncl_presheaf_counit_stalk_comp
     simpa [TopCat.Presheaf.pushforwardPullbackAdjunction, TopCat.Presheaf.pushforward] using htri
   rw [← Category.assoc, htri']; simp
 
+/-- The counit of the pullback-pushforward adjunction along a closed inclusion is an isomorphism.
+This is a key property of closed immersions: `i^* i_* F ≅ F`. -/
 theorem closedIncl_counit_isIso
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     (F : TopCat.Sheaf AddCommGrpCat (TopCat.of s)) :
@@ -253,17 +259,19 @@ theorem closedIncl_counit_isIso
           (Opens.grothendieckTopology X) K) F) using 1
   rw [← hcompare]; infer_instance
 
+/-- If `f ≫ g = h` with `g` and `h` both isomorphisms, then `f` is an isomorphism. -/
 lemma isIso_left {C : Type*} [CategoryTheory.Category C] {A B D : C}
     {f : A ⟶ B} {g : B ⟶ D} {h : A ⟶ D} [CategoryTheory.IsIso g] [CategoryTheory.IsIso h]
     (e : f ≫ g = h) : CategoryTheory.IsIso f := by
   rw [show f = h ≫ CategoryTheory.inv g from by simp [← e]]; infer_instance
 
+/-- If `f ≫ g = h` with `f` and `h` both isomorphisms, then `g` is an isomorphism. -/
 lemma isIso_right {C : Type*} [CategoryTheory.Category C] {A B D : C}
     {f : A ⟶ B} {g : B ⟶ D} {h : A ⟶ D} [CategoryTheory.IsIso f] [CategoryTheory.IsIso h]
     (e : f ≫ g = h) : CategoryTheory.IsIso g := by
   rw [show g = CategoryTheory.inv f ≫ h from by simp [← e]]; infer_instance
 
--- Stalk pullback hom naturality
+/-- Stalk pullback hom naturality: the stalk pullback commutes with presheaf morphisms. -/
 lemma stalkPull_nat {X Y : TopCat.{u}} (f : X ⟶ Y)
     {F G : Y.Presheaf AddCommGrpCat.{u}} (α : F ⟶ G) (x : ↑X) :
     (Presheaf.stalkFunctor AddCommGrpCat.{u} (ConcreteCategory.hom f x)).map α ≫
@@ -284,9 +292,9 @@ lemma stalkPull_nat {X Y : TopCat.{u}} (f : X ⟶ Y)
     simpa only [Functor.id_obj, Functor.id_map, Functor.comp_obj, Functor.comp_map] using h
   rw [← CategoryTheory.Category.assoc, key, CategoryTheory.Category.assoc]
 
--- Unit stalk is iso for closed immersions.
--- Proof chain: triangle identity → pullback.map(η) iso → pullbackIso naturality
--- → toSheafify naturality → stalkPull_nat → η stalk iso
+/-- The stalk map of the adjunction unit `F → i_*(i^*F)` is an isomorphism at points of
+the closed subset `s`. Proved via: triangle identity, pullback iso naturality,
+toSheafify naturality, and `stalkPull_nat`. -/
 theorem closedIncl_unit_stalk_isIso
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (x : TopCat.of s) :

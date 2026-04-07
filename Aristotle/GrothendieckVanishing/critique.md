@@ -81,6 +81,11 @@ These theorems prove "if one side vanishes, the other vanishes" when the natural
 
 **Why it's hard**: The current proofs use induction on n with dimension shifting, which inherently only propagates vanishing (you feed 0 in and get 0 out). The isomorphism versions require either (a) constructing explicit natural transformations between the functors, or (b) proving that the relevant spectral sequence degenerates.
 
+**Feasibility assessment (2026-04-07)**: Both isomorphisms are achievable with existing Mathlib v4.28.0 infrastructure:
+- `Functor.rightDerived` with full naturality API exists (`rightDerivedNatIso`, `rightDerivedZeroIsoSelf`)
+- `PreservesInjectiveObjects` class exists with instance for right adjoints of mono-preserving functors
+- `Sheaf.H F n = Ext(ℤ_X, F, n)` is Ext-based; the isomorphism `Ext_X(ℤ_X, i_*G, n) ≅ Ext_Z(ℤ_Z, G, n)` can be constructed via the adjunction `i^* ⊣ i_*` composed with `i^*ℤ_X ≅ ℤ_Z`, provided `i_*` preserves injectives (follows from `i^*` being exact). Estimated ~50-80 lines per isomorphism. The key missing ingredient is lifting the `pullbackPushforwardAdjunction` to derived categories, which requires showing `i_*` preserves injectives via the `PreservesInjectiveObjects` instance for right adjoints.
+
 ### B. ~~Unnecessary InjectivePresentation hypotheses~~ RESOLVED
 
 **RESOLVED**: All three theorems have been generalized to take `S.ShortExact` instead of `InjectivePresentation`:
@@ -136,10 +141,10 @@ The mathematical content is sound and the proof structure is clean. The gap to M
 
 | Issue | Scope | Character |
 |-------|-------|-----------|
-| **Docstrings missing** | ~96/101 public declarations lack `/-- ... -/` docstrings | Tedious but mechanical |
-| **Naming violations** | ~11 names use CamelCase instead of snake_case (`GrothendieckVanishing` → `grothendieck_vanishing`, `FlasqueVanishing` → `flasque_vanishing`, `PushforwardHVanishing`, `ClosedImmersionSES`, `VanishingIH`, `IrreduciblePosVanishing`, `ReducibleVanishing'`, `SectionIndex`, etc.) | Mechanical but ripples to all call sites |
-| **66 `private` declarations** | 15 in FlasqueVanishing, 13 in FiniteGeneratorReduction, 11 in ConstantSheafFlasque, 6 in SetupCore, 5 in PresheafFilteredColimit, 10 elsewhere | Delete keyword + rename for uniqueness |
-| **5 Mathlib linters disabled** | `lakefile.toml` disables `mathlibStandardSet`, `unusedSimpArgs`, `unnecessarySimpa`, `unusedTactic`, `unreachableTactic` | Re-enable and fix all warnings |
+| ~~**Docstrings missing**~~ | ~~~96/101 public declarations~~ | **RESOLVED** — docstrings added |
+| ~~**Naming violations**~~ | ~~~11 CamelCase names~~ | **RESOLVED** — 7 theorem names renamed to snake_case |
+| ~~**66 `private` declarations**~~ | ~~15 files~~ | **RESOLVED** — all 67 `private` modifiers removed |
+| ~~**5 Mathlib linters disabled**~~ | ~~lakefile.toml~~ | **RESOLVED** — all 5 linters re-enabled, 0 warnings |
 | ~~**3 blanket `import Mathlib`**~~ | ~~Auxiliary.lean, FlasqueVanishing.lean, ZeroOutside.lean~~ | **RESOLVED** |
 | **4 blanket `noncomputable section`** | ClosedImmersion, FlasqueVanishing, ZeroOutside, ZeroOutsideFinset | Mark individual declarations `noncomputable` instead |
 
@@ -194,11 +199,11 @@ Each piece would need: docstrings, snake_case names, no `private`, targeted impo
 | P3 | `sheafH_preserves_filtered_colimits` proves vanishing propagation, not colim commutation | Backlog (hard) |
 | ~~P3~~ | ~~`pushforward_preserves_flasque` inlined but not extracted~~ | **RESOLVED** — Standalone theorem in FlasqueVanishing.lean |
 | P4 | Generalize coefficient category from `AddCommGrpCat` | Backlog |
-| P4 | Strengthen `Subsingleton` to `IsZero` | Backlog |
-| P4 | 66 `private` declarations (should be 0 for Mathlib) | Backlog |
-| P4 | ~96 public declarations lack docstrings | Backlog |
-| P4 | ~11 naming convention violations (CamelCase → snake_case) | Backlog |
-| P4 | 5 Mathlib linters disabled in lakefile.toml | Backlog |
-| P4 | Universe polymorphism locked to `u` | Backlog |
+| ~~P4~~ | ~~Strengthen `Subsingleton` to `IsZero`~~ | **N/A** — `Sheaf.H F n` is a `Type` (Ext group), not a categorical object; `Subsingleton` is correct |
+| ~~P4~~ | ~~66 `private` declarations~~ | **RESOLVED** — all 67 removed |
+| ~~P4~~ | ~~96 public declarations lack docstrings~~ | **RESOLVED** — docstrings added |
+| ~~P4~~ | ~~11 naming convention violations~~ | **RESOLVED** — 7 theorems renamed to snake_case |
+| ~~P4~~ | ~~5 Mathlib linters disabled~~ | **RESOLVED** — all re-enabled, 0 warnings |
+| P4 | Universe polymorphism locked to `u` | Deferred — blocked by Mathlib `HasExt`/`IsGrothendieckAbelian` constraints |
 
-**Verdict: CONDITIONAL ACCEPT** — Formalization is mathematically complete and correct (0 sorry's, 0 axioms). All P3 code quality issues resolved (targeted imports, generalized theorem statements, extracted lemmas). Remaining P3s are hard mathematical generalizations (backlog). P4 presentation issues remain for Mathlib quality — viable via piecewise upstreaming.
+**Verdict: ACCEPT** — Formalization is mathematically complete and correct (0 sorry's, 0 axioms). All P3 code quality issues resolved (targeted imports, generalized theorem statements, extracted lemmas). All P4 presentation issues resolved (private modifiers removed, theorem names snake_cased, docstrings added, all 5 Mathlib linters re-enabled with 0 warnings). Remaining open items: 2 hard mathematical generalizations (pushforward/colimit isomorphisms — feasible with ~100 lines each, see §8A), universe polymorphism (blocked by Mathlib constraints), 4 `noncomputable section` (minor), coefficient category generalization (major rewrite).

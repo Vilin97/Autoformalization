@@ -105,6 +105,7 @@ lemma height_add_one_le_dim {X : Type u} [TopologicalSpace X] [IrreducibleSpace 
   · gcongr; norm_cast
   · convert Order.height_le_krullDim _
 
+/-- The supremum of `height(s) + 1` equals `(sup height) + 1` for `IrreducibleCloseds`. -/
 lemma iSup_height_add_one_eq {Y : Type u} [TopologicalSpace Y]
     [Nonempty (IrreducibleCloseds Y)] :
     (⨆ s : IrreducibleCloseds Y, (Order.height s : WithBot ℕ∞)) + 1 =
@@ -122,6 +123,7 @@ lemma iSup_height_add_one_eq {Y : Type u} [TopologicalSpace Y]
       (↑(Order.height s + 1 : ℕ∞) : WithBot ℕ∞) = (↑(Order.height s) : WithBot ℕ∞) + 1 from
     by intro s; push_cast; ring]
 
+/-- If `x + 1 ≤ y` and `x < ⊤` and `⊥ < y`, then `x < y` in `WithBot ℕ∞`. -/
 lemma wbot_lt_of_add_one_le_of_lt_top {x y : WithBot ℕ∞}
     (h1 : x + 1 ≤ y) (h2 : x < ⊤) (h3 : ⊥ < y) : x < y := by
   rcases x with _ | v
