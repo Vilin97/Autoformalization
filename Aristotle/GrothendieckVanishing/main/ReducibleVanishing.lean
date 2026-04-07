@@ -1,8 +1,8 @@
 /-
-  ReducibleVanishing.lean -- Proof of reducibleVanishing
+  ReducibleVanishing.lean -- Proof of ReducibleVanishing
 
-  Proves reducibleVanishing' (re-exported by Setup.lean as reducibleVanishing)
-  by iterating closedImmersionSES over the finitely many irreducible components.
+  Proves ReducibleVanishing' (re-exported by Setup.lean as ReducibleVanishing)
+  by iterating ClosedImmersionSES over the finitely many irreducible components.
 -/
 import Aristotle.GrothendieckVanishing.main.SetupCore
 
@@ -14,10 +14,7 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
 /-! ## Main proof -/
 
-/-- **Reducible case** of Grothendieck vanishing: on a reducible Noetherian space,
-`H^n(F) = 0` for `n > dim X`, proved by iterating `closedImmersionSES` over the
-finitely many irreducible components via `Finset.induction`. -/
-theorem reducibleVanishing'
+theorem ReducibleVanishing'
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -62,7 +59,7 @@ theorem reducibleVanishing'
     have hpush : Subsingleton (Sheaf.H S.X₃ n) := by
       show Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
         ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj G)) n)
-      apply pushforwardHVanishing Z hZ_closed
+      apply PushforwardHVanishing Z hZ_closed
       haveI : IrreducibleSpace (TopCat.of Z) :=
         isIrreducible_iff_irreducibleSpace.mp hZ_irred
       exact ih_irred (TopCat.of Z) _

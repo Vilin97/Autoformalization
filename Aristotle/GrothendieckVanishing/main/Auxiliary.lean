@@ -6,12 +6,7 @@
   - Any morphism to a terminal object in an abelian category is epi
   - F(⊥) is terminal for any sheaf F on a topological space
 -/
-import Mathlib.Topology.KrullDimension
-import Mathlib.CategoryTheory.Abelian.Basic
-import Mathlib.CategoryTheory.Sites.Sheaf
-import Mathlib.CategoryTheory.Sites.Spaces
-import Mathlib.Algebra.Category.Grp.ZModuleEquivalence
-import Mathlib.Algebra.Category.ModuleCat.Projective
+import Mathlib
 
 universe u
 
@@ -76,7 +71,7 @@ theorem topologicalKrullDim_nonneg_of_irreducible {X : Type u} [TopologicalSpace
 
 /-- Every element in the image of IrreducibleCloseds Y → IrreducibleCloseds X
     is strictly below the whole space X, when Y ⊊ X. -/
-lemma map_subtype_lt_top {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
+private lemma map_subtype_lt_top {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
     {Y : Set X} (hY : IsClosed Y) (hne : Y ≠ Set.univ)
     (s : IrreducibleCloseds Y) :
     IrreducibleCloseds.map (Subtype.val : Y → X) continuous_subtype_val s <
@@ -86,7 +81,7 @@ lemma map_subtype_lt_top {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
   · rw [Set.eq_univ_iff_forall] at *; contrapose! hne; aesop
 
 /-- For each s : IrreducibleCloseds Y, height(s) + 1 ≤ topologicalKrullDim X. -/
-lemma height_add_one_le_dim {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
+private lemma height_add_one_le_dim {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
     {Y : Set X} (hY : IsClosed Y) (hne : Y ≠ Set.univ)
     (s : IrreducibleCloseds Y) :
     (Order.height s : WithBot ℕ∞) + 1 ≤ topologicalKrullDim X := by
@@ -105,8 +100,7 @@ lemma height_add_one_le_dim {X : Type u} [TopologicalSpace X] [IrreducibleSpace 
   · gcongr; norm_cast
   · convert Order.height_le_krullDim _
 
-/-- The supremum of `height(s) + 1` equals `(sup height) + 1` for `IrreducibleCloseds`. -/
-lemma iSup_height_add_one_eq {Y : Type u} [TopologicalSpace Y]
+private lemma iSup_height_add_one_eq {Y : Type u} [TopologicalSpace Y]
     [Nonempty (IrreducibleCloseds Y)] :
     (⨆ s : IrreducibleCloseds Y, (Order.height s : WithBot ℕ∞)) + 1 =
     ⨆ s : IrreducibleCloseds Y, ((Order.height s : WithBot ℕ∞) + 1) := by
@@ -123,8 +117,7 @@ lemma iSup_height_add_one_eq {Y : Type u} [TopologicalSpace Y]
       (↑(Order.height s + 1 : ℕ∞) : WithBot ℕ∞) = (↑(Order.height s) : WithBot ℕ∞) + 1 from
     by intro s; push_cast; ring]
 
-/-- If `x + 1 ≤ y` and `x < ⊤` and `⊥ < y`, then `x < y` in `WithBot ℕ∞`. -/
-lemma wbot_lt_of_add_one_le_of_lt_top {x y : WithBot ℕ∞}
+private lemma wbot_lt_of_add_one_le_of_lt_top {x y : WithBot ℕ∞}
     (h1 : x + 1 ≤ y) (h2 : x < ⊤) (h3 : ⊥ < y) : x < y := by
   rcases x with _ | v
   · exact h3

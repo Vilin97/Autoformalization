@@ -5,7 +5,7 @@
   - exists_section_generating_stalks: PROVED — uses Nat.find to choose x₀ with minimal
     image subgroup generator d, then divisibility d | d_x follows from minimality.
   - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
-  - irreduciblePosVanishing: assembles all pieces (FULLY PROVED)
+  - IrreduciblePosVanishing: assembles all pieces (FULLY PROVED)
 -/
 import Aristotle.GrothendieckVanishing.main.StalkGeneratorAlgebra
 
@@ -16,7 +16,7 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 /-- The stalk map of `sHom s` at `x ∈ U` is bijective when every stalk element of R at x
     is an integer multiple of `germ(s, x)`, and R embeds into `zeroOutsideInt V`
     (providing torsion-freeness needed for injectivity). -/
-theorem sHom_stalk_bijective_at
+private theorem sHom_stalk_bijective_at
     {X : TopCat.{u}} (V U : Opens X) (hUV : U ≤ V)
     (R : TopCat.Sheaf AddCommGrpCat.{u} X)
     (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
@@ -73,7 +73,7 @@ theorem sHom_stalk_bijective_at
     (1) `germ(s, x) ≠ 0`
     (2) every stalk element of `R` at `x` is an integer multiple of `germ(s, x)`.
     This is the hard "Noetherian shrinking" step of Hartshorne III.2.7, Step 4. -/
-theorem exists_section_generating_stalks
+private theorem exists_section_generating_stalks
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) (R : TopCat.Sheaf AddCommGrpCat.{u} X)
     (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
@@ -318,7 +318,7 @@ theorem epiImage_zeroOutsideInt_vanishing
 -- directLimit_cohomology_vanishing are in FiniteGeneratorReduction.lean.
 
 /-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case). -/
-theorem irreduciblePosVanishing
+theorem IrreduciblePosVanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -326,9 +326,9 @@ theorem irreduciblePosVanishing
     Subsingleton (Sheaf.H F n) := by
   obtain ⟨Z, hZ_closed, _, hZ_dim, hn_Z⟩ :=
     exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos
-  obtain ⟨S, hSE, hS₂, hS₃⟩ := closedImmersionSES Z hZ_closed F
+  obtain ⟨S, hSE, hS₂, hS₃⟩ := ClosedImmersionSES Z hZ_closed F
   have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
-    rw [hS₃]; exact pushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ n _ hZ_dim hn_Z)
+    rw [hS₃]; exact PushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ n _ hZ_dim hn_Z)
   have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
     directLimit_cohomology_vanishing S.X₁ n
       (fun f hf => epiImage_zeroOutsideInt_vanishing X ih hpos _ f hf n hn)

@@ -21,7 +21,7 @@ open CategoryTheory TopologicalSpace Order Limits
 /-! ## Main induction -/
 
 /-- The core induction step: vanishing at dimension d, given vanishing at all d' < d. -/
-theorem grothendieck_vanishing_aux (d : WithBot ℕ∞)
+private theorem grothendieck_vanishing_aux (d : WithBot ℕ∞)
     (ih : ∀ d' < d, ∀ (X : TopCat.{u}) [NoetherianSpace X]
       (n : ℕ) (F : TopCat.Sheaf AddCommGrpCat.{u} X),
       topologicalKrullDim X = d' → n > d' → Subsingleton (Sheaf.H F n))
@@ -40,12 +40,12 @@ theorem grothendieck_vanishing_aux (d : WithBot ℕ∞)
     exact grothendieck_vanishing_dim_zero Y hdim G k
   · -- dim Y > 0: use IrreducibleStep
     push_neg at hdim
-    exact irreduciblePosVanishing Y m hY hdim G
+    exact IrreduciblePosVanishing Y m hY hdim G
       (fun Z _ m' G' hlt hG' =>
         ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle)) Z m' G' rfl hG')
 
 /-- **Grothendieck's vanishing theorem** (Hartshorne III, Theorem 2.7). -/
-theorem grothendieckVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+theorem GrothendieckVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     [NoetherianSpace X] (n : ℕ) (h : n > topologicalKrullDim X) :
     Subsingleton (Sheaf.H F n) := by
   have hwf : WellFounded (fun (a b : WithBot ℕ∞) => a < b) := IsWellFounded.wf

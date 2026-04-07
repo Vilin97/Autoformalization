@@ -30,6 +30,6 @@ theorem exists_closed_subset_lt_dim_of_irreducible_pos
 
 /-! ## Remaining sub-lemmas and main theorem
 
-The auxiliary lemmas and `irreduciblePosVanishing` are now in `IrreducibleStep.lean`
+The auxiliary lemmas and `IrreduciblePosVanishing` are now in `IrreducibleStep.lean`
 where they have access to `zeroOutsideInt_vanishing`, `cokernel_openHom_vanishing`,
 and the stalk computation tools needed for their proofs. -/
