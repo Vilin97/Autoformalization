@@ -70,7 +70,7 @@ open scoped Classical
 
 variable {X : TopCat.{u}} [NoetherianSpace X] (K : TopCat.Sheaf AddCommGrpCat.{u} X)
 
-/-- Coproduct inclusion for general `S ⊆ S'`. -/
+/-- Coproduct inclusion for `S ⊆ S'`: maps the coproduct indexed by `S` into that indexed by `S'`. -/
 noncomputable def finsetCoproductInclGen
     {S S' : Finset (TopCat.Sheaf.SectionIndex K)} (h : S ⊆ S') :
     (∐ fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟶
@@ -93,12 +93,14 @@ noncomputable def finsetImageInclGen
               TopCat.Sheaf.familyGeneratorMap] }
 
 omit [NoetherianSpace X] in
+/-- The image inclusion composed with `image.ι` equals the original `image.ι`. -/
 lemma finsetImageInclGen_comp_ι
     {S S' : Finset (TopCat.Sheaf.SectionIndex K)} (h : S ⊆ S') :
     finsetImageInclGen K h ≫ Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S') =
       Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S) :=
   Limits.image.lift_fac _
 
+/-- The image inclusion for `S ⊆ S'` is a monomorphism. -/
 instance finsetImageInclGen_mono
     {S S' : Finset (TopCat.Sheaf.SectionIndex K)} (h : S ⊆ S') :
     Mono (finsetImageInclGen K h) :=
@@ -407,12 +409,15 @@ variable {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
     [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
     [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
 
+/-- Coproduct inclusion for the insertion `S' ⊆ insert σ₀ S'`. -/
 noncomputable abbrev finsetCoproductIncl (_ : σ₀ ∉ S') :=
   finsetCoproductInclGen K (Finset.subset_insert σ₀ S')
 
+/-- Image inclusion for the insertion `S' ⊆ insert σ₀ S'`. -/
 noncomputable abbrev imageIncl (_ : σ₀ ∉ S') :=
   finsetImageInclGen K (Finset.subset_insert σ₀ S')
 
+/-- The image inclusion for `insert σ₀ S'` is a monomorphism. -/
 instance imageIncl_mono (hσ₀ : σ₀ ∉ S') :
     Mono (imageIncl hσ₀ : TopCat.Sheaf.finsetGeneratedSheaf S' ⟶ _) :=
   finsetImageInclGen_mono K (Finset.subset_insert σ₀ S')

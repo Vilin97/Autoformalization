@@ -14,6 +14,9 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
 /-! ## Main proof -/
 
+/-- **Reducible case** of Grothendieck vanishing: on a reducible Noetherian space,
+`H^n(F) = 0` for `n > dim X`, proved by iterating `closedImmersionSES` over the
+finitely many irreducible components via `Finset.induction`. -/
 theorem reducibleVanishing'
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)

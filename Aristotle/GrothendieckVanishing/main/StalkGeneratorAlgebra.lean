@@ -84,6 +84,8 @@ theorem resGen_eqToHom_eq_one
     Functor.const_obj_map, Category.id_comp]
   simp [show hObjW.symm.trans hObjW = rfl from Subsingleton.elim _ _]
 
+/-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
+is an integer multiple of the germ of the distinguished generator over `V`. -/
 theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
     {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj

@@ -8,13 +8,16 @@ universe u
 
 open CategoryTheory TopologicalSpace Limits Opposite GrothendieckTopology GrothendieckTopology.Plus
 
+/-- The constant presheaf with value `ULift ℤ` on a topological space. -/
 abbrev constPresheaf (X : Type u) [TopologicalSpace X] :
     (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} :=
   (Functor.const (Opens X)ᵒᵖ).obj (AddCommGrpCat.of (ULift.{u} ℤ))
 
+/-- The Grothendieck topology on `Opens X` (abbreviation for `Opens.grothendieckTopology X`). -/
 abbrev opensGT (X : Type u) [TopologicalSpace X] : GrothendieckTopology (Opens X) :=
   Opens.grothendieckTopology X
 
+/-- The plus-construction applied to any presheaf yields a subsingleton on the empty open `⊥`. -/
 theorem plusObj_bot_subsingleton {X : Type u} [TopologicalSpace X]
     (P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}) :
     Subsingleton (ToType (((Opens.grothendieckTopology X).plusObj P).obj (op ⊥))) := by
@@ -23,6 +26,7 @@ theorem plusObj_bot_subsingleton {X : Type u} [TopologicalSpace X]
     fun p hp => (Opens.mem_bot.mp hp).elim
   exact Plus.sep P ⟨⊥, hcov⟩ x y (fun ⟨_, _, hf⟩ => absurd hf id)
 
+/-- The `toPlus` map for the constant presheaf is injective on nonempty opens. -/
 theorem toPlus_injective_of_const
     {X : Type u} [TopologicalSpace X]
     (U : Opens X) (hU : (U : Set X).Nonempty)
@@ -38,6 +42,7 @@ theorem toPlus_injective_of_const
   simpa [Meq.refine, Meq.mk] using
     congr_fun (congr_arg Subtype.val heq) (⟨V, f, hf⟩ : W.Arrow)
 
+/-- A cover of a nonempty open has at least one arrow with nonempty domain. -/
 lemma cover_nonempty_arrow
     {X : Type u} [TopologicalSpace X]
     (U : Opens X) (hU : (U : Set X).Nonempty)
@@ -47,6 +52,7 @@ lemma cover_nonempty_arrow
   obtain ⟨V, f, hf, hmem⟩ := S.2 x hx
   exact ⟨⟨V, f, hf⟩, ⟨x, hmem⟩⟩
 
+/-- Any two arrows of a cover are related: there exists a relation connecting them. -/
 lemma cover_arrows_related
     {X : Type u} [TopologicalSpace X]
     {U : Opens X} (S : (opensGT X).Cover U) (I₁ I₂ : S.Arrow) :
@@ -54,6 +60,7 @@ lemma cover_arrows_related
   ⟨Cover.Relation.mk' (fst := I₁) (snd := I₂)
     ⟨I₁.Y ⊓ I₂.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩, rfl, rfl⟩
 
+/-- A matching family for the constant presheaf has equal values at all arrows. -/
 lemma meq_const_values_eq
     {X : Type u} [TopologicalSpace X]
     {U : Opens X} (S : (opensGT X).Cover U) (x : Meq (constPresheaf X) S)
@@ -62,6 +69,7 @@ lemma meq_const_values_eq
   obtain ⟨R, rfl, rfl⟩ := cover_arrows_related S I₁ I₂
   simpa [constPresheaf] using x.condition R
 
+/-- The `toPlus` map for the constant presheaf is surjective on nonempty opens. -/
 theorem toPlus_surjective_of_const
     {X : Type u} [TopologicalSpace X]
     (U : Opens X) (hU : (U : Set X).Nonempty) :
@@ -76,6 +84,8 @@ theorem toPlus_surjective_of_const
   apply Meq.ext; intro I
   simp [Meq.refine, Meq.mk, constPresheaf]
 
+/-- Naturality of `toPlus` for the constant presheaf: restricting then applying `toPlus` equals
+applying `toPlus` then restricting via the plus-object map. -/
 lemma toPlus_naturality_const
     {X : Type u} [TopologicalSpace X]
     {U V : Opens X} (i : U ⟶ V) (a : (constPresheaf X).obj (op V)) :
@@ -118,6 +128,8 @@ theorem toPlus_firstPlus_key
   rw [← hb, ← hab]
   exact toPlus_naturality_const I.f a
 
+/-- The `toPlus` map applied to the first plus-object of the constant presheaf is surjective
+on nonempty opens of an irreducible space. -/
 theorem toPlus_surjective_of_firstPlus
     {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
     (U : Opens X) (hU : (U : Set X).Nonempty) :
@@ -137,6 +149,7 @@ theorem toPlus_surjective_of_firstPlus
     have hIbot : I.Y = ⊥ := Opens.ext (by simpa using hI)
     exact @Subsingleton.elim _ (hIbot ▸ plusObj_bot_subsingleton _) _ _
 
+/-- On an irreducible space, the sheafification of the constant presheaf is flasque. -/
 theorem sheafify_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
     {U V : Opens X} (i : U ⟶ V) :
@@ -168,6 +181,8 @@ theorem sheafify_constPresheaf_flasque_of_irreducible
       exact ⟨a, by rw [ConcreteCategory.comp_apply, ha]; exact hz⟩
     exact epi_of_epi_fac hfac
 
+/-- On an irreducible space, `presheafToSheaf` applied to the constant presheaf is flasque
+(variant using the `presheafToSheaf`/`plusPlusIso` interface). -/
 theorem presheafToSheaf_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
     {U V : Opens X} (i : U ⟶ V) :
@@ -180,6 +195,7 @@ theorem presheafToSheaf_constPresheaf_flasque_of_irreducible
   exact epi_of_epi (e.hom.app (op V))
     ((CategoryTheory.sheafify (opensGT X) (constPresheaf X)).map i.op)
 
+/-- **The constant sheaf `ℤ_X` is flasque on an irreducible space.** -/
 theorem constantSheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
     {U V : Opens X} (i : U ⟶ V) :

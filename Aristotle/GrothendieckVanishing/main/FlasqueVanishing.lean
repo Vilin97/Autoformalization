@@ -26,6 +26,7 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
+/-- `AddCommGrpCat` has a separator: `ULift ℤ` separates morphisms. -/
 instance : HasSeparator AddCommGrpCat.{u} where
   hasSeparator := by
     use AddCommGrpCat.of (ULift ℤ)
@@ -38,17 +39,22 @@ instance : HasSeparator AddCommGrpCat.{u} where
       (AddMonoidHom.mk' (fun y => y • x) fun y z => by simp only [add_smul])) 1
     aesop
 
+/-- `AddCommGrpCat` is a Grothendieck abelian category (AB5 + generator). -/
 instance : IsGrothendieckAbelian.{u} AddCommGrpCat.{u} where
 
+/-- Sheaves of abelian groups on a topological space form an abelian category. -/
 instance (X : TopCat.{u}) : Abelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   inferInstanceAs (Abelian (CategoryTheory.Sheaf _ _))
 
+/-- Sheaves of abelian groups on a topological space form a Grothendieck abelian category. -/
 instance (X : TopCat.{u}) : IsGrothendieckAbelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   inferInstanceAs (IsGrothendieckAbelian (CategoryTheory.Sheaf _ _))
 
+/-- The constant diagram functor is additive. -/
 instance {C : Type*} [Category C] {D : Type*} [Category D] [Preadditive D] :
     (Functor.const Cᵒᵖ : D ⥤ Cᵒᵖ ⥤ D).Additive where
 
+/-- The constant sheaf functor is additive. -/
 instance {X : TopCat.{u}} :
     (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive :=
   inferInstanceAs ((Functor.const (Opens X)ᵒᵖ ⋙
@@ -57,14 +63,17 @@ instance {X : TopCat.{u}} :
 -- Cache expensive typeclass resolutions to avoid re-synthesizing in every proof.
 -- The chain IsGrothendieckAbelian → EnoughInjectives → HasDerivedCategory is very
 -- expensive via inference. Using explicit constructors avoids synthesis entirely.
+/-- Sheaves of abelian groups on a topological space have enough injectives. -/
 noncomputable instance sheafEnoughInjectives (X : TopCat.{u}) :
     EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   IsGrothendieckAbelian.enoughInjectives
 
+/-- The derived functor `Ext` exists in the category of sheaves of abelian groups. -/
 noncomputable instance sheafHasExt (X : TopCat.{u}) :
     HasExt.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   hasExt_of_enoughInjectives _
 
+/-- A sheaf with all stalks zero is the zero sheaf. -/
 theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (hstalk : ∀ (x : X)
@@ -80,6 +89,7 @@ theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
     (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
       fun U => (hZ.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
 
+/-- Sheaf cohomology of the zero sheaf is trivial. -/
 theorem subsingleton_sheafH_of_isZero' {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsZero F) (n : ℕ) :
     Subsingleton (Sheaf.H F n) := by
@@ -89,6 +99,8 @@ theorem subsingleton_sheafH_of_isZero' {X : TopCat.{u}}
     exact h.symm.trans (Ext.comp_zero x F 0 n (add_zero n))
   exact ⟨fun a b => (this a).trans (this b).symm⟩
 
+/-- In a short exact sequence where `g` induces a stalk isomorphism at `x`, the stalk of `X₁`
+at `x` vanishes. -/
 theorem stalk_zero_of_ses_g_iso
     {X : TopCat.{u}} {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hSE : S.ShortExact) (x : X)
@@ -160,15 +172,14 @@ noncomputable def sectionsAt {X : TopCat.{u}} (V : Opens X) :
   sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)
 
 -- Provide explicitly to avoid expensive typeclass resolution on the composite functor.
+/-- The sections-at-V functor preserves zero morphisms. -/
 noncomputable instance sectionsAt_preservesZeroMorphisms
     {X : TopCat.{u}} (V : Opens X) :
     (sectionsAt (X := X) V).PreservesZeroMorphisms :=
   inferInstanceAs
     ((sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)).PreservesZeroMorphisms)
 
--- The sections functor preserves left homology of a SES with mono f:
--- it preserves the kernel of g (limit-preserving) and the coimage of f
--- (f is mono ⟹ the coimage map is an iso, whose cokernel is trivially preserved).
+/-- The sections functor preserves left homology of a short exact sequence with mono `f`. -/
 lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (V : Opens X) :
@@ -187,8 +198,8 @@ lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
         (f := (sectionsAt (X := X) V).map h.f')).eq_of_src _ _, hz.eq_of_src _ _⟩⟩
     exact PreservesCokernel.of_iso_comparison _ _
 
--- For a SES of sheaves, the evaluated sequence at V is exact:
--- if g_V(x) = 0, then x is in the image of f_V.
+/-- For a short exact sequence of sheaves, the evaluated sequence at `V` is exact:
+if `g_V(x) = 0`, then `x` is in the image of `f_V`. -/
 lemma sections_exact_of_shortExact {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (V : Opens X)
@@ -203,15 +214,14 @@ lemma sections_exact_of_shortExact {X : TopCat.{u}}
 
 /-! ### Zero condition and mono for the evaluated short complex -/
 
--- In a thin category (Opens X), any two parallel morphisms are equal,
--- so presheaf restriction maps agree regardless of which morphism is used.
+/-- In the thin category `Opens X`, any two parallel presheaf restriction maps agree. -/
 lemma presheaf_map_eq {X : TopCat.{u}}
     (F : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
     {U V : Opens X} (f g : U ⟶ V) (s : F.obj (op V)) :
     F.map f.op s = F.map g.op s := congr_arg (F.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim f g))
 
--- Extension preorder on partial lifts (V, t):
--- (V₁,t₁) ≤ (V₂,t₂) iff V₁ ≤ V₂ and t₂|_{V₁} = t₁.
+/-- Extension preorder on partial lifts `(V, t)`:
+`(V₁, t₁) ≤ (V₂, t₂)` iff `V₁ ≤ V₂` and `t₂|_{V₁} = t₁`. -/
 noncomputable instance sigmaPreorder {X : TopCat.{u}}
     (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)) :
     Preorder (Σ V : Opens X, S.X₂.val.obj (op V)) where
@@ -234,7 +244,7 @@ def IsPartialLift {X : TopCat.{u}}
   ∃ h : p.1 ≤ U, ConcreteCategory.hom (S.g.val.app (op p.1)) p.2 =
     ConcreteCategory.hom (S.X₃.val.map (homOfLE h).op) s
 
--- Chain of partial lifts has an upper bound via sheaf gluing.
+/-- A chain of partial lifts has an upper bound, obtained by sheaf gluing. -/
 lemma partialLift_chain_ub {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     {U : Opens X} {s : S.X₃.val.obj (op U)}
@@ -269,9 +279,9 @@ lemma partialLift_chain_ub {X : TopCat.{u}}
       (AddCommGrpCat.subsingleton_of_isZero (isTerminal_sheaf_bot S.X₃).isZero) _ _⟩,
       fun _ hz => absurd ⟨_, hz⟩ hc⟩
 
--- Maximal partial lift must cover all of U.
--- If V₀ < U, find x ∈ U \ V₀, get a local lift on W ∋ x, adjust for compatibility
--- using exactness + flasqueness, glue to get a strictly larger partial lift.
+/-- A maximal partial lift must cover all of `U`. If not, one finds a point in `U \ V₀`,
+constructs a local lift on a neighborhood, adjusts for compatibility using exactness
+and flasqueness, and glues to obtain a strictly larger partial lift, contradicting maximality. -/
 lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁)
@@ -347,7 +357,8 @@ lemma partialLift_maximal_eq_U {X : TopCat.{u}}
   exact hxV₀ ((hmax _ h_new_inP ⟨le_sup_left, by
     have h0 := ht_new false; simp only [BU, Bsf] at h0; exact h0⟩).1 (Or.inr hxW))
 
--- Zorn argument for surjectivity of sections (Nugent, PR #35790).
+/-- **Zorn surjectivity** (Nugent, PR #35790): in a short exact sequence `0 → F' → G → H → 0`
+with `F'` flasque, `G(U) → H(U)` is surjective for every open `U`. -/
 theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁) (U : Opens X) :
@@ -387,17 +398,22 @@ noncomputable section FreeAbSheaf
 
 variable {X : TopCat.{u}}
 
+/-- The free abelian presheaf on `U`: the representable presheaf `yoneda(U)` composed with the
+free abelian group functor. -/
 def freeAbPresheaf (U : Opens X) : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} :=
   yoneda.obj U ⋙ AddCommGrpCat.free
 
+/-- The free abelian sheaf on `U`: the sheafification of `freeAbPresheaf U`. -/
 def freeAbSheaf (U : Opens X) : TopCat.Sheaf AddCommGrpCat.{u} X :=
   (presheafToSheaf (Opens.grothendieckTopology (T := X)) AddCommGrpCat.{u}).obj
     (freeAbPresheaf U)
 
+/-- The functorial map `freeAbSheaf U ⟶ freeAbSheaf V` induced by an inclusion `U ⟶ V`. -/
 def freeAbSheafMap {U V : Opens X} (i : U ⟶ V) : freeAbSheaf U ⟶ freeAbSheaf V :=
   (presheafToSheaf (Opens.grothendieckTopology (T := X)) AddCommGrpCat.{u}).map
     (Functor.whiskerRight (yoneda.map i) AddCommGrpCat.free)
 
+/-- The Yoneda-style equivalence `Hom(freeAbSheaf U, I) ≃ I(U)`. -/
 def freeAbSheafHomEquiv (U : Opens X) (I : TopCat.Sheaf AddCommGrpCat.{u} X) :
     (freeAbSheaf U ⟶ I) ≃ (forget AddCommGrpCat).obj (I.val.obj (op U)) :=
   ((sheafificationAdjunction (Opens.grothendieckTopology (T := X)) AddCommGrpCat.{u}).homEquiv
@@ -406,6 +422,8 @@ def freeAbSheafHomEquiv (U : Opens X) (I : TopCat.Sheaf AddCommGrpCat.{u} X) :
     (sheafToPresheaf _ _ |>.obj I)).trans <|
   yonedaEquiv
 
+/-- `freeAbSheafHomEquiv` is natural in the open set: precomposing with `freeAbSheafMap i`
+corresponds to restricting sections from `V` to `U`. -/
 lemma freeAbSheafHomEquiv_naturality {U V : Opens X} (i : U ⟶ V)
     (I : TopCat.Sheaf AddCommGrpCat.{u} X) (f : freeAbSheaf V ⟶ I) :
     freeAbSheafHomEquiv U I (freeAbSheafMap i ≫ f) =
@@ -427,6 +445,7 @@ lemma freeAbSheafHomEquiv_naturality {U V : Opens X} (i : U ⟶ V)
           AddCommGrpCat).homEquiv (freeAbPresheaf V) I f)) i.op),
     fun h => by convert congr_arg (fun g => g (𝟙 V)) h using 1⟩
 
+/-- `freeAbSheafMap i` is a monomorphism. -/
 instance freeAbSheafMap_mono {U V : Opens X} (i : U ⟶ V) :
     Mono (freeAbSheafMap i) := by
   haveI : PreservesFiniteLimits (presheafToSheaf (Opens.grothendieckTopology (T := X))
@@ -437,8 +456,8 @@ instance freeAbSheafMap_mono {U V : Opens X} (i : U ⟶ V) :
 
 end FreeAbSheaf
 
--- Injective sheaves are flasque (proved by Aristotle 8f42abaa).
--- Uses free abelian sheaf + Yoneda identification + Injective.factors.
+/-- **Injective sheaves are flasque.** Uses the free abelian sheaf Yoneda identification
+and `Injective.factors` to lift sections along restriction maps. -/
 theorem isFlasque_of_injective {X : TopCat.{u}}
     (I : TopCat.Sheaf AddCommGrpCat.{u} X) [Injective I] : IsFlasqueSheaf I := by
   intro U V i
@@ -455,6 +474,7 @@ theorem pushforward_preserves_flasque {X Y : TopCat.{u}} (f : X ⟶ Y)
     change Epi (F.val.map ((Opens.map f).op.map j.op))
     exact hF ((Opens.map f).map j)
 
+/-- Epimorphisms transfer across natural isomorphisms of functors. -/
 theorem epi_of_natIso_epi {C D : Type*} [Category C] [Category D]
     {F G : C ⥤ D} (α : F ≅ G) {X Y : C} (f : X ⟶ Y)
     (h : Epi (F.map f)) : Epi (G.map f) := by
@@ -463,11 +483,10 @@ theorem epi_of_natIso_epi {C D : Type*} [Category C] [Category D]
       Category.comp_id]]
   exact epi_comp _ _
 
--- Surjectivity of Ext map at degree 0 (base case input).
--- For a SES 0 -> F -> I -> Q -> 0 with F flasque, the induced map
--- Ext(Z_X, I, 0) -> Ext(Z_X, Q, 0) is surjective for Z_X = constant sheaf.
--- Proof: reduce to Hom via addEquiv₀, then use constantSheafΓAdj + projectivity
--- of ULift ℤ + epi_app_of_shortExact_flasque.
+/-- **Surjectivity of Ext^0 map** for short exact sequences with flasque first term.
+For `0 → F → I → Q → 0` with `F` flasque, the induced map `Ext^0(ℤ_X, I) → Ext^0(ℤ_X, Q)` is
+surjective. Proved by reducing to `Hom` via `addEquiv₀`, then using `constantSheafΓAdj`,
+projectivity of `ULift ℤ`, and `epi_app_of_shortExact_flasque`. -/
 theorem ext_zero_map_surjective {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁) :
