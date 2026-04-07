@@ -28,9 +28,16 @@ lemma sheafH0EquivSections_natural {X : TopCat.{u}}
     {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G) (x : Sheaf.H F 0) :
     sheafH0EquivSections G (x.comp (Ext.mk₀ f) (add_zero 0)) =
     ConcreteCategory.hom (f.val.app (op ⊤)) (sheafH0EquivSections F x) := by
-  -- Naturality: sheafH0 ∘ comp(mk₀ f) = f.app(⊤) ∘ sheafH0
-  -- Decomposition: sheafH0 = uliftZMult ∘ adj.homEquiv ∘ addEquiv₀
-  -- The naturality follows from: addEquiv₀(mk₀(g ≫ f)) = g ≫ f, adj.homEquiv_naturality_right
+  conv_lhs => rw [show x = Ext.mk₀ (Ext.addEquiv₀ x) from
+    (Ext.mk₀_addEquiv₀_apply x).symm, Ext.mk₀_comp_mk₀]
+  unfold sheafH0EquivSections
+  simp only [AddEquiv.trans_apply]
+  have key : Ext.addEquiv₀ (Ext.mk₀ (Ext.addEquiv₀ x ≫ f)) = Ext.addEquiv₀ x ≫ f :=
+    Ext.addEquiv₀.apply_symm_apply _
+  erw [Adjunction.homAddEquiv_apply, Adjunction.homAddEquiv_apply, key,
+    Adjunction.homEquiv_naturality_right, Adjunction.homAddEquiv_apply]
+  -- Last step: uliftZMultiplesAddEquiv(h ≫ sheafSections.map f) = f.app(⊤)(uliftZMultiplesAddEquiv h)
+  -- These are definitionally equal modulo the sheafSections/val identification.
   sorry
 
 /-- Transport subsingletons across an additive equivalence. -/
