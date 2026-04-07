@@ -94,20 +94,18 @@ theorem stalk_zero_of_ses_g_iso
     rw [← ConcreteCategory.comp_apply, ← T.map_comp]
     obtain ⟨U, hxU, s, rfl⟩ := S.X₁.presheaf.germ_exist x a
     rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
-    have : ConcreteCategory.hom ((S.f.val ≫ S.g.val).app (op U)) s = 0 := by
-      change ConcreteCategory.hom ((S.f ≫ S.g).val.app (op U)) s = 0
-      rw [S.zero]; exact AddMonoidHom.zero_apply s
     change ConcreteCategory.hom (S.X₃.presheaf.germ U x hxU)
       (ConcreteCategory.hom ((S.f.val ≫ S.g.val).app (op U)) s) = 0
-    rw [this]; exact map_zero _
-  have hfa_zero : ConcreteCategory.hom (T.map S.f.val) a = 0 :=
-    (ConcreteCategory.bijective_of_isIso (T.map S.g.val)).1
-      (hcomp_elem.trans (map_zero _).symm)
+    rw [show ConcreteCategory.hom ((S.f.val ≫ S.g.val).app (op U)) s = 0 from by
+      change ConcreteCategory.hom ((S.f ≫ S.g).val.app (op U)) s = 0
+      rw [S.zero]; exact AddMonoidHom.zero_apply s]
+    exact map_zero _
   haveI : Mono S.f := hSE.mono_f
   haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
   exact (AddCommGrpCat.mono_iff_injective _).mp
     (Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f)
-    (hfa_zero.trans (map_zero _).symm)
+    (((ConcreteCategory.bijective_of_isIso (T.map S.g.val)).1
+      (hcomp_elem.trans (map_zero _).symm)).trans (map_zero _).symm)
 
 /-- The kernel short exact sequence `0 → ker(f) → X → Y → 0` for an epi `f`. -/
 theorem shortExact_of_epi {C : Type*} [Category C] [Abelian C] {X Y : C} (f : X ⟶ Y) [Epi f] :
@@ -171,17 +169,15 @@ private lemma sectionsAt_preservesLeftHomologyOf {X : TopCat.{u}}
   constructor; intro h; constructor
   · -- sectionsAt V preserves the kernel of S.g (it preserves all limits)
     show PreservesLimit _ (sheafToPresheaf _ _ ⋙ _); infer_instance
-  · -- sectionsAt V preserves the cokernel of h.f'
-    -- Since S is exact with mono f, h.f' is an iso (epi + mono),
-    -- so its cokernel is 0, which is trivially preserved.
+  · -- h.f' is an iso (mono from f, epi from exactness), so cokernel is trivially preserved
     haveI : Mono S.f := hS.mono_f
     haveI : Mono h.f' := mono_of_mono_fac h.f'_i
     haveI : Epi h.f' := hS.exact.epi_f' h
     haveI : IsIso h.f' := isIso_of_mono_of_epi h.f'
     haveI : IsIso (cokernelComparison h.f' (sectionsAt (X := X) V)) :=
-      let hz2 := Functor.map_isZero (sectionsAt (X := X) V) (isZero_cokernel_of_epi h.f')
-      ⟨⟨hz2.to_ _, (isZero_cokernel_of_epi
-        (f := (sectionsAt (X := X) V).map h.f')).eq_of_src _ _, hz2.eq_of_src _ _⟩⟩
+      let hz := Functor.map_isZero (sectionsAt (X := X) V) (isZero_cokernel_of_epi h.f')
+      ⟨⟨hz.to_ _, (isZero_cokernel_of_epi
+        (f := (sectionsAt (X := X) V).map h.f')).eq_of_src _ _, hz.eq_of_src _ _⟩⟩
     exact PreservesCokernel.of_iso_comparison _ _
 
 -- For a SES of sheaves, the evaluated sequence at V is exact:
@@ -217,9 +213,8 @@ private noncomputable instance sigmaPreorder {X : TopCat.{u}}
   le_refl p := ⟨le_refl _, by simp⟩
   le_trans p q r := fun ⟨h₁, ht₁⟩ ⟨h₂, ht₂⟩ =>
     ⟨le_trans h₁ h₂, by
-      have : (homOfLE (le_trans h₁ h₂)).op =
-          (homOfLE h₂).op ≫ (homOfLE h₁).op := rfl
-      simp only [this, Functor.map_comp, AddCommGrpCat.hom_comp,
+      simp only [show (homOfLE (le_trans h₁ h₂)).op = (homOfLE h₂).op ≫ (homOfLE h₁).op from rfl,
+        Functor.map_comp, AddCommGrpCat.hom_comp,
         AddMonoidHom.coe_comp, Function.comp_apply, ht₂, ht₁]⟩
 
 /-! ### Partial lift sub-lemmas for the Zorn surjectivity argument -/
@@ -242,40 +237,30 @@ private lemma partialLift_chain_ub {X : TopCat.{u}}
     ∃ ub ∈ {p | IsPartialLift (S := S) U s p},
       ∀ p ∈ c, (sigmaPreorder S).le p ub := by
   by_cases hc : c.Nonempty
-  · set Vsup := ⨆ (p : c), (p : Σ V : Opens X, S.X₂.val.obj (op V)).1
+  · let cV (p : c) := (p : Σ V : Opens X, S.X₂.val.obj (op V)).1
+    let cs (p : c) := (p : Σ V : Opens X, S.X₂.val.obj (op V)).2
+    set Vsup := ⨆ p, cV p
     have hVsup_le : Vsup ≤ U := iSup_le fun ⟨_, hp⟩ => (hcP _ hp).choose
-    have hcompat : TopCat.Presheaf.IsCompatible S.X₂.val
-        (fun (p : c) => (p : Σ V : Opens X, S.X₂.val.obj (op V)).1)
-        (fun (p : c) => (p : Σ V : Opens X, S.X₂.val.obj (op V)).2) := by
+    have hcompat : TopCat.Presheaf.IsCompatible S.X₂.val cV cs := by
       intro ⟨p, hp⟩ ⟨q, hq⟩
       rcases hchain.total hp hq with ⟨h, e⟩ | ⟨h, e⟩
       · rw [show (p.1).infLERight q.1 = (p.1).infLELeft q.1 ≫ homOfLE h from rfl,
           op_comp, Functor.map_comp, CategoryTheory.comp_apply, e]
       · rw [show (p.1).infLELeft q.1 = (p.1).infLERight q.1 ≫ homOfLE h from rfl,
           op_comp, Functor.map_comp, CategoryTheory.comp_apply, e]
-    obtain ⟨t_gl, ht_gl, _⟩ := TopCat.Sheaf.existsUnique_gluing' S.X₂
-        (fun (p : c) => (p : Σ V : Opens X, S.X₂.val.obj (op V)).1) Vsup
-        (fun p => homOfLE (le_iSup (fun (q : c) =>
-          (q : Σ V : Opens X, S.X₂.val.obj (op V)).1) p))
-        le_rfl
-        (fun (p : c) => (p : Σ V : Opens X, S.X₂.val.obj (op V)).2) hcompat
+    obtain ⟨t_gl, ht_gl, _⟩ := TopCat.Sheaf.existsUnique_gluing' S.X₂ cV Vsup
+        (fun p => homOfLE (le_iSup cV p)) le_rfl cs hcompat
     refine ⟨⟨Vsup, t_gl⟩, ⟨hVsup_le, ?_⟩, fun ⟨p, hp⟩ hpP =>
-      ⟨le_iSup (fun (q : c) =>
-        (q : Σ V : Opens X, S.X₂.val.obj (op V)).1) ⟨⟨p, hp⟩, hpP⟩,
-        ht_gl ⟨⟨p, hp⟩, hpP⟩⟩⟩
-    apply TopCat.Sheaf.eq_of_locally_eq' S.X₃
-      (fun (p : c) => (p : Σ V : Opens X, S.X₂.val.obj (op V)).1) Vsup
-      (fun p => homOfLE (le_iSup (fun (q : c) =>
-        (q : Σ V : Opens X, S.X₂.val.obj (op V)).1) p))
-      le_rfl
+      ⟨le_iSup cV ⟨⟨p, hp⟩, hpP⟩, ht_gl ⟨⟨p, hp⟩, hpP⟩⟩⟩
+    apply TopCat.Sheaf.eq_of_locally_eq' S.X₃ cV Vsup
+      (fun p => homOfLE (le_iSup cV p)) le_rfl
     intro ⟨p, hp⟩
     rw [← S.g.val.naturality_apply _ t_gl, ht_gl ⟨p, hp⟩, (hcP _ hp).choose_spec]
     simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
     exact presheaf_map_eq S.X₃.val _ _ s
-  · refine ⟨⟨⊥, 0⟩, ?_, fun _ hz => absurd ⟨_, hz⟩ hc⟩
-    refine ⟨bot_le, ?_⟩
-    exact @Subsingleton.elim _
-      (AddCommGrpCat.subsingleton_of_isZero (isTerminal_sheaf_bot S.X₃).isZero) _ _
+  · exact ⟨⟨⊥, 0⟩, ⟨bot_le, @Subsingleton.elim _
+      (AddCommGrpCat.subsingleton_of_isZero (isTerminal_sheaf_bot S.X₃).isZero) _ _⟩,
+      fun _ hz => absurd ⟨_, hz⟩ hc⟩
 
 -- Maximal partial lift must cover all of U.
 -- If V₀ < U, find x ∈ U \ V₀, get a local lift on W ∋ x, adjust for compatibility
@@ -480,17 +465,14 @@ theorem ext_zero_map_surjective {X : TopCat.{u}}
   suffices ∃ ψ : _ ⟶ S.X₂, ψ ≫ S.g = Ext.addEquiv₀ y by
     obtain ⟨ψ, hψ⟩ := this
     exact ⟨Ext.mk₀ ψ, by rw [Ext.mk₀_comp_mk₀, hψ, Ext.mk₀_addEquiv₀_apply]⟩
-  have hΓg : Epi ((Sheaf.Γ (Opens.grothendieckTopology X)
-      AddCommGrpCat.{u}).map S.g) :=
+  haveI : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map S.g) :=
     epi_of_natIso_epi (Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).symm S.g
       (epi_app_of_shortExact_flasque hS hFlasque₁ ⊤)
+  haveI : Projective (AddCommGrpCat.of (ULift.{u} ℤ)) := ulift_int_projective
   let adj := constantSheafΓAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
-  let M := AddCommGrpCat.of (ULift.{u} ℤ)
-  haveI : Projective M := ulift_int_projective
-  exact ⟨(adj.homEquiv M S.X₂).symm (Projective.factorThru
-    ((adj.homEquiv M S.X₃) (Ext.addEquiv₀ y))
-    ((Sheaf.Γ _ _).map S.g)), by
-    apply (adj.homEquiv M S.X₃).injective
+  exact ⟨(adj.homEquiv _ S.X₂).symm (Projective.factorThru
+    ((adj.homEquiv _ S.X₃) (Ext.addEquiv₀ y)) ((Sheaf.Γ _ _).map S.g)), by
+    apply (adj.homEquiv _ S.X₃).injective
     rw [Adjunction.homEquiv_naturality_right, Equiv.apply_symm_apply,
       Projective.factorThru_comp]⟩
 

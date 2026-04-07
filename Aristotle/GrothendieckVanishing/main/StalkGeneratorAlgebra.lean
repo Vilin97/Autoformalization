@@ -69,6 +69,20 @@ theorem sheaf_mono_of_stalk_injective
 
 /-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
     is an integer multiple of the germ of the distinguished generator over `V`. -/
+-- The restricted generator of `constZ.zeroOutside V` maps to `1` under `eqToHom`.
+private theorem resGen_eqToHom_eq_one
+    {X : TopCat.{u}} (V : Opens X) {W : Opens X} (hWV : W ≤ V)
+    (hObjW : (TopCat.Presheaf.constZ.zeroOutside V).obj (op W) =
+        AddCommGrpCat.of (ULift ℤ)) :
+    (AddCommGrpCat.Hom.hom (eqToHom hObjW))
+      (ConcreteCategory.hom ((TopCat.Presheaf.constZ.zeroOutside V).map (homOfLE hWV).op)
+        (TopCat.Presheaf.zeroOutside.generator V)) = (1 : ULift ℤ) := by
+  unfold TopCat.Presheaf.zeroOutside.generator
+  simp only [TopCat.Presheaf.zeroOutside_map, dif_pos hWV, dif_pos (le_refl V),
+    ← ConcreteCategory.comp_apply, ← CategoryTheory.comp_apply, eqToHom_trans,
+    Functor.const_obj_map, Category.id_comp]
+  simp [show hObjW.symm.trans hObjW = rfl from Subsingleton.elim _ _]
+
 private theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
     {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
@@ -88,16 +102,8 @@ private theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
       ConcreteCategory.hom
         ((TopCat.Presheaf.constZ.zeroOutside V).map (homOfLE hWV).op)
         (TopCat.Presheaf.zeroOutside.generator V)
-    -- Under the iso to ULift ℤ, genW maps to 1
-    have hgenW_val : (AddCommGrpCat.Hom.hom (eqToHom hObjW)) genW = (1 : ULift ℤ) := by
-      show (AddCommGrpCat.Hom.hom (eqToHom hObjW))
-        (ConcreteCategory.hom ((TopCat.Presheaf.constZ.zeroOutside V).map (homOfLE hWV).op)
-          (TopCat.Presheaf.zeroOutside.generator V)) = 1
-      -- Unfold map and generator, reduce dite, compose eqToHoms
-      simp only [TopCat.Presheaf.zeroOutside.generator, TopCat.Presheaf.zeroOutside_map,
-        dif_pos hWV, dif_pos (le_refl V), ← ConcreteCategory.comp_apply,
-        ← CategoryTheory.comp_apply, eqToHom_trans, Functor.const_obj_map, Category.id_comp]
-      simp [show hObjW.symm.trans hObjW = rfl from Subsingleton.elim _ _]
+    have hgenW_val : (AddCommGrpCat.Hom.hom (eqToHom hObjW)) genW = (1 : ULift ℤ) :=
+      resGen_eqToHom_eq_one V hWV hObjW
     -- eqToHom is injective (it's an iso)
     have hinj : Function.Injective (AddCommGrpCat.Hom.hom (eqToHom hObjW)) := by
       intro a b h
@@ -215,18 +221,8 @@ theorem zsmul_generator_injective
     simp [P, TopCat.Presheaf.zeroOutside, hWV, TopCat.Presheaf.constZ]
   -- The restricted generator maps to 1 in ULift ℤ
   set resGen := ConcreteCategory.hom (P.map (homOfLE hWV).op) gen_P
-  -- resGen maps to 1 ∈ ULift ℤ via eqToHom
-  have hresGen_val : (AddCommGrpCat.Hom.hom (eqToHom hObjW)) resGen = (1 : ULift ℤ) := by
-    -- resGen = (P.map (homOfLE hWV).op) gen_P where P = constZ.zeroOutside V
-    -- Under eqToHom to ULift ℤ, this composition sends gen to 1
-    -- (eqToHom ∘ zeroOutside_map ∘ eqToHom)(1) = 1 by eqToHom_trans
-    simp only [resGen, gen_P, P]
-    -- Now the goal is explicit: unfold generator and zeroOutside_map
-    unfold TopCat.Presheaf.zeroOutside.generator
-    simp only [TopCat.Presheaf.zeroOutside_map, dif_pos hWV, dif_pos (le_refl V),
-      ← ConcreteCategory.comp_apply, ← CategoryTheory.comp_apply, eqToHom_trans,
-      Functor.const_obj_map, Category.id_comp]
-    simp [show hObjW.symm.trans hObjW = rfl from Subsingleton.elim _ _]
+  have hresGen_val : (AddCommGrpCat.Hom.hom (eqToHom hObjW)) resGen = (1 : ULift ℤ) :=
+    resGen_eqToHom_eq_one V hWV hObjW
   -- Transfer hEq to ULift ℤ and extract n = m
   have hEq_ULift : n • (1 : ULift ℤ) = m • (1 : ULift ℤ) := by
     have := congrArg (AddCommGrpCat.Hom.hom (eqToHom hObjW)) hEq

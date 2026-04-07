@@ -87,10 +87,8 @@ private theorem pushforward_stalk_zero_closedIncl
   intro a; obtain ⟨U, hxU, sU, rfl⟩ := F.germ_exist x a
   let W : Opens X := U ⊓ ⟨sᶜ, hs.isOpen_compl⟩
   have hxW : x ∈ W := ⟨hxU, hx⟩
-  have hW_bot : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ := by
-    ext ⟨y, hy⟩; simp only [Opens.map, TopCat.closedIncl, SetLike.mem_coe,
-      Opens.coe_bot, Set.mem_empty_iff_false, iff_false]
-    exact fun h => absurd hy h.2
+  have hW_bot : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ :=
+    le_antisymm (fun ⟨_, hy⟩ h => absurd hy h.2) bot_le
   have hFW_zero : IsZero (F.obj (op W)) := by
     change IsZero (G.val.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
     rw [hW_bot]; exact (isTerminal_sheaf_bot G).isZero
