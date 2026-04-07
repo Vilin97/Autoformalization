@@ -47,18 +47,18 @@ All hypotheses are necessary and standard. No issue.
 
 | Issue | Severity | Details |
 |-------|----------|---------|
-| **FiniteGeneratorReduction.lean: 624 lines** | P3 | Exceeds the 600-line soft limit in CLAUDE.md. Should be split. |
+| ~~**FiniteGeneratorReduction.lean: 624 lines**~~ | ~~P3~~ | **RESOLVED** — now 510 lines after prior compression. |
 | **IrreducibleStep.lean: 588 lines** | P4 | Approaching the limit. |
 | ~~**3 blanket `import Mathlib` statements**~~ | ~~P3~~ | **RESOLVED**: All three files now use targeted imports. |
-| **CohomologyIso.lean is dead code** | P3 | Not imported by any file in the project. Not imported by `main.lean`. Contains `cohomologyPresheafTopEquiv` which is defined but never referenced. The whole file appears to be vestigial. |
-| **Stale Aristotle job tracking** | P4 | `aristotle-jobs.json` still has a completed job entry. Should be cleaned. |
+| ~~**CohomologyIso.lean is dead code**~~ | ~~P3~~ | **RESOLVED** — file deleted. |
+| ~~**Stale Aristotle job tracking**~~ | ~~P4~~ | **RESOLVED** — cleared. |
 | **closedIncl_counit_isIso: ~200 lines** | P4 | Single proof spanning ~200 lines in `ClosedImmersion.lean`. Could benefit from extraction of intermediate lemmas. |
 
 ## 7. Documentation Lies
 
 | Claim | Source | Reality | Verdict |
 |-------|--------|---------|---------|
-| "Mathlib v4.24.0" | MEMORY.md | `lakefile.toml` says `v4.28.0` | **STALE** |
+| ~~"Mathlib v4.24.0"~~ | ~~MEMORY.md~~ | ~~`lakefile.toml` says `v4.28.0`~~ | **RESOLVED** — MEMORY.md updated |
 | "0 sorry's, 0 axioms, 0 admits" | CLAUDE.md, main.lean | Verified correct | OK |
 | "File structure" in CLAUDE.md | CLAUDE.md | Lists `SheafStalkAlgebra.lean`, `StalkGeneratorAlgebra.lean`, `PresheafFilteredColimit.lean`, `ZeroOutsideFinset.lean` which are present | OK |
 | Previous critique says "ACCEPT" | critique.md | Previous critique did not flag blueprint 404, blanket imports, dead code, or file size limits | **Too lenient** |
@@ -195,8 +195,8 @@ Each piece would need: docstrings, snake_case names, no `private`, targeted impo
 | ~~P3~~ | ~~3 files use blanket `import Mathlib`~~ | **RESOLVED** — All three use targeted imports |
 | ~~P3~~ | ~~`closedIncl_pushforward_shortExact` unnecessarily requires `InjectivePresentation`~~ | **RESOLVED** — Now takes `S.ShortExact` |
 | ~~P3~~ | ~~`epi_g_app_top_of_H1_vanishing` unnecessarily requires `InjectivePresentation`~~ | **RESOLVED** — Now takes `S.ShortExact` |
-| P3 | `PushforwardHVanishing` proves vanishing propagation, not isomorphism H^n(X,i_\*G)≅H^n(Z,G) | Backlog (hard) |
-| P3 | `sheafH_preserves_filtered_colimits` proves vanishing propagation, not colim commutation | Backlog (hard) |
+| P3 | `pushforwardHVanishing` proves vanishing propagation, not isomorphism H^n(X,i_\*G)≅H^n(Z,G) | **Blocked** — requires `pullbackConstantSheafIso` (Mathlib TODO at ConstantSheaf.lean:155) |
+| P3 | `sheafH_preserves_filtered_colimits` proves vanishing propagation, not colim commutation | **Blocked** — same dependency on constant sheaf pullback commutativity |
 | ~~P3~~ | ~~`pushforward_preserves_flasque` inlined but not extracted~~ | **RESOLVED** — Standalone theorem in FlasqueVanishing.lean |
 | P4 | Generalize coefficient category from `AddCommGrpCat` | Backlog |
 | ~~P4~~ | ~~Strengthen `Subsingleton` to `IsZero`~~ | **N/A** — `Sheaf.H F n` is a `Type` (Ext group), not a categorical object; `Subsingleton` is correct |
