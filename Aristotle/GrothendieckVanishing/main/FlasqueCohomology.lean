@@ -9,6 +9,7 @@
   Split from FlasqueVanishing.lean (flasque infrastructure) for file size.
 -/
 import Aristotle.GrothendieckVanishing.main.FlasqueVanishing
+import Mathlib.CategoryTheory.Abelian.Injective.Resolution
 
 universe u
 

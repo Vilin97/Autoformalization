@@ -350,9 +350,7 @@ private theorem sheafH_filtered_colimit_aux
         obtain ⟨j₀, q₀, hq₀⟩ := Concrete.isColimit_exists_rep _ hc_top_Q q
         -- Per-piece: Γ(Inj.obj j₀) ↠ Γ(Q_{j₀}) from SES + mono + H^1(Y_{j₀}) = 0
         haveI : Mono (η.app j₀) := hη_mono j₀
-        let ip_j₀ : InjectivePresentation (Y'.obj j₀) :=
-          { J := Inj.obj j₀, injective := hInj j₀, f := η.app j₀ }
-        have hπ_epi := epi_g_app_top_of_H1_vanishing ip_j₀ (hvan j₀)
+        have hπ_epi := epi_g_app_top_of_H1_vanishing (shortExact_of_mono (η.app j₀)) (hvan j₀)
         rw [AddCommGrpCat.epi_iff_surjective] at hπ_epi
         obtain ⟨p, hp⟩ := hπ_epi q₀
         -- Composition: Inj.obj j₀ →[π_{j₀}] Q_{j₀} →[cocone] Q
@@ -360,8 +358,8 @@ private theorem sheafH_filtered_colimit_aux
         refine ⟨(injCocone.ι.app j₀).val.app (op ⊤) p, ?_⟩
         show (S.g.val.app (op ⊤)) ((injCocone.ι.app j₀).val.app (op ⊤) p) = q
         have hcomp_sec : (injCocone.ι.app j₀ ≫ S.g).val.app (op ⊤) =
-            (ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀).val.app (op ⊤) :=
-          congrArg (fun f => f.val.app (op ⊤)) (show ip_j₀.shortComplex.g ≫ qCocone.ι.app j₀ =
+            (cokernel.π (η.app j₀) ≫ qCocone.ι.app j₀).val.app (op ⊤) :=
+          congrArg (fun f => f.val.app (op ⊤)) (show cokernel.π (η.app j₀) ≫ qCocone.ι.app j₀ =
             injCocone.ι.app j₀ ≫ S.g from cokernel.π_desc _ _ _).symm
         rw [← hq₀, ← hp]; exact congrArg (· p) (congrArg ConcreteCategory.hom hcomp_sec)
       exact subsingleton_H1_via_surj _ hSE hI (ext0_surj_of_epi_top (S := S) hΓg_epi)

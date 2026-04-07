@@ -6,7 +6,12 @@
   - Any morphism to a terminal object in an abelian category is epi
   - F(⊥) is terminal for any sheaf F on a topological space
 -/
-import Mathlib
+import Mathlib.Topology.KrullDimension
+import Mathlib.CategoryTheory.Abelian.Basic
+import Mathlib.CategoryTheory.Sites.Sheaf
+import Mathlib.CategoryTheory.Sites.Spaces
+import Mathlib.Algebra.Category.Grp.ZModuleEquivalence
+import Mathlib.Algebra.Category.ModuleCat.Projective
 
 universe u
 

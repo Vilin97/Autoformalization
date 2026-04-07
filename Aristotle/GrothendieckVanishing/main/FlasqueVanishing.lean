@@ -10,10 +10,17 @@
   `FlasqueVanishing` itself is in `FlasqueCohomology.lean`.
   Split from SetupCore.lean for compilation performance.
 -/
-import Mathlib
 import Aristotle.GrothendieckVanishing.main.Auxiliary
 import Aristotle.GrothendieckVanishing.main.ClosedImmersion
 import Aristotle.GrothendieckVanishing.main.ZeroOutside
+import Mathlib.CategoryTheory.Abelian.GrothendieckAxioms.Sheaf
+import Mathlib.CategoryTheory.Abelian.GrothendieckCategory.EnoughInjectives
+import Mathlib.CategoryTheory.Abelian.GrothendieckCategory.HasExt
+import Mathlib.CategoryTheory.Adjunction.Whiskering
+import Mathlib.CategoryTheory.Sites.ConstantSheaf
+import Mathlib.CategoryTheory.Sites.EpiMono
+import Mathlib.CategoryTheory.Sites.GlobalSections
+import Mathlib.CategoryTheory.Sites.SheafCohomology.Basic
 
 universe u
 
@@ -438,6 +445,15 @@ theorem isFlasque_of_injective {X : TopCat.{u}}
   rw [AddCommGrpCat.epi_iff_surjective]
   intro s; obtain ⟨h, hh⟩ := Injective.factors ((freeAbSheafHomEquiv U I).symm s) (freeAbSheafMap i)
   exact ⟨freeAbSheafHomEquiv V I h, by rw [← freeAbSheafHomEquiv_naturality i I h, hh]; simp⟩
+
+/-- Pushforward along any continuous map preserves flasqueness.
+    Restriction maps of `f_*F` are restriction maps of `F` over preimage opens. -/
+theorem pushforward_preserves_flasque {X Y : TopCat.{u}} (f : X ⟶ Y)
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsFlasqueSheaf F) :
+    IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} f).obj F) :=
+  fun {U V} j => by
+    change Epi (F.val.map ((Opens.map f).op.map j.op))
+    exact hF ((Opens.map f).map j)
 
 theorem epi_of_natIso_epi {C D : Type*} [Category C] [Category D]
     {F G : C ⥤ D} (α : F ≅ G) {X Y : C} (f : X ⟶ Y)
