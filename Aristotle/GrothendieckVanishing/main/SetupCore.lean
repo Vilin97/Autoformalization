@@ -72,6 +72,43 @@ noncomputable def ext_dimension_shift_addEquiv (Z : C') {S : ShortComplex C'} (h
     (AddMonoidHom.mk' δ_fun (fun a b => Ext.add_comp a b hS.extClass rfl))
     ⟨δ_inj, δ_surj⟩
 
+/-- Naturality of the extension class: given a morphism `φ : S₁ ⟶ S₂` of short exact sequences,
+    the connecting homomorphism commutes with the induced maps on Ext groups.
+    Proved via the triangulated category axiom TR3 (`complete_distinguished_triangle_morphism₁`),
+    fullness/faithfulness of `singleFunctor`, and mono cancellation. -/
+lemma extClass_naturality {S₁ S₂ : ShortComplex C'} (hS₁ : S₁.ShortExact)
+    (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂) :
+    (Ext.mk₀ φ.τ₃).comp hS₂.extClass (zero_add 1) =
+    hS₁.extClass.comp (Ext.mk₀ φ.τ₁) (add_zero 1) := by
+  letI := HasDerivedCategory.standard C'
+  ext
+  simp only [Ext.comp_hom, Ext.mk₀_hom, ShortComplex.ShortExact.extClass_hom]
+  rw [ShiftedHom.mk₀_comp, ShiftedHom.comp_mk₀]
+  have comm₂ : hS₁.singleTriangle.mor₂ ≫ (DerivedCategory.singleFunctor C' 0).map φ.τ₃ =
+      (DerivedCategory.singleFunctor C' 0).map φ.τ₂ ≫ hS₂.singleTriangle.mor₂ := by
+    show (DerivedCategory.singleFunctor C' 0).map S₁.g ≫
+      (DerivedCategory.singleFunctor C' 0).map φ.τ₃ =
+      (DerivedCategory.singleFunctor C' 0).map φ.τ₂ ≫
+      (DerivedCategory.singleFunctor C' 0).map S₂.g
+    simp [← Functor.map_comp, φ.comm₂₃]
+  obtain ⟨a', ha₁, ha₃⟩ := Pretriangulated.complete_distinguished_triangle_morphism₁
+    hS₁.singleTriangle hS₂.singleTriangle
+    hS₁.singleTriangle_distinguished hS₂.singleTriangle_distinguished
+    ((DerivedCategory.singleFunctor C' 0).map φ.τ₂)
+    ((DerivedCategory.singleFunctor C' 0).map φ.τ₃) comm₂
+  simp only [ShortComplex.ShortExact.singleTriangle_mor₃] at ha₃
+  rw [← ha₃]
+  suffices a' = (DerivedCategory.singleFunctor C' 0).map φ.τ₁ by rw [this]; simp
+  obtain ⟨a'', rfl⟩ := (DerivedCategory.singleFunctor C' 0).map_surjective a'
+  congr 1
+  have h : S₁.f ≫ φ.τ₂ = a'' ≫ S₂.f := by
+    have := ha₁
+    simp only [ShortComplex.ShortExact.singleTriangle_mor₁] at this
+    rwa [← Functor.map_comp, ← Functor.map_comp,
+      (DerivedCategory.singleFunctor C' 0).map_injective.eq_iff] at this
+  haveI : Mono S₂.f := hS₂.mono_f
+  exact (cancel_mono S₂.f).mp (by rw [← φ.comm₁₂.symm, h])
+
 end ExtDimShift
 
 /-! ## Building blocks for the closed-open decomposition
