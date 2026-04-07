@@ -38,19 +38,9 @@ theorem zeroOutsideInt_vanishing
       CategoryTheory.NatIso.ofComponents
         (fun W => eqToIso (by show _ = A; simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ, A]))
         (by intro W₁ W₂ f; simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ, A])
-    let β : S.X₂ ≅ (constantSheaf J AddCommGrpCat.{u}).obj A :=
-      (presheafToSheaf J AddCommGrpCat.{u}).mapIso α
-    haveI : IsIso β.hom.val :=
-      (sheafToPresheaf J AddCommGrpCat.{u}).map_isIso β.hom
-    haveI := CategoryTheory.NatIso.isIso_app_of_isIso β.hom.val (op W)
-    haveI := CategoryTheory.NatIso.isIso_app_of_isIso β.hom.val (op U)
-    have hrw : S.X₂.val.map i.op = β.hom.val.app (op W) ≫
-        ((constantSheaf J AddCommGrpCat.{u}).obj A).val.map i.op ≫
-        inv (β.hom.val.app (op U)) := by
-      rw [← Category.assoc, ← β.hom.val.naturality i.op, Category.assoc,
-        IsIso.hom_inv_id, Category.comp_id]
-    rw [hrw]
-    haveI := constantSheaf_flasque_of_irreducible X i; exact inferInstance
+    exact epi_of_natIso_epi ((sheafToPresheaf J AddCommGrpCat.{u}).mapIso
+      ((presheafToSheaf J AddCommGrpCat.{u}).mapIso α).symm) i.op
+      (constantSheaf_flasque_of_irreducible X i)
   exact ext_dimension_shift _ hSE m hCoker (FlasqueVanishing X S.X₂ hFlasque m)
 
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
