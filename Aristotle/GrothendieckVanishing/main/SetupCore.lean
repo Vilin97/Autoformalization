@@ -416,6 +416,200 @@ lemma pushforwardH0Iso_natural
         (TopCat.closedIncl hZ)).obj F)) x))
   erw [h2]; exact pushforwardH0Iso_natural_step3 hZ f _
 
+/-- Kernel compatibility (forward): if `δ_X(x) = 0` then `δ_Z(pushH0(x)) = 0`.
+    Uses `pushforwardH0Iso_natural` + `comp_extClass`. -/
+lemma pushforwardH1Iso_ker_fwd
+    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
+    {G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)}
+    (ip : InjectivePresentation G')
+    (hSE_X : (ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ))).ShortExact)
+    (hSE_Z : ip.shortComplex.ShortExact)
+    (x : Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ)).obj ip.shortComplex.X₃) 0)
+    (hx : x.comp hSE_X.extClass rfl = 0) :
+    (pushforwardH0Iso hZ ip.shortComplex.X₃ x).comp hSE_Z.extClass rfl = 0 := by
+  obtain ⟨z, hz⟩ := Ext.covariant_sequence_exact₃ _ hSE_X x rfl hx
+  show (pushforwardH0Iso hZ _ _).comp hSE_Z.extClass rfl = 0
+  rw [hz.symm]; erw [pushforwardH0Iso_natural hZ ip.shortComplex.g z]
+  rw [Ext.comp_assoc_of_second_deg_zero, hSE_Z.comp_extClass, Ext.comp_zero]
+
+/-- Naturality of `pushforwardH0Iso` composed with `.symm`: applying `pushH0` to
+    `(pushH0.symm y).comp(mk₀(push.map f))` yields `y.comp(mk₀ f)`. -/
+lemma pushforwardH0Iso_symm_comp
+    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)} (f : F ⟶ G)
+    (y : Sheaf.H F 0) :
+    pushforwardH0Iso hZ G (((pushforwardH0Iso hZ F).symm y).comp
+      (Ext.mk₀ ((TopCat.Sheaf.pushforward AddCommGrpCat
+        (TopCat.closedIncl hZ)).map f)) (add_zero 0)) =
+    y.comp (Ext.mk₀ f) (add_zero 0) := by
+  erw [pushforwardH0Iso_natural hZ f]; rw [AddEquiv.apply_symm_apply]
+
+/-- Kernel compatibility (backward): if `δ_Z(pushH0(x)) = 0` then `δ_X(x) = 0`.
+    Uses `pushforwardH0Iso_symm_comp` + `comp_extClass`. -/
+lemma pushforwardH1Iso_ker_bwd
+    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
+    {G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)}
+    (ip : InjectivePresentation G')
+    (hSE_X : (ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ))).ShortExact)
+    (hSE_Z : ip.shortComplex.ShortExact)
+    (x : Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ)).obj ip.shortComplex.X₃) 0)
+    (hx : (pushforwardH0Iso hZ ip.shortComplex.X₃ x).comp hSE_Z.extClass rfl = 0) :
+    x.comp hSE_X.extClass rfl = 0 := by
+  obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₃ _ hSE_Z _ rfl hx
+  have : x = ((pushforwardH0Iso hZ ip.shortComplex.X₂).symm y).comp
+      (Ext.mk₀ (ip.shortComplex.map (TopCat.Sheaf.pushforward _
+        (TopCat.closedIncl hZ))).g) (add_zero 0) :=
+    (pushforwardH0Iso hZ ip.shortComplex.X₃).injective
+      (pushforwardH0Iso_symm_comp hZ ip.shortComplex.g y ▸ hy.symm)
+  rw [this, Ext.comp_assoc_of_second_deg_zero, hSE_X.comp_extClass, Ext.comp_zero]
+
+/-- Additivity helper for `pushforwardH1Iso`: the lift-then-compose map is additive. -/
+lemma pushforwardH1Iso_add
+    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
+    {G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)}
+    (ip : InjectivePresentation G')
+    (hSE_X : (ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ))).ShortExact)
+    (hSE_Z : ip.shortComplex.ShortExact)
+    (hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ)).obj ip.shortComplex.X₂))
+    (a b : Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hZ)).obj G') 1) :
+    let hX1 := flasqueVanishing _ _ hFlasque 0
+    let liftX := fun c => (Ext.covariant_sequence_exact₁ _ hSE_X c
+      (@Subsingleton.elim _ hX1 _ _) rfl).choose
+    let φ : AddMonoidHom _ _ := (AddMonoidHom.mk'
+      (fun x => x.comp hSE_Z.extClass rfl)
+      (fun a b => Ext.add_comp a b hSE_Z.extClass rfl)).comp
+      (pushforwardH0Iso hZ ip.shortComplex.X₃).toAddMonoidHom
+    φ (liftX (a + b)) = φ (liftX a) + φ (liftX b) := by
+  intro hX1 liftX φ
+  have hlX : ∀ c, (liftX c).comp hSE_X.extClass rfl = c := fun c =>
+    (Ext.covariant_sequence_exact₁ _ hSE_X c (@Subsingleton.elim _ hX1 _ _) rfl).choose_spec
+  rw [← map_add]
+  have : (liftX (a + b) - (liftX a + liftX b)).comp hSE_X.extClass rfl = 0 := by
+    rw [show liftX (a + b) - (liftX a + liftX b) = liftX (a + b) + (-(liftX a + liftX b)) from
+      sub_eq_add_neg _ _, Ext.add_comp, Ext.neg_comp, Ext.add_comp, hlX, hlX, hlX, add_neg_cancel]
+  exact sub_eq_zero.mp (show φ (liftX (a + b)) - φ (liftX a + liftX b) = 0 from by
+    rw [← map_sub]; exact pushforwardH1Iso_ker_fwd hZ ip hSE_X hSE_Z _ this)
+
+/-- Injectivity helper for `pushforwardH1Iso`. -/
+lemma pushforwardH1Iso_inj
+    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
+    {G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)}
+    (ip : InjectivePresentation G')
+    (hSE_X : (ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ))).ShortExact)
+    (hSE_Z : ip.shortComplex.ShortExact)
+    (hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ)).obj ip.shortComplex.X₂))
+    {a b : Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hZ)).obj G') 1}
+    (hab : let hX1 := flasqueVanishing _ _ hFlasque 0
+      let liftX := fun c => (Ext.covariant_sequence_exact₁ _ hSE_X c
+        (@Subsingleton.elim _ hX1 _ _) rfl).choose
+      let φ : AddMonoidHom _ _ := (AddMonoidHom.mk'
+        (fun x => x.comp hSE_Z.extClass rfl)
+        (fun a b => Ext.add_comp a b hSE_Z.extClass rfl)).comp
+        (pushforwardH0Iso hZ ip.shortComplex.X₃).toAddMonoidHom
+      φ (liftX a) = φ (liftX b)) :
+    a = b := by
+  let hX1 := flasqueVanishing _ _ hFlasque 0
+  let liftX := fun c => (Ext.covariant_sequence_exact₁ _ hSE_X c
+    (@Subsingleton.elim _ hX1 _ _) rfl).choose
+  have hlX : ∀ c, (liftX c).comp hSE_X.extClass rfl = c := fun c =>
+    (Ext.covariant_sequence_exact₁ _ hSE_X c (@Subsingleton.elim _ hX1 _ _) rfl).choose_spec
+  let φ : AddMonoidHom _ _ := (AddMonoidHom.mk'
+    (fun x => x.comp hSE_Z.extClass rfl)
+    (fun a b => Ext.add_comp a b hSE_Z.extClass rfl)).comp
+    (pushforwardH0Iso hZ ip.shortComplex.X₃).toAddMonoidHom
+  have h1 : (liftX a - liftX b).comp hSE_X.extClass rfl = 0 :=
+    pushforwardH1Iso_ker_bwd hZ ip hSE_X hSE_Z _ (by
+      show φ (liftX a - liftX b) = 0; rw [map_sub]; exact sub_eq_zero.mpr hab)
+  rw [← hlX a, ← hlX b]
+  rw [show liftX a - liftX b = liftX a + -(liftX b) from sub_eq_add_neg _ _,
+    Ext.add_comp, Ext.neg_comp] at h1
+  have := add_eq_zero_iff_eq_neg.mp h1
+  rwa [neg_neg] at this
+
+/-- Surjectivity helper for `pushforwardH1Iso`. -/
+lemma pushforwardH1Iso_surj
+    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
+    {G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)}
+    (ip : InjectivePresentation G')
+    (hSE_X : (ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ))).ShortExact)
+    (hSE_Z : ip.shortComplex.ShortExact)
+    (hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ)).obj ip.shortComplex.X₂))
+    (b : Sheaf.H G' 1) :
+    let hX1 := flasqueVanishing _ _ hFlasque 0
+    let hZ1 := Ext.subsingleton_of_injective
+      ((constantSheaf (Opens.grothendieckTopology (TopCat.of Z)) AddCommGrpCat).obj
+        (AddCommGrpCat.of (ULift.{u} ℤ))) ip.shortComplex.X₂ 0
+    let liftX := fun c => (Ext.covariant_sequence_exact₁ _ hSE_X c
+      (@Subsingleton.elim _ hX1 _ _) rfl).choose
+    let φ : AddMonoidHom _ _ := (AddMonoidHom.mk'
+      (fun x => x.comp hSE_Z.extClass rfl)
+      (fun a b => Ext.add_comp a b hSE_Z.extClass rfl)).comp
+      (pushforwardH0Iso hZ ip.shortComplex.X₃).toAddMonoidHom
+    ∃ a, φ (liftX a) = b := by
+  intro hX1 hZ1 liftX φ
+  have hlX : ∀ c, (liftX c).comp hSE_X.extClass rfl = c := fun c =>
+    (Ext.covariant_sequence_exact₁ _ hSE_X c (@Subsingleton.elim _ hX1 _ _) rfl).choose_spec
+  obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₁ _ hSE_Z b
+    (@Subsingleton.elim _ hZ1 _ _) rfl
+  refine ⟨((pushforwardH0Iso hZ ip.shortComplex.X₃).symm y).comp hSE_X.extClass rfl, ?_⟩
+  show φ (liftX _) = b
+  -- Cast liftX _ to Sheaf.H type to match pushH0.symm y (definitionally equal types)
+  let a := ((pushforwardH0Iso hZ ip.shortComplex.X₃).symm y).comp hSE_X.extClass rfl
+  let z : Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ)).obj ip.shortComplex.X₃) 0 := liftX a
+  have h1 : (z + -((pushforwardH0Iso hZ ip.shortComplex.X₃).symm y)).comp
+      hSE_X.extClass rfl = 0 := by
+    rw [Ext.add_comp, Ext.neg_comp, hlX, add_neg_cancel]
+  have h2 := pushforwardH1Iso_ker_fwd hZ ip hSE_X hSE_Z _ h1
+  -- h2 : φ(z + -(pushH0.symm y)) = 0. Since φ is AddMonoidHom:
+  have h3 : φ z = φ ((pushforwardH0Iso hZ ip.shortComplex.X₃).symm y) := by
+    have : φ z + -(φ ((pushforwardH0Iso hZ ip.shortComplex.X₃).symm y)) = 0 := by
+      rw [← map_neg, ← map_add]; exact h2
+    have := add_eq_zero_iff_eq_neg.mp this
+    rwa [neg_neg] at this
+  rw [show φ (liftX a) = φ z from rfl, h3]
+  show (pushforwardH0Iso hZ ip.shortComplex.X₃
+    ((pushforwardH0Iso hZ ip.shortComplex.X₃).symm y)).comp hSE_Z.extClass rfl = b
+  rw [AddEquiv.apply_symm_apply]; exact hy
+
+/-- **Pushforward H^1 isomorphism**: assembles the three pieces. -/
+noncomputable def pushforwardH1Iso
+    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
+    {G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)}
+    (ip : InjectivePresentation G')
+    (hSE_X : (ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ))).ShortExact)
+    (hSE_Z : ip.shortComplex.ShortExact)
+    (hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ)).obj ip.shortComplex.X₂)) :
+    Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hZ)).obj G') 1 ≃+ Sheaf.H G' 1 :=
+  let hX1 := flasqueVanishing _ _ hFlasque 0
+  let liftX := fun c => (Ext.covariant_sequence_exact₁ _ hSE_X c
+    (@Subsingleton.elim _ hX1 _ _) rfl).choose
+  let φ : AddMonoidHom _ _ := (AddMonoidHom.mk'
+    (fun x => x.comp hSE_Z.extClass rfl)
+    (fun a b => Ext.add_comp a b hSE_Z.extClass rfl)).comp
+    (pushforwardH0Iso hZ ip.shortComplex.X₃).toAddMonoidHom
+  AddEquiv.ofBijective
+    (AddMonoidHom.mk' (fun a => φ (liftX a))
+      (pushforwardH1Iso_add hZ ip hSE_X hSE_Z hFlasque))
+    ⟨fun {a b} hab => pushforwardH1Iso_inj hZ ip hSE_X hSE_Z hFlasque
+      (show _ from hab),
+    fun b => pushforwardH1Iso_surj hZ ip hSE_X hSE_Z hFlasque b⟩
+
 /-- **Pushforward isomorphism**: `H^n(X, i_*G) ≃+ H^n(Z, G)` for closed immersions.
     The pushforward along a closed immersion preserves cohomology, not just vanishing.
     Base case: sections comparison `Γ(X, i_*G) = Γ(Z, G)`.
@@ -449,15 +643,7 @@ noncomputable def pushforwardHIso
     have hSE_Z := ip.shortExact_shortComplex
     cases k with
     | zero =>
-      -- H^1: The proof uses pushforwardH0Iso_natural + kernel compatibility (hker_fwd/bwd)
-      -- + AddEquiv.ofBijective. All key lemmas are proved:
-      -- - pushforwardH0Iso_natural (commutes with morphisms)
-      -- - sheafH0EquivSections_natural, sheafH0EquivSections_symm_natural
-      -- - comp_extClass (boundary ∘ boundary = 0)
-      -- The assembly exceeds 200k heartbeats due to expensive Ext WHNF reduction.
-      -- Each erw involving pushforwardH0Iso_natural costs ~150k heartbeats,
-      -- and the full n=1 proof needs 3 such rewrites.
-      exact sorry
+      exact pushforwardH1Iso hZ ip hSE_X hSE_Z hFlasque
     | succ m =>
       -- H^{m+2}: dimension shift connecting map isomorphism
       exact (ext_dimension_shift_addEquiv _ hSE_X (m + 1)
