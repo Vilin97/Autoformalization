@@ -146,7 +146,7 @@ The mathematical content is sound and the proof structure is clean. The gap to M
 | ~~**66 `private` declarations**~~ | ~~15 files~~ | **RESOLVED** — all 67 `private` modifiers removed |
 | ~~**5 Mathlib linters disabled**~~ | ~~lakefile.toml~~ | **RESOLVED** — all 5 linters re-enabled, 0 warnings |
 | ~~**3 blanket `import Mathlib`**~~ | ~~Auxiliary.lean, FlasqueVanishing.lean, ZeroOutside.lean~~ | **RESOLVED** |
-| **4 blanket `noncomputable section`** | ClosedImmersion, FlasqueVanishing, ZeroOutside, ZeroOutsideFinset | Mark individual declarations `noncomputable` instead |
+| ~~**4 blanket `noncomputable section`**~~ | ~~ClosedImmersion, FlasqueVanishing, ZeroOutside, ZeroOutsideFinset~~ | **RESOLVED** — per-declaration `noncomputable` |
 
 ### Expected for Mathlib quality
 
