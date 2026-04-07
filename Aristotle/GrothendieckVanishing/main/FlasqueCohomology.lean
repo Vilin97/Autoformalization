@@ -15,6 +15,13 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
+/-- `Ext.addEquiv₀ (Ext.mk₀ f) = f`: round-trip through the Ext^0 ≃ Hom equivalence. -/
+@[simp] lemma Ext.addEquiv₀_mk₀ {C : Type*} [Category C] [Abelian C] [HasExt C]
+    {X Y : C} (f : X ⟶ Y) : Ext.addEquiv₀ (Ext.mk₀ f) = f := by
+  rw [show Ext.mk₀ f = Ext.addEquiv₀.symm f from by
+    apply Ext.addEquiv₀.injective; simp,
+    AddEquiv.apply_symm_apply]
+
 /-- `H F 0` is equivalent to sections on `⊤`. -/
 noncomputable def sheafH0EquivSections {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
@@ -22,6 +29,22 @@ noncomputable def sheafH0EquivSections {X : TopCat.{u}}
   refine AddEquiv.trans Ext.addEquiv₀ ?_
   refine AddEquiv.trans ?_ (TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv _)
   exact (constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat Limits.isTerminalTop).homAddEquiv _ F
+
+/-- `sheafH0EquivSections` is natural in the sheaf: the square
+    `H^0(F) →[comp(mk₀ f)] H^0(G) →[sections] Γ(G)` commutes with
+    `H^0(F) →[sections] Γ(F) →[f.app ⊤] Γ(G)`. -/
+lemma sheafH0EquivSections_natural {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G) (x : Sheaf.H F 0) :
+    sheafH0EquivSections G (x.comp (Ext.mk₀ f) (add_zero 0)) =
+    ConcreteCategory.hom (f.val.app (op ⊤)) (sheafH0EquivSections F x) := by
+  rw [show x = Ext.mk₀ (Ext.addEquiv₀ x) from (Ext.mk₀_addEquiv₀_apply x).symm,
+    Ext.mk₀_comp_mk₀]; simp only [sheafH0EquivSections, AddEquiv.trans_apply]
+  erw [Ext.addEquiv₀_mk₀, Ext.addEquiv₀_mk₀, Adjunction.homEquiv_naturality_right]
+  change _ = ConcreteCategory.hom (f.val.app (op ⊤))
+    ((TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv (F.val.obj (op ⊤)))
+      (((constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat
+        Limits.isTerminalTop).homEquiv _ F) (Ext.addEquiv₀ x)))
+  rfl
 
 /-- Transport subsingletons across an additive equivalence. -/
 theorem subsingleton_of_addEquiv {A B : Type*} [Add A] [Add B]
