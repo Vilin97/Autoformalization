@@ -37,6 +37,39 @@ private lemma transition_preserves_zero
   simp only [ConcreteCategory.comp_apply]
   exact (congr_arg (ConcreteCategory.hom (α.app (op U))) h).trans (map_zero _)
 
+/-- Pairwise compatibility is preserved under filtered transitions. -/
+private lemma transition_preserves_compat
+    {X : TopCat.{u}} {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    {j₀ j j' : J'} (f : j₀ ⟶ j) (g : j ⟶ j')
+    {U V : Opens X} (a : ToType ((Y'.obj j₀).val.obj (op U)))
+    (b : ToType ((Y'.obj j₀).val.obj (op V)))
+    (h : ConcreteCategory.hom ((Y'.obj j).val.map (Opens.infLELeft U V).op)
+      (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map f).app (op U)) a) =
+     ConcreteCategory.hom ((Y'.obj j).val.map (Opens.infLERight U V).op)
+      (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map f).app (op V)) b)) :
+    ConcreteCategory.hom ((Y'.obj j').val.map (Opens.infLELeft U V).op)
+      (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map (f ≫ g)).app (op U)) a) =
+    ConcreteCategory.hom ((Y'.obj j').val.map (Opens.infLERight U V).op)
+      (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map (f ≫ g)).app (op V)) b) := by
+  let β := (Y' ⋙ sheafToPresheaf _ _).map g
+  -- Factor F(f ≫ g) = F(f) ≫ β; for each side use naturality: β ≫ res = res ≫ β
+  suffices ∀ {W : Opens X} (φ : U ⊓ V ⟶ W) (c₀ : ToType ((Y'.obj j₀).val.obj (op W))),
+      ConcreteCategory.hom ((Y'.obj j').val.map φ.op)
+        (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map (f ≫ g)).app (op W)) c₀) =
+      ConcreteCategory.hom (β.app (op (U ⊓ V)))
+        (ConcreteCategory.hom ((Y'.obj j).val.map φ.op)
+          (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map f).app (op W)) c₀)) by
+    rw [this (Opens.infLELeft U V) a, this (Opens.infLERight U V) b, h]
+  intro W φ c₀
+  simp only [Functor.map_comp, NatTrans.comp_app, AddCommGrpCat.hom_comp,
+    AddMonoidHom.coe_comp, Function.comp_apply]
+  change ConcreteCategory.hom (β.app (op W) ≫ (Y'.obj j').val.map φ.op) _ =
+    ConcreteCategory.hom ((Y'.obj j).val.map φ.op ≫ β.app (op (U ⊓ V))) _
+  rw [show β.app (op W) ≫ (Y'.obj j').val.map φ.op =
+    (Y'.obj j).val.map φ.op ≫ β.app (op (U ⊓ V))
+    from (β.naturality φ.op).symm]; rfl
+
 /-- A section of a sheaf that restricts to 0 on a finite open cover is 0. -/
 private theorem sheaf_section_zero_of_zero_on_finite_cover
     {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -69,15 +102,13 @@ private theorem filtered_colimit_kills_all_restrictions
   | @insert k₀ t₀ hk₀ ih =>
     obtain ⟨j_cur, g_cur, hg_cur⟩ := ih (fun k hk => h_ev k (Finset.mem_insert_of_mem hk))
     obtain ⟨jk₀, fk₀, hfk₀⟩ := h_ev k₀ (Finset.mem_insert_self k₀ t₀)
-    let j₁ := IsFiltered.coeq (g_cur ≫ IsFiltered.leftToMax j_cur jk₀)
-        (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
     let h_eq := IsFiltered.coeqHom (g_cur ≫ IsFiltered.leftToMax j_cur jk₀)
         (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
     have heq : g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq =
         fk₀ ≫ IsFiltered.rightToMax j_cur jk₀ ≫ h_eq := by
       simpa only [Category.assoc] using IsFiltered.coeq_condition
         (g_cur ≫ IsFiltered.leftToMax j_cur jk₀) (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
-    refine ⟨j₁, g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq, fun k hk => ?_⟩
+    refine ⟨_, g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq, fun k hk => ?_⟩
     rw [Finset.mem_insert] at hk; rcases hk with rfl | hk
     · rw [heq]; exact transition_preserves_zero Y' fk₀
         (IsFiltered.rightToMax j_cur jk₀ ≫ h_eq) (homOfLE (hW k)) b₀ hfk₀
@@ -253,63 +284,19 @@ private theorem isSheaf_presheaf_filtered_colimit
       obtain ⟨j_new, f_new, hf_new⟩ := h_ev_compat p₀.1
         (Finset.mem_product.mp hp₀t).1 p₀.2 (Finset.mem_product.mp hp₀t).2
       -- Merge via IsFiltered.coeq
-      refine ⟨IsFiltered.coeq (g_cur ≫ IsFiltered.leftToMax j_cur j_new)
-          (f_new ≫ IsFiltered.rightToMax j_cur j_new),
-        g_cur ≫ IsFiltered.leftToMax j_cur j_new ≫
-          IsFiltered.coeqHom (g_cur ≫ IsFiltered.leftToMax j_cur j_new)
-            (f_new ≫ IsFiltered.rightToMax j_cur j_new),
-        fun p hp => ?_⟩
-      -- htrans_compat: compat preserved under further transition
       let h_coeq := IsFiltered.coeqHom (g_cur ≫ IsFiltered.leftToMax j_cur j_new)
           (f_new ≫ IsFiltered.rightToMax j_cur j_new)
-      have htrans : ∀ {j j' : J'} (f : j₀ ⟶ j) (g : j ⟶ j') (k₁ : ι) (hk₁ : k₁ ∈ t)
-          (l₁ : ι) (hl₁ : l₁ ∈ t),
-          ConcreteCategory.hom ((Y'.obj j).val.map (Opens.infLELeft (U k₁) (U l₁)).op)
-            (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map f).app (op (U k₁))) (x' k₁ hk₁)) =
-          ConcreteCategory.hom ((Y'.obj j).val.map (Opens.infLERight (U k₁) (U l₁)).op)
-            (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map f).app (op (U l₁))) (x' l₁ hl₁)) →
-          ConcreteCategory.hom ((Y'.obj j').val.map (Opens.infLELeft (U k₁) (U l₁)).op)
-            (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map (f ≫ g)).app (op (U k₁))) (x' k₁ hk₁)) =
-          ConcreteCategory.hom ((Y'.obj j').val.map (Opens.infLERight (U k₁) (U l₁)).op)
-            (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map (f ≫ g)).app (op (U l₁))) (x' l₁ hl₁)) := by
-        intro j j' f g k₁ hk₁ l₁ hl₁ hfkl
-        let β := (Y' ⋙ sheafToPresheaf _ _).map g
-        suffices ∀ (m : ι) (hm : m ∈ t) (φ : U k₁ ⊓ U l₁ ⟶ U m),
-            ConcreteCategory.hom ((Y'.obj j').val.map φ.op)
-              (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map (f ≫ g)).app (op (U m))) (x' m hm)) =
-            ConcreteCategory.hom (β.app (op (U k₁ ⊓ U l₁)))
-              (ConcreteCategory.hom ((Y'.obj j).val.map φ.op)
-                (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map f).app (op (U m))) (x' m hm))) by
-          rw [this k₁ hk₁ (Opens.infLELeft (U k₁) (U l₁)),
-              this l₁ hl₁ (Opens.infLERight (U k₁) (U l₁)), hfkl]
-        intro m hm φ
-        -- F(f ≫ g) = F(f) ≫ β, then naturality: β(Um) ≫ res = res ≫ β(Ukl)
-        simp only [Functor.map_comp, NatTrans.comp_app,
-          AddCommGrpCat.hom_comp, AddMonoidHom.coe_comp, Function.comp_apply]
-        -- Goal: res_j'(β(Um)(F(f)(x'))) = β(Ukl)(res_j(F(f)(x')))
-        change ConcreteCategory.hom (β.app (op (U m)) ≫ (Y'.obj j').val.map φ.op) _ =
-          ConcreteCategory.hom ((Y'.obj j).val.map φ.op ≫ β.app (op (U k₁ ⊓ U l₁))) _
-        rw [show β.app (op (U m)) ≫ (Y'.obj j').val.map φ.op =
-          (Y'.obj j).val.map φ.op ≫ β.app (op (U k₁ ⊓ U l₁))
-          from (β.naturality φ.op).symm]; rfl
-      -- Apply htrans to each case
+      have heq : g_cur ≫ IsFiltered.leftToMax j_cur j_new ≫ h_coeq =
+          f_new ≫ IsFiltered.rightToMax j_cur j_new ≫ h_coeq := by
+        simpa only [Category.assoc] using IsFiltered.coeq_condition
+          (g_cur ≫ IsFiltered.leftToMax j_cur j_new)
+          (f_new ≫ IsFiltered.rightToMax j_cur j_new)
+      refine ⟨_, g_cur ≫ IsFiltered.leftToMax j_cur j_new ≫ h_coeq, fun p hp => ?_⟩
       rw [Finset.mem_insert] at hp; rcases hp with rfl | hp
-      · -- p = p₀: use coeq condition to equate transitions
-        have heq : g_cur ≫ IsFiltered.leftToMax j_cur j_new ≫ h_coeq =
-            f_new ≫ IsFiltered.rightToMax j_cur j_new ≫ h_coeq := by
-          simpa only [Category.assoc] using IsFiltered.coeq_condition
-            (g_cur ≫ IsFiltered.leftToMax j_cur j_new)
-            (f_new ≫ IsFiltered.rightToMax j_cur j_new)
-        rw [heq]
-        exact htrans f_new (IsFiltered.rightToMax j_cur j_new ≫ h_coeq)
-          _ ((Finset.mem_product.mp hp₀t).1)
-          _ ((Finset.mem_product.mp hp₀t).2)
-          hf_new
-      · -- p ∈ rest: use hg_cur + transition
-        exact htrans g_cur (IsFiltered.leftToMax j_cur j_new ≫ h_coeq)
-          p.1 ((Finset.mem_product.mp (hS (Finset.mem_insert_of_mem hp))).1)
-          p.2 ((Finset.mem_product.mp (hS (Finset.mem_insert_of_mem hp))).2)
-          (hg_cur p hp)
+      · rw [heq]; exact transition_preserves_compat Y' f_new
+          (IsFiltered.rightToMax j_cur j_new ≫ h_coeq) _ _ hf_new
+      · exact transition_preserves_compat Y' g_cur
+          (IsFiltered.leftToMax j_cur j_new ≫ h_coeq) _ _ (hg_cur p hp)
   -- Glue in piece
   let W : ↥t → Opens X := fun ⟨k, _⟩ => U k
   let x'' : ∀ (k : ↥t), ToType ((Y'.obj j₁).val.obj (op (W k))) :=
@@ -338,7 +325,7 @@ private theorem isSheaf_presheaf_filtered_colimit
       (ConcreteCategory.hom ((Y'.obj j₁).val.map (Opens.leSupr U k).op) s₀) = sf k
     rw [hs₀ ⟨k, hk⟩]; dsimp [x'']
     have hfac := congrArg (fun α => NatTrans.app α (op (U k))) (c.ι.naturality g₁)
-    simp only [Functor.const_obj_map, NatTrans.comp_app, Category.comp_id] at hfac
+    simp only [Functor.const_obj_map, NatTrans.comp_app] at hfac
     change ConcreteCategory.hom ((((Y' ⋙ sheafToPresheaf _ _).map g₁).app (op (U k)) ≫
       (c.ι.app j₁).app (op (U k)))) (x' k hk) = sf k
     rw [hfac]; exact hx' k hk
