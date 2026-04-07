@@ -36,9 +36,7 @@ lemma sheafH0EquivSections_natural {X : TopCat.{u}}
     Ext.addEquiv₀.apply_symm_apply _
   erw [Adjunction.homAddEquiv_apply, Adjunction.homAddEquiv_apply, key,
     Adjunction.homEquiv_naturality_right, Adjunction.homAddEquiv_apply]
-  -- Last step: uliftZMultiplesAddEquiv(h ≫ sheafSections.map f) = f.app(⊤)(uliftZMultiplesAddEquiv h)
-  -- These are definitionally equal modulo the sheafSections/val identification.
-  sorry
+  rfl
 
 /-- Transport subsingletons across an additive equivalence. -/
 theorem subsingleton_of_addEquiv {A B : Type*} [Add A] [Add B]
