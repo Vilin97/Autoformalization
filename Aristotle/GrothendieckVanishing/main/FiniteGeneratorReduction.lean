@@ -351,9 +351,7 @@ private theorem sheafH_filtered_colimit_aux
         -- Per-piece: Γ(Inj.obj j₀) ↠ Γ(Q_{j₀}) from SES + mono + H^1(Y_{j₀}) = 0
         haveI : Mono (η.app j₀) := hη_mono j₀
         let ip_j₀ : InjectivePresentation (Y'.obj j₀) :=
-          { J := Inj.obj j₀
-            injective := hInj j₀
-            f := η.app j₀ }
+          { J := Inj.obj j₀, injective := hInj j₀, f := η.app j₀ }
         have hπ_epi := epi_g_app_top_of_H1_vanishing ip_j₀ (hvan j₀)
         rw [AddCommGrpCat.epi_iff_surjective] at hπ_epi
         obtain ⟨p, hp⟩ := hπ_epi q₀
