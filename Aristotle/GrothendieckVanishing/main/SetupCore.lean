@@ -2,11 +2,11 @@
   SetupCore.lean -- Closed immersion infrastructure for Grothendieck vanishing
 
   Provides:
-  1. `PushforwardHVanishing` (pushforward preserves cohomological vanishing)
+  1. `pushforwardHVanishing` (pushforward preserves cohomological vanishing)
   2. `epi_unit_of_closedImmersion` (adjunction unit is epi)
-  3. `ClosedImmersionSES` (short exact sequence from closed immersion)
+  3. `closedImmersionSES` (short exact sequence from closed immersion)
 
-  Depends on FlasqueCohomology.lean for `FlasqueVanishing`, `sheafH0EquivSections`,
+  Depends on FlasqueCohomology.lean for `flasqueVanishing`, `sheafH0EquivSections`,
   and FlasqueVanishing.lean for `IsFlasqueSheaf`, `isFlasque_of_injective`.
 -/
 import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
@@ -56,15 +56,15 @@ end ExtDimShift
 
 /-! ## Building blocks for the closed-open decomposition
 
-ReducibleVanishing and IrreduciblePosVanishing require two building blocks:
+reducibleVanishing and irreduciblePosVanishing require two building blocks:
 
-1. PushforwardHVanishing: pushforward along closed immersion preserves vanishing
+1. pushforwardHVanishing: pushforward along closed immersion preserves vanishing
    (adjunction + mono preservation + exactness of i_*)
-2. ClosedImmersionSES: the adjunction unit F -> i_*(i^*F) gives a short exact sequence
+2. closedImmersionSES: the adjunction unit F -> i_*(i^*F) gives a short exact sequence
 -/
 
 -- stalkPushforward naturality w.r.t. presheaf morphisms
-private theorem stalkPush_nat_closedIncl
+theorem stalkPush_nat_closedIncl
     {X Y : TopCat.{u}} (f : X ⟶ Y)
     {F G : X.Presheaf AddCommGrpCat.{u}} (α : F ⟶ G) (x : X) :
     (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} (ConcreteCategory.hom f x)).map
@@ -79,7 +79,7 @@ private theorem stalkPush_nat_closedIncl
     TopCat.Presheaf.stalkFunctor_map_germ]; rfl
 
 -- Stalk of pushforward is zero outside the closed set
-private theorem pushforward_stalk_zero_closedIncl
+theorem pushforward_stalk_zero_closedIncl
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) (x : X) (hx : x ∉ s)
     (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) :
     ∀ a : ((TopCat.Presheaf.pushforward AddCommGrpCat.{u}
@@ -104,7 +104,7 @@ private theorem pushforward_stalk_zero_closedIncl
   rw [hsW_eq]; exact AddMonoidHom.map_zero _
 
 -- Surjectivity transfer: f ≫ g = h ≫ k with g, h iso and k surj → f surj
-private theorem surj_transfer_closedIncl {A B C D : AddCommGrpCat.{u}}
+theorem surj_transfer_closedIncl {A B C D : AddCommGrpCat.{u}}
     {f : A ⟶ B} {g : B ⟶ C} {h : A ⟶ D} {k : D ⟶ C}
     [IsIso g] [IsIso h]
     (hnat : f ≫ g = h ≫ k)
@@ -132,7 +132,7 @@ noncomputable instance sheafBalanced (X : TopCat.{u}) :
   balanced_of_strongEpiCategory
 
 -- Stalkwise surjectivity of pushed-forward g
-private theorem closedIncl_pushforward_epi_g
+theorem closedIncl_pushforward_epi_g
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s))}
     (hSE : S.ShortExact) :
@@ -206,10 +206,10 @@ theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
     (@Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _)
   rw [← hc, ← hd, @Subsingleton.elim _ h₁ c d]
 
-/-! ### PushforwardHVanishing sub-lemmas -/
+/-! ### pushforwardHVanishing sub-lemmas -/
 
 -- Base case: Γ comparison. Γ_X(i_*G') = G'(⊤_Z) = Γ_Z(G')
-private lemma PushforwardHVanishing_zero
+lemma pushforwardHVanishing_zero
     {X : TopCat.{u}} {Z : Set X} (_hZ : IsClosed Z) [NoetherianSpace X]
     (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))
     (hG' : Subsingleton (Sheaf.H G' 0)) :
@@ -226,7 +226,7 @@ private lemma PushforwardHVanishing_zero
   exact @Subsingleton.elim (F'.val.obj (op ⊤)) (hobj ▸ hsec) _ _
 
 -- Helper: Ext₀ composition identity used in epi_g_app_top_of_H1_vanishing
-private lemma ext0_comp_eq_of_covariant
+lemma ext0_comp_eq_of_covariant
     {Z : TopCat.{u}} [NoetherianSpace Z]
     {A B C : TopCat.Sheaf AddCommGrpCat.{u} Z}
     (g : B ⟶ C)
@@ -295,7 +295,7 @@ theorem ext0_surj_of_epi_top
 
 -- Pushforward along closed immersion preserves cohomological vanishing.
 -- Proof by induction: n=0 via sections, n=1 via Ext^0 surjectivity, n≥2 via LES dimension shift.
-theorem PushforwardHVanishing
+theorem pushforwardHVanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
     (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) (n : ℕ)
@@ -307,7 +307,7 @@ theorem PushforwardHVanishing
       Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') m) from
     this n G h
   intro m; induction m with
-  | zero => exact PushforwardHVanishing_zero hZ
+  | zero => exact pushforwardHVanishing_zero hZ
   | succ k ih_push =>
     intro G' hG'
     obtain ⟨ip⟩ := EnoughInjectives.presentation G'
@@ -319,7 +319,7 @@ theorem PushforwardHVanishing
       pushforward_preserves_flasque i _ (isFlasque_of_injective ip.shortComplex.X₂)
     cases k with
     | zero =>
-      exact subsingleton_H1_via_surj _ hSE_X (FlasqueVanishing _ _ hFlasque 0)
+      exact subsingleton_H1_via_surj _ hSE_X (flasqueVanishing _ _ hFlasque 0)
         (ext0_surj_of_epi_top (by
           show Epi (ip.shortComplex.g.val.app (op ((Opens.map i).obj ⊤)))
           rw [show ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ from by ext; simp [Opens.map]]
@@ -328,7 +328,7 @@ theorem PushforwardHVanishing
       exact ext_dimension_shift _ hSE_X (m + 1)
         (ih_push ip.shortComplex.X₃ (ext_dimension_shift_X₃ _ ip.shortExact_shortComplex (m + 1)
           (Ext.subsingleton_of_injective _ _ m) hG'))
-        (FlasqueVanishing _ _ hFlasque (m + 1))
+        (flasqueVanishing _ _ hFlasque (m + 1))
 
 -- The adjunction unit F → i_*(i^*F) is epi for closed immersions.
 -- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).
@@ -381,7 +381,7 @@ theorem epi_unit_of_closedImmersion
 
 -- Short exact sequence from closed immersion.
 -- Uses epi_unit_of_closedImmersion to form 0 → ker(η) → F → i_*(i^*F) → 0.
-theorem ClosedImmersionSES
+theorem closedImmersionSES
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
@@ -432,5 +432,5 @@ theorem closedComplementVanishing
           exact stalk_zero_of_ses_g_iso hSE x inferInstance a
         · exact stalk_zero_of_shortExact_kernel hSE x
             (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b) a)
-    (PushforwardHVanishing Y hYcl _ n
+    (pushforwardHVanishing Y hYcl _ n
       (@ih (TopCat.of Y) _ n _ hY_dim_lt (lt_trans hY_dim_lt hn)))

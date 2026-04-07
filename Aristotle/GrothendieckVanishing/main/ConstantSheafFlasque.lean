@@ -8,11 +8,11 @@ universe u
 
 open CategoryTheory TopologicalSpace Limits Opposite GrothendieckTopology GrothendieckTopology.Plus
 
-private abbrev constPresheaf (X : Type u) [TopologicalSpace X] :
+abbrev constPresheaf (X : Type u) [TopologicalSpace X] :
     (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} :=
   (Functor.const (Opens X)ᵒᵖ).obj (AddCommGrpCat.of (ULift.{u} ℤ))
 
-private abbrev opensGT (X : Type u) [TopologicalSpace X] : GrothendieckTopology (Opens X) :=
+abbrev opensGT (X : Type u) [TopologicalSpace X] : GrothendieckTopology (Opens X) :=
   Opens.grothendieckTopology X
 
 theorem plusObj_bot_subsingleton {X : Type u} [TopologicalSpace X]
@@ -38,7 +38,7 @@ theorem toPlus_injective_of_const
   simpa [Meq.refine, Meq.mk] using
     congr_fun (congr_arg Subtype.val heq) (⟨V, f, hf⟩ : W.Arrow)
 
-private lemma cover_nonempty_arrow
+lemma cover_nonempty_arrow
     {X : Type u} [TopologicalSpace X]
     (U : Opens X) (hU : (U : Set X).Nonempty)
     (S : (opensGT X).Cover U) :
@@ -47,14 +47,14 @@ private lemma cover_nonempty_arrow
   obtain ⟨V, f, hf, hmem⟩ := S.2 x hx
   exact ⟨⟨V, f, hf⟩, ⟨x, hmem⟩⟩
 
-private lemma cover_arrows_related
+lemma cover_arrows_related
     {X : Type u} [TopologicalSpace X]
     {U : Opens X} (S : (opensGT X).Cover U) (I₁ I₂ : S.Arrow) :
     ∃ R : S.Relation, R.fst = I₁ ∧ R.snd = I₂ :=
   ⟨Cover.Relation.mk' (fst := I₁) (snd := I₂)
     ⟨I₁.Y ⊓ I₂.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩, rfl, rfl⟩
 
-private lemma meq_const_values_eq
+lemma meq_const_values_eq
     {X : Type u} [TopologicalSpace X]
     {U : Opens X} (S : (opensGT X).Cover U) (x : Meq (constPresheaf X) S)
     (I₁ I₂ : S.Arrow) :
@@ -62,7 +62,7 @@ private lemma meq_const_values_eq
   obtain ⟨R, rfl, rfl⟩ := cover_arrows_related S I₁ I₂
   simpa [constPresheaf] using x.condition R
 
-private theorem toPlus_surjective_of_const
+theorem toPlus_surjective_of_const
     {X : Type u} [TopologicalSpace X]
     (U : Opens X) (hU : (U : Set X).Nonempty) :
     Function.Surjective
@@ -76,7 +76,7 @@ private theorem toPlus_surjective_of_const
   apply Meq.ext; intro I
   simp [Meq.refine, Meq.mk, constPresheaf]
 
-private lemma toPlus_naturality_const
+lemma toPlus_naturality_const
     {X : Type u} [TopologicalSpace X]
     {U V : Opens X} (i : U ⟶ V) (a : (constPresheaf X).obj (op V)) :
     ConcreteCategory.hom (((opensGT X).toPlus (constPresheaf X)).app (op U)) a =
@@ -92,7 +92,7 @@ private lemma toPlus_naturality_const
 
 /-- Key lemma extracted from toPlus_surjective_of_firstPlus: preimages at different
     arrows agree because of irreducibility (intersection is nonempty). -/
-private theorem toPlus_firstPlus_key
+theorem toPlus_firstPlus_key
     {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
     {U : Opens X} (S : (opensGT X).Cover U) (x : Meq ((opensGT X).plusObj (constPresheaf X)) S)
     (I₀ : S.Arrow) (hI₀ : (I₀.Y : Set X).Nonempty)
@@ -118,7 +118,7 @@ private theorem toPlus_firstPlus_key
   rw [← hb, ← hab]
   exact toPlus_naturality_const I.f a
 
-private theorem toPlus_surjective_of_firstPlus
+theorem toPlus_surjective_of_firstPlus
     {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
     (U : Opens X) (hU : (U : Set X).Nonempty) :
     Function.Surjective (ConcreteCategory.hom
@@ -137,7 +137,7 @@ private theorem toPlus_surjective_of_firstPlus
     have hIbot : I.Y = ⊥ := Opens.ext (by simpa using hI)
     exact @Subsingleton.elim _ (hIbot ▸ plusObj_bot_subsingleton _) _ _
 
-private theorem sheafify_constPresheaf_flasque_of_irreducible
+theorem sheafify_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
     {U V : Opens X} (i : U ⟶ V) :
     Epi (((opensGT X).sheafify (constPresheaf X)).map i.op) := by
@@ -168,7 +168,7 @@ private theorem sheafify_constPresheaf_flasque_of_irreducible
       exact ⟨a, by rw [ConcreteCategory.comp_apply, ha]; exact hz⟩
     exact epi_of_epi_fac hfac
 
-private theorem presheafToSheaf_constPresheaf_flasque_of_irreducible
+theorem presheafToSheaf_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
     {U V : Opens X} (i : U ⟶ V) :
     Epi (((presheafToSheaf (opensGT X) AddCommGrpCat.{u}).obj (constPresheaf X)).val.map i.op) := by

@@ -31,11 +31,11 @@ per-piece restrictions. Filtered colimits in `AddCommGrpCat` preserve surjection
 flasque means all restrictions are surjective.
 
 This replaces Gabriel's theorem (filtered colimits of injectives are injective) for our
-purposes: we only need `H^n(colim I_j) = 0` for injective `I_j`, and `FlasqueVanishing`
+purposes: we only need `H^n(colim I_j) = 0` for injective `I_j`, and `flasqueVanishing`
 gives this since injective sheaves are flasque (`isFlasque_of_injective`). -/
 
 /-- Filtered colimits of flasque sheaves on Noetherian spaces are flasque. -/
-private lemma isFlasque_filtered_colimit
+lemma isFlasque_filtered_colimit
     {X : TopCat.{u}} [NoetherianSpace X]
     {J : Type u} [SmallCategory J] [IsFiltered J]
     (F : J ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -71,7 +71,7 @@ open scoped Classical
 variable {X : TopCat.{u}} [NoetherianSpace X] (K : TopCat.Sheaf AddCommGrpCat.{u} X)
 
 /-- Coproduct inclusion for general `S ⊆ S'`. -/
-private noncomputable def finsetCoproductInclGen
+noncomputable def finsetCoproductInclGen
     {S S' : Finset (TopCat.Sheaf.SectionIndex K)} (h : S ⊆ S') :
     (∐ fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟶
     (∐ fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1) :=
@@ -79,7 +79,7 @@ private noncomputable def finsetCoproductInclGen
     Sigma.ι (fun τ : {τ // τ ∈ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ.1, h σ.2⟩
 
 /-- Image inclusion for general `S ⊆ S'`: `finsetGeneratedSheaf S ⟶ finsetGeneratedSheaf S'`. -/
-private noncomputable def finsetImageInclGen
+noncomputable def finsetImageInclGen
     {S S' : Finset (TopCat.Sheaf.SectionIndex K)} (h : S ⊆ S') :
     TopCat.Sheaf.finsetGeneratedSheaf S ⟶ TopCat.Sheaf.finsetGeneratedSheaf S' :=
   Limits.image.lift
@@ -93,20 +93,20 @@ private noncomputable def finsetImageInclGen
               TopCat.Sheaf.familyGeneratorMap] }
 
 omit [NoetherianSpace X] in
-private lemma finsetImageInclGen_comp_ι
+lemma finsetImageInclGen_comp_ι
     {S S' : Finset (TopCat.Sheaf.SectionIndex K)} (h : S ⊆ S') :
     finsetImageInclGen K h ≫ Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S') =
       Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S) :=
   Limits.image.lift_fac _
 
-private instance finsetImageInclGen_mono
+instance finsetImageInclGen_mono
     {S S' : Finset (TopCat.Sheaf.SectionIndex K)} (h : S ⊆ S') :
     Mono (finsetImageInclGen K h) :=
   mono_of_mono_fac (finsetImageInclGen_comp_ι K h)
 
 /-- The functor `Finset(SectionIndex K) ⥤ Sheaf(X)` sending `S ↦ finsetGeneratedSheaf S`.
     Transition maps are the canonical image inclusions, which are monomorphisms. -/
-private noncomputable def finsetGenFunctor :
+noncomputable def finsetGenFunctor :
     Finset (TopCat.Sheaf.SectionIndex K) ⥤ TopCat.Sheaf AddCommGrpCat.{u} X where
   obj S := TopCat.Sheaf.finsetGeneratedSheaf S
   map h := finsetImageInclGen K h.le
@@ -119,7 +119,7 @@ private noncomputable def finsetGenFunctor :
         finsetImageInclGen_comp_ι]
 
 /-- Cocone with vertex `K`: the cocone maps are `image.ι : finsetGeneratedSheaf S ⟶ K`. -/
-private noncomputable def finsetGenCocone :
+noncomputable def finsetGenCocone :
     Cocone (finsetGenFunctor K) :=
   Cocone.mk K
     { app := fun S => Limits.image.ι (TopCat.Sheaf.finsetGeneratorMap S)
@@ -129,7 +129,7 @@ private noncomputable def finsetGenCocone :
 /-- The cocone is a colimit: `K` is the filtered colimit of its finitely generated subsheaves.
     Proof: the canonical map `colim → K` is mono (by AB5 + mono transitions) and epi
     (since `allSectionMap K` factors through it), hence an isomorphism. -/
-private noncomputable def finsetGenCocone_isColimit :
+noncomputable def finsetGenCocone_isColimit :
     IsColimit (finsetGenCocone K) := by
   -- Show the comparison map colim → K is an iso, then transport IsColimit
   let d := colimit.desc (finsetGenFunctor K) (finsetGenCocone K)
@@ -190,7 +190,7 @@ recursive IH levels). -/
 /-- Auxiliary: sheaf cohomology vanishing commutes with filtered colimits on Noetherian
     spaces. Proof by induction on `n` with dimension shifting via per-object functorial
     injective embeddings. FULLY PROVED (flasque vanishing replaces Gabriel's theorem). -/
-private theorem sheafH_filtered_colimit_aux
+theorem sheafH_filtered_colimit_aux
     {X : TopCat.{u}} [NoetherianSpace X] (n : ℕ) :
     ∀ {J' : Type u} [SmallCategory J'] [IsFiltered J']
       (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -273,7 +273,7 @@ private theorem sheafH_filtered_colimit_aux
       ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
     have hSE : S.ShortExact := shortExact_of_mono ι'
     -- H^{n+1}(colim Inj) = 0 since colim Inj is flasque
-    have hI := FlasqueVanishing X injCocone.pt
+    have hI := flasqueVanishing X injCocone.pt
       (isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
         (colimit.isColimit Inj)) n
     -- Build per-object quotient functor Q.obj j = cokernel(η.app j)
@@ -407,18 +407,18 @@ variable {X : TopCat.{u}} {K : TopCat.Sheaf AddCommGrpCat.{u} X}
     [HasCoproduct fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
     [HasCoproduct fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1]
 
-private noncomputable abbrev finsetCoproductIncl (_ : σ₀ ∉ S') :=
+noncomputable abbrev finsetCoproductIncl (_ : σ₀ ∉ S') :=
   finsetCoproductInclGen K (Finset.subset_insert σ₀ S')
 
-private noncomputable abbrev imageIncl (_ : σ₀ ∉ S') :=
+noncomputable abbrev imageIncl (_ : σ₀ ∉ S') :=
   finsetImageInclGen K (Finset.subset_insert σ₀ S')
 
-private instance imageIncl_mono (hσ₀ : σ₀ ∉ S') :
+instance imageIncl_mono (hσ₀ : σ₀ ∉ S') :
     Mono (imageIncl hσ₀ : TopCat.Sheaf.finsetGeneratedSheaf S' ⟶ _) :=
   finsetImageInclGen_mono K (Finset.subset_insert σ₀ S')
 
 /-- The `σ₀`-component maps epi onto the cokernel of `imageIncl`. -/
-private theorem imageIncl_cokernel_epi (hσ₀ : σ₀ ∉ S') :
+theorem imageIncl_cokernel_epi (hσ₀ : σ₀ ∉ S') :
     Epi (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1)
       ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
       factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫
