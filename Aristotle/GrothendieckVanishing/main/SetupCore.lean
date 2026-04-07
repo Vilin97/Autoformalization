@@ -366,6 +366,29 @@ noncomputable def pushforwardH0Iso
   intro i h; subst h
   exact (sheafH0EquivSections _).trans (sheafH0EquivSections F).symm
 
+/-- Reverse naturality of `sheafH0EquivSections`: composing `sheafH0.symm` with `mk₀ f`
+    equals applying `f.app(⊤)` then `sheafH0.symm`. -/
+lemma sheafH0EquivSections_symm_natural {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G)
+    (a : F.val.obj (op ⊤)) :
+    ((sheafH0EquivSections F).symm a).comp (Ext.mk₀ f) (add_zero 0) =
+    (sheafH0EquivSections G).symm (ConcreteCategory.hom (f.val.app (op ⊤)) a) := by
+  apply (sheafH0EquivSections G).injective
+  erw [AddEquiv.apply_symm_apply, sheafH0EquivSections_natural, AddEquiv.apply_symm_apply]
+
+/-- After naturality rewrites, the sections-level maps agree:
+    `(push.map f).app(⊤)(a) = f.app(⊤)(sheafH0(F)(sheafH0(F).symm(a)))`. -/
+lemma pushforwardH0Iso_natural_step3
+    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)} (f : F ⟶ G)
+    (a : ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hZ)).obj F).val.obj (op ⊤)) :
+    ConcreteCategory.hom (((TopCat.Sheaf.pushforward AddCommGrpCat
+      (TopCat.closedIncl hZ)).map f).val.app (op ⊤)) a =
+    ConcreteCategory.hom (f.val.app (op ⊤))
+      ((sheafH0EquivSections F) ((sheafH0EquivSections F).symm a)) := by
+  erw [AddEquiv.apply_symm_apply]; rfl
+
 /-- `pushforwardH0Iso` is natural: commutes with morphisms of sheaves.
     Proved by `subst` on the Opens.map equality + `sheafH0EquivSections_natural` + `rfl`. -/
 lemma pushforwardH0Iso_natural
@@ -379,13 +402,19 @@ lemma pushforwardH0Iso_natural
   show pushforwardH0Iso hZ G _ = _
   unfold pushforwardH0Iso
   simp only [id, AddEquiv.trans_apply]
-  -- LHS: sheafH0(G).symm (sheafH0(i_*G)(x.comp(mk₀(i_*f))))
-  -- RHS: (sheafH0(F).symm(sheafH0(i_*F)(x))).comp(mk₀ f)
-  -- Proved in lean_run_code (subst + sheafH0_natural + rfl), but the erw chain
-  -- exceeds heartbeats when applied inline due to heavy Ext WHNF reduction.
-  -- The mathematical content: both sides reduce to f.val.app(op ⊤) applied to sections,
-  -- which agree since (push.map f).val.app(op ⊤) = f.val.app(op ⊤) after subst.
-  exact sorry
+  -- Apply sheafH0(G).injective, use naturality lemmas on both sides.
+  apply (sheafH0EquivSections G).injective
+  erw [AddEquiv.apply_symm_apply]
+  -- Goal: sheafH0(i_*G)(x.comp(mk₀(push.map f))) = sheafH0(G)(RHS.comp(mk₀ f))
+  erw [sheafH0EquivSections_natural
+    ((TopCat.Sheaf.pushforward AddCommGrpCat (TopCat.closedIncl hZ)).map f) x]
+  -- Goal: (push.map f).app(⊤)(sheafH0(i_*F)(x)) = sheafH0(G)(RHS.comp(mk₀ f))
+  -- Use pre-computed naturality to avoid heartbeat overflow from erw.
+  have h2 := sheafH0EquivSections_natural f
+    ((sheafH0EquivSections F).symm
+      ((sheafH0EquivSections ((TopCat.Sheaf.pushforward AddCommGrpCat
+        (TopCat.closedIncl hZ)).obj F)) x))
+  erw [h2]; exact pushforwardH0Iso_natural_step3 hZ f _
 
 /-- **Pushforward isomorphism**: `H^n(X, i_*G) ≃+ H^n(Z, G)` for closed immersions.
     The pushforward along a closed immersion preserves cohomology, not just vanishing.
@@ -420,20 +449,14 @@ noncomputable def pushforwardHIso
     have hSE_Z := ip.shortExact_shortComplex
     cases k with
     | zero =>
-      -- H^1: use naturality of ih_push + kernel compatibility + AddEquiv.ofBijective.
-      -- The key infrastructure (ih_nat, hker) is proved by subst + sheafH0_natural.
-      -- But ih_push is a let-variable that's hard to unfold in tactic mode.
-      -- Instead, reduce to n≥2 case by replacing G' with an IP chain G' → I → Q → J → R.
-      -- Actually, use a direct construction: since both δ_X and δ_Z are surjective
-      -- additive maps from H^0(i_*Q) and H^0(Q) respectively, and ih_push Q identifies
-      -- the two domain groups, we construct the iso on codomains.
-      -- The cleanest approach: use the fact that the composition
-      --   δ_Z ∘ ih_push Q : H^0(i_*Q) → H^1(G')
-      -- is surjective and has the same kernel as δ_X : H^0(i_*Q) → H^1(i_*G'),
-      -- so the two targets are isomorphic.
-      -- This requires ih_nat and hker, which need sheafH0EquivSections_natural and subst.
-      -- Since proving ih_nat inside this let-variable context is problematic,
-      -- we extract the proof to a standalone sorry and will fill it with an external lemma.
+      -- H^1: The proof uses pushforwardH0Iso_natural + kernel compatibility (hker_fwd/bwd)
+      -- + AddEquiv.ofBijective. All key lemmas are proved:
+      -- - pushforwardH0Iso_natural (commutes with morphisms)
+      -- - sheafH0EquivSections_natural, sheafH0EquivSections_symm_natural
+      -- - comp_extClass (boundary ∘ boundary = 0)
+      -- The assembly exceeds 200k heartbeats due to expensive Ext WHNF reduction.
+      -- Each erw involving pushforwardH0Iso_natural costs ~150k heartbeats,
+      -- and the full n=1 proof needs 3 such rewrites.
       exact sorry
     | succ m =>
       -- H^{m+2}: dimension shift connecting map isomorphism
