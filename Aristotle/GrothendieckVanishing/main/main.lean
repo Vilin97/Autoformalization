@@ -7,12 +7,12 @@
   FULLY PROVED — 0 sorry's, 0 axioms, 0 admits.
   The last sorry (Gabriel's theorem) was eliminated by replacing "filtered colimits of
   injectives are injective" with "filtered colimits of flasque sheaves are flasque"
-  (isFlasque_filtered_colimit) + flasqueVanishing, since injective ⟹ flasque.
+  (isFlasque_filtered_colimit) + FlasqueVanishing, since injective ⟹ flasque.
 
   File structure:
-  - FlasqueVanishing.lean + FlasqueCohomology.lean: IsFlasqueSheaf, flasqueVanishing, dim shift
-  - SetupCore.lean: pushforwardHVanishing, closedImmersionSES, dimension shift, epi lemmas
-  - Setup.lean: reducibleVanishing, irreduciblePosVanishing wrappers
+  - FlasqueVanishing.lean + FlasqueCohomology.lean: IsFlasqueSheaf, FlasqueVanishing, dim shift
+  - SetupCore.lean: PushforwardHVanishing, ClosedImmersionSES, dimension shift, epi lemmas
+  - Setup.lean: ReducibleVanishing, IrreduciblePosVanishing wrappers
   - Auxiliary.lean: topology/dimension helpers
   - ClosedImmersion.lean: closed immersion counit/stalk infrastructure
   - ZeroOutside.lean + ZeroOutsideFinset.lean: extension-by-zero sheaf machinery
@@ -31,5 +31,5 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutside
 import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
 import Aristotle.GrothendieckVanishing.main.GrothendieckVanishing
 
-#check grothendieckVanishing
-#check flasqueVanishing
+#check GrothendieckVanishing
+#check FlasqueVanishing
