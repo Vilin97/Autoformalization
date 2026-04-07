@@ -269,14 +269,13 @@ private theorem sheafH_filtered_colimit_aux
       haveI := NatTrans.mono_of_mono_app η
       exact colim.map_mono' η hc' (colimit.isColimit Inj) ι' (fun j =>
         hc'.fac ι'Cocone j)
-    have hFlasqueColim : IsFlasqueSheaf injCocone.pt :=
-      isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
-        (colimit.isColimit Inj)
     let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
       ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
     have hSE : S.ShortExact := shortExact_of_mono ι'
     -- H^{n+1}(colim Inj) = 0 since colim Inj is flasque
-    have hI := FlasqueVanishing X injCocone.pt hFlasqueColim n
+    have hI := FlasqueVanishing X injCocone.pt
+      (isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
+        (colimit.isColimit Inj)) n
     -- Build per-object quotient functor Q.obj j = cokernel(η.app j)
     -- η.app j is ALWAYS mono by ffData.hi, so no hmono needed!
     let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
