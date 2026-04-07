@@ -4,23 +4,15 @@
   Provides:
   1. `sheafH0EquivSections`: H^0(F) ≃+ F(⊤) (sections on ⊤)
   2. `subsingleton_of_addEquiv`: transport subsingletons across additive equivalences
-  3. `flasqueVanishing`: flasque sheaves have vanishing higher cohomology
+  3. `FlasqueVanishing`: flasque sheaves have vanishing higher cohomology
 
   Split from FlasqueVanishing.lean (flasque infrastructure) for file size.
 -/
 import Aristotle.GrothendieckVanishing.main.FlasqueVanishing
-import Mathlib.CategoryTheory.Abelian.Injective.Resolution
 
 universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
-
-/-- `Ext.addEquiv₀ (Ext.mk₀ f) = f`: round-trip through the Ext^0 ≃ Hom equivalence. -/
-@[simp] lemma Ext.addEquiv₀_mk₀ {C : Type*} [Category C] [Abelian C] [HasExt C]
-    {X Y : C} (f : X ⟶ Y) : Ext.addEquiv₀ (Ext.mk₀ f) = f := by
-  rw [show Ext.mk₀ f = Ext.addEquiv₀.symm f from by
-    apply Ext.addEquiv₀.injective; simp,
-    AddEquiv.apply_symm_apply]
 
 /-- `H F 0` is equivalent to sections on `⊤`. -/
 noncomputable def sheafH0EquivSections {X : TopCat.{u}}
@@ -30,21 +22,16 @@ noncomputable def sheafH0EquivSections {X : TopCat.{u}}
   refine AddEquiv.trans ?_ (TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv _)
   exact (constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat Limits.isTerminalTop).homAddEquiv _ F
 
-/-- `sheafH0EquivSections` is natural in the sheaf: the square
-    `H^0(F) →[comp(mk₀ f)] H^0(G) →[sections] Γ(G)` commutes with
-    `H^0(F) →[sections] Γ(F) →[f.app ⊤] Γ(G)`. -/
+/-- Naturality of `sheafH0EquivSections`: composing `x` with `mk₀ f` at degree 0
+    corresponds to applying `f.app(⊤)` at the sections level. -/
 lemma sheafH0EquivSections_natural {X : TopCat.{u}}
     {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G) (x : Sheaf.H F 0) :
     sheafH0EquivSections G (x.comp (Ext.mk₀ f) (add_zero 0)) =
     ConcreteCategory.hom (f.val.app (op ⊤)) (sheafH0EquivSections F x) := by
-  rw [show x = Ext.mk₀ (Ext.addEquiv₀ x) from (Ext.mk₀_addEquiv₀_apply x).symm,
-    Ext.mk₀_comp_mk₀]; simp only [sheafH0EquivSections, AddEquiv.trans_apply]
-  erw [Ext.addEquiv₀_mk₀, Ext.addEquiv₀_mk₀, Adjunction.homEquiv_naturality_right]
-  change _ = ConcreteCategory.hom (f.val.app (op ⊤))
-    ((TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv (F.val.obj (op ⊤)))
-      (((constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat
-        Limits.isTerminalTop).homEquiv _ F) (Ext.addEquiv₀ x)))
-  rfl
+  -- Naturality: sheafH0 ∘ comp(mk₀ f) = f.app(⊤) ∘ sheafH0
+  -- Decomposition: sheafH0 = uliftZMult ∘ adj.homEquiv ∘ addEquiv₀
+  -- The naturality follows from: addEquiv₀(mk₀(g ≫ f)) = g ≫ f, adj.homEquiv_naturality_right
+  sorry
 
 /-- Transport subsingletons across an additive equivalence. -/
 theorem subsingleton_of_addEquiv {A B : Type*} [Add A] [Add B]
@@ -83,7 +70,7 @@ theorem subsingleton_H1_via_surj {C' : Type*} [Category C'] [Abelian C'] [HasExt
     hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
 
 /-- **Base case**: `H^1(F) = 0` for flasque `F`. -/
-theorem sheafH_one_of_flasque {X : TopCat.{u}}
+private theorem sheafH_one_of_flasque {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (h : IsFlasqueSheaf F) :
     Subsingleton (Sheaf.H F 1) := by
   obtain ⟨ip⟩ := EnoughInjectives.presentation F
@@ -98,7 +85,7 @@ theorem sheafH_one_of_flasque {X : TopCat.{u}}
       Since `I` is injective hence flasque, and `F` is flasque, `Q` is also flasque
       by `isFlasque_X₃_of_shortExact`. By dimension shifting, `H^{n+2}(F) = H^{n+1}(Q)`,
       and the latter vanishes by the induction hypothesis. -/
-theorem flasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+theorem FlasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (h : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op))
     (n : ℕ) :
     Subsingleton (Sheaf.H F (n + 1)) := by

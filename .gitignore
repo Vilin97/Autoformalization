@@ -45,3 +45,4 @@ logs/*.lock
 aristotle-in/
 aristotle-out/
 state.md
+.prover-state/

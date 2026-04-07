@@ -11,7 +11,6 @@
   - zsmul_generator_injective: generator coefficient uniqueness
 -/
 import Aristotle.GrothendieckVanishing.main.SheafStalkAlgebra
-import Mathlib.Data.Int.LeastGreatest
 
 universe u
 
@@ -71,7 +70,7 @@ theorem sheaf_mono_of_stalk_injective
 /-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
     is an integer multiple of the germ of the distinguished generator over `V`. -/
 -- The restricted generator of `constZ.zeroOutside V` maps to `1` under `eqToHom`.
-theorem resGen_eqToHom_eq_one
+private theorem resGen_eqToHom_eq_one
     {X : TopCat.{u}} (V : Opens X) {W : Opens X} (hWV : W ≤ V)
     (hObjW : (TopCat.Presheaf.constZ.zeroOutside V).obj (op W) =
         AddCommGrpCat.of (ULift ℤ)) :
@@ -84,9 +83,7 @@ theorem resGen_eqToHom_eq_one
     Functor.const_obj_map, Category.id_comp]
   simp [show hObjW.symm.trans hObjW = rfl from Subsingleton.elim _ _]
 
-/-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
-is an integer multiple of the germ of the distinguished generator over `V`. -/
-theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
+private theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
     {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
       (TopCat.Presheaf.constZ.zeroOutside V)) :
@@ -175,10 +172,10 @@ theorem ulift_int_subgroup_cyclic
         · exact ⟨0, fun z hz => by obtain ⟨e, he, rfl⟩ := hz; exact le_of_lt he.2⟩
         · exact ⟨_, ⟨d, ⟨hd_pos, hd_gen⟩, rfl⟩⟩
       aesop
-    refine ⟨d, hd_pos, hd_gen.1, fun h hh => ?_⟩
+    refine' ⟨d, hd_pos, hd_gen.1, fun h hh => _⟩
     contrapose! hd_gen
     intro hd_pos'
-    refine ⟨h - (h.down / d.down) • d, ?_, ?_, ?_⟩ <;> simp_all +decide [Int.emod_def]
+    refine' ⟨h - ⌊h.down / d.down⌋ • d, _, _, _⟩ <;> simp_all +decide [Int.emod_def]
     · convert H.sub_mem hh (H.zsmul_mem hd_pos (h.down / d.down)) using 1
     · cases lt_or_gt_of_ne hd_gen <;>
         linarith [Int.mul_ediv_add_emod h.down d.down,

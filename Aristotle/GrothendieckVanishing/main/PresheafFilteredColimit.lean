@@ -17,7 +17,7 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 
 /-- Zero is preserved under filtered transitions: if restricting a transition to an open
     gives 0, then restricting any further transition also gives 0. -/
-lemma transition_preserves_zero
+private lemma transition_preserves_zero
     {X : TopCat.{u}} {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     {j₀ j j' : J'} (f : j₀ ⟶ j) (g : j ⟶ j')
@@ -38,7 +38,7 @@ lemma transition_preserves_zero
   exact (congr_arg (ConcreteCategory.hom (α.app (op U))) h).trans (map_zero _)
 
 /-- Pairwise compatibility is preserved under filtered transitions. -/
-lemma transition_preserves_compat
+private lemma transition_preserves_compat
     {X : TopCat.{u}} {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     {j₀ j j' : J'} (f : j₀ ⟶ j) (g : j ⟶ j')
@@ -71,7 +71,7 @@ lemma transition_preserves_compat
     from (β.naturality φ.op).symm]; rfl
 
 /-- A section of a sheaf that restricts to 0 on a finite open cover is 0. -/
-theorem sheaf_section_zero_of_zero_on_finite_cover
+private theorem sheaf_section_zero_of_zero_on_finite_cover
     {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     {ι : Type u} (U : ι → Opens X) (t : Finset ι) (hcov : iSup U ≤ ⨆ i ∈ t, U i)
     (b : ToType (F.val.obj (op (iSup U))))
@@ -84,7 +84,7 @@ theorem sheaf_section_zero_of_zero_on_finite_cover
     exact ⟨U k, le_iSup U k, hxk, (hzero k hkt).trans (map_zero _).symm⟩
 
 /-- Merge finitely many eventually-zero restrictions into a common index. -/
-theorem filtered_colimit_kills_all_restrictions
+private theorem filtered_colimit_kills_all_restrictions
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     {X : TopCat.{u}} (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     {ι : Type u} {V : Opens X} {W : ι → Opens X} (hW : ∀ k, W k ≤ V) (j₀ : J')
@@ -118,7 +118,7 @@ theorem filtered_colimit_kills_all_restrictions
 /-- On a Noetherian space, the presheaf-level filtered colimit of sheaves is a sheaf.
     Proof: Noetherian compactness reduces the sheaf condition to finite covers, then
     filtered colimit merging passes from per-piece data to glued data. -/
-theorem isSheaf_presheaf_filtered_colimit
+private theorem isSheaf_presheaf_filtered_colimit
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)

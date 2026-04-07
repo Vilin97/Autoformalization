@@ -41,12 +41,12 @@ theorem zeroOutsideInt_vanishing
     exact epi_of_natIso_epi ((sheafToPresheaf J AddCommGrpCat.{u}).mapIso
       ((presheafToSheaf J AddCommGrpCat.{u}).mapIso α).symm) i.op
       (constantSheaf_flasque_of_irreducible X i)
-  exact ext_dimension_shift _ hSE m hCoker (flasqueVanishing X S.X₂ hFlasque m)
+  exact ext_dimension_shift _ hSE m hCoker (FlasqueVanishing X S.X₂ hFlasque m)
 
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
     any germ in the larger zero-outside presheaf can be lifted by restricting to `W ∩ V ≤ V`
     where the presheaf map is `eqToHom` (identity). -/
-theorem presheaf_stalk_surj_openHom
+private theorem presheaf_stalk_surj_openHom
     {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
     Function.Surjective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
@@ -79,7 +79,7 @@ theorem presheaf_stalk_surj_openHom
 /-- The sheaf stalk map of `openHom(h)` at `x ∈ V` is surjective.
     Transfers presheaf stalk surjectivity via `toSheafify_naturality` and
     the fact that `stalk(toSheafify)` is an isomorphism. -/
-theorem sheaf_stalk_surj_openHom
+private theorem sheaf_stalk_surj_openHom
     {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
     Function.Surjective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
@@ -129,7 +129,7 @@ theorem cokernel_stalk_zero_of_stalk_surj
 
 /-- The cokernel of `openHom(le_top)` has zero stalks at points of `V`.
     Delegates to `cokernel_stalk_zero_of_stalk_surj` via `sheaf_stalk_surj_openHom`. -/
-theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
+private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
       (Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))).val) :
     a = 0 :=
@@ -146,7 +146,7 @@ are in `FiniteGeneratorReduction.lean`.
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
     degree `m > dim X` on an irreducible Noetherian space of positive dimension.
     Proof: write `m = m' + 1`, apply `zeroOutsideInt_vanishing` (SES + flasque), then prove
-    cokernel vanishing at `m'` via `closedImmersionSES` on `Vᶜ` + `pushforwardHVanishing`. -/
+    cokernel vanishing at `m'` via `ClosedImmersionSES` on `Vᶜ` + `PushforwardHVanishing`. -/
 theorem zeroOutsideInt_cohomology_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (ih : VanishingIH (X := X))
@@ -193,7 +193,7 @@ theorem zeroOutsideInt_cohomology_vanishing
           exact stalk_zero_of_ses_g_iso hSE x inferInstance a
         · exact stalk_zero_of_shortExact_kernel hSE x
             (fun b => cokernel_stalk_zero_V V x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY) b) a)
-    (pushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim_lt hm'_Y))
+    (PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim_lt hm'_Y))
 
 
 -- Stalk generator algebra, subgroup theory, and generator injectivity
