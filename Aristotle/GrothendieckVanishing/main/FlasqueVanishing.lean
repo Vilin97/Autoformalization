@@ -394,7 +394,7 @@ theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
 
 /-! ### Free abelian sheaf construction for injective → flasque (Aristotle 8f42abaa) -/
 
-noncomputable section FreeAbSheaf
+section FreeAbSheaf
 
 variable {X : TopCat.{u}}
 
@@ -404,17 +404,17 @@ def freeAbPresheaf (U : Opens X) : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} :=
   yoneda.obj U ⋙ AddCommGrpCat.free
 
 /-- The free abelian sheaf on `U`: the sheafification of `freeAbPresheaf U`. -/
-def freeAbSheaf (U : Opens X) : TopCat.Sheaf AddCommGrpCat.{u} X :=
+noncomputable def freeAbSheaf (U : Opens X) : TopCat.Sheaf AddCommGrpCat.{u} X :=
   (presheafToSheaf (Opens.grothendieckTopology (T := X)) AddCommGrpCat.{u}).obj
     (freeAbPresheaf U)
 
 /-- The functorial map `freeAbSheaf U ⟶ freeAbSheaf V` induced by an inclusion `U ⟶ V`. -/
-def freeAbSheafMap {U V : Opens X} (i : U ⟶ V) : freeAbSheaf U ⟶ freeAbSheaf V :=
+noncomputable def freeAbSheafMap {U V : Opens X} (i : U ⟶ V) : freeAbSheaf U ⟶ freeAbSheaf V :=
   (presheafToSheaf (Opens.grothendieckTopology (T := X)) AddCommGrpCat.{u}).map
     (Functor.whiskerRight (yoneda.map i) AddCommGrpCat.free)
 
 /-- The Yoneda-style equivalence `Hom(freeAbSheaf U, I) ≃ I(U)`. -/
-def freeAbSheafHomEquiv (U : Opens X) (I : TopCat.Sheaf AddCommGrpCat.{u} X) :
+noncomputable def freeAbSheafHomEquiv (U : Opens X) (I : TopCat.Sheaf AddCommGrpCat.{u} X) :
     (freeAbSheaf U ⟶ I) ≃ (forget AddCommGrpCat).obj (I.val.obj (op U)) :=
   ((sheafificationAdjunction (Opens.grothendieckTopology (T := X)) AddCommGrpCat.{u}).homEquiv
     (freeAbPresheaf U) I).trans <|

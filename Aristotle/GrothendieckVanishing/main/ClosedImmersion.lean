@@ -21,8 +21,6 @@ open CategoryTheory TopologicalSpace Opposite Limits
 
 universe u
 
-noncomputable section
-
 namespace TopCat
 
 /-- Closed inclusion `s ↪ X` as a morphism in `TopCat`. -/
