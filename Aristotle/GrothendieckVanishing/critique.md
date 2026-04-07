@@ -195,8 +195,8 @@ Each piece would need: docstrings, snake_case names, no `private`, targeted impo
 | ~~P3~~ | ~~3 files use blanket `import Mathlib`~~ | **RESOLVED** — All three use targeted imports |
 | ~~P3~~ | ~~`closedIncl_pushforward_shortExact` unnecessarily requires `InjectivePresentation`~~ | **RESOLVED** — Now takes `S.ShortExact` |
 | ~~P3~~ | ~~`epi_g_app_top_of_H1_vanishing` unnecessarily requires `InjectivePresentation`~~ | **RESOLVED** — Now takes `S.ShortExact` |
-| P3 | `pushforwardHVanishing` proves vanishing propagation, not isomorphism H^n(X,i_\*G)≅H^n(Z,G) | **Blocked** — requires `pullbackConstantSheafIso` (Mathlib TODO at ConstantSheaf.lean:155) |
-| P3 | `sheafH_preserves_filtered_colimits` proves vanishing propagation, not colim commutation | **Blocked** — same dependency on constant sheaf pullback commutativity |
+| P3 | `pushforwardHIso`: H^n(X,i_\*G) ≃+ H^n(Z,G) | **PARTIAL** — proved for n=0 and n≥2 via `ext_dimension_shift_addEquiv`; n=1 sorry (needs Ext LES naturality w.r.t. exact functors) |
+| P3 | `sheafH_preserves_filtered_colimits` proves vanishing propagation, not colim commutation | **Blocked** — requires delta-functor formalism or Ext naturality (not in Mathlib) |
 | ~~P3~~ | ~~`pushforward_preserves_flasque` inlined but not extracted~~ | **RESOLVED** — Standalone theorem in FlasqueVanishing.lean |
 | P4 | Generalize coefficient category from `AddCommGrpCat` | Backlog |
 | ~~P4~~ | ~~Strengthen `Subsingleton` to `IsZero`~~ | **N/A** — `Sheaf.H F n` is a `Type` (Ext group), not a categorical object; `Subsingleton` is correct |

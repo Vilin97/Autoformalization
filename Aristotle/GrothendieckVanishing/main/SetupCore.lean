@@ -52,6 +52,26 @@ theorem ext_dimension_shift_X₃ (Z : C') {S : ShortComplex C'} (hS : S.ShortExa
   obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ _ hS b rfl (@Subsingleton.elim _ h₁ _ _)
   rw [← hc, ← hd, @Subsingleton.elim _ h₂ c d]
 
+/-- **Dimension shift additive equivalence**: given `0 → X₁ → X₂ → X₃ → 0` short exact
+    with `Ext^n(Z, X₂) = 0` and `Ext^{n+1}(Z, X₂) = 0`, the connecting map
+    `δ : Ext^n(Z, X₃) ≃+ Ext^{n+1}(Z, X₁)` is an isomorphism. -/
+noncomputable def ext_dimension_shift_addEquiv (Z : C') {S : ShortComplex C'} (hS : S.ShortExact)
+    (n : ℕ) (h₂n : Subsingleton (Ext Z S.X₂ n)) (h₂n1 : Subsingleton (Ext Z S.X₂ (n + 1))) :
+    Ext Z S.X₃ n ≃+ Ext Z S.X₁ (n + 1) :=
+  let δ_fun : Ext Z S.X₃ n → Ext Z S.X₁ (n + 1) := fun x₃ => x₃.comp hS.extClass rfl
+  have δ_inj : Function.Injective δ_fun := fun {a b} hab => by
+    have : (a - b).comp hS.extClass rfl = 0 := by
+      rw [show a - b = a + (-b) from sub_eq_add_neg a b, Ext.add_comp, Ext.neg_comp,
+        show a.comp hS.extClass rfl = b.comp hS.extClass rfl from hab, add_neg_cancel]
+    obtain ⟨x₂, hx₂⟩ := Ext.covariant_sequence_exact₃ _ hS (a - b) rfl this
+    rw [@Subsingleton.elim _ h₂n x₂ 0, Ext.zero_comp] at hx₂
+    exact sub_eq_zero.mp hx₂.symm
+  have δ_surj : Function.Surjective δ_fun := fun x₁ =>
+    Ext.covariant_sequence_exact₁ _ hS x₁ (@Subsingleton.elim _ h₂n1 _ _) rfl
+  AddEquiv.ofBijective
+    (AddMonoidHom.mk' δ_fun (fun a b => Ext.add_comp a b hS.extClass rfl))
+    ⟨δ_inj, δ_surj⟩
+
 end ExtDimShift
 
 /-! ## Building blocks for the closed-open decomposition
@@ -335,6 +355,51 @@ theorem pushforwardHVanishing
         (ih_push ip.shortComplex.X₃ (ext_dimension_shift_X₃ _ ip.shortExact_shortComplex (m + 1)
           (Ext.subsingleton_of_injective _ _ m) hG'))
         (flasqueVanishing _ _ hFlasque (m + 1))
+
+/-- **Pushforward isomorphism**: `H^n(X, i_*G) ≃+ H^n(Z, G)` for closed immersions.
+    The pushforward along a closed immersion preserves cohomology, not just vanishing.
+    Base case: sections comparison `Γ(X, i_*G) = Γ(Z, G)`.
+    Inductive step: dimension shifting via the connecting map isomorphism. -/
+noncomputable def pushforwardHIso
+    {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
+    [NoetherianSpace X]
+    (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) (n : ℕ) :
+    let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
+    Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G) n ≃+
+    Sheaf.H G n := by
+  intro i
+  suffices ∀ (m : ℕ) (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)),
+      Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') m ≃+
+      Sheaf.H G' m from this n G
+  intro m; induction m with
+  | zero =>
+    intro G'; let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G'
+    have hobj : F'.val.obj (op ⊤) = G'.val.obj (op ⊤) := by
+      change G'.val.obj (op ((Opens.map i).obj ⊤)) = G'.val.obj (op ⊤)
+      simp [show ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ from by ext; simp [Opens.map]]
+    exact (sheafH0EquivSections F').trans (hobj ▸ (sheafH0EquivSections G').symm)
+  | succ k ih_push =>
+    intro G'
+    let ip := Classical.choice (EnoughInjectives.presentation G')
+    have hSE_X := closedIncl_pushforward_shortExact hZ ip.shortExact_shortComplex
+    have hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
+        ip.shortComplex.X₂) :=
+      pushforward_preserves_flasque i ip.shortComplex.X₂
+        (isFlasque_of_injective ip.shortComplex.X₂)
+    have hSE_Z := ip.shortExact_shortComplex
+    cases k with
+    | zero =>
+      -- H^1 case: the isomorphism follows from Γ ∘ i_* = Γ applied to the injective
+      -- presentation, making the two cokernels that compute H^1 identical. Formalizing
+      -- this requires naturality of the Ext LES w.r.t. exact functors (not yet in Mathlib).
+      exact sorry
+    | succ m =>
+      -- H^{m+2}: dimension shift connecting map isomorphism
+      exact (ext_dimension_shift_addEquiv _ hSE_X (m + 1)
+          (flasqueVanishing _ _ hFlasque m) (flasqueVanishing _ _ hFlasque (m + 1))).symm.trans
+        ((ih_push ip.shortComplex.X₃).trans
+          (ext_dimension_shift_addEquiv _ hSE_Z (m + 1)
+            (Ext.subsingleton_of_injective _ _ m) (Ext.subsingleton_of_injective _ _ (m + 1))))
 
 /-- The adjunction unit `F → i_*(i^*F)` is epi for closed immersions. Stalkwise:
 on `Z` the stalk map is an iso (by `closedIncl_unit_stalk_isIso`), and outside `Z`
