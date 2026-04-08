@@ -22,6 +22,22 @@ noncomputable def sheafH0EquivSections {X : TopCat.{u}}
   refine AddEquiv.trans ?_ (TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv _)
   exact (constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat Limits.isTerminalTop).homAddEquiv _ F
 
+/-- Naturality of `sheafH0EquivSections`: composing `x` with `mk₀ f` at degree 0
+    corresponds to applying `f.app(⊤)` at the sections level. -/
+lemma sheafH0EquivSections_natural {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G) (x : Sheaf.H F 0) :
+    sheafH0EquivSections G (x.comp (Ext.mk₀ f) (add_zero 0)) =
+    ConcreteCategory.hom (f.val.app (op ⊤)) (sheafH0EquivSections F x) := by
+  conv_lhs => rw [show x = Ext.mk₀ (Ext.addEquiv₀ x) from
+    (Ext.mk₀_addEquiv₀_apply x).symm, Ext.mk₀_comp_mk₀]
+  unfold sheafH0EquivSections
+  simp only [AddEquiv.trans_apply]
+  have key : Ext.addEquiv₀ (Ext.mk₀ (Ext.addEquiv₀ x ≫ f)) = Ext.addEquiv₀ x ≫ f :=
+    Ext.addEquiv₀.apply_symm_apply _
+  erw [Adjunction.homAddEquiv_apply, Adjunction.homAddEquiv_apply, key,
+    Adjunction.homEquiv_naturality_right, Adjunction.homAddEquiv_apply]
+  rfl
+
 /-- Transport subsingletons across an additive equivalence. -/
 theorem subsingleton_of_addEquiv {A B : Type*} [Add A] [Add B]
     (e : A ≃+ B) [Subsingleton A] : Subsingleton B :=

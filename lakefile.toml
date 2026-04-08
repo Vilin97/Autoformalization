@@ -6,11 +6,6 @@ defaultTargets = ["Aristotle"]
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
 relaxedAutoImplicit = false
-weak.linter.mathlibStandardSet = false
-weak.linter.unusedSimpArgs = false
-weak.linter.unnecessarySimpa = false
-weak.linter.unusedTactic = false
-weak.linter.unreachableTactic = false
 
 [[require]]
 name = "mathlib"

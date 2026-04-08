@@ -2,10 +2,10 @@
   FiniteGeneratorReduction.lean — Colimit step and finitely generated vanishing
 
   Key results (presheaf colimit theory split to PresheafFilteredColimit.lean):
-  - sheafH_filtered_colimit_aux / sheafH_preserves_filtered_colimits: H^n commutes with
-    filtered colimits (FULLY PROVED). Uses per-object functorial injective embeddings
-    via IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp, with
-    flasque vanishing replacing Gabriel's theorem (injective ⟹ flasque ⟹ H^n = 0).
+  - sheafH_filtered_colimit_aux / sheafH_preserves_filtered_colimits: vanishing propagation
+    for filtered colimits (FULLY PROVED).
+  - sheafH_filtered_colimit_surj: surjectivity of colim H^n(F_j) → H^n(colim F_j) (FULLY PROVED).
+    Uses extClass_naturality (in SetupCore.lean) for the connecting map commutation.
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
@@ -386,6 +386,128 @@ theorem sheafH_preserves_filtered_colimits
     (hvan : ∀ j, Subsingleton (Sheaf.H (Y'.obj j) n)) :
     Subsingleton (Sheaf.H c'.pt n) :=
   sheafH_filtered_colimit_aux n Y' c' hc' hvan
+
+/-- **Sheaf cohomology commutes with filtered colimits (surjectivity)** on Noetherian spaces.
+    Every element of `H^n(colim F_j)` comes from some `H^n(F_j)` via the canonical map.
+    Together with injectivity (not proved here), this gives `colim H^n(F_j) ≅ H^n(colim F_j)`. -/
+theorem sheafH_filtered_colimit_surj
+    {X : TopCat.{u}} [NoetherianSpace X]
+    (n : ℕ) :
+    ∀ {J' : Type u} [SmallCategory J'] [IsFiltered J']
+      (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+      (c' : Cocone Y') (hc' : IsColimit c') --
+      (x : Sheaf.H c'.pt n),
+    ∃ (j : J') (y : Sheaf.H (Y'.obj j) n),
+      y.comp (Ext.mk₀ (c'.ι.app j)) (add_zero n) = x := by
+  induction n with
+  | zero =>
+    intro J' inst1 inst2 Y' c' hc' x
+    letI := inst1; letI := inst2
+    haveI := createsFilteredColimit Y'
+    have hc_psh := isColimitOfPreserves (sheafToPresheaf _ _) hc'
+    have hc_top := isColimitOfPreserves
+      ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)) hc_psh
+    let x_sec := sheafH0EquivSections c'.pt x
+    obtain ⟨j, s_j, hs_j⟩ := Concrete.isColimit_exists_rep _ hc_top x_sec
+    let y := (sheafH0EquivSections (Y'.obj j)).symm s_j
+    refine ⟨j, y, ?_⟩
+    apply (sheafH0EquivSections c'.pt).injective
+    rw [sheafH0EquivSections_natural, AddEquiv.apply_symm_apply]
+    exact hs_j
+  | succ n ih =>
+    intro J' inst1 inst2 Y' c' hc' x
+    letI := inst1; letI := inst2
+    letI : Zero (TopCat.Sheaf AddCommGrpCat.{u} X) := Limits.HasZeroObject.zero' _
+    let toArrow : J' ⥤ Arrow (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+      { obj := fun j => Arrow.mk (0 : Y'.obj j ⟶ 0)
+        map := fun f => Arrow.homMk (Y'.map f) (𝟙 0) (by simp)
+        map_id := fun j => by ext <;> simp
+        map_comp := fun f g => by ext <;> simp }
+    let ffData := MorphismProperty.functorialFactorizationData
+      (MorphismProperty.monomorphisms (TopCat.Sheaf AddCommGrpCat.{u} X))
+      (MorphismProperty.monomorphisms (TopCat.Sheaf AddCommGrpCat.{u} X)).rlp
+    let Inj : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X := toArrow ⋙ ffData.Z
+    let η : Y' ⟶ Inj :=
+      { app := fun j => ffData.i.app (toArrow.obj j)
+        naturality := fun _ _ f => ffData.i.naturality (toArrow.map f) }
+    have hη_mono : ∀ j, Mono (η.app j) := fun j => ffData.hi (toArrow.obj j)
+    haveI hInj : ∀ j, Injective (Inj.obj j) := fun j =>
+      IsGrothendieckAbelian.instInjectiveZMonomorphismsRlpMonoMapFactorizationDataRlpOfNatHom
+    let injCocone : Cocone Inj := colimit.cocone Inj
+    let ι'Cocone : Cocone Y' := Cocone.mk injCocone.pt
+      { app := fun j => η.app j ≫ injCocone.ι.app j
+        naturality := fun j j' f => by
+          simp only [Functor.const_obj_obj, Functor.const_obj_map, Category.comp_id,
+            ← injCocone.w f, ← Category.assoc, η.naturality f] }
+    let ι' : c'.pt ⟶ injCocone.pt := hc'.desc ι'Cocone
+    haveI : Mono ι' := by
+      haveI : ∀ j, Mono (η.app j) := hη_mono
+      haveI := NatTrans.mono_of_mono_app η
+      exact colim.map_mono' η hc' (colimit.isColimit Inj) ι' (fun j => hc'.fac ι'Cocone j)
+    let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+      ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
+    have hSE : S.ShortExact := shortExact_of_mono ι'
+    have hI := FlasqueVanishing X injCocone.pt
+      (isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
+        (colimit.isColimit Inj)) n
+    let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
+      { obj := fun j => cokernel (η.app j)
+        map := fun {j j'} f => cokernel.map _ _ (Y'.map f) (Inj.map f) (η.naturality f).symm
+        map_id := fun j => by ext; simp [cokernel.map]
+        map_comp := fun {j j' j''} f g => by ext; simp [cokernel.map, Functor.map_comp] }
+    have hfac_ι : ∀ j, c'.ι.app j ≫ ι' = η.app j ≫ injCocone.ι.app j := hc'.fac ι'Cocone
+    let qCocone : Cocone Q := Cocone.mk S.X₃
+      { app := fun j => cokernel.map (η.app j) ι' (c'.ι.app j) (injCocone.ι.app j)
+            (hfac_ι j).symm
+        naturality := fun j j' f => by
+          ext; show cokernel.π _ ≫ Q.map f ≫ _ = cokernel.π _ ≫ _ ≫ _
+          rw [← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
+          simp [cokernel.π_desc, Functor.const_obj_map] }
+    have hqColim : IsColimit qCocone := by
+      haveI : Nonempty J' := IsFiltered.nonempty
+      have hπC : ∀ j, cokernel.π (η.app j) ≫ qCocone.ι.app j =
+          injCocone.ι.app j ≫ cokernel.π ι' := fun j => cokernel.π_desc _ _ _
+      have hπQ : ∀ {j₁ j₂ : J'} (a : j₁ ⟶ j₂),
+          cokernel.π (η.app j₁) ≫ Q.map a =
+          Inj.map a ≫ cokernel.π (η.app j₂) := fun a => cokernel.π_desc _ _ _
+      let liftCocone : ∀ (s : Cocone Q), Cocone Inj := fun s =>
+        Cocone.mk s.pt
+          { app := fun j => cokernel.π (η.app j) ≫ s.ι.app j
+            naturality := fun j j' a => by
+              dsimp; rw [Category.comp_id, ← Category.assoc, ← hπQ a, Category.assoc, s.w] }
+      let injColim := colimit.isColimit Inj
+      exact
+      { desc := fun s => cokernel.desc ι' (injColim.desc (liftCocone s)) (by
+          apply hc'.hom_ext; intro j
+          rw [comp_zero]; conv_lhs => rw [← Category.assoc, hfac_ι j, Category.assoc]
+          rw [injColim.fac, ← Category.assoc, cokernel.condition, zero_comp])
+        fac := fun s j => by
+          apply (cancel_epi (cokernel.π (η.app j))).mp
+          rw [← Category.assoc, hπC, Category.assoc, cokernel.π_desc, injColim.fac]
+        uniq := fun s m hm => by
+          apply (cancel_epi (cokernel.π ι')).mp
+          rw [cokernel.π_desc]
+          apply injColim.hom_ext; intro j
+          rw [injColim.fac]
+          show injCocone.ι.app j ≫ cokernel.π ι' ≫ m = _
+          rw [← Category.assoc, ← hπC j, Category.assoc, hm] }
+    have hSE_j : ∀ j, (ShortComplex.mk (η.app j) (cokernel.π (η.app j))
+        (cokernel.condition (η.app j))).ShortExact := fun j => by
+      haveI : Mono (η.app j) := hη_mono j; exact shortExact_of_mono (η.app j)
+    obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₁ _ hSE x
+      (@Subsingleton.elim _ hI _ _) rfl
+    obtain ⟨j₀, y_j, hy_j⟩ := ih (Y' := Q) qCocone hqColim y
+    haveI : Mono (η.app j₀) := hη_mono j₀
+    let x_j : Sheaf.H (Y'.obj j₀) (n + 1) := y_j.comp (hSE_j j₀).extClass rfl
+    refine ⟨j₀, x_j, ?_⟩
+    show x_j.comp (Ext.mk₀ (c'.ι.app j₀)) (add_zero (n + 1)) = x
+    rw [show x_j = y_j.comp (hSE_j j₀).extClass rfl from rfl]
+    rw [Ext.comp_assoc_of_third_deg_zero]
+    have h_nat : (Ext.mk₀ (qCocone.ι.app j₀)).comp hSE.extClass (zero_add 1) =
+        (hSE_j j₀).extClass.comp (Ext.mk₀ (c'.ι.app j₀)) (add_zero 1) :=
+      extClass_naturality (hSE_j j₀) hSE (ShortComplex.homMk (c'.ι.app j₀) (injCocone.ι.app j₀)
+        (qCocone.ι.app j₀) (hfac_ι j₀) (cokernel.π_desc _ _ _).symm)
+    rw [← h_nat, ← Ext.comp_assoc_of_second_deg_zero, hy_j, hy]
 
 /-- **Hartshorne III, Ex. 2.9 core**: on a Noetherian space, if `H^m = 0` for all finitely generated
     subsheaves of `K`, then `H^m(K) = 0`. Applies `sheafH_preserves_filtered_colimits`
