@@ -236,8 +236,10 @@ theorem ext0_surj_of_epi_top
   intro y; suffices ∃ ψ : _ ⟶ S.X₂, ψ ≫ S.g = Ext.addEquiv₀ y by
     obtain ⟨ψ, hψ⟩ := this
     exact ⟨Ext.mk₀ ψ, by rw [Ext.mk₀_comp_mk₀, hψ, Ext.mk₀_addEquiv₀_apply]⟩
-  have hΓg : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map S.g) :=
-    epi_of_natIso_epi (Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).symm S.g hg_epi_top
+  have hΓg : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map S.g) := by
+    have h := hg_epi_top
+    exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
+      ((Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).inv.naturality S.g).symm
   let adj := constantSheafΓAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
   let M := AddCommGrpCat.of (ULift.{u} ℤ)
   haveI : Projective M := ulift_int_projective

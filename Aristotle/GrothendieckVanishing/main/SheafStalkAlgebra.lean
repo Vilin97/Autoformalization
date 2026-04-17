@@ -39,9 +39,10 @@ theorem zeroOutsideInt_vanishing
       CategoryTheory.NatIso.ofComponents
         (fun W => eqToIso (by show _ = A; simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ, A]))
         (by intro W₁ W₂ f; simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ, A])
-    exact epi_of_natIso_epi ((sheafToPresheaf J AddCommGrpCat.{u}).mapIso
-      ((presheafToSheaf J AddCommGrpCat.{u}).mapIso α).symm) i.op
-      (constantSheaf_flasque_of_irreducible X A i)
+    have h := constantSheaf_flasque_of_irreducible X A i
+    exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
+      (((sheafToPresheaf J AddCommGrpCat.{u}).mapIso
+        ((presheafToSheaf J AddCommGrpCat.{u}).mapIso α).symm).hom.naturality i.op).symm
   exact ext_dimension_shift _ hSE m hCoker (FlasqueVanishing X S.X₂ hFlasque m)
 
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
