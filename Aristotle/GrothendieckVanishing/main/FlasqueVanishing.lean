@@ -11,7 +11,7 @@
   Split from SetupCore.lean for compilation performance.
 -/
 import Mathlib
-import Aristotle.GrothendieckVanishing.main.Auxiliary
+import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
 import Aristotle.GrothendieckVanishing.main.ClosedImmersion
 import Aristotle.GrothendieckVanishing.main.ZeroOutside
 

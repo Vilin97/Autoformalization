@@ -1,11 +1,21 @@
-/-
-  Auxiliary.lean — Topology and dimension helper lemmas
-
-  Key results:
-  - On irreducible spaces of dimension 0, the only opens are ⊥ and ⊤
-  - Dimension comparison for proper closed subsets of irreducible spaces
--/
 import Mathlib
+
+/-!
+# Topological Krull Dimension
+
+API for topological Krull dimension on irreducible spaces.
+
+## Main results
+
+- `irreducibleCloseds_unique_of_dim_zero`: on an irreducible space with dim ≤ 0,
+  every irreducible closed set is the whole space
+- `opens_eq_bot_or_top_of_irreducibleSpace_dim_zero`: on an irreducible dim-0 space,
+  the only opens are ⊥ and ⊤
+- `topologicalKrullDim_nonneg_of_irreducible`: irreducible spaces have dim ≥ 0
+- `topologicalKrullDim_lt_of_isIrreducible_of_isClosed`: proper closed subsets of
+  irreducible spaces with finite dim have strictly smaller dim
+- `ulift_int_projective`: `ULift ℤ` is projective in `AddCommGrpCat`
+-/
 
 universe u
 

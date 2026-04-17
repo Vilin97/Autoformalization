@@ -8,7 +8,7 @@
   This is Hartshorne III.2.7 Step 2.
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
-import Aristotle.GrothendieckVanishing.main.Auxiliary
+import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
 
 universe u
 
