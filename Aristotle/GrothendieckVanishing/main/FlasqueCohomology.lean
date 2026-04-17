@@ -4,7 +4,7 @@ import Aristotle.GrothendieckVanishing.main.CohomologyAPI
 # FlasqueCohomology — Cohomological vanishing for flasque sheaves
 
 Provides:
-* `sheafH_dimension_shift`: dimension shifting via injective presentation
+* `sheafH_dimension_shift`: dimension shifting via short exact sequence with injective middle term
 * `FlasqueVanishing`: flasque sheaves have vanishing higher cohomology
 
 General cohomology API (`sheafH0EquivSections`, `subsingleton_of_addEquiv`) lives in
@@ -15,21 +15,15 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
-/-- **Dimension shifting** via injective presentation.
-    For `0 -> F -> I -> Q -> 0` with `I` injective, `Subsingleton (H Q n)`
-    implies `Subsingleton (H F (n+1))`. Uses the covariant Ext LES:
-    `Ext(Z, Q, n) -> Ext(Z, F, n+1) -> Ext(Z, I, n+1) = 0`
-    so every element of `Ext(Z, F, n+1)` lifts to `Ext(Z, Q, n)`. -/
+/-- **Dimension shifting** via short exact sequence with injective middle term.
+    For `0 → X₁ → X₂ → X₃ → 0` with `X₂` injective, `Subsingleton (H X₃ n)`
+    implies `Subsingleton (H X₁ (n+1))`. Thin wrapper over `ext_dimension_shift`. -/
 theorem sheafH_dimension_shift {X : TopCat.{u}}
-    {F : TopCat.Sheaf AddCommGrpCat.{u} X}
-    (ip : InjectivePresentation F) (n : ℕ)
-    (hQ : Subsingleton (Sheaf.H ip.shortComplex.X₃ n)) :
-    Subsingleton (Sheaf.H F (n + 1)) := by
-  have hSE := ip.shortExact_shortComplex
-  constructor; intro a b
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a (Ext.eq_zero_of_injective _) rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b (Ext.eq_zero_of_injective _) rfl
-  rw [← hc, ← hd]; congr 1; exact @Subsingleton.elim _ hQ c d
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
+    [Injective S.X₂] (n : ℕ)
+    (hQ : Subsingleton (Sheaf.H S.X₃ n)) :
+    Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
+  ext_dimension_shift _ hS n hQ (Ext.subsingleton_of_injective _ _ n)
 
 /-- **Base case**: `H^1(F) = 0` for flasque `F`. -/
 private theorem sheafH_one_of_flasque {X : TopCat.{u}}
@@ -59,4 +53,4 @@ theorem FlasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     have hI_flasque : IsFlasqueSheaf ip.shortComplex.X₂ := isFlasque_of_injective _
     have hQ_flasque : IsFlasqueSheaf ip.shortComplex.X₃ :=
       isFlasque_X₃_of_shortExact hSE h hI_flasque
-    exact sheafH_dimension_shift ip (n + 1) (ih ip.shortComplex.X₃ hQ_flasque)
+    exact sheafH_dimension_shift ip.shortExact_shortComplex (n + 1) (ih ip.shortComplex.X₃ hQ_flasque)
