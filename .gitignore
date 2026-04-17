@@ -46,3 +46,4 @@ aristotle-in/
 aristotle-out/
 state.md
 .prover-state/
+.refactor-state/
