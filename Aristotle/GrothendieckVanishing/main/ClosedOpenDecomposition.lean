@@ -16,14 +16,10 @@ open CategoryTheory TopologicalSpace Limits
 /-! ## Empty space vanishing -/
 
 private theorem sheaf_H_subsingleton_of_isEmpty'
-    (X : TopCat.{u}) [hE : IsEmpty X]
+    (X : TopCat.{u}) [IsEmpty X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (n : ℕ) : Subsingleton (Sheaf.H F n) := by
-  unfold Sheaf.H
-  have := (sheaf_isZero_of_zero_stalks X ((constantSheaf (Opens.grothendieckTopology X)
-    AddCommGrpCat.{u}).obj (AddCommGrpCat.of (ULift ℤ)))
-    (fun x _ => (hE.false x).elim)).hasProjectiveDimensionLT_zero
-  exact HasProjectiveDimensionLT.subsingleton _ 0 n (Nat.zero_le n) F
+    (n : ℕ) : Subsingleton (Sheaf.H F n) :=
+  sheafH_subsingleton_of_isEmpty F n
 
 /-! ## Main theorem -/
 

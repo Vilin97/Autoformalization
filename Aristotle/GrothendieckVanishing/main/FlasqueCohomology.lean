@@ -8,7 +8,7 @@
 
   Split from FlasqueVanishing.lean (flasque infrastructure) for file size.
 -/
-import Aristotle.GrothendieckVanishing.main.FlasqueVanishing
+import Aristotle.GrothendieckVanishing.main.CohomologyAPI
 
 universe u
 
@@ -58,21 +58,6 @@ theorem sheafH_dimension_shift {X : TopCat.{u}}
   obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a (Ext.eq_zero_of_injective _) rfl
   obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b (Ext.eq_zero_of_injective _) rfl
   rw [← hc, ← hd]; congr 1; exact @Subsingleton.elim _ hQ c d
-
-/-- H^1 vanishing via Ext^0 surjectivity: if H^1(X₂)=0 and every Ext^0 element
-    of X₃ lifts to X₂, then H^1(X₁)=0. Used in flasque, pushforward, and colimit proofs. -/
-theorem subsingleton_H1_via_surj {C' : Type*} [Category C'] [Abelian C'] [HasExt C']
-    (Z : C') {S : ShortComplex C'} (hSE : S.ShortExact)
-    (hJ : Subsingleton (Ext Z S.X₂ 1))
-    (h_surj : ∀ y : Ext Z S.X₃ 0,
-      ∃ z : Ext Z S.X₂ 0, z.comp (Ext.mk₀ S.g) (add_zero 0) = y) :
-    Subsingleton (Ext Z S.X₁ 1) := by
-  constructor; intro a b
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₁ _ hSE a (@Subsingleton.elim _ hJ _ _) rfl
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₁ _ hSE b (@Subsingleton.elim _ hJ _ _) rfl
-  obtain ⟨c', hc'⟩ := h_surj c; obtain ⟨d', hd'⟩ := h_surj d
-  simp only [← hc, ← hd, ← hc', ← hd', Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀ S.g)
-    hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
 
 /-- **Base case**: `H^1(F) = 0` for flasque `F`. -/
 private theorem sheafH_one_of_flasque {X : TopCat.{u}}
