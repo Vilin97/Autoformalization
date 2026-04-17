@@ -4,7 +4,7 @@
   Provides:
   1. `PushforwardHVanishing` (pushforward preserves cohomological vanishing)
   2. `epi_unit_of_closedImmersion` (adjunction unit is epi)
-  3. `ClosedImmersionSES` (short exact sequence from closed immersion)
+  3. `closedImmersionSES` (short exact sequence from closed immersion)
 
   Depends on FlasqueCohomology.lean for `FlasqueVanishing`, `sheafH0EquivSections`,
   and FlasqueVanishing.lean for `IsFlasqueSheaf`, `isFlasque_of_injective`.
@@ -30,7 +30,7 @@ ReducibleVanishing and IrreduciblePosVanishing require two building blocks:
 
 1. PushforwardHVanishing: pushforward along closed immersion preserves vanishing
    (adjunction + mono preservation + exactness of i_*)
-2. ClosedImmersionSES: the adjunction unit F -> i_*(i^*F) gives a short exact sequence
+2. closedImmersionSES: the adjunction unit F -> i_*(i^*F) gives a short exact sequence
 -/
 
 -- stalkPushforward naturality w.r.t. presheaf morphisms
@@ -338,23 +338,26 @@ theorem epi_unit_of_closedImmersion
     exact fun b => ⟨0, by simp [(@Subsingleton.elim _
       (AddCommGrpCat.subsingleton_of_isZero hstalk_zero) b 0).symm]⟩
 
--- Short exact sequence from closed immersion.
--- Uses epi_unit_of_closedImmersion to form 0 → ker(η) → F → i_*(i^*F) → 0.
-theorem ClosedImmersionSES
+/-- The short exact sequence `0 → ker(η) → F → i_*(i^*F) → 0` from a closed immersion,
+    where `η` is the pullback-pushforward adjunction unit and `i : Z ↪ X` is the
+    inclusion of a closed subset. -/
+noncomputable def closedImmersionSES
+    {X : TopCat.{u}} (Z : Set X) (_hZ : IsClosed Z)
+    [NoetherianSpace X]
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
+    ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+  let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
+  let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i).unit.app F
+  ShortComplex.mk (kernel.ι η) η (kernel.condition η)
+
+theorem closedImmersionSES_shortExact
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
-    let Y := TopCat.of Z
-    let i : Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-    ∃ (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)),
-      S.ShortExact ∧ S.X₂ = F ∧
-      S.X₃ = (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
-        ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F) := by
-  intro Y i
-  let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
-  let η := adj.unit.app F
-  haveI : Epi η := epi_unit_of_closedImmersion Z hZ F
-  exact ⟨ShortComplex.mk (kernel.ι η) η (kernel.condition η), shortExact_of_epi η, rfl, rfl⟩
+    (closedImmersionSES Z hZ F).ShortExact := by
+  delta closedImmersionSES
+  haveI := epi_unit_of_closedImmersion Z hZ F
+  exact shortExact_of_epi _
 
 /-- Vanishing for a sheaf supported on the complement of an open V, via closed-immersion SES.
     Given:
@@ -378,11 +381,8 @@ theorem closedComplementVanishing
     topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl (compl_ne_univ_of_ne_bot hV)
       (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
         (lt_of_lt_of_le hn le_top))
-  let i : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-  let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i).unit.app C
-  haveI : Epi η := epi_unit_of_closedImmersion Y hYcl C
-  let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
-  have hSE : S.ShortExact := shortExact_of_epi η
+  let S := closedImmersionSES Y hYcl C
+  have hSE := closedImmersionSES_shortExact Y hYcl C
   exact subsingleton_sheafH_of_shortExact_middle hSE n
     (by apply Ext.subsingleton_of_isZero_tgt; apply sheaf_isZero_of_zero_stalks X; intro x a
         by_cases hxY : x ∈ Y

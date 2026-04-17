@@ -103,7 +103,7 @@ GrothendieckVanishing.lean      ← Main theorem (assembles all cases)
 ├── ClosedOpenDecomposition.lean ← Reduction to irreducible spaces
 │   └── ReducibleVanishing.lean  ← Reducible case via Finset.induction
 └── (shared infrastructure)
-    ├── SetupCore.lean           ← Core: category instances, ClosedImmersionSES
+    ├── SetupCore.lean           ← Core: category instances, closedImmersionSES
     ├── FlasqueVanishing.lean    ← Flasque sheaf theory and cohomological vanishing
     ├── FlasqueCohomology.lean   ← H^1 vanishing for flasque sheaves
     ├── Setup.lean               ← Wrapper theorems

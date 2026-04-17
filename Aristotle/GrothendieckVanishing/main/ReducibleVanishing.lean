@@ -2,7 +2,7 @@
   ReducibleVanishing.lean -- Proof of ReducibleVanishing
 
   Proves ReducibleVanishing' (re-exported by Setup.lean as ReducibleVanishing)
-  by iterating ClosedImmersionSES over the finitely many irreducible components.
+  by iterating closedImmersionSES over the finitely many irreducible components.
 -/
 import Aristotle.GrothendieckVanishing.main.SetupCore
 
@@ -51,14 +51,9 @@ theorem ReducibleVanishing'
     have hZ_comp := hs_irred Z (Finset.mem_insert_self Z s')
     have hZ_closed := isClosed_of_mem_irreducibleComponents Z hZ_comp
     have hZ_irred := hZ_comp.1
-    let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-    let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i).unit.app G
-    haveI : Epi η := epi_unit_of_closedImmersion Z hZ_closed G
-    let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
-    have hSE : S.ShortExact := shortExact_of_epi η
+    let S := closedImmersionSES Z hZ_closed G
+    have hSE := closedImmersionSES_shortExact Z hZ_closed G
     have hpush : Subsingleton (Sheaf.H S.X₃ n) := by
-      show Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
-        ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj G)) n)
       apply PushforwardHVanishing Z hZ_closed
       haveI : IrreducibleSpace (TopCat.of Z) :=
         isIrreducible_iff_irreducibleSpace.mp hZ_irred
