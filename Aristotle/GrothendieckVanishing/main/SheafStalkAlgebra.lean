@@ -40,7 +40,7 @@ theorem zeroOutsideInt_vanishing
         (by intro W₁ W₂ f; simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ, A])
     exact epi_of_natIso_epi ((sheafToPresheaf J AddCommGrpCat.{u}).mapIso
       ((presheafToSheaf J AddCommGrpCat.{u}).mapIso α).symm) i.op
-      (constantSheaf_flasque_of_irreducible X i)
+      (constantSheaf_flasque_of_irreducible X A i)
   exact ext_dimension_shift _ hSE m hCoker (FlasqueVanishing X S.X₂ hFlasque m)
 
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
