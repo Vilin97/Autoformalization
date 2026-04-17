@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3.9
 """
 Refactoring loop for Grothendieck Vanishing formalization.
 Adapted from the autonomous_loop.py (sorry-closing) for code quality refactoring.
@@ -44,6 +44,7 @@ from string import Template
 # ---------------------------------------------------------------------------
 
 REPO_DIR = Path(__file__).resolve().parent.parent
+SETUP_CACHE_SCRIPT = REPO_DIR / "scripts" / "setup_local_cache.sh"
 STATE_DIR = REPO_DIR / ".refactor-state"
 PROMPTS_DIR = REPO_DIR / "scripts" / "prompts"
 LOCK_FILE = STATE_DIR / "run.lock"
@@ -62,14 +63,10 @@ STUCK_THRESHOLD = 4  # consecutive stalls before flagging
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN", "claude")
 
 # Timeouts (seconds)
-PLANNER_TIMEOUT = 900    # 15 min
-WORKER_TIMEOUT = 7200    # 2 hours
-EVALUATOR_TIMEOUT = 300  # 5 min
-COOLDOWN = 300           # 5 min between cycles
-
-# Budget
-WORKER_BUDGET_USD = 5.0
-PLANNER_BUDGET_USD = 1.0
+PLANNER_TIMEOUT = 1800    # 30 min
+WORKER_TIMEOUT = 10800    # 3 hours
+EVALUATOR_TIMEOUT = 1800  # 30 min
+COOLDOWN = 300            # 5 min between cycles
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -82,7 +79,24 @@ def load_env():
             line = line.strip()
             if line and not line.startswith("#") and "=" in line:
                 key, _, value = line.partition("=")
-                os.environ.setdefault(key.strip(), value.strip())
+                os.environ[key.strip()] = value.strip()
+
+
+def ensure_local_cache():
+    """Move .lake to local NVMe for fast olean access (GPFS is ~10-100x slower)."""
+    if SETUP_CACHE_SCRIPT.exists():
+        result = subprocess.run(
+            ["bash", str(SETUP_CACHE_SCRIPT)],
+            cwd=REPO_DIR,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=600,
+        )
+        if result.stdout:
+            print(result.stdout.strip())
+        if result.returncode != 0:
+            print(f"  Warning: local cache setup failed: {result.stderr[:200]}", file=sys.stderr)
 
 
 def git(*args: str, check: bool = True) -> str:
@@ -236,25 +250,28 @@ def run_claude(
     prompt: str,
     timeout: int = WORKER_TIMEOUT,
     model: str | None = None,
-    budget_usd: float | None = None,
     tools: str | None = None,
     json_schema: dict | None = None,
     skip_permissions: bool = True,
 ) -> tuple[int, str]:
     """Run a fresh Claude Code session. Returns (exit_code, stdout)."""
-    cmd = [CLAUDE_BIN, "-p", prompt, "--no-session-persistence"]
+    mcp_config = str(REPO_DIR / ".mcp.json")
+    cmd = [CLAUDE_BIN, "-p", prompt, "--no-session-persistence",
+           "--mcp-config", mcp_config]
 
     if skip_permissions:
         cmd.append("--dangerously-skip-permissions")
     if model:
         cmd.extend(["--model", model])
-    if budget_usd is not None:
-        cmd.extend(["--max-budget-usd", str(budget_usd)])
     if tools is not None:
         cmd.extend(["--tools", tools])
     if json_schema is not None:
         cmd.extend(["--json-schema", json.dumps(json_schema)])
         cmd.extend(["--output-format", "json"])
+
+    # Unset CLAUDECODE env var to allow nested sessions
+    env = os.environ.copy()
+    env.pop("CLAUDECODE", None)
 
     result = subprocess.run(
         cmd,
@@ -263,6 +280,7 @@ def run_claude(
         text=True,
         check=False,
         timeout=timeout,
+        env=env,
     )
     stdout = result.stdout[-5000:] if result.stdout else ""
     return result.returncode, stdout
@@ -284,8 +302,7 @@ def run_planner(cycle: int, history: list[dict]) -> str:
     exit_code, output = run_claude(
         prompt,
         timeout=PLANNER_TIMEOUT,
-        model="sonnet",
-        budget_usd=PLANNER_BUDGET_USD,
+        model="opus",
     )
     print(f"  Planner finished (exit={exit_code})")
 
@@ -313,12 +330,11 @@ def run_worker(cycle: int, strategy: str) -> tuple[int, str]:
         principles=principles,
     )
 
-    print(f"  Running worker (budget: ${WORKER_BUDGET_USD})...")
+    print(f"  Running worker (timeout: {WORKER_TIMEOUT}s)...")
     exit_code, output = run_claude(
         prompt,
         timeout=WORKER_TIMEOUT,
-        model="sonnet",
-        budget_usd=WORKER_BUDGET_USD,
+        model="opus",
     )
     print(f"  Worker finished (exit={exit_code})")
     return exit_code, output
@@ -398,7 +414,7 @@ def run_evaluator(
     exit_code, output = run_claude(
         prompt,
         timeout=EVALUATOR_TIMEOUT,
-        model="haiku",
+        model="opus",
         tools="",
         json_schema=EVALUATOR_SCHEMA,
     )
@@ -486,20 +502,22 @@ def send_telegram(message: str):
     if not token:
         return
     try:
-        subprocess.run(
+        result = subprocess.run(
             [
                 "curl", "-s", "-X", "POST",
                 f"https://api.telegram.org/bot{token}/sendMessage",
                 "-d", f"chat_id={chat_id}",
-                "-d", "parse_mode=Markdown",
                 "--data-urlencode", f"text={message}",
             ],
             capture_output=True,
+            text=True,
             check=False,
             timeout=10,
         )
-    except Exception:
-        pass
+        if '"ok":false' in (result.stdout or ""):
+            print(f"  Telegram error: {result.stdout[:200]}", file=sys.stderr)
+    except Exception as e:
+        print(f"  Telegram send failed: {e}", file=sys.stderr)
 
 
 # ---------------------------------------------------------------------------
@@ -515,6 +533,9 @@ def run_cycle(dry_run: bool = False, worker_only: bool = False) -> dict:
     print(f"\n{'='*60}")
     print(f"REFACTOR Cycle {cycle} — {ts}")
     print(f"{'='*60}")
+
+    # 0. Ensure .lake is on local NVMe (GPFS is too slow for olean I/O)
+    ensure_local_cache()
 
     # 1. Git pull
     print("  Pulling latest...")
@@ -671,4 +692,7 @@ def main():
 
 
 if __name__ == "__main__":
+    # Unbuffered output for real-time logging
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
+    sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 1)
     main()
