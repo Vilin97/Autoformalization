@@ -418,14 +418,6 @@ theorem isFlasque_of_injective {X : TopCat.{u}}
   intro s; obtain ⟨h, hh⟩ := Injective.factors ((freeAbSheafHomEquiv U I).symm s) (freeAbSheafMap i)
   exact ⟨freeAbSheafHomEquiv V I h, by rw [← freeAbSheafHomEquiv_naturality i I h, hh]; simp⟩
 
-theorem epi_of_natIso_epi {C D : Type*} [Category C] [Category D]
-    {F G : C ⥤ D} (α : F ≅ G) {X Y : C} (f : X ⟶ Y)
-    (h : Epi (F.map f)) : Epi (G.map f) := by
-  rw [show G.map f = α.inv.app X ≫ F.map f ≫ α.hom.app Y from by
-    rw [← Category.assoc, ← α.inv.naturality, Category.assoc, Iso.inv_hom_id_app,
-      Category.comp_id]]
-  exact epi_comp _ _
-
 -- Surjectivity of Ext map at degree 0 (base case input).
 -- For a SES 0 -> F -> I -> Q -> 0 with F flasque, the induced map
 -- Ext(Z_X, I, 0) -> Ext(Z_X, Q, 0) is surjective for Z_X = constant sheaf.
@@ -444,9 +436,10 @@ theorem ext_zero_map_surjective {X : TopCat.{u}}
   suffices ∃ ψ : _ ⟶ S.X₂, ψ ≫ S.g = Ext.addEquiv₀ y by
     obtain ⟨ψ, hψ⟩ := this
     exact ⟨Ext.mk₀ ψ, by rw [Ext.mk₀_comp_mk₀, hψ, Ext.mk₀_addEquiv₀_apply]⟩
-  haveI : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map S.g) :=
-    epi_of_natIso_epi (Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).symm S.g
-      (epi_app_of_shortExact_flasque hS hFlasque₁ ⊤)
+  haveI : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map S.g) := by
+    have h := epi_app_of_shortExact_flasque hS hFlasque₁ ⊤
+    exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
+      ((Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).inv.naturality S.g).symm
   haveI : Projective (AddCommGrpCat.of (ULift.{u} ℤ)) := ulift_int_projective
   let adj := constantSheafΓAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
   exact ⟨(adj.homEquiv _ S.X₂).symm (Projective.factorThru
