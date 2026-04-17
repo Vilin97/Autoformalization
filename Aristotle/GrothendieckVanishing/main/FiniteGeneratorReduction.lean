@@ -352,7 +352,7 @@ private theorem sheafH_filtered_colimit_aux
         haveI : Mono (η.app j₀) := hη_mono j₀
         let ip_j₀ : InjectivePresentation (Y'.obj j₀) :=
           { J := Inj.obj j₀, injective := hInj j₀, f := η.app j₀ }
-        have hπ_epi := epi_g_app_top_of_H1_vanishing ip_j₀ (hvan j₀)
+        have hπ_epi := epi_g_app_top_of_H1_vanishing ip_j₀.shortExact_shortComplex (hvan j₀)
         rw [AddCommGrpCat.epi_iff_surjective] at hπ_epi
         obtain ⟨p, hp⟩ := hπ_epi q₀
         -- Composition: Inj.obj j₀ →[π_{j₀}] Q_{j₀} →[cocone] Q
