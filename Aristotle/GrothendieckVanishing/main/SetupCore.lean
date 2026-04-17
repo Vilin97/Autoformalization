@@ -354,7 +354,8 @@ theorem closedImmersionSES_shortExact
     (closedImmersionSES Z hZ F).ShortExact := by
   delta closedImmersionSES
   haveI := epi_unit_of_closedImmersion Z hZ F
-  exact shortExact_of_epi _
+  exact ShortComplex.ShortExact.mk'
+    (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel _)) inferInstance inferInstance
 
 /-- Vanishing for a sheaf supported on the complement of an open V, via closed-immersion SES.
     Given:

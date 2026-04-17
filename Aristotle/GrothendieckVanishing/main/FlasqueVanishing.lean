@@ -98,18 +98,6 @@ theorem stalk_zero_of_ses_g_iso
     (((ConcreteCategory.bijective_of_isIso (T.map S.g.val)).1
       (hcomp_elem.trans (map_zero _).symm)).trans (map_zero _).symm)
 
-/-- The kernel short exact sequence `0 → ker(f) → X → Y → 0` for an epi `f`. -/
-theorem shortExact_of_epi {C : Type*} [Category C] [Abelian C] {X Y : C} (f : X ⟶ Y) [Epi f] :
-    (ShortComplex.mk (kernel.ι f) f (kernel.condition f)).ShortExact :=
-  ShortComplex.ShortExact.mk'
-    (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
-
-/-- The cokernel short exact sequence `0 → X → Y → coker(f) → 0` for a mono `f`. -/
-theorem shortExact_of_mono {C : Type*} [Category C] [Abelian C] {X Y : C} (f : X ⟶ Y) [Mono f] :
-    (ShortComplex.mk f (cokernel.π f) (cokernel.condition f)).ShortExact :=
-  ShortComplex.ShortExact.mk'
-    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel f)) inferInstance inferInstance
-
 /-- In a short exact sequence `X₁ → X₂ → X₃`, if all stalks of `X₂` at `x` vanish, then
     all stalks of `X₁` at `x` vanish (by mono-injectivity of `f`). -/
 theorem stalk_zero_of_shortExact_kernel

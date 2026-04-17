@@ -285,7 +285,8 @@ theorem subsheaf_zeroOutsideInt_vanishing
       subsheaf_contains_zeroOutsideInt V R i hR
     haveI : Mono j := hj_mono
     let S := ShortComplex.mk j (cokernel.π j) (cokernel.condition j)
-    have hSE : S.ShortExact := shortExact_of_mono j
+    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel j)) inferInstance inferInstance
     exact subsingleton_sheafH_of_shortExact_middle hSE m
       (zeroOutsideInt_cohomology_vanishing X ih hpos V' hV'ne m hm)
       (closedComplementVanishing V' hV'ne _ m hm ih
@@ -308,7 +309,8 @@ theorem epiImage_zeroOutsideInt_vanishing
     have hZero : IsZero G := (isZero_zeroOutsideInt_bot X).of_epi f
     exact Ext.subsingleton_of_isZero_tgt hZero m
   · let S := ShortComplex.mk (kernel.ι f) f (kernel.condition f)
-    have hSE : S.ShortExact := shortExact_of_epi f
+    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
     exact ext_dimension_shift_X₃ _ hSE m
       (zeroOutsideInt_cohomology_vanishing X ih hpos V hV m hm)
       (subsheaf_zeroOutsideInt_vanishing X ih hpos V (kernel f) (kernel.ι f) (m + 1)
