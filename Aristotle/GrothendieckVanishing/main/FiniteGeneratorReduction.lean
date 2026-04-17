@@ -2,7 +2,7 @@
   FiniteGeneratorReduction.lean — Colimit step and finitely generated vanishing
 
   Key results (presheaf colimit theory split to PresheafFilteredColimit.lean):
-  - sheafH_filtered_colimit_aux / sheafH_preserves_filtered_colimits: vanishing propagation
+  - sheafH_preserves_filtered_colimits: vanishing propagation
     for filtered colimits (FULLY PROVED).
   - sheafH_filtered_colimit_surj: surjectivity of colim H^n(F_j) → H^n(colim F_j) (FULLY PROVED).
     Uses extClass_naturality (in SetupCore.lean) for the connecting map commutation.
@@ -187,24 +187,24 @@ This approach avoids requiring mono transitions in the diagram (the previous app
 embedded into a single injective and needed mono coprojections, which is false at
 recursive IH levels). -/
 
-/-- Auxiliary: sheaf cohomology vanishing commutes with filtered colimits on Noetherian
-    spaces. Proof by induction on `n` with dimension shifting via per-object functorial
-    injective embeddings. FULLY PROVED (flasque vanishing replaces Gabriel's theorem). -/
-private theorem sheafH_filtered_colimit_aux
-    {X : TopCat.{u}} [NoetherianSpace X] (n : ℕ) :
-    ∀ {J' : Type u} [SmallCategory J'] [IsFiltered J']
-      (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-      (c' : Cocone Y') (_ : IsColimit c')
-      (_ : ∀ j, Subsingleton (Sheaf.H (Y'.obj j) n)),
+/-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
+    If `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
+
+    FULLY PROVED. -/
+theorem sheafH_preserves_filtered_colimits
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (c' : Cocone Y') (hc' : IsColimit c')
+    (n : ℕ)
+    (hvan : ∀ j, Subsingleton (Sheaf.H (Y'.obj j) n)) :
     Subsingleton (Sheaf.H c'.pt n) := by
-  induction n with
+  induction n generalizing J' with
   | zero =>
     -- Base case: H^0 = Ext^0 ≅ Hom ≅ global sections.
     -- On Noetherian spaces, sheafToPresheaf creates filtered colimits (via
     -- isSheaf_presheaf_filtered_colimit), so global sections commute with
     -- filtered colimits. If each piece has trivial global sections, so does the colimit.
-    intro J' inst1 inst2 Y' c' hc' hvan
-    letI := inst1; letI := inst2
     -- H^0 ≅ global sections, colimit of trivial sections is trivial
     haveI := createsFilteredColimit Y'
     have hc_psh := isColimitOfPreserves (sheafToPresheaf _ _) hc'
@@ -225,8 +225,6 @@ private theorem sheafH_filtered_colimit_aux
     -- coprojections), embed each Y'.obj j into its own injective I_j via functorial
     -- factorization. This gives mono η.app j : Y'.obj j → I_j for free, avoiding the
     -- need for mono transitions in the diagram.
-    intro J' inst1 inst2 Y' c' hc' hvan
-    letI := inst1; letI := inst2
     -- Zero instance for sheaves (needed for `(0 : X ⟶ 0)` syntax in Arrow.mk)
     letI : Zero (TopCat.Sheaf AddCommGrpCat.{u} X) :=
       Limits.HasZeroObject.zero' _
@@ -307,7 +305,6 @@ private theorem sheafH_filtered_colimit_aux
       -- cokernel.π(η.app j) ≫ qCocone.ι.app j = injCocone.ι.app j ≫ cokernel.π(ι')
       have hπC : ∀ j, cokernel.π (η.app j) ≫ qCocone.ι.app j =
           injCocone.ι.app j ≫ cokernel.π ι' := fun j => cokernel.π_desc _ _ _
-      -- For a cocone s on Q, the maps Inj.obj j →[cokernel.π ≫ s.ι] s.pt form a cocone on Inj
       -- cokernel.π(η.app j) ≫ Q.map a = Inj.map a ≫ cokernel.π(η.app j')
       have hπQ : ∀ {j₁ j₂ : J'} (a : j₁ ⟶ j₂),
           cokernel.π (η.app j₁) ≫ Q.map a =
@@ -376,20 +373,6 @@ private theorem sheafH_filtered_colimit_aux
           inferInstance inferInstance) (n' + 1)
           (Ext.subsingleton_of_injective _ _ n') (hvan j)
       exact ext_dimension_shift _ hSE (n' + 1) (ih Q qCocone hqColim h_van_Q) hI
-
-/-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
-    If `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
-
-    FULLY PROVED. -/
-theorem sheafH_preserves_filtered_colimits
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (c' : Cocone Y') (hc' : IsColimit c')
-    (n : ℕ)
-    (hvan : ∀ j, Subsingleton (Sheaf.H (Y'.obj j) n)) :
-    Subsingleton (Sheaf.H c'.pt n) :=
-  sheafH_filtered_colimit_aux n Y' c' hc' hvan
 
 /-- **Sheaf cohomology commutes with filtered colimits (surjectivity)** on Noetherian spaces.
     Every element of `H^n(colim F_j)` comes from some `H^n(F_j)` via the canonical map.
