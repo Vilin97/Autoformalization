@@ -271,7 +271,8 @@ private theorem sheafH_filtered_colimit_aux
         hc'.fac ι'Cocone j)
     let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
       ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
-    have hSE : S.ShortExact := shortExact_of_mono ι'
+    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel ι')) inferInstance inferInstance
     -- H^{n+1}(colim Inj) = 0 since colim Inj is flasque
     have hI := FlasqueVanishing X injCocone.pt
       (isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
@@ -369,7 +370,10 @@ private theorem sheafH_filtered_colimit_aux
       -- For n ≥ 1: dimension shift via h_van_Q + IH
       have h_van_Q : ∀ j, Subsingleton (Sheaf.H (Q.obj j) (n' + 1)) := fun j => by
         haveI : Mono (η.app j) := hη_mono j
-        exact ext_dimension_shift_X₃ _ (shortExact_of_mono (η.app j)) (n' + 1)
+        let Sj := ShortComplex.mk (η.app j) (cokernel.π (η.app j)) (cokernel.condition (η.app j))
+        exact ext_dimension_shift_X₃ _ (ShortComplex.ShortExact.mk'
+          (ShortComplex.exact_of_g_is_cokernel Sj (cokernelIsCokernel (η.app j)))
+          inferInstance inferInstance) (n' + 1)
           (Ext.subsingleton_of_injective _ _ n') (hvan j)
       exact ext_dimension_shift _ hSE (n' + 1) (ih Q qCocone hqColim h_van_Q) hI
 
@@ -446,7 +450,8 @@ theorem sheafH_filtered_colimit_surj
       exact colim.map_mono' η hc' (colimit.isColimit Inj) ι' (fun j => hc'.fac ι'Cocone j)
     let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
       ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
-    have hSE : S.ShortExact := shortExact_of_mono ι'
+    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel ι')) inferInstance inferInstance
     have hI := FlasqueVanishing X injCocone.pt
       (isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
         (colimit.isColimit Inj)) n
@@ -493,7 +498,10 @@ theorem sheafH_filtered_colimit_surj
           rw [← Category.assoc, ← hπC j, Category.assoc, hm] }
     have hSE_j : ∀ j, (ShortComplex.mk (η.app j) (cokernel.π (η.app j))
         (cokernel.condition (η.app j))).ShortExact := fun j => by
-      haveI : Mono (η.app j) := hη_mono j; exact shortExact_of_mono (η.app j)
+      haveI : Mono (η.app j) := hη_mono j
+      exact ShortComplex.ShortExact.mk'
+        (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel (η.app j)))
+        inferInstance inferInstance
     obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₁ _ hSE x
       (@Subsingleton.elim _ hI _ _) rfl
     obtain ⟨j₀, y_j, hy_j⟩ := ih (Y' := Q) qCocone hqColim y
@@ -609,7 +617,9 @@ theorem finsetGeneratedSheaf_vanishing
     haveI : Mono (imageIncl hσ₀) := imageIncl_mono hσ₀
     let SC := ShortComplex.mk (imageIncl hσ₀) (cokernel.π (imageIncl hσ₀))
       (cokernel.condition _)
-    have hSE : SC.ShortExact := shortExact_of_mono (imageIncl hσ₀)
+    have hSE : SC.ShortExact := ShortComplex.ShortExact.mk'
+      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel (imageIncl hσ₀)))
+      inferInstance inferInstance
     have hCoker : Subsingleton (Sheaf.H SC.X₃ m) :=
       haveI := imageIncl_cokernel_epi hσ₀
       hzero (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} =>

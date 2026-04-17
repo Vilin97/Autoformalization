@@ -28,7 +28,8 @@ theorem zeroOutsideInt_vanishing
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) (m + 1)) := by
   let f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
   let S := ShortComplex.mk f (cokernel.π f) (cokernel.condition f)
-  have hSE : S.ShortExact := shortExact_of_mono f
+  have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
+    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel f)) inferInstance inferInstance
   have hFlasque : IsFlasqueSheaf S.X₂ := by
     intro U W i
     let J := Opens.grothendieckTopology (T := X)
