@@ -51,7 +51,7 @@ GrothendieckVanishing.lean    ← Main theorem (assembles all cases)
     ├── Setup.lean             ← Wrapper theorems (IrreduciblePosVanishing, ReducibleVanishing)
     ├── ClosedImmersion.lean   ← Closed immersion counit/stalk
     ├── ZeroOutside.lean       ← Extension-by-zero sheaf machinery
-    └── Auxiliary.lean         ← Topology/dimension helpers
+    └── TopologicalKrullDim.lean ← Topological Krull dimension API
 ```
 
 ## Lean Options (from lakefile.toml)

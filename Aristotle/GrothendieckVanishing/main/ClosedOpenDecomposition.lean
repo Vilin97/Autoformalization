@@ -7,7 +7,7 @@
   - Reducible X: delegates to ReducibleVanishing' (Finset.induction on components)
 -/
 import Aristotle.GrothendieckVanishing.main.Setup
-import Aristotle.GrothendieckVanishing.main.Auxiliary
+import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
 
 universe u
 
