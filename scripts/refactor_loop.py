@@ -425,7 +425,10 @@ def run_evaluator(
 
     try:
         outer = json.loads(output)
-        if "result" in outer:
+        # Claude --output-format json wraps structured output in a metadata envelope
+        if "structured_output" in outer and isinstance(outer["structured_output"], dict):
+            return outer["structured_output"]
+        if "result" in outer and outer["result"]:
             return json.loads(outer["result"])
         return outer
     except (json.JSONDecodeError, KeyError):

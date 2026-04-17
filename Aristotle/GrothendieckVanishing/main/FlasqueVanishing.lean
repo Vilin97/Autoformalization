@@ -73,15 +73,6 @@ theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
     (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
       fun U => (hZ.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
 
-theorem subsingleton_sheafH_of_isZero' {X : TopCat.{u}}
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsZero F) (n : ℕ) :
-    Subsingleton (Sheaf.H F n) := by
-  have : ∀ x : Sheaf.H F n, x = 0 := fun x => by
-    have h := Ext.comp_mk₀_id x
-    rw [show (𝟙 F : F ⟶ F) = 0 from hF.eq_of_src _ _, Ext.mk₀_zero] at h
-    exact h.symm.trans (Ext.comp_zero x F 0 n (add_zero n))
-  exact ⟨fun a b => (this a).trans (this b).symm⟩
-
 theorem stalk_zero_of_ses_g_iso
     {X : TopCat.{u}} {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hSE : S.ShortExact) (x : X)

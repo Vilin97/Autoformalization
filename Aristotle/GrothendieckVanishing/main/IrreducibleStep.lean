@@ -280,7 +280,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H R m) := by
   by_cases hR : IsZero R
-  · exact subsingleton_sheafH_of_isZero' R hR m
+  · exact Ext.subsingleton_of_isZero_tgt hR m
   · obtain ⟨V', hV'le, hV'ne, j, hj_mono, hj_stalk⟩ :=
       subsheaf_contains_zeroOutsideInt V R i hR
     haveI : Mono j := hj_mono
@@ -306,7 +306,7 @@ theorem epiImage_zeroOutsideInt_vanishing
   by_cases hV : V = ⊥
   · subst hV
     have hZero : IsZero G := (isZero_zeroOutsideInt_bot X).of_epi f
-    exact subsingleton_sheafH_of_isZero' G hZero m
+    exact Ext.subsingleton_of_isZero_tgt hZero m
   · let S := ShortComplex.mk (kernel.ι f) f (kernel.condition f)
     have hSE : S.ShortExact := shortExact_of_epi f
     exact ext_dimension_shift_X₃ _ hSE m
