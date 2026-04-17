@@ -30,16 +30,20 @@ def closedIncl {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) : TopCat.of s ⟶ 
   TopCat.ofHom ⟨Subtype.val, hs.isClosedEmbedding_subtypeVal.continuous⟩
 
 theorem locallyInjective_stalkFunctor_map_injective
-    {X : TopCat.{u}} {F G : X.Presheaf AddCommGrpCat} (T : F ⟶ G)
+    {C : Type*} [Category.{u} C] [HasColimits C]
+    {FC : C → C → Type*} {CC : C → Type u}
+    [∀ (X Y : C), FunLike (FC X Y) (CC X) (CC Y)] [ConcreteCategory C FC]
+    [PreservesFilteredColimits (forget C)]
+    {X : TopCat.{u}} {F G : X.Presheaf C} (T : F ⟶ G)
     [CategoryTheory.Presheaf.IsLocallyInjective (Opens.grothendieckTopology X) T] :
-    ∀ x : X, Function.Injective ((TopCat.Presheaf.stalkFunctor AddCommGrpCat x).map T) := by
+    ∀ x : X, Function.Injective ((TopCat.Presheaf.stalkFunctor C x).map T) := by
   intro x s t hst
   obtain ⟨U, hxU, sU, rfl⟩ := F.germ_exist x s
   obtain ⟨V, hxV, sV, hsV⟩ := F.germ_exist x t
   rw [← hsV] at hst ⊢
   rw [TopCat.Presheaf.stalkFunctor_map_germ_apply, TopCat.Presheaf.stalkFunctor_map_germ_apply] at hst
   obtain ⟨W, hxW, iWU, iWV, hEq⟩ := G.germ_eq x hxU hxV _ _ hst
-  have hnat (Y : Opens X) (iWY : W ⟶ Y) (sY : F.obj (op Y)) :
+  have hnat (Y : Opens X) (iWY : W ⟶ Y) (sY : CC (F.obj (op Y))) :
       T.app (op W) (F.map iWY.op sY) = G.map iWY.op (T.app (op Y) sY) := by
     rw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply, T.naturality]
   have hEq' : T.app (op W) (F.map iWU.op sU) =
@@ -53,8 +57,15 @@ theorem locallyInjective_stalkFunctor_map_injective
   simpa using hEqZ
 
 theorem stalkFunctor_map_iso_toSheafify
-    {X : TopCat.{u}} (P : X.Presheaf AddCommGrpCat) (x : X) :
-    IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat x).map
+    {C : Type*} [Category.{u} C] [HasColimits C]
+    {FC : C → C → Type*} {CC : C → Type u}
+    [∀ (X Y : C), FunLike (FC X Y) (CC X) (CC Y)] [ConcreteCategory C FC]
+    [PreservesFilteredColimits (forget C)]
+    [(forget C).ReflectsIsomorphisms]
+    {X : TopCat.{u}} [HasWeakSheafify (Opens.grothendieckTopology X) C]
+    [(Opens.grothendieckTopology X).WEqualsLocallyBijective C]
+    (P : X.Presheaf C) (x : X) :
+    IsIso ((TopCat.Presheaf.stalkFunctor C x).map
       (CategoryTheory.toSheafify (Opens.grothendieckTopology X) P)) := by
   rw [ConcreteCategory.isIso_iff_bijective]
   constructor
@@ -68,33 +79,34 @@ theorem stalkFunctor_map_iso_toSheafify
         (T := CategoryTheory.toSheafify (Opens.grothendieckTopology X) P)).mp hls) x
 
 theorem closedIncl_presheaf_counit_stalk_comp
+    {C : Type*} [Category C] [HasColimits C]
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    (F : TopCat.Presheaf AddCommGrpCat (TopCat.of s)) (x : TopCat.of s) :
-    (TopCat.Presheaf.stalkPullbackIso AddCommGrpCat (closedIncl hs)
-      ((TopCat.Presheaf.pushforward AddCommGrpCat (closedIncl hs)).obj F) x).hom ≫
-      (TopCat.Presheaf.stalkFunctor AddCommGrpCat x).map
-        ((TopCat.Presheaf.pushforwardPullbackAdjunction AddCommGrpCat
+    (F : TopCat.Presheaf C (TopCat.of s)) (x : TopCat.of s) :
+    (TopCat.Presheaf.stalkPullbackIso C (closedIncl hs)
+      ((TopCat.Presheaf.pushforward C (closedIncl hs)).obj F) x).hom ≫
+      (TopCat.Presheaf.stalkFunctor C x).map
+        ((TopCat.Presheaf.pushforwardPullbackAdjunction C
           (closedIncl hs)).counit.app F) =
-      F.stalkPushforward AddCommGrpCat (closedIncl hs) x := by
+      F.stalkPushforward C (closedIncl hs) x := by
   apply TopCat.Presheaf.stalk_hom_ext; intro U hU
-  change ((TopCat.Presheaf.pushforward AddCommGrpCat (closedIncl hs)).obj F).germ U
+  change ((TopCat.Presheaf.pushforward C (closedIncl hs)).obj F).germ U
       ((closedIncl hs) x) hU ≫
-        TopCat.Presheaf.stalkPullbackHom AddCommGrpCat (closedIncl hs)
-          ((TopCat.Presheaf.pushforward AddCommGrpCat (closedIncl hs)).obj F) x ≫
-        (TopCat.Presheaf.stalkFunctor AddCommGrpCat x).map
-          ((TopCat.Presheaf.pushforwardPullbackAdjunction AddCommGrpCat
+        TopCat.Presheaf.stalkPullbackHom C (closedIncl hs)
+          ((TopCat.Presheaf.pushforward C (closedIncl hs)).obj F) x ≫
+        (TopCat.Presheaf.stalkFunctor C x).map
+          ((TopCat.Presheaf.pushforwardPullbackAdjunction C
             (closedIncl hs)).counit.app F) =
-      ((TopCat.Presheaf.pushforward AddCommGrpCat (closedIncl hs)).obj F).germ U
-        ((closedIncl hs) x) hU ≫ F.stalkPushforward AddCommGrpCat (closedIncl hs) x
+      ((TopCat.Presheaf.pushforward C (closedIncl hs)).obj F).germ U
+        ((closedIncl hs) x) hU ≫ F.stalkPushforward C (closedIncl hs) x
   rw [TopCat.Presheaf.germ_stalkPullbackHom_assoc, TopCat.Presheaf.stalkFunctor_map_germ,
     TopCat.Presheaf.stalkPushforward_germ]
   have htri :=
     CategoryTheory.Functor.lanUnit_app_app_lanAdjunction_counit_app_app
       ((TopologicalSpace.Opens.map (closedIncl hs)).op) F (op U)
   have htri' :
-      ((TopCat.Presheaf.pushforwardPullbackAdjunction AddCommGrpCat (closedIncl hs)).unit.app
-            ((TopCat.Presheaf.pushforward AddCommGrpCat (closedIncl hs)).obj F)).app (op U) ≫
-        ((TopCat.Presheaf.pushforwardPullbackAdjunction AddCommGrpCat
+      ((TopCat.Presheaf.pushforwardPullbackAdjunction C (closedIncl hs)).unit.app
+            ((TopCat.Presheaf.pushforward C (closedIncl hs)).obj F)).app (op U) ≫
+        ((TopCat.Presheaf.pushforwardPullbackAdjunction C
             (closedIncl hs)).counit.app F).app
           (op ((Opens.map (closedIncl hs)).obj U)) =
       𝟙 (F.obj (op ((Opens.map (closedIncl hs)).obj U))) := by
@@ -264,23 +276,25 @@ private lemma isIso_right {C : Type*} [CategoryTheory.Category C] {A B D : C}
   rw [show g = CategoryTheory.inv f ≫ h from by simp [← e]]; infer_instance
 
 -- Stalk pullback hom naturality
-private lemma stalkPull_nat {X Y : TopCat.{u}} (f : X ⟶ Y)
-    {F G : Y.Presheaf AddCommGrpCat.{u}} (α : F ⟶ G) (x : ↑X) :
-    (Presheaf.stalkFunctor AddCommGrpCat.{u} (ConcreteCategory.hom f x)).map α ≫
-      Presheaf.stalkPullbackHom AddCommGrpCat f G x =
-    Presheaf.stalkPullbackHom AddCommGrpCat f F x ≫
-      (Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-        ((Presheaf.pullback AddCommGrpCat f).map α) := by
+private lemma stalkPull_nat
+    {C : Type*} [Category C] [HasColimits C]
+    {X Y : TopCat.{u}} (f : X ⟶ Y)
+    {F G : Y.Presheaf C} (α : F ⟶ G) (x : ↑X) :
+    (Presheaf.stalkFunctor C (ConcreteCategory.hom f x)).map α ≫
+      Presheaf.stalkPullbackHom C f G x =
+    Presheaf.stalkPullbackHom C f F x ≫
+      (Presheaf.stalkFunctor C x).map
+        ((Presheaf.pullback C f).map α) := by
   apply Presheaf.stalk_hom_ext; intro U hU
   simp only [Presheaf.stalkFunctor_map_germ_assoc, Presheaf.germ_stalkPullbackHom,
     Presheaf.germ_stalkPullbackHom_assoc, Presheaf.stalkFunctor_map_germ]
   have key : α.app (Opposite.op U) ≫
-      ((Presheaf.pushforwardPullbackAdjunction AddCommGrpCat f).unit.app G).app (Opposite.op U) =
-    ((Presheaf.pushforwardPullbackAdjunction AddCommGrpCat f).unit.app F).app (Opposite.op U) ≫
-      ((Presheaf.pullback AddCommGrpCat f).map α).app
+      ((Presheaf.pushforwardPullbackAdjunction C f).unit.app G).app (Opposite.op U) =
+    ((Presheaf.pushforwardPullbackAdjunction C f).unit.app F).app (Opposite.op U) ≫
+      ((Presheaf.pullback C f).map α).app
         (Opposite.op ((TopologicalSpace.Opens.map f).obj U)) := by
     have h := congr_arg (fun β => NatTrans.app β (Opposite.op U))
-      ((Presheaf.pushforwardPullbackAdjunction AddCommGrpCat f).unit.naturality α)
+      ((Presheaf.pushforwardPullbackAdjunction C f).unit.naturality α)
     simpa only [Functor.id_obj, Functor.id_map, Functor.comp_obj, Functor.comp_map] using h
   rw [← CategoryTheory.Category.assoc, key, CategoryTheory.Category.assoc]
 
