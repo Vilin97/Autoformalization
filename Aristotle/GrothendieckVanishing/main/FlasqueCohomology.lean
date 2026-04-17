@@ -1,47 +1,19 @@
-/-
-  FlasqueCohomology.lean — Cohomological vanishing for flasque sheaves
-
-  Provides:
-  1. `sheafH0EquivSections`: H^0(F) ≃+ F(⊤) (sections on ⊤)
-  2. `subsingleton_of_addEquiv`: transport subsingletons across additive equivalences
-  3. `FlasqueVanishing`: flasque sheaves have vanishing higher cohomology
-
-  Split from FlasqueVanishing.lean (flasque infrastructure) for file size.
--/
 import Aristotle.GrothendieckVanishing.main.CohomologyAPI
+
+/-!
+# FlasqueCohomology — Cohomological vanishing for flasque sheaves
+
+Provides:
+* `sheafH_dimension_shift`: dimension shifting via injective presentation
+* `FlasqueVanishing`: flasque sheaves have vanishing higher cohomology
+
+General cohomology API (`sheafH0EquivSections`, `subsingleton_of_addEquiv`) lives in
+`CohomologyAPI.lean`.
+-/
 
 universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
-
-/-- `H F 0` is equivalent to sections on `⊤`. -/
-noncomputable def sheafH0EquivSections {X : TopCat.{u}}
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
-    Sheaf.H F 0 ≃+ F.val.obj (op ⊤) := by
-  refine AddEquiv.trans Ext.addEquiv₀ ?_
-  refine AddEquiv.trans ?_ (TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv _)
-  exact (constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat Limits.isTerminalTop).homAddEquiv _ F
-
-/-- Naturality of `sheafH0EquivSections`: composing `x` with `mk₀ f` at degree 0
-    corresponds to applying `f.app(⊤)` at the sections level. -/
-lemma sheafH0EquivSections_natural {X : TopCat.{u}}
-    {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G) (x : Sheaf.H F 0) :
-    sheafH0EquivSections G (x.comp (Ext.mk₀ f) (add_zero 0)) =
-    ConcreteCategory.hom (f.val.app (op ⊤)) (sheafH0EquivSections F x) := by
-  conv_lhs => rw [show x = Ext.mk₀ (Ext.addEquiv₀ x) from
-    (Ext.mk₀_addEquiv₀_apply x).symm, Ext.mk₀_comp_mk₀]
-  unfold sheafH0EquivSections
-  simp only [AddEquiv.trans_apply]
-  have key : Ext.addEquiv₀ (Ext.mk₀ (Ext.addEquiv₀ x ≫ f)) = Ext.addEquiv₀ x ≫ f :=
-    Ext.addEquiv₀.apply_symm_apply _
-  erw [Adjunction.homAddEquiv_apply, Adjunction.homAddEquiv_apply, key,
-    Adjunction.homEquiv_naturality_right, Adjunction.homAddEquiv_apply]
-  rfl
-
-/-- Transport subsingletons across an additive equivalence. -/
-theorem subsingleton_of_addEquiv {A B : Type*} [Add A] [Add B]
-    (e : A ≃+ B) [Subsingleton A] : Subsingleton B :=
-  ⟨fun x y => by simpa using congrArg e (Subsingleton.elim (e.symm x) (e.symm y))⟩
 
 /-- **Dimension shifting** via injective presentation.
     For `0 -> F -> I -> Q -> 0` with `I` injective, `Subsingleton (H Q n)`

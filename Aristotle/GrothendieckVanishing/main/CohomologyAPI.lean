@@ -13,11 +13,21 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `subsingleton_H1_via_surj`: H^1 vanishing via Ext^0 surjectivity
 * `subsingleton_sheafH_of_shortExact_middle`: LES consequence for Sheaf.H
 * `sheafH_subsingleton_of_isEmpty`: empty-space vanishing
+* `subsingleton_of_addEquiv`: transport subsingletons across additive equivalences
+* `sheafH0EquivSections`: H^0(F) ≃+ F(⊤)
+* `sheafH0EquivSections_natural`: naturality of the above
 -/
 
 universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
+
+/-! ## General algebra helpers -/
+
+/-- Transport subsingletons across an additive equivalence. -/
+theorem subsingleton_of_addEquiv {A B : Type*} [Add A] [Add B]
+    (e : A ≃+ B) [Subsingleton A] : Subsingleton B :=
+  ⟨fun x y => by simpa using congrArg e (Subsingleton.elim (e.symm x) (e.symm y))⟩
 
 /-! ## Abstract Ext dimension shift helpers -/
 
@@ -84,6 +94,32 @@ lemma extClass_naturality {S₁ S₂ : ShortComplex C'} (hS₁ : S₁.ShortExact
   exact (cancel_mono S₂.f).mp (by rw [← φ.comm₁₂.symm, h])
 
 end ExtDimShift
+
+/-! ## H⁰ ≅ Sections -/
+
+/-- `H F 0` is equivalent to sections on `⊤`. -/
+noncomputable def sheafH0EquivSections {X : TopCat.{u}}
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
+    Sheaf.H F 0 ≃+ F.val.obj (op ⊤) := by
+  refine AddEquiv.trans Ext.addEquiv₀ ?_
+  refine AddEquiv.trans ?_ (TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv _)
+  exact (constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat Limits.isTerminalTop).homAddEquiv _ F
+
+/-- Naturality of `sheafH0EquivSections`: composing `x` with `mk₀ f` at degree 0
+    corresponds to applying `f.app(⊤)` at the sections level. -/
+lemma sheafH0EquivSections_natural {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G) (x : Sheaf.H F 0) :
+    sheafH0EquivSections G (x.comp (Ext.mk₀ f) (add_zero 0)) =
+    ConcreteCategory.hom (f.val.app (op ⊤)) (sheafH0EquivSections F x) := by
+  conv_lhs => rw [show x = Ext.mk₀ (Ext.addEquiv₀ x) from
+    (Ext.mk₀_addEquiv₀_apply x).symm, Ext.mk₀_comp_mk₀]
+  unfold sheafH0EquivSections
+  simp only [AddEquiv.trans_apply]
+  have key : Ext.addEquiv₀ (Ext.mk₀ (Ext.addEquiv₀ x ≫ f)) = Ext.addEquiv₀ x ≫ f :=
+    Ext.addEquiv₀.apply_symm_apply _
+  erw [Adjunction.homAddEquiv_apply, Adjunction.homAddEquiv_apply, key,
+    Adjunction.homEquiv_naturality_right, Adjunction.homAddEquiv_apply]
+  rfl
 
 /-- H^1 vanishing via Ext^0 surjectivity: if H^1(X₂)=0 and every Ext^0 element
     of X₃ lifts to X₂, then H^1(X₁)=0. Used in flasque, pushforward, and colimit proofs. -/
