@@ -18,31 +18,7 @@ universe u
 
 open CategoryTheory TopologicalSpace Order Limits
 
-/-! ## Main induction -/
-
-/-- The core induction step: vanishing at dimension d, given vanishing at all d' < d. -/
-private theorem grothendieck_vanishing_aux (d : WithBot ℕ∞)
-    (ih : ∀ d' < d, ∀ (X : TopCat.{u}) [NoetherianSpace X]
-      (n : ℕ) (F : TopCat.Sheaf AddCommGrpCat.{u} X),
-      topologicalKrullDim X = d' → n > d' → Subsingleton (Sheaf.H F n))
-    (X : TopCat.{u}) [NoetherianSpace X]
-    (n : ℕ) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (hd : topologicalKrullDim X = d) (hn : n > d) :
-    Subsingleton (Sheaf.H F n) := by
-  -- Step 1: Reduce to irreducible X
-  apply grothendieck_vanishing_of_irreducible X n (hd ▸ hn) F
-  intro Y _ _ m G hle hY
-  by_cases hdim : topologicalKrullDim Y ≤ 0
-  · -- dim Y ≤ 0: use DimZeroVanishing
-    have hm0 : m ≠ 0 := fun heq => by
-      subst heq; exact not_lt.mpr topologicalKrullDim_nonneg_of_irreducible (by exact_mod_cast hY)
-    obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm0
-    exact grothendieck_vanishing_dim_zero Y hdim G k
-  · -- dim Y > 0: use IrreducibleStep
-    push_neg at hdim
-    exact IrreduciblePosVanishing Y m hY hdim G
-      (fun Z _ m' G' hlt hG' =>
-        ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle)) Z m' G' rfl hG')
+/-! ## Main theorem -/
 
 /-- **Grothendieck's vanishing theorem** (Hartshorne III, Theorem 2.7). -/
 theorem GrothendieckVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -53,4 +29,20 @@ theorem GrothendieckVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{
     ∀ (X : TopCat.{u}) [NoetherianSpace X]
       (n : ℕ) (F : TopCat.Sheaf AddCommGrpCat.{u} X),
       topologicalKrullDim X = d → n > d → Subsingleton (Sheaf.H F n))
-    (topologicalKrullDim X) grothendieck_vanishing_aux X n F rfl h
+    (topologicalKrullDim X) (fun d ih X _ n F hd hn => by
+      -- Reduce to irreducible X
+      apply grothendieck_vanishing_of_irreducible X n (hd ▸ hn) F
+      intro Y _ _ m G hle hY
+      by_cases hdim : topologicalKrullDim Y ≤ 0
+      · -- dim Y ≤ 0: use DimZeroVanishing
+        have hm0 : m ≠ 0 := fun heq => by
+          subst heq
+          exact not_lt.mpr topologicalKrullDim_nonneg_of_irreducible (by exact_mod_cast hY)
+        obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm0
+        exact grothendieck_vanishing_dim_zero Y hdim G k
+      · -- dim Y > 0: use IrreducibleStep
+        push_neg at hdim
+        exact IrreduciblePosVanishing Y m hY hdim G
+          (fun Z _ m' G' hlt hG' =>
+            ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle)) Z m' G' rfl hG'))
+    X n F rfl h
