@@ -250,7 +250,7 @@ private lemma partialLift_chain_ub {X : TopCat.{u}}
     simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
     exact presheaf_map_eq S.X₃.val _ _ s
   · exact ⟨⟨⊥, 0⟩, ⟨bot_le, @Subsingleton.elim _
-      (AddCommGrpCat.subsingleton_of_isZero (isTerminal_sheaf_bot S.X₃).isZero) _ _⟩,
+      (AddCommGrpCat.subsingleton_of_isZero S.X₃.isTerminalOfEmpty.isZero) _ _⟩,
       fun _ hz => absurd ⟨_, hz⟩ hc⟩
 
 -- Maximal partial lift must cover all of U.
