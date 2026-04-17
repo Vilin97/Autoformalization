@@ -15,7 +15,7 @@
   - directLimit_cohomology_vanishing: from epi-image vanishing to all sheaves (PROVED)
 -/
 import Aristotle.GrothendieckVanishing.main.PresheafFilteredColimit
-import Aristotle.GrothendieckVanishing.main.Setup
+import Aristotle.GrothendieckVanishing.main.SetupCore
 import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
 
 universe u
