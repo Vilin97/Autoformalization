@@ -24,7 +24,7 @@ theorem sheaf_restriction_epi_of_irreducible_dim_zero
     {U V : Opens X} (i : U ⟶ V) :
     Epi (F.val.map i.op) := by
   rcases opens_eq_bot_or_top_of_irreducibleSpace_dim_zero hdim U with rfl | rfl
-  · exact epi_of_isTerminal_tgt (isTerminal_sheaf_bot F) _
+  · exact F.isTerminalOfEmpty.isZero.epi _
   · have hV := le_antisymm le_top (homOfLE le_top ≫ i |>.le); subst hV
     rw [Subsingleton.elim i (𝟙 ⊤), op_id, F.val.map_id]; infer_instance
 

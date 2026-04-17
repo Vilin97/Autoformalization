@@ -3,32 +3,13 @@
 
   Key results:
   - On irreducible spaces of dimension 0, the only opens are ⊥ and ⊤
-  - Any morphism to a terminal object in an abelian category is epi
-  - F(⊥) is terminal for any sheaf F on a topological space
+  - Dimension comparison for proper closed subsets of irreducible spaces
 -/
 import Mathlib
 
 universe u
 
 open CategoryTheory TopologicalSpace Limits
-
-/-! ## Abelian category helpers -/
-
-/-- In an abelian category, any morphism to a terminal (= zero) object is epi. -/
-theorem epi_of_isTerminal_tgt {C : Type*} [Category C] [Abelian C] {X Y : C}
-    (t : IsTerminal Y) (f : X ⟶ Y) : Epi f := by
-  have hzero : IsZero Y := by rw [IsZero.iff_id_eq_zero]; exact t.hom_ext _ _
-  constructor; intro Z g h _
-  exact (hzero.eq_of_src g 0).trans (hzero.eq_of_src h 0).symm
-
-/-! ## Sheaf at the empty open set -/
-
-/-- For any sheaf F on a topological space, F(⊥) = F(∅) is a terminal object.
-    This follows from the sheaf condition on the empty cover. -/
-noncomputable def isTerminal_sheaf_bot {X : Type u} [TopologicalSpace X]
-    (F : Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :
-    IsTerminal (F.val.obj (Opposite.op ⊥)) := by
-  apply Sheaf.isTerminalOfBotCover; intro x hx; exact (Opens.mem_bot.mp hx).elim
 
 /-! ## Irreducible spaces of dimension 0 -/
 
@@ -69,17 +50,6 @@ theorem topologicalKrullDim_nonneg_of_irreducible {X : Type u} [TopologicalSpace
     [IrreducibleSpace X] : topologicalKrullDim X ≥ 0 := by
   rw [topologicalKrullDim, ge_iff_le, Order.krullDim_nonneg_iff]; exact ⟨⟨_, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩⟩
 
-/-- Every element in the image of IrreducibleCloseds Y → IrreducibleCloseds X
-    is strictly below the whole space X, when Y ⊊ X. -/
-private lemma map_subtype_lt_top {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
-    {Y : Set X} (hY : IsClosed Y) (hne : Y ≠ Set.univ)
-    (s : IrreducibleCloseds Y) :
-    IrreducibleCloseds.map (Subtype.val : Y → X) continuous_subtype_val s <
-      ⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩ := by
-  refine lt_of_le_of_ne ?_ ?_ <;> simp_all +decide [IrreducibleCloseds.map]
-  · exact Set.subset_univ _
-  · rw [Set.eq_univ_iff_forall] at *; contrapose! hne; aesop
-
 /-- For each s : IrreducibleCloseds Y, height(s) + 1 ≤ topologicalKrullDim X. -/
 private lemma height_add_one_le_dim {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
     {Y : Set X} (hY : IsClosed Y) (hne : Y ≠ Set.univ)
@@ -91,10 +61,16 @@ private lemma height_add_one_le_dim {X : Type u} [TopologicalSpace X] [Irreducib
     IrreducibleCloseds.map_strictMono_of_isInducing Topology.IsInducing.subtypeVal
   have h_height_le : Order.height s ≤ Order.height (f s) :=
     Order.height_le_height_apply_of_strictMono f hf_strict s
+  have h_lt_top : f s < ⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩ := by
+    refine lt_of_le_of_ne (Set.subset_univ _) fun h_eq => hne ?_
+    have h_sub : (f s : Set X) ⊆ Y :=
+      closure_minimal (fun _ ⟨⟨_, hy⟩, _, rfl⟩ => hy) hY
+    rwa [show (f s : Set X) = Set.univ from congrArg IrreducibleCloseds.carrier h_eq,
+      Set.univ_subset_iff] at h_sub
   have h_height_add_one : (Order.height (f s) : WithBot ℕ∞) + 1 ≤
       (Order.height (⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩ :
         IrreducibleCloseds X)) := by
-    convert Order.height_add_one_le (map_subtype_lt_top hY hne s)
+    convert Order.height_add_one_le h_lt_top
     norm_cast
   refine le_trans ?_ (h_height_add_one.trans ?_)
   · gcongr; norm_cast
@@ -117,15 +93,6 @@ private lemma iSup_height_add_one_eq {Y : Type u} [TopologicalSpace Y]
       (↑(Order.height s + 1 : ℕ∞) : WithBot ℕ∞) = (↑(Order.height s) : WithBot ℕ∞) + 1 from
     by intro s; push_cast; ring]
 
-private lemma wbot_lt_of_add_one_le_of_lt_top {x y : WithBot ℕ∞}
-    (h1 : x + 1 ≤ y) (h2 : x < ⊤) (h3 : ⊥ < y) : x < y := by
-  rcases x with _ | v
-  · exact h3
-  · have hv_ne_top : v ≠ ⊤ := by intro h; subst h; exact absurd h2 (lt_irrefl _)
-    exact lt_of_lt_of_le (show (↑v : WithBot ℕ∞) < ↑v + 1 by
-      rw [← show (↑(v + 1) : WithBot ℕ∞) = ↑v + 1 from by push_cast; ring]
-      exact WithBot.coe_lt_coe.mpr ((ENat.lt_add_one_iff hv_ne_top).mpr le_rfl)) h1
-
 /-- Unconditional: topologicalKrullDim Y + 1 ≤ topologicalKrullDim X for
     Y ⊊ X closed in irreducible X. -/
 theorem topologicalKrullDim_add_one_le_of_isIrreducible_of_isClosed {X : Type u}
@@ -144,13 +111,17 @@ theorem topologicalKrullDim_lt_of_isIrreducible_of_isClosed {X : Type u} [Topolo
     [IrreducibleSpace X] {Y : Set X} (hY : IsClosed Y) (hne : Y ≠ Set.univ)
     (hfin : topologicalKrullDim Y < ⊤) :
     topologicalKrullDim Y < topologicalKrullDim X := by
-  apply wbot_lt_of_add_one_le_of_lt_top
-  · exact topologicalKrullDim_add_one_le_of_isIrreducible_of_isClosed hY hne
-  · exact hfin
+  have h1 := topologicalKrullDim_add_one_le_of_isIrreducible_of_isClosed hY hne
+  generalize topologicalKrullDim Y = x at h1 hfin ⊢
+  rcases x with _ | v
   · rw [topologicalKrullDim]
     have : Nonempty (IrreducibleCloseds X) :=
       ⟨⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩⟩
     exact (WithBot.bot_lt_coe _).trans_le Order.krullDim_nonneg
+  · have hv_ne_top : v ≠ ⊤ := by intro h; subst h; exact absurd hfin (lt_irrefl _)
+    exact lt_of_lt_of_le (show (↑v : WithBot ℕ∞) < ↑v + 1 by
+      rw [← show (↑(v + 1) : WithBot ℕ∞) = ↑v + 1 from by push_cast; ring]
+      exact WithBot.coe_lt_coe.mpr ((ENat.lt_add_one_iff hv_ne_top).mpr le_rfl)) h1
 
 /-- The complement of a nonempty open is not the whole space. -/
 theorem compl_ne_univ_of_ne_bot {X : Type*} [TopologicalSpace X] {V : Opens X} (hV : V ≠ ⊥) :

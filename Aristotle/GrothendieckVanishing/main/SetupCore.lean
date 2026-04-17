@@ -62,7 +62,7 @@ private theorem pushforward_stalk_zero_closedIncl
     le_antisymm (fun ⟨_, hy⟩ h => absurd hy h.2) bot_le
   have hFW_zero : IsZero (F.obj (op W)) := by
     change IsZero (G.val.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
-    rw [hW_bot]; exact (isTerminal_sheaf_bot G).isZero
+    rw [hW_bot]; exact G.isTerminalOfEmpty.isZero
   let sW := ConcreteCategory.hom (F.map (homOfLE (show W ≤ U from inf_le_left)).op) sU
   have hsW_eq : sW = 0 := by
     have h0 : (𝟙 (F.obj (op W)) : _ ⟶ _) = 0 := hFW_zero.eq_of_src _ _
@@ -330,7 +330,7 @@ theorem epi_unit_of_closedImmersion
         (op ((Opens.map i).obj V'_nhd.1)))
       rw [show (Opens.map i).obj V'_nhd.1 = ⊥ from le_antisymm (fun ⟨_, hy⟩ hmem => by
         simp only [Opens.map, Opens.mem_mk] at hmem; exact absurd hy (hmem.2 ·)) bot_le]
-      exact (isTerminal_sheaf_bot _).isZero
+      exact (TopCat.Sheaf.isTerminalOfEmpty _).isZero
     -- The stalk is IsZero → surjective
     exact fun b => ⟨0, by simp [(@Subsingleton.elim _
       (AddCommGrpCat.subsingleton_of_isZero hstalk_zero) b 0).symm]⟩
