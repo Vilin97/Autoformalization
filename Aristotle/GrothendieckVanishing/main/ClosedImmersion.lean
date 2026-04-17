@@ -310,16 +310,6 @@ theorem closedIncl_counit_isIso
           (Opens.grothendieckTopology X) K) F) using 1
   rw [← hcompare]; infer_instance
 
-private lemma isIso_left {C : Type*} [CategoryTheory.Category C] {A B D : C}
-    {f : A ⟶ B} {g : B ⟶ D} {h : A ⟶ D} [CategoryTheory.IsIso g] [CategoryTheory.IsIso h]
-    (e : f ≫ g = h) : CategoryTheory.IsIso f := by
-  rw [show f = h ≫ CategoryTheory.inv g from by simp [← e]]; infer_instance
-
-private lemma isIso_right {C : Type*} [CategoryTheory.Category C] {A B D : C}
-    {f : A ⟶ B} {g : B ⟶ D} {h : A ⟶ D} [CategoryTheory.IsIso f] [CategoryTheory.IsIso h]
-    (e : f ≫ g = h) : CategoryTheory.IsIso g := by
-  rw [show g = CategoryTheory.inv f ≫ h from by simp [← e]]; infer_instance
-
 -- Stalk pullback hom naturality
 private lemma stalkPull_nat
     {C : Type*} [Category C] [HasColimits C]
@@ -386,7 +376,7 @@ theorem closedIncl_unit_stalk_isIso
   -- Step 4: presheafToSheaf.map(pull.map(η.val)).val stalk is iso
   haveI : IsIso (Tz.map
       (presheafToSheaf _ _ |>.map ((Presheaf.pullback C (closedIncl hs)).map η.val)).val) :=
-    isIso_right (e := hnat_stalk.symm)
+    IsIso.of_isIso_fac_left hnat_stalk.symm
   -- Step 5: toSheafify naturality → pull.map(η.val) stalk is iso
   let K := Opens.grothendieckTopology (TopCat.of s)
   let P₁ := (Presheaf.pullback C (closedIncl hs)).obj F.val
@@ -402,7 +392,7 @@ theorem closedIncl_unit_stalk_isIso
   haveI : IsIso (Tz.map (CategoryTheory.toSheafify K P₁)) := stalkFunctor_map_iso_toSheafify P₁ x
   haveI : IsIso (Tz.map (CategoryTheory.toSheafify K P₂)) := stalkFunctor_map_iso_toSheafify P₂ x
   haveI : IsIso (Tz.map ((Presheaf.pullback C (closedIncl hs)).map η.val)) :=
-    isIso_left (e := hts)
+    IsIso.of_isIso_fac_right hts
   -- Step 6: stalkPull_nat → η.val stalk is iso
   haveI : IsIso (Presheaf.stalkPullbackHom C (closedIncl hs)
       ((𝟭 _).obj F).val x) :=
@@ -411,6 +401,6 @@ theorem closedIncl_unit_stalk_isIso
       ((pb ⋙ Sheaf.pushforward C (closedIncl hs)).obj F).val x) :=
     (Presheaf.stalkPullbackIso C (closedIncl hs)
       ((pb ⋙ Sheaf.pushforward C (closedIncl hs)).obj F).val x).isIso_hom
-  exact isIso_left (e := stalkPull_nat (closedIncl hs) η.val x)
+  exact IsIso.of_isIso_fac_right (stalkPull_nat (closedIncl hs) η.val x)
 
 end TopCat
