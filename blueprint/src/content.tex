@@ -141,8 +141,8 @@ The formalization is fully proved with 0 sorry's, 0 axioms, and 0 admits.
   the unit $\eta : \FF \to i_*(i^*\FF)$ is an epimorphism.
 \end{lemma}
 
-\begin{theorem}[Closed immersion short exact sequence]\label{thm:ClosedImmersionSES}
-  \lean{ClosedImmersionSES}
+\begin{theorem}[Closed immersion short exact sequence]\label{thm:closedImmersionSES}
+  \lean{closedImmersionSES}
   \leanok
   \uses{lem:epi_unit_of_closedImmersion}
   For a closed subset $Z \subseteq X$ and a sheaf $\FF$ on $X$, the unit
@@ -355,7 +355,7 @@ The formalization is fully proved with 0 sorry's, 0 axioms, and 0 admits.
 \begin{theorem}[Irreducible positive-dimension vanishing]\label{thm:IrreduciblePosVanishing}
   \lean{IrreduciblePosVanishing}
   \leanok
-  \uses{def:sHom, def:zeroOutside, def:zeroOutsideInt, lem:closedIncl_counit_isIso, lem:dim_lt_of_closed, lem:epi_unit_of_closedImmersion, lem:exists_closed_subset, lem:exists_good_section, thm:ClosedImmersionSES, thm:PushforwardHVanishing, thm:directLimit_cohomology_vanishing, thm:zeroOutsideInt_cohomology_vanishing}
+  \uses{def:sHom, def:zeroOutside, def:zeroOutsideInt, lem:closedIncl_counit_isIso, lem:dim_lt_of_closed, lem:epi_unit_of_closedImmersion, lem:exists_closed_subset, lem:exists_good_section, thm:closedImmersionSES, thm:PushforwardHVanishing, thm:directLimit_cohomology_vanishing, thm:zeroOutsideInt_cohomology_vanishing}
   On an irreducible Noetherian space with $\KrullDim(X) > 0$ and
   $n > \KrullDim(X)$, we have $H^n(\FF) = 0$ for all sheaves $\FF$.
 

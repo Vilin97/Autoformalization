@@ -11,7 +11,7 @@
 
   File structure:
   - FlasqueVanishing.lean + FlasqueCohomology.lean: IsFlasqueSheaf, FlasqueVanishing, dim shift
-  - SetupCore.lean: PushforwardHVanishing, ClosedImmersionSES, dimension shift, epi lemmas
+  - SetupCore.lean: PushforwardHVanishing, closedImmersionSES, dimension shift, epi lemmas
   - Setup.lean: ReducibleVanishing, IrreduciblePosVanishing wrappers
   - Auxiliary.lean: topology/dimension helpers
   - ClosedImmersion.lean: closed immersion counit/stalk infrastructure

@@ -326,12 +326,12 @@ theorem IrreduciblePosVanishing
     Subsingleton (Sheaf.H F n) := by
   obtain ⟨Z, hZ_closed, _, hZ_dim, hn_Z⟩ :=
     exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos
-  obtain ⟨S, hSE, hS₂, hS₃⟩ := ClosedImmersionSES Z hZ_closed F
-  have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
-    rw [hS₃]; exact PushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ n _ hZ_dim hn_Z)
+  let S := closedImmersionSES Z hZ_closed F
+  have hSE := closedImmersionSES_shortExact Z hZ_closed F
+  have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
+    PushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ n _ hZ_dim hn_Z)
   have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
     directLimit_cohomology_vanishing S.X₁ n
       (fun f hf => epiImage_zeroOutsideInt_vanishing X ih hpos _ f hf n hn)
-  rw [← hS₂]
   exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
 

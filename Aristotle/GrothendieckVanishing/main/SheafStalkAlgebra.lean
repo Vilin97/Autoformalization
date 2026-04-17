@@ -146,7 +146,7 @@ are in `FiniteGeneratorReduction.lean`.
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
     degree `m > dim X` on an irreducible Noetherian space of positive dimension.
     Proof: write `m = m' + 1`, apply `zeroOutsideInt_vanishing` (SES + flasque), then prove
-    cokernel vanishing at `m'` via `ClosedImmersionSES` on `Vᶜ` + `PushforwardHVanishing`. -/
+    cokernel vanishing at `m'` via `closedImmersionSES` on `Vᶜ` + `PushforwardHVanishing`. -/
 theorem zeroOutsideInt_cohomology_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (ih : VanishingIH (X := X))
@@ -180,11 +180,8 @@ theorem zeroOutsideInt_cohomology_vanishing
     calc topologicalKrullDim Y < ↑↑d' := hY_dim_lt
       _ ≤ ↑↑m' := by exact_mod_cast Nat.lt_succ_iff.mp hd_lt
   -- Build SES on Vᶜ, apply middle-term vanishing
-  let i : TopCat.of Y ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-  let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i).unit.app C
-  haveI : Epi η := epi_unit_of_closedImmersion Y hYcl C
-  let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
-  have hSE : S.ShortExact := shortExact_of_epi η
+  let S := closedImmersionSES Y hYcl C
+  have hSE := closedImmersionSES_shortExact Y hYcl C
   exact subsingleton_sheafH_of_shortExact_middle hSE m'
     (by apply Ext.subsingleton_of_isZero_tgt; apply sheaf_isZero_of_zero_stalks X; intro x a
         by_cases hxY : x ∈ Y
