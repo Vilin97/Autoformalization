@@ -12,7 +12,6 @@
   File structure:
   - FlasqueVanishing.lean + FlasqueCohomology.lean: IsFlasqueSheaf, FlasqueVanishing, dim shift
   - SetupCore.lean: PushforwardHVanishing, closedImmersionSES, dimension shift, epi lemmas
-  - Setup.lean: ReducibleVanishing, IrreduciblePosVanishing wrappers
   - TopologicalKrullDim.lean: topological Krull dimension API
   - ClosedImmersion.lean: closed immersion counit/stalk infrastructure
   - ZeroOutside.lean + ZeroOutsideFinset.lean: extension-by-zero sheaf machinery

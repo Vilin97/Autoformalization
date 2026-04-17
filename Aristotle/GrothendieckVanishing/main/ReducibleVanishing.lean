@@ -1,7 +1,7 @@
 /-
   ReducibleVanishing.lean -- Proof of ReducibleVanishing
 
-  Proves ReducibleVanishing' (re-exported by Setup.lean as ReducibleVanishing)
+  Proves ReducibleVanishing' (used by ClosedOpenDecomposition.lean)
   by iterating closedImmersionSES over the finitely many irreducible components.
 -/
 import Aristotle.GrothendieckVanishing.main.SetupCore

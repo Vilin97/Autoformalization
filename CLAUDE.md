@@ -48,7 +48,6 @@ GrothendieckVanishing.lean    ← Main theorem (assembles all cases)
 └── (shared infrastructure)
     ├── SetupCore.lean         ← Core: category instances, closedImmersionSES
     ├── FlasqueVanishing.lean  ← Flasque sheaf theory and cohomological vanishing
-    ├── Setup.lean             ← Wrapper theorems (IrreduciblePosVanishing, ReducibleVanishing)
     ├── ClosedImmersion.lean   ← Closed immersion counit/stalk
     ├── ZeroOutside.lean       ← Extension-by-zero sheaf machinery
     └── TopologicalKrullDim.lean ← Topological Krull dimension API

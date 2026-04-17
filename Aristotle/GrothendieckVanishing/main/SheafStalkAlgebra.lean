@@ -8,7 +8,7 @@
   Note: stalk_zeroOutsideInt_eq_zsmul_generator, ulift_int_subgroup_cyclic,
   and zsmul_generator_injective are in StalkGeneratorAlgebra.lean.
 -/
-import Aristotle.GrothendieckVanishing.main.Setup
+import Aristotle.GrothendieckVanishing.main.SetupCore
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
 import Aristotle.GrothendieckVanishing.main.FiniteGeneratorReduction
 

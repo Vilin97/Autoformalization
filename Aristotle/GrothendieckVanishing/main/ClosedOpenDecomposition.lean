@@ -6,7 +6,8 @@
   - Irreducible X: apply ih_irred directly
   - Reducible X: delegates to ReducibleVanishing' (Finset.induction on components)
 -/
-import Aristotle.GrothendieckVanishing.main.Setup
+import Aristotle.GrothendieckVanishing.main.SetupCore
+import Aristotle.GrothendieckVanishing.main.ReducibleVanishing
 import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
 
 universe u
