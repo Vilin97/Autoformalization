@@ -384,7 +384,7 @@ theorem closedComplementVanishing
   let S := ShortComplex.mk (kernel.ι η) η (kernel.condition η)
   have hSE : S.ShortExact := shortExact_of_epi η
   exact subsingleton_sheafH_of_shortExact_middle hSE n
-    (by apply subsingleton_sheafH_of_isZero'; apply sheaf_isZero_of_zero_stalks X; intro x a
+    (by apply Ext.subsingleton_of_isZero_tgt; apply sheaf_isZero_of_zero_stalks X; intro x a
         by_cases hxY : x ∈ Y
         · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
             TopCat.closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩

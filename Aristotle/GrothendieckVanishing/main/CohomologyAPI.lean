@@ -9,6 +9,7 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 ## Main results
 
 * `ext_dimension_shift` / `ext_dimension_shift_X₃`: dimension shifting via Ext LES
+* `Ext.subsingleton_of_isZero_tgt`: zero target ⟹ subsingleton Ext (general abelian category)
 * `extClass_naturality`: naturality of the extension class
 * `subsingleton_H1_via_surj`: H^1 vanishing via Ext^0 surjectivity
 * `subsingleton_sheafH_of_shortExact_middle`: LES consequence for Sheaf.H
@@ -93,6 +94,17 @@ lemma extClass_naturality {S₁ S₂ : ShortComplex C'} (hS₁ : S₁.ShortExact
   haveI : Mono S₂.f := hS₂.mono_f
   exact (cancel_mono S₂.f).mp (by rw [← φ.comm₁₂.symm, h])
 
+/-- If `Y` is zero in an abelian category, `Ext X Y n` is subsingleton for all `X`, `n`.
+    Proof: `𝟙 Y = 0` because `Y` is zero, so `x = x ∘ mk₀(𝟙 Y) = x ∘ mk₀(0) = x ∘ 0 = 0`. -/
+theorem Ext.subsingleton_of_isZero_tgt {X Y : C'} (hY : IsZero Y) (n : ℕ) :
+    Subsingleton (Ext X Y n) :=
+  ⟨fun a b => by
+    have eq : ∀ x : Ext X Y n, x = 0 := fun x => by
+      have h := Ext.comp_mk₀_id x
+      rw [show (𝟙 Y : Y ⟶ Y) = 0 from hY.eq_of_src _ _, Ext.mk₀_zero] at h
+      exact h.symm.trans (Ext.comp_zero x Y 0 n (add_zero n))
+    exact (eq a).trans (eq b).symm⟩
+
 end ExtDimShift
 
 /-! ## H⁰ ≅ Sections -/
@@ -156,5 +168,5 @@ theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
 theorem sheafH_subsingleton_of_isEmpty {X : TopCat.{u}} [IsEmpty X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (n : ℕ) :
     Subsingleton (Sheaf.H F n) :=
-  subsingleton_sheafH_of_isZero' F
+  Ext.subsingleton_of_isZero_tgt
     (sheaf_isZero_of_zero_stalks X F (fun x _ => (IsEmpty.false x).elim)) n

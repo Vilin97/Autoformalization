@@ -602,7 +602,7 @@ theorem finsetGeneratedSheaf_vanishing
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf T) m) from h S
   intro T; induction T using Finset.induction with
   | empty =>
-    apply subsingleton_sheafH_of_isZero'
+    apply Ext.subsingleton_of_isZero_tgt
     apply IsZero.of_iso (isZero_zero _) (imageZero' _)
     apply Sigma.hom_ext; intro ⟨σ, hσ⟩; simp at hσ
   | @insert σ₀ S' hσ₀ ih =>
