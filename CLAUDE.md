@@ -43,8 +43,7 @@ GrothendieckVanishing.lean    ← Main theorem (assembles all cases)
 │   └── ConstantSheafFlasque.lean
 ├── IrreducibleStep.lean      ← Irreducible dim≥1 (uses IrreduciblePosVanishing)
 │   └── FiniteGeneratorReduction.lean ← Colimit step, filtered diagram, f.g. vanishing
-├── ClosedOpenDecomposition.lean ← Reduction to irreducible spaces
-│   └── ReducibleVanishing.lean  ← Reducible case via Finset.induction
+├── ClosedOpenDecomposition.lean ← Reduction to irreducible spaces (+ reducible case)
 └── (shared infrastructure)
     ├── SetupCore.lean         ← Core: category instances, closedImmersionSES
     ├── FlasqueVanishing.lean  ← Flasque sheaf theory and cohomological vanishing
