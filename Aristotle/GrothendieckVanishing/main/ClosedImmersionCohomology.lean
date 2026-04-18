@@ -48,31 +48,6 @@ private theorem stalkPush_nat_closedIncl
     TopCat.Presheaf.stalkPushforward_germ_assoc,
     TopCat.Presheaf.stalkFunctor_map_germ]; rfl
 
--- Stalk of pushforward is zero outside the closed set
-private theorem pushforward_stalk_zero_closedIncl
-    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) (x : X) (hx : x ∉ s)
-    (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) :
-    ∀ a : ((TopCat.Presheaf.pushforward AddCommGrpCat.{u}
-        (TopCat.closedIncl hs)).obj G.val).stalk x, a = 0 := by
-  let F := (TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G.val
-  intro a; obtain ⟨U, hxU, sU, rfl⟩ := F.germ_exist x a
-  let W : Opens X := U ⊓ ⟨sᶜ, hs.isOpen_compl⟩
-  have hxW : x ∈ W := ⟨hxU, hx⟩
-  have hW_bot : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ :=
-    le_antisymm (fun ⟨_, hy⟩ h => absurd hy h.2) bot_le
-  have hFW_zero : IsZero (F.obj (op W)) := by
-    change IsZero (G.val.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
-    rw [hW_bot]; exact G.isTerminalOfEmpty.isZero
-  let sW := ConcreteCategory.hom (F.map (homOfLE (show W ≤ U from inf_le_left)).op) sU
-  have hsW_eq : sW = 0 := by
-    have h0 : (𝟙 (F.obj (op W)) : _ ⟶ _) = 0 := hFW_zero.eq_of_src _ _
-    calc sW = ConcreteCategory.hom (𝟙 (F.obj (op W))) sW := (ConcreteCategory.id_apply sW).symm
-      _ = 0 := by rw [h0]; exact AddMonoidHom.zero_apply _
-  rw [← TopCat.Presheaf.germ_res_apply F
-    (homOfLE (show W ≤ U from inf_le_left)) x hxW sU]
-  change ConcreteCategory.hom (F.germ W x hxW) sW = 0
-  rw [hsW_eq]; exact AddMonoidHom.map_zero _
-
 -- Stalkwise surjectivity of pushed-forward g
 private theorem closedIncl_pushforward_epi_g
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
@@ -130,7 +105,26 @@ private theorem closedIncl_pushforward_epi_g
       rw [Category.assoc, IsIso.hom_inv_id, Category.comp_id]]
     exact epi_comp _ _
   · intro b
-    rw [pushforward_stalk_zero_closedIncl hs x hx S.X₃ b]
+    have hb : b = 0 := by
+      let F := (TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj S.X₃.val
+      obtain ⟨U, hxU, sU, rfl⟩ := F.germ_exist x b
+      let W : Opens X := U ⊓ ⟨sᶜ, hs.isOpen_compl⟩
+      have hxW : x ∈ W := ⟨hxU, hx⟩
+      have hW_bot : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ :=
+        le_antisymm (fun ⟨_, hy⟩ h => absurd hy h.2) bot_le
+      have hFW_zero : IsZero (F.obj (op W)) := by
+        change IsZero (S.X₃.val.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
+        rw [hW_bot]; exact S.X₃.isTerminalOfEmpty.isZero
+      let sW := ConcreteCategory.hom (F.map (homOfLE (show W ≤ U from inf_le_left)).op) sU
+      have hsW_eq : sW = 0 := by
+        have h0 : (𝟙 (F.obj (op W)) : _ ⟶ _) = 0 := hFW_zero.eq_of_src _ _
+        calc sW = ConcreteCategory.hom (𝟙 (F.obj (op W))) sW := (ConcreteCategory.id_apply sW).symm
+          _ = 0 := by rw [h0]; exact AddMonoidHom.zero_apply _
+      rw [← TopCat.Presheaf.germ_res_apply F
+        (homOfLE (show W ≤ U from inf_le_left)) x hxW sU]
+      change ConcreteCategory.hom (F.germ W x hxW) sW = 0
+      rw [hsW_eq]; exact AddMonoidHom.map_zero _
+    rw [hb]
     exact ⟨0, AddMonoidHom.map_zero _⟩
 
 -- Pushforward along closed immersion preserves ShortExact.
