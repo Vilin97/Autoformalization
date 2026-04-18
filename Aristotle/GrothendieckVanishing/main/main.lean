@@ -16,7 +16,6 @@
   - ClosedImmersion.lean: closed immersion counit/stalk infrastructure
   - ZeroOutside.lean + ZeroOutsideFinset.lean: extension-by-zero sheaf machinery
   - ConstantSheafFlasque.lean: constant sheaf on irreducible space is flasque
-  - DimZeroVanishing.lean: irreducible dim 0 case
   - ClosedOpenDecomposition.lean: reduction to irreducible (+ reducible case)
   - PresheafFilteredColimit.lean: presheaf colimit is sheaf on Noetherian spaces (PROVED)
   - FiniteGeneratorReduction.lean: colimit step, f.g. vanishing (FULLY PROVED)

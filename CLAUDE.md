@@ -38,9 +38,7 @@ Entry point: `Aristotle.lean` → imports `Aristotle.Basic` + `Aristotle.Grothen
 All theorem files live in `Aristotle/GrothendieckVanishing/main/`. The proof proceeds by well-founded induction on Krull dimension:
 
 ```
-GrothendieckVanishing.lean    ← Main theorem (assembles all cases)
-├── DimZeroVanishing.lean     ← Irreducible dim=0: constant sheaf is flasque
-│   └── ConstantSheafFlasque.lean
+GrothendieckVanishing.lean    ← Main theorem (assembles all cases, incl. dim=0)
 ├── IrreducibleStep.lean      ← Irreducible dim≥1 (uses IrreduciblePosVanishing)
 │   └── FiniteGeneratorReduction.lean ← Colimit step, filtered diagram, f.g. vanishing
 ├── ClosedOpenDecomposition.lean ← Reduction to irreducible spaces (+ reducible case)
