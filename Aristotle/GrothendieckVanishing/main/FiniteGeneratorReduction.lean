@@ -211,14 +211,14 @@ theorem sheafH_preserves_filtered_colimits
     have hc_top := isColimitOfPreserves
       ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)) hc_psh
     have h_sec : ∀ j, Subsingleton ((Y'.obj j).val.obj (op ⊤)) := fun j => by
-      haveI := hvan j; exact subsingleton_of_addEquiv (sheafH0EquivSections (Y'.obj j))
+      haveI := hvan j; exact (sheafH0EquivSections (Y'.obj j)).toEquiv.subsingleton_congr.mp ‹_›
     have : Subsingleton (c'.pt.val.obj (op ⊤)) := by
       constructor; intro a b
       obtain ⟨j₁, x, hx⟩ := Concrete.isColimit_exists_rep _ hc_top a
       obtain ⟨j₂, y, hy⟩ := Concrete.isColimit_exists_rep _ hc_top b
       rw [← hx, ← hy, @Subsingleton.elim _ (h_sec j₁) x 0,
           @Subsingleton.elim _ (h_sec j₂) y 0, map_zero, map_zero]
-    exact subsingleton_of_addEquiv (sheafH0EquivSections c'.pt).symm
+    exact (sheafH0EquivSections c'.pt).toEquiv.subsingleton_congr.mpr ‹_›
   | succ n ih =>
     -- Inductive step: dimension shifting via per-object functorial injective embedding.
     -- Key idea: instead of embedding colim(Y') into a single injective (which needs mono

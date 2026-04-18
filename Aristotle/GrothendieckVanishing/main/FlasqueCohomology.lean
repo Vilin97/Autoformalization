@@ -7,8 +7,7 @@ Provides:
 * `sheafH_dimension_shift`: dimension shifting via short exact sequence with injective middle term
 * `FlasqueVanishing`: flasque sheaves have vanishing higher cohomology
 
-General cohomology API (`sheafH0EquivSections`, `subsingleton_of_addEquiv`) lives in
-`CohomologyAPI.lean`.
+General cohomology API (`sheafH0EquivSections`) lives in `CohomologyAPI.lean`.
 -/
 
 universe u

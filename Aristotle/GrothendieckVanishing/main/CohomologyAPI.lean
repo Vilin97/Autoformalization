@@ -14,7 +14,6 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `subsingleton_H1_via_surj`: H^1 vanishing via Ext^0 surjectivity
 * `subsingleton_sheafH_of_shortExact_middle`: LES consequence for Sheaf.H
 * `sheafH_subsingleton_of_isEmpty`: empty-space vanishing
-* `subsingleton_of_addEquiv`: transport subsingletons across additive equivalences
 * `sheafH0EquivSections`: H^0(F) ≃+ F(⊤)
 * `sheafH0EquivSections_natural`: naturality of the above
 -/
@@ -22,13 +21,6 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
-
-/-! ## General algebra helpers -/
-
-/-- Transport subsingletons across an additive equivalence. -/
-theorem subsingleton_of_addEquiv {A B : Type*} [Add A] [Add B]
-    (e : A ≃+ B) [Subsingleton A] : Subsingleton B :=
-  ⟨fun x y => by simpa using congrArg e (Subsingleton.elim (e.symm x) (e.symm y))⟩
 
 /-! ## Abstract Ext dimension shift helpers -/
 
