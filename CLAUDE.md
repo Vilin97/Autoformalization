@@ -17,7 +17,7 @@ Formalization of Grothendieck's Vanishing Theorem (Hartshorne III, Theorem 2.7) 
 lake build
 
 # Verify a single modified file (IMPORTANT: lake build may use stale .olean cache)
-lake env lean Aristotle/GrothendieckVanishing/main/SetupCore.lean
+lake env lean Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean
 
 # Rebuild from scratch (rarely needed; slow)
 lake clean && lake build
@@ -42,7 +42,7 @@ GrothendieckVanishing.lean    ← Main theorem (assembles all cases, incl. dim=0
 ├── IrreducibleStep.lean      ← Irreducible dim≥1 (uses IrreduciblePosVanishing)
 │   └── FiniteGeneratorReduction.lean ← Colimit step, filtered diagram, f.g. vanishing
 └── (shared infrastructure)
-    ├── SetupCore.lean         ← Core: category instances, closedImmersionSES
+    ├── ClosedImmersionCohomology.lean ← Closed immersion cohomology, closedImmersionSES
     ├── FlasqueVanishing.lean  ← Flasque sheaf theory and cohomological vanishing
     ├── ClosedImmersion.lean   ← Closed immersion counit/stalk
     ├── ZeroOutside.lean       ← Extension-by-zero sheaf machinery

@@ -8,7 +8,7 @@
     on Noetherian spaces (PROVED)
   - createsFilteredColimit: sheafToPresheaf creates filtered colimits (PROVED)
 -/
-import Aristotle.GrothendieckVanishing.main.SetupCore
+import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
 
 universe u

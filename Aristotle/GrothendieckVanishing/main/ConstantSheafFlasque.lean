@@ -1,7 +1,7 @@
 /-
   ConstantSheafFlasque.lean — The constant sheaf on an irreducible space is flasque
 -/
-import Aristotle.GrothendieckVanishing.main.SetupCore
+import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
 
 universe u
