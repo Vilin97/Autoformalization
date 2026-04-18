@@ -9,7 +9,7 @@
   - exists_nonzero_stalk_in_V: nonzero subsheaf has nonzero stalk in V
   - stalk_zeroOutsideInt_eq_zsmul_generator: stalks are Z-multiples of generator
   - ulift_int_subgroup_cyclic: cyclic subgroup classification
-  - zsmul_generator_injective: generator coefficient uniqueness
+  - zsmul_generator_injective: injectivity of the ℤ-scalar action on the generator
 -/
 import Aristotle.GrothendieckVanishing.main.SetupCore
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
@@ -351,15 +351,14 @@ theorem ulift_int_subgroup_cyclic
     · push_neg at hle
       exact ⟨-n, ULift.ext _ _ (by rw [abs_of_neg hle, neg_mul_neg]; exact hn.symm)⟩
 
-/-- In `stalk(zeroOutsideInt V, x)` for `x ∈ V`, the integer coefficient in the generator
-    representation is unique: `n • gen = m • gen → n = m`. -/
+/-- The map `n ↦ n • gen` from `ℤ` into `stalk(zeroOutsideInt V, x)` is injective
+    for `x ∈ V`. -/
 theorem zsmul_generator_injective
-    {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
-    {n m : ℤ}
-    (h : n • ((TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V x hx
-        (TopCat.Sheaf.zeroOutsideInt.generator V)) =
-      m • ((TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V x hx
-        (TopCat.Sheaf.zeroOutsideInt.generator V))) : n = m := by
+    {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V) :
+    Function.Injective (fun (n : ℤ) =>
+      n • ((TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V x hx
+        (TopCat.Sheaf.zeroOutsideInt.generator V))) := by
+  intro n m h
   let P := TopCat.Presheaf.constZ.zeroOutside V
   let J := Opens.grothendieckTopology (T := X)
   let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
