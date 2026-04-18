@@ -6,17 +6,45 @@
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
   The proof assembles (FULLY PROVED — 0 sorry's):
-  - DimZeroVanishing: irreducible dim 0 case
+  - Dim 0 case: handled inline (sheaf_restriction_epi_of_irreducible_dim_zero,
+    grothendieck_vanishing_dim_zero)
   - IrreducibleStep + FiniteGeneratorReduction: irreducible dim >= 1 case
   - ClosedOpenDecomposition: reduction to irreducible
 -/
-import Aristotle.GrothendieckVanishing.main.DimZeroVanishing
 import Aristotle.GrothendieckVanishing.main.ClosedOpenDecomposition
 import Aristotle.GrothendieckVanishing.main.IrreducibleStep
 
 universe u
 
 open CategoryTheory TopologicalSpace Order Limits
+
+/-! ## Dim 0 vanishing -/
+
+/-- On an irreducible space of dim ≤ 0, every sheaf has epi restriction maps.
+    The only nonempty open is ⊤, so the only nontrivial restriction is F(⊤) → F(⊥),
+    which is epi because F(⊥) is terminal (zero). -/
+private theorem sheaf_restriction_epi_of_irreducible_dim_zero
+    (X : TopCat.{u}) [IrreducibleSpace X]
+    (hdim : topologicalKrullDim X ≤ 0)
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    {U V : Opens X} (i : U ⟶ V) :
+    Epi (F.val.map i.op) := by
+  rcases opens_eq_bot_or_top_of_irreducibleSpace_dim_zero hdim U with rfl | rfl
+  · exact F.isTerminalOfEmpty.isZero.epi _
+  · have hV := le_antisymm le_top (homOfLE le_top ≫ i |>.le); subst hV
+    rw [Subsingleton.elim i (𝟙 ⊤), op_id, F.val.map_id]; infer_instance
+
+/-- On an irreducible Noetherian space of dim ≤ 0, all higher cohomology vanishes.
+    Hartshorne III.2.7, Step 2. Uses FlasqueVanishing applied to sheaves that are
+    flasque because the only opens are ⊥ and ⊤. -/
+private theorem grothendieck_vanishing_dim_zero
+    (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X] [IrreducibleSpace X]
+    (hdim : topologicalKrullDim X ≤ 0)
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (n : ℕ) :
+    Subsingleton (Sheaf.H F (n + 1)) :=
+  FlasqueVanishing X F
+    (fun i => sheaf_restriction_epi_of_irreducible_dim_zero X hdim F i) n
 
 /-! ## Main theorem -/
 
