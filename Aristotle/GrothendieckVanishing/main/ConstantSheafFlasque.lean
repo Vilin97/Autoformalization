@@ -12,14 +12,6 @@ private abbrev constPresheaf (X : Type u) [TopologicalSpace X]
     (A : AddCommGrpCat.{u}) : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} :=
   (Functor.const (Opens X)ᵒᵖ).obj A
 
-theorem plusObj_bot_subsingleton {X : Type u} [TopologicalSpace X]
-    (P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}) :
-    Subsingleton (ToType (((Opens.grothendieckTopology X).plusObj P).obj (op ⊥))) := by
-  constructor; intro x y
-  have hcov : (⊥ : Sieve (⊥ : Opens X)) ∈ (Opens.grothendieckTopology X) ⊥ :=
-    fun p hp => (Opens.mem_bot.mp hp).elim
-  exact Plus.sep P ⟨⊥, hcov⟩ x y (fun ⟨_, _, hf⟩ => absurd hf id)
-
 theorem toPlus_injective_of_const
     {X : Type u} [TopologicalSpace X] {A : AddCommGrpCat.{u}}
     (U : Opens X) (hU : (U : Set X).Nonempty)
@@ -119,7 +111,10 @@ private theorem toPlus_surjective_of_firstPlus
   · exact (toPlus_firstPlus_key S x I₀ hI₀ a ha I hI).symm
   · rw [Set.not_nonempty_iff_eq_empty] at hI
     have hIbot : I.Y = ⊥ := Opens.ext (by simpa using hI)
-    exact @Subsingleton.elim _ (hIbot ▸ plusObj_bot_subsingleton _) _ _
+    have hcov : (⊥ : Sieve (⊥ : Opens X)) ∈ (Opens.grothendieckTopology X) ⊥ :=
+      fun _ hp => (Opens.mem_bot.mp hp).elim
+    exact @Subsingleton.elim _ (hIbot ▸ ⟨fun x y =>
+      Plus.sep _ ⟨⊥, hcov⟩ x y fun ⟨_, _, hf⟩ => absurd hf id⟩) _ _
 
 private theorem sheafify_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X] {A : AddCommGrpCat.{u}}
@@ -130,9 +125,10 @@ private theorem sheafify_constPresheaf_flasque_of_irreducible
     subst this
     rw [AddCommGrpCat.epi_iff_surjective]
     intro y
-    haveI : Subsingleton (ToType (((Opens.grothendieckTopology X).sheafify (constPresheaf X A)).obj (op ⊥))) := by
-      simpa [GrothendieckTopology.toSheafify] using
-        plusObj_bot_subsingleton (X := X) (P := (Opens.grothendieckTopology X).plusObj (constPresheaf X A))
+    haveI : Subsingleton (ToType (((Opens.grothendieckTopology X).sheafify (constPresheaf X A)).obj (op ⊥))) :=
+      AddCommGrpCat.subsingleton_of_isZero
+        (TopCat.Sheaf.isTerminalOfEmpty
+          ⟨_, (Opens.grothendieckTopology X).sheafify_isSheaf (constPresheaf X A)⟩).isZero
     exact ⟨0, Subsingleton.elim _ _⟩
   · have hUne : (U : Set X).Nonempty := Set.nonempty_iff_ne_empty.mpr hU
     have hnat := ((Opens.grothendieckTopology X).toSheafify (constPresheaf X A)).naturality i.op
