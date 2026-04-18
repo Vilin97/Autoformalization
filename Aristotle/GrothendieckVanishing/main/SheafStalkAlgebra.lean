@@ -24,7 +24,7 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
     degree `m + 1`. Uses the SES `0 → zeroOutsideInt V → zeroOutsideInt ⊤ → cokernel → 0`
     where `zeroOutsideInt ⊤ = Z_X` (constant sheaf, flasque on irreducible spaces). -/
 theorem zeroOutsideInt_vanishing
-    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
+    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) (m : ℕ)
     (hCoker : Subsingleton (Sheaf.H (Limits.cokernel
       (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))) m)) :
@@ -155,7 +155,7 @@ theorem zeroOutsideInt_cohomology_vanishing
     intro h; subst h; exact absurd hm (not_lt.mpr topologicalKrullDim_nonneg)
   obtain ⟨m', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
   -- Step 2: apply zeroOutsideInt_vanishing, reducing to cokernel vanishing at m'
-  apply zeroOutsideInt_vanishing X V m'
+  apply zeroOutsideInt_vanishing V m'
   -- Goal: Subsingleton (Sheaf.H (Limits.cokernel (openHom le_top)) m')
   -- Cokernel vanishing at m': dim Vᶜ < dim X ≤ m' (since m'+1 > dim X > 0)
   set C := Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))
