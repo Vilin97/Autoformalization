@@ -271,13 +271,14 @@ theorem PushforwardHVanishing
     have hSE_X : (ip.shortComplex.map
         (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
       closedIncl_pushforward_shortExact hZ ip.shortExact_shortComplex
-    have hFlasque : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat i).obj
-        ip.shortComplex.X₂) := fun {U V} j => by
+    haveI : IsFlasqueSheaf (ip.shortComplex.map
+        (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).X₂ := by
+      constructor; intro U V j
       change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
-      exact isFlasque_of_injective ip.shortComplex.X₂ _
+      exact IsFlasqueSheaf.epi_map ((Opens.map i).map j)
     cases k with
     | zero =>
-      exact subsingleton_H1_via_surj _ hSE_X (FlasqueVanishing _ _ hFlasque 0)
+      exact subsingleton_H1_via_surj _ hSE_X (FlasqueVanishing _ _ 0)
         (ext0_surj_of_epi_top (by
           show Epi (ip.shortComplex.g.val.app (op ((Opens.map i).obj ⊤)))
           rw [show ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ from by ext; simp [Opens.map]]
@@ -286,7 +287,7 @@ theorem PushforwardHVanishing
       exact ext_dimension_shift _ hSE_X (m + 1)
         (ih_push ip.shortComplex.X₃ (ext_dimension_shift_X₃ _ ip.shortExact_shortComplex (m + 1)
           (Ext.subsingleton_of_injective _ _ m) hG'))
-        (FlasqueVanishing _ _ hFlasque (m + 1))
+        (FlasqueVanishing _ _ (m + 1))
 
 -- The adjunction unit F → i_*(i^*F) is epi for closed immersions.
 -- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).

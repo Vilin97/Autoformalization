@@ -42,14 +42,14 @@ private lemma isFlasque_filtered_colimit
     (hFlasque : ∀ j, IsFlasqueSheaf (F.obj j))
     {c : Cocone F} (hc : IsColimit c) :
     IsFlasqueSheaf c.pt := by
-  intro U V i
+  constructor; intro U V i
   rw [AddCommGrpCat.epi_iff_surjective]
   intro b; haveI := createsFilteredColimit F
   have hc_psh := isColimitOfPreserves (sheafToPresheaf _ _) hc
   have hc_U := isColimitOfPreserves
     ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op U)) hc_psh
   obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ hc_U b
-  obtain ⟨a₀, ha₀⟩ := (AddCommGrpCat.epi_iff_surjective _).mp (hFlasque j₀ i) b₀
+  obtain ⟨a₀, ha₀⟩ := (AddCommGrpCat.epi_iff_surjective _).mp ((hFlasque j₀).epi_map i) b₀
   refine ⟨ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀, ?_⟩
   rw [show ConcreteCategory.hom (c.pt.val.map i.op)
       (ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀) =
@@ -272,9 +272,9 @@ theorem sheafH_preserves_filtered_colimits
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel ι')) inferInstance inferInstance
     -- H^{n+1}(colim Inj) = 0 since colim Inj is flasque
-    have hI := FlasqueVanishing X injCocone.pt
-      (isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
-        (colimit.isColimit Inj)) n
+    haveI := isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
+        (colimit.isColimit Inj)
+    have hI := FlasqueVanishing X injCocone.pt n
     -- Build per-object quotient functor Q.obj j = cokernel(η.app j)
     -- η.app j is ALWAYS mono by ffData.hi, so no hmono needed!
     let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
@@ -435,9 +435,9 @@ theorem sheafH_filtered_colimit_surj
       ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel ι')) inferInstance inferInstance
-    have hI := FlasqueVanishing X injCocone.pt
-      (isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
-        (colimit.isColimit Inj)) n
+    haveI := isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
+        (colimit.isColimit Inj)
+    have hI := FlasqueVanishing X injCocone.pt n
     let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
       { obj := fun j => cokernel (η.app j)
         map := fun {j j'} f => cokernel.map _ _ (Y'.map f) (Inj.map f) (η.naturality f).symm

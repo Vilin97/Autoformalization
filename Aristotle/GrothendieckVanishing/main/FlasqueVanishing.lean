@@ -120,8 +120,8 @@ statement that can be attacked independently.
 
 /-- A sheaf of abelian groups is **flasque** if all restriction maps are epi.
     This is equivalent to surjectivity of restriction on sections. -/
-def IsFlasqueSheaf {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X) : Prop :=
-  ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op)
+class IsFlasqueSheaf {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X) : Prop where
+  epi_map : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op)
 
 /-! ### Helper: sections functor and evaluated exactness -/
 
@@ -245,7 +245,7 @@ private lemma partialLift_chain_ub {X : TopCat.{u}}
 -- using exactness + flasqueness, glue to get a strictly larger partial lift.
 private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁)
+    (hS : S.ShortExact) [IsFlasqueSheaf S.X₁]
     {U : Opens X} {s : S.X₃.val.obj (op U)}
     {V₀ : Opens X} {t₀ : S.X₂.val.obj (op V₀)}
     (hV₀U : V₀ ≤ U)
@@ -271,7 +271,7 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     exact presheaf_map_eq S.X₃.val _ _ s
   obtain ⟨a, ha⟩ := sections_exact_of_shortExact hS (V₀ ⊓ W) _ hdiff_ker
   obtain ⟨ahat, hahat⟩ := (AddCommGrpCat.epi_iff_surjective _).mp
-    (hFlasque₁ (homOfLE inf_le_right : V₀ ⊓ W ⟶ W)) a
+    (IsFlasqueSheaf.epi_map (homOfLE inf_le_right : V₀ ⊓ W ⟶ W)) a
   set t'' := t' + S.f.val.app (op W) ahat with ht''_def
   have hgt'' : S.g.val.app (op W) t'' = S.X₃.val.map (homOfLE hWU).op s := by
     simp only [ht''_def, map_add, show S.g.val.app (op W) (S.f.val.app (op W) ahat) = 0 from by
@@ -321,7 +321,7 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
 -- Zorn argument for surjectivity of sections (Nugent, PR #35790).
 theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁) (U : Opens X) :
+    (hS : S.ShortExact) [IsFlasqueSheaf S.X₁] (U : Opens X) :
     Epi (S.g.val.app (op U)) := by
   rw [AddCommGrpCat.epi_iff_surjective]; intro s
   haveI : Epi S.g := hS.epi_g
@@ -330,7 +330,7 @@ theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
   obtain ⟨⟨V₀, t₀⟩, ⟨hV₀U, ht₀⟩, hmax⟩ :=
     @zorn_le₀ _ (sigmaPreorder S) {p | IsPartialLift U s p}
       (fun c hcP hchain => partialLift_chain_ub (fun p hp => hcP hp) hchain)
-  have := partialLift_maximal_eq_U hS hFlasque₁ hV₀U ht₀ hls hmax
+  have := partialLift_maximal_eq_U hS hV₀U ht₀ hls hmax
   subst this; exact ⟨t₀, by rw [ht₀]; simp⟩
 
 /-- **Quotient preserves flasqueness** (Nugent, PR #35790).
@@ -339,11 +339,11 @@ theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
     through the epi `G(U) -> H(U)` composed with the restriction of `G`. -/
 theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (h₁ : IsFlasqueSheaf S.X₁) (h₂ : IsFlasqueSheaf S.X₂) :
+    (hS : S.ShortExact) [IsFlasqueSheaf S.X₁] [IsFlasqueSheaf S.X₂] :
     IsFlasqueSheaf S.X₃ := by
-  intro U V j
-  have hg_U : Epi (S.g.val.app (op U)) := epi_app_of_shortExact_flasque hS h₁ U
-  have hres₂ : Epi (S.X₂.val.map j.op) := h₂ j
+  constructor; intro U V j
+  have hg_U : Epi (S.g.val.app (op U)) := epi_app_of_shortExact_flasque hS U
+  have hres₂ : Epi (S.X₂.val.map j.op) := IsFlasqueSheaf.epi_map j
   rw [AddCommGrpCat.epi_iff_surjective] at hg_U hres₂ ⊢
   intro z; obtain ⟨w, hw⟩ := hg_U z
   obtain ⟨x, hx⟩ := hres₂ w
@@ -410,9 +410,9 @@ end FreeAbSheaf
 
 -- Injective sheaves are flasque (proved by Aristotle 8f42abaa).
 -- Uses free abelian sheaf + Yoneda identification + Injective.factors.
-theorem isFlasque_of_injective {X : TopCat.{u}}
+instance isFlasque_of_injective {X : TopCat.{u}}
     (I : TopCat.Sheaf AddCommGrpCat.{u} X) [Injective I] : IsFlasqueSheaf I := by
-  intro U V i
+  constructor; intro U V i
   rw [AddCommGrpCat.epi_iff_surjective]
   intro s; obtain ⟨h, hh⟩ := Injective.factors ((freeAbSheafHomEquiv U I).symm s) (freeAbSheafMap i)
   exact ⟨freeAbSheafHomEquiv V I h, by rw [← freeAbSheafHomEquiv_naturality i I h, hh]; simp⟩

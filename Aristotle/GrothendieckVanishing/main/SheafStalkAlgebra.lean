@@ -30,8 +30,8 @@ theorem zeroOutsideInt_vanishing
   let S := ShortComplex.mk f (cokernel.π f) (cokernel.condition f)
   have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
     (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel f)) inferInstance inferInstance
-  have hFlasque : IsFlasqueSheaf S.X₂ := by
-    intro U W i
+  haveI : IsFlasqueSheaf S.X₂ := by
+    constructor; intro U W i
     let J := Opens.grothendieckTopology (T := X)
     let A := AddCommGrpCat.of (ULift.{u} ℤ)
     let α : TopCat.Presheaf.constZ.zeroOutside (⊤ : Opens X) ≅
@@ -43,7 +43,7 @@ theorem zeroOutsideInt_vanishing
     exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
       (((sheafToPresheaf J AddCommGrpCat.{u}).mapIso
         ((presheafToSheaf J AddCommGrpCat.{u}).mapIso α).symm).hom.naturality i.op).symm
-  exact ext_dimension_shift _ hSE m hCoker (FlasqueVanishing X S.X₂ hFlasque m)
+  exact ext_dimension_shift _ hSE m hCoker (FlasqueVanishing X S.X₂ m)
 
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
     any germ in the larger zero-outside presheaf can be lifted by restricting to `W ∩ V ≤ V`
