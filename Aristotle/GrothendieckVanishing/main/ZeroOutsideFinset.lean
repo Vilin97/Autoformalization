@@ -40,13 +40,6 @@ abbrev finsetGeneratedSheaf {X : TopCat.{u}}
     Sheaf AddCommGrpCat.{u} X :=
   Limits.image (finsetGeneratorMap S)
 
-instance finsetGeneratorMap_epi_to_image {X : TopCat.{u}}
-    {F : Sheaf AddCommGrpCat.{u} X}
-    (S : Finset (SectionIndex F))
-    [HasCoproduct fun σ : {σ // σ ∈ S} => zeroOutsideInt σ.1.1] :
-    Epi (factorThruImage (finsetGeneratorMap S)) :=
-  inferInstance
-
 /-- The canonical map from the coproduct of all `zeroOutsideInt U` indexed by local sections
 of `F` onto `F`. This is the formal Step 3A starting point for building finitely generated
 subsheaves via images of smaller subcoproducts. -/
