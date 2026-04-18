@@ -132,14 +132,6 @@ theorem cokernel_stalk_zero_of_stalk_surj
       congr_arg Sheaf.Hom.val (cokernel.condition f)]; rfl
   simp only [NatTrans.comp_app, ConcreteCategory.comp_apply] at h1; rw [h1, map_zero]
 
-/-- The cokernel of `openHom(le_top)` has zero stalks at points of `V`.
-    Delegates to `cokernel_stalk_zero_of_stalk_surj` via `sheaf_stalk_surj_openHom`. -/
-private theorem cokernel_stalk_zero_V {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
-    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
-      (Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))).val) :
-    a = 0 :=
-  cokernel_stalk_zero_of_stalk_surj _ x (sheaf_stalk_surj_openHom le_top x hx) a
-
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
 
 These lemmas decompose the kernel vanishing argument.
@@ -196,7 +188,8 @@ theorem zeroOutsideInt_cohomology_vanishing
             closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
           exact stalk_zero_of_ses_g_iso hSE x inferInstance a
         · exact stalk_zero_of_shortExact_kernel hSE x
-            (fun b => cokernel_stalk_zero_V V x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY) b) a)
+            (cokernel_stalk_zero_of_stalk_surj _ x
+              (sheaf_stalk_surj_openHom le_top x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY))) a)
     (PushforwardHVanishing Y hYcl _ m' (ih (TopCat.of Y) m' _ hY_dim_lt hm'_Y))
 
 
