@@ -31,7 +31,7 @@ theorem sheafH_dimension_shift {X : TopCat.{u}}
 -- of ULift ℤ + epi_app_of_shortExact_flasque.
 private theorem ext_zero_map_surjective {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁) :
+    (hS : S.ShortExact) [IsFlasqueSheaf S.X₁] :
     ∀ y : Ext ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
         (AddCommGrpCat.of (ULift.{u} ℤ))) S.X₃ 0,
       ∃ z : Ext ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
@@ -43,7 +43,7 @@ private theorem ext_zero_map_surjective {X : TopCat.{u}}
     obtain ⟨ψ, hψ⟩ := this
     exact ⟨Ext.mk₀ ψ, by rw [Ext.mk₀_comp_mk₀, hψ, Ext.mk₀_addEquiv₀_apply]⟩
   haveI : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map S.g) := by
-    have h := epi_app_of_shortExact_flasque hS hFlasque₁ ⊤
+    have h := epi_app_of_shortExact_flasque hS ⊤
     exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
       ((Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).inv.naturality S.g).symm
   haveI : Projective (AddCommGrpCat.of (ULift.{u} ℤ)) := ulift_int_projective
@@ -56,11 +56,11 @@ private theorem ext_zero_map_surjective {X : TopCat.{u}}
 
 /-- **Base case**: `H^1(F) = 0` for flasque `F`. -/
 private theorem sheafH_one_of_flasque {X : TopCat.{u}}
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (h : IsFlasqueSheaf F) :
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) [IsFlasqueSheaf F] :
     Subsingleton (Sheaf.H F 1) := by
   obtain ⟨ip⟩ := EnoughInjectives.presentation F
   exact subsingleton_H1_via_surj _ ip.shortExact_shortComplex
-    (Ext.subsingleton_of_injective _ _ 0) (ext_zero_map_surjective ip.shortExact_shortComplex h)
+    (Ext.subsingleton_of_injective _ _ 0) (ext_zero_map_surjective ip.shortExact_shortComplex)
 
 /-- **Flasque sheaves have vanishing higher cohomology** (Nugent, PR #35790).
 
@@ -71,15 +71,13 @@ private theorem sheafH_one_of_flasque {X : TopCat.{u}}
       by `isFlasque_X₃_of_shortExact`. By dimension shifting, `H^{n+2}(F) = H^{n+1}(Q)`,
       and the latter vanishes by the induction hypothesis. -/
 theorem FlasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (h : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op))
+    [IsFlasqueSheaf F]
     (n : ℕ) :
     Subsingleton (Sheaf.H F (n + 1)) := by
   induction n generalizing F with
-  | zero => exact sheafH_one_of_flasque F h
+  | zero => exact sheafH_one_of_flasque F
   | succ n ih =>
     obtain ⟨ip⟩ := EnoughInjectives.presentation F
     have hSE := ip.shortExact_shortComplex
-    have hI_flasque : IsFlasqueSheaf ip.shortComplex.X₂ := isFlasque_of_injective _
-    have hQ_flasque : IsFlasqueSheaf ip.shortComplex.X₃ :=
-      isFlasque_X₃_of_shortExact hSE h hI_flasque
-    exact sheafH_dimension_shift ip.shortExact_shortComplex (n + 1) (ih ip.shortComplex.X₃ hQ_flasque)
+    haveI : IsFlasqueSheaf ip.shortComplex.X₃ := isFlasque_X₃_of_shortExact hSE
+    exact sheafH_dimension_shift ip.shortExact_shortComplex (n + 1) (ih ip.shortComplex.X₃)

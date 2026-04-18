@@ -43,8 +43,8 @@ private theorem grothendieck_vanishing_dim_zero
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (n : ℕ) :
     Subsingleton (Sheaf.H F (n + 1)) :=
-  FlasqueVanishing X F
-    (fun i => sheaf_restriction_epi_of_irreducible_dim_zero X hdim F i) n
+  letI : IsFlasqueSheaf F := ⟨fun i => sheaf_restriction_epi_of_irreducible_dim_zero X hdim F i⟩
+  FlasqueVanishing X F n
 
 /-! ## Main theorem -/
 
