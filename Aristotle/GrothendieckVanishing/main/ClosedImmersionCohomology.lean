@@ -1,5 +1,5 @@
 /-
-  SetupCore.lean -- Closed immersion infrastructure for Grothendieck vanishing
+  ClosedImmersionCohomology.lean — Closed immersion cohomology infrastructure
 
   Provides:
   1. `PushforwardHVanishing` (pushforward preserves cohomological vanishing)

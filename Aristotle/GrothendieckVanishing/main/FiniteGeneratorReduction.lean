@@ -5,7 +5,7 @@
   - sheafH_preserves_filtered_colimits: vanishing propagation
     for filtered colimits (FULLY PROVED).
   - sheafH_filtered_colimit_surj: surjectivity of colim H^n(F_j) → H^n(colim F_j) (FULLY PROVED).
-    Uses extClass_naturality (in SetupCore.lean) for the connecting map commutation.
+    Uses extClass_naturality (in ClosedImmersionCohomology.lean) for the connecting map commutation.
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
@@ -15,7 +15,7 @@
   - directLimit_cohomology_vanishing: from epi-image vanishing to all sheaves (PROVED)
 -/
 import Aristotle.GrothendieckVanishing.main.PresheafFilteredColimit
-import Aristotle.GrothendieckVanishing.main.SetupCore
+import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
 
 universe u

@@ -11,7 +11,7 @@
   - ulift_int_subgroup_cyclic: cyclic subgroup classification
   - zsmul_generator_injective: injectivity of the ℤ-scalar action on the generator
 -/
-import Aristotle.GrothendieckVanishing.main.SetupCore
+import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
 import Aristotle.GrothendieckVanishing.main.FiniteGeneratorReduction
 
