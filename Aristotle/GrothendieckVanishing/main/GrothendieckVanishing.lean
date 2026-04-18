@@ -149,7 +149,7 @@ theorem GrothendieckVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{
         exact grothendieck_vanishing_dim_zero Y hdim G k
       · -- dim Y > 0: use IrreducibleStep
         push_neg at hdim
-        exact IrreduciblePosVanishing Y m hY hdim G
+        exact IrreduciblePosVanishing G m hY hdim
           (fun Z _ m' G' hlt hG' =>
             ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle)) Z m' G' rfl hG'))
     X n F rfl h

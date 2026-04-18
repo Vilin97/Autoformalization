@@ -145,9 +145,9 @@ are in `FiniteGeneratorReduction.lean`.
     Proof: write `m = m' + 1`, apply `zeroOutsideInt_vanishing` (SES + flasque), then prove
     cokernel vanishing at `m'` via `closedImmersionSES` on `Vᶜ` + `PushforwardHVanishing`. -/
 theorem zeroOutsideInt_cohomology_vanishing
-    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (ih : VanishingIH.{u} (topologicalKrullDim X))
+    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) (hV : V ≠ ⊥)
+    (ih : VanishingIH.{u} (topologicalKrullDim X))
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) m) := by
   -- m ≠ 0 (since m > dim X ≥ 0), write m = m' + 1

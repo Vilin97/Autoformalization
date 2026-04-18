@@ -275,10 +275,10 @@ theorem subsheaf_contains_zeroOutsideInt
     `V' ⊆ V` with `Z_{V'} ↪ R` (stalk-iso on `V'`). The cokernel is supported on `(V')^c`
     (dim < dim X), so vanishes by the IH. Middle-term LES gives `H^m(R) = 0`. -/
 theorem subsheaf_zeroOutsideInt_vanishing
-    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (ih : VanishingIH.{u} (topologicalKrullDim X))
+    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) (R : TopCat.Sheaf AddCommGrpCat.{u} X)
     (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
+    (ih : VanishingIH.{u} (topologicalKrullDim X))
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H R m) := by
   by_cases hR : IsZero R
@@ -290,7 +290,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel j)) inferInstance inferInstance
     exact subsingleton_sheafH_of_shortExact_middle hSE m
-      (zeroOutsideInt_cohomology_vanishing X ih V' hV'ne m hm)
+      (zeroOutsideInt_cohomology_vanishing V' hV'ne ih m hm)
       (closedComplementVanishing V' hV'ne _ m hm ih
         (fun x hxV' b => cokernel_stalk_zero_of_stalk_surj j x (hj_stalk x hxV').2 b))
 
@@ -299,10 +299,10 @@ theorem subsheaf_zeroOutsideInt_vanishing
     `zeroOutsideInt_cohomology_vanishing` (Step 5) and
     `subsheaf_zeroOutsideInt_vanishing` (Step 4). -/
 theorem epiImage_zeroOutsideInt_vanishing
-    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (ih : VanishingIH.{u} (topologicalKrullDim X))
+    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) {G : TopCat.Sheaf AddCommGrpCat.{u} X}
     (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G) (hf : Epi f)
+    (ih : VanishingIH.{u} (topologicalKrullDim X))
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H G m) := by
   by_cases hV : V = ⊥
@@ -313,8 +313,8 @@ theorem epiImage_zeroOutsideInt_vanishing
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
     exact ext_dimension_shift_X₃ _ hSE m
-      (zeroOutsideInt_cohomology_vanishing X ih V hV m hm)
-      (subsheaf_zeroOutsideInt_vanishing X ih V (kernel f) (kernel.ι f) (m + 1)
+      (zeroOutsideInt_cohomology_vanishing V hV ih m hm)
+      (subsheaf_zeroOutsideInt_vanishing V (kernel f) (kernel.ι f) ih (m + 1)
         (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl)))
 
 -- Filtered diagram infrastructure, finitely generated vanishing, and
@@ -322,9 +322,9 @@ theorem epiImage_zeroOutsideInt_vanishing
 
 /-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case). -/
 theorem IrreduciblePosVanishing
-    (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
+    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
     (ih : VanishingIH.{u} (topologicalKrullDim X)) :
     Subsingleton (Sheaf.H F n) := by
   obtain ⟨Z, hZ_closed, _, hZ_dim, hn_Z⟩ :=
@@ -335,6 +335,6 @@ theorem IrreduciblePosVanishing
     PushforwardHVanishing Z hZ_closed _ n (ih (TopCat.of Z) n _ hZ_dim hn_Z)
   have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
     directLimit_cohomology_vanishing S.X₁ n
-      (fun f hf => epiImage_zeroOutsideInt_vanishing X ih _ f hf n hn)
+      (fun f hf => epiImage_zeroOutsideInt_vanishing _ f hf ih n hn)
   exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
 
