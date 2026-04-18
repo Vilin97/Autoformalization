@@ -276,7 +276,7 @@ theorem subsheaf_contains_zeroOutsideInt
     (dim < dim X), so vanishes by the IH. Middle-term LES gives `H^m(R) = 0`. -/
 theorem subsheaf_zeroOutsideInt_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (ih : VanishingIH (X := X))
+    (ih : VanishingIH.{u} (topologicalKrullDim X))
     (hpos : topologicalKrullDim X > 0)
     (V : Opens X) (R : TopCat.Sheaf AddCommGrpCat.{u} X)
     (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
@@ -301,7 +301,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
     `subsheaf_zeroOutsideInt_vanishing` (Step 4). -/
 theorem epiImage_zeroOutsideInt_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (ih : VanishingIH (X := X))
+    (ih : VanishingIH.{u} (topologicalKrullDim X))
     (hpos : topologicalKrullDim X > 0)
     (V : Opens X) {G : TopCat.Sheaf AddCommGrpCat.{u} X}
     (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G) (hf : Epi f)
@@ -327,14 +327,14 @@ theorem IrreduciblePosVanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (ih : VanishingIH (X := X)) :
+    (ih : VanishingIH.{u} (topologicalKrullDim X)) :
     Subsingleton (Sheaf.H F n) := by
   obtain ⟨Z, hZ_closed, _, hZ_dim, hn_Z⟩ :=
     exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos
   let S := closedImmersionSES Z hZ_closed F
   have hSE := closedImmersionSES_shortExact Z hZ_closed F
   have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
-    PushforwardHVanishing Z hZ_closed _ n (@ih (TopCat.of Z) _ n _ hZ_dim hn_Z)
+    PushforwardHVanishing Z hZ_closed _ n (ih (TopCat.of Z) n _ hZ_dim hn_Z)
   have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
     directLimit_cohomology_vanishing S.X₁ n
       (fun f hf => epiImage_zeroOutsideInt_vanishing X ih hpos _ f hf n hn)
