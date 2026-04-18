@@ -1,13 +1,13 @@
 /-
   IrreducibleStep.lean — Assembly: irreducible positive-dimension vanishing
 
-  Key results (unique to this file; stalk algebra lemmas are in StalkGeneratorAlgebra.lean):
+  Key results (unique to this file; stalk algebra lemmas are in SheafStalkAlgebra.lean):
   - exists_section_generating_stalks: PROVED — uses Nat.find to choose x₀ with minimal
     image subgroup generator d, then divisibility d | d_x follows from minimality.
   - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
   - IrreduciblePosVanishing: assembles all pieces (FULLY PROVED)
 -/
-import Aristotle.GrothendieckVanishing.main.StalkGeneratorAlgebra
+import Aristotle.GrothendieckVanishing.main.SheafStalkAlgebra
 
 universe u
 
