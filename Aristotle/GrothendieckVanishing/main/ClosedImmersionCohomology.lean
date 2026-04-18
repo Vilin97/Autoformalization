@@ -53,11 +53,11 @@ private theorem closedIncl_pushforward_epi_g
     haveI : IsIso (TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
         (TopCat.closedIncl hs) S.X₂.val z) :=
       TopCat.Presheaf.stalkPushforward.stalkPushforward_iso_of_isInducing
-        AddCommGrpCat.{u} hs.isClosedEmbedding_subtypeVal.isInducing _ z
+        AddCommGrpCat.{u} (TopCat.closedIncl_isInducing hs) _ z
     haveI : IsIso (TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
         (TopCat.closedIncl hs) S.X₃.val z) :=
       TopCat.Presheaf.stalkPushforward.stalkPushforward_iso_of_isInducing
-        AddCommGrpCat.{u} hs.isClosedEmbedding_subtypeVal.isInducing _ z
+        AddCommGrpCat.{u} (TopCat.closedIncl_isInducing hs) _ z
     have hg_surj : Function.Surjective
         (ConcreteCategory.hom
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map

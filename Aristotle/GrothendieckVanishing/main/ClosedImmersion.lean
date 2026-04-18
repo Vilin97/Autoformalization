@@ -29,6 +29,14 @@ namespace TopCat
 def closedIncl {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) : TopCat.of s ⟶ X :=
   TopCat.ofHom ⟨Subtype.val, hs.isClosedEmbedding_subtypeVal.continuous⟩
 
+lemma closedIncl_isClosedEmbedding {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
+    Topology.IsClosedEmbedding (closedIncl hs) :=
+  hs.isClosedEmbedding_subtypeVal
+
+lemma closedIncl_isInducing {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
+    Topology.IsInducing (closedIncl hs) :=
+  (closedIncl_isClosedEmbedding hs).isInducing
+
 theorem locallyInjective_stalkFunctor_map_injective
     {C : Type*} [Category.{u} C] [HasColimits C]
     {FC : C → C → Type*} {CC : C → Type u}
@@ -262,7 +270,7 @@ private theorem closedIncl_sheafAdj_counit_isIso
         rw [closedIncl_presheaf_counit_stalk_comp hs F.val x]
       rw [hη_eq]
       haveI := TopCat.Presheaf.stalkPushforward.stalkPushforward_iso_of_isInducing
-        (f := closedIncl hs) C hs.isClosedEmbedding_subtypeVal.isInducing F.val x
+        (f := closedIncl hs) C (closedIncl_isInducing hs) F.val x
       infer_instance
     have hsheafifyLift_eq :
         T.map (CategoryTheory.sheafifyLift K η F.cond) =
