@@ -106,7 +106,7 @@ noncomputable def sheafH0EquivSections {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
     Sheaf.H F 0 ≃+ F.val.obj (op ⊤) := by
   refine AddEquiv.trans Ext.addEquiv₀ ?_
-  refine AddEquiv.trans ?_ (TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv _)
+  refine AddEquiv.trans ?_ (AddCommGrpCat.uliftZMultiplesAddEquiv _)
   exact (constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat Limits.isTerminalTop).homAddEquiv _ F
 
 /-- Naturality of `sheafH0EquivSections`: composing `x` with `mk₀ f` at degree 0
