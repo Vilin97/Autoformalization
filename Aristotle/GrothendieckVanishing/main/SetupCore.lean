@@ -73,24 +73,6 @@ private theorem pushforward_stalk_zero_closedIncl
   change ConcreteCategory.hom (F.germ W x hxW) sW = 0
   rw [hsW_eq]; exact AddMonoidHom.map_zero _
 
--- Surjectivity transfer: f ≫ g = h ≫ k with g, h iso and k surj → f surj
-private theorem surj_transfer_closedIncl {A B C D : AddCommGrpCat.{u}}
-    {f : A ⟶ B} {g : B ⟶ C} {h : A ⟶ D} {k : D ⟶ C}
-    [IsIso g] [IsIso h]
-    (hnat : f ≫ g = h ≫ k)
-    (hk : Function.Surjective (ConcreteCategory.hom k)) :
-    Function.Surjective (ConcreteCategory.hom f) := by
-  intro b; obtain ⟨d, hd⟩ := hk (ConcreteCategory.hom g b)
-  refine ⟨ConcreteCategory.hom (inv h) d, ?_⟩
-  rw [show ConcreteCategory.hom f (ConcreteCategory.hom (inv h) d) =
-      ConcreteCategory.hom (inv h ≫ f) d from
-        (ConcreteCategory.comp_apply _ _ _).symm,
-    show inv h ≫ f = k ≫ inv g by
-      rw [show f = h ≫ k ≫ inv g from by
-        rw [← Category.assoc, ← hnat, Category.assoc, IsIso.hom_inv_id, Category.comp_id]]; simp,
-    ConcreteCategory.comp_apply, hd, ← ConcreteCategory.comp_apply,
-    IsIso.hom_inv_id, ConcreteCategory.id_apply]
-
 -- Cache Balanced to avoid expensive synthesis chain
 -- (Abelian → IsNormalEpiCategory → StrongEpiCategory → Balanced)
 noncomputable instance sheafStrongEpiCategory (X : TopCat.{u}) :
@@ -132,10 +114,31 @@ private theorem closedIncl_pushforward_epi_g
           (T := S.g.val)).mp
         ((Sheaf.isLocallySurjective_iff_epi'
             AddCommGrpCat.{u} _).mpr hSE.epi_g)) z
-    exact surj_transfer_closedIncl
-      (hnat := stalkPush_nat_closedIncl
-        (TopCat.closedIncl hs) S.g.val z)
-      hg_surj
+    apply (AddCommGrpCat.epi_iff_surjective _).mp
+    have hnat := stalkPush_nat_closedIncl (TopCat.closedIncl hs) S.g.val z
+    haveI : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map S.g.val) :=
+      (AddCommGrpCat.epi_iff_surjective _).mpr hg_surj
+    change Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
+        ((ConcreteCategory.hom (TopCat.closedIncl hs)) z)).map
+        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map S.g.val))
+    haveI : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
+        ((ConcreteCategory.hom (TopCat.closedIncl hs)) z)).map
+        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map S.g.val) ≫
+        TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
+          (TopCat.closedIncl hs) S.X₃.val z) := by
+      rw [hnat]; exact epi_comp _ _
+    rw [show (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
+        ((ConcreteCategory.hom (TopCat.closedIncl hs)) z)).map
+        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map S.g.val) =
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
+          ((ConcreteCategory.hom (TopCat.closedIncl hs)) z)).map
+          ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map S.g.val) ≫
+        TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
+          (TopCat.closedIncl hs) S.X₃.val z) ≫
+      inv (TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
+        (TopCat.closedIncl hs) S.X₃.val z) from by
+      rw [Category.assoc, IsIso.hom_inv_id, Category.comp_id]]
+    exact epi_comp _ _
   · intro b
     rw [pushforward_stalk_zero_closedIncl hs x hx S.X₃ b]
     exact ⟨0, AddMonoidHom.map_zero _⟩
