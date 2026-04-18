@@ -5,8 +5,8 @@
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
   FULLY PROVED — 0 sorry's, 0 axioms, 0 admits.
-  The last sorry (Gabriel's theorem) was eliminated by replacing "filtered colimits of
-  injectives are injective" with "filtered colimits of flasque sheaves are flasque"
+  The last sorry (filtered colimits of injectives are injective) was eliminated by
+  replacing it with "filtered colimits of flasque sheaves are flasque"
   (isFlasque_filtered_colimit) + FlasqueVanishing, since injective ⟹ flasque.
 
   File structure:

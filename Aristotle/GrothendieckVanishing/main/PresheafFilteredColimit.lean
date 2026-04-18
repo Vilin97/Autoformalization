@@ -188,7 +188,6 @@ private theorem isSheaf_presheaf_filtered_colimit
   choose j_all x_all hx_all using fun k =>
     Concrete.isColimit_exists_rep _ (hcV (U k)) (sf k)
   -- Merge j_all k (k ∈ t) to common index
-  haveI : DecidableEq J' := Classical.decEq _
   obtain ⟨j₀, hj₀⟩ := IsFiltered.sup_objs_exists (t.image j_all)
   let g₀ : ∀ k, k ∈ t → (j_all k ⟶ j₀) :=
     fun k hk => (hj₀ (Finset.mem_image_of_mem j_all hk)).some
@@ -263,7 +262,6 @@ private theorem isSheaf_presheaf_filtered_colimit
       simp only [AddCommGrpCat.hom_comp, AddMonoidHom.coe_comp, Function.comp_apply]
       exact hf
     -- Step 2: merge via Finset.induction on t ×ˢ t
-    haveI : DecidableEq ι := Classical.decEq _
     suffices h : ∀ (S : Finset (ι × ι)) (hS : S ⊆ t ×ˢ t),
         ∃ (j₁ : J') (g₁ : j₀ ⟶ j₁), ∀ (p : ι × ι) (hp : p ∈ S),
           ConcreteCategory.hom ((Y'.obj j₁).val.map (Opens.infLELeft (U p.1) (U p.2)).op)
