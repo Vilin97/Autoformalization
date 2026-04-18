@@ -159,13 +159,6 @@ private lemma sections_exact_of_shortExact {X : TopCat.{u}}
 
 /-! ### Zero condition and mono for the evaluated short complex -/
 
--- In a thin category (Opens X), any two parallel morphisms are equal,
--- so presheaf restriction maps agree regardless of which morphism is used.
-private lemma presheaf_map_eq {X : TopCat.{u}}
-    (F : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
-    {U V : Opens X} (f g : U ⟶ V) (s : F.obj (op V)) :
-    F.map f.op s = F.map g.op s := congr_arg (F.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim f g))
-
 -- Extension preorder on partial lifts (V, t):
 -- (V₁,t₁) ≤ (V₂,t₂) iff V₁ ≤ V₂ and t₂|_{V₁} = t₁.
 private noncomputable instance sigmaPreorder {X : TopCat.{u}}
@@ -220,7 +213,7 @@ private lemma partialLift_chain_ub {X : TopCat.{u}}
     intro ⟨p, hp⟩
     rw [← S.g.val.naturality_apply _ t_gl, ht_gl ⟨p, hp⟩, (hcP _ hp).choose_spec]
     simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
-    exact presheaf_map_eq S.X₃.val _ _ s
+    exact congr_arg (S.X₃.val.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
   · exact ⟨⟨⊥, 0⟩, ⟨bot_le, @Subsingleton.elim _
       (AddCommGrpCat.subsingleton_of_isZero S.X₃.isTerminalOfEmpty.isZero) _ _⟩,
       fun _ hz => absurd ⟨_, hz⟩ hc⟩
@@ -253,7 +246,7 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     simp only [map_sub]
     rw [S.g.val.naturality_apply _ t₀, ht₀, S.g.val.naturality_apply _ t', ht', sub_eq_zero]
     simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
-    exact presheaf_map_eq S.X₃.val _ _ s
+    exact congr_arg (S.X₃.val.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
   obtain ⟨a, ha⟩ := sections_exact_of_shortExact hS (V₀ ⊓ W) _ hdiff_ker
   obtain ⟨ahat, hahat⟩ := (AddCommGrpCat.epi_iff_surjective _).mp
     (IsFlasqueSheaf.epi_map (homOfLE inf_le_right : V₀ ⊓ W ⟶ W)) a
@@ -262,7 +255,7 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     simp only [ht''_def, map_add, show S.g.val.app (op W) (S.f.val.app (op W) ahat) = 0 from by
       show (S.f.val.app (op W) ≫ S.g.val.app (op W)) ahat = 0
       change (S.f ≫ S.g).val.app (op W) ahat = 0; rw [S.zero]; aesop_cat,
-      add_zero, ht']; exact presheaf_map_eq S.X₃.val _ _ s
+      add_zero, ht']; exact congr_arg (S.X₃.val.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
   have hcompat_patch : S.X₂.val.map (homOfLE inf_le_right).op t'' =
       S.X₂.val.map (homOfLE inf_le_left).op t₀ := by
     simp only [ht''_def, map_add]
@@ -299,7 +292,7 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     have hb := ht_new b; cases b <;>
       (simp only [BU, Bsf] at hb ⊢; rw [hb]; first | rw [ht₀] | rw [hgt'']
        simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
-       exact presheaf_map_eq S.X₃.val _ _ s)
+       exact congr_arg (S.X₃.val.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _)))
   exact hxV₀ ((hmax _ h_new_inP ⟨le_sup_left, by
     have h0 := ht_new false; simp only [BU, Bsf] at h0; exact h0⟩).1 (Or.inr hxW))
 
