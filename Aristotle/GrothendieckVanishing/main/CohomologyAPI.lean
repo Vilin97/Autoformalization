@@ -157,7 +157,7 @@ theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
 /-- On an empty space, all sheaf cohomology groups are subsingleton.
     Proof: when X is empty, all stalks are vacuously zero, so the sheaf is zero,
     and zero sheaves have subsingleton cohomology in all degrees. -/
-theorem sheafH_subsingleton_of_isEmpty {X : TopCat.{u}} [IsEmpty X]
+instance sheafH_subsingleton_of_isEmpty {X : TopCat.{u}} [IsEmpty X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (n : ℕ) :
     Subsingleton (Sheaf.H F n) :=
   Ext.subsingleton_of_isZero_tgt

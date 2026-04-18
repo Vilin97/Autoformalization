@@ -70,7 +70,7 @@ private theorem sheafH_one_of_flasque {X : TopCat.{u}}
       Since `I` is injective hence flasque, and `F` is flasque, `Q` is also flasque
       by `isFlasque_X₃_of_shortExact`. By dimension shifting, `H^{n+2}(F) = H^{n+1}(Q)`,
       and the latter vanishes by the induction hypothesis. -/
-theorem FlasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+instance FlasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     [IsFlasqueSheaf F]
     (n : ℕ) :
     Subsingleton (Sheaf.H F (n + 1)) := by
