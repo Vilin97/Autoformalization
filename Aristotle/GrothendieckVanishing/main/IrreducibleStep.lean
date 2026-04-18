@@ -260,12 +260,15 @@ theorem subsheaf_contains_zeroOutsideInt
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map j.val))) := by
   obtain ⟨V', hle, hne, s, hbij⟩ := exists_good_section V R i hR
   refine ⟨V', hle, hne, TopCat.Sheaf.zeroOutsideInt.sHom s, ?_, hbij⟩
-  apply sheaf_mono_of_stalk_injective
-  intro y; by_cases hy : y ∈ V'
-  · exact (hbij y hy).1
-  · intro a b _
-    exact (stalk_zeroOutsideInt_zero_outside V' y hy a).trans
-      (stalk_zeroOutsideInt_zero_outside V' y hy b).symm
+  haveI : ∀ x, Mono ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
+      (TopCat.Sheaf.zeroOutsideInt.sHom s).val) := fun y => by
+    apply (ConcreteCategory.mono_iff_injective_of_preservesPullback _).mpr
+    by_cases hy : y ∈ V'
+    · exact (hbij y hy).1
+    · intro a b _
+      exact (stalk_zeroOutsideInt_zero_outside V' y hy a).trans
+        (stalk_zeroOutsideInt_zero_outside V' y hy b).symm
+  exact TopCat.Presheaf.mono_of_stalk_mono _
 
 /-- **Step 4** (Hartshorne III.2.7): any subsheaf of `zeroOutsideInt V` has vanishing
     cohomology in degree `m > dim X`. Uses `subsheaf_contains_zeroOutsideInt` to find
