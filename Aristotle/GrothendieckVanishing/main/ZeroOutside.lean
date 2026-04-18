@@ -207,6 +207,25 @@ theorem sHom_app_generator {X : TopCat.{u}} {U : Opens X}
   erw [sHom_val, ← ConcreteCategory.comp_apply, ← NatTrans.comp_app, toSheafify_sheafifyLift]
   exact Presheaf.zeroOutside.sHom_app_generator s
 
+theorem openHom_val_app_generator {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) :
+    (openHom h).val.app (op V) (generator V) =
+    (zeroOutsideInt U).val.map (homOfLE h).op (generator U) := by
+  delta generator
+  erw [openHom_val,
+    ← ConcreteCategory.comp_apply
+      ((CategoryTheory.toSheafify _ (Presheaf.constZ.zeroOutside V)).app (op V))
+      ((CategoryTheory.sheafifyMap _ (Presheaf.zeroOutside_openHom (F := Presheaf.constZ) h)).app
+        (op V)),
+    ← NatTrans.comp_app (CategoryTheory.toSheafify _ (Presheaf.constZ.zeroOutside V))
+      (CategoryTheory.sheafifyMap _ (Presheaf.zeroOutside_openHom (F := Presheaf.constZ) h)),
+    ← CategoryTheory.toSheafify_naturality _ (Presheaf.zeroOutside_openHom (F := Presheaf.constZ) h),
+    NatTrans.comp_app, ConcreteCategory.comp_apply,
+    ← (CategoryTheory.toSheafify _ (Presheaf.constZ.zeroOutside U)).naturality_apply
+      (homOfLE h).op (Presheaf.zeroOutside.generator U)]
+  congr 1
+  simp [Presheaf.zeroOutside.generator, Presheaf.zeroOutside_openHom, h,
+    Presheaf.zeroOutside, Presheaf.constZ, ← ConcreteCategory.comp_apply, eqToHom_trans]
+
 end zeroOutsideInt
 
 open zeroOutsideInt
