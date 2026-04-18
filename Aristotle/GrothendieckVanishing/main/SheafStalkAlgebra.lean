@@ -160,7 +160,7 @@ theorem zeroOutsideInt_cohomology_vanishing
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) m) := by
   -- m ≠ 0 (since m > dim X ≥ 0), write m = m' + 1
   have hm_ne : m ≠ 0 := by
-    intro h; subst h; exact absurd hm (not_lt.mpr topologicalKrullDim_nonneg_of_irreducible)
+    intro h; subst h; exact absurd hm (not_lt.mpr topologicalKrullDim_nonneg)
   obtain ⟨m', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
   -- Step 2: apply zeroOutsideInt_vanishing, reducing to cokernel vanishing at m'
   apply zeroOutsideInt_vanishing X V m'
@@ -177,7 +177,7 @@ theorem zeroOutsideInt_cohomology_vanishing
     show topologicalKrullDim Y < ↑m'
     have hd_ne_bot : topologicalKrullDim X ≠ ⊥ :=
       ne_bot_of_gt (lt_of_lt_of_le (WithBot.bot_lt_coe (0 : ℕ∞))
-        topologicalKrullDim_nonneg_of_irreducible)
+        topologicalKrullDim_nonneg)
     lift topologicalKrullDim X to ℕ∞ using hd_ne_bot with d
     have hd_lt : (d : WithBot ℕ∞) < ↑((m'.succ : ℕ) : ℕ∞) := hm
     rw [WithBot.coe_lt_coe] at hd_lt
