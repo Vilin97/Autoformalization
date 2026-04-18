@@ -24,6 +24,36 @@ theorem sheafH_dimension_shift {X : TopCat.{u}}
     Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
   ext_dimension_shift _ hS n hQ (Ext.subsingleton_of_injective _ _ n)
 
+-- Surjectivity of Ext map at degree 0 (base case input).
+-- For a SES 0 -> F -> I -> Q -> 0 with F flasque, the induced map
+-- Ext(Z_X, I, 0) -> Ext(Z_X, Q, 0) is surjective for Z_X = constant sheaf.
+-- Proof: reduce to Hom via addEquiv₀, then use constantSheafΓAdj + projectivity
+-- of ULift ℤ + epi_app_of_shortExact_flasque.
+private theorem ext_zero_map_surjective {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁) :
+    ∀ y : Ext ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+        (AddCommGrpCat.of (ULift.{u} ℤ))) S.X₃ 0,
+      ∃ z : Ext ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
+          (AddCommGrpCat.of (ULift.{u} ℤ))) S.X₂ 0,
+        z.comp (Ext.mk₀ S.g) (add_zero 0) = y := by
+  intro y
+  -- Convert from Ext⁰ to Hom via addEquiv₀
+  suffices ∃ ψ : _ ⟶ S.X₂, ψ ≫ S.g = Ext.addEquiv₀ y by
+    obtain ⟨ψ, hψ⟩ := this
+    exact ⟨Ext.mk₀ ψ, by rw [Ext.mk₀_comp_mk₀, hψ, Ext.mk₀_addEquiv₀_apply]⟩
+  haveI : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map S.g) := by
+    have h := epi_app_of_shortExact_flasque hS hFlasque₁ ⊤
+    exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
+      ((Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).inv.naturality S.g).symm
+  haveI : Projective (AddCommGrpCat.of (ULift.{u} ℤ)) := ulift_int_projective
+  let adj := constantSheafΓAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
+  exact ⟨(adj.homEquiv _ S.X₂).symm (Projective.factorThru
+    ((adj.homEquiv _ S.X₃) (Ext.addEquiv₀ y)) ((Sheaf.Γ _ _).map S.g)), by
+    apply (adj.homEquiv _ S.X₃).injective
+    rw [Adjunction.homEquiv_naturality_right, Equiv.apply_symm_apply,
+      Projective.factorThru_comp]⟩
+
 /-- **Base case**: `H^1(F) = 0` for flasque `F`. -/
 private theorem sheafH_one_of_flasque {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (h : IsFlasqueSheaf F) :
