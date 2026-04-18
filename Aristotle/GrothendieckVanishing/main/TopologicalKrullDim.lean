@@ -11,7 +11,7 @@ API for topological Krull dimension on irreducible spaces.
   every irreducible closed set is the whole space
 - `opens_eq_bot_or_top_of_irreducibleSpace_dim_zero`: on an irreducible dim-0 space,
   the only opens are ⊥ and ⊤
-- `topologicalKrullDim_nonneg_of_irreducible`: irreducible spaces have dim ≥ 0
+- `topologicalKrullDim_nonneg`: non-empty spaces have dim ≥ 0
 - `topologicalKrullDim_lt_of_isIrreducible_of_isClosed`: proper closed subsets of
   irreducible spaces with finite dim have strictly smaller dim
 - `exists_closed_subset_lt_dim_of_irreducible_pos`: on an irreducible Noetherian space of
@@ -57,10 +57,12 @@ theorem opens_eq_bot_or_top_of_irreducibleSpace_dim_zero
 
 /-! ## Dimension helpers -/
 
-/-- On an irreducible space, the topological Krull dimension is ≥ 0. -/
-theorem topologicalKrullDim_nonneg_of_irreducible {X : Type u} [TopologicalSpace X]
-    [IrreducibleSpace X] : topologicalKrullDim X ≥ 0 := by
-  rw [topologicalKrullDim, ge_iff_le, Order.krullDim_nonneg_iff]; exact ⟨⟨_, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩⟩
+/-- On a non-empty topological space, the topological Krull dimension is ≥ 0. -/
+theorem topologicalKrullDim_nonneg {X : Type u} [TopologicalSpace X]
+    [Nonempty X] : topologicalKrullDim X ≥ 0 := by
+  rw [topologicalKrullDim, ge_iff_le, Order.krullDim_nonneg_iff]
+  obtain ⟨x⟩ := ‹Nonempty X›
+  exact ⟨⟨closure {x}, isIrreducible_singleton.closure, isClosed_closure⟩⟩
 
 /-- For each s : IrreducibleCloseds Y, height(s) + 1 ≤ topologicalKrullDim X. -/
 private lemma height_add_one_le_dim {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]

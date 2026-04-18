@@ -144,7 +144,7 @@ theorem GrothendieckVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{
       · -- dim Y ≤ 0: use DimZeroVanishing
         have hm0 : m ≠ 0 := fun heq => by
           subst heq
-          exact not_lt.mpr topologicalKrullDim_nonneg_of_irreducible (by exact_mod_cast hY)
+          exact not_lt.mpr topologicalKrullDim_nonneg (by exact_mod_cast hY)
         obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm0
         exact grothendieck_vanishing_dim_zero Y hdim G k
       · -- dim Y > 0: use IrreducibleStep

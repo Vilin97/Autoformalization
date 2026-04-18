@@ -25,7 +25,7 @@ LEAN_TO_LABEL = {
     "epi_unit_of_closedImmersion": "lem:epi_unit_of_closedImmersion",
     "closedImmersionSES": "thm:closedImmersionSES",
     "opens_eq_bot_or_top_of_irreducibleSpace_dim_zero": "lem:opens_eq_bot_or_top",
-    "topologicalKrullDim_nonneg_of_irreducible": "lem:dim_nonneg_irreducible",
+    "topologicalKrullDim_nonneg": "lem:dim_nonneg_irreducible",
     "topologicalKrullDim_lt_of_isIrreducible_of_isClosed": "lem:dim_lt_of_closed",
     "TopCat.Presheaf.zeroOutside": "def:zeroOutside",
     "TopCat.Sheaf.zeroOutsideInt": "def:zeroOutsideInt",
@@ -69,7 +69,7 @@ TRANSITIVE_DEPS = {
     "epi_unit_of_closedImmersion": ["TopCat.closedIncl_counit_isIso"],
     "closedImmersionSES": ["epi_unit_of_closedImmersion"],
     "opens_eq_bot_or_top_of_irreducibleSpace_dim_zero": [],
-    "topologicalKrullDim_nonneg_of_irreducible": [],
+    "topologicalKrullDim_nonneg": [],
     "topologicalKrullDim_lt_of_isIrreducible_of_isClosed": [],
     "TopCat.Presheaf.zeroOutside": [],
     "TopCat.Sheaf.zeroOutsideInt": ["TopCat.Presheaf.zeroOutside"],
@@ -91,7 +91,7 @@ TRANSITIVE_DEPS = {
     "IrreduciblePosVanishing": ["closedImmersionSES", "PushforwardHVanishing", "TopCat.Presheaf.zeroOutside", "TopCat.Sheaf.zeroOutsideInt", "TopCat.Sheaf.zeroOutsideInt.sHom", "TopCat.closedIncl_counit_isIso", "directLimit_cohomology_vanishing", "epi_unit_of_closedImmersion", "exists_closed_subset_lt_dim_of_irreducible_pos", "exists_good_section", "topologicalKrullDim_lt_of_isIrreducible_of_isClosed", "zeroOutsideInt_cohomology_vanishing"],
     "ReducibleVanishing'": ["PushforwardHVanishing", "TopCat.closedIncl_counit_isIso", "epi_unit_of_closedImmersion"],
     "grothendieck_vanishing_of_irreducible": ["ReducibleVanishing'"],
-    "GrothendieckVanishing": ["IrreduciblePosVanishing", "grothendieck_vanishing_dim_zero", "grothendieck_vanishing_of_irreducible", "topologicalKrullDim_nonneg_of_irreducible"],
+    "GrothendieckVanishing": ["IrreduciblePosVanishing", "grothendieck_vanishing_dim_zero", "grothendieck_vanishing_of_irreducible", "topologicalKrullDim_nonneg"],
 }
 
 def lean_deps_to_labels(lean_name):
