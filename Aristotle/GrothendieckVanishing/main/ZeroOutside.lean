@@ -99,20 +99,6 @@ namespace zeroOutside
 
 variable {X : TopCat.{u}} (U : Opens X)
 
-@[simp] theorem hom_eqToHom_symm_hom_eqToHom {A B : AddCommGrpCat.{u}} (e : A = B) (x : A) :
-    (AddCommGrpCat.Hom.hom (eqToHom e.symm)) ((AddCommGrpCat.Hom.hom (eqToHom e)) x) = x := by
-  cases e; rfl
-
-@[simp] theorem hom_eqToHom_hom_eqToHom_symm {A B : AddCommGrpCat.{u}} (e : A = B) (x : B) :
-    (AddCommGrpCat.Hom.hom (eqToHom e)) ((AddCommGrpCat.Hom.hom (eqToHom e.symm)) x) = x := by
-  cases e; rfl
-
-@[simp] theorem hom_eqToHom_hom_eqToHom {A B C : AddCommGrpCat.{u}}
-    (e₁ : A = B) (e₂ : B = C) (x : A) :
-    (AddCommGrpCat.Hom.hom (eqToHom e₂)) ((AddCommGrpCat.Hom.hom (eqToHom e₁)) x) =
-      (AddCommGrpCat.Hom.hom (eqToHom (e₁.trans e₂))) x := by
-  cases e₁; cases e₂; rfl
-
 @[simp] theorem uliftZMultiplesAddEquiv_symm_apply (G : AddCommGrpCat.{u}) (x : G) (n : ULift ℤ) :
     AddCommGrpCat.Hom.hom ((TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv G).symm x) n =
       (n.down : ℤ) • x := rfl
@@ -147,7 +133,7 @@ def sHom {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U)) :
       let w : ULift ℤ :=
         (AddCommGrpCat.Hom.hom (eqToHom hObjW) z)
       have hz : (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) w = z := by
-        simpa [w] using hom_eqToHom_symm_hom_eqToHom (e := hObjW) z
+        simp [w, ← comp_apply, eqToHom_trans]
       rw [← hz]
       simp [zeroOutside, hWU, hYU, w, hmap, constZ]
       rw [uliftZMultiplesAddEquiv_symm_apply, uliftZMultiplesAddEquiv_symm_apply]
@@ -162,7 +148,7 @@ theorem sHom_app_generator {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U))
   have h1 :
       (AddCommGrpCat.Hom.hom (eqToHom hObjU))
           ((AddCommGrpCat.Hom.hom (eqToHom hObjU.symm)) (1 : ULift ℤ)) = (1 : ULift ℤ) := by
-    simpa using hom_eqToHom_hom_eqToHom_symm (e := hObjU) (1 : ULift ℤ)
+    simp [← comp_apply, eqToHom_trans]
   rw [show generator U =
     (eqToHom hObjU.symm : AddCommGrpCat.of (ULift ℤ) ⟶ (zeroOutside U constZ).obj (op U))
       (1 : ULift ℤ) by

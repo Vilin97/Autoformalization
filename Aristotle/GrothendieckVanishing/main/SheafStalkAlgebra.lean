@@ -278,10 +278,8 @@ private theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
     have hgenW_val : (AddCommGrpCat.Hom.hom (eqToHom hObjW)) genW = (1 : ULift ℤ) :=
       resGen_eqToHom_eq_one V hWV hObjW
     -- eqToHom is injective (it's an iso)
-    have hinj : Function.Injective (AddCommGrpCat.Hom.hom (eqToHom hObjW)) := by
-      intro a b h
-      have := TopCat.Presheaf.zeroOutside.hom_eqToHom_symm_hom_eqToHom hObjW
-      exact (this a).symm.trans (congrArg _ h |>.trans (this b))
+    have hinj : Function.Injective (AddCommGrpCat.Hom.hom (eqToHom hObjW)) :=
+      (ConcreteCategory.bijective_of_isIso (eqToHom hObjW)).1
     -- s = w.down • genW
     have hs_zsmul : s = w.down • genW := by
       apply hinj
