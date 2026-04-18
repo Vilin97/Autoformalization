@@ -154,7 +154,7 @@ are in `FiniteGeneratorReduction.lean`.
     cokernel vanishing at `m'` via `closedImmersionSES` on `Vᶜ` + `PushforwardHVanishing`. -/
 theorem zeroOutsideInt_cohomology_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
-    (ih : VanishingIH (X := X))
+    (ih : VanishingIH.{u} (topologicalKrullDim X))
     (hpos : topologicalKrullDim X > 0)
     (V : Opens X) (hV : V ≠ ⊥)
     (m : ℕ) (hm : m > topologicalKrullDim X) :
@@ -195,7 +195,7 @@ theorem zeroOutsideInt_cohomology_vanishing
           exact stalk_zero_of_ses_g_iso hSE x inferInstance a
         · exact stalk_zero_of_shortExact_kernel hSE x
             (fun b => cokernel_stalk_zero_V V x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY) b) a)
-    (PushforwardHVanishing Y hYcl _ m' (@ih (TopCat.of Y) _ m' _ hY_dim_lt hm'_Y))
+    (PushforwardHVanishing Y hYcl _ m' (ih (TopCat.of Y) m' _ hY_dim_lt hm'_Y))
 
 
 /-- Stalks of `zeroOutsideInt V` vanish outside `V`. -/
