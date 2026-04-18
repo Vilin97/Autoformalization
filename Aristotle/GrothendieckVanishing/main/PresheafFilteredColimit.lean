@@ -7,6 +7,7 @@
   - isSheaf_presheaf_filtered_colimit: presheaf-level filtered colimit of sheaves is a sheaf
     on Noetherian spaces (PROVED)
   - createsFilteredColimit: sheafToPresheaf creates filtered colimits (PROVED)
+  - isFlasque_filtered_colimit: filtered colimits of flasque sheaves are flasque (PROVED)
 -/
 import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
@@ -412,3 +413,40 @@ noncomputable def createsFilteredColimit
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X) :
     CreatesColimit Y' (sheafToPresheaf _ _) :=
   Sheaf.createsColimitOfIsSheaf Y' (fun c hc => isSheaf_presheaf_filtered_colimit Y' c hc)
+
+/-! ### Filtered colimits of flasque sheaves
+
+On a Noetherian topological space, filtered colimits of flasque sheaves are flasque.
+This is because `sheafToPresheaf` creates filtered colimits (presheaf colimits of sheaves
+are already sheaves on Noetherian spaces), so restrictions of the colimit are colimits of
+per-piece restrictions. Filtered colimits in `AddCommGrpCat` preserve surjections, and
+flasque means all restrictions are surjective.
+
+This replaces the result that filtered colimits of injectives are injective for our
+purposes: we only need `H^n(colim I_j) = 0` for injective `I_j`, and `FlasqueVanishing`
+gives this since injective sheaves are flasque (`isFlasque_of_injective`). -/
+
+/-- Filtered colimits of flasque sheaves on Noetherian spaces are flasque. -/
+theorem isFlasque_filtered_colimit
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J : Type u} [SmallCategory J] [IsFiltered J]
+    (F : J ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (hFlasque : ∀ j, IsFlasqueSheaf (F.obj j))
+    {c : Cocone F} (hc : IsColimit c) :
+    IsFlasqueSheaf c.pt := by
+  constructor; intro U V i
+  rw [AddCommGrpCat.epi_iff_surjective]
+  intro b; haveI := createsFilteredColimit F
+  have hc_psh := isColimitOfPreserves (sheafToPresheaf _ _) hc
+  have hc_U := isColimitOfPreserves
+    ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op U)) hc_psh
+  obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ hc_U b
+  obtain ⟨a₀, ha₀⟩ := (AddCommGrpCat.epi_iff_surjective _).mp ((hFlasque j₀).epi_map i) b₀
+  refine ⟨ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀, ?_⟩
+  rw [show ConcreteCategory.hom (c.pt.val.map i.op)
+      (ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀) =
+    ConcreteCategory.hom ((c.ι.app j₀).val.app (op U))
+      (ConcreteCategory.hom ((F.obj j₀).val.map i.op) a₀) from
+    congrFun (congrArg DFunLike.coe
+      (congrArg ConcreteCategory.hom ((c.ι.app j₀).val.naturality i.op).symm)) a₀,
+    ha₀]; exact hb₀
