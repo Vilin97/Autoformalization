@@ -44,21 +44,6 @@ private lemma cover_nonempty_arrow
   obtain ⟨V, f, hf, hmem⟩ := S.2 x hx
   exact ⟨⟨V, f, hf⟩, ⟨x, hmem⟩⟩
 
-private lemma cover_arrows_related
-    {X : Type u} [TopologicalSpace X]
-    {U : Opens X} (S : (Opens.grothendieckTopology X).Cover U) (I₁ I₂ : S.Arrow) :
-    ∃ R : S.Relation, R.fst = I₁ ∧ R.snd = I₂ :=
-  ⟨Cover.Relation.mk' (fst := I₁) (snd := I₂)
-    ⟨I₁.Y ⊓ I₂.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩, rfl, rfl⟩
-
-private lemma meq_const_values_eq
-    {X : Type u} [TopologicalSpace X] {A : AddCommGrpCat.{u}}
-    {U : Opens X} (S : (Opens.grothendieckTopology X).Cover U) (x : Meq (constPresheaf X A) S)
-    (I₁ I₂ : S.Arrow) :
-    x I₁ = x I₂ := by
-  obtain ⟨R, rfl, rfl⟩ := cover_arrows_related S I₁ I₂
-  simpa [constPresheaf] using x.condition R
-
 private theorem toPlus_surjective_of_const
     {X : Type u} [TopologicalSpace X] {A : AddCommGrpCat.{u}}
     (U : Opens X) (hU : (U : Set X).Nonempty) :
@@ -67,7 +52,9 @@ private theorem toPlus_surjective_of_const
   intro y; obtain ⟨S, x, hx⟩ := exists_rep y
   obtain ⟨I₀, hI₀⟩ := cover_nonempty_arrow U hU S
   refine ⟨x I₀, ?_⟩
-  rw [hx, show x = Meq.mk S (x I₀) from Meq.ext _ _ fun I => meq_const_values_eq S x I I₀,
+  rw [hx, show x = Meq.mk S (x I₀) from Meq.ext _ _ fun I => by
+      simpa [constPresheaf] using x.condition (Cover.Relation.mk' (fst := I) (snd := I₀)
+        ⟨I.Y ⊓ I₀.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩),
       toPlus_eq_mk, eq_mk_iff_exists]
   refine ⟨S, homOfLE le_top, 𝟙 S, ?_⟩
   apply Meq.ext; intro I
