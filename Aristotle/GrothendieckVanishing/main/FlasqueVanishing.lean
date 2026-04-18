@@ -32,9 +32,6 @@ instance : HasSeparator AddCommGrpCat.{u} where
 
 instance : IsGrothendieckAbelian.{u} AddCommGrpCat.{u} where
 
-instance (X : TopCat.{u}) : Abelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-  inferInstanceAs (Abelian (CategoryTheory.Sheaf _ _))
-
 instance (X : TopCat.{u}) : IsGrothendieckAbelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   inferInstanceAs (IsGrothendieckAbelian (CategoryTheory.Sheaf _ _))
 
@@ -45,13 +42,6 @@ instance {X : TopCat.{u}} :
     (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive :=
   inferInstanceAs ((Functor.const (Opens X)ᵒᵖ ⋙
     presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive)
-
--- Cache expensive typeclass resolutions to avoid re-synthesizing in every proof.
--- The chain IsGrothendieckAbelian → EnoughInjectives → HasDerivedCategory is very
--- expensive via inference. Using explicit constructors avoids synthesis entirely.
-noncomputable instance sheafEnoughInjectives (X : TopCat.{u}) :
-    EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-  IsGrothendieckAbelian.enoughInjectives
 
 noncomputable instance sheafHasExt (X : TopCat.{u}) :
     HasExt.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
