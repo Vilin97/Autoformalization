@@ -163,3 +163,28 @@ instance sheafH_subsingleton_of_isEmpty {X : TopCat.{u}} [IsEmpty X]
     Subsingleton (Sheaf.H F n) :=
   Ext.subsingleton_of_isZero_tgt
     (sheaf_isZero_of_zero_stalks X F (fun x _ => (IsEmpty.false x).elim)) n
+
+/-! ## Sheaf Cohomology Functor -/
+
+/-- The sheaf cohomology functor `H^n : Sheaf(X, Ab) ⥤ Ab`, defined as the covariant
+    Ext functor `Ext^n(ℤ_X, −)` where `ℤ_X` is the constant sheaf of integers. -/
+noncomputable def sheafCohomologyFunctor (X : TopCat.{u}) (n : ℕ) :
+    TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
+  extFunctorObj ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat).obj
+    (AddCommGrpCat.of (ULift.{u} ℤ))) n
+
+noncomputable instance sheafCohomologyFunctor_additive (X : TopCat.{u}) (n : ℕ) :
+    (sheafCohomologyFunctor X n).Additive :=
+  inferInstanceAs (extFunctorObj _ n).Additive
+
+@[simp]
+theorem sheafCohomologyFunctor_obj (X : TopCat.{u}) (n : ℕ)
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
+    (sheafCohomologyFunctor X n).obj F = AddCommGrpCat.of (Sheaf.H F n) := rfl
+
+@[simp]
+theorem sheafCohomologyFunctor_map_apply (X : TopCat.{u}) (n : ℕ)
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G)
+    (x : Sheaf.H F n) :
+    ConcreteCategory.hom ((sheafCohomologyFunctor X n).map f) x =
+    x.comp (Ext.mk₀ f) (add_zero n) := rfl
