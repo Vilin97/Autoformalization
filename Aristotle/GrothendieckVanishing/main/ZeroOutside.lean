@@ -6,24 +6,28 @@ open CategoryTheory TopologicalSpace Limits Opposite
 
 noncomputable section
 
+namespace AddCommGrpCat
+
+theorem uliftZMultiplesHom_add (G : Type u) [AddCommGroup G] (x y : G) :
+    (uliftZMultiplesHom G) (x + y) = ((uliftZMultiplesHom G) x) + ((uliftZMultiplesHom G) y) := by
+  ext
+  simp_all only [uliftZMultiplesHom_apply_apply, smul_add, AddMonoidHom.add_apply]
+
+/-- The additive equivalence `(ULift ℤ ⟶ G) ≃+ G`. -/
+def uliftZMultiplesAddEquiv (G : AddCommGrpCat.{u}) :
+    (AddCommGrpCat.of (ULift ℤ) ⟶ G) ≃+ G :=
+  AddEquiv.trans
+    (@AddCommGrpCat.homAddEquiv (AddCommGrpCat.of (ULift ℤ)) G)
+    (AddEquiv.mk' (uliftZMultiplesHom G) (uliftZMultiplesHom_add G)).symm
+
+end AddCommGrpCat
+
 namespace TopCat
 
 namespace Sheaf
 
 instance (X : TopCat.{u}) : Abelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   inferInstanceAs (Abelian (CategoryTheory.Sheaf _ _))
-
-theorem AddCommGrpCat.uliftZMultiplesHom_add (G : Type u) [AddCommGroup G] (x y : G) :
-    (uliftZMultiplesHom G) (x + y) = ((uliftZMultiplesHom G) x) + ((uliftZMultiplesHom G) y) := by
-  ext
-  simp_all only [uliftZMultiplesHom_apply_apply, smul_add, AddMonoidHom.add_apply]
-
-/-- The additive equivalence `(ULift ℤ ⟶ G) ≃+ G`. -/
-def AddCommGrpCat.uliftZMultiplesAddEquiv (G : AddCommGrpCat.{u}) :
-    (AddCommGrpCat.of (ULift ℤ) ⟶ G) ≃+ G :=
-  AddEquiv.trans
-    (@AddCommGrpCat.homAddEquiv (AddCommGrpCat.of (ULift ℤ)) G)
-    (AddEquiv.mk' (uliftZMultiplesHom G) (AddCommGrpCat.uliftZMultiplesHom_add G)).symm
 
 end Sheaf
 
@@ -100,7 +104,7 @@ namespace zeroOutside
 variable {X : TopCat.{u}} (U : Opens X)
 
 @[simp] theorem uliftZMultiplesAddEquiv_symm_apply (G : AddCommGrpCat.{u}) (x : G) (n : ULift ℤ) :
-    AddCommGrpCat.Hom.hom ((TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv G).symm x) n =
+    AddCommGrpCat.Hom.hom ((AddCommGrpCat.uliftZMultiplesAddEquiv G).symm x) n =
       (n.down : ℤ) • x := rfl
 
 def generator : (constZ.zeroOutside U).obj (op U) :=
@@ -115,7 +119,7 @@ def sHom {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U)) :
   app {W} :=
     if h : (unop W) ≤ U then
       eqToHom (by simp_all) ≫
-        (TopCat.Sheaf.AddCommGrpCat.uliftZMultiplesAddEquiv (F.obj W)).symm
+        (AddCommGrpCat.uliftZMultiplesAddEquiv (F.obj W)).symm
           (F.map (homOfLE h).op s)
     else 0
   naturality {W Y} i := by
@@ -216,13 +220,6 @@ abbrev familyGeneratorMap {X : TopCat.{u}} {ι : Type*}
     [HasCoproduct fun i => zeroOutsideInt (U i)] :
     (∐ fun i => zeroOutsideInt (U i)) ⟶ F :=
   Sigma.desc fun i => zeroOutsideInt.sHom (s i)
-
-instance familyGeneratorMap_epi_to_image {X : TopCat.{u}} {ι : Type*}
-    (U : ι → Opens X) {F : Sheaf AddCommGrpCat.{u} X}
-    (s : ∀ i, F.presheaf.obj (op (U i)))
-    [HasCoproduct fun i => zeroOutsideInt (U i)] :
-    Epi (factorThruImage (familyGeneratorMap U s)) :=
-  inferInstance
 
 -- SectionIndex, finsetGeneratedSheaf, and allSectionMap are in ZeroOutsideFinset.lean.
 
