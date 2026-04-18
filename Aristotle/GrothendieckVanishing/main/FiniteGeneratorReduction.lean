@@ -156,7 +156,7 @@ private noncomputable def finsetGenCocone_isColimit :
           colimit.ι (finsetGenFunctor K) {σ}
     have hfac : g ≫ d = TopCat.Sheaf.allSectionMap K := by
       dsimp only [g, d]; apply Sigma.hom_ext; intro σ
-      simp [← Category.assoc, Sigma.ι_desc, Category.assoc, colimit.ι_desc,
+      simp [Category.assoc, colimit.ι_desc,
         finsetGenCocone, Limits.image.fac, TopCat.Sheaf.finsetGeneratorMap,
         TopCat.Sheaf.familyGeneratorMap]
     haveI := TopCat.Sheaf.allSectionMap_epi K
@@ -382,7 +382,7 @@ theorem sheafH_filtered_colimit_surj
     (n : ℕ) :
     ∀ {J' : Type u} [SmallCategory J'] [IsFiltered J']
       (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-      (c' : Cocone Y') (hc' : IsColimit c') --
+      (c' : Cocone Y') (_ : IsColimit c')
       (x : Sheaf.H c'.pt n),
     ∃ (j : J') (y : Sheaf.H (Y'.obj j) n),
       y.comp (Ext.mk₀ (c'.ι.app j)) (add_zero n) = x := by
