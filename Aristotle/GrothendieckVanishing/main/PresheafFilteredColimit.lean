@@ -1,16 +1,23 @@
-/-
-  PresheafFilteredColimit.lean — Presheaf filtered colimit is a sheaf on Noetherian spaces
-
-  Split from FiniteGeneratorReduction.lean. Contains:
-  - sheaf_section_zero_of_zero_on_finite_cover: sections vanishing on finite cover vanish
-  - filtered_colimit_kills_all_restrictions: merge finitely many eventually-zero transitions
-  - isSheaf_presheaf_filtered_colimit: presheaf-level filtered colimit of sheaves is a sheaf
-    on Noetherian spaces (PROVED)
-  - createsFilteredColimit: sheafToPresheaf creates filtered colimits (PROVED)
-  - isFlasque_filtered_colimit: filtered colimits of flasque sheaves are flasque (PROVED)
--/
 import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
+
+/-!
+  # Presheaf filtered colimit is a sheaf on Noetherian spaces
+
+  Split from FiniteGeneratorReduction.lean. Contains:
+
+  ## Presheaf-level helpers (work for any `J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat`)
+  - `transition_preserves_zero`: zero is preserved under filtered transitions
+  - `transition_preserves_compat`: pairwise compatibility is preserved under filtered transitions
+  - `sheaf_section_zero_of_zero_on_finite_cover`: sections vanishing on finite cover vanish
+  - `filtered_colimit_kills_all_restrictions`: merge finitely many eventually-zero transitions
+
+  ## Sheaf-level results
+  - `isSheaf_presheaf_filtered_colimit`: presheaf-level filtered colimit of sheaves is a sheaf
+    on Noetherian spaces
+  - `createsFilteredColimit`: `sheafToPresheaf` creates filtered colimits
+  - `isFlasque_filtered_colimit`: filtered colimits of flasque sheaves are flasque
+-/
 
 universe u
 
@@ -20,20 +27,20 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
     gives 0, then restricting any further transition also gives 0. -/
 private lemma transition_preserves_zero
     {X : TopCat.{u}} {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (Y' : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
     {j₀ j j' : J'} (f : j₀ ⟶ j) (g : j ⟶ j')
     {U V : Opens X} (φ : U ⟶ V)
-    (b₀ : ToType ((Y'.obj j₀).val.obj (op V)))
-    (h : ConcreteCategory.hom ((Y'.obj j).val.map φ.op)
-      (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map f).app (op V)) b₀) = 0) :
-    ConcreteCategory.hom ((Y'.obj j').val.map φ.op)
-      (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map (f ≫ g)).app (op V)) b₀) = 0 := by
-  let α := (Y' ⋙ sheafToPresheaf _ _).map g
-  change ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map (f ≫ g)).app (op V) ≫
-    (Y'.obj j').val.map φ.op) b₀ = 0
-  rw [(Y' ⋙ sheafToPresheaf _ _).map_comp, NatTrans.comp_app, Category.assoc,
-    show α.app (op V) ≫ (Y'.obj j').val.map φ.op =
-      (Y'.obj j).val.map φ.op ≫ α.app (op U) from (α.naturality φ.op).symm,
+    (b₀ : ToType ((Y'.obj j₀).obj (op V)))
+    (h : ConcreteCategory.hom ((Y'.obj j).map φ.op)
+      (ConcreteCategory.hom ((Y'.map f).app (op V)) b₀) = 0) :
+    ConcreteCategory.hom ((Y'.obj j').map φ.op)
+      (ConcreteCategory.hom ((Y'.map (f ≫ g)).app (op V)) b₀) = 0 := by
+  let α := Y'.map g
+  change ConcreteCategory.hom ((Y'.map (f ≫ g)).app (op V) ≫
+    (Y'.obj j').map φ.op) b₀ = 0
+  rw [Y'.map_comp, NatTrans.comp_app, Category.assoc,
+    show α.app (op V) ≫ (Y'.obj j').map φ.op =
+      (Y'.obj j).map φ.op ≫ α.app (op U) from (α.naturality φ.op).symm,
     ← Category.assoc]
   simp only [ConcreteCategory.comp_apply]
   exact (congr_arg (ConcreteCategory.hom (α.app (op U))) h).trans (map_zero _)
@@ -41,45 +48,44 @@ private lemma transition_preserves_zero
 /-- Pairwise compatibility is preserved under filtered transitions. -/
 private lemma transition_preserves_compat
     {X : TopCat.{u}} {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (Y' : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
     {j₀ j j' : J'} (f : j₀ ⟶ j) (g : j ⟶ j')
-    {U V : Opens X} (a : ToType ((Y'.obj j₀).val.obj (op U)))
-    (b : ToType ((Y'.obj j₀).val.obj (op V)))
-    (h : ConcreteCategory.hom ((Y'.obj j).val.map (Opens.infLELeft U V).op)
-      (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map f).app (op U)) a) =
-     ConcreteCategory.hom ((Y'.obj j).val.map (Opens.infLERight U V).op)
-      (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map f).app (op V)) b)) :
-    ConcreteCategory.hom ((Y'.obj j').val.map (Opens.infLELeft U V).op)
-      (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map (f ≫ g)).app (op U)) a) =
-    ConcreteCategory.hom ((Y'.obj j').val.map (Opens.infLERight U V).op)
-      (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map (f ≫ g)).app (op V)) b) := by
-  let β := (Y' ⋙ sheafToPresheaf _ _).map g
+    {U V : Opens X} (a : ToType ((Y'.obj j₀).obj (op U)))
+    (b : ToType ((Y'.obj j₀).obj (op V)))
+    (h : ConcreteCategory.hom ((Y'.obj j).map (Opens.infLELeft U V).op)
+      (ConcreteCategory.hom ((Y'.map f).app (op U)) a) =
+     ConcreteCategory.hom ((Y'.obj j).map (Opens.infLERight U V).op)
+      (ConcreteCategory.hom ((Y'.map f).app (op V)) b)) :
+    ConcreteCategory.hom ((Y'.obj j').map (Opens.infLELeft U V).op)
+      (ConcreteCategory.hom ((Y'.map (f ≫ g)).app (op U)) a) =
+    ConcreteCategory.hom ((Y'.obj j').map (Opens.infLERight U V).op)
+      (ConcreteCategory.hom ((Y'.map (f ≫ g)).app (op V)) b) := by
+  let β := Y'.map g
   -- Factor F(f ≫ g) = F(f) ≫ β; for each side use naturality: β ≫ res = res ≫ β
-  suffices ∀ {W : Opens X} (φ : U ⊓ V ⟶ W) (c₀ : ToType ((Y'.obj j₀).val.obj (op W))),
-      ConcreteCategory.hom ((Y'.obj j').val.map φ.op)
-        (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map (f ≫ g)).app (op W)) c₀) =
+  suffices ∀ {W : Opens X} (φ : U ⊓ V ⟶ W) (c₀ : ToType ((Y'.obj j₀).obj (op W))),
+      ConcreteCategory.hom ((Y'.obj j').map φ.op)
+        (ConcreteCategory.hom ((Y'.map (f ≫ g)).app (op W)) c₀) =
       ConcreteCategory.hom (β.app (op (U ⊓ V)))
-        (ConcreteCategory.hom ((Y'.obj j).val.map φ.op)
-          (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map f).app (op W)) c₀)) by
+        (ConcreteCategory.hom ((Y'.obj j).map φ.op)
+          (ConcreteCategory.hom ((Y'.map f).app (op W)) c₀)) by
     rw [this (Opens.infLELeft U V) a, this (Opens.infLERight U V) b, h]
   intro W φ c₀
   simp only [Functor.map_comp, NatTrans.comp_app, AddCommGrpCat.hom_comp,
     AddMonoidHom.coe_comp, Function.comp_apply]
-  change ConcreteCategory.hom (β.app (op W) ≫ (Y'.obj j').val.map φ.op) _ =
-    ConcreteCategory.hom ((Y'.obj j).val.map φ.op ≫ β.app (op (U ⊓ V))) _
-  rw [show β.app (op W) ≫ (Y'.obj j').val.map φ.op =
-    (Y'.obj j).val.map φ.op ≫ β.app (op (U ⊓ V))
-    from (β.naturality φ.op).symm]; rfl
+  change ConcreteCategory.hom (β.app (op W) ≫ (Y'.obj j').map φ.op) _ =
+    ConcreteCategory.hom ((Y'.obj j).map φ.op ≫ β.app (op (U ⊓ V))) _
+  rw [show β.app (op W) ≫ (Y'.obj j').map φ.op =
+    (Y'.obj j).map φ.op ≫ β.app (op (U ⊓ V))
+    from (β.naturality φ.op).symm]
 
 /-- A section of a sheaf that restricts to 0 on a finite open cover is 0. -/
 private theorem sheaf_section_zero_of_zero_on_finite_cover
-    {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    {X : TopCat.{u}} {F : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}} (hF : TopCat.Presheaf.IsSheaf F)
     {ι : Type u} (U : ι → Opens X) (t : Finset ι) (hcov : iSup U ≤ ⨆ i ∈ t, U i)
-    (b : ToType (F.val.obj (op (iSup U))))
-    (hzero : ∀ k ∈ t, ConcreteCategory.hom (F.val.map (Opens.leSupr U k).op) b = 0) :
+    (b : ToType (F.obj (op (iSup U))))
+    (hzero : ∀ k ∈ t, ConcreteCategory.hom (F.map (Opens.leSupr U k).op) b = 0) :
     b = 0 := by
-  have hFS : TopCat.Presheaf.IsSheaf F.val := F.cond
-  exact hFS.section_ext (s := b) (t := 0) fun x hx => by
+  exact hF.section_ext (s := b) (t := 0) fun x hx => by
     obtain ⟨k, hk⟩ := Opens.mem_iSup.mp (hcov hx)
     obtain ⟨hkt, hxk⟩ := Opens.mem_iSup.mp hk
     exact ⟨U k, le_iSup U k, hxk, (hzero k hkt).trans (map_zero _).symm⟩
@@ -87,16 +93,16 @@ private theorem sheaf_section_zero_of_zero_on_finite_cover
 /-- Merge finitely many eventually-zero restrictions into a common index. -/
 private theorem filtered_colimit_kills_all_restrictions
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    {X : TopCat.{u}} (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    {X : TopCat.{u}} (Y' : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
     {ι : Type u} {V : Opens X} {W : ι → Opens X} (hW : ∀ k, W k ≤ V) (j₀ : J')
-    (b₀ : ToType ((Y'.obj j₀).val.obj (op V)))
+    (b₀ : ToType ((Y'.obj j₀).obj (op V)))
     (t : Finset ι)
     (h_ev : ∀ k ∈ t, ∃ (jk : J') (fk : j₀ ⟶ jk),
-      ConcreteCategory.hom ((Y'.obj jk).val.map (homOfLE (hW k)).op)
-        (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op V)) b₀) = 0) :
+      ConcreteCategory.hom ((Y'.obj jk).map (homOfLE (hW k)).op)
+        (ConcreteCategory.hom ((Y'.map fk).app (op V)) b₀) = 0) :
     ∃ (j₁ : J') (g₀ : j₀ ⟶ j₁),
-      ∀ k ∈ t, ConcreteCategory.hom ((Y'.obj j₁).val.map (homOfLE (hW k)).op)
-        (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op V)) b₀) = 0 := by
+      ∀ k ∈ t, ConcreteCategory.hom ((Y'.obj j₁).map (homOfLE (hW k)).op)
+        (ConcreteCategory.hom ((Y'.map g₀).app (op V)) b₀) = 0 := by
   classical
   induction t using Finset.induction with
   | empty => exact ⟨j₀, 𝟙 j₀, fun _ hk => absurd hk (by simp)⟩
@@ -169,8 +175,8 @@ private theorem isSheaf_presheaf_filtered_colimit
       obtain ⟨jk, fk, hfk⟩ := h0
       exact ⟨jk, fk, by simpa [map_zero] using hfk⟩
     -- Merge via filtered_colimit_kills_all_restrictions
-    obtain ⟨j₁, g₀, hg₀⟩ := filtered_colimit_kills_all_restrictions Y'
-        (fun k => le_iSup U k) j₀ b₀ t (by
+    obtain ⟨j₁, g₀, hg₀⟩ := filtered_colimit_kills_all_restrictions
+        (Y' ⋙ sheafToPresheaf _ _) (fun k => le_iSup U k) j₀ b₀ t (by
       intro k hk; obtain ⟨jk, fk, hfk⟩ := h_ev_zero k hk; refine ⟨jk, fk, ?_⟩
       change ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op (iSup U)) ≫
         ((Y' ⋙ sheafToPresheaf _ _).obj jk).map (Opens.leSupr U k).op) b₀ = 0
@@ -183,7 +189,7 @@ private theorem isSheaf_presheaf_filtered_colimit
         (congrArg (fun α => NatTrans.app α (op (iSup U))) (c.ι.naturality g₀)).symm]
     change ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U)))
       (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op (iSup U))) b₀) = 0
-    rw [sheaf_section_zero_of_zero_on_finite_cover (Y'.obj j₁) U t hsup_le _ hg₀, map_zero]
+    rw [sheaf_section_zero_of_zero_on_finite_cover (Y'.obj j₁).cond U t hsup_le _ hg₀, map_zero]
   -- Existence: construct a gluing section
   classical
   choose j_all x_all hx_all using fun k =>
@@ -292,9 +298,9 @@ private theorem isSheaf_presheaf_filtered_colimit
           (f_new ≫ IsFiltered.rightToMax j_cur j_new)
       refine ⟨_, g_cur ≫ IsFiltered.leftToMax j_cur j_new ≫ h_coeq, fun p hp => ?_⟩
       rw [Finset.mem_insert] at hp; rcases hp with rfl | hp
-      · rw [heq]; exact transition_preserves_compat Y' f_new
+      · rw [heq]; exact transition_preserves_compat (Y' ⋙ sheafToPresheaf _ _) f_new
           (IsFiltered.rightToMax j_cur j_new ≫ h_coeq) _ _ hf_new
-      · exact transition_preserves_compat Y' g_cur
+      · exact transition_preserves_compat (Y' ⋙ sheafToPresheaf _ _) g_cur
           (IsFiltered.leftToMax j_cur j_new ≫ h_coeq) _ _ (hg_cur p hp)
   -- Glue in piece
   let W : ↥t → Opens X := fun ⟨k, _⟩ => U k
@@ -378,8 +384,8 @@ private theorem isSheaf_presheaf_filtered_colimit
         ((Y' ⋙ sheafToPresheaf _ _).obj jk).map (homOfLE inf_le_left).op) d₀ = 0
       rw [← hnat']; exact hfk.trans (map_zero _)
     -- Merge all to common index
-    obtain ⟨j₃, g₃, hg₃⟩ := filtered_colimit_kills_all_restrictions Y'
-      (fun k => inf_le_left (a := U i) (b := U k)) j₂ d₀ t h_ev_d
+    obtain ⟨j₃, g₃, hg₃⟩ := filtered_colimit_kills_all_restrictions
+        (Y' ⋙ sheafToPresheaf _ _) (fun k => inf_le_left (a := U i) (b := U k)) j₂ d₀ t h_ev_d
     -- Sheaf separation in piece: F(g₃)(d₀) = 0
     let b₃ := ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₃).app (op (U i))) d₀
     have hb₃_zero : b₃ = 0 := by
