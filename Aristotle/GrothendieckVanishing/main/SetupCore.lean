@@ -73,16 +73,6 @@ private theorem pushforward_stalk_zero_closedIncl
   change ConcreteCategory.hom (F.germ W x hxW) sW = 0
   rw [hsW_eq]; exact AddMonoidHom.map_zero _
 
--- Cache Balanced to avoid expensive synthesis chain
--- (Abelian → IsNormalEpiCategory → StrongEpiCategory → Balanced)
-noncomputable instance sheafStrongEpiCategory (X : TopCat.{u}) :
-    StrongEpiCategory (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-  strongEpiCategory_of_regularEpiCategory
-
-noncomputable instance sheafBalanced (X : TopCat.{u}) :
-    Balanced (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-  balanced_of_strongEpiCategory
-
 -- Stalkwise surjectivity of pushed-forward g
 private theorem closedIncl_pushforward_epi_g
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
@@ -90,7 +80,7 @@ private theorem closedIncl_pushforward_epi_g
     (hSE : S.ShortExact) :
     Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
       (TopCat.closedIncl hs)).map S.g) := by
-  letI : Balanced (Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) := sheafBalanced X
+  letI : Balanced (Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
   rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u}]
   change TopCat.Presheaf.IsLocallySurjective
     ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
