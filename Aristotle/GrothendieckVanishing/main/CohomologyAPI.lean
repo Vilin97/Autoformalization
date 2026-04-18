@@ -104,10 +104,11 @@ end ExtDimShift
 /-- `H F 0` is equivalent to sections on `⊤`. -/
 noncomputable def sheafH0EquivSections {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
-    Sheaf.H F 0 ≃+ F.val.obj (op ⊤) := by
-  refine AddEquiv.trans Ext.addEquiv₀ ?_
-  refine AddEquiv.trans ?_ (AddCommGrpCat.uliftZMultiplesAddEquiv _)
-  exact (constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat Limits.isTerminalTop).homAddEquiv _ F
+    Sheaf.H F 0 ≃+ F.val.obj (op ⊤) :=
+  Ext.addEquiv₀.trans
+    (((constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat
+        Limits.isTerminalTop).homAddEquiv _ F).trans
+      (AddCommGrpCat.uliftZMultiplesAddEquiv _))
 
 /-- Naturality of `sheafH0EquivSections`: composing `x` with `mk₀ f` at degree 0
     corresponds to applying `f.app(⊤)` at the sections level. -/
