@@ -11,6 +11,8 @@
 -/
 import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
 
+set_option linter.unusedSimpArgs false
+
 universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
@@ -72,7 +74,7 @@ private theorem closedIncl_pushforward_epi_g
     TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} (TopCat.closedIncl hs) S.X₂.val z ≫
       (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map S.g.val := by
       apply TopCat.Presheaf.stalk_hom_ext; intro U hU
-      simp only [TopCat.Presheaf.stalkFunctor_map_germ_assoc,
+      rw [TopCat.Presheaf.stalkFunctor_map_germ_assoc,
         TopCat.Presheaf.stalkPushforward_germ,
         TopCat.Presheaf.stalkPushforward_germ_assoc,
         TopCat.Presheaf.stalkFunctor_map_germ]; rfl

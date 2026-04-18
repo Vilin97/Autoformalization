@@ -35,7 +35,7 @@ purposes: we only need `H^n(colim I_j) = 0` for injective `I_j`, and `FlasqueVan
 gives this since injective sheaves are flasque (`isFlasque_of_injective`). -/
 
 /-- Filtered colimits of flasque sheaves on Noetherian spaces are flasque. -/
-private lemma isFlasque_filtered_colimit
+theorem isFlasque_filtered_colimit
     {X : TopCat.{u}} [NoetherianSpace X]
     {J : Type u} [SmallCategory J] [IsFiltered J]
     (F : J ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -272,7 +272,7 @@ theorem sheafH_preserves_filtered_colimits
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel ι')) inferInstance inferInstance
     -- H^{n+1}(colim Inj) = 0 since colim Inj is flasque
-    haveI := isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
+    haveI := isFlasque_filtered_colimit Inj (fun j => inferInstance)
         (colimit.isColimit Inj)
     have hI := FlasqueVanishing X injCocone.pt n
     -- Build per-object quotient functor Q.obj j = cokernel(η.app j)
@@ -418,8 +418,9 @@ theorem sheafH_filtered_colimit_surj
       { app := fun j => ffData.i.app (toArrow.obj j)
         naturality := fun _ _ f => ffData.i.naturality (toArrow.map f) }
     have hη_mono : ∀ j, Mono (η.app j) := fun j => ffData.hi (toArrow.obj j)
-    haveI hInj : ∀ j, Injective (Inj.obj j) := fun j =>
-      IsGrothendieckAbelian.instInjectiveZMonomorphismsRlpMonoMapFactorizationDataRlpOfNatHom
+    haveI hInj : ∀ j, Injective (Inj.obj j) := fun j => by
+      change Injective (ffData.Z.obj (Arrow.mk (0 : Y'.obj j ⟶ 0)))
+      exact IsGrothendieckAbelian.instInjectiveZMonomorphismsRlpMonoMapFactorizationDataRlpOfNatHom
     let injCocone : Cocone Inj := colimit.cocone Inj
     let ι'Cocone : Cocone Y' := Cocone.mk injCocone.pt
       { app := fun j => η.app j ≫ injCocone.ι.app j
@@ -435,7 +436,7 @@ theorem sheafH_filtered_colimit_surj
       ShortComplex.mk ι' (cokernel.π ι') (cokernel.condition ι')
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel ι')) inferInstance inferInstance
-    haveI := isFlasque_filtered_colimit Inj (fun j => isFlasque_of_injective _)
+    haveI := isFlasque_filtered_colimit Inj (fun j => inferInstance)
         (colimit.isColimit Inj)
     have hI := FlasqueVanishing X injCocone.pt n
     let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
