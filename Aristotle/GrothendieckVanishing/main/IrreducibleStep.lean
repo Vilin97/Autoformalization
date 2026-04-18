@@ -277,7 +277,6 @@ theorem subsheaf_contains_zeroOutsideInt
 theorem subsheaf_zeroOutsideInt_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (ih : VanishingIH.{u} (topologicalKrullDim X))
-    (hpos : topologicalKrullDim X > 0)
     (V : Opens X) (R : TopCat.Sheaf AddCommGrpCat.{u} X)
     (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
     (m : ℕ) (hm : m > topologicalKrullDim X) :
@@ -291,7 +290,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel j)) inferInstance inferInstance
     exact subsingleton_sheafH_of_shortExact_middle hSE m
-      (zeroOutsideInt_cohomology_vanishing X ih hpos V' hV'ne m hm)
+      (zeroOutsideInt_cohomology_vanishing X ih V' hV'ne m hm)
       (closedComplementVanishing V' hV'ne _ m hm ih
         (fun x hxV' b => cokernel_stalk_zero_of_stalk_surj j x (hj_stalk x hxV').2 b))
 
@@ -302,7 +301,6 @@ theorem subsheaf_zeroOutsideInt_vanishing
 theorem epiImage_zeroOutsideInt_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (ih : VanishingIH.{u} (topologicalKrullDim X))
-    (hpos : topologicalKrullDim X > 0)
     (V : Opens X) {G : TopCat.Sheaf AddCommGrpCat.{u} X}
     (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G) (hf : Epi f)
     (m : ℕ) (hm : m > topologicalKrullDim X) :
@@ -315,8 +313,8 @@ theorem epiImage_zeroOutsideInt_vanishing
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
     exact ext_dimension_shift_X₃ _ hSE m
-      (zeroOutsideInt_cohomology_vanishing X ih hpos V hV m hm)
-      (subsheaf_zeroOutsideInt_vanishing X ih hpos V (kernel f) (kernel.ι f) (m + 1)
+      (zeroOutsideInt_cohomology_vanishing X ih V hV m hm)
+      (subsheaf_zeroOutsideInt_vanishing X ih V (kernel f) (kernel.ι f) (m + 1)
         (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl)))
 
 -- Filtered diagram infrastructure, finitely generated vanishing, and
@@ -337,6 +335,6 @@ theorem IrreduciblePosVanishing
     PushforwardHVanishing Z hZ_closed _ n (ih (TopCat.of Z) n _ hZ_dim hn_Z)
   have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
     directLimit_cohomology_vanishing S.X₁ n
-      (fun f hf => epiImage_zeroOutsideInt_vanishing X ih hpos _ f hf n hn)
+      (fun f hf => epiImage_zeroOutsideInt_vanishing X ih _ f hf n hn)
   exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
 

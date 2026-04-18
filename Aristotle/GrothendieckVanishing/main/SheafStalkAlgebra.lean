@@ -149,18 +149,18 @@ are in `FiniteGeneratorReduction.lean`.
 -/
 
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
-    degree `m > dim X` on an irreducible Noetherian space of positive dimension.
+    degree `m > dim X` on an irreducible Noetherian space.
     Proof: write `m = m' + 1`, apply `zeroOutsideInt_vanishing` (SES + flasque), then prove
     cokernel vanishing at `m'` via `closedImmersionSES` on `Vᶜ` + `PushforwardHVanishing`. -/
 theorem zeroOutsideInt_cohomology_vanishing
     (X : TopCat.{u}) [NoetherianSpace X] [IrreducibleSpace X]
     (ih : VanishingIH.{u} (topologicalKrullDim X))
-    (hpos : topologicalKrullDim X > 0)
     (V : Opens X) (hV : V ≠ ⊥)
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) m) := by
-  -- m ≠ 0 (since m > dim X > 0), write m = m' + 1
-  have hm_ne : m ≠ 0 := by intro h; subst h; simp at hm; exact not_lt.mpr (le_of_lt hpos) hm
+  -- m ≠ 0 (since m > dim X ≥ 0), write m = m' + 1
+  have hm_ne : m ≠ 0 := by
+    intro h; subst h; exact absurd hm (not_lt.mpr topologicalKrullDim_nonneg_of_irreducible)
   obtain ⟨m', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
   -- Step 2: apply zeroOutsideInt_vanishing, reducing to cokernel vanishing at m'
   apply zeroOutsideInt_vanishing X V m'
@@ -175,7 +175,9 @@ theorem zeroOutsideInt_cohomology_vanishing
         (lt_of_lt_of_le hm le_top))
   have hm'_Y : ↑m' > topologicalKrullDim (TopCat.of Y) := by
     show topologicalKrullDim Y < ↑m'
-    have hd_ne_bot : topologicalKrullDim X ≠ ⊥ := ne_bot_of_gt hpos
+    have hd_ne_bot : topologicalKrullDim X ≠ ⊥ :=
+      ne_bot_of_gt (lt_of_lt_of_le (WithBot.bot_lt_coe (0 : ℕ∞))
+        topologicalKrullDim_nonneg_of_irreducible)
     lift topologicalKrullDim X to ℕ∞ using hd_ne_bot with d
     have hd_lt : (d : WithBot ℕ∞) < ↑((m'.succ : ℕ) : ℕ∞) := hm
     rw [WithBot.coe_lt_coe] at hd_lt
