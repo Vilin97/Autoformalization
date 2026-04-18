@@ -153,44 +153,6 @@ theorem closedIncl_pushforward_shortExact
     closedIncl_pushforward_epi_g hs hSE
   exact ShortComplex.ShortExact.mk' hExact ‹_› ‹_›
 
-
-/-! ### PushforwardHVanishing sub-lemmas -/
-
--- Base case: Γ comparison. Γ_X(i_*G') = G'(⊤_Z) = Γ_Z(G')
-private lemma PushforwardHVanishing_zero
-    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
-    (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))
-    (hG' : Subsingleton (Sheaf.H G' 0)) :
-    Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hZ)).obj G') 0) := by
-  let i := TopCat.closedIncl hZ
-  let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G'
-  have hsec : Subsingleton (G'.val.obj (op ⊤)) := by
-    letI := hG'; exact (sheafH0EquivSections G').toEquiv.subsingleton_congr.mp ‹_›
-  have hobj : F'.val.obj (op ⊤) = G'.val.obj (op ⊤) := by
-    change G'.val.obj (op ((Opens.map i).obj ⊤)) = G'.val.obj (op ⊤)
-    simp [show ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ from by ext; simp [Opens.map]]
-  constructor; intro a b
-  apply (sheafH0EquivSections F').injective
-  exact @Subsingleton.elim (F'.val.obj (op ⊤)) (hobj ▸ hsec) _ _
-
--- Helper: Ext₀ composition identity used in epi_g_app_top_of_H1_vanishing
-private lemma ext0_comp_eq_of_covariant
-    {Z : TopCat.{u}} [NoetherianSpace Z]
-    {A B C : TopCat.Sheaf AddCommGrpCat.{u} Z}
-    (g : B ⟶ C)
-    (z : Ext A B 0)
-    (φ : A ⟶ C)
-    (hz : z.comp (Ext.mk₀ g) (add_zero 0) = Ext.addEquiv₀.symm φ) :
-    Ext.addEquiv₀ z ≫ g = φ := by
-  apply Ext.addEquiv₀.symm.injective
-  change Ext.addEquiv₀.symm (Ext.addEquiv₀ z ≫ g) = Ext.addEquiv₀.symm φ
-  rw [show Ext.addEquiv₀.symm (Ext.addEquiv₀ z ≫ g) =
-      Ext.mk₀ (Ext.addEquiv₀ z ≫ g) from rfl, ← Ext.mk₀_comp_mk₀]
-  show (Ext.addEquiv₀.symm (Ext.addEquiv₀ z)).comp
-      (Ext.mk₀ g) _ = Ext.addEquiv₀.symm φ
-  rw [AddEquiv.symm_apply_apply]; exact hz
-
 -- Epi of g at ⊤ from H^1(X₁)=0 via LES + adj + separator
 theorem epi_g_app_top_of_H1_vanishing
     {Z : TopCat.{u}} [NoetherianSpace Z]
@@ -209,8 +171,10 @@ theorem epi_g_app_top_of_H1_vanishing
   let φ := (adj_Z.homEquiv _ S.X₃).symm φ_hom
   obtain ⟨z, hz⟩ := Ext.covariant_sequence_exact₃ _ hSE _ rfl
     (@Subsingleton.elim _ hG' _ _)
-  have hψ : Ext.addEquiv₀ z ≫ S.g = φ :=
-    ext0_comp_eq_of_covariant S.g z φ hz
+  have hψ : Ext.addEquiv₀ z ≫ S.g = φ := by
+    apply Ext.addEquiv₀.symm.injective
+    change Ext.mk₀ (Ext.addEquiv₀ z ≫ S.g) = Ext.addEquiv₀.symm φ
+    rw [← Ext.mk₀_comp_mk₀, Ext.mk₀_addEquiv₀_apply]; exact hz
   let ψ_hom := (adj_Z.homEquiv _ S.X₂) (Ext.addEquiv₀ z)
   have hfact := Adjunction.homEquiv_naturality_right adj_Z (Ext.addEquiv₀ z) S.g
   rw [hψ, Equiv.apply_symm_apply] at hfact
@@ -259,7 +223,17 @@ theorem PushforwardHVanishing
       Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') m) from
     this n G h
   intro m; induction m with
-  | zero => exact PushforwardHVanishing_zero hZ
+  | zero =>
+    intro G' hG'
+    let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G'
+    have hsec : Subsingleton (G'.val.obj (op ⊤)) := by
+      letI := hG'; exact (sheafH0EquivSections G').toEquiv.subsingleton_congr.mp ‹_›
+    have hobj : F'.val.obj (op ⊤) = G'.val.obj (op ⊤) := by
+      change G'.val.obj (op ((Opens.map i).obj ⊤)) = G'.val.obj (op ⊤)
+      simp [show ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ from by ext; simp [Opens.map]]
+    constructor; intro a b
+    apply (sheafH0EquivSections F').injective
+    exact @Subsingleton.elim (F'.val.obj (op ⊤)) (hobj ▸ hsec) _ _
   | succ k ih_push =>
     intro G' hG'
     obtain ⟨ip⟩ := EnoughInjectives.presentation G'
