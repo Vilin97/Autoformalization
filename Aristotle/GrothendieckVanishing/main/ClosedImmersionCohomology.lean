@@ -33,21 +33,6 @@ ReducibleVanishing and IrreduciblePosVanishing require two building blocks:
 2. closedImmersionSES: the adjunction unit F -> i_*(i^*F) gives a short exact sequence
 -/
 
--- stalkPushforward naturality w.r.t. presheaf morphisms
-private theorem stalkPush_nat_closedIncl
-    {X Y : TopCat.{u}} (f : X ⟶ Y)
-    {F G : X.Presheaf AddCommGrpCat.{u}} (α : F ⟶ G) (x : X) :
-    (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} (ConcreteCategory.hom f x)).map
-        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} f).map α) ≫
-      TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} f G x =
-    TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} f F x ≫
-      (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map α := by
-  apply TopCat.Presheaf.stalk_hom_ext; intro U hU
-  simp only [TopCat.Presheaf.stalkFunctor_map_germ_assoc,
-    TopCat.Presheaf.stalkPushforward_germ,
-    TopCat.Presheaf.stalkPushforward_germ_assoc,
-    TopCat.Presheaf.stalkFunctor_map_germ]; rfl
-
 -- Stalkwise surjectivity of pushed-forward g
 private theorem closedIncl_pushforward_epi_g
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
@@ -80,7 +65,17 @@ private theorem closedIncl_pushforward_epi_g
         ((Sheaf.isLocallySurjective_iff_epi'
             AddCommGrpCat.{u} _).mpr hSE.epi_g)) z
     apply (AddCommGrpCat.epi_iff_surjective _).mp
-    have hnat := stalkPush_nat_closedIncl (TopCat.closedIncl hs) S.g.val z
+    have hnat : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
+        (ConcreteCategory.hom (TopCat.closedIncl hs) z)).map
+        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map S.g.val) ≫
+      TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} (TopCat.closedIncl hs) S.X₃.val z =
+    TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} (TopCat.closedIncl hs) S.X₂.val z ≫
+      (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map S.g.val := by
+      apply TopCat.Presheaf.stalk_hom_ext; intro U hU
+      simp only [TopCat.Presheaf.stalkFunctor_map_germ_assoc,
+        TopCat.Presheaf.stalkPushforward_germ,
+        TopCat.Presheaf.stalkPushforward_germ_assoc,
+        TopCat.Presheaf.stalkFunctor_map_germ]; rfl
     haveI : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map S.g.val) :=
       (AddCommGrpCat.epi_iff_surjective _).mpr hg_surj
     change Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
