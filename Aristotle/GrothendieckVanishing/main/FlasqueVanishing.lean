@@ -5,7 +5,6 @@
   1. Categorical infrastructure for sheaf cohomology on `AddCommGrpCat`
   2. `IsFlasqueSheaf`, `epi_app_of_shortExact_flasque`, `isFlasque_X₃_of_shortExact`
   3. `isFlasque_of_injective` (injective sheaves are flasque)
-  4. `ext_zero_map_surjective` (base case for flasque vanishing)
 
   `FlasqueVanishing` itself is in `FlasqueCohomology.lean`.
   Split from SetupCore.lean for compilation performance.
@@ -417,37 +416,3 @@ theorem isFlasque_of_injective {X : TopCat.{u}}
   rw [AddCommGrpCat.epi_iff_surjective]
   intro s; obtain ⟨h, hh⟩ := Injective.factors ((freeAbSheafHomEquiv U I).symm s) (freeAbSheafMap i)
   exact ⟨freeAbSheafHomEquiv V I h, by rw [← freeAbSheafHomEquiv_naturality i I h, hh]; simp⟩
-
--- Surjectivity of Ext map at degree 0 (base case input).
--- For a SES 0 -> F -> I -> Q -> 0 with F flasque, the induced map
--- Ext(Z_X, I, 0) -> Ext(Z_X, Q, 0) is surjective for Z_X = constant sheaf.
--- Proof: reduce to Hom via addEquiv₀, then use constantSheafΓAdj + projectivity
--- of ULift ℤ + epi_app_of_shortExact_flasque.
-theorem ext_zero_map_surjective {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (hFlasque₁ : IsFlasqueSheaf S.X₁) :
-    ∀ y : Ext ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-        (AddCommGrpCat.of (ULift.{u} ℤ))) S.X₃ 0,
-      ∃ z : Ext ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-          (AddCommGrpCat.of (ULift.{u} ℤ))) S.X₂ 0,
-        z.comp (Ext.mk₀ S.g) (add_zero 0) = y := by
-  intro y
-  -- Convert from Ext⁰ to Hom via addEquiv₀
-  suffices ∃ ψ : _ ⟶ S.X₂, ψ ≫ S.g = Ext.addEquiv₀ y by
-    obtain ⟨ψ, hψ⟩ := this
-    exact ⟨Ext.mk₀ ψ, by rw [Ext.mk₀_comp_mk₀, hψ, Ext.mk₀_addEquiv₀_apply]⟩
-  haveI : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map S.g) := by
-    have h := epi_app_of_shortExact_flasque hS hFlasque₁ ⊤
-    exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
-      ((Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).inv.naturality S.g).symm
-  haveI : Projective (AddCommGrpCat.of (ULift.{u} ℤ)) := ulift_int_projective
-  let adj := constantSheafΓAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
-  exact ⟨(adj.homEquiv _ S.X₂).symm (Projective.factorThru
-    ((adj.homEquiv _ S.X₃) (Ext.addEquiv₀ y)) ((Sheaf.Γ _ _).map S.g)), by
-    apply (adj.homEquiv _ S.X₃).injective
-    rw [Adjunction.homEquiv_naturality_right, Equiv.apply_symm_apply,
-      Projective.factorThru_comp]⟩
-
--- Cohomological vanishing theorems (sheafH0EquivSections, FlasqueVanishing)
--- are in FlasqueCohomology.lean.
-
