@@ -30,7 +30,7 @@ are already sheaves on Noetherian spaces), so restrictions of the colimit are co
 per-piece restrictions. Filtered colimits in `AddCommGrpCat` preserve surjections, and
 flasque means all restrictions are surjective.
 
-This replaces Gabriel's theorem (filtered colimits of injectives are injective) for our
+This replaces the result that filtered colimits of injectives are injective for our
 purposes: we only need `H^n(colim I_j) = 0` for injective `I_j`, and `FlasqueVanishing`
 gives this since injective sheaves are flasque (`isFlasque_of_injective`). -/
 

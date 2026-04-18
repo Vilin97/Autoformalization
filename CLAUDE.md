@@ -69,4 +69,4 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 
 **FULLY PROVED — 0 sorry's, 0 axioms, 0 admits.**
 
-The last sorry (Gabriel's theorem: filtered colimits of injectives are injective) was eliminated by observing that we only need `H^n(colim I_j) = 0`, not full injectivity. Since injective sheaves are flasque (`isFlasque_of_injective`), filtered colimits of flasque sheaves are flasque (`isFlasque_filtered_colimit` in `FiniteGeneratorReduction.lean`), and flasque sheaves have vanishing higher cohomology (`FlasqueVanishing`), the result follows without Gabriel's theorem.
+The last sorry (that filtered colimits of injectives are injective) was eliminated by observing that we only need `H^n(colim I_j) = 0`, not full injectivity. Since injective sheaves are flasque (`isFlasque_of_injective`), filtered colimits of flasque sheaves are flasque (`isFlasque_filtered_colimit` in `FiniteGeneratorReduction.lean`), and flasque sheaves have vanishing higher cohomology (`FlasqueVanishing`), the result follows without this fact.
