@@ -19,7 +19,7 @@
   - ClosedOpenDecomposition.lean: reduction to irreducible (+ reducible case)
   - PresheafFilteredColimit.lean: presheaf colimit is sheaf on Noetherian spaces (PROVED)
   - FiniteGeneratorReduction.lean: colimit step, f.g. vanishing (FULLY PROVED)
-  - SheafStalkAlgebra.lean + StalkGeneratorAlgebra.lean: stalk algebra, generator section
+  - SheafStalkAlgebra.lean: stalk algebra, zeroOutsideInt cohomology, generator section
   - IrreducibleStep.lean: irreducible step assembly
   - GrothendieckVanishing.lean: main theorem + cascade theorems
 -/
