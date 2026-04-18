@@ -5,7 +5,6 @@
   - isZero_zeroOutsideInt_bot: zeroOutsideInt ⊥ is zero
   - stalk_zeroOutsideInt_zero_outside: stalks vanish outside support
   - exists_nonzero_stalk_in_V: nonzero subsheaf has nonzero stalk in V
-  - sheaf_mono_of_stalk_injective: stalk injectivity → mono
   - stalk_zeroOutsideInt_eq_zsmul_generator: stalks are Z-multiples of generator
   - ulift_int_subgroup_cyclic: cyclic subgroup classification
   - zsmul_generator_injective: generator coefficient uniqueness
@@ -55,17 +54,6 @@ theorem exists_nonzero_stalk_in_V
     exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
       (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) i)
       ((stalk_zeroOutsideInt_zero_outside V x hx _).trans (map_zero _).symm)
-
-/-- A sheaf morphism is mono if all its stalk maps are injective. -/
-theorem sheaf_mono_of_stalk_injective
-    {X : TopCat.{u}}
-    {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G)
-    (h : ∀ x : X, Function.Injective (ConcreteCategory.hom
-      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val))) :
-    Mono f := by
-  have : ∀ x, Mono ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val) :=
-    fun x => (ConcreteCategory.mono_iff_injective_of_preservesPullback _).mpr (h x)
-  exact TopCat.Presheaf.mono_of_stalk_mono f
 
 /-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
     is an integer multiple of the germ of the distinguished generator over `V`. -/
