@@ -165,12 +165,13 @@ theorem closedIncl_pushforward_shortExact
 
 -- Base case: Γ comparison. Γ_X(i_*G') = G'(⊤_Z) = Γ_Z(G')
 private lemma PushforwardHVanishing_zero
-    {X : TopCat.{u}} {Z : Set X} (_hZ : IsClosed Z) [NoetherianSpace X]
+    {X : TopCat.{u}} {Z : Set X} (hZ : IsClosed Z) [NoetherianSpace X]
     (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))
     (hG' : Subsingleton (Sheaf.H G' 0)) :
-    let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-    Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') 0) := by
-  intro i; let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G'
+    Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hZ)).obj G') 0) := by
+  let i := TopCat.closedIncl hZ
+  let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G'
   have hsec : Subsingleton (G'.val.obj (op ⊤)) := by
     letI := hG'; exact (sheafH0EquivSections G').toEquiv.subsingleton_congr.mp ‹_›
   have hobj : F'.val.obj (op ⊤) = G'.val.obj (op ⊤) := by
@@ -257,9 +258,10 @@ theorem PushforwardHVanishing
     [NoetherianSpace X]
     (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) (n : ℕ)
     (h : Subsingleton (Sheaf.H G n)) :
-    let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-    Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G) n) := by
-  intro i; suffices ∀ (m : ℕ) (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)),
+    Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hZ)).obj G) n) := by
+  let i := TopCat.closedIncl hZ
+  suffices ∀ (m : ℕ) (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)),
       Subsingleton (Sheaf.H G' m) →
       Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') m) from
     this n G h
@@ -297,10 +299,10 @@ theorem epi_unit_of_closedImmersion
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
-    let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
-    let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
-    Epi (adj.unit.app F) := by
-  intro i adj
+    Epi ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
+      (TopCat.closedIncl hZ)).unit.app F) := by
+  let i := TopCat.closedIncl hZ
+  let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
   rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} (adj.unit.app F),
     show Sheaf.IsLocallySurjective (adj.unit.app F) =
       TopCat.Presheaf.IsLocallySurjective (adj.unit.app F).val from rfl,
@@ -342,11 +344,11 @@ theorem epi_unit_of_closedImmersion
     where `η` is the pullback-pushforward adjunction unit and `i : Z ↪ X` is the
     inclusion of a closed subset. -/
 noncomputable def closedImmersionSES
-    {X : TopCat.{u}} (Z : Set X) (_hZ : IsClosed Z)
+    {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     [NoetherianSpace X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
     ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-  let i : TopCat.of Z ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
+  let i := TopCat.closedIncl hZ
   let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i).unit.app F
   ShortComplex.mk (kernel.ι η) η (kernel.condition η)
 
