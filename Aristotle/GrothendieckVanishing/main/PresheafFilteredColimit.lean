@@ -137,8 +137,9 @@ theorem filtered_colimit_kills_all_restrictions
 theorem colimit_section_zero_of_zero_on_cover
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    {Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X}
-    {c : Cocone (Y' ⋙ sheafToPresheaf _ _)} (hc : IsColimit c)
+    (Y' : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y'.obj j))
+    {c : Cocone Y'} (hc : IsColimit c)
     {ι : Type u} {V : Opens X} {W : ι → Opens X} (hW : ∀ k, W k ≤ V)
     {t : Finset ι} (hcov : V ≤ ⨆ k ∈ t, W k)
     (a : ToType (c.pt.obj (op V)))
@@ -149,22 +150,22 @@ theorem colimit_section_zero_of_zero_on_cover
   obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ (hcV V) a
   -- For each k ∈ t: ι(b₀|_{W_k}) = a|_{W_k} = 0, so eventually zero
   have h_ev_zero : ∀ k ∈ t, ∃ (jk : J') (fk : j₀ ⟶ jk),
-      ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _) ⋙ ev (W k)).map fk)
-        (ConcreteCategory.hom ((Y'.obj j₀).val.map (homOfLE (hW k)).op) b₀) = 0 := by
+      ConcreteCategory.hom (((Y' ⋙ ev (W k)).map fk))
+        (ConcreteCategory.hom ((Y'.obj j₀).map (homOfLE (hW k)).op) b₀) = 0 := by
     intro k hk
     have hcTyp := isColimitOfPreserves (CategoryTheory.forget AddCommGrpCat) (hcV (W k))
     have hnat_k : ConcreteCategory.hom (((ev (W k)).mapCocone c).ι.app j₀)
-        (ConcreteCategory.hom ((Y'.obj j₀).val.map (homOfLE (hW k)).op) b₀) =
+        (ConcreteCategory.hom ((Y'.obj j₀).map (homOfLE (hW k)).op) b₀) =
       ConcreteCategory.hom (c.pt.map (homOfLE (hW k)).op) a := by
       simp only [Functor.mapCocone_ι_app]; rw [← hb₀]
       change ConcreteCategory.hom
-        (((Y' ⋙ sheafToPresheaf _ _).obj j₀).map _ ≫ (c.ι.app j₀).app _) b₀ =
+        ((Y'.obj j₀).map _ ≫ (c.ι.app j₀).app _) b₀ =
         ConcreteCategory.hom
         ((c.ι.app j₀).app _ ≫ (((Functor.const J').obj c.pt).obj j₀).map _) b₀
       rw [(c.ι.app j₀).naturality (homOfLE (hW k)).op]
     have h0 : ((CategoryTheory.forget AddCommGrpCat).mapCocone
         ((ev (W k)).mapCocone c)).ι.app j₀
-        (ConcreteCategory.hom ((Y'.obj j₀).val.map (homOfLE (hW k)).op) b₀) =
+        (ConcreteCategory.hom ((Y'.obj j₀).map (homOfLE (hW k)).op) b₀) =
       ((CategoryTheory.forget AddCommGrpCat).mapCocone
         ((ev (W k)).mapCocone c)).ι.app j₀ 0 := by
       change ConcreteCategory.hom (((ev (W k)).mapCocone c).ι.app j₀) _ =
@@ -175,20 +176,22 @@ theorem colimit_section_zero_of_zero_on_cover
     exact ⟨jk, fk, by simpa [map_zero] using hfk⟩
   -- Merge via filtered_colimit_kills_all_restrictions
   obtain ⟨j₁, g₀, hg₀⟩ := filtered_colimit_kills_all_restrictions
-      (Y' ⋙ sheafToPresheaf _ _) hW j₀ b₀ t (by
+      Y' hW j₀ b₀ t (by
     intro k hk; obtain ⟨jk, fk, hfk⟩ := h_ev_zero k hk; refine ⟨jk, fk, ?_⟩
-    change ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map fk).app (op V) ≫
-      ((Y' ⋙ sheafToPresheaf _ _).obj jk).map (homOfLE (hW k)).op) b₀ = 0
-    rw [← ((Y' ⋙ sheafToPresheaf _ _).map fk).naturality (homOfLE (hW k)).op]; exact hfk)
+    change ConcreteCategory.hom (((Y'.map fk).app (op V)) ≫
+      (Y'.obj jk).map (homOfLE (hW k)).op) b₀ = 0
+    rw [← ((Y'.map fk).naturality (homOfLE (hW k)).op)]
+    exact hfk)
   -- Conclude: the transition is zero by sheaf separation, hence a = 0
   rw [← hb₀]; change ConcreteCategory.hom ((c.ι.app j₀).app (op V)) b₀ = 0
-  rw [show (c.ι.app j₀).app (op V) =
-      ((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op V) ≫
-      (c.ι.app j₁).app (op V) from by
+  have hnat : (c.ι.app j₀).app (op V) =
+      (Y'.map g₀).app (op V) ≫
+      (c.ι.app j₁).app (op V) := by
     simpa [Functor.const_obj_map] using
-      (congrArg (fun α => NatTrans.app α (op V)) (c.ι.naturality g₀)).symm]
+      (congrArg (fun α => NatTrans.app α (op V)) (c.ι.naturality g₀)).symm
+  rw [hnat]
   rw [ConcreteCategory.comp_apply,
-    sheaf_section_zero_of_zero_on_cover (Y'.obj j₁).cond hW hcov _ hg₀, map_zero]
+    sheaf_section_zero_of_zero_on_cover (hY j₁) hW hcov _ hg₀, map_zero]
 
 /-- On a Noetherian space, the presheaf-level filtered colimit of sheaves is a sheaf.
     Proof: Noetherian compactness reduces the sheaf condition to finite covers, then
@@ -214,7 +217,9 @@ theorem isSheaf_presheaf_filtered_colimit
   -- Separation: section zero on finite subcover is zero
   have hsep : ∀ (a : ToType (c.pt.obj (op (iSup U)))),
       (∀ k ∈ t, c.pt.map (Opens.leSupr U k).op a = 0) → a = 0 :=
-    fun a ha => colimit_section_zero_of_zero_on_cover hc (fun k => le_iSup U k) hsup_le a ha
+    fun a ha => colimit_section_zero_of_zero_on_cover
+      (Y' ⋙ sheafToPresheaf _ _) (fun j => (Y'.obj j).cond) hc
+      (fun k => le_iSup U k) hsup_le a ha
   -- Existence: construct a gluing section
   classical
   choose j_all x_all hx_all using fun k =>
@@ -372,7 +377,8 @@ theorem isSheaf_presheaf_filtered_colimit
       · exact (hcompat i k).symm
     -- Colimit separation at U_i via shared helper
     apply sub_eq_zero.mp
-    exact colimit_section_zero_of_zero_on_cover hc
+    exact colimit_section_zero_of_zero_on_cover
+      (Y' ⋙ sheafToPresheaf _ _) (fun j => (Y'.obj j).cond) hc
       (fun k => inf_le_left (a := U i) (b := U k))
       (by rw [SetLike.le_def]; intro x hx
           obtain ⟨k, hk⟩ := Opens.mem_iSup.mp (hsup_le (le_iSup U i hx))
