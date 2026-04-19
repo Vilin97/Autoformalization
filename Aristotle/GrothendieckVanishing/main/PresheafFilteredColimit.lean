@@ -343,12 +343,31 @@ theorem colimit_exists_gluing_of_compatible_finite_subcover
     ∃ s : ToType (c.pt.obj (op (iSup U))),
       ∀ k, k ∈ t → c.pt.map (Opens.leSupr U k).op s = sf k := by
   let W : ↥t → Opens X := fun k => U k.1
-  have hcov_W : iSup U ≤ iSup W := by
-    rw [show iSup W = ⨆ k ∈ t, U k from iSup_subtype (p := (· ∈ t))]
-    exact hsup_le
-  let F : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨P.obj j₁, hP j₁⟩
-  obtain ⟨s₀, hs₀, _⟩ := TopCat.Sheaf.existsUnique_gluing' F W (iSup U)
-    (fun k => Opens.leSupr U k.1) hcov_W x'' (by simpa [W] using hx''_compat)
+  have hcov_W : iSup W = iSup U := by
+    apply le_antisymm
+    · refine iSup_le ?_
+      intro k
+      exact le_iSup U k.1
+    · rw [show iSup W = ⨆ k ∈ t, U k from iSup_subtype (p := (· ∈ t))]
+      exact hsup_le
+  obtain ⟨sW, hsW, _⟩ := (hP j₁).isSheafUniqueGluing W x''
+    (by simpa [W] using hx''_compat)
+  let s₀ : ToType ((P.obj j₁).obj (op (iSup U))) :=
+    ConcreteCategory.hom ((P.obj j₁).map (eqToHom hcov_W.symm).op) sW
+  have hs₀ : ∀ k (hk : k ∈ t),
+      ConcreteCategory.hom ((P.obj j₁).map (Opens.leSupr U k).op) s₀ = x'' ⟨k, hk⟩ := by
+    intro k hk
+    dsimp [s₀]
+    rw [← ConcreteCategory.comp_apply, ← (P.obj j₁).map_comp]
+    have hle_k : Opens.leSupr U k ≫ eqToHom hcov_W.symm = Opens.leSupr W ⟨k, hk⟩ := by
+      simpa [W] using
+        (Subsingleton.elim
+          (Opens.leSupr U k ≫ eqToHom hcov_W.symm)
+          (Opens.leSupr W ⟨k, hk⟩))
+    rw [show (eqToHom hcov_W.symm).op ≫ (Opens.leSupr U k).op =
+        (Opens.leSupr W ⟨k, hk⟩).op by
+      simpa using congrArg Quiver.Hom.op hle_k]
+    exact hsW ⟨k, hk⟩
   let s : ToType (c.pt.obj (op (iSup U))) :=
     ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U))) s₀
   refine ⟨s, ?_⟩
@@ -360,8 +379,7 @@ theorem colimit_exists_gluing_of_compatible_finite_subcover
     from ((c.ι.app j₁).naturality (Opens.leSupr U k).op).symm]
   change ConcreteCategory.hom ((c.ι.app j₁).app (op (U k)))
     (ConcreteCategory.hom ((P.obj j₁).map (Opens.leSupr U k).op) s₀) = sf k
-  rw [show ConcreteCategory.hom ((P.obj j₁).map (Opens.leSupr U k).op) s₀ = x'' ⟨k, hk⟩ by
-    simpa [F, W] using hs₀ ⟨k, hk⟩]
+  rw [hs₀ k hk]
   exact hx'' ⟨k, hk⟩
 
 /-- If a section on `iSup U` agrees with a compatible family on a finite subcover,
