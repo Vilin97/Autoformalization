@@ -364,6 +364,43 @@ theorem colimit_exists_gluing_of_compatible_finite_subcover
     simpa [F, W] using hs₀ ⟨k, hk⟩]
   exact hx'' ⟨k, hk⟩
 
+/-- If a section on `iSup U` agrees with a compatible family on a finite subcover,
+    then it restricts to that family on every `U i`. -/
+theorem colimit_restrict_eq_of_eq_on_finite_subcover
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (P : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
+    (hP : ∀ j, TopCat.Presheaf.IsSheaf (P.obj j))
+    {c : Cocone P} (hc : IsColimit c)
+    {ι : Type u} (U : ι → Opens X)
+    (sf : ∀ i, ToType (c.pt.obj (op (U i))))
+    (hcompat : Presheaf.IsCompatible c.pt U sf)
+    {t : Finset ι} (hsup_le : iSup U ≤ ⨆ k ∈ t, U k)
+    (s : ToType (c.pt.obj (op (iSup U))))
+    (hs_k : ∀ k, k ∈ t → c.pt.map (Opens.leSupr U k).op s = sf k) :
+    ∀ i, c.pt.map (Opens.leSupr U i).op s = sf i := by
+  intro i
+  apply sub_eq_zero.mp
+  refine colimit_section_zero_of_zero_on_cover
+    P hP hc
+    (fun k => inf_le_left (a := U i) (b := U k))
+    (t := t)
+    ?_
+    (c.pt.map (Opens.leSupr U i).op s - sf i)
+    ?_
+  · rw [SetLike.le_def]
+    intro x hx
+    obtain ⟨k, hk⟩ := Opens.mem_iSup.mp (hsup_le (le_iSup U i hx))
+    obtain ⟨hkt, hxk⟩ := Opens.mem_iSup.mp hk
+    exact Opens.mem_iSup.mpr ⟨k, Opens.mem_iSup.mpr ⟨hkt, ⟨hx, hxk⟩⟩⟩
+  · intro k hk
+    rw [map_sub, sub_eq_zero]
+    trans (ConcreteCategory.hom (c.pt.map (Opens.infLERight (U i) (U k)).op) (sf k))
+    · rw [← hs_k k hk, ← ConcreteCategory.comp_apply, ← c.pt.map_comp,
+          ← ConcreteCategory.comp_apply, ← c.pt.map_comp]
+      congr 1
+    · exact (hcompat i k).symm
+
 /-- On a Noetherian space, the presheaf-level filtered colimit of sheaves is a sheaf.
     Proof: Noetherian compactness reduces the sheaf condition to finite covers, then
     filtered colimit merging passes from per-piece data to glued data. -/
@@ -422,29 +459,9 @@ theorem isSheaf_presheaf_filtered_colimit
     P hcP U sf hcompat j₀ x' hx'
   obtain ⟨s, hs_k⟩ := colimit_exists_gluing_of_compatible_finite_subcover
     P hP U sf hsup_le j₁ x'' hx''_compat hx''
-  -- For all i: s|_{U_i} = sf_i (by separation at U_i via hcompat)
   refine ⟨s, fun i => ?_, fun s' hs' => ?_⟩
-  · -- s|_{U_i} = sf_i: show difference is 0 by checking on finite subcover of U_i
-    have h_diff_zero : ∀ k ∈ t,
-        ConcreteCategory.hom (c.pt.map (homOfLE (inf_le_left : U i ⊓ U k ≤ U i)).op)
-          (c.pt.map (Opens.leSupr U i).op s - sf i) = 0 := by
-      intro k hk; rw [map_sub, sub_eq_zero]
-      -- LHS = s|_{U_i ⊓ U_k} = s|_{U_k}|_{U_i ⊓ U_k} = sf_k|_{U_i ⊓ U_k}
-      -- RHS = sf_i|_{U_i ⊓ U_k} = sf_k|_{U_i ⊓ U_k} (by hcompat)
-      trans (ConcreteCategory.hom (c.pt.map (Opens.infLERight (U i) (U k)).op) (sf k))
-      · rw [← hs_k k hk, ← ConcreteCategory.comp_apply, ← c.pt.map_comp,
-            ← ConcreteCategory.comp_apply, ← c.pt.map_comp]; congr 1
-      · exact (hcompat i k).symm
-    -- Colimit separation at U_i via shared helper
-    apply sub_eq_zero.mp
-    exact colimit_section_zero_of_zero_on_cover
-      P hP hcP
-      (fun k => inf_le_left (a := U i) (b := U k))
-      (by rw [SetLike.le_def]; intro x hx
-          obtain ⟨k, hk⟩ := Opens.mem_iSup.mp (hsup_le (le_iSup U i hx))
-          obtain ⟨hkt, hxk⟩ := Opens.mem_iSup.mp hk
-          exact Opens.mem_iSup.mpr ⟨k, Opens.mem_iSup.mpr ⟨hkt, ⟨hx, hxk⟩⟩⟩)
-      _ h_diff_zero
+  · exact colimit_restrict_eq_of_eq_on_finite_subcover
+      P hP hcP U sf hcompat hsup_le s hs_k i
   · -- Uniqueness from hsep
     have h0 : s' - s = 0 := hsep (s' - s) (fun k hk => by
       show c.pt.map (Opens.leSupr U k).op (s' - s) = 0
