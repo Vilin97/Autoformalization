@@ -35,6 +35,33 @@ ReducibleVanishing and IrreduciblePosVanishing require two building blocks:
 2. closedImmersionSES: the adjunction unit F -> i_*(i^*F) gives a short exact sequence
 -/
 
+/-- Stalks of a pushforward along a closed inclusion vanish outside the closed set:
+    if `x ∉ s`, every element of `stalk(i_*(G), x)` is zero. -/
+theorem pushforward_closedIncl_stalk_eq_zero
+    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
+    (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s))
+    {x : X} (hx : x ∉ s)
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
+      ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G).val) :
+    a = 0 := by
+  let F' := (TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G.val
+  obtain ⟨U, hxU, sU, rfl⟩ := F'.germ_exist x a
+  let W : Opens X := U ⊓ ⟨sᶜ, hs.isOpen_compl⟩
+  have hW_bot : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ :=
+    le_antisymm (fun ⟨_, hy⟩ h => absurd hy h.2) bot_le
+  have hFW_zero : IsZero (F'.obj (op W)) := by
+    change IsZero (G.val.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
+    rw [hW_bot]; exact G.isTerminalOfEmpty.isZero
+  let sW := ConcreteCategory.hom (F'.map (homOfLE (show W ≤ U from inf_le_left)).op) sU
+  have hsW_eq : sW = 0 := by
+    have h0 : (𝟙 (F'.obj (op W)) : _ ⟶ _) = 0 := hFW_zero.eq_of_src _ _
+    calc sW = ConcreteCategory.hom (𝟙 (F'.obj (op W))) sW := (ConcreteCategory.id_apply sW).symm
+      _ = 0 := by rw [h0]; exact AddMonoidHom.zero_apply _
+  rw [← TopCat.Presheaf.germ_res_apply F'
+    (homOfLE (show W ≤ U from inf_le_left)) x ⟨hxU, hx⟩ sU]
+  change ConcreteCategory.hom (F'.germ W x ⟨hxU, hx⟩) sW = 0
+  rw [hsW_eq]; exact AddMonoidHom.map_zero _
+
 /-- Pushforward along a closed immersion preserves epis: if `f : F ⟶ G` is epi in
     sheaves on the closed subspace, then `i_*(f)` is epi in sheaves on the ambient space.
     Proof: stalkwise surjectivity (identity on the closed set, zero outside). -/
@@ -104,26 +131,7 @@ theorem epi_pushforward_map_closedIncl
       rw [Category.assoc, IsIso.hom_inv_id, Category.comp_id]]
     exact epi_comp _ _
   · intro b
-    have hb : b = 0 := by
-      let F' := (TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G.val
-      obtain ⟨U, hxU, sU, rfl⟩ := F'.germ_exist x b
-      let W : Opens X := U ⊓ ⟨sᶜ, hs.isOpen_compl⟩
-      have hxW : x ∈ W := ⟨hxU, hx⟩
-      have hW_bot : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ :=
-        le_antisymm (fun ⟨_, hy⟩ h => absurd hy h.2) bot_le
-      have hFW_zero : IsZero (F'.obj (op W)) := by
-        change IsZero (G.val.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
-        rw [hW_bot]; exact G.isTerminalOfEmpty.isZero
-      let sW := ConcreteCategory.hom (F'.map (homOfLE (show W ≤ U from inf_le_left)).op) sU
-      have hsW_eq : sW = 0 := by
-        have h0 : (𝟙 (F'.obj (op W)) : _ ⟶ _) = 0 := hFW_zero.eq_of_src _ _
-        calc sW = ConcreteCategory.hom (𝟙 (F'.obj (op W))) sW := (ConcreteCategory.id_apply sW).symm
-          _ = 0 := by rw [h0]; exact AddMonoidHom.zero_apply _
-      rw [← TopCat.Presheaf.germ_res_apply F'
-        (homOfLE (show W ≤ U from inf_le_left)) x hxW sU]
-      change ConcreteCategory.hom (F'.germ W x hxW) sW = 0
-      rw [hsW_eq]; exact AddMonoidHom.map_zero _
-    rw [hb]
+    rw [pushforward_closedIncl_stalk_eq_zero hs G hx b]
     exact ⟨0, AddMonoidHom.map_zero _⟩
 
 -- Pushforward along closed immersion preserves ShortExact.
@@ -276,30 +284,8 @@ theorem epi_unit_of_closedImmersion
         ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
           (TopCat.closedIncl hZ)).unit.app F).val)).2
   · -- x ∉ Z: target stalk is 0 (pushforward has zero stalk outside closed Z)
-    -- Show stalk is IsZero by showing all colimit injections (germs) are 0.
-    -- Each germ_V factors through V' = V ∩ (X\Z) where the source is 0.
-    let D := (OpenNhds.inclusion x).op ⋙
-      ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
-        ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F)).val
-    have hstalk_zero : IsZero (colimit D) := by
-      rw [IsZero.iff_id_eq_zero]
-      apply colimit.hom_ext; intro ⟨⟨V, hxV⟩⟩
-      simp only [comp_zero, Category.comp_id]
-      let Zc : Opens X := ⟨Zᶜ, hZ.isOpen_compl⟩
-      let V'_nhd : OpenNhds x := ⟨V ⊓ Zc, ⟨hxV, hxZ⟩⟩
-      rw [show colimit.ι D (op ⟨V, hxV⟩) =
-        D.map (homOfLE (show V'_nhd.1 ≤ V from inf_le_left) : V'_nhd ⟶ ⟨V, hxV⟩).op ≫
-          colimit.ι D (op V'_nhd) from (colimit.w D _).symm]
-      suffices IsZero (D.obj (op V'_nhd)) by
-        rw [this.eq_zero_of_src (colimit.ι D (op V'_nhd)), comp_zero]
-      change IsZero (((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F).val.obj
-        (op ((Opens.map i).obj V'_nhd.1)))
-      rw [show (Opens.map i).obj V'_nhd.1 = ⊥ from le_antisymm (fun ⟨_, hy⟩ hmem => by
-        simp only [Opens.map, Opens.mem_mk] at hmem; exact absurd hy (hmem.2 ·)) bot_le]
-      exact (TopCat.Sheaf.isTerminalOfEmpty _).isZero
-    -- The stalk is IsZero → surjective
-    exact fun b => ⟨0, by simp [(@Subsingleton.elim _
-      (AddCommGrpCat.subsingleton_of_isZero hstalk_zero) b 0).symm]⟩
+    exact fun b => ⟨0, by
+      rw [pushforward_closedIncl_stalk_eq_zero hZ _ hxZ b]; exact map_zero _⟩
 
 /-- The short exact sequence `0 → ker(η) → F → i_*(i^*F) → 0` from a closed immersion,
     where `η` is the pullback-pushforward adjunction unit and `i : Z ↪ X` is the
