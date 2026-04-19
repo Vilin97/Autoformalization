@@ -14,6 +14,9 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `subsingleton_H1_via_surj`: H^1 vanishing via Ext^0 surjectivity
 * `subsingleton_sheafH_of_shortExact_middle`: LES consequence for Sheaf.H
 * `sheafH_subsingleton_of_isEmpty`: empty-space vanishing
+* `sheaf_isZero_of_zero_stalks`: zero stalks imply zero sheaf
+* `stalk_zero_of_ses_g_iso`: stalk vanishing from SES with iso on `g`
+* `stalk_zero_of_shortExact_kernel`: stalk vanishing from SES kernel
 * `sheafH0EquivSections`: H^0(F) ≃+ F(⊤)
 * `sheafH0EquivSections_natural`: naturality of the above
 -/
@@ -98,6 +101,58 @@ theorem Ext.subsingleton_of_isZero_tgt {X Y : C'} (hY : IsZero Y) (n : ℕ) :
     exact (eq a).trans (eq b).symm⟩
 
 end ExtDimShift
+
+/-! ## Stalks and zero sheaves -/
+
+theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    (hstalk : ∀ (x : X)
+      (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F.val), a = 0) :
+    IsZero F := by
+  have hZ : IsZero F.val := Functor.isZero F.val (fun ⟨U⟩ =>
+    @AddCommGrpCat.isZero_of_subsingleton _
+      ⟨fun s t => TopCat.Presheaf.section_ext F U s t fun x hx =>
+        (hstalk x _).trans (hstalk x _).symm⟩)
+  exact IsZero.mk
+    (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
+      fun U => (hZ.obj U).eq_zero_of_src (f.val.app U))) }⟩)
+    (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
+      fun U => (hZ.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
+
+theorem stalk_zero_of_ses_g_iso
+    {X : TopCat.{u}} {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hSE : S.ShortExact) (x : X)
+    (hiso : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val))
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₁.val) :
+    a = 0 := by
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  have hf0 : T.map S.f.val = 0 := by
+    have : T.map S.f.val ≫ T.map S.g.val = 0 := by
+      rw [← T.map_comp, show S.f.val ≫ S.g.val = (S.f ≫ S.g).val from rfl, S.zero]
+      change T.map ((sheafToPresheaf _ _).map (0 : S.X₁ ⟶ S.X₃)) = 0
+      simp only [Functor.map_zero]
+    rw [show T.map S.f.val = (T.map S.f.val ≫ T.map S.g.val) ≫ inv (T.map S.g.val)
+      from by simp, this, zero_comp]
+  haveI : Mono S.f := hSE.mono_f
+  haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
+  exact (AddCommGrpCat.mono_iff_injective _).mp
+    (Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f)
+    (show ConcreteCategory.hom (T.map S.f.val) a = ConcreteCategory.hom (T.map S.f.val) 0
+      by simp [hf0])
+
+/-- In a short exact sequence `X₁ → X₂ → X₃`, if all stalks of `X₂` at `x` vanish, then
+    all stalks of `X₁` at `x` vanish (by mono-injectivity of `f`). -/
+theorem stalk_zero_of_shortExact_kernel
+    {X : TopCat.{u}} {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hSE : S.ShortExact) (x : X)
+    (hX₂ : ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₂.val), b = 0)
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₁.val) :
+    a = 0 := by
+  haveI : Mono S.f := hSE.mono_f
+  haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
+  exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
+    (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) S.f)
+    ((hX₂ _).trans (map_zero _).symm)
 
 /-! ## H⁰ ≅ Sections -/
 

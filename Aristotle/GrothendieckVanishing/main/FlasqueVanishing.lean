@@ -11,6 +11,9 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutside
   2. `IsFlasqueSheaf`, `epi_app_of_shortExact_flasque`, `isFlasque_X₃_of_shortExact`
   3. `isFlasque_of_injective` (injective sheaves are flasque)
 
+  General stalk/zero-sheaf lemmas (`sheaf_isZero_of_zero_stalks`, `stalk_zero_of_ses_g_iso`,
+  `stalk_zero_of_shortExact_kernel`) are in `CohomologyAPI.lean`.
+
   `FlasqueVanishing` itself is in `FlasqueCohomology.lean`.
   Split from SetupCore.lean for compilation performance.
 -/
@@ -60,56 +63,6 @@ noncomputable instance ulift_int_projective :
 noncomputable instance sheafHasExt (X : TopCat.{u}) :
     HasExt.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   hasExt_of_enoughInjectives _
-
-theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (hstalk : ∀ (x : X)
-      (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F.val), a = 0) :
-    IsZero F := by
-  have hZ : IsZero F.val := Functor.isZero F.val (fun ⟨U⟩ =>
-    @AddCommGrpCat.isZero_of_subsingleton _
-      ⟨fun s t => TopCat.Presheaf.section_ext F U s t fun x hx =>
-        (hstalk x _).trans (hstalk x _).symm⟩)
-  exact IsZero.mk
-    (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
-      fun U => (hZ.obj U).eq_zero_of_src (f.val.app U))) }⟩)
-    (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
-      fun U => (hZ.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
-
-theorem stalk_zero_of_ses_g_iso
-    {X : TopCat.{u}} {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hSE : S.ShortExact) (x : X)
-    (hiso : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val))
-    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₁.val) :
-    a = 0 := by
-  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  have hf0 : T.map S.f.val = 0 := by
-    have : T.map S.f.val ≫ T.map S.g.val = 0 := by
-      rw [← T.map_comp, show S.f.val ≫ S.g.val = (S.f ≫ S.g).val from rfl, S.zero]
-      change T.map ((sheafToPresheaf _ _).map (0 : S.X₁ ⟶ S.X₃)) = 0
-      simp only [Functor.map_zero]
-    rw [show T.map S.f.val = (T.map S.f.val ≫ T.map S.g.val) ≫ inv (T.map S.g.val)
-      from by simp, this, zero_comp]
-  haveI : Mono S.f := hSE.mono_f
-  haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
-  exact (AddCommGrpCat.mono_iff_injective _).mp
-    (Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f)
-    (show ConcreteCategory.hom (T.map S.f.val) a = ConcreteCategory.hom (T.map S.f.val) 0
-      by simp [hf0])
-
-/-- In a short exact sequence `X₁ → X₂ → X₃`, if all stalks of `X₂` at `x` vanish, then
-    all stalks of `X₁` at `x` vanish (by mono-injectivity of `f`). -/
-theorem stalk_zero_of_shortExact_kernel
-    {X : TopCat.{u}} {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hSE : S.ShortExact) (x : X)
-    (hX₂ : ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₂.val), b = 0)
-    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₁.val) :
-    a = 0 := by
-  haveI : Mono S.f := hSE.mono_f
-  haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
-  exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
-    (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) S.f)
-    ((hX₂ _).trans (map_zero _).symm)
 
 /-! ## Flasque sheaf sub-lemmas
 
