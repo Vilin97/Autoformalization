@@ -4,7 +4,6 @@ import Aristotle.GrothendieckVanishing.main.CohomologyAPI
 # FlasqueCohomology — Cohomological vanishing for flasque sheaves
 
 Provides:
-* `sheafH_dimension_shift`: dimension shifting via short exact sequence with injective middle term
 * `FlasqueVanishing`: flasque sheaves have vanishing higher cohomology
 
 General sheaf-cohomology API lives in `CohomologyAPI.lean`.
@@ -13,16 +12,6 @@ General sheaf-cohomology API lives in `CohomologyAPI.lean`.
 universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
-
-/-- **Dimension shifting** via short exact sequence with injective middle term.
-    For `0 → X₁ → X₂ → X₃ → 0` with `X₂` injective, `Subsingleton (H X₃ n)`
-    implies `Subsingleton (H X₁ (n+1))`. Thin wrapper over `ext_dimension_shift`. -/
-theorem sheafH_dimension_shift {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
-    [Injective S.X₂] (n : ℕ)
-    [Subsingleton (Sheaf.H S.X₃ n)] :
-    Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
-  ext_dimension_shift _ hS n ‹_› (Ext.subsingleton_of_injective _ _ n)
 
 /-- **Base case**: `H^1(F) = 0` for flasque `F`. -/
 private theorem sheafH_one_of_flasque {X : TopCat.{u}}
