@@ -43,6 +43,8 @@ CODEX_HOME_ROOT = Path(
 CODEX_BIN = Path(os.environ.get("CODEX_BIN", "/gscratch/amath/vilin/conda/envs/codex/bin/codex"))
 COOLDOWN = 12 * 60 * 60
 SUPERVISOR_TIMEOUT = 3 * 60 * 60
+DEFAULT_MODEL = os.environ.get("CODEX_REFACTOR_MODEL", "gpt-5.4")
+DEFAULT_REASONING_EFFORT = os.environ.get("CODEX_REFACTOR_REASONING_EFFORT", "xhigh")
 
 
 class FileLock:
@@ -192,7 +194,9 @@ def run_codex(prompt: str, output_path: Path) -> tuple[int, str]:
         "--ephemeral",
         "--dangerously-bypass-approvals-and-sandbox",
         "-m",
-        "gpt-5.4",
+        DEFAULT_MODEL,
+        "-c",
+        f'model_reasoning_effort="{DEFAULT_REASONING_EFFORT}"',
         "-o",
         str(output_path),
         prompt,

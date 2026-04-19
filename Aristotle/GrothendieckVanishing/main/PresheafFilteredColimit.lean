@@ -459,7 +459,7 @@ theorem sheafH_filtered_colimit_surj
       (c' : Cocone Y') (_ : IsColimit c')
       (x : Sheaf.H c'.pt n),
     ∃ (j : J') (y : Sheaf.H (Y'.obj j) n),
-      y.comp (Ext.mk₀ (c'.ι.app j)) (add_zero n) = x := by
+      ConcreteCategory.hom ((sheafCohomologyFunctor X n).map (c'.ι.app j)) y = x := by
   induction n with
   | zero =>
     intro J' inst1 inst2 Y' c' hc' x
@@ -472,8 +472,17 @@ theorem sheafH_filtered_colimit_surj
     obtain ⟨j, s_j, hs_j⟩ := Concrete.isColimit_exists_rep _ hc_top x_sec
     let y := (sheafH0EquivSections (Y'.obj j)).symm s_j
     refine ⟨j, y, ?_⟩
+    have h_nat :
+        sheafH0EquivSections c'.pt
+          (ConcreteCategory.hom ((sheafCohomologyFunctor X 0).map (c'.ι.app j)) y) =
+        ConcreteCategory.hom ((c'.ι.app j).val.app (op ⊤))
+          (sheafH0EquivSections (Y'.obj j) y) := by
+      simpa [sheafCohomologyFunctor_map_apply] using
+        (sheafH0EquivSections_natural (f := c'.ι.app j) (x := y))
     apply (sheafH0EquivSections c'.pt).injective
-    rw [sheafH0EquivSections_natural, AddEquiv.apply_symm_apply]
+    change sheafH0EquivSections c'.pt
+      (ConcreteCategory.hom ((sheafCohomologyFunctor X 0).map (c'.ι.app j)) y) = x_sec
+    rw [h_nat, AddEquiv.apply_symm_apply]
     exact hs_j
   | succ n ih =>
     intro J' inst1 inst2 Y' c' hc' x
@@ -555,12 +564,14 @@ theorem sheafH_filtered_colimit_surj
     haveI : Mono (η.app j₀) := hη_mono j₀
     let x_j : Sheaf.H (Y'.obj j₀) (n + 1) := y_j.comp (hSE_j j₀).extClass rfl
     refine ⟨j₀, x_j, ?_⟩
-    show x_j.comp (Ext.mk₀ (c'.ι.app j₀)) (add_zero (n + 1)) = x
+    show ConcreteCategory.hom ((sheafCohomologyFunctor X (n + 1)).map (c'.ι.app j₀)) x_j = x
     rw [show x_j = y_j.comp (hSE_j j₀).extClass rfl from rfl]
     have h_ext :
-        (y_j.comp (hSE_j j₀).extClass rfl).comp (Ext.mk₀ (c'.ι.app j₀)) (add_zero (n + 1)) =
-          (y_j.comp (Ext.mk₀ (qCocone.ι.app j₀)) (add_zero n)).comp hSE.extClass rfl :=
-      sheafH_comp_extClass_naturality (hSE_j j₀) hSE
+        ConcreteCategory.hom ((sheafCohomologyFunctor X (n + 1)).map (c'.ι.app j₀))
+          (y_j.comp (hSE_j j₀).extClass rfl) =
+        (ConcreteCategory.hom ((sheafCohomologyFunctor X n).map (qCocone.ι.app j₀)) y_j).comp
+          hSE.extClass rfl :=
+      sheafCohomologyFunctor_map_extClass_naturality (hSE_j j₀) hSE
         (ShortComplex.homMk (c'.ι.app j₀) (injCocone.ι.app j₀)
           (qCocone.ι.app j₀) (hfac_ι j₀) (cokernel.π_desc _ _ _).symm) n y_j
     rw [h_ext]
@@ -581,4 +592,4 @@ theorem sheafH_preserves_filtered_colimits
   obtain ⟨jx, ex, hex⟩ := sheafH_filtered_colimit_surj n Y' c' hc' x
   obtain ⟨jy, ey, hey⟩ := sheafH_filtered_colimit_surj n Y' c' hc' y
   rw [← hex, ← hey, @Subsingleton.elim _ (hvan jx) ex 0,
-      @Subsingleton.elim _ (hvan jy) ey 0, Ext.zero_comp, Ext.zero_comp]
+      @Subsingleton.elim _ (hvan jy) ey 0, map_zero, map_zero]
