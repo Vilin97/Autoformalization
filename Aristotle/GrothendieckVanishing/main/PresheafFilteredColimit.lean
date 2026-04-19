@@ -194,6 +194,46 @@ theorem colimit_section_zero_of_zero_on_cover
   rw [ConcreteCategory.comp_apply,
     sheaf_section_zero_of_zero_on_cover (hY j₁) hW hcov _ hg₀, map_zero]
 
+/-- A compatible family on a finite subcover, represented at a single filtered index,
+    glues to a section of any cocone point with the prescribed finite restrictions. -/
+theorem colimit_exists_gluing_of_compatible_finite_subcover
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (P : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
+    (hP : ∀ j, TopCat.Presheaf.IsSheaf (P.obj j))
+    {c : Cocone P}
+    {ι : Type u} (U : ι → Opens X)
+    (sf : ∀ i, ToType (c.pt.obj (op (U i))))
+    {t : Finset ι} (hsup_le : iSup U ≤ ⨆ k ∈ t, U k)
+    (j₁ : J')
+    (x'' : ∀ k : ↥t, ToType ((P.obj j₁).obj (op (U k.1))))
+    (hx''_compat : Presheaf.IsCompatible (P.obj j₁) (fun k : ↥t => U k.1) x'')
+    (hx'' : ∀ k : ↥t,
+      ConcreteCategory.hom ((c.ι.app j₁).app (op (U k.1))) (x'' k) = sf k.1) :
+    ∃ s : ToType (c.pt.obj (op (iSup U))),
+      ∀ k, k ∈ t → c.pt.map (Opens.leSupr U k).op s = sf k := by
+  let W : ↥t → Opens X := fun k => U k.1
+  have hcov_W : iSup U ≤ iSup W := by
+    rw [show iSup W = ⨆ k ∈ t, U k from iSup_subtype (p := (· ∈ t))]
+    exact hsup_le
+  let F : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨P.obj j₁, hP j₁⟩
+  obtain ⟨s₀, hs₀, _⟩ := TopCat.Sheaf.existsUnique_gluing' F W (iSup U)
+    (fun k => Opens.leSupr U k.1) hcov_W x'' (by simpa [W] using hx''_compat)
+  let s : ToType (c.pt.obj (op (iSup U))) :=
+    ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U))) s₀
+  refine ⟨s, ?_⟩
+  intro k hk
+  change ConcreteCategory.hom
+    ((c.ι.app j₁).app (op (iSup U)) ≫ c.pt.map (Opens.leSupr U k).op) s₀ = sf k
+  rw [show (c.ι.app j₁).app (op (iSup U)) ≫ c.pt.map (Opens.leSupr U k).op =
+    (P.obj j₁).map (Opens.leSupr U k).op ≫ (c.ι.app j₁).app (op (U k))
+    from ((c.ι.app j₁).naturality (Opens.leSupr U k).op).symm]
+  change ConcreteCategory.hom ((c.ι.app j₁).app (op (U k)))
+    (ConcreteCategory.hom ((P.obj j₁).map (Opens.leSupr U k).op) s₀) = sf k
+  rw [show ConcreteCategory.hom ((P.obj j₁).map (Opens.leSupr U k).op) s₀ = x'' ⟨k, hk⟩ by
+    simpa [F, W] using hs₀ ⟨k, hk⟩]
+  exact hx'' ⟨k, hk⟩
+
 /-- On a Noetherian space, the presheaf-level filtered colimit of sheaves is a sheaf.
     Proof: Noetherian compactness reduces the sheaf condition to finite covers, then
     filtered colimit merging passes from per-piece data to glued data. -/
@@ -338,38 +378,25 @@ theorem isSheaf_presheaf_filtered_colimit
           (IsFiltered.rightToMax j_cur j_new ≫ h_coeq) _ _ hf_new
       · exact transition_preserves_compat P g_cur
           (IsFiltered.leftToMax j_cur j_new ≫ h_coeq) _ _ (hg_cur p hp)
-  -- Glue in piece
-  let W : ↥t → Opens X := fun ⟨k, _⟩ => U k
-  let x'' : ∀ (k : ↥t), ToType ((P.obj j₁).obj (op (W k))) :=
+  let x'' : ∀ (k : ↥t), ToType ((P.obj j₁).obj (op (U k.1))) :=
     fun ⟨k, hk⟩ => ConcreteCategory.hom
       ((P.map g₁).app (op (U k))) (x' k hk)
-  have hx''_compat : Presheaf.IsCompatible (P.obj j₁) W x'' :=
+  have hx''_compat :
+      Presheaf.IsCompatible (P.obj j₁) (fun k : ↥t => U k.1) x'' :=
     fun ⟨k, hk⟩ ⟨l, hl⟩ => hg₁ k hk l hl
-  have hcov_W : iSup U ≤ iSup W := by
-    rw [show iSup W = ⨆ k ∈ t, U k from iSup_subtype (p := (· ∈ t))]; exact hsup_le
-  obtain ⟨s₀, hs₀, _⟩ := (Y'.obj j₁).existsUnique_gluing' W (iSup U)
-    (fun ⟨k, _⟩ => Opens.leSupr U k) hcov_W x'' hx''_compat
-  -- Map to colimit
-  let s : ToType (c.pt.obj (op (iSup U))) :=
-    ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U))) s₀
-  -- For k ∈ t: s|_{U_k} = sf_k
-  have hs_k : ∀ k (hk : k ∈ t), c.pt.map (Opens.leSupr U k).op s = sf k := by
-    intro k hk
-    change ConcreteCategory.hom
-      ((c.ι.app j₁).app (op (iSup U)) ≫ c.pt.map (Opens.leSupr U k).op) s₀ = sf k
-    rw [show (c.ι.app j₁).app (op (iSup U)) ≫ c.pt.map (Opens.leSupr U k).op =
-      (Y'.obj j₁).val.map (Opens.leSupr U k).op ≫ (c.ι.app j₁).app (op (U k))
-      from ((c.ι.app j₁).naturality (Opens.leSupr U k).op).symm]
-    change ConcreteCategory.hom ((c.ι.app j₁).app (op (U k)))
-      (ConcreteCategory.hom ((Y'.obj j₁).val.map (Opens.leSupr U k).op) s₀) = sf k
-    rw [show ConcreteCategory.hom ((Y'.obj j₁).val.map (Opens.leSupr U k).op) s₀ = x'' ⟨k, hk⟩ by
-      simpa [P, W, x''] using hs₀ ⟨k, hk⟩]
+  have hx'' : ∀ k : ↥t,
+      ConcreteCategory.hom ((c.ι.app j₁).app (op (U k.1))) (x'' k) = sf k.1 := by
+    intro k
+    rcases k with ⟨k, hk⟩
     dsimp [x'']
     change ConcreteCategory.hom ((P.map g₁).app (op (U k)) ≫
       (c.ι.app j₁).app (op (U k))) (x' k hk) = sf k
     have := congrArg (fun α => NatTrans.app α (op (U k))) (c.ι.naturality g₁)
     simp only [Functor.const_obj_map, NatTrans.comp_app] at this
-    rw [this]; exact hx' k hk
+    rw [this]
+    exact hx' k hk
+  obtain ⟨s, hs_k⟩ := colimit_exists_gluing_of_compatible_finite_subcover
+    P hP U sf hsup_le j₁ x'' hx''_compat hx''
   -- For all i: s|_{U_i} = sf_i (by separation at U_i via hcompat)
   refine ⟨s, fun i => ?_, fun s' hs' => ?_⟩
   · -- s|_{U_i} = sf_i: show difference is 0 by checking on finite subcover of U_i
