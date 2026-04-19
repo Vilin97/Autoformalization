@@ -19,9 +19,7 @@ private theorem sheafH_one_of_flasque {X : TopCat.{u}}
     Subsingleton (Sheaf.H F 1) := by
   obtain ⟨ip⟩ := EnoughInjectives.presentation F
   have hSE := ip.shortExact_shortComplex
-  exact sheafH_subsingleton_H1_via_surj hSE
-    (Ext.subsingleton_of_injective _ _ 0)
-    (sheafH0_surj_of_epi_app_top _ (by
+  exact sheafH_subsingleton_H1_of_injective_of_epi_app_top hSE (by
       haveI : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map
           ip.shortComplex.g) := by
         have h := epi_app_of_shortExact_flasque hSE ⊤
@@ -36,7 +34,7 @@ private theorem sheafH_one_of_flasque {X : TopCat.{u}}
           (Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).hom.app ip.shortComplex.X₃) :=
         epi_comp' (inferInstance : Epi ((Sheaf.Γ (Opens.grothendieckTopology X)
           AddCommGrpCat).map ip.shortComplex.g)) (IsIso.epi_of_iso _)
-      exact epi_of_epi_fac hfac.symm))
+      exact epi_of_epi_fac hfac.symm)
 
 /-- **Flasque sheaves have vanishing higher cohomology** (Nugent, PR #35790).
 
