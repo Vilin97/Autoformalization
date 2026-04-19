@@ -109,33 +109,6 @@ statement that can be attacked independently.
 class IsFlasqueSheaf {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X) : Prop where
   epi_map : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op)
 
-/-! ### Helper: sections functor and evaluated exactness -/
-
--- The sections functor preserves left homology of a SES with mono f:
--- it preserves the kernel of g (limit-preserving) and the coimage of f
--- (f is mono ⟹ the coimage map is an iso, whose cokernel is trivially preserved).
-private lemma sheafSections_obj_preservesLeftHomologyOf {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (V : Opens X) :
-    ((sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj
-      (op V)).PreservesLeftHomologyOf S := by
-  have hsectV : (sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op V) =
-      sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V) := rfl
-  constructor; intro h; constructor
-  · -- sheafSections preserves the kernel of S.g (it preserves all limits)
-    rw [hsectV]; infer_instance
-  · -- h.f' is an iso (mono from f, epi from exactness), so cokernel is trivially preserved
-    haveI : Mono S.f := hS.mono_f
-    haveI : Mono h.f' := mono_of_mono_fac h.f'_i
-    haveI : Epi h.f' := hS.exact.epi_f' h
-    haveI : IsIso h.f' := isIso_of_mono_of_epi h.f'
-    let sectV := (sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op V)
-    haveI : IsIso (cokernelComparison h.f' sectV) :=
-      let hz := Functor.map_isZero sectV (isZero_cokernel_of_epi h.f')
-      ⟨⟨hz.to_ _, (isZero_cokernel_of_epi (f := sectV.map h.f')).eq_of_src _ _,
-        hz.eq_of_src _ _⟩⟩
-    exact PreservesCokernel.of_iso_comparison _ _
-
 -- For a SES of sheaves, the evaluated sequence at V is exact:
 -- if g_V(x) = 0, then x is in the image of f_V.
 private lemma sections_exact_of_shortExact {X : TopCat.{u}}
@@ -148,9 +121,10 @@ private lemma sections_exact_of_shortExact {X : TopCat.{u}}
   let sectV := (sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op V)
   haveI : sectV.PreservesZeroMorphisms :=
     inferInstanceAs ((sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)).PreservesZeroMorphisms)
-  have hexact : (S.map sectV).Exact := by
-    haveI := sheafSections_obj_preservesLeftHomologyOf hS V
-    exact hS.exact.map_of_preservesLeftHomologyOf sectV
+  haveI : PreservesLimit (parallelPair S.g 0) sectV :=
+    show PreservesLimit _ (sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)) from inferInstance
+  have hexact : (S.map sectV).Exact :=
+    hS.exact.map_of_mono_of_preservesKernel sectV hS.mono_f inferInstance
   exact (ShortComplex.ab_exact_iff _).mp hexact x hx
 
 /-! ### Zero condition and mono for the evaluated short complex -/
