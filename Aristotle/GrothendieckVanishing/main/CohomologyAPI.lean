@@ -196,6 +196,16 @@ theorem subsingleton_H1_via_surj {C' : Type*} [Category C'] [Abelian C'] [HasExt
   simp only [← hc, ← hd, ← hc', ← hd', Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀ S.g)
     hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
 
+/-- Sheaf-level wrapper for `subsingleton_H1_via_surj`: if `H¹(X₂)=0` and every `H⁰`
+    class on `X₃` lifts along `g`, then `H¹(X₁)=0`. -/
+theorem sheafH_subsingleton_H1_via_surj {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
+    (h₂ : Subsingleton (Sheaf.H S.X₂ 1))
+    (h_surj : ∀ y : Sheaf.H S.X₃ 0,
+      ∃ z : Sheaf.H S.X₂ 0, z.comp (Ext.mk₀ S.g) (add_zero 0) = y) :
+    Subsingleton (Sheaf.H S.X₁ 1) :=
+  subsingleton_H1_via_surj _ hSE h₂ h_surj
+
 -- If both ends of a short exact sequence have vanishing H^n, so does the middle.
 theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}

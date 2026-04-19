@@ -222,17 +222,20 @@ theorem PushforwardHVanishing
       exact IsFlasqueSheaf.epi_map ((Opens.map i).map j)
     cases k with
     | zero =>
-      exact subsingleton_H1_via_surj _ hSE_X (FlasqueVanishing _ _ 0)
+      exact sheafH_subsingleton_H1_via_surj hSE_X (FlasqueVanishing _ _ 0)
         (ext0_surj_of_epi_top (by
           show Epi (ip.shortComplex.g.val.app (op ((Opens.map i).obj ⊤)))
           rw [Opens.map_top]
           exact epi_g_app_top_of_H1_vanishing ip.shortExact_shortComplex hG'))
     | succ m =>
       haveI := hG'
-      exact ext_dimension_shift _ hSE_X (m + 1)
-        (ih_push ip.shortComplex.X₃
-          (sheafH_dimension_shift_X₃ ip.shortExact_shortComplex m))
-        (FlasqueVanishing _ _ (m + 1))
+      haveI : Subsingleton (Sheaf.H
+          ((ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).X₃) (m + 1)) :=
+        ih_push ip.shortComplex.X₃ (sheafH_dimension_shift_X₃ ip.shortExact_shortComplex m)
+      haveI : Subsingleton (Sheaf.H
+          ((ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).X₂) (m + 2)) :=
+        FlasqueVanishing _ _ (m + 1)
+      exact sheafH_dimension_shift_of_both hSE_X (m + 1)
 
 -- The adjunction unit F → i_*(i^*F) is epi for closed immersions.
 -- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).
