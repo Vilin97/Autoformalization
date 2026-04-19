@@ -140,7 +140,7 @@ theorem closedIncl_pushforward_shortExact
 
 -- Epi of g at ⊤ from H^1(X₁)=0 via LES + adj + separator
 theorem epi_g_app_top_of_H1_vanishing
-    {Z : TopCat.{u}} [NoetherianSpace Z]
+    {Z : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} Z)}
     (hSE : S.ShortExact)
     (hG' : Subsingleton (Sheaf.H S.X₁ 1)) :
@@ -170,7 +170,7 @@ theorem epi_g_app_top_of_H1_vanishing
 
 -- Surjectivity of Ext⁰ map from epi at ⊤ via adjunction + projectivity of ULift ℤ
 theorem ext0_surj_of_epi_top
-    {X : TopCat.{u}} [NoetherianSpace X]
+    {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hg_epi_top : Epi (S.g.val.app (op ⊤))) :
     ∀ y : Sheaf.H S.X₃ 0,
