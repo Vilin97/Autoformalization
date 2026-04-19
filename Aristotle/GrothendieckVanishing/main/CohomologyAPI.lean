@@ -373,6 +373,15 @@ theorem sheafH_dimension_shift_X₃ {X : TopCat.{u}}
     Subsingleton (Sheaf.H S.X₃ (n + 1)) :=
   ext_dimension_shift_X₃ _ hS (n + 1) (Ext.subsingleton_of_injective _ _ n) ‹_›
 
+/-- Reverse dimension shift at `Sheaf.H` level: if `H^n(X₂)=0` and `H^(n+1)(X₁)=0`
+    in a short exact sequence `0 → X₁ → X₂ → X₃ → 0`, then `H^n(X₃)=0`. -/
+theorem sheafH_dimension_shift_X₃_of_both {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) (n : ℕ)
+    [Subsingleton (Sheaf.H S.X₂ n)]
+    [Subsingleton (Sheaf.H S.X₁ (n + 1))] :
+    Subsingleton (Sheaf.H S.X₃ n) :=
+  ext_dimension_shift_X₃ _ hS n ‹_› ‹_›
+
 -- If both ends of a short exact sequence have vanishing H^n, so does the middle.
 theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}

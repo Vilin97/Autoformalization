@@ -302,10 +302,10 @@ theorem epiImage_zeroOutsideInt_vanishing
   · let S := ShortComplex.mk (kernel.ι f) f (kernel.condition f)
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
-    exact ext_dimension_shift_X₃ _ hSE m
-      (zeroOutsideInt_cohomology_vanishing V hV ih m hm)
-      (subsheaf_zeroOutsideInt_vanishing (kernel.ι f) ih (m + 1)
-        (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl)))
+    haveI : Subsingleton (Sheaf.H S.X₂ m) := zeroOutsideInt_cohomology_vanishing V hV ih m hm
+    haveI : Subsingleton (Sheaf.H S.X₁ (m + 1)) := subsheaf_zeroOutsideInt_vanishing
+      (kernel.ι f) ih (m + 1) (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
+    exact sheafH_dimension_shift_X₃_of_both hSE m
 
 -- Filtered diagram infrastructure, finitely generated vanishing, and
 -- directLimit_cohomology_vanishing are in FiniteGeneratorReduction.lean.
@@ -340,4 +340,3 @@ theorem IrreduciblePosVanishing
       subst h; exact absurd hn (not_lt.mpr topologicalKrullDim_nonneg)
     obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
     exact inferInstance
-
