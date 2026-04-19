@@ -20,9 +20,9 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite
 theorem sheafH_dimension_shift {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
     [Injective S.X₂] (n : ℕ)
-    (hQ : Subsingleton (Sheaf.H S.X₃ n)) :
+    [Subsingleton (Sheaf.H S.X₃ n)] :
     Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
-  ext_dimension_shift _ hS n hQ (Ext.subsingleton_of_injective _ _ n)
+  ext_dimension_shift _ hS n ‹_› (Ext.subsingleton_of_injective _ _ n)
 
 /-- **Base case**: `H^1(F) = 0` for flasque `F`. -/
 private theorem sheafH_one_of_flasque {X : TopCat.{u}}
@@ -67,4 +67,5 @@ instance FlasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X
     obtain ⟨ip⟩ := EnoughInjectives.presentation F
     have hSE := ip.shortExact_shortComplex
     haveI : IsFlasqueSheaf ip.shortComplex.X₃ := isFlasque_X₃_of_shortExact hSE
-    exact sheafH_dimension_shift ip.shortExact_shortComplex (n + 1) (ih ip.shortComplex.X₃)
+    haveI := ih ip.shortComplex.X₃
+    exact sheafH_dimension_shift ip.shortExact_shortComplex (n + 1)
