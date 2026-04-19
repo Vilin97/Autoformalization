@@ -69,23 +69,19 @@ theorem stalk_zero_of_ses_g_iso
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₁.val) :
     a = 0 := by
   let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  have hcomp_elem : ConcreteCategory.hom (T.map S.g.val)
+  have hcomp : ConcreteCategory.hom (T.map S.g.val)
       (ConcreteCategory.hom (T.map S.f.val) a) = 0 := by
     rw [← ConcreteCategory.comp_apply, ← T.map_comp]
     obtain ⟨U, hxU, s, rfl⟩ := S.X₁.presheaf.germ_exist x a
-    rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
-    change ConcreteCategory.hom (S.X₃.presheaf.germ U x hxU)
-      (ConcreteCategory.hom ((S.f.val ≫ S.g.val).app (op U)) s) = 0
-    rw [show ConcreteCategory.hom ((S.f.val ≫ S.g.val).app (op U)) s = 0 from by
-      change ConcreteCategory.hom ((S.f ≫ S.g).val.app (op U)) s = 0
-      rw [S.zero]; exact AddMonoidHom.zero_apply s]
+    rw [TopCat.Presheaf.stalkFunctor_map_germ_apply,
+      show S.f.val ≫ S.g.val = (S.f ≫ S.g).val from rfl, S.zero]
     exact map_zero _
   haveI : Mono S.f := hSE.mono_f
   haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
   exact (AddCommGrpCat.mono_iff_injective _).mp
     (Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f)
     (((ConcreteCategory.bijective_of_isIso (T.map S.g.val)).1
-      (hcomp_elem.trans (map_zero _).symm)).trans (map_zero _).symm)
+      (hcomp.trans (map_zero _).symm)).trans (map_zero _).symm)
 
 /-- In a short exact sequence `X₁ → X₂ → X₃`, if all stalks of `X₂` at `x` vanish, then
     all stalks of `X₁` at `x` vanish (by mono-injectivity of `f`). -/
