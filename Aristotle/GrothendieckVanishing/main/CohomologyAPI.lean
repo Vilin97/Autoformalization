@@ -22,6 +22,7 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `sheafH0EquivSections_natural`: naturality of the above
 * `epi_app_top_of_subsingleton_sheafH1`: H^1 vanishing gives surjectivity on top sections
 * `sheafH0_surj_of_epi_app_top`: surjectivity on top sections gives H^0 surjectivity
+* `sheafH_subsingleton_H1_via_epi_app_top`: H^1 vanishing via surjective top sections
 -/
 
 universe u
@@ -243,6 +244,16 @@ theorem sheafH_subsingleton_H1_via_surj {X : TopCat.{u}}
       ∃ z : Sheaf.H S.X₂ 0, z.comp (Ext.mk₀ S.g) (add_zero 0) = y) :
     Subsingleton (Sheaf.H S.X₁ 1) :=
   subsingleton_H1_via_surj _ hSE h₂ h_surj
+
+/-- Sheaf-level `H¹` vanishing criterion from surjective top sections:
+    if `H¹(X₂)=0` and `g.app(⊤)` is epi in a short exact sequence
+    `0 → X₁ → X₂ → X₃ → 0`, then `H¹(X₁)=0`. -/
+theorem sheafH_subsingleton_H1_via_epi_app_top {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
+    (h₂ : Subsingleton (Sheaf.H S.X₂ 1))
+    (hg : Epi (S.g.val.app (op ⊤))) :
+    Subsingleton (Sheaf.H S.X₁ 1) :=
+  sheafH_subsingleton_H1_via_surj hSE h₂ (sheafH0_surj_of_epi_app_top _ hg)
 
 -- If both ends of a short exact sequence have vanishing H^n, so does the middle.
 theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
