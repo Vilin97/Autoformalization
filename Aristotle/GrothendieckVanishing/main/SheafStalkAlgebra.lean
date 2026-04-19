@@ -160,7 +160,8 @@ theorem zeroOutsideInt_cohomology_vanishing
   set Y := (V : Set X)ᶜ with hY_def
   have hYcl : IsClosed Y := V.2.isClosed_compl
   have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl (compl_ne_univ_of_ne_bot hV)
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl
+      (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
       (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
         (lt_of_lt_of_le hm le_top))
   have hm'_Y : ↑m' > topologicalKrullDim (TopCat.of Y) :=

@@ -41,7 +41,6 @@ private theorem sheafH_one_of_flasque {X : TopCat.{u}}
         exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
           ((Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).inv.naturality
             ip.shortComplex.g).symm
-      haveI : Projective (AddCommGrpCat.of (ULift.{u} ℤ)) := ulift_int_projective
       let adj := constantSheafΓAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
       exact ⟨(adj.homEquiv _ ip.shortComplex.X₂).symm (Projective.factorThru
         ((adj.homEquiv _ ip.shortComplex.X₃) (Ext.addEquiv₀ y))
