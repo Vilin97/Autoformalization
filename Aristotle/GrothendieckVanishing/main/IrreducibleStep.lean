@@ -303,21 +303,34 @@ theorem epiImage_zeroOutsideInt_vanishing
 -- Filtered diagram infrastructure, finitely generated vanishing, and
 -- directLimit_cohomology_vanishing are in FiniteGeneratorReduction.lean.
 
-/-- **Irreducible positive-dimension vanishing** (Hartshorne III.2.7, irreducible case). -/
+/-- **Irreducible vanishing** (Hartshorne III.2.7, irreducible case).
+    Covers both dim > 0 (closed immersion + induction) and dim ≤ 0 (flasque). -/
 theorem IrreduciblePosVanishing
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0)
+    (n : ℕ) (hn : n > topologicalKrullDim X)
     (ih : VanishingIH.{u} (topologicalKrullDim X)) :
     Subsingleton (Sheaf.H F n) := by
-  obtain ⟨Z, hZ_closed, _, hZ_dim, hn_Z⟩ :=
-    exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos
-  let S := closedImmersionSES Z hZ_closed F
-  have hSE := closedImmersionSES_shortExact Z hZ_closed F
-  have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
-    PushforwardHVanishing Z hZ_closed _ n (ih (TopCat.of Z) n _ hZ_dim hn_Z)
-  have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
-    directLimit_cohomology_vanishing S.X₁ n
-      (fun f hf => epiImage_zeroOutsideInt_vanishing f hf ih n hn)
-  exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
+  by_cases hpos : topologicalKrullDim X > 0
+  · obtain ⟨Z, hZ_closed, _, hZ_dim, hn_Z⟩ :=
+      exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos
+    let S := closedImmersionSES Z hZ_closed F
+    have hSE := closedImmersionSES_shortExact Z hZ_closed F
+    have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
+      PushforwardHVanishing Z hZ_closed _ n (ih (TopCat.of Z) n _ hZ_dim hn_Z)
+    have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
+      directLimit_cohomology_vanishing S.X₁ n
+        (fun f hf => epiImage_zeroOutsideInt_vanishing f hf ih n hn)
+    exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
+  · -- dim ≤ 0: F is flasque on irreducible dim-0 space, use FlasqueVanishing
+    push_neg at hpos
+    haveI : IsFlasqueSheaf F := ⟨fun {U V} i => by
+      rcases opens_eq_bot_or_top_of_irreducibleSpace_dim_zero hpos U with rfl | rfl
+      · exact F.isTerminalOfEmpty.isZero.epi _
+      · have hV := le_antisymm le_top (homOfLE le_top ≫ i |>.le); subst hV
+        rw [Subsingleton.elim i (𝟙 ⊤), op_id, F.val.map_id]; infer_instance⟩
+    have hm_ne : n ≠ 0 := fun h => by
+      subst h; exact absurd hn (not_lt.mpr topologicalKrullDim_nonneg)
+    obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
+    exact FlasqueVanishing X F m
 
