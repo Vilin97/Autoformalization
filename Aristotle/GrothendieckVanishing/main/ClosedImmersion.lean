@@ -17,6 +17,17 @@ import Mathlib.Topology.Sheaves.LocallySurjective
 import Mathlib.Topology.Sheaves.SheafCondition.UniqueGluing
 import Mathlib.Topology.Sheaves.Stalks
 
+/-!
+  ClosedImmersion.lean — Closed inclusion API and stalk results
+
+  Provides:
+  - `closedIncl`: closed inclusion `s ↪ X` as a morphism in `TopCat`
+  - `closedIncl_isClosedEmbedding`, `closedIncl_isInducing`: basic properties
+  - `stalkFunctor_map_iso_toSheafify`: stalk of sheafification map is an iso
+  - `closedIncl_counit_isIso`: pushforward–pullback counit is an iso on closed subspace
+  - `closedIncl_unit_stalk_isIso`: adjunction unit is a stalk iso at points in the subspace
+-/
+
 open CategoryTheory TopologicalSpace Opposite Limits
 
 universe u

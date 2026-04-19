@@ -1,11 +1,12 @@
-/-
+import Aristotle.GrothendieckVanishing.main.ZeroOutside
+
+/-!
   ZeroOutsideFinset.lean — Finset-generated subsheaf machinery
 
   Contains:
   - SectionIndex, finsetGeneratorMap, finsetGeneratedSheaf
   - allSectionMap: canonical epi from coproduct of all zeroOutsideInt
 -/
-import Aristotle.GrothendieckVanishing.main.ZeroOutside
 
 universe u
 

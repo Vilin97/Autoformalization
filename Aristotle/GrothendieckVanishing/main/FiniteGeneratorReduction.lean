@@ -1,4 +1,8 @@
-/-
+import Aristotle.GrothendieckVanishing.main.PresheafFilteredColimit
+import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
+import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
+
+/-!
   FiniteGeneratorReduction.lean — Colimit step and finitely generated vanishing
 
   Key results:
@@ -13,9 +17,6 @@
   Note: isFlasque_filtered_colimit, sheafH_preserves_filtered_colimits, and
   sheafH_filtered_colimit_surj have been moved to PresheafFilteredColimit.lean.
 -/
-import Aristotle.GrothendieckVanishing.main.PresheafFilteredColimit
-import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
-import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
 
 universe u
 

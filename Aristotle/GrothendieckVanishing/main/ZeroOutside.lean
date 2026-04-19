@@ -1,5 +1,17 @@
 import Mathlib
 
+/-!
+  ZeroOutside.lean — Extension-by-zero presheaf and sheaf machinery
+
+  Provides:
+  - `zeroOutside`: presheaf that is `F` on opens contained in `U` and zero elsewhere
+  - `constZ`: constant presheaf with value `ULift ℤ`
+  - `zeroOutsideInt`: sheafified extension-by-zero of `constZ` on an open `U`
+  - `sHom`: section-hom from a section `s ∈ F(U)` to a presheaf/sheaf morphism
+  - `generator`: canonical generator of `(constZ.zeroOutside U).obj (op U)`
+  - `familyGeneratorMap`: coproduct map from a family of `zeroOutsideInt`
+-/
+
 universe u
 
 open CategoryTheory TopologicalSpace Limits Opposite
