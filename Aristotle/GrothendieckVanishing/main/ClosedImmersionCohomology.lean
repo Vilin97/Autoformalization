@@ -1,3 +1,4 @@
+import Aristotle.GrothendieckVanishing.main.CohomologyAPI
 import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
 
 /-!
@@ -253,12 +254,13 @@ theorem closedComplementVanishing
       (lt_of_lt_of_le hn le_top)
   let S := closedImmersionSES Y hYcl C
   have hSE := closedImmersionSES_shortExact Y hYcl C
+  have hSX₁_zero : IsZero S.X₁ := sheaf_isZero_of_zero_stalks X S.X₁ (fun x a => by
+    by_cases hxY : x ∈ Y
+    · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
+        TopCat.closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
+      exact stalk_zero_of_ses_g_iso hSE x inferInstance a
+    · exact stalk_zero_of_shortExact_kernel hSE x
+        (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b) a)
   exact subsingleton_sheafH_of_shortExact_middle hSE n
-    (by apply Ext.subsingleton_of_isZero_tgt; apply sheaf_isZero_of_zero_stalks X; intro x a
-        by_cases hxY : x ∈ Y
-        · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
-            TopCat.closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
-          exact stalk_zero_of_ses_g_iso hSE x inferInstance a
-        · exact stalk_zero_of_shortExact_kernel hSE x
-            (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b) a)
+    (_root_.sheafH_subsingleton_of_isZero S.X₁ hSX₁_zero n)
     (PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ n _ hY_dim_lt hn))
