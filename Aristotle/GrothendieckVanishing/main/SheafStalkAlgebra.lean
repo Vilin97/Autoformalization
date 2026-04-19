@@ -155,31 +155,16 @@ theorem zeroOutsideInt_cohomology_vanishing
   obtain ⟨m', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
   -- Step 2: apply zeroOutsideInt_vanishing, reducing to cokernel vanishing at m'
   apply zeroOutsideInt_vanishing V m'
-  -- Goal: Subsingleton (Sheaf.H (Limits.cokernel (openHom le_top)) m')
-  -- Cokernel vanishing at m': dim Vᶜ < dim X ≤ m' (since m'+1 > dim X > 0)
-  set C := Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))
-  set Y := (V : Set X)ᶜ with hY_def
-  have hYcl : IsClosed Y := V.2.isClosed_compl
-  have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl
-      (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
-      (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
-        (lt_of_lt_of_le hm le_top))
-  have hm'_Y : ↑m' > topologicalKrullDim (TopCat.of Y) :=
-    lt_coe_nat_of_lt_of_lt_coe_nat_succ hY_dim_lt hm
-  -- Build SES on Vᶜ, apply middle-term vanishing
-  let S := closedImmersionSES Y hYcl C
-  have hSE := closedImmersionSES_shortExact Y hYcl C
-  exact subsingleton_sheafH_of_shortExact_middle hSE m'
-    (by apply Ext.subsingleton_of_isZero_tgt; apply sheaf_isZero_of_zero_stalks X; intro x a
-        by_cases hxY : x ∈ Y
-        · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
-            closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
-          exact stalk_zero_of_ses_g_iso hSE x inferInstance a
-        · exact stalk_zero_of_shortExact_kernel hSE x
-            (cokernel_stalk_zero_of_stalk_surj _ x
-              (sheafifyMap_zeroOutside_openHom_stalk_surj Presheaf.constZ le_top x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY))) a)
-    (PushforwardHVanishing Y hYcl _ m' (ih (TopCat.of Y) m' _ hY_dim_lt hm'_Y))
+  -- Cokernel vanishing at m': use closedComplementVanishing with m' > dim Vᶜ
+  exact closedComplementVanishing V hV _ m' ih
+    (lt_coe_nat_of_lt_of_lt_coe_nat_succ
+      (topologicalKrullDim_lt_of_isIrreducible_of_isClosed V.2.isClosed_compl
+        (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr
+          (Opens.coe_eq_empty.not.mpr hV)))
+        (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) _)
+          (lt_of_lt_of_le hm le_top))) hm)
+    (fun x hxV a => cokernel_stalk_zero_of_stalk_surj _ x
+      (sheafifyMap_zeroOutside_openHom_stalk_surj Presheaf.constZ le_top x hxV) a)
 
 
 /-- Stalks of `zeroOutsideInt V` vanish outside `V`. -/

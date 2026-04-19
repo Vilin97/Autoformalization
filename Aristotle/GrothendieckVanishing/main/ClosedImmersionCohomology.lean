@@ -294,7 +294,7 @@ theorem closedImmersionSES_shortExact
 /-- Vanishing for a sheaf supported on the complement of an open V, via closed-immersion SES.
     Given:
     - C is a sheaf on irreducible Noetherian X
-    - V ≠ ⊥ is an open with n > dim X
+    - V ≠ ⊥ is an open with n > dim Vᶜ
     - IH gives vanishing on all spaces of smaller dimension
     - Stalks of C vanish at all points of V (the `hStalksOnV` hypothesis)
     Concludes H^n(C) = 0 by building the SES on Y = Vᶜ. -/
@@ -302,8 +302,8 @@ theorem closedComplementVanishing
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) (hV : V ≠ ⊥)
     (C : TopCat.Sheaf AddCommGrpCat.{u} X) (n : ℕ)
-    (hn : ↑n > topologicalKrullDim X)
     (ih : VanishingIH.{u} (topologicalKrullDim X))
+    (hn : ↑n > topologicalKrullDim (Set.compl (V : Set X)))
     (hStalksOnV : ∀ x ∈ V,
       ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj C.val), a = 0) :
     Subsingleton (Sheaf.H C n) := by
@@ -312,8 +312,7 @@ theorem closedComplementVanishing
   have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
     topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl
       (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
-      (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
-        (lt_of_lt_of_le hn le_top))
+      (lt_of_lt_of_le hn le_top)
   let S := closedImmersionSES Y hYcl C
   have hSE := closedImmersionSES_shortExact Y hYcl C
   exact subsingleton_sheafH_of_shortExact_middle hSE n
@@ -324,5 +323,4 @@ theorem closedComplementVanishing
           exact stalk_zero_of_ses_g_iso hSE x inferInstance a
         · exact stalk_zero_of_shortExact_kernel hSE x
             (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b) a)
-    (PushforwardHVanishing Y hYcl _ n
-      (@ih (TopCat.of Y) _ n _ hY_dim_lt (lt_trans hY_dim_lt hn)))
+    (PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ n _ hY_dim_lt hn))
