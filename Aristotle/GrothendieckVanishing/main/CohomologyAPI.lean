@@ -15,6 +15,7 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `subsingleton_sheafH_of_shortExact_middle`: LES consequence for Sheaf.H
 * `sheafH_subsingleton_of_isEmpty`: empty-space vanishing
 * `sheaf_isZero_of_zero_stalks`: zero stalks imply zero sheaf
+* `sheafH_subsingleton_of_isZero`: zero sheaf ⟹ subsingleton cohomology
 * `stalk_zero_of_ses_g_iso`: stalk vanishing from SES with iso on `g`
 * `stalk_zero_of_shortExact_kernel`: stalk vanishing from SES kernel
 * `sheafH0EquivSections`: H^0(F) ≃+ F(⊤)
@@ -120,6 +121,12 @@ theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
       fun U => (hZ.obj U).eq_zero_of_src (f.val.app U))) }⟩)
     (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
       fun U => (hZ.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
+
+/-- If a sheaf is zero, then all its cohomology groups are subsingleton. -/
+theorem sheafH_subsingleton_of_isZero {X : TopCat.{u}}
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsZero F) (n : ℕ) :
+    Subsingleton (Sheaf.H F n) :=
+  Ext.subsingleton_of_isZero_tgt hF n
 
 theorem stalk_zero_of_ses_g_iso
     {X : TopCat.{u}} {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
@@ -257,7 +264,7 @@ theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
 instance sheafH_subsingleton_of_isEmpty {X : TopCat.{u}} [IsEmpty X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (n : ℕ) :
     Subsingleton (Sheaf.H F n) :=
-  Ext.subsingleton_of_isZero_tgt
+  sheafH_subsingleton_of_isZero F
     (sheaf_isZero_of_zero_stalks X F (fun x _ => (IsEmpty.false x).elim)) n
 
 /-! ## Sheaf Cohomology Functor -/
