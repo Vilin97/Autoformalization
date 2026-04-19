@@ -7,7 +7,7 @@ Provides:
 * `sheafH_dimension_shift`: dimension shifting via short exact sequence with injective middle term
 * `FlasqueVanishing`: flasque sheaves have vanishing higher cohomology
 
-General cohomology API (`sheafH0EquivSections`) lives in `CohomologyAPI.lean`.
+General sheaf-cohomology API lives in `CohomologyAPI.lean`.
 -/
 
 universe u
@@ -23,25 +23,6 @@ theorem sheafH_dimension_shift {X : TopCat.{u}}
     [Subsingleton (Sheaf.H S.X₃ n)] :
     Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
   ext_dimension_shift _ hS n ‹_› (Ext.subsingleton_of_injective _ _ n)
-
-/-- General dimension shifting at `Sheaf.H` level: both vanishing hypotheses are
-    instance-implicit. More general than `sheafH_dimension_shift` (no `Injective` needed). -/
-theorem sheafH_dimension_shift_of_both {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) (n : ℕ)
-    [Subsingleton (Sheaf.H S.X₃ n)]
-    [Subsingleton (Sheaf.H S.X₂ (n + 1))] :
-    Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
-  ext_dimension_shift _ hS n ‹_› ‹_›
-
-/-- Reverse dimension shift at `Sheaf.H` level with injective middle term:
-    `Subsingleton (H X₁ (n+2))` implies `Subsingleton (H X₃ (n+1))`.
-    Requires degree ≥ 1 since `Ext^0(Z, I)` is not necessarily trivial for injective `I`. -/
-theorem sheafH_dimension_shift_X₃ {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
-    [Injective S.X₂] (n : ℕ)
-    [Subsingleton (Sheaf.H S.X₁ (n + 2))] :
-    Subsingleton (Sheaf.H S.X₃ (n + 1)) :=
-  ext_dimension_shift_X₃ _ hS (n + 1) (Ext.subsingleton_of_injective _ _ n) ‹_›
 
 /-- **Base case**: `H^1(F) = 0` for flasque `F`. -/
 private theorem sheafH_one_of_flasque {X : TopCat.{u}}
