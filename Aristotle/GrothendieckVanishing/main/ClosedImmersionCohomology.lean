@@ -196,7 +196,6 @@ theorem ext0_surj_of_epi_top
 -- Proof by induction: n=0 via sections, n=1 via Ext^0 surjectivity, n≥2 via LES dimension shift.
 theorem PushforwardHVanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    [NoetherianSpace X]
     (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) (n : ℕ)
     (h : Subsingleton (Sheaf.H G n)) :
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
