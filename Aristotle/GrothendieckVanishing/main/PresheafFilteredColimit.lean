@@ -1,3 +1,4 @@
+import Aristotle.GrothendieckVanishing.main.CohomologyAPI
 import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
 
@@ -557,12 +558,14 @@ theorem sheafH_filtered_colimit_surj
     refine ⟨j₀, x_j, ?_⟩
     show x_j.comp (Ext.mk₀ (c'.ι.app j₀)) (add_zero (n + 1)) = x
     rw [show x_j = y_j.comp (hSE_j j₀).extClass rfl from rfl]
-    rw [Ext.comp_assoc_of_third_deg_zero]
-    have h_nat : (Ext.mk₀ (qCocone.ι.app j₀)).comp hSE.extClass (zero_add 1) =
-        (hSE_j j₀).extClass.comp (Ext.mk₀ (c'.ι.app j₀)) (add_zero 1) :=
-      extClass_naturality (hSE_j j₀) hSE (ShortComplex.homMk (c'.ι.app j₀) (injCocone.ι.app j₀)
-        (qCocone.ι.app j₀) (hfac_ι j₀) (cokernel.π_desc _ _ _).symm)
-    rw [← h_nat, ← Ext.comp_assoc_of_second_deg_zero, hy_j, hy]
+    have h_ext :
+        (y_j.comp (hSE_j j₀).extClass rfl).comp (Ext.mk₀ (c'.ι.app j₀)) (add_zero (n + 1)) =
+          (y_j.comp (Ext.mk₀ (qCocone.ι.app j₀)) (add_zero n)).comp hSE.extClass rfl :=
+      sheafH_comp_extClass_naturality (hSE_j j₀) hSE
+        (ShortComplex.homMk (c'.ι.app j₀) (injCocone.ι.app j₀)
+          (qCocone.ι.app j₀) (hfac_ι j₀) (cokernel.π_desc _ _ _).symm) n y_j
+    rw [h_ext]
+    rw [hy_j, hy]
 
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
     If `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.

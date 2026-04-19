@@ -110,6 +110,20 @@ end ExtDimShift
 
 /-! ## Stalks and zero sheaves -/
 
+/-- Naturality of the connecting map on sheaf cohomology for a morphism of short exact
+    sequences. This packages `extClass_naturality` together with the two associativity
+    rewrites needed to move between nested `comp` expressions and composition with the
+    connecting class. -/
+theorem sheafH_comp_extClass_naturality {X : TopCat.{u}}
+    {S₁ S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS₁ : S₁.ShortExact) (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂) (n : ℕ)
+    (y : Sheaf.H S₁.X₃ n) :
+    (y.comp hS₁.extClass rfl).comp (Ext.mk₀ φ.τ₁) (add_zero (n + 1)) =
+      (y.comp (Ext.mk₀ φ.τ₃) (add_zero n)).comp hS₂.extClass rfl := by
+  rw [Ext.comp_assoc_of_third_deg_zero]
+  rw [← extClass_naturality hS₁ hS₂ φ]
+  rw [← Ext.comp_assoc_of_second_deg_zero]
+
 theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (hstalk : ∀ (x : X)
