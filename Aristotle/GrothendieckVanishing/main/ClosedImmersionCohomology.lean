@@ -77,14 +77,6 @@ theorem epi_pushforward_map_closedIncl
   rw [TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
   intro x; by_cases hx : (x : X) ∈ s
   · let z : TopCat.of s := ⟨x, hx⟩
-    haveI : IsIso (TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
-        (TopCat.closedIncl hs) F.val z) :=
-      TopCat.Presheaf.stalkPushforward.stalkPushforward_iso_of_isInducing
-        AddCommGrpCat.{u} (TopCat.closedIncl_isInducing hs) _ z
-    haveI : IsIso (TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
-        (TopCat.closedIncl hs) G.val z) :=
-      TopCat.Presheaf.stalkPushforward.stalkPushforward_iso_of_isInducing
-        AddCommGrpCat.{u} (TopCat.closedIncl_isInducing hs) _ z
     haveI : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map f.val) :=
       (AddCommGrpCat.epi_iff_surjective _).mpr
         (((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
@@ -213,7 +205,7 @@ theorem PushforwardHVanishing
       letI := hG'; exact (sheafH0EquivSections G').toEquiv.subsingleton_congr.mp ‹_›
     have hobj : F'.val.obj (op ⊤) = G'.val.obj (op ⊤) := by
       change G'.val.obj (op ((Opens.map i).obj ⊤)) = G'.val.obj (op ⊤)
-      simp [show ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ from by ext; simp [Opens.map]]
+      rw [Opens.map_top]
     constructor; intro a b
     apply (sheafH0EquivSections F').injective
     exact @Subsingleton.elim (F'.val.obj (op ⊤)) (hobj ▸ hsec) _ _
@@ -233,7 +225,7 @@ theorem PushforwardHVanishing
       exact subsingleton_H1_via_surj _ hSE_X (FlasqueVanishing _ _ 0)
         (ext0_surj_of_epi_top (by
           show Epi (ip.shortComplex.g.val.app (op ((Opens.map i).obj ⊤)))
-          rw [show ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ from by ext; simp [Opens.map]]
+          rw [Opens.map_top]
           exact epi_g_app_top_of_H1_vanishing ip.shortExact_shortComplex hG'))
     | succ m =>
       haveI := hG'
