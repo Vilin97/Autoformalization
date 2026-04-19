@@ -2,9 +2,11 @@
   ClosedImmersionCohomology.lean — Closed immersion cohomology infrastructure
 
   Provides:
-  1. `PushforwardHVanishing` (pushforward preserves cohomological vanishing)
-  2. `epi_unit_of_closedImmersion` (adjunction unit is epi)
-  3. `closedImmersionSES` (short exact sequence from closed immersion)
+  1. `closedIncl_pushforward_preservesEpis/Monos` (pushforward preserves epis/monos)
+  2. `closedIncl_pushforward_shortExact` (pushforward preserves ShortExact)
+  3. `PushforwardHVanishing` (pushforward preserves cohomological vanishing)
+  4. `epi_unit_of_closedImmersion` (adjunction unit is epi)
+  5. `closedImmersionSES` (short exact sequence from closed immersion)
 
   Depends on FlasqueCohomology.lean for `FlasqueVanishing`, `sheafH0EquivSections`,
   and FlasqueVanishing.lean for `IsFlasqueSheaf`, `isFlasque_of_injective`.
@@ -116,6 +118,11 @@ instance closedIncl_pushforward_preservesEpis
       (TopCat.closedIncl hs)).PreservesEpimorphisms where
   preserves f := epi_pushforward_map_closedIncl hs f
 
+instance closedIncl_pushforward_preservesMonos
+    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
+    (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hs)).PreservesMonomorphisms := inferInstance
+
 -- Pushforward along closed immersion preserves ShortExact.
 theorem closedIncl_pushforward_shortExact
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
@@ -125,8 +132,8 @@ theorem closedIncl_pushforward_shortExact
         (TopCat.closedIncl hs))).ShortExact := by
   let F := TopCat.Sheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)
   haveI := hSE.mono_f; haveI := hSE.epi_g
-  haveI : Mono (F.map S.f) := Functor.map_mono _ _
-  haveI : Epi (F.map S.g) := Functor.map_epi _ _
+  haveI : Mono (F.map S.f) := inferInstance
+  haveI : Epi (F.map S.g) := inferInstance
   exact ShortComplex.ShortExact.mk'
     (hSE.exact.map_of_mono_of_preservesKernel _ hSE.mono_f inferInstance) ‹_› ‹_›
 
