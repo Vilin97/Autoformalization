@@ -19,6 +19,8 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `stalk_zero_of_shortExact_kernel`: stalk vanishing from SES kernel
 * `sheafH0EquivSections`: H^0(F) ≃+ F(⊤)
 * `sheafH0EquivSections_natural`: naturality of the above
+* `epi_app_top_of_subsingleton_sheafH1`: H^1 vanishing gives surjectivity on top sections
+* `sheafH0_surj_of_epi_app_top`: surjectivity on top sections gives H^0 surjectivity
 -/
 
 universe u
@@ -180,6 +182,35 @@ lemma sheafH0EquivSections_natural {X : TopCat.{u}}
   erw [Adjunction.homAddEquiv_apply, Adjunction.homAddEquiv_apply, key,
     Adjunction.homEquiv_naturality_right, Adjunction.homAddEquiv_apply]
   rfl
+
+/-- In a short exact sequence of sheaves, `H¹(X₁)=0` implies the map on global sections
+    `X₂(⊤) → X₃(⊤)` is surjective. This packages the `H⁰/H¹` segment of the LES using
+    `sheafH0EquivSections`. -/
+theorem epi_app_top_of_subsingleton_sheafH1 {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
+    (h₁ : Subsingleton (Sheaf.H S.X₁ 1)) :
+    Epi (S.g.val.app (op ⊤)) := by
+  rw [AddCommGrpCat.epi_iff_surjective]
+  intro r
+  let y : Sheaf.H S.X₃ 0 := (sheafH0EquivSections S.X₃).symm r
+  obtain ⟨z, hz⟩ := Ext.covariant_sequence_exact₃ _ hSE y rfl
+    (@Subsingleton.elim _ h₁ _ _)
+  refine ⟨sheafH0EquivSections S.X₂ z, ?_⟩
+  rw [← sheafH0EquivSections_natural, hz]
+  simp [y]
+
+/-- If `f.app (op ⊤)` is surjective on sections, then every `H⁰` class of the target
+    lifts along `f`. This is the `H⁰`-surjectivity input used by
+    `sheafH_subsingleton_H1_via_surj`. -/
+theorem sheafH0_surj_of_epi_app_top {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G)
+    (hf : Epi (f.val.app (op ⊤))) :
+    ∀ y : Sheaf.H G 0, ∃ z : Sheaf.H F 0, z.comp (Ext.mk₀ f) (add_zero 0) = y := by
+  intro y
+  obtain ⟨s, hs⟩ := (AddCommGrpCat.epi_iff_surjective _).mp hf (sheafH0EquivSections G y)
+  refine ⟨(sheafH0EquivSections F).symm s, ?_⟩
+  apply (sheafH0EquivSections G).injective
+  rw [sheafH0EquivSections_natural, AddEquiv.apply_symm_apply, hs]
 
 /-- H^1 vanishing via Ext^0 surjectivity: if H^1(X₂)=0 and every Ext^0 element
     of X₃ lifts to X₂, then H^1(X₁)=0. Used in flasque, pushforward, and colimit proofs. -/

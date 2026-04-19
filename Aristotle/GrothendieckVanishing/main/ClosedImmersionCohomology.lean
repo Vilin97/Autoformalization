@@ -130,60 +130,6 @@ theorem closedIncl_pushforward_shortExact
   exact ShortComplex.ShortExact.mk'
     (hSE.exact.map_of_mono_of_preservesKernel _ hSE.mono_f inferInstance) ‹_› ‹_›
 
--- Epi of g at ⊤ from H^1(X₁)=0 via LES + adj + separator
-theorem epi_g_app_top_of_H1_vanishing
-    {Z : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} Z)}
-    (hSE : S.ShortExact)
-    (hG' : Subsingleton (Sheaf.H S.X₁ 1)) :
-    Epi (S.g.val.app (op ⊤)) := by
-  rw [AddCommGrpCat.epi_iff_surjective]; intro r
-  let R_top := S.X₃.val.obj (op ⊤)
-  let φ_hom : AddCommGrpCat.of (ULift.{u} ℤ) ⟶ R_top :=
-    AddCommGrpCat.ofHom
-      (AddMonoidHom.mk' (fun (n : ULift.{u} ℤ) => (n.down : ℤ) • (r : R_top))
-        (fun a b => by simp [add_zsmul]))
-  let adj_Z := constantSheafAdj (Opens.grothendieckTopology Z)
-    AddCommGrpCat.{u} Limits.isTerminalTop
-  let φ := (adj_Z.homEquiv _ S.X₃).symm φ_hom
-  obtain ⟨z, hz⟩ := Ext.covariant_sequence_exact₃ _ hSE _ rfl
-    (@Subsingleton.elim _ hG' _ _)
-  have hψ : Ext.addEquiv₀ z ≫ S.g = φ := by
-    apply Ext.addEquiv₀.symm.injective
-    change Ext.mk₀ (Ext.addEquiv₀ z ≫ S.g) = Ext.addEquiv₀.symm φ
-    rw [← Ext.mk₀_comp_mk₀, Ext.mk₀_addEquiv₀_apply]; exact hz
-  let ψ_hom := (adj_Z.homEquiv _ S.X₂) (Ext.addEquiv₀ z)
-  have hfact := Adjunction.homEquiv_naturality_right adj_Z (Ext.addEquiv₀ z) S.g
-  rw [hψ, Equiv.apply_symm_apply] at hfact
-  change φ_hom = ψ_hom ≫ S.g.val.app (op ⊤) at hfact
-  refine ⟨ψ_hom (ULift.up 1), ?_⟩
-  change (ConcreteCategory.hom (ψ_hom ≫ S.g.val.app (op ⊤))) (ULift.up 1) = r
-  rw [← hfact]; simp [φ_hom]
-
--- Surjectivity of Ext⁰ map from epi at ⊤ via adjunction + projectivity of ULift ℤ
-theorem ext0_surj_of_epi_top
-    {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hg_epi_top : Epi (S.g.val.app (op ⊤))) :
-    ∀ y : Sheaf.H S.X₃ 0,
-      ∃ z : Sheaf.H S.X₂ 0,
-        z.comp (Ext.mk₀ S.g) (add_zero 0) = y := by
-  intro y; suffices ∃ ψ : _ ⟶ S.X₂, ψ ≫ S.g = Ext.addEquiv₀ y by
-    obtain ⟨ψ, hψ⟩ := this
-    exact ⟨Ext.mk₀ ψ, by rw [Ext.mk₀_comp_mk₀, hψ, Ext.mk₀_addEquiv₀_apply]⟩
-  have hΓg : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map S.g) := by
-    have h := hg_epi_top
-    exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
-      ((Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).inv.naturality S.g).symm
-  let adj := constantSheafΓAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
-  let M := AddCommGrpCat.of (ULift.{u} ℤ)
-  exact ⟨(adj.homEquiv M _).symm (Projective.factorThru
-    ((adj.homEquiv M _) (Ext.addEquiv₀ y))
-    ((Sheaf.Γ _ _).map S.g)), by
-    apply (adj.homEquiv M _).injective
-    rw [Adjunction.homEquiv_naturality_right, Equiv.apply_symm_apply,
-      Projective.factorThru_comp]⟩
-
 -- Pushforward along closed immersion preserves cohomological vanishing.
 -- Proof by induction: n=0 via sections, n=1 via Ext^0 surjectivity, n≥2 via LES dimension shift.
 theorem PushforwardHVanishing
@@ -223,10 +169,10 @@ theorem PushforwardHVanishing
     cases k with
     | zero =>
       exact sheafH_subsingleton_H1_via_surj hSE_X (FlasqueVanishing _ _ 0)
-        (ext0_surj_of_epi_top (by
+        (sheafH0_surj_of_epi_app_top _ (by
           show Epi (ip.shortComplex.g.val.app (op ((Opens.map i).obj ⊤)))
           rw [Opens.map_top]
-          exact epi_g_app_top_of_H1_vanishing ip.shortExact_shortComplex hG'))
+          exact epi_app_top_of_subsingleton_sheafH1 ip.shortExact_shortComplex hG'))
     | succ m =>
       haveI := hG'
       haveI : Subsingleton (Sheaf.H
