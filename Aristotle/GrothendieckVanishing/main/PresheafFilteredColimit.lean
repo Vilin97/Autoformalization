@@ -12,7 +12,7 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
   - `sheaf_section_zero_of_zero_on_cover`: sections vanishing on finite cover vanish
   - `filtered_colimit_kills_all_restrictions`: merge finitely many eventually-zero transitions
   - `colimit_section_zero_of_zero_on_cover`: colimit section vanishing on finite cover is zero
-    (combines representative extraction, eventual vanishing, merging, and sheaf separation)
+    (no `NoetherianSpace` hypothesis needed)
 
   ## Sheaf-level results
   - `isSheaf_presheaf_filtered_colimit`: presheaf-level filtered colimit of sheaves is a sheaf
@@ -135,7 +135,7 @@ theorem filtered_colimit_kills_all_restrictions
     Combines representative extraction, per-element eventual vanishing,
     merging to a common index, and sheaf separation. -/
 theorem colimit_section_zero_of_zero_on_cover
-    {X : TopCat.{u}} [NoetherianSpace X]
+    {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     {Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X}
     {c : Cocone (Y' ⋙ sheafToPresheaf _ _)} (hc : IsColimit c)
@@ -182,14 +182,13 @@ theorem colimit_section_zero_of_zero_on_cover
     rw [← ((Y' ⋙ sheafToPresheaf _ _).map fk).naturality (homOfLE (hW k)).op]; exact hfk)
   -- Conclude: the transition is zero by sheaf separation, hence a = 0
   rw [← hb₀]; change ConcreteCategory.hom ((c.ι.app j₀).app (op V)) b₀ = 0
-  conv_lhs => rw [show (c.ι.app j₀).app (op V) =
+  rw [show (c.ι.app j₀).app (op V) =
       ((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op V) ≫
       (c.ι.app j₁).app (op V) from by
     simpa [Functor.const_obj_map] using
       (congrArg (fun α => NatTrans.app α (op V)) (c.ι.naturality g₀)).symm]
-  change ConcreteCategory.hom ((c.ι.app j₁).app (op V))
-    (ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₀).app (op V)) b₀) = 0
-  rw [sheaf_section_zero_of_zero_on_cover (Y'.obj j₁).cond hW hcov _ hg₀, map_zero]
+  rw [ConcreteCategory.comp_apply,
+    sheaf_section_zero_of_zero_on_cover (Y'.obj j₁).cond hW hcov _ hg₀, map_zero]
 
 /-- On a Noetherian space, the presheaf-level filtered colimit of sheaves is a sheaf.
     Proof: Noetherian compactness reduces the sheaf condition to finite covers, then
