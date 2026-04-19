@@ -420,3 +420,15 @@ theorem sheafCohomologyFunctor_map_apply (X : TopCat.{u}) (n : ℕ)
     (x : Sheaf.H F n) :
     ConcreteCategory.hom ((sheafCohomologyFunctor X n).map f) x =
     x.comp (Ext.mk₀ f) (add_zero n) := rfl
+
+/-- Functor-level naturality of the connecting morphism on sheaf cohomology. This is the
+    `sheafCohomologyFunctor`-packaged form of `sheafH_comp_extClass_naturality`. -/
+theorem sheafCohomologyFunctor_map_extClass_naturality {X : TopCat.{u}}
+    {S₁ S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS₁ : S₁.ShortExact) (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂) (n : ℕ)
+    (y : Sheaf.H S₁.X₃ n) :
+    ConcreteCategory.hom ((sheafCohomologyFunctor X (n + 1)).map φ.τ₁)
+      (y.comp hS₁.extClass rfl) =
+    (ConcreteCategory.hom ((sheafCohomologyFunctor X n).map φ.τ₃) y).comp hS₂.extClass rfl := by
+  rw [sheafCohomologyFunctor_map_apply, sheafCohomologyFunctor_map_apply]
+  exact sheafH_comp_extClass_naturality hS₁ hS₂ φ n y

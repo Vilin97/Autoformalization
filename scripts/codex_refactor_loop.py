@@ -43,6 +43,8 @@ PLANNER_TIMEOUT = 1800
 WORKER_TIMEOUT = 10800
 EVALUATOR_TIMEOUT = 1800
 HISTORY_WINDOW = 8
+DEFAULT_MODEL = os.environ.get("CODEX_REFACTOR_MODEL", "gpt-5.4")
+DEFAULT_REASONING_EFFORT = os.environ.get("CODEX_REFACTOR_REASONING_EFFORT", "xhigh")
 
 CODEX_BIN = Path(os.environ.get("CODEX_BIN", "/gscratch/amath/vilin/conda/envs/codex/bin/codex"))
 CODEX_HOME_ROOT = Path(
@@ -208,6 +210,7 @@ def run_codex(
     output_schema: dict | None = None,
     output_path: Path | None = None,
     model: str | None = None,
+    reasoning_effort: str | None = DEFAULT_REASONING_EFFORT,
 ) -> tuple[int, str]:
     cmd = [
         str(CODEX_BIN),
@@ -221,6 +224,8 @@ def run_codex(
     ]
     if model:
         cmd.extend(["-m", model])
+    if reasoning_effort:
+        cmd.extend(["-c", f'model_reasoning_effort="{reasoning_effort}"'])
     schema_path = None
     if output_schema is not None:
         schema_path = STATE_DIR / "codex_evaluator_schema.json"
@@ -250,7 +255,7 @@ def run_planner(cycle: int, history: list[dict]) -> str:
     template = Template((PROMPTS_DIR / "codex_planner.md").read_text())
     prompt = template.safe_substitute(cycle=cycle, history=format_history(history))
     write_status(mode="planner", cycle=cycle)
-    exit_code, _ = run_codex(prompt, timeout=PLANNER_TIMEOUT, model="gpt-5.4")
+    exit_code, _ = run_codex(prompt, timeout=PLANNER_TIMEOUT, model=DEFAULT_MODEL)
     if exit_code != 0:
         raise RuntimeError(f"Planner failed with exit code {exit_code}")
     strategy = read_file_safe(STRATEGY_FILE)
@@ -272,7 +277,7 @@ def run_worker(cycle: int, strategy: str) -> tuple[int, str]:
         prompt,
         timeout=WORKER_TIMEOUT,
         output_path=output_path,
-        model="gpt-5.4",
+        model=DEFAULT_MODEL,
     )
 
 
@@ -307,7 +312,7 @@ def run_evaluator(cycle: int, strategy: str, diff: str, report: str, history: li
         timeout=EVALUATOR_TIMEOUT,
         output_schema=EVALUATOR_SCHEMA,
         output_path=output_path,
-        model="gpt-5.4-mini",
+        model=DEFAULT_MODEL,
     )
     if exit_code != 0:
         return default_eval(f"Evaluator failed with exit code {exit_code}")
