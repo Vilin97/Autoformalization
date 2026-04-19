@@ -169,11 +169,10 @@ theorem PushforwardHVanishing
       exact IsFlasqueSheaf.epi_map ((Opens.map i).map j)
     cases k with
     | zero =>
-      exact sheafH_subsingleton_H1_via_surj hSE_X (FlasqueVanishing _ _ 0)
-        (sheafH0_surj_of_epi_app_top _ (by
-          show Epi (ip.shortComplex.g.val.app (op ((Opens.map i).obj ⊤)))
-          rw [Opens.map_top]
-          exact epi_app_top_of_subsingleton_sheafH1 ip.shortExact_shortComplex hG'))
+      exact sheafH_subsingleton_H1_via_epi_app_top hSE_X (FlasqueVanishing _ _ 0) (by
+        show Epi (ip.shortComplex.g.val.app (op ((Opens.map i).obj ⊤)))
+        rw [Opens.map_top]
+        exact epi_app_top_of_subsingleton_sheafH1 ip.shortExact_shortComplex hG')
     | succ m =>
       haveI := hG'
       haveI : Subsingleton (Sheaf.H
