@@ -125,7 +125,7 @@ class IsFlasqueSheaf {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X) : P
 
 -- For a SES of sheaves, the evaluated sequence at V is exact:
 -- if g_V(x) = 0, then x is in the image of f_V.
-private lemma sections_exact_of_shortExact {X : TopCat.{u}}
+lemma sections_exact_of_shortExact {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) (V : Opens X)
     (x : S.X₂.val.obj (op V))
