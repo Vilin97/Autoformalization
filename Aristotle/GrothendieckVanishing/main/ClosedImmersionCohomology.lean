@@ -49,18 +49,13 @@ theorem pushforward_closedIncl_stalk_eq_zero
   let W : Opens X := U ⊓ ⟨sᶜ, hs.isOpen_compl⟩
   have hW_bot : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ :=
     le_antisymm (fun ⟨_, hy⟩ h => absurd hy h.2) bot_le
-  have hFW_zero : IsZero (F'.obj (op W)) := by
+  haveI : Subsingleton (F'.obj (op W)) := AddCommGrpCat.subsingleton_of_isZero (by
     change IsZero (G.val.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
-    rw [hW_bot]; exact G.isTerminalOfEmpty.isZero
-  let sW := ConcreteCategory.hom (F'.map (homOfLE (show W ≤ U from inf_le_left)).op) sU
-  have hsW_eq : sW = 0 := by
-    have h0 : (𝟙 (F'.obj (op W)) : _ ⟶ _) = 0 := hFW_zero.eq_of_src _ _
-    calc sW = ConcreteCategory.hom (𝟙 (F'.obj (op W))) sW := (ConcreteCategory.id_apply sW).symm
-      _ = 0 := by rw [h0]; exact AddMonoidHom.zero_apply _
+    rw [hW_bot]; exact G.isTerminalOfEmpty.isZero)
   rw [← TopCat.Presheaf.germ_res_apply F'
     (homOfLE (show W ≤ U from inf_le_left)) x ⟨hxU, hx⟩ sU]
-  change ConcreteCategory.hom (F'.germ W x ⟨hxU, hx⟩) sW = 0
-  rw [hsW_eq]; exact AddMonoidHom.map_zero _
+  simp [Subsingleton.eq_zero (ConcreteCategory.hom (F'.map (homOfLE (show W ≤ U from
+    inf_le_left)).op) sU)]
 
 /-- Pushforward along a closed immersion preserves epis: if `f : F ⟶ G` is epi in
     sheaves on the closed subspace, then `i_*(f)` is epi in sheaves on the ambient space.
@@ -115,6 +110,12 @@ theorem epi_pushforward_map_closedIncl
     rw [pushforward_closedIncl_stalk_eq_zero hs G hx b]
     exact ⟨0, AddMonoidHom.map_zero _⟩
 
+instance closedIncl_pushforward_preservesEpis
+    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
+    (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hs)).PreservesEpimorphisms where
+  preserves f := epi_pushforward_map_closedIncl hs f
+
 -- Pushforward along closed immersion preserves ShortExact.
 theorem closedIncl_pushforward_shortExact
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
@@ -122,19 +123,12 @@ theorem closedIncl_pushforward_shortExact
     (hSE : S.ShortExact) :
     (S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
         (TopCat.closedIncl hs))).ShortExact := by
-  haveI := hSE.mono_f
-  haveI : Mono ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hs)).map S.f) :=
-    Functor.map_mono _ _
-  have hExact : (S.map
-      (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-        (TopCat.closedIncl hs))).Exact :=
-    hSE.exact.map_of_mono_of_preservesKernel _ hSE.mono_f inferInstance
-  haveI := hSE.epi_g
-  haveI : Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hs)).map S.g) :=
-    epi_pushforward_map_closedIncl hs S.g
-  exact ShortComplex.ShortExact.mk' hExact ‹_› ‹_›
+  let F := TopCat.Sheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)
+  haveI := hSE.mono_f; haveI := hSE.epi_g
+  haveI : Mono (F.map S.f) := Functor.map_mono _ _
+  haveI : Epi (F.map S.g) := Functor.map_epi _ _
+  exact ShortComplex.ShortExact.mk'
+    (hSE.exact.map_of_mono_of_preservesKernel _ hSE.mono_f inferInstance) ‹_› ‹_›
 
 -- Epi of g at ⊤ from H^1(X₁)=0 via LES + adj + separator
 theorem epi_g_app_top_of_H1_vanishing
