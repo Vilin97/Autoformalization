@@ -49,7 +49,7 @@ private theorem ReducibleVanishing'
   intro s; induction s using Finset.induction_on with
   | empty =>
     intro _ G hG
-    exact Ext.subsingleton_of_isZero_tgt
+    exact _root_.sheafH_subsingleton_of_isZero G
       (sheaf_isZero_of_zero_stalks X G (fun x a => hG x (by simp) a)) n
   | @insert Z s' hZ_notin ih =>
     intro hs_irred G hG_stalks
