@@ -1,4 +1,6 @@
-/-
+import Aristotle.GrothendieckVanishing.main.IrreducibleStep
+
+/-!
   GrothendieckVanishing.lean — Main theorem
 
   Grothendieck's vanishing theorem (Hartshorne III.2.7):
@@ -10,7 +12,6 @@
     grothendieck_vanishing_of_irreducible
   - IrreduciblePosVanishing (IrreducibleStep): irreducible case (all dimensions)
 -/
-import Aristotle.GrothendieckVanishing.main.IrreducibleStep
 
 universe u
 

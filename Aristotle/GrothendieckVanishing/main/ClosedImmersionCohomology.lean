@@ -1,4 +1,6 @@
-/-
+import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
+
+/-!
   ClosedImmersionCohomology.lean — Closed immersion cohomology infrastructure
 
   Provides:
@@ -11,7 +13,6 @@
   Depends on FlasqueCohomology.lean for `FlasqueVanishing`, `sheafH0EquivSections`,
   and FlasqueVanishing.lean for `IsFlasqueSheaf`, `isFlasque_of_injective`.
 -/
-import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
 
 set_option linter.unusedSimpArgs false
 

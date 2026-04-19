@@ -194,7 +194,7 @@ private theorem colimit_section_zero_of_zero_on_cover
 /-- On a Noetherian space, the presheaf-level filtered colimit of sheaves is a sheaf.
     Proof: Noetherian compactness reduces the sheaf condition to finite covers, then
     filtered colimit merging passes from per-piece data to glued data. -/
-private theorem isSheaf_presheaf_filtered_colimit
+theorem isSheaf_presheaf_filtered_colimit
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)

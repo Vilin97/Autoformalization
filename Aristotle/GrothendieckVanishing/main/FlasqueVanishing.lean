@@ -1,4 +1,9 @@
-/-
+import Mathlib
+import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
+import Aristotle.GrothendieckVanishing.main.ClosedImmersion
+import Aristotle.GrothendieckVanishing.main.ZeroOutside
+
+/-!
   FlasqueVanishing.lean -- Flasque sheaf theory and infrastructure
 
   Provides:
@@ -9,10 +14,6 @@
   `FlasqueVanishing` itself is in `FlasqueCohomology.lean`.
   Split from SetupCore.lean for compilation performance.
 -/
-import Mathlib
-import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
-import Aristotle.GrothendieckVanishing.main.ClosedImmersion
-import Aristotle.GrothendieckVanishing.main.ZeroOutside
 
 universe u
 
