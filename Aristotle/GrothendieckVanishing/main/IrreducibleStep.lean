@@ -17,8 +17,8 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
     is an integer multiple of `germ(s, x)`, and R embeds into `zeroOutsideInt V`
     (providing torsion-freeness needed for injectivity). -/
 private theorem sHom_stalk_bijective_at
-    {X : TopCat.{u}} (V U : Opens X) (hUV : U ≤ V)
-    (R : TopCat.Sheaf AddCommGrpCat.{u} X)
+    {X : TopCat.{u}} {V U : Opens X} (hUV : U ≤ V)
+    {R : TopCat.Sheaf AddCommGrpCat.{u} X}
     (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
     (s : R.val.obj (op U))
     (x : X) (hxU : x ∈ U)
@@ -75,7 +75,7 @@ private theorem sHom_stalk_bijective_at
     This is the hard "Noetherian shrinking" step of Hartshorne III.2.7, Step 4. -/
 private theorem exists_section_generating_stalks
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
-    (V : Opens X) (R : TopCat.Sheaf AddCommGrpCat.{u} X)
+    {V : Opens X} {R : TopCat.Sheaf AddCommGrpCat.{u} X}
     (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
     (hR : ¬ IsZero R) :
     ∃ (V' : Opens X) (_ : V' ≤ V) (_ : V' ≠ ⊥)
@@ -230,7 +230,7 @@ private theorem exists_section_generating_stalks
     Uses: minimum-index point, generator section, locally constant germ shrinking. -/
 theorem exists_good_section
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
-    (V : Opens X) (R : TopCat.Sheaf AddCommGrpCat.{u} X)
+    {V : Opens X} {R : TopCat.Sheaf AddCommGrpCat.{u} X}
     (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
     (hR : ¬ IsZero R) :
     ∃ (V' : Opens X) (_ : V' ≤ V) (_ : V' ≠ ⊥)
@@ -239,9 +239,9 @@ theorem exists_good_section
         Function.Bijective (ConcreteCategory.hom
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
             (TopCat.Sheaf.zeroOutsideInt.sHom s).val)) := by
-  obtain ⟨V', hV'V, hV'ne, s, hgen⟩ := exists_section_generating_stalks V R i hR
+  obtain ⟨V', hV'V, hV'ne, s, hgen⟩ := exists_section_generating_stalks i hR
   exact ⟨V', hV'V, hV'ne, s, fun x hx =>
-    sHom_stalk_bijective_at V V' hV'V R i s x hx (hgen x hx).1 (hgen x hx).2⟩
+    sHom_stalk_bijective_at hV'V i s x hx (hgen x hx).1 (hgen x hx).2⟩
 
 /-- **Structure lemma** (Hartshorne Step 4 core): a nonzero subsheaf of `zeroOutsideInt V`
     contains `zeroOutsideInt V'` for some nonempty open `V' ⊆ V`, with the inclusion
@@ -250,7 +250,7 @@ theorem exists_good_section
     `d_x` is constant and minimal, `R` restricts to `d·Z_{V'}` ≅ `Z_{V'}`. -/
 theorem subsheaf_contains_zeroOutsideInt
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
-    (V : Opens X) (R : TopCat.Sheaf AddCommGrpCat.{u} X)
+    {V : Opens X} {R : TopCat.Sheaf AddCommGrpCat.{u} X}
     (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
     (hR : ¬ IsZero R) :
     ∃ (V' : Opens X) (_ : V' ≤ V) (_ : V' ≠ ⊥)
@@ -258,7 +258,7 @@ theorem subsheaf_contains_zeroOutsideInt
       (∀ (x : X) (_ : x ∈ V'),
         Function.Bijective (ConcreteCategory.hom
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map j.val))) := by
-  obtain ⟨V', hle, hne, s, hbij⟩ := exists_good_section V R i hR
+  obtain ⟨V', hle, hne, s, hbij⟩ := exists_good_section i hR
   refine ⟨V', hle, hne, TopCat.Sheaf.zeroOutsideInt.sHom s, ?_, hbij⟩
   haveI : ∀ x, Mono ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
       (TopCat.Sheaf.zeroOutsideInt.sHom s).val) := fun y => by
@@ -276,7 +276,7 @@ theorem subsheaf_contains_zeroOutsideInt
     (dim < dim X), so vanishes by the IH. Middle-term LES gives `H^m(R) = 0`. -/
 theorem subsheaf_zeroOutsideInt_vanishing
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
-    (V : Opens X) (R : TopCat.Sheaf AddCommGrpCat.{u} X)
+    {V : Opens X} {R : TopCat.Sheaf AddCommGrpCat.{u} X}
     (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
     (ih : VanishingIH.{u} (topologicalKrullDim X))
     (m : ℕ) (hm : m > topologicalKrullDim X) :
@@ -284,7 +284,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
   by_cases hR : IsZero R
   · exact Ext.subsingleton_of_isZero_tgt hR m
   · obtain ⟨V', hV'le, hV'ne, j, hj_mono, hj_stalk⟩ :=
-      subsheaf_contains_zeroOutsideInt V R i hR
+      subsheaf_contains_zeroOutsideInt i hR
     haveI : Mono j := hj_mono
     let S := ShortComplex.mk j (cokernel.π j) (cokernel.condition j)
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
@@ -300,7 +300,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
     `subsheaf_zeroOutsideInt_vanishing` (Step 4). -/
 theorem epiImage_zeroOutsideInt_vanishing
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
-    (V : Opens X) {G : TopCat.Sheaf AddCommGrpCat.{u} X}
+    {V : Opens X} {G : TopCat.Sheaf AddCommGrpCat.{u} X}
     (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G) (hf : Epi f)
     (ih : VanishingIH.{u} (topologicalKrullDim X))
     (m : ℕ) (hm : m > topologicalKrullDim X) :
@@ -314,7 +314,7 @@ theorem epiImage_zeroOutsideInt_vanishing
       (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
     exact ext_dimension_shift_X₃ _ hSE m
       (zeroOutsideInt_cohomology_vanishing V hV ih m hm)
-      (subsheaf_zeroOutsideInt_vanishing V (kernel f) (kernel.ι f) ih (m + 1)
+      (subsheaf_zeroOutsideInt_vanishing (kernel.ι f) ih (m + 1)
         (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl)))
 
 -- Filtered diagram infrastructure, finitely generated vanishing, and
@@ -335,6 +335,6 @@ theorem IrreduciblePosVanishing
     PushforwardHVanishing Z hZ_closed _ n (ih (TopCat.of Z) n _ hZ_dim hn_Z)
   have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
     directLimit_cohomology_vanishing S.X₁ n
-      (fun f hf => epiImage_zeroOutsideInt_vanishing _ f hf ih n hn)
+      (fun f hf => epiImage_zeroOutsideInt_vanishing f hf ih n hn)
   exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
 
