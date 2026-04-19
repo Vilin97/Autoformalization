@@ -345,8 +345,6 @@ private theorem isSheaf_presheaf_filtered_colimit
   -- For k ∈ t: s|_{U_k} = sf_k
   have hs_k : ∀ k (hk : k ∈ t), c.pt.map (Opens.leSupr U k).op s = sf k := by
     intro k hk
-    change ConcreteCategory.hom (c.pt.map (Opens.leSupr U k).op)
-      (ConcreteCategory.hom ((c.ι.app j₁).app (op (iSup U))) s₀) = sf k
     change ConcreteCategory.hom
       ((c.ι.app j₁).app (op (iSup U)) ≫ c.pt.map (Opens.leSupr U k).op) s₀ = sf k
     rw [show (c.ι.app j₁).app (op (iSup U)) ≫ c.pt.map (Opens.leSupr U k).op =
@@ -355,11 +353,11 @@ private theorem isSheaf_presheaf_filtered_colimit
     change ConcreteCategory.hom ((c.ι.app j₁).app (op (U k)))
       (ConcreteCategory.hom ((Y'.obj j₁).val.map (Opens.leSupr U k).op) s₀) = sf k
     rw [hs₀ ⟨k, hk⟩]; dsimp [x'']
-    have hfac := congrArg (fun α => NatTrans.app α (op (U k))) (c.ι.naturality g₁)
-    simp only [Functor.const_obj_map, NatTrans.comp_app] at hfac
-    change ConcreteCategory.hom ((((Y' ⋙ sheafToPresheaf _ _).map g₁).app (op (U k)) ≫
-      (c.ι.app j₁).app (op (U k)))) (x' k hk) = sf k
-    rw [hfac]; exact hx' k hk
+    change ConcreteCategory.hom (((Y' ⋙ sheafToPresheaf _ _).map g₁).app (op (U k)) ≫
+      (c.ι.app j₁).app (op (U k))) (x' k hk) = sf k
+    have := congrArg (fun α => NatTrans.app α (op (U k))) (c.ι.naturality g₁)
+    simp only [Functor.const_obj_map, NatTrans.comp_app] at this
+    rw [this]; exact hx' k hk
   -- For all i: s|_{U_i} = sf_i (by separation at U_i via hcompat)
   refine ⟨s, fun i => ?_, fun s' hs' => ?_⟩
   · -- s|_{U_i} = sf_i: show difference is 0 by checking on finite subcover of U_i
