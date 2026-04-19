@@ -236,9 +236,10 @@ theorem PushforwardHVanishing
           rw [show ((Opens.map i).obj ⊤ : Opens (TopCat.of Z)) = ⊤ from by ext; simp [Opens.map]]
           exact epi_g_app_top_of_H1_vanishing ip.shortExact_shortComplex hG'))
     | succ m =>
+      haveI := hG'
       exact ext_dimension_shift _ hSE_X (m + 1)
-        (ih_push ip.shortComplex.X₃ (ext_dimension_shift_X₃ _ ip.shortExact_shortComplex (m + 1)
-          (Ext.subsingleton_of_injective _ _ m) hG'))
+        (ih_push ip.shortComplex.X₃
+          (sheafH_dimension_shift_X₃ ip.shortExact_shortComplex m))
         (FlasqueVanishing _ _ (m + 1))
 
 -- The adjunction unit F → i_*(i^*F) is epi for closed immersions.

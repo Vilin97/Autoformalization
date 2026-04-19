@@ -47,7 +47,8 @@ theorem zeroOutsideInt_vanishing
     exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
       (((sheafToPresheaf J AddCommGrpCat.{u}).mapIso
         ((presheafToSheaf J AddCommGrpCat.{u}).mapIso α).symm).hom.naturality i.op).symm
-  exact ext_dimension_shift _ hSE m hCoker (FlasqueVanishing X S.X₂ m)
+  haveI := hCoker
+  exact sheafH_dimension_shift_of_both hSE m
 
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
     any germ in the larger zero-outside presheaf can be lifted by restricting to `W ∩ V ≤ V`
