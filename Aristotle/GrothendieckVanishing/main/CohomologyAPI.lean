@@ -124,6 +124,16 @@ theorem sheafH_comp_extClass_naturality {X : TopCat.{u}}
   rw [← extClass_naturality hS₁ hS₂ φ]
   rw [← Ext.comp_assoc_of_second_deg_zero]
 
+/-- In a short exact sequence of sheaves, if `H^(n+1)(X₂)` is subsingleton then every
+    `H^(n+1)(X₁)` class lifts along the connecting morphism from some `H^n(X₃)` class. -/
+theorem sheafH_exists_preimage_extClass {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) (n : ℕ)
+    (h₂ : Subsingleton (Sheaf.H S.X₂ (n + 1)))
+    (x : Sheaf.H S.X₁ (n + 1)) :
+    ∃ y : Sheaf.H S.X₃ n, y.comp hS.extClass rfl = x := by
+  obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₁ _ hS x (@Subsingleton.elim _ h₂ _ _) rfl
+  exact ⟨y, hy⟩
+
 theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
     (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (hstalk : ∀ (x : X)

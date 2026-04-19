@@ -550,8 +550,7 @@ theorem sheafH_filtered_colimit_surj
       exact ShortComplex.ShortExact.mk'
         (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel (η.app j)))
         inferInstance inferInstance
-    obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₁ _ hSE x
-      (@Subsingleton.elim _ hI _ _) rfl
+    obtain ⟨y, hy⟩ := sheafH_exists_preimage_extClass hSE n hI x
     obtain ⟨j₀, y_j, hy_j⟩ := ih (Y' := Q) qCocone hqColim y
     haveI : Mono (η.app j₀) := hη_mono j₀
     let x_j : Sheaf.H (Y'.obj j₀) (n + 1) := y_j.comp (hSE_j j₀).extClass rfl
