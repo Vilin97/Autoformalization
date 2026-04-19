@@ -12,6 +12,8 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
   - `transition_preserves_compat`: pairwise compatibility is preserved under filtered transitions
   - `sheaf_section_zero_of_zero_on_cover`: sections vanishing on finite cover vanish
   - `filtered_colimit_kills_all_restrictions`: merge finitely many eventually-zero transitions
+  - `filtered_colimit_exists_compatible_representatives`: merge a finite compatible family
+    to one filtered stage of pairwise-compatible representatives
   - `colimit_section_zero_of_zero_on_cover`: colimit section vanishing on finite cover is zero
     (no `NoetherianSpace` hypothesis needed)
 
@@ -194,6 +196,134 @@ theorem colimit_section_zero_of_zero_on_cover
   rw [ConcreteCategory.comp_apply,
     sheaf_section_zero_of_zero_on_cover (hY j₁) hW hcov _ hg₀, map_zero]
 
+/-- A finite compatible family in a filtered colimit admits representatives at one filtered
+    stage that are pairwise compatible on the chosen finite subfamily. -/
+theorem filtered_colimit_exists_compatible_representatives
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (P : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
+    {c : Cocone P} (hc : IsColimit c)
+    {ι : Type u} (U : ι → Opens X)
+    (sf : ∀ i, ToType (c.pt.obj (op (U i))))
+    (hcompat : Presheaf.IsCompatible c.pt U sf)
+    {t : Finset ι}
+    (j₀ : J')
+    (x' : ∀ k, k ∈ t → ToType ((P.obj j₀).obj (op (U k))))
+    (hx' : ∀ k (hk : k ∈ t),
+      ConcreteCategory.hom ((c.ι.app j₀).app (op (U k))) (x' k hk) = sf k) :
+    ∃ (j₁ : J')
+      (x'' : ∀ k : ↥t, ToType ((P.obj j₁).obj (op (U k.1)))),
+      Presheaf.IsCompatible (P.obj j₁) (fun k : ↥t => U k.1) x'' ∧
+      (∀ k : ↥t, ConcreteCategory.hom ((c.ι.app j₁).app (op (U k.1))) (x'' k) = sf k.1) := by
+  classical
+  let ev V := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op V)
+  have hcV : ∀ V, IsColimit ((ev V).mapCocone c) := fun V => isColimitOfPreserves (ev V) hc
+  obtain ⟨j₁, g₁, hg₁⟩ : ∃ (j₁ : J') (g₁ : j₀ ⟶ j₁),
+      ∀ (k : ι) (hk : k ∈ t) (l : ι) (hl : l ∈ t),
+        ConcreteCategory.hom ((P.obj j₁).map (Opens.infLELeft (U k) (U l)).op)
+          (ConcreteCategory.hom ((P.map g₁).app (op (U k))) (x' k hk)) =
+        ConcreteCategory.hom ((P.obj j₁).map (Opens.infLERight (U k) (U l)).op)
+          (ConcreteCategory.hom ((P.map g₁).app (op (U l))) (x' l hl)) := by
+    have h_ev_compat : ∀ (k : ι) (hk : k ∈ t) (l : ι) (hl : l ∈ t),
+        ∃ (j' : J') (f : j₀ ⟶ j'),
+        ConcreteCategory.hom ((P.obj j').map (Opens.infLELeft (U k) (U l)).op)
+          (ConcreteCategory.hom ((P.map f).app (op (U k))) (x' k hk)) =
+        ConcreteCategory.hom ((P.obj j').map (Opens.infLERight (U k) (U l)).op)
+          (ConcreteCategory.hom ((P.map f).app (op (U l))) (x' l hl)) := by
+      intro k hk l hl
+      have hcTyp := isColimitOfPreserves (CategoryTheory.forget AddCommGrpCat) (hcV (U k ⊓ U l))
+      have h_eq : ((CategoryTheory.forget AddCommGrpCat).mapCocone
+          ((ev (U k ⊓ U l)).mapCocone c)).ι.app j₀
+          (ConcreteCategory.hom ((P.obj j₀).map (Opens.infLELeft (U k) (U l)).op) (x' k hk)) =
+        ((CategoryTheory.forget AddCommGrpCat).mapCocone
+          ((ev (U k ⊓ U l)).mapCocone c)).ι.app j₀
+          (ConcreteCategory.hom ((P.obj j₀).map (Opens.infLERight (U k) (U l)).op) (x' l hl)) := by
+        change ConcreteCategory.hom (((ev (U k ⊓ U l)).mapCocone c).ι.app j₀) _ =
+          ConcreteCategory.hom (((ev (U k ⊓ U l)).mapCocone c).ι.app j₀) _
+        have hnat_m : ∀ (m : ι) (hm : m ∈ t) (φ : U k ⊓ U l ⟶ U m),
+            ConcreteCategory.hom (((ev (U k ⊓ U l)).mapCocone c).ι.app j₀)
+              (ConcreteCategory.hom ((P.obj j₀).map φ.op) (x' m hm)) =
+            ConcreteCategory.hom (c.pt.map φ.op) (sf m) := by
+          intro m hm φ
+          simp only [Functor.mapCocone_ι_app]
+          rw [← hx' m hm]
+          change ConcreteCategory.hom
+            ((P.obj j₀).map _ ≫ (c.ι.app j₀).app _) (x' m hm) =
+            ConcreteCategory.hom
+            ((c.ι.app j₀).app _ ≫ (((Functor.const J').obj c.pt).obj j₀).map _) (x' m hm)
+          rw [(c.ι.app j₀).naturality φ.op]
+        rw [hnat_m k hk (Opens.infLELeft (U k) (U l)),
+            hnat_m l hl (Opens.infLERight (U k) (U l))]
+        exact hcompat k l
+      rw [Types.FilteredColimit.isColimit_eq_iff' hcTyp] at h_eq
+      obtain ⟨j', f, hf⟩ := h_eq
+      refine ⟨j', f, ?_⟩
+      let α := P.map f
+      change ConcreteCategory.hom
+        (α.app (op (U k)) ≫ (P.obj j').map (Opens.infLELeft (U k) (U l)).op) (x' k hk) =
+        ConcreteCategory.hom
+        (α.app (op (U l)) ≫ (P.obj j').map (Opens.infLERight (U k) (U l)).op) (x' l hl)
+      rw [show α.app (op (U k)) ≫ (P.obj j').map (Opens.infLELeft (U k) (U l)).op =
+        (P.obj j₀).map (Opens.infLELeft (U k) (U l)).op ≫ α.app (op (U k ⊓ U l))
+        from (α.naturality (Opens.infLELeft (U k) (U l)).op).symm,
+        show α.app (op (U l)) ≫ (P.obj j').map (Opens.infLERight (U k) (U l)).op =
+        (P.obj j₀).map (Opens.infLERight (U k) (U l)).op ≫ α.app (op (U k ⊓ U l))
+        from (α.naturality (Opens.infLERight (U k) (U l)).op).symm]
+      simp only [AddCommGrpCat.hom_comp, AddMonoidHom.coe_comp, Function.comp_apply]
+      exact hf
+    suffices h : ∀ (S : Finset (ι × ι)) (hS : S ⊆ t ×ˢ t),
+        ∃ (j₁ : J') (g₁ : j₀ ⟶ j₁), ∀ (p : ι × ι) (hp : p ∈ S),
+          ConcreteCategory.hom ((P.obj j₁).map (Opens.infLELeft (U p.1) (U p.2)).op)
+            (ConcreteCategory.hom ((P.map g₁).app (op (U p.1)))
+              (x' p.1 ((Finset.mem_product.mp (hS hp)).1))) =
+          ConcreteCategory.hom ((P.obj j₁).map (Opens.infLERight (U p.1) (U p.2)).op)
+            (ConcreteCategory.hom ((P.map g₁).app (op (U p.2)))
+              (x' p.2 ((Finset.mem_product.mp (hS hp)).2))) by
+      obtain ⟨j₁, g₁, hg₁⟩ := h (t ×ˢ t) (fun _ hx => hx)
+      exact ⟨j₁, g₁, fun k hk l hl =>
+        hg₁ (k, l) (Finset.mem_product.mpr ⟨hk, hl⟩)⟩
+    intro S hS
+    induction S using Finset.induction with
+    | empty => exact ⟨j₀, 𝟙 j₀, fun _ hp => absurd hp (by simp)⟩
+    | @insert p₀ rest hnin ih =>
+      obtain ⟨j_cur, g_cur, hg_cur⟩ := ih (fun p hp => hS (Finset.mem_insert_of_mem hp))
+      have hp₀t := hS (Finset.mem_insert_self p₀ rest)
+      obtain ⟨j_new, f_new, hf_new⟩ := h_ev_compat p₀.1
+        (Finset.mem_product.mp hp₀t).1 p₀.2 (Finset.mem_product.mp hp₀t).2
+      let h_coeq := IsFiltered.coeqHom (g_cur ≫ IsFiltered.leftToMax j_cur j_new)
+          (f_new ≫ IsFiltered.rightToMax j_cur j_new)
+      have heq : g_cur ≫ IsFiltered.leftToMax j_cur j_new ≫ h_coeq =
+          f_new ≫ IsFiltered.rightToMax j_cur j_new ≫ h_coeq := by
+        simpa only [Category.assoc] using IsFiltered.coeq_condition
+          (g_cur ≫ IsFiltered.leftToMax j_cur j_new)
+          (f_new ≫ IsFiltered.rightToMax j_cur j_new)
+      refine ⟨_, g_cur ≫ IsFiltered.leftToMax j_cur j_new ≫ h_coeq, fun p hp => ?_⟩
+      rw [Finset.mem_insert] at hp
+      rcases hp with rfl | hp
+      · rw [heq]
+        exact transition_preserves_compat P f_new
+          (IsFiltered.rightToMax j_cur j_new ≫ h_coeq) _ _ hf_new
+      · exact transition_preserves_compat P g_cur
+          (IsFiltered.leftToMax j_cur j_new ≫ h_coeq) _ _ (hg_cur p hp)
+  let x'' : ∀ (k : ↥t), ToType ((P.obj j₁).obj (op (U k.1))) :=
+    fun ⟨k, hk⟩ => ConcreteCategory.hom
+      ((P.map g₁).app (op (U k))) (x' k hk)
+  have hx''_compat :
+      Presheaf.IsCompatible (P.obj j₁) (fun k : ↥t => U k.1) x'' :=
+    fun ⟨k, hk⟩ ⟨l, hl⟩ => hg₁ k hk l hl
+  have hx'' : ∀ k : ↥t,
+      ConcreteCategory.hom ((c.ι.app j₁).app (op (U k.1))) (x'' k) = sf k.1 := by
+    intro k
+    rcases k with ⟨k, hk⟩
+    dsimp [x'']
+    change ConcreteCategory.hom ((P.map g₁).app (op (U k)) ≫
+      (c.ι.app j₁).app (op (U k))) (x' k hk) = sf k
+    have := congrArg (fun α => NatTrans.app α (op (U k))) (c.ι.naturality g₁)
+    simp only [Functor.const_obj_map, NatTrans.comp_app] at this
+    rw [this]
+    exact hx' k hk
+  exact ⟨j₁, x'', hx''_compat, hx''⟩
+
 /-- A compatible family on a finite subcover, represented at a single filtered index,
     glues to a section of any cocone point with the prescribed finite restrictions. -/
 theorem colimit_exists_gluing_of_compatible_finite_subcover
@@ -280,7 +410,7 @@ theorem isSheaf_presheaf_filtered_colimit
       ((P.map (g₀ k hk)).app (op (U k))) (x_all k)
   -- x' still maps to sf_k in the colimit
   have hx' : ∀ k (hk : k ∈ t),
-      ConcreteCategory.hom (((ev (U k)).mapCocone c).ι.app j₀) (x' k hk) = sf k := by
+      ConcreteCategory.hom ((c.ι.app j₀).app (op (U k))) (x' k hk) = sf k := by
     intro k hk; dsimp [x']
     change ConcreteCategory.hom (((P.map (g₀ k hk)).app (op (U k))) ≫
       (c.ι.app j₀).app (op (U k))) (x_all k) = sf k
@@ -288,113 +418,8 @@ theorem isSheaf_presheaf_filtered_colimit
         (c.ι.app j₀).app (op (U k)) = (c.ι.app (j_all k)).app (op (U k)) from by
       simpa using congrArg (fun α => NatTrans.app α (op (U k))) (c.ι.naturality (g₀ k hk))]
     exact hx_all k
-  -- Pairwise compatibility after merging via IsFiltered
-  obtain ⟨j₁, g₁, hg₁⟩ : ∃ (j₁ : J') (g₁ : j₀ ⟶ j₁),
-      ∀ (k : ι) (hk : k ∈ t) (l : ι) (hl : l ∈ t),
-        ConcreteCategory.hom ((P.obj j₁).map (Opens.infLELeft (U k) (U l)).op)
-          (ConcreteCategory.hom ((P.map g₁).app (op (U k))) (x' k hk)) =
-        ConcreteCategory.hom ((P.obj j₁).map (Opens.infLERight (U k) (U l)).op)
-          (ConcreteCategory.hom ((P.map g₁).app (op (U l))) (x' l hl)) := by
-    -- Step 1: each pair is eventually compatible
-    have h_ev_compat : ∀ (k : ι) (hk : k ∈ t) (l : ι) (hl : l ∈ t),
-        ∃ (j' : J') (f : j₀ ⟶ j'),
-        ConcreteCategory.hom ((P.obj j').map (Opens.infLELeft (U k) (U l)).op)
-          (ConcreteCategory.hom ((P.map f).app (op (U k))) (x' k hk)) =
-        ConcreteCategory.hom ((P.obj j').map (Opens.infLERight (U k) (U l)).op)
-          (ConcreteCategory.hom ((P.map f).app (op (U l))) (x' l hl)) := by
-      intro k hk l hl
-      have hcTyp := isColimitOfPreserves (CategoryTheory.forget AddCommGrpCat) (hcV (U k ⊓ U l))
-      -- Both sides equal in colimit (by naturality + hcompat)
-      have h_eq : ((CategoryTheory.forget AddCommGrpCat).mapCocone
-          ((ev (U k ⊓ U l)).mapCocone c)).ι.app j₀
-          (ConcreteCategory.hom ((P.obj j₀).map (Opens.infLELeft (U k) (U l)).op) (x' k hk)) =
-        ((CategoryTheory.forget AddCommGrpCat).mapCocone
-          ((ev (U k ⊓ U l)).mapCocone c)).ι.app j₀
-          (ConcreteCategory.hom ((P.obj j₀).map (Opens.infLERight (U k) (U l)).op) (x' l hl)) := by
-        change ConcreteCategory.hom (((ev (U k ⊓ U l)).mapCocone c).ι.app j₀) _ =
-          ConcreteCategory.hom (((ev (U k ⊓ U l)).mapCocone c).ι.app j₀) _
-        have hnat_m : ∀ (m : ι) (hm : m ∈ t) (φ : U k ⊓ U l ⟶ U m),
-            ConcreteCategory.hom (((ev (U k ⊓ U l)).mapCocone c).ι.app j₀)
-              (ConcreteCategory.hom ((P.obj j₀).map φ.op) (x' m hm)) =
-            ConcreteCategory.hom (c.pt.map φ.op) (sf m) := by
-          intro m hm φ; simp only [Functor.mapCocone_ι_app]; rw [← hx' m hm]
-          change ConcreteCategory.hom
-            ((P.obj j₀).map _ ≫ (c.ι.app j₀).app _) (x' m hm) =
-            ConcreteCategory.hom
-            ((c.ι.app j₀).app _ ≫ (((Functor.const J').obj c.pt).obj j₀).map _) (x' m hm)
-          rw [(c.ι.app j₀).naturality φ.op]
-        rw [hnat_m k hk (Opens.infLELeft (U k) (U l)),
-            hnat_m l hl (Opens.infLERight (U k) (U l))]
-        exact hcompat k l
-      -- Eventually equal
-      rw [Types.FilteredColimit.isColimit_eq_iff' hcTyp] at h_eq
-      obtain ⟨j', f, hf⟩ := h_eq
-      refine ⟨j', f, ?_⟩
-      -- Convert via naturality
-      let α := P.map f
-      change ConcreteCategory.hom
-        (α.app (op (U k)) ≫ (P.obj j').map (Opens.infLELeft (U k) (U l)).op) (x' k hk) =
-        ConcreteCategory.hom
-        (α.app (op (U l)) ≫ (P.obj j').map (Opens.infLERight (U k) (U l)).op) (x' l hl)
-      rw [show α.app (op (U k)) ≫ (P.obj j').map (Opens.infLELeft (U k) (U l)).op =
-        (P.obj j₀).map (Opens.infLELeft (U k) (U l)).op ≫ α.app (op (U k ⊓ U l))
-        from (α.naturality (Opens.infLELeft (U k) (U l)).op).symm,
-        show α.app (op (U l)) ≫ (P.obj j').map (Opens.infLERight (U k) (U l)).op =
-        (P.obj j₀).map (Opens.infLERight (U k) (U l)).op ≫ α.app (op (U k ⊓ U l))
-        from (α.naturality (Opens.infLERight (U k) (U l)).op).symm]
-      simp only [AddCommGrpCat.hom_comp, AddMonoidHom.coe_comp, Function.comp_apply]
-      exact hf
-    -- Step 2: merge via Finset.induction on t ×ˢ t
-    suffices h : ∀ (S : Finset (ι × ι)) (hS : S ⊆ t ×ˢ t),
-        ∃ (j₁ : J') (g₁ : j₀ ⟶ j₁), ∀ (p : ι × ι) (hp : p ∈ S),
-          ConcreteCategory.hom ((P.obj j₁).map (Opens.infLELeft (U p.1) (U p.2)).op)
-            (ConcreteCategory.hom ((P.map g₁).app (op (U p.1)))
-              (x' p.1 ((Finset.mem_product.mp (hS hp)).1))) =
-          ConcreteCategory.hom ((P.obj j₁).map (Opens.infLERight (U p.1) (U p.2)).op)
-            (ConcreteCategory.hom ((P.map g₁).app (op (U p.2)))
-              (x' p.2 ((Finset.mem_product.mp (hS hp)).2))) by
-      obtain ⟨j₁, g₁, hg₁⟩ := h (t ×ˢ t) (fun _ hx => hx)
-      exact ⟨j₁, g₁, fun k hk l hl =>
-        hg₁ (k, l) (Finset.mem_product.mpr ⟨hk, hl⟩)⟩
-    intro S hS
-    induction S using Finset.induction with
-    | empty => exact ⟨j₀, 𝟙 j₀, fun _ hp => absurd hp (by simp)⟩
-    | @insert p₀ rest hnin ih =>
-      obtain ⟨j_cur, g_cur, hg_cur⟩ := ih (fun p hp => hS (Finset.mem_insert_of_mem hp))
-      have hp₀t := hS (Finset.mem_insert_self p₀ rest)
-      obtain ⟨j_new, f_new, hf_new⟩ := h_ev_compat p₀.1
-        (Finset.mem_product.mp hp₀t).1 p₀.2 (Finset.mem_product.mp hp₀t).2
-      -- Merge via IsFiltered.coeq
-      let h_coeq := IsFiltered.coeqHom (g_cur ≫ IsFiltered.leftToMax j_cur j_new)
-          (f_new ≫ IsFiltered.rightToMax j_cur j_new)
-      have heq : g_cur ≫ IsFiltered.leftToMax j_cur j_new ≫ h_coeq =
-          f_new ≫ IsFiltered.rightToMax j_cur j_new ≫ h_coeq := by
-        simpa only [Category.assoc] using IsFiltered.coeq_condition
-          (g_cur ≫ IsFiltered.leftToMax j_cur j_new)
-          (f_new ≫ IsFiltered.rightToMax j_cur j_new)
-      refine ⟨_, g_cur ≫ IsFiltered.leftToMax j_cur j_new ≫ h_coeq, fun p hp => ?_⟩
-      rw [Finset.mem_insert] at hp; rcases hp with rfl | hp
-      · rw [heq]; exact transition_preserves_compat P f_new
-          (IsFiltered.rightToMax j_cur j_new ≫ h_coeq) _ _ hf_new
-      · exact transition_preserves_compat P g_cur
-          (IsFiltered.leftToMax j_cur j_new ≫ h_coeq) _ _ (hg_cur p hp)
-  let x'' : ∀ (k : ↥t), ToType ((P.obj j₁).obj (op (U k.1))) :=
-    fun ⟨k, hk⟩ => ConcreteCategory.hom
-      ((P.map g₁).app (op (U k))) (x' k hk)
-  have hx''_compat :
-      Presheaf.IsCompatible (P.obj j₁) (fun k : ↥t => U k.1) x'' :=
-    fun ⟨k, hk⟩ ⟨l, hl⟩ => hg₁ k hk l hl
-  have hx'' : ∀ k : ↥t,
-      ConcreteCategory.hom ((c.ι.app j₁).app (op (U k.1))) (x'' k) = sf k.1 := by
-    intro k
-    rcases k with ⟨k, hk⟩
-    dsimp [x'']
-    change ConcreteCategory.hom ((P.map g₁).app (op (U k)) ≫
-      (c.ι.app j₁).app (op (U k))) (x' k hk) = sf k
-    have := congrArg (fun α => NatTrans.app α (op (U k))) (c.ι.naturality g₁)
-    simp only [Functor.const_obj_map, NatTrans.comp_app] at this
-    rw [this]
-    exact hx' k hk
+  obtain ⟨j₁, x'', hx''_compat, hx''⟩ := filtered_colimit_exists_compatible_representatives
+    P hcP U sf hcompat j₀ x' hx'
   obtain ⟨s, hs_k⟩ := colimit_exists_gluing_of_compatible_finite_subcover
     P hP U sf hsup_le j₁ x'' hx''_compat hx''
   -- For all i: s|_{U_i} = sf_i (by separation at U_i via hcompat)
