@@ -600,16 +600,9 @@ theorem sheafH_filtered_colimit_surj
     refine ⟨j₀, x_j, ?_⟩
     show ConcreteCategory.hom ((sheafCohomologyFunctor X (n + 1)).map (c'.ι.app j₀)) x_j = x
     rw [show x_j = y_j.comp (hSE_j j₀).extClass rfl from rfl]
-    have h_ext :
-        ConcreteCategory.hom ((sheafCohomologyFunctor X (n + 1)).map (c'.ι.app j₀))
-          (y_j.comp (hSE_j j₀).extClass rfl) =
-        (ConcreteCategory.hom ((sheafCohomologyFunctor X n).map (qCocone.ι.app j₀)) y_j).comp
-          hSE.extClass rfl :=
-      sheafCohomologyFunctor_map_extClass_naturality (hSE_j j₀) hSE
-        (ShortComplex.homMk (c'.ι.app j₀) (injCocone.ι.app j₀)
-          (qCocone.ι.app j₀) (hfac_ι j₀) (cokernel.π_desc _ _ _).symm) n y_j
-    rw [h_ext]
-    rw [hy_j, hy]
+    exact (sheafCohomologyFunctor_map_extClass_of_map_eq (hSE_j j₀) hSE
+      (ShortComplex.homMk (c'.ι.app j₀) (injCocone.ι.app j₀)
+        (qCocone.ι.app j₀) (hfac_ι j₀) (cokernel.π_desc _ _ _).symm) n hy_j).trans hy
 
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
     If `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.

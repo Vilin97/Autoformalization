@@ -441,3 +441,17 @@ theorem sheafCohomologyFunctor_map_extClass_naturality {X : TopCat.{u}}
     (ConcreteCategory.hom ((sheafCohomologyFunctor X n).map φ.τ₃) y).comp hS₂.extClass rfl := by
   rw [sheafCohomologyFunctor_map_apply, sheafCohomologyFunctor_map_apply]
   exact sheafH_comp_extClass_naturality hS₁ hS₂ φ n y
+
+/-- If `y` maps to `z` on the `X₃` side of a morphism of short exact sequences, then the
+    corresponding extension class of `y` maps to the extension class of `z` on the `X₁`
+    side. This packages `sheafCohomologyFunctor_map_extClass_naturality` with the
+    downstream rewrite by the known `X₃`-side equality. -/
+theorem sheafCohomologyFunctor_map_extClass_of_map_eq {X : TopCat.{u}}
+    {S₁ S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS₁ : S₁.ShortExact) (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂) (n : ℕ)
+    {y : Sheaf.H S₁.X₃ n} {z : Sheaf.H S₂.X₃ n}
+    (hy : ConcreteCategory.hom ((sheafCohomologyFunctor X n).map φ.τ₃) y = z) :
+    ConcreteCategory.hom ((sheafCohomologyFunctor X (n + 1)).map φ.τ₁)
+      (y.comp hS₁.extClass rfl) =
+    z.comp hS₂.extClass rfl := by
+  rw [sheafCohomologyFunctor_map_extClass_naturality hS₁ hS₂ φ n y, hy]
