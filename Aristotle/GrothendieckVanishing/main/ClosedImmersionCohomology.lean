@@ -11,8 +11,9 @@ import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
   4. `epi_unit_of_closedImmersion` (adjunction unit is epi)
   5. `closedImmersionSES` (short exact sequence from closed immersion)
 
-  Depends on FlasqueCohomology.lean for `FlasqueVanishing`, `sheafH0EquivSections`,
-  and FlasqueVanishing.lean for `IsFlasqueSheaf`, `isFlasque_of_injective`.
+  Depends on CohomologyAPI.lean for LES-facing `Sheaf.H` wrappers and on
+  FlasqueCohomology.lean for `FlasqueVanishing`. FlasqueVanishing.lean supplies
+  `IsFlasqueSheaf` and `isFlasque_of_injective`.
 -/
 
 set_option linter.unusedSimpArgs false
