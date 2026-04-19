@@ -87,15 +87,12 @@ theorem epi_pushforward_map_closedIncl
         (TopCat.closedIncl hs) G.val z) :=
       TopCat.Presheaf.stalkPushforward.stalkPushforward_iso_of_isInducing
         AddCommGrpCat.{u} (TopCat.closedIncl_isInducing hs) _ z
-    have hg_surj : Function.Surjective
-        (ConcreteCategory.hom
-          ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map
-            f.val)) :=
-      ((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
-          (T := f.val)).mp
-        ((Sheaf.isLocallySurjective_iff_epi'
-            AddCommGrpCat.{u} _).mpr inferInstance)) z
-    apply (AddCommGrpCat.epi_iff_surjective _).mp
+    haveI : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map f.val) :=
+      (AddCommGrpCat.epi_iff_surjective _).mpr
+        (((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
+            (T := f.val)).mp
+          ((Sheaf.isLocallySurjective_iff_epi'
+              AddCommGrpCat.{u} _).mpr inferInstance)) z)
     have hnat : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
         (ConcreteCategory.hom (TopCat.closedIncl hs) z)).map
         ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f.val) ≫
@@ -107,28 +104,12 @@ theorem epi_pushforward_map_closedIncl
         TopCat.Presheaf.stalkPushforward_germ,
         TopCat.Presheaf.stalkPushforward_germ_assoc,
         TopCat.Presheaf.stalkFunctor_map_germ]; rfl
-    haveI : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map f.val) :=
-      (AddCommGrpCat.epi_iff_surjective _).mpr hg_surj
+    apply (AddCommGrpCat.epi_iff_surjective _).mp
     change Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
         ((ConcreteCategory.hom (TopCat.closedIncl hs)) z)).map
         ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f.val))
-    haveI : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
-        ((ConcreteCategory.hom (TopCat.closedIncl hs)) z)).map
-        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f.val) ≫
-        TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
-          (TopCat.closedIncl hs) G.val z) := by
-      rw [hnat]; exact epi_comp _ _
-    rw [show (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
-        ((ConcreteCategory.hom (TopCat.closedIncl hs)) z)).map
-        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f.val) =
-      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
-          ((ConcreteCategory.hom (TopCat.closedIncl hs)) z)).map
-          ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f.val) ≫
-        TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
-          (TopCat.closedIncl hs) G.val z) ≫
-      inv (TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
-        (TopCat.closedIncl hs) G.val z) from by
-      rw [Category.assoc, IsIso.hom_inv_id, Category.comp_id]]
+    rw [← epi_comp_iff_of_isIso _ (TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
+        (TopCat.closedIncl hs) G.val z), hnat]
     exact epi_comp _ _
   · intro b
     rw [pushforward_closedIncl_stalk_eq_zero hs G hx b]
