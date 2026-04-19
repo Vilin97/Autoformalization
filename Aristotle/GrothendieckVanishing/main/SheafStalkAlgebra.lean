@@ -117,20 +117,15 @@ theorem cokernel_stalk_zero_of_stalk_surj
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val)))
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj (Limits.cokernel f).val) :
     a = 0 := by
-  have hπ_surj : Function.Surjective (ConcreteCategory.hom
-      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map (cokernel.π f).val)) := by
-    have hEpi : Epi (cokernel.π f) := inferInstance
-    have hLS := (Sheaf.isLocallySurjective_iff_epi' (φ := cokernel.π f)).mpr hEpi
-    exact ((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
-      (cokernel.π f).val).mp hLS) x
-  obtain ⟨b, rfl⟩ := hπ_surj a
+  obtain ⟨b, rfl⟩ := ((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
+    (cokernel.π f).val).mp ((Sheaf.isLocallySurjective_iff_epi'
+    (φ := cokernel.π f)).mpr inferInstance)) x a
   obtain ⟨c, rfl⟩ := hf b
+  rw [← ConcreteCategory.comp_apply, ← Functor.map_comp,
+    show f.val ≫ (cokernel.π f).val = 0 from
+      congr_arg Sheaf.Hom.val (cokernel.condition f)]
   obtain ⟨U, hxU, s, rfl⟩ := TopCat.Presheaf.germ_exist F.val x c
-  simp only [TopCat.Presheaf.stalkFunctor_map_germ_apply]
-  have h1 : ConcreteCategory.hom ((f.val ≫ (cokernel.π f).val).app (op U)) s = 0 := by
-    rw [show f.val ≫ (cokernel.π f).val = (0 : F ⟶ cokernel f).val from
-      congr_arg Sheaf.Hom.val (cokernel.condition f)]; rfl
-  simp only [NatTrans.comp_app, ConcreteCategory.comp_apply] at h1; rw [h1, map_zero]
+  simp
 
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
 
