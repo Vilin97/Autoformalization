@@ -17,7 +17,6 @@ API for topological Krull dimension on irreducible spaces.
 - `lt_coe_nat_of_lt_of_lt_coe_nat_succ`: in `WithBot ℕ∞`, from `a < b < ↑↑(n+1)` deduce `a < ↑↑n`
 - `exists_closed_subset_lt_dim_of_irreducible_pos`: on an irreducible Noetherian space of
   positive Krull dimension, there exists a proper closed subset of strictly smaller dimension
-- `ulift_int_projective`: `ULift ℤ` is projective in `AddCommGrpCat`
 -/
 
 universe u
@@ -172,23 +171,5 @@ theorem exists_closed_subset_lt_dim_of_irreducible_pos
       (lt_of_le_of_lt (topologicalKrullDim_subspace_le X a.carrier)
         (lt_of_lt_of_le hn le_top))
   refine ⟨a.carrier, a.isClosed', hZ_ne_univ, hZ_dim, lt_trans hZ_dim hn⟩
-
-/-- The complement of a nonempty open is not the whole space. -/
-theorem compl_ne_univ_of_ne_bot {X : Type*} [TopologicalSpace X] {V : Opens X} (hV : V ≠ ⊥) :
-    (V : Set X)ᶜ ≠ Set.univ :=
-  Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV))
-
-/-! ## Projective ULift ℤ in AddCommGrpCat -/
-
-/-- `ULift ℤ` is projective in `AddCommGrpCat` (via the equivalence with `ModuleCat ℤ`). -/
-noncomputable instance ulift_int_projective :
-    Projective (AddCommGrpCat.of (ULift.{u} ℤ)) := by
-  set e := (forget₂ (ModuleCat.{u} ℤ) AddCommGrpCat.{u}).asEquivalence with he
-  have : e.inverse.PreservesEpimorphisms :=
-    ⟨fun f _ => e.symm.functor.map_epi f⟩
-  have hp := e.toAdjunction.map_projective _
-    (inferInstance : Projective (ModuleCat.of ℤ (ULift.{u} ℤ)))
-  simp only [he, Functor.asEquivalence, ModuleCat.forget₂_obj] at hp
-  exact hp
 
 

@@ -184,7 +184,6 @@ theorem ext0_surj_of_epi_top
       ((Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).inv.naturality S.g).symm
   let adj := constantSheafΓAdj (Opens.grothendieckTopology X) AddCommGrpCat.{u}
   let M := AddCommGrpCat.of (ULift.{u} ℤ)
-  haveI : Projective M := ulift_int_projective
   exact ⟨(adj.homEquiv M _).symm (Projective.factorThru
     ((adj.homEquiv M _) (Ext.addEquiv₀ y))
     ((Sheaf.Γ _ _).map S.g)), by
@@ -310,7 +309,8 @@ theorem closedComplementVanishing
   set Y := (V : Set X)ᶜ
   have hYcl : IsClosed Y := V.2.isClosed_compl
   have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl (compl_ne_univ_of_ne_bot hV)
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl
+      (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
       (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
         (lt_of_lt_of_le hn le_top))
   let S := closedImmersionSES Y hYcl C
