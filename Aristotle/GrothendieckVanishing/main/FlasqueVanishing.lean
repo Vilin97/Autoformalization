@@ -69,19 +69,19 @@ theorem stalk_zero_of_ses_g_iso
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₁.val) :
     a = 0 := by
   let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  have hcomp : ConcreteCategory.hom (T.map S.g.val)
-      (ConcreteCategory.hom (T.map S.f.val) a) = 0 := by
-    rw [← ConcreteCategory.comp_apply, ← T.map_comp]
-    obtain ⟨U, hxU, s, rfl⟩ := S.X₁.presheaf.germ_exist x a
-    rw [TopCat.Presheaf.stalkFunctor_map_germ_apply,
-      show S.f.val ≫ S.g.val = (S.f ≫ S.g).val from rfl, S.zero]
-    exact map_zero _
+  have hf0 : T.map S.f.val = 0 := by
+    have : T.map S.f.val ≫ T.map S.g.val = 0 := by
+      rw [← T.map_comp, show S.f.val ≫ S.g.val = (S.f ≫ S.g).val from rfl, S.zero]
+      change T.map ((sheafToPresheaf _ _).map (0 : S.X₁ ⟶ S.X₃)) = 0
+      simp only [Functor.map_zero]
+    rw [show T.map S.f.val = (T.map S.f.val ≫ T.map S.g.val) ≫ inv (T.map S.g.val)
+      from by simp, this, zero_comp]
   haveI : Mono S.f := hSE.mono_f
   haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
   exact (AddCommGrpCat.mono_iff_injective _).mp
     (Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f)
-    (((ConcreteCategory.bijective_of_isIso (T.map S.g.val)).1
-      (hcomp.trans (map_zero _).symm)).trans (map_zero _).symm)
+    (show ConcreteCategory.hom (T.map S.f.val) a = ConcreteCategory.hom (T.map S.f.val) 0
+      by simp [hf0])
 
 /-- In a short exact sequence `X₁ → X₂ → X₃`, if all stalks of `X₂` at `x` vanish, then
     all stalks of `X₁` at `x` vanish (by mono-injectivity of `f`). -/
@@ -297,7 +297,7 @@ theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
   obtain ⟨x, hx⟩ := hres₂ w
   exact ⟨ConcreteCategory.hom (S.g.val.app (op V)) x, by
     have := congrArg (· x) (S.g.val.naturality j.op)
-    simp only [AddCommGrpCat.hom_comp, Function.comp_apply] at this
+    simp only [AddCommGrpCat.hom_comp] at this
     exact this.symm.trans (by simp [hx, hw])⟩
 
 -- Injective sheaves are flasque.
