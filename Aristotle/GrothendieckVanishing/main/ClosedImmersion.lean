@@ -48,6 +48,13 @@ lemma closedIncl_isInducing {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
     Topology.IsInducing (closedIncl hs) :=
   (closedIncl_isClosedEmbedding hs).isInducing
 
+instance closedIncl_stalkPushforward_isIso {X : TopCat.{u}} {s : Set X} {hs : IsClosed s}
+    {C : Type*} [Category.{u} C] [HasColimits C]
+    {F : (TopCat.of s).Presheaf C} {x : TopCat.of s} :
+    IsIso (Presheaf.stalkPushforward C (closedIncl hs) F x) :=
+  Presheaf.stalkPushforward.stalkPushforward_iso_of_isInducing
+    C (closedIncl_isInducing hs) F x
+
 theorem locallyInjective_stalkFunctor_map_injective
     {C : Type*} [Category.{u} C] [HasColimits C]
     {FC : C → C → Type*} {CC : C → Type u}
@@ -279,10 +286,7 @@ private theorem closedIncl_sheafAdj_counit_isIso
               (closedIncl hs) F.val x := by
         conv_lhs => rw [← e.inv_hom_id_assoc (T.map _)]
         rw [closedIncl_presheaf_counit_stalk_comp hs F.val x]
-      rw [hη_eq]
-      haveI := TopCat.Presheaf.stalkPushforward.stalkPushforward_iso_of_isInducing
-        (f := closedIncl hs) C (closedIncl_isInducing hs) F.val x
-      infer_instance
+      rw [hη_eq]; infer_instance
     have hsheafifyLift_eq :
         T.map (CategoryTheory.sheafifyLift K η F.cond) =
           inv (T.map (CategoryTheory.toSheafify K P)) ≫ T.map η := by
