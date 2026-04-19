@@ -505,7 +505,7 @@ theorem sheafH_filtered_colimit_surj
       (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel ι')) inferInstance inferInstance
     haveI := isFlasque_filtered_colimit Inj (fun j => inferInstance)
         (colimit.isColimit Inj)
-    have hI := FlasqueVanishing X injCocone.pt n
+    have hI : Subsingleton (Sheaf.H injCocone.pt (n + 1)) := inferInstance
     let Q : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
       { obj := fun j => cokernel (η.app j)
         map := fun {j j'} f => cokernel.map _ _ (Y'.map f) (Inj.map f) (η.naturality f).symm

@@ -339,5 +339,5 @@ theorem IrreduciblePosVanishing
     have hm_ne : n ≠ 0 := fun h => by
       subst h; exact absurd hn (not_lt.mpr topologicalKrullDim_nonneg)
     obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
-    exact FlasqueVanishing X F m
+    exact inferInstance
 
