@@ -23,6 +23,8 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `epi_app_top_of_subsingleton_sheafH1`: H^1 vanishing gives surjectivity on top sections
 * `sheafH0_surj_of_epi_app_top`: surjectivity on top sections gives H^0 surjectivity
 * `sheafH_subsingleton_H1_via_epi_app_top`: H^1 vanishing via surjective top sections
+* `sheafH_subsingleton_H1_of_flasque`: flasque sheaves have vanishing `H¹`
+* `sheafH_subsingleton_H1_of_flasque_of_epi_app_top`: flasque-middle-term `H¹` vanishing
 -/
 
 universe u
@@ -264,6 +266,40 @@ theorem sheafH_subsingleton_H1_of_injective_of_epi_app_top {X : TopCat.{u}}
     (hg : Epi (S.g.val.app (op ⊤))) :
     Subsingleton (Sheaf.H S.X₁ 1) :=
   sheafH_subsingleton_H1_via_epi_app_top hSE (Ext.subsingleton_of_injective _ _ 0) hg
+
+/-- Flasque sheaves have vanishing `H¹`. This isolates the base case of flasque
+    cohomological vanishing in the general sheaf-cohomology API. -/
+theorem sheafH_subsingleton_H1_of_flasque {X : TopCat.{u}}
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) [IsFlasqueSheaf F] :
+    Subsingleton (Sheaf.H F 1) := by
+  obtain ⟨ip⟩ := EnoughInjectives.presentation F
+  have hSE := ip.shortExact_shortComplex
+  exact sheafH_subsingleton_H1_of_injective_of_epi_app_top hSE (by
+      haveI : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map
+          ip.shortComplex.g) := by
+        have h := epi_app_of_shortExact_flasque hSE ⊤
+        exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
+          ((Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).inv.naturality
+            ip.shortComplex.g).symm
+      have hfac := (Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).hom.naturality
+        ip.shortComplex.g
+      change Epi (((sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op ⊤)).map
+        ip.shortComplex.g)
+      haveI : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat).map ip.shortComplex.g ≫
+          (Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).hom.app ip.shortComplex.X₃) :=
+        epi_comp' (inferInstance : Epi ((Sheaf.Γ (Opens.grothendieckTopology X)
+          AddCommGrpCat).map ip.shortComplex.g)) (IsIso.epi_of_iso _)
+      exact epi_of_epi_fac hfac.symm)
+
+/-- Sheaf-level `H¹` vanishing criterion with flasque middle term:
+    if `X₂` is flasque and `g.app(⊤)` is epi in a short exact sequence
+    `0 → X₁ → X₂ → X₃ → 0`, then `H¹(X₁)=0`. -/
+theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
+    [IsFlasqueSheaf S.X₂]
+    (hg : Epi (S.g.val.app (op ⊤))) :
+    Subsingleton (Sheaf.H S.X₁ 1) :=
+  sheafH_subsingleton_H1_via_epi_app_top hSE (sheafH_subsingleton_H1_of_flasque S.X₂) hg
 
 /-- General dimension shifting at `Sheaf.H` level: if `H^n(X₃)=0` and `H^(n+1)(X₂)=0`
     in a short exact sequence `0 → X₁ → X₂ → X₃ → 0`, then `H^(n+1)(X₁)=0`. -/

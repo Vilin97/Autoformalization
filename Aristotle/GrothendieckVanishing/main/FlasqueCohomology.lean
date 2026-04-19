@@ -13,29 +13,6 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
-/-- **Base case**: `H^1(F) = 0` for flasque `F`. -/
-private theorem sheafH_one_of_flasque {X : TopCat.{u}}
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) [IsFlasqueSheaf F] :
-    Subsingleton (Sheaf.H F 1) := by
-  obtain ⟨ip⟩ := EnoughInjectives.presentation F
-  have hSE := ip.shortExact_shortComplex
-  exact sheafH_subsingleton_H1_of_injective_of_epi_app_top hSE (by
-      haveI : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map
-          ip.shortComplex.g) := by
-        have h := epi_app_of_shortExact_flasque hSE ⊤
-        exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
-          ((Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).inv.naturality
-            ip.shortComplex.g).symm
-      have hfac := (Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).hom.naturality
-        ip.shortComplex.g
-      change Epi (((sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op ⊤)).map
-        ip.shortComplex.g)
-      haveI : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat).map ip.shortComplex.g ≫
-          (Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).hom.app ip.shortComplex.X₃) :=
-        epi_comp' (inferInstance : Epi ((Sheaf.Γ (Opens.grothendieckTopology X)
-          AddCommGrpCat).map ip.shortComplex.g)) (IsIso.epi_of_iso _)
-      exact epi_of_epi_fac hfac.symm)
-
 /-- **Flasque sheaves have vanishing higher cohomology** (Nugent, PR #35790).
 
     The proof is by induction on `n`:
@@ -49,7 +26,7 @@ instance FlasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X
     (n : ℕ) :
     Subsingleton (Sheaf.H F (n + 1)) := by
   induction n generalizing F with
-  | zero => exact sheafH_one_of_flasque F
+  | zero => exact sheafH_subsingleton_H1_of_flasque F
   | succ n ih =>
     obtain ⟨ip⟩ := EnoughInjectives.presentation F
     have hSE := ip.shortExact_shortComplex
