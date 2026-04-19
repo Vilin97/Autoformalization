@@ -81,6 +81,12 @@ lemma zeroOutside_le {W : Opens X} (h : W ≤ U) :
     (zeroOutside U F).obj (op W) = F.obj (op W) := by
   simp [zeroOutside, h]
 
+/-- `zeroOutside ⊤ F ≅ F`: zero-outside on the whole space is the identity. -/
+def zeroOutside_top_iso : zeroOutside (⊤ : Opens X) F ≅ F :=
+  NatIso.ofComponents
+    (fun W => eqToIso (zeroOutside_le (le_top : unop W ≤ ⊤)))
+    (fun {W Y} i => by simp [zeroOutside, le_top])
+
 variable {V : Opens X} (h : V ≤ U)
 
 open Classical in

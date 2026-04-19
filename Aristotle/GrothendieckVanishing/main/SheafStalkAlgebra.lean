@@ -20,6 +20,20 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 
+/-- `zeroOutsideInt ⊤` is flasque on an irreducible space: it is the sheafification of
+    `constZ.zeroOutside ⊤ ≅ constZ` (via `zeroOutside_top_iso`), and the constant sheaf
+    on an irreducible space is flasque (`constantSheaf_flasque_of_irreducible`). -/
+instance isFlasqueSheaf_zeroOutsideInt_top (X : TopCat.{u}) [IrreducibleSpace X] :
+    IsFlasqueSheaf (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) := by
+  constructor; intro U W i
+  let J := Opens.grothendieckTopology (T := X)
+  let A := AddCommGrpCat.of (ULift.{u} ℤ)
+  have h := constantSheaf_flasque_of_irreducible X A i
+  exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
+    (((sheafToPresheaf J AddCommGrpCat.{u}).mapIso
+      ((presheafToSheaf J AddCommGrpCat.{u}).mapIso
+        (Presheaf.zeroOutside_top_iso (F := Presheaf.constZ))).symm).hom.naturality i.op).symm
+
 /-- **Step 5** (Hartshorne III.2.7): given vanishing of the cokernel of
     `openHom(V ≤ ⊤)` at degree `m`, deduce vanishing of `zeroOutsideInt V` at
     degree `m + 1`. Uses the SES `0 → zeroOutsideInt V → zeroOutsideInt ⊤ → cokernel → 0`
@@ -34,19 +48,7 @@ theorem zeroOutsideInt_vanishing
   let S := ShortComplex.mk f (cokernel.π f) (cokernel.condition f)
   have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
     (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel f)) inferInstance inferInstance
-  haveI : IsFlasqueSheaf S.X₂ := by
-    constructor; intro U W i
-    let J := Opens.grothendieckTopology (T := X)
-    let A := AddCommGrpCat.of (ULift.{u} ℤ)
-    let α : TopCat.Presheaf.constZ.zeroOutside (⊤ : Opens X) ≅
-        (CategoryTheory.Functor.const (Opens X)ᵒᵖ).obj A :=
-      CategoryTheory.NatIso.ofComponents
-        (fun W => eqToIso (by show _ = A; simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ, A]))
-        (by intro W₁ W₂ f; simp [TopCat.Presheaf.zeroOutside, TopCat.Presheaf.constZ, A])
-    have h := constantSheaf_flasque_of_irreducible X A i
-    exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
-      (((sheafToPresheaf J AddCommGrpCat.{u}).mapIso
-        ((presheafToSheaf J AddCommGrpCat.{u}).mapIso α).symm).hom.naturality i.op).symm
+  haveI : IsFlasqueSheaf S.X₂ := isFlasqueSheaf_zeroOutsideInt_top X
   haveI := hCoker
   exact sheafH_dimension_shift_of_both hSE m
 
