@@ -521,33 +521,23 @@ theorem sheafH_filtered_colimit_surj
           rw [← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
           simp [cokernel.π_desc, Functor.const_obj_map] }
     have hqColim : IsColimit qCocone := by
-      haveI : Nonempty J' := IsFiltered.nonempty
-      have hπC : ∀ j, cokernel.π (η.app j) ≫ qCocone.ι.app j =
-          injCocone.ι.app j ≫ cokernel.π ι' := fun j => cokernel.π_desc _ _ _
-      have hπQ : ∀ {j₁ j₂ : J'} (a : j₁ ⟶ j₂),
-          cokernel.π (η.app j₁) ≫ Q.map a =
-          Inj.map a ≫ cokernel.π (η.app j₂) := fun a => cokernel.π_desc _ _ _
-      let liftCocone : ∀ (s : Cocone Q), Cocone Inj := fun s =>
-        Cocone.mk s.pt
+      let injColim := colimit.isColimit Inj
+      have hπ (j) : cokernel.π (η.app j) ≫ qCocone.ι.app j =
+          injCocone.ι.app j ≫ cokernel.π ι' := cokernel.π_desc _ _ _
+      exact
+      { desc := fun s => cokernel.desc ι' (injColim.desc ⟨s.pt,
           { app := fun j => cokernel.π (η.app j) ≫ s.ι.app j
             naturality := fun j j' a => by
-              dsimp; rw [Category.comp_id, ← Category.assoc, ← hπQ a, Category.assoc, s.w] }
-      let injColim := colimit.isColimit Inj
-      exact
-      { desc := fun s => cokernel.desc ι' (injColim.desc (liftCocone s)) (by
-          apply hc'.hom_ext; intro j
+              dsimp; rw [Category.comp_id, ← Category.assoc,
+                ← (cokernel.π_desc _ _ _ : cokernel.π (η.app j) ≫ Q.map a = _),
+                Category.assoc, s.w] }⟩) (hc'.hom_ext fun j => by
           rw [comp_zero]; conv_lhs => rw [← Category.assoc, hfac_ι j, Category.assoc]
           rw [injColim.fac, ← Category.assoc, cokernel.condition, zero_comp])
-        fac := fun s j => by
-          apply (cancel_epi (cokernel.π (η.app j))).mp
-          rw [← Category.assoc, hπC, Category.assoc, cokernel.π_desc, injColim.fac]
-        uniq := fun s m hm => by
-          apply (cancel_epi (cokernel.π ι')).mp
-          rw [cokernel.π_desc]
-          apply injColim.hom_ext; intro j
-          rw [injColim.fac]
-          show injCocone.ι.app j ≫ cokernel.π ι' ≫ m = _
-          rw [← Category.assoc, ← hπC j, Category.assoc, hm] }
+        fac := fun s j => (cancel_epi (cokernel.π (η.app j))).mp (by
+          rw [← Category.assoc, hπ, Category.assoc, cokernel.π_desc, injColim.fac])
+        uniq := fun s m hm => (cancel_epi (cokernel.π ι')).mp (by
+          rw [cokernel.π_desc]; exact injColim.hom_ext fun j => by
+            rw [injColim.fac, ← Category.assoc, ← hπ, Category.assoc, hm]) }
     have hSE_j : ∀ j, (ShortComplex.mk (η.app j) (cokernel.π (η.app j))
         (cokernel.condition (η.app j))).ShortExact := fun j => by
       haveI : Mono (η.app j) := hη_mono j
