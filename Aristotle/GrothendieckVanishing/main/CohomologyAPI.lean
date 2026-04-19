@@ -264,6 +264,15 @@ theorem sheafH_dimension_shift_of_both {X : TopCat.{u}}
     Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
   ext_dimension_shift _ hS n ‹_› ‹_›
 
+/-- Dimension shifting at `Sheaf.H` level with injective middle term:
+    if `X₂` is injective and `H^n(X₃)=0`, then `H^(n+1)(X₁)=0`. -/
+theorem sheafH_dimension_shift {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
+    [Injective S.X₂] (n : ℕ)
+    [Subsingleton (Sheaf.H S.X₃ n)] :
+    Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
+  ext_dimension_shift _ hS n ‹_› (Ext.subsingleton_of_injective _ _ n)
+
 /-- Reverse dimension shift at `Sheaf.H` level with injective middle term:
     `Subsingleton (H X₁ (n+2))` implies `Subsingleton (H X₃ (n+1))`.
     Requires degree at least `1`, since `Ext^0(Z, I)` need not vanish for injective `I`. -/
