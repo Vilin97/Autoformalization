@@ -315,6 +315,26 @@ theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top {X : TopCat.{u}}
     Subsingleton (Sheaf.H S.X₁ 1) :=
   sheafH_subsingleton_H1_via_epi_app_top hSE (sheafH_subsingleton_H1_of_flasque S.X₂) hg
 
+/-- Sheaf-level `H¹` vanishing criterion for a pushed-forward short exact sequence:
+    if the mapped middle term is flasque and the source sequence has `H¹(X₁)=0`,
+    then `H¹` vanishes on the mapped kernel, provided the caller supplies the
+    identification of `f⁻¹(⊤)` with `⊤`. -/
+theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map {X Y : TopCat.{u}}
+    (f : X ⟶ Y)
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
+    (hSE_map : (S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f)).ShortExact)
+    [IsFlasqueSheaf ((S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f)).X₂)]
+    (h_top : (Opens.map f).obj ⊤ = ⊤)
+    (h₁ : Subsingleton (Sheaf.H S.X₁ 1)) :
+    Subsingleton (Sheaf.H ((S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f)).X₁) 1) := by
+  refine sheafH_subsingleton_H1_of_flasque_of_epi_app_top
+    (S := S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f))
+    (hSE := hSE_map)
+    ?_
+  change Epi (S.g.val.app (op ((Opens.map f).obj ⊤)))
+  rw [h_top]
+  exact epi_app_top_of_subsingleton_sheafH1 hSE h₁
+
 /-- General dimension shifting at `Sheaf.H` level: if `H^n(X₃)=0` and `H^(n+1)(X₂)=0`
     in a short exact sequence `0 → X₁ → X₂ → X₃ → 0`, then `H^(n+1)(X₁)=0`. -/
 theorem sheafH_dimension_shift_of_both {X : TopCat.{u}}
