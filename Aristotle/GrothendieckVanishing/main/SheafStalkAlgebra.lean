@@ -160,19 +160,8 @@ theorem zeroOutsideInt_cohomology_vanishing
     topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl (compl_ne_univ_of_ne_bot hV)
       (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Y)
         (lt_of_lt_of_le hm le_top))
-  have hm'_Y : ↑m' > topologicalKrullDim (TopCat.of Y) := by
-    show topologicalKrullDim Y < ↑m'
-    have hd_ne_bot : topologicalKrullDim X ≠ ⊥ :=
-      ne_bot_of_gt (lt_of_lt_of_le (WithBot.bot_lt_coe (0 : ℕ∞))
-        topologicalKrullDim_nonneg)
-    lift topologicalKrullDim X to ℕ∞ using hd_ne_bot with d
-    have hd_lt : (d : WithBot ℕ∞) < ↑((m'.succ : ℕ) : ℕ∞) := hm
-    rw [WithBot.coe_lt_coe] at hd_lt
-    have hd_ne_top : d ≠ ⊤ := ne_top_of_lt hd_lt
-    lift d to ℕ using hd_ne_top with d'
-    rw [ENat.coe_lt_coe] at hd_lt
-    calc topologicalKrullDim Y < ↑↑d' := hY_dim_lt
-      _ ≤ ↑↑m' := by exact_mod_cast Nat.lt_succ_iff.mp hd_lt
+  have hm'_Y : ↑m' > topologicalKrullDim (TopCat.of Y) :=
+    lt_coe_nat_of_lt_of_lt_coe_nat_succ hY_dim_lt hm
   -- Build SES on Vᶜ, apply middle-term vanishing
   let S := closedImmersionSES Y hYcl C
   have hSE := closedImmersionSES_shortExact Y hYcl C

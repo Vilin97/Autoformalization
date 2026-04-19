@@ -14,6 +14,7 @@ API for topological Krull dimension on irreducible spaces.
 - `topologicalKrullDim_nonneg`: non-empty spaces have dim ≥ 0
 - `topologicalKrullDim_lt_of_isIrreducible_of_isClosed`: proper closed subsets of
   irreducible spaces with finite dim have strictly smaller dim
+- `lt_coe_nat_of_lt_of_lt_coe_nat_succ`: in `WithBot ℕ∞`, from `a < b < ↑↑(n+1)` deduce `a < ↑↑n`
 - `exists_closed_subset_lt_dim_of_irreducible_pos`: on an irreducible Noetherian space of
   positive Krull dimension, there exists a proper closed subset of strictly smaller dimension
 - `ulift_int_projective`: `ULift ℤ` is projective in `AddCommGrpCat`
@@ -137,6 +138,19 @@ theorem topologicalKrullDim_lt_of_isIrreducible_of_isClosed {X : Type u} [Topolo
       rw [← show (↑(v + 1) : WithBot ℕ∞) = ↑v + 1 from by push_cast; ring]
       exact WithBot.coe_lt_coe.mpr ((ENat.lt_add_one_iff hv_ne_top).mpr le_rfl)) h1
 
+/-- In `WithBot ℕ∞`, if `a < b` and `b < ↑↑(n+1)`, then `a < ↑↑n`.
+    Used for dimension arithmetic: from `dim Y < dim X` and `dim X < n+1`,
+    conclude `dim Y < n` (predecessor step through the double coercion). -/
+theorem lt_coe_nat_of_lt_of_lt_coe_nat_succ {a b : WithBot ℕ∞} {n : ℕ}
+    (hab : a < b) (hbn : b < ↑↑(n + 1 : ℕ)) : a < ↑↑(n : ℕ) := by
+  have hb_ne_bot : b ≠ ⊥ := ne_bot_of_gt hab
+  lift b to ℕ∞ using hb_ne_bot with b'
+  norm_cast at hbn ⊢
+  have hb_ne_top : b' ≠ ⊤ := ne_top_of_lt hbn
+  lift b' to ℕ using hb_ne_top with b''
+  rw [ENat.coe_lt_coe] at hbn
+  exact lt_of_lt_of_le hab (by exact_mod_cast Nat.lt_succ_iff.mp hbn)
+
 /-- On an irreducible noetherian space of positive Krull dimension, one can choose a proper
 closed subset `Z ⊊ X` of strictly smaller Krull dimension, and the ambient cohomological bound
 `n > dim X` automatically implies `n > dim Z`. This isolates the closed-subset selection used at
@@ -156,8 +170,7 @@ theorem exists_closed_subset_lt_dim_of_irreducible_pos
   have hZ_dim : topologicalKrullDim (TopCat.of a.carrier) < topologicalKrullDim X :=
     topologicalKrullDim_lt_of_isIrreducible_of_isClosed a.isClosed' hZ_ne_univ
       (lt_of_le_of_lt (topologicalKrullDim_subspace_le X a.carrier)
-        (lt_of_lt_of_le (show topologicalKrullDim X < ⊤ from
-          lt_of_lt_of_le hn le_top) le_top))
+        (lt_of_lt_of_le hn le_top))
   refine ⟨a.carrier, a.isClosed', hZ_ne_univ, hZ_dim, lt_trans hZ_dim hn⟩
 
 /-- The complement of a nonempty open is not the whole space. -/
