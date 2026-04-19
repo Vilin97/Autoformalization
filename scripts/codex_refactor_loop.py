@@ -51,6 +51,7 @@ CODEX_HOME_ROOT = Path(
 
 EVALUATOR_SCHEMA = {
     "type": "object",
+    "additionalProperties": False,
     "properties": {
         "progress_score": {"type": "integer", "minimum": -2, "maximum": 2},
         "summary": {"type": "string"},
@@ -429,7 +430,8 @@ def run_cycle(dry_run: bool = False, worker_only: bool = False) -> dict:
     if evaluation.get("strategy_recommendation"):
         STRATEGY_FILE.write_text(evaluation["strategy_recommendation"] + "\n")
 
-    if git("diff", "--name-only", check=False):
+    evaluator_ok = not str(evaluation.get("summary", "")).startswith("Evaluator failed")
+    if evaluator_ok and git("diff", "--name-only", check=False):
         git("add", "-A")
         summary = evaluation.get("summary", "codex refactor cycle")
         git("commit", "-m", f"refactor: codex cycle {cycle} — {summary}", check=False)

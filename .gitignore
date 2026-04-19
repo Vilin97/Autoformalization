@@ -1,4 +1,6 @@
 *.csv
+*.pyc
+__pycache__/
 /.lake
 .DS_Store
 *.log
