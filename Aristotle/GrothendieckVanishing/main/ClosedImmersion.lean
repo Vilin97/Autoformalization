@@ -330,7 +330,7 @@ theorem closedIncl_counit_isIso
   rw [← hcompare]; infer_instance
 
 -- Stalk pullback hom naturality
-private lemma stalkPull_nat
+lemma stalkPullbackHom_naturality
     {C : Type*} [Category C] [HasColimits C]
     {X Y : TopCat.{u}} (f : X ⟶ Y)
     {F G : Y.Presheaf C} (α : F ⟶ G) (x : ↑X) :
@@ -354,7 +354,7 @@ private lemma stalkPull_nat
 
 -- Unit stalk is iso for closed immersions.
 -- Proof chain: triangle identity → pullback.map(η) iso → pullbackIso naturality
--- → toSheafify naturality → stalkPull_nat → η stalk iso
+-- → toSheafify naturality → stalkPullbackHom_naturality → η stalk iso
 theorem closedIncl_unit_stalk_isIso
     {C : Type*} [Category.{u} C]
     {FC : C → C → Type*} {CC : C → Type u}
@@ -420,6 +420,6 @@ theorem closedIncl_unit_stalk_isIso
       ((pb ⋙ Sheaf.pushforward C (closedIncl hs)).obj F).val x) :=
     (Presheaf.stalkPullbackIso C (closedIncl hs)
       ((pb ⋙ Sheaf.pushforward C (closedIncl hs)).obj F).val x).isIso_hom
-  exact IsIso.of_isIso_fac_right (stalkPull_nat (closedIncl hs) η.val x)
+  exact IsIso.of_isIso_fac_right (stalkPullbackHom_naturality (closedIncl hs) η.val x)
 
 end TopCat

@@ -33,7 +33,7 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 
 /-- Zero is preserved under filtered transitions: if restricting a transition to an open
     gives 0, then restricting any further transition also gives 0. -/
-private lemma transition_preserves_zero
+lemma transition_preserves_zero
     {X : TopCat.{u}} {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
     {j₀ j j' : J'} (f : j₀ ⟶ j) (g : j ⟶ j')
@@ -54,7 +54,7 @@ private lemma transition_preserves_zero
   exact (congr_arg (ConcreteCategory.hom (α.app (op U))) h).trans (map_zero _)
 
 /-- Pairwise compatibility is preserved under filtered transitions. -/
-private lemma transition_preserves_compat
+lemma transition_preserves_compat
     {X : TopCat.{u}} {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
     {j₀ j j' : J'} (f : j₀ ⟶ j) (g : j ⟶ j')
@@ -87,7 +87,7 @@ private lemma transition_preserves_compat
     from (β.naturality φ.op).symm]
 
 /-- A section of a sheaf that restricts to 0 on a finite open cover is 0. -/
-private theorem sheaf_section_zero_of_zero_on_cover
+theorem sheaf_section_zero_of_zero_on_cover
     {X : TopCat.{u}} {F : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}} (hF : TopCat.Presheaf.IsSheaf F)
     {ι : Type u} {V : Opens X} {W : ι → Opens X} (hW : ∀ k, W k ≤ V)
     {t : Finset ι} (hcov : V ≤ ⨆ k ∈ t, W k)
@@ -100,7 +100,7 @@ private theorem sheaf_section_zero_of_zero_on_cover
     exact ⟨W k, hW k, hxk, (hzero k hkt).trans (map_zero _).symm⟩
 
 /-- Merge finitely many eventually-zero restrictions into a common index. -/
-private theorem filtered_colimit_kills_all_restrictions
+theorem filtered_colimit_kills_all_restrictions
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     {X : TopCat.{u}} (Y' : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
     {ι : Type u} {V : Opens X} {W : ι → Opens X} (hW : ∀ k, W k ≤ V) (j₀ : J')
@@ -134,7 +134,7 @@ private theorem filtered_colimit_kills_all_restrictions
 /-- A section of a filtered colimit that restricts to zero on a finite open cover is zero.
     Combines representative extraction, per-element eventual vanishing,
     merging to a common index, and sheaf separation. -/
-private theorem colimit_section_zero_of_zero_on_cover
+theorem colimit_section_zero_of_zero_on_cover
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     {Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X}
