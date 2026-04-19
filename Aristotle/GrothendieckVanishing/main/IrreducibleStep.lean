@@ -160,19 +160,13 @@ private theorem exists_section_generating_stalks
     ((TopCat.Sheaf.zeroOutsideInt V).val.map (homOfLE hV₁V).op)
     (TopCat.Sheaf.zeroOutsideInt.generator V) with hgen_V_res_def
   set d_gen_res := d.down • gen_V_res with hd_gen_res_def
-  have his₁_germ : (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁ is₁ =
-      d.down • gen_at x₀ hx₀V := by
-    rw [his₁_def, show (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁
-        (i.val.app (op V₁) s₁) = i_x x₀ (R.presheaf.germ V₁ x₀ hx₀V₁ s₁) from
-      (TopCat.Presheaf.stalkFunctor_map_germ_apply V₁ x₀ hx₀V₁ i.val s₁).symm,
-      hs₁_germ, ha₁]
-  have hd_gen_res_germ : (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁
-      d_gen_res = d.down • gen_at x₀ hx₀V := by
-    rw [hd_gen_res_def, map_zsmul, hgen_V_res_def,
-      TopCat.Presheaf.germ_res_apply (TopCat.Sheaf.zeroOutsideInt V).val (homOfLE hV₁V)]
   obtain ⟨W, hx₀W, iW1, _, hW_eq⟩ :=
-    TopCat.Presheaf.germ_eq (TopCat.Sheaf.zeroOutsideInt V).val x₀ hx₀V₁ hx₀V₁
-      is₁ d_gen_res (his₁_germ.trans hd_gen_res_germ.symm)
+    TopCat.Presheaf.germ_eq (TopCat.Sheaf.zeroOutsideInt V).val x₀ hx₀V₁ hx₀V₁ is₁ d_gen_res (by
+      rw [his₁_def, show (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁
+          (i.val.app (op V₁) s₁) = i_x x₀ (R.presheaf.germ V₁ x₀ hx₀V₁ s₁) from
+        (TopCat.Presheaf.stalkFunctor_map_germ_apply V₁ x₀ hx₀V₁ i.val s₁).symm,
+        hs₁_germ, ha₁, hd_gen_res_def, map_zsmul, hgen_V_res_def,
+        TopCat.Presheaf.germ_res_apply (TopCat.Sheaf.zeroOutsideInt V).val (homOfLE hV₁V)])
   have hWV₁ : W ≤ V₁ := leOfHom iW1
   have hWV : W ≤ V := le_trans hWV₁ hV₁V
   have hW_ne : W ≠ ⊥ := fun h => (Opens.mem_bot (x := x₀)).mp (h ▸ hx₀W)
@@ -207,19 +201,13 @@ private theorem exists_section_generating_stalks
       rw [ne_eq, AddSubgroup.eq_bot_iff_forall]; push_neg
       exact ⟨d, hd_in_Hx, by rw [ne_eq, ULift.ext_iff, ULift.zero_down]; omega⟩
     obtain ⟨d_x, hd_x_mem, hd_x_pos, hd_x_gen⟩ := ulift_int_subgroup_cyclic _ hHx_ne
-    have h_le : d_nat ≤ d_x.down.toNat :=
-      h_minimal _ (mk_P x (hWV hxW) d_x hd_x_pos hd_x_mem hd_x_gen)
-    obtain ⟨k_div, hk_div⟩ := hd_x_gen d hd_in_Hx
-    have hd_eq : d.down = k_div * d_x.down := by simpa using congrArg ULift.down hk_div
-    -- Minimality forces k_div = 1, d_x.down = d.down
     have hd_x_eq : d_x.down = d.down := by
-      have h1 : (d_nat : ℤ) ≤ d_x.down := by
-        rw [← Int.toNat_of_nonneg (le_of_lt hd_x_pos)]; exact_mod_cast h_le
-      have hk_pos : 0 < k_div := by
-        by_contra! hle; linarith [mul_nonpos_of_nonpos_of_nonneg hle (le_of_lt hd_x_pos)]
-      have : k_div = 1 := le_antisymm (by
-        by_contra! hgt; linarith [mul_lt_mul_of_pos_right hgt hd_x_pos]) hk_pos
-      rw [this, one_mul] at hd_eq; linarith
+      have h_le : (d_nat : ℤ) ≤ d_x.down := by
+        rw [← Int.toNat_of_nonneg (le_of_lt hd_x_pos)]
+        exact_mod_cast h_minimal _ (mk_P x (hWV hxW) d_x hd_x_pos hd_x_mem hd_x_gen)
+      obtain ⟨k, hk⟩ := hd_x_gen d hd_in_Hx
+      exact le_antisymm (Int.le_of_dvd hd_pos
+        ⟨k, by simpa [mul_comm] using congrArg ULift.down hk⟩) h_le
     obtain ⟨k₀, hk₀⟩ := hd_x_gen ⟨n⟩
       ⟨a, show i_x x a = (⟨n⟩ : ULift.{u} ℤ).down • gen_at x (hWV hxW) from hn⟩
     have hn_eq : n = k₀ * d.down := by simpa [hd_x_eq] using congrArg ULift.down hk₀
