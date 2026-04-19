@@ -255,6 +255,16 @@ theorem sheafH_subsingleton_H1_via_epi_app_top {X : TopCat.{u}}
     Subsingleton (Sheaf.H S.X₁ 1) :=
   sheafH_subsingleton_H1_via_surj hSE h₂ (sheafH0_surj_of_epi_app_top _ hg)
 
+/-- Sheaf-level `H¹` vanishing criterion with injective middle term:
+    if `X₂` is injective and `g.app(⊤)` is epi in a short exact sequence
+    `0 → X₁ → X₂ → X₃ → 0`, then `H¹(X₁)=0`. -/
+theorem sheafH_subsingleton_H1_of_injective_of_epi_app_top {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
+    [Injective S.X₂]
+    (hg : Epi (S.g.val.app (op ⊤))) :
+    Subsingleton (Sheaf.H S.X₁ 1) :=
+  sheafH_subsingleton_H1_via_epi_app_top hSE (Ext.subsingleton_of_injective _ _ 0) hg
+
 /-- General dimension shifting at `Sheaf.H` level: if `H^n(X₃)=0` and `H^(n+1)(X₂)=0`
     in a short exact sequence `0 → X₁ → X₂ → X₃ → 0`, then `H^(n+1)(X₁)=0`. -/
 theorem sheafH_dimension_shift_of_both {X : TopCat.{u}}
