@@ -2,7 +2,7 @@
   SheafStalkAlgebra.lean — Stalk algebra for sheaves of abelian groups
 
   Split from IrreducibleStep.lean. Contains:
-  - Stalk surjectivity/bijectivity for zeroOutsideInt
+  - Stalk surjectivity for zeroOutside_openHom / sheafifyMap (any presheaf, not just constZ)
   - zeroOutsideInt cohomology vanishing (zeroOutsideInt_cohomology_vanishing)
   - isZero_zeroOutsideInt_bot: zeroOutsideInt ⊥ is zero
   - stalk_zeroOutsideInt_zero_outside: stalks vanish outside support
@@ -51,56 +51,59 @@ theorem zeroOutsideInt_vanishing
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
     any germ in the larger zero-outside presheaf can be lifted by restricting to `W ∩ V ≤ V`
     where the presheaf map is `eqToHom` (identity). -/
-private theorem presheaf_stalk_surj_openHom
-    {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
+theorem zeroOutside_openHom_stalk_surj
+    {X : TopCat.{u}} {F : TopCat.Presheaf AddCommGrpCat.{u} X}
+    {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
     Function.Surjective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-        (TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) h))) := by
-  intro g; obtain ⟨W, hxW, s, rfl⟩ := (TopCat.Presheaf.constZ.zeroOutside U).germ_exist x g
-  -- Restrict to W ⊓ V, where both presheaves agree with constZ
+        (TopCat.Presheaf.zeroOutside_openHom (F := F) h))) := by
+  intro g; obtain ⟨W, hxW, s, rfl⟩ := (F.zeroOutside U).germ_exist x g
+  -- Restrict to W ⊓ V, where both presheaves agree with F
   set WV := W ⊓ V
   have hWV_le_V : WV ≤ V := inf_le_right
   have hWV_le_W : WV ≤ W := inf_le_left
   have hxWV : x ∈ WV := ⟨hxW, hx⟩
   -- On WV, openHom is an iso (eqToHom)
   have happ_iso : IsIso ((TopCat.Presheaf.zeroOutside_openHom
-    (F := TopCat.Presheaf.constZ) h).app (op WV)) := by
+    (F := F) h).app (op WV)) := by
     simp only [TopCat.Presheaf.zeroOutside_openHom, hWV_le_V, ↓reduceDIte]; infer_instance
   -- Use the iso to find a preimage of the restricted section
   let s_res := ConcreteCategory.hom
-    ((TopCat.Presheaf.constZ.zeroOutside U).map (homOfLE hWV_le_W).op) s
+    ((F.zeroOutside U).map (homOfLE hWV_le_W).op) s
   have h_bij := ConcreteCategory.bijective_of_isIso
-    ((TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) h).app (op WV))
+    ((TopCat.Presheaf.zeroOutside_openHom (F := F) h).app (op WV))
   obtain ⟨t, ht⟩ := h_bij.2 s_res
-  refine ⟨(TopCat.Presheaf.constZ.zeroOutside V).germ WV x hxWV t, ?_⟩
+  refine ⟨(F.zeroOutside V).germ WV x hxWV t, ?_⟩
   rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
-  change (TopCat.Presheaf.constZ.zeroOutside U).germ WV x hxWV
-    ((TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) h).app (op WV) t) =
-    (TopCat.Presheaf.constZ.zeroOutside U).germ W x hxW s
+  change (F.zeroOutside U).germ WV x hxWV
+    ((TopCat.Presheaf.zeroOutside_openHom (F := F) h).app (op WV) t) =
+    (F.zeroOutside U).germ W x hxW s
   rw [ht]; simp only [s_res]
-  convert ((TopCat.Presheaf.constZ.zeroOutside U).germ_res_apply
+  convert ((F.zeroOutside U).germ_res_apply
     (homOfLE hWV_le_W) x hxWV s) using 1
 
-/-- The sheaf stalk map of `openHom(h)` at `x ∈ V` is surjective.
+/-- The sheaf stalk map of `sheafifyMap(zeroOutside_openHom h)` at `x ∈ V` is surjective.
     Transfers presheaf stalk surjectivity via `toSheafify_naturality` and
     the fact that `stalk(toSheafify)` is an isomorphism. -/
-private theorem sheaf_stalk_surj_openHom
-    {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
+theorem sheafifyMap_zeroOutside_openHom_stalk_surj
+    {X : TopCat.{u}} (F : TopCat.Presheaf AddCommGrpCat.{u} X)
+    {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
     Function.Surjective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-        (TopCat.Sheaf.zeroOutsideInt.openHom h).val)) := by
+        (sheafifyMap (Opens.grothendieckTopology (T := X))
+          (TopCat.Presheaf.zeroOutside_openHom (F := F) h)))) := by
   let J := Opens.grothendieckTopology (T := X)
-  let φ := TopCat.Presheaf.zeroOutside_openHom (F := TopCat.Presheaf.constZ) h
+  let φ := TopCat.Presheaf.zeroOutside_openHom (F := F) h
   let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
   have hnat : T.map φ ≫ T.map (toSheafify J _) =
     T.map (toSheafify J _) ≫ T.map (sheafifyMap J φ) := by
     rw [← T.map_comp, ← T.map_comp, toSheafify_naturality]
-  haveI : IsIso (T.map (toSheafify J (TopCat.Presheaf.constZ.zeroOutside V))) :=
+  haveI : IsIso (T.map (toSheafify J (F.zeroOutside V))) :=
     stalkFunctor_map_iso_toSheafify _ x
-  haveI : IsIso (T.map (toSheafify J (TopCat.Presheaf.constZ.zeroOutside U))) :=
+  haveI : IsIso (T.map (toSheafify J (F.zeroOutside U))) :=
     stalkFunctor_map_iso_toSheafify _ x
   intro g; obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J _))).2 g
-  obtain ⟨p, hp⟩ := presheaf_stalk_surj_openHom h x hx q
+  obtain ⟨p, hp⟩ := zeroOutside_openHom_stalk_surj h x hx q
   exact ⟨ConcreteCategory.hom (T.map (toSheafify J _)) p, by
     change ConcreteCategory.hom (T.map (sheafifyMap J φ))
       (ConcreteCategory.hom (T.map (toSheafify J _)) p) = _
@@ -173,7 +176,7 @@ theorem zeroOutsideInt_cohomology_vanishing
           exact stalk_zero_of_ses_g_iso hSE x inferInstance a
         · exact stalk_zero_of_shortExact_kernel hSE x
             (cokernel_stalk_zero_of_stalk_surj _ x
-              (sheaf_stalk_surj_openHom le_top x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY))) a)
+              (sheafifyMap_zeroOutside_openHom_stalk_surj Presheaf.constZ le_top x (by rwa [hY_def, Set.mem_compl_iff, not_not] at hxY))) a)
     (PushforwardHVanishing Y hYcl _ m' (ih (TopCat.of Y) m' _ hY_dim_lt hm'_Y))
 
 
