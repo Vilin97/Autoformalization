@@ -248,7 +248,6 @@ theorem PushforwardHVanishing
 -- epi via surjective on stalks
 theorem epi_unit_of_closedImmersion
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    [NoetherianSpace X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
     Epi ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
       (TopCat.closedIncl hZ)).unit.app F) := by
@@ -274,7 +273,6 @@ theorem epi_unit_of_closedImmersion
     inclusion of a closed subset. -/
 noncomputable def closedImmersionSES
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    [NoetherianSpace X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
     ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   let i := TopCat.closedIncl hZ
@@ -283,7 +281,6 @@ noncomputable def closedImmersionSES
 
 theorem closedImmersionSES_shortExact
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    [NoetherianSpace X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
     (closedImmersionSES Z hZ F).ShortExact := by
   delta closedImmersionSES
