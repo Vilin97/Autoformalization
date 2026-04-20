@@ -250,12 +250,13 @@ theorem closedImmersionSES_shortExact
 theorem closedComplementVanishing
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) (hV : V ≠ ⊥)
-    (C : TopCat.Sheaf AddCommGrpCat.{u} X) (n : ℕ)
+    {C : TopCat.Presheaf AddCommGrpCat.{u} X} (hC : C.IsSheaf) (n : ℕ)
     (ih : VanishingIH.{u} (topologicalKrullDim X))
     (hn : ↑n > topologicalKrullDim (Set.compl (V : Set X)))
     (hStalksOnV : ∀ x ∈ V,
-      ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj C.val), a = 0) :
-    Subsingleton (Sheaf.H C n) := by
+      ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj C), a = 0) :
+    Subsingleton (Sheaf.H (⟨C, hC⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
+  let Csh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨C, hC⟩
   set Y := (V : Set X)ᶜ
   have hYcl : IsClosed Y := V.2.isClosed_compl
   have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
@@ -263,14 +264,14 @@ theorem closedComplementVanishing
       (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
       (lt_of_lt_of_le hn le_top)
   let i := TopCat.closedIncl hYcl
-  let S := closedImmersionSES Y hYcl C
-  have hSE := closedImmersionSES_shortExact Y hYcl C
+  let S := closedImmersionSES Y hYcl Csh
+  have hSE := closedImmersionSES_shortExact Y hYcl Csh
   have hSX₁_zero : IsZero S.X₁ := by
     have hSX₁_zero' : IsZero ((⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
       sheaf_isZero_of_zero_stalks X S.X₁.cond (fun x a => by
         by_cases hxY : x ∈ Y
         · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
-            TopCat.closedIncl_unit_stalk_isIso hYcl C ⟨x, hxY⟩
+            TopCat.closedIncl_unit_stalk_isIso hYcl Csh ⟨x, hxY⟩
           exact stalk_zero_of_ses_g_iso hSE x inferInstance a
         · exact stalk_zero_of_shortExact_kernel hSE x
             (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b) a)
@@ -280,7 +281,7 @@ theorem closedComplementVanishing
     (by
       simpa [S, closedImmersionSES, i] using
         (PushforwardHVanishing Y hYcl
-          (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj C).val)
-          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj C).cond n
-          (@ih (TopCat.of Y) _ n ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj C)
+          (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Csh).val)
+          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Csh).cond n
+          (@ih (TopCat.of Y) _ n ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Csh)
             hY_dim_lt hn)))
