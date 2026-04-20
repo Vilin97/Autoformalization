@@ -53,11 +53,11 @@ theorem pushforward_closedIncl_stalk_eq_zero
   let F' := (TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G
   obtain ⟨U, hxU, sU, rfl⟩ := F'.germ_exist x a
   let W : Opens X := U ⊓ ⟨sᶜ, hs.isOpen_compl⟩
-  have hW_bot : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ :=
-    le_antisymm (fun ⟨_, hy⟩ h => absurd hy h.2) bot_le
+  have hW_le : W ≤ ⟨sᶜ, hs.isOpen_compl⟩ := inf_le_right
   haveI : Subsingleton (F'.obj (op W)) := AddCommGrpCat.subsingleton_of_isZero (by
     change IsZero (G.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
-    rw [hW_bot]; exact Gsh.isTerminalOfEmpty.isZero)
+    rw [TopCat.closedIncl_map_eq_bot_of_le_compl hs hW_le]
+    exact Gsh.isTerminalOfEmpty.isZero)
   rw [← TopCat.Presheaf.germ_res_apply F'
     (homOfLE (show W ≤ U from inf_le_left)) x ⟨hxU, hx⟩ sU]
   simp [Subsingleton.eq_zero (ConcreteCategory.hom (F'.map (homOfLE (show W ≤ U from
@@ -89,7 +89,7 @@ theorem epi_pushforward_map_closedIncl
           ((Sheaf.isLocallySurjective_iff_epi'
               AddCommGrpCat.{u} _).mpr inferInstance)) z)
     have hnat : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
-        (ConcreteCategory.hom (TopCat.closedIncl hs) z)).map
+        ((TopCat.closedIncl hs) z)).map
         ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f.val) ≫
       TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} (TopCat.closedIncl hs) G z =
     TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} (TopCat.closedIncl hs) F z ≫
@@ -101,7 +101,7 @@ theorem epi_pushforward_map_closedIncl
         TopCat.Presheaf.stalkFunctor_map_germ]; rfl
     apply (AddCommGrpCat.epi_iff_surjective _).mp
     change Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
-        ((ConcreteCategory.hom (TopCat.closedIncl hs)) z)).map
+        ((TopCat.closedIncl hs) z)).map
         ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f.val))
     rw [← epi_comp_iff_of_isIso _ (TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
         (TopCat.closedIncl hs) G z), hnat]
