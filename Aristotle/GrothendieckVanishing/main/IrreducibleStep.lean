@@ -397,8 +397,15 @@ theorem IrreduciblePosVanishing
       directLimit_cohomology_vanishing (K := S.X₁.val) S.X₁.cond n
         (fun {G} (hG : G.IsSheaf) {V}
           (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G) hf => by
+          let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
+          let fsh : TopCat.Sheaf.zeroOutsideInt V ⟶ Gsh := Sheaf.Hom.mk f
+          letI : Balanced (CategoryTheory.Sheaf (Opens.grothendieckTopology X)
+              AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
+          have hf_epi : Epi fsh := by
+            rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} fsh]
+            simpa [fsh] using hf
           exact epiImage_zeroOutsideInt_vanishing_of_sheaf_epi
-            (V := V) (G := G) hG f hf ih n hn)
+            (V := V) (G := G) hG f (by simpa [fsh] using hf_epi) ih n hn)
     exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
   · -- dim ≤ 0: F is flasque on irreducible dim-0 space, use FlasqueVanishing
     push_neg at hpos

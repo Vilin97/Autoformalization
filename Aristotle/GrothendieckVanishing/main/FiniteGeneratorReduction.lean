@@ -269,8 +269,7 @@ theorem finsetGeneratedSheaf_vanishing
     (m : ℕ)
     (hzero : ∀ {G : TopCat.Presheaf AddCommGrpCat.{u} X} (hG : G.IsSheaf) {V : Opens X}
       (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G),
-      Epi (show TopCat.Sheaf.zeroOutsideInt V ⟶
-          (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from Sheaf.Hom.mk f) →
+      TopCat.Presheaf.IsLocallySurjective f →
       Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m))
     (S : Finset
       (TopCat.Sheaf.SectionIndex (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)))
@@ -305,9 +304,13 @@ theorem finsetGeneratedSheaf_vanishing
         haveI : Epi g := by
           simpa [g, SC, h_sub] using
             imageIncl_cokernel_epi (K := K) hK (σ₀ := σ₀) (S' := S')
-        have hg : Epi (show TopCat.Sheaf.zeroOutsideInt σ₀.1 ⟶ SC.X₃ from Sheaf.Hom.mk g.val) := by
-          simpa [g] using (inferInstance : Epi g)
-        simpa [g] using hzero SC.X₃.cond g.val hg
+        letI : Balanced (CategoryTheory.Sheaf (Opens.grothendieckTopology X)
+            AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
+        have hg_loc : TopCat.Presheaf.IsLocallySurjective g.val := by
+          simpa [g] using
+            (show Sheaf.IsLocallySurjective g from
+              (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} g).mpr inferInstance)
+        simpa [g] using hzero SC.X₃.cond g.val hg_loc
     exact subsingleton_sheafH_of_shortExact_middle hSE m ih hCoker
 
 end FinsetGenerated
@@ -321,8 +324,7 @@ theorem directLimit_cohomology_vanishing
     {K : TopCat.Presheaf AddCommGrpCat.{u} X} (hK : K.IsSheaf) (m : ℕ)
     (hzero : ∀ {G : TopCat.Presheaf AddCommGrpCat.{u} X} (hG : G.IsSheaf) {V : Opens X}
       (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G),
-      Epi (show TopCat.Sheaf.zeroOutsideInt V ⟶
-          (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from Sheaf.Hom.mk f) →
+      TopCat.Presheaf.IsLocallySurjective f →
       Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m)) :
     Subsingleton (Sheaf.H (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
   exact cohomology_vanishing_of_finitelyGenerated_vanishing hK m
