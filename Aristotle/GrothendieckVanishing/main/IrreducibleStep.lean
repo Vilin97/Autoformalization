@@ -76,15 +76,16 @@ private theorem sHom_stalk_bijective_at
     This is the hard "Noetherian shrinking" step of Hartshorne III.2.7, Step 4. -/
 private theorem exists_section_generating_stalks
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
-    {V : Opens X} {R : TopCat.Sheaf AddCommGrpCat.{u} X}
-    (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
-    (hR : ¬ IsZero R) :
+    {V : Opens X} {R : TopCat.Presheaf AddCommGrpCat.{u} X} (hRsh : R.IsSheaf)
+    (i : (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶ TopCat.Sheaf.zeroOutsideInt V)
+    [Mono i]
+    (hR : ¬ IsZero (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :
     ∃ (V' : Opens X) (_ : V' ≤ V) (_ : V' ≠ ⊥)
-      (s : R.val.obj (op V')),
+      (s : R.obj (op V')),
       ∀ (x : X) (hx : x ∈ V'),
-        (R.presheaf.germ V' x hx s ≠ 0) ∧
-        (∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R.val),
-          ∃ k : ℤ, a = k • R.presheaf.germ V' x hx s) := by
+        (R.germ V' x hx s ≠ 0) ∧
+        (∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R),
+          ∃ k : ℤ, a = k • R.germ V' x hx s) := by
   let i_x (x : X) := ConcreteCategory.hom
     ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map i.val)
   have hi_inj : ∀ (x : X), Function.Injective (i_x x) := fun x => by
@@ -112,9 +113,7 @@ private theorem exists_section_generating_stalks
                      obtain ⟨k, hk⟩ := hgen ⟨m⟩ hm
                      exact ⟨k, by simpa [mul_comm] using congrArg ULift.down hk⟩⟩
   have hP : ∃ n, P n := by
-    have hR' : ¬ IsZero (⟨R.val, R.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := by
-      simpa using hR
-    obtain ⟨x₀', hx₀'V, a₀', ha₀'⟩ := @exists_nonzero_stalk_in_V _ V R.val R.cond i _ hR'
+    obtain ⟨x₀', hx₀'V, a₀', ha₀'⟩ := exists_nonzero_stalk_in_V V hRsh i hR
     have hH'_ne : H_at x₀' hx₀'V ≠ ⊥ := by
       rw [ne_eq, AddSubgroup.eq_bot_iff_forall]; push_neg
       obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x₀' hx₀'V (i_x x₀' a₀')
@@ -142,19 +141,19 @@ private theorem exists_section_generating_stalks
     intro h; rw [h, map_zero] at ha₁
     exact absurd (zsmul_generator_injective V x₀ hx₀V ((zero_smul _ _).trans ha₁)).symm
       (by omega)
-  have ha₁_gen : ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x₀).obj R.val),
+  have ha₁_gen : ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x₀).obj R),
       ∃ k : ℤ, a = k • a₁ := by
     intro a; obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x₀ hx₀V (i_x x₀ a)
     obtain ⟨k, hk⟩ := hd_gen ⟨n⟩ ⟨a, hn⟩
     have hn_eq : n = k * d.down := by simpa [mul_comm] using congrArg ULift.down hk
     exact ⟨k, hi_inj x₀ (by rw [map_zsmul, hn, hn_eq, mul_smul, ← ha₁])⟩
-  obtain ⟨W₀, hx₀W₀, s₀, hs₀⟩ := TopCat.Presheaf.germ_exist R.val x₀ a₁
+  obtain ⟨W₀, hx₀W₀, s₀, hs₀⟩ := TopCat.Presheaf.germ_exist R x₀ a₁
   set V₁ := W₀ ⊓ V with hV₁_def
   have hV₁V : V₁ ≤ V := inf_le_right
   have hx₀V₁ : x₀ ∈ V₁ := ⟨hx₀W₀, hx₀V⟩
-  set s₁ := ConcreteCategory.hom (R.val.map (homOfLE (inf_le_left : V₁ ≤ W₀)).op) s₀
-  have hs₁_germ : R.presheaf.germ V₁ x₀ hx₀V₁ s₁ = a₁ :=
-    (TopCat.Presheaf.germ_res_apply R.val (homOfLE inf_le_left) x₀ hx₀V₁ s₀).trans hs₀
+  set s₁ := ConcreteCategory.hom (R.map (homOfLE (inf_le_left : V₁ ≤ W₀)).op) s₀
+  have hs₁_germ : R.germ V₁ x₀ hx₀V₁ s₁ = a₁ :=
+    (TopCat.Presheaf.germ_res_apply R (homOfLE inf_le_left) x₀ hx₀V₁ s₀).trans hs₀
   -- Step 5: Shrink to where germ coefficient is constant via germ_eq
   set is₁ := i.val.app (op V₁) s₁ with his₁_def
   set d_gen_res := d.down • ConcreteCategory.hom
@@ -163,7 +162,7 @@ private theorem exists_section_generating_stalks
   obtain ⟨W, hx₀W, iW1, _, hW_eq⟩ :=
     TopCat.Presheaf.germ_eq (TopCat.Sheaf.zeroOutsideInt V).val x₀ hx₀V₁ hx₀V₁ is₁ d_gen_res (by
       rw [his₁_def, show (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x₀ hx₀V₁
-          (i.val.app (op V₁) s₁) = i_x x₀ (R.presheaf.germ V₁ x₀ hx₀V₁ s₁) from
+          (i.val.app (op V₁) s₁) = i_x x₀ (R.germ V₁ x₀ hx₀V₁ s₁) from
         (TopCat.Presheaf.stalkFunctor_map_germ_apply V₁ x₀ hx₀V₁ i.val s₁).symm,
         hs₁_germ, ha₁, hd_gen_res_def, map_zsmul,
         TopCat.Presheaf.germ_res_apply (TopCat.Sheaf.zeroOutsideInt V).val (homOfLE hV₁V)])
@@ -172,12 +171,12 @@ private theorem exists_section_generating_stalks
   have hW_ne : W ≠ ⊥ := fun h => (Opens.mem_bot (x := x₀)).mp (h ▸ hx₀W)
   -- Key: at every x ∈ W, i_x(germ(s₁|_W, x)) = d.down • gen_at x
   have hcoeff_const : ∀ (x : X) (hxW : x ∈ W),
-      i_x x (R.presheaf.germ W x hxW
-        (ConcreteCategory.hom (R.val.map (homOfLE hWV₁).op) s₁)) =
+      i_x x (R.germ W x hxW
+        (ConcreteCategory.hom (R.map (homOfLE hWV₁).op) s₁)) =
       d.down • gen_at x (hWV hxW) := by
     intro x hxW
     rw [TopCat.Presheaf.germ_res_apply,
-      show i_x x (R.presheaf.germ V₁ x (hWV₁ hxW) s₁) =
+      show i_x x (R.germ V₁ x (hWV₁ hxW) s₁) =
         (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x (hWV₁ hxW) is₁ from
         his₁_def ▸ TopCat.Presheaf.stalkFunctor_map_germ_apply V₁ x (hWV₁ hxW) i.val s₁,
       ← TopCat.Presheaf.germ_res_apply (TopCat.Sheaf.zeroOutsideInt V).val
@@ -186,7 +185,7 @@ private theorem exists_section_generating_stalks
         (TopCat.Sheaf.zeroOutsideInt V).val.map (homOfLE hWV₁).op d_gen_res from hW_eq,
       TopCat.Presheaf.germ_res_apply, hd_gen_res_def, map_zsmul,
       TopCat.Presheaf.germ_res_apply]
-  refine ⟨W, hWV, hW_ne, ConcreteCategory.hom (R.val.map (homOfLE hWV₁).op) s₁,
+  refine ⟨W, hWV, hW_ne, ConcreteCategory.hom (R.map (homOfLE hWV₁).op) s₁,
     fun x hxW => ?_⟩
   have hcoeff_x := hcoeff_const x hxW
   constructor
@@ -225,7 +224,8 @@ theorem exists_good_section
         Function.Bijective (ConcreteCategory.hom
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
             (TopCat.Sheaf.zeroOutsideInt.sHom s).val)) := by
-  obtain ⟨V', hV'V, hV'ne, s, hgen⟩ := exists_section_generating_stalks i hR
+  obtain ⟨V', hV'V, hV'ne, s, hgen⟩ :=
+    exists_section_generating_stalks (R := R.val) R.cond i (by simpa using hR)
   exact ⟨V', hV'V, hV'ne, s, fun x hx =>
     sHom_stalk_bijective_at hV'V i s x hx (hgen x hx).1 (hgen x hx).2⟩
 
