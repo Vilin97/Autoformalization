@@ -33,3 +33,12 @@ instance FlasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X
     haveI : IsFlasqueSheaf ip.shortComplex.X₃ := isFlasque_X₃_of_shortExact hSE
     haveI := ih ip.shortComplex.X₃
     exact sheafH_dimension_shift ip.shortExact_shortComplex (n + 1)
+
+/-- Presheaf-boundary form of `FlasqueVanishing`. -/
+theorem sheafH_subsingleton_of_flasque_presheaf
+    (X : TopCat.{u}) {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
+    [IsFlasqueSheaf (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)]
+    (n : ℕ) :
+    Subsingleton (Sheaf.H (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) (n + 1)) := by
+  simpa using
+    (FlasqueVanishing X (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n)
