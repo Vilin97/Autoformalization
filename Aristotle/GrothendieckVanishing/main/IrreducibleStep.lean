@@ -361,10 +361,13 @@ theorem IrreduciblePosVanishing
     have hSE := closedImmersionSES_shortExact (Z := Z) (hZ := hZ_closed) (F := F) hF
     have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
       by
-        simpa [S, closedImmersionSES, i, Fsh, FZ] using
-          (PushforwardHVanishing Z hZ_closed
-            (G := FZ.val) FZ.cond n
-            (ih (TopCat.of Z) n (G := FZ.val) FZ.cond hZ_dim hn_Z))
+        let e : Sheaf.H FZ n ≃ Sheaf.H S.X₃ n := by
+          simpa [S, closedImmersionSES, i, Fsh, FZ] using
+            Equiv.ofBijective
+              (ConcreteCategory.hom (PushforwardHIso Z hZ_closed FZ.cond n).hom)
+              (ConcreteCategory.bijective_of_isIso (PushforwardHIso Z hZ_closed FZ.cond n).hom)
+        exact (e.subsingleton_congr).mp
+          (ih (TopCat.of Z) n (G := FZ.val) FZ.cond hZ_dim hn_Z)
     have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
       directLimit_cohomology_vanishing (K := S.X₁.val) S.X₁.cond n
         (fun {G} (hG : G.IsSheaf) {V} f hf =>

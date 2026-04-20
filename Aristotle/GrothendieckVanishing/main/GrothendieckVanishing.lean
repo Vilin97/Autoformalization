@@ -71,13 +71,15 @@ private theorem ReducibleVanishing'
     have hpush : Subsingleton (Sheaf.H S.X₃ n) := by
       haveI : IrreducibleSpace (TopCat.of Z) :=
         isIrreducible_iff_irreducibleSpace.mp hZ_irred
-      simpa [S, closedImmersionSES, i, Gsh, GZ] using
-        (PushforwardHVanishing Z hZ_closed
-          (G := GZ.val) GZ.cond
-          n
-          (ih_irred (TopCat.of Z) (G := GZ.val) GZ.cond
-            (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z)
-            (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z) hn)))
+      let e : Sheaf.H GZ n ≃ Sheaf.H S.X₃ n := by
+        simpa [S, closedImmersionSES, i, Gsh, GZ] using
+          Equiv.ofBijective
+            (ConcreteCategory.hom (PushforwardHIso Z hZ_closed GZ.cond n).hom)
+            (ConcreteCategory.bijective_of_isIso (PushforwardHIso Z hZ_closed GZ.cond n).hom)
+      exact (e.subsingleton_congr).mp
+        (ih_irred (TopCat.of Z) (G := GZ.val) GZ.cond
+          (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z)
+          (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z) hn))
     have hker : Subsingleton (Sheaf.H S.X₁ n) := by
       have hker' :
           Subsingleton
