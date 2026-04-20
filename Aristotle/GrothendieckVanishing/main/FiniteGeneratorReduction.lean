@@ -54,7 +54,7 @@ private noncomputable def finsetImageInclGen
         rw [TopCat.Sheaf.familyGeneratedSheaf_ι_eq, Category.assoc, Limits.image.fac]
         ext ⟨σ, hσ⟩
         simp [finsetCoproductInclGen, TopCat.Sheaf.finsetGeneratorMap,
-              TopCat.Sheaf.familyGeneratorMap] }
+              TopCat.Sheaf.familyMap] }
 
 omit [NoetherianSpace X] in
 private lemma finsetImageInclGen_comp_ι
@@ -140,7 +140,7 @@ private noncomputable def finsetGenCocone_isColimit :
           TopCat.Sheaf.allSectionMap K
       rw [TopCat.Sheaf.familyGeneratedSheaf_ι_eq, Limits.image.fac]
       simp [TopCat.Sheaf.allSectionMap, TopCat.Sheaf.finsetGeneratorMap,
-        TopCat.Sheaf.familyGeneratorMap]
+        TopCat.Sheaf.familyMap]
     haveI := TopCat.Sheaf.allSectionMap_epi K
     exact epi_of_epi_fac hfac
   -- mono + epi → iso in abelian category
@@ -204,7 +204,7 @@ private theorem imageIncl_cokernel_epi :
     rw [Category.assoc, hlf, TopCat.Sheaf.familyGeneratedSheaf_ι_eq, Limits.image.fac]
     ext ⟨σ', hσ'⟩
     simp [finsetCoproductInclGen, TopCat.Sheaf.finsetGeneratorMap,
-      TopCat.Sheaf.familyGeneratorMap]
+      TopCat.Sheaf.familyMap]
   have hfac : proj ≫
       (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1)
         ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
