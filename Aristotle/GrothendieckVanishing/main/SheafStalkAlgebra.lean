@@ -187,9 +187,12 @@ theorem stalk_zeroOutsideInt_zero_outside
 
 /-- `zeroOutsideInt ⊥` is the zero sheaf (all stalks vanish). -/
 theorem isZero_zeroOutsideInt_bot (X : TopCat.{u}) :
-    IsZero (TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X)) :=
-  sheaf_isZero_of_zero_stalks X _ fun x a =>
-    stalk_zeroOutsideInt_zero_outside ⊥ x (Opens.mem_bot.not.mpr (fun h => h.elim)) a
+    IsZero (TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X)) := by
+  let F := TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X)
+  have hF_zero : IsZero ((⟨F.val, F.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
+    sheaf_isZero_of_zero_stalks X F.cond (fun x a =>
+      stalk_zeroOutsideInt_zero_outside ⊥ x (Opens.mem_bot.not.mpr (fun h => h.elim)) a)
+  simpa [F] using hF_zero
 
 /-- A nonzero subsheaf of `zeroOutsideInt V` has a nonzero stalk at some point of `V`. -/
 theorem exists_nonzero_stalk_in_V
@@ -201,14 +204,16 @@ theorem exists_nonzero_stalk_in_V
       (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R.val),
       a ≠ 0 := by
   by_contra! h; apply hR
-  apply sheaf_isZero_of_zero_stalks; intro x a
-  by_cases hx : (x : X) ∈ (V : Set X)
-  · exact h x hx a
-  · haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
-      (C := AddCommGrpCat.{u}) (X := X) x
-    exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
-      (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) i)
-      ((stalk_zeroOutsideInt_zero_outside V x hx _).trans (map_zero _).symm)
+  have hR_zero : IsZero ((⟨R.val, R.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
+    sheaf_isZero_of_zero_stalks X R.cond (fun x a => by
+      by_cases hx : (x : X) ∈ (V : Set X)
+      · exact h x hx a
+      · haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
+          (C := AddCommGrpCat.{u}) (X := X) x
+        exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
+          (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) i)
+          ((stalk_zeroOutsideInt_zero_outside V x hx _).trans (map_zero _).symm))
+  simpa using hR_zero
 
 /-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
     is an integer multiple of the germ of the distinguished generator over `V`. -/

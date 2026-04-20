@@ -50,7 +50,10 @@ private theorem ReducibleVanishing'
   | empty =>
     intro _ G hG
     exact _root_.sheafH_subsingleton_of_isZero G
-      (sheaf_isZero_of_zero_stalks X G (fun x a => hG x (by simp) a)) n
+      (by
+        have hG_zero : IsZero ((⟨G.val, G.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
+          sheaf_isZero_of_zero_stalks X G.cond (fun x a => hG x (by simp) a)
+        simpa using hG_zero) n
   | @insert Z s' hZ_notin ih =>
     intro hs_irred G hG_stalks
     have hZ_comp := hs_irred Z (Finset.mem_insert_self Z s')
