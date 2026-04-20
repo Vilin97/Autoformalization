@@ -156,13 +156,21 @@ end FilteredDiagram
     to the filtered diagram of finitely generated subsheaves. -/
 theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
-    (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ)
-    (hfg : ∀ (S : Finset (TopCat.Sheaf.SectionIndex K))
+    {K : TopCat.Presheaf AddCommGrpCat.{u} X} (hK : K.IsSheaf) (m : ℕ)
+    (hfg : ∀ (S : Finset
+        (TopCat.Sheaf.SectionIndex (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)))
       [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)) :
-    Subsingleton (Sheaf.H K m) :=
-  sheafH_preserves_filtered_colimits (finsetGenFunctor K) (finsetGenCocone K)
-    (finsetGenCocone_isColimit K) m (fun S => hfg S)
+    Subsingleton (Sheaf.H (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
+  let Ksh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨K, hK⟩
+  change Subsingleton (Sheaf.H Ksh m)
+  have hfg' : ∀ (S : Finset (TopCat.Sheaf.SectionIndex Ksh))
+      [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
+      Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m) := by
+    intro S
+    simpa [Ksh] using hfg S
+  exact sheafH_preserves_filtered_colimits (finsetGenFunctor Ksh) (finsetGenCocone Ksh)
+    (finsetGenCocone_isColimit Ksh) m (fun S => hfg' S)
 
 section FinsetGenerated
 open scoped Classical
@@ -279,7 +287,5 @@ theorem directLimit_cohomology_vanishing
       (f : TopCat.Sheaf.zeroOutsideInt V ⟶ (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)),
       Epi f → Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m)) :
     Subsingleton (Sheaf.H (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
-  let Ksh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨K, hK⟩
-  change Subsingleton (Sheaf.H Ksh m)
-  exact cohomology_vanishing_of_finitelyGenerated_vanishing Ksh m
+  exact cohomology_vanishing_of_finitelyGenerated_vanishing hK m
     (fun S _ => finsetGeneratedSheaf_vanishing m hzero S)
