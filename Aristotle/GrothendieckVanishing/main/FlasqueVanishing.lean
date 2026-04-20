@@ -160,7 +160,8 @@ private lemma partialLift_chain_ub {X : TopCat.{u}}
 -- using exactness + flasqueness, glue to get a strictly larger partial lift.
 private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) [IsFlasqueSheaf S.X₁]
+    (hS : S.ShortExact)
+    (hX₁_epi : ∀ {U V : Opens X} (i : U ⟶ V), Epi (S.X₁.val.map i.op))
     {U : Opens X} {s : S.X₃.val.obj (op U)}
     {V₀ : Opens X} {t₀ : S.X₂.val.obj (op V₀)}
     (hV₀U : V₀ ≤ U)
@@ -186,7 +187,7 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     exact congr_arg (S.X₃.val.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
   obtain ⟨a, ha⟩ := sections_exact_of_shortExact hS (V₀ ⊓ W) _ hdiff_ker
   obtain ⟨ahat, hahat⟩ := (AddCommGrpCat.epi_iff_surjective _).mp
-    (IsFlasqueSheaf.epi_map (homOfLE inf_le_right : V₀ ⊓ W ⟶ W)) a
+    (hX₁_epi (homOfLE inf_le_right : V₀ ⊓ W ⟶ W)) a
   set t'' := t' + S.f.val.app (op W) ahat with ht''_def
   have hgt'' : S.g.val.app (op W) t'' = S.X₃.val.map (homOfLE hWU).op s := by
     simp only [ht''_def, map_add, show S.g.val.app (op W) (S.f.val.app (op W) ahat) = 0 from by
@@ -233,20 +234,32 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
   exact hxV₀ ((hmax _ h_new_inP ⟨le_sup_left, by
     have h0 := ht_new false; simp only [BU, Bsf] at h0; exact h0⟩).1 (Or.inr hxW))
 
--- Zorn argument for surjectivity of sections (Nugent, PR #35790).
-theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
+/-- If `0 → X₁ → X₂ → X₃ → 0` is short exact and every restriction map of the
+underlying presheaf `S.X₁.val` is epi, then `g(U) : X₂(U) → X₃(U)` is epi. -/
+theorem epi_app_of_shortExact_of_epi_restrictions {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) [IsFlasqueSheaf S.X₁] (U : Opens X) :
+    (hS : S.ShortExact)
+    (hX₁_epi : ∀ {U V : Opens X} (i : U ⟶ V), Epi (S.X₁.val.map i.op))
+    (U : Opens X) :
     Epi (S.g.val.app (op U)) := by
-  rw [AddCommGrpCat.epi_iff_surjective]; intro s
+  rw [AddCommGrpCat.epi_iff_surjective]
+  intro s
   haveI : Epi S.g := hS.epi_g
   have hls : Sheaf.IsLocallySurjective S.g :=
     (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} S.g).mpr inferInstance
   obtain ⟨⟨V₀, t₀⟩, ⟨hV₀U, ht₀⟩, hmax⟩ :=
     @zorn_le₀ _ (sigmaPreorder S) {p | IsPartialLift U s p}
       (fun c hcP hchain => partialLift_chain_ub (fun p hp => hcP hp) hchain)
-  have := partialLift_maximal_eq_U hS hV₀U ht₀ hls hmax
-  subst this; exact ⟨t₀, by rw [ht₀]; simp⟩
+  have := partialLift_maximal_eq_U hS hX₁_epi hV₀U ht₀ hls hmax
+  subst this
+  exact ⟨t₀, by rw [ht₀]; simp⟩
+
+-- Zorn argument for surjectivity of sections (Nugent, PR #35790).
+theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact) [IsFlasqueSheaf S.X₁] (U : Opens X) :
+    Epi (S.g.val.app (op U)) :=
+  epi_app_of_shortExact_of_epi_restrictions hS (fun {_ _} i => IsFlasqueSheaf.epi_map i) U
 
 /-- **Quotient preserves flasqueness** (Nugent, PR #35790).
     If `F'` and `G` are flasque in `0 -> F' -> G -> H -> 0`, then `H` is flasque.
