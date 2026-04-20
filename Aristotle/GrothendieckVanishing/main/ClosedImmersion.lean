@@ -226,26 +226,30 @@ theorem closedIncl_unit_stalk_isIso
     [PreservesFilteredColimits (forget C)]
     [(forget C).ReflectsIsomorphisms]
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    (F : TopCat.Sheaf C X) (x : TopCat.of s) :
+    {F : TopCat.Presheaf C X} (hF : F.IsSheaf) (x : TopCat.of s) :
     IsIso ((Presheaf.stalkFunctor C ((closedIncl hs) x)).map
-      ((Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)).unit.app F).val) := by
+      ((Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)).unit.app
+        (⟨F, hF⟩ : TopCat.Sheaf C X)).val) := by
+  let Fsh : TopCat.Sheaf C X := ⟨F, hF⟩
   -- Use the triangle identity + counit iso
   let adj := Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)
   let pb := Sheaf.pullback C (closedIncl hs)
-  let η := adj.unit.app F
-  haveI : IsIso (adj.counit.app (pb.obj F)) := closedIncl_counit_isIso hs (pb.obj F)
+  let η := adj.unit.app Fsh
+  haveI : IsIso (adj.counit.app (pb.obj Fsh)) := closedIncl_counit_isIso hs (pb.obj Fsh)
   haveI : IsIso (pb.map η) := by
-    have htri : pb.map η ≫ adj.counit.app (pb.obj F) = 𝟙 _ := adj.left_triangle_components F
-    rw [show pb.map η = inv (adj.counit.app (pb.obj F)) from by
-      apply (cancel_mono (adj.counit.app (pb.obj F))).mp; simp [htri]]; infer_instance
+    have htri : pb.map η ≫ adj.counit.app (pb.obj Fsh) = 𝟙 _ :=
+      adj.left_triangle_components Fsh
+    rw [show pb.map η = inv (adj.counit.app (pb.obj Fsh)) from by
+      apply (cancel_mono (adj.counit.app (pb.obj Fsh))).mp; simp [htri]]
+    infer_instance
   -- Step 2: val stalk of pb.map(η) is iso
   haveI : IsIso (pb.map η).val := by
     show IsIso (sheafToPresheaf _ _ |>.map (pb.map η)); infer_instance
   let Tz := Presheaf.stalkFunctor C x
   -- Step 3: pullbackIso naturality
   let pi := Sheaf.pullbackIso C (closedIncl hs)
-  let piF := pi.hom.app F
-  let piT := pi.hom.app ((Sheaf.pushforward C (closedIncl hs)).obj (pb.obj F))
+  let piF := pi.hom.app Fsh
+  let piT := pi.hom.app ((Sheaf.pushforward C (closedIncl hs)).obj (pb.obj Fsh))
   haveI : IsIso piF.val := by show IsIso ((sheafToPresheaf _ _).map piF); infer_instance
   haveI : IsIso piT.val := by show IsIso ((sheafToPresheaf _ _).map piT); infer_instance
   have hnat : (pb.map η).val ≫ piT.val = piF.val ≫
@@ -259,9 +263,9 @@ theorem closedIncl_unit_stalk_isIso
     IsIso.of_isIso_fac_left hnat_stalk.symm
   -- Step 5: toSheafify naturality → pull.map(η.val) stalk is iso
   let K := Opens.grothendieckTopology (TopCat.of s)
-  let P₁ := (Presheaf.pullback C (closedIncl hs)).obj F.val
+  let P₁ := (Presheaf.pullback C (closedIncl hs)).obj F
   let P₂ := (Presheaf.pullback C (closedIncl hs)).obj
-    ((Sheaf.pushforward C (closedIncl hs)).obj (pb.obj F)).val
+    ((Sheaf.pushforward C (closedIncl hs)).obj (pb.obj Fsh)).val
   have hts : Tz.map ((Presheaf.pullback C (closedIncl hs)).map η.val) ≫
       Tz.map (CategoryTheory.toSheafify K P₂) =
     Tz.map (CategoryTheory.toSheafify K P₁) ≫ Tz.map
@@ -275,12 +279,13 @@ theorem closedIncl_unit_stalk_isIso
     IsIso.of_isIso_fac_right hts
   -- Step 6: stalkPull_nat → η.val stalk is iso
   haveI : IsIso (Presheaf.stalkPullbackHom C (closedIncl hs)
-      ((𝟭 _).obj F).val x) :=
-    (Presheaf.stalkPullbackIso C (closedIncl hs) ((𝟭 _).obj F).val x).isIso_hom
+      ((𝟭 (Sheaf C X)).obj Fsh).val x) := by
+    simpa using
+      (Presheaf.stalkPullbackIso C (closedIncl hs) ((𝟭 (Sheaf C X)).obj Fsh).val x).isIso_hom
   haveI : IsIso (Presheaf.stalkPullbackHom C (closedIncl hs)
-      ((pb ⋙ Sheaf.pushforward C (closedIncl hs)).obj F).val x) :=
+      ((pb ⋙ Sheaf.pushforward C (closedIncl hs)).obj Fsh).val x) :=
     (Presheaf.stalkPullbackIso C (closedIncl hs)
-      ((pb ⋙ Sheaf.pushforward C (closedIncl hs)).obj F).val x).isIso_hom
+      ((pb ⋙ Sheaf.pushforward C (closedIncl hs)).obj Fsh).val x).isIso_hom
   exact IsIso.of_isIso_fac_right (stalkPullbackHom_naturality (closedIncl hs) η.val x)
 
 end TopCat

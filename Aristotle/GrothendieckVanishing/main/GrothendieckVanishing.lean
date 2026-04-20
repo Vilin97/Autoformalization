@@ -90,7 +90,8 @@ private theorem ReducibleVanishing'
         · -- closedIncl_unit_stalk_isIso: iso on stalks at z ∈ Z
           haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
             simpa [S, closedImmersionSES, i, Gsh] using
-              (TopCat.closedIncl_unit_stalk_isIso hZ_closed Gsh ⟨x, hxZ⟩)
+              (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
+                (hs := hZ_closed) (F := G) hG ⟨x, hxZ⟩)
           exact stalk_zero_of_ses_g_iso hSE x inferInstance a
         · have hx' : x ∉ ⋃₀ ((insert Z s' : Finset (Set X)) : Set (Set X)) := by
             simp only [Finset.coe_insert, Set.sUnion_insert, Set.mem_union] at hx ⊢
