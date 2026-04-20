@@ -430,6 +430,26 @@ theorem sheafCohomologyFunctor_map_apply (X : TopCat.{u}) (n : ℕ)
     ConcreteCategory.hom ((sheafCohomologyFunctor X n).map f) x =
     x.comp (Ext.mk₀ f) (add_zero n) := rfl
 
+/-- The degree-`0` sheaf cohomology functor is naturally isomorphic to taking sections on `⊤`. -/
+noncomputable def sheafH0NatIsoSections {X : TopCat.{u}} :
+    sheafCohomologyFunctor X 0 ≅
+      sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u} ⋙
+        (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤) :=
+  NatIso.ofComponents (fun F => (sheafH0EquivSections F).toAddCommGrpIso) fun f => by
+    ext x
+    simpa [sheafCohomologyFunctor_map_apply] using
+      (sheafH0EquivSections_natural (f := f) (x := x))
+
+@[simp] theorem sheafH0NatIsoSections_hom_app {X : TopCat.{u}}
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (x : Sheaf.H F 0) :
+    ConcreteCategory.hom ((sheafH0NatIsoSections (X := X)).hom.app F) x =
+      sheafH0EquivSections F x := rfl
+
+@[simp] theorem sheafH0NatIsoSections_inv_app {X : TopCat.{u}}
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (x : ToType (F.val.obj (op ⊤))) :
+    ConcreteCategory.hom ((sheafH0NatIsoSections (X := X)).inv.app F) x =
+      (sheafH0EquivSections F).symm x := rfl
+
 /-- Functor-level naturality of the connecting morphism on sheaf cohomology. This is the
     `sheafCohomologyFunctor`-packaged form of `sheafH_comp_extClass_naturality`. -/
 theorem sheafCohomologyFunctor_map_extClass_naturality {X : TopCat.{u}}
