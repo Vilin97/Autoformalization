@@ -59,15 +59,20 @@ private theorem ReducibleVanishing'
     have hZ_comp := hs_irred Z (Finset.mem_insert_self Z s')
     have hZ_closed := isClosed_of_mem_irreducibleComponents Z hZ_comp
     have hZ_irred := hZ_comp.1
+    let i := TopCat.closedIncl hZ_closed
     let S := closedImmersionSES Z hZ_closed G
     have hSE := closedImmersionSES_shortExact Z hZ_closed G
     have hpush : Subsingleton (Sheaf.H S.X₃ n) := by
-      apply PushforwardHVanishing Z hZ_closed
       haveI : IrreducibleSpace (TopCat.of Z) :=
         isIrreducible_iff_irreducibleSpace.mp hZ_irred
-      exact ih_irred (TopCat.of Z) _
-        (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z)
-        (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z) hn)
+      simpa [S, closedImmersionSES, i] using
+        (PushforwardHVanishing Z hZ_closed
+          (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj G).val)
+          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj G).cond
+          n
+          (ih_irred (TopCat.of Z) ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj G)
+            (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z)
+            (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z) hn)))
     have hker : Subsingleton (Sheaf.H S.X₁ n) := by
       apply ih (fun Z' hZ' => hs_irred Z' (Finset.mem_insert_of_mem hZ')) S.X₁
       intro x hx a

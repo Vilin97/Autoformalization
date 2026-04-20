@@ -142,15 +142,16 @@ theorem closedIncl_pushforward_shortExact
 -- Proof by induction: n=0 via sections, n=1 via Ext^0 surjectivity, n≥2 via LES dimension shift.
 theorem PushforwardHVanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) (n : ℕ)
-    (h : Subsingleton (Sheaf.H G n)) :
+    {G : TopCat.Presheaf AddCommGrpCat.{u} (TopCat.of Z)} (hG : G.IsSheaf)
+    (n : ℕ) (h : Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) n)) :
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hZ)).obj G) n) := by
+      (TopCat.closedIncl hZ)).obj (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))) n) := by
+  let Gsh : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z) := ⟨G, hG⟩
   let i := TopCat.closedIncl hZ
   suffices ∀ (m : ℕ) (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)),
       Subsingleton (Sheaf.H G' m) →
       Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') m) from
-    this n G h
+    this n Gsh h
   intro m; induction m with
   | zero =>
     intro G' hG'
@@ -261,6 +262,7 @@ theorem closedComplementVanishing
     topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl
       (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
       (lt_of_lt_of_le hn le_top)
+  let i := TopCat.closedIncl hYcl
   let S := closedImmersionSES Y hYcl C
   have hSE := closedImmersionSES_shortExact Y hYcl C
   have hSX₁_zero : IsZero S.X₁ := by
@@ -275,4 +277,10 @@ theorem closedComplementVanishing
     simpa using hSX₁_zero'
   exact subsingleton_sheafH_of_shortExact_middle hSE n
     (_root_.sheafH_subsingleton_of_isZero S.X₁ hSX₁_zero n)
-    (PushforwardHVanishing Y hYcl _ n (@ih (TopCat.of Y) _ n _ hY_dim_lt hn))
+    (by
+      simpa [S, closedImmersionSES, i] using
+        (PushforwardHVanishing Y hYcl
+          (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj C).val)
+          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj C).cond n
+          (@ih (TopCat.of Y) _ n ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj C)
+            hY_dim_lt hn)))

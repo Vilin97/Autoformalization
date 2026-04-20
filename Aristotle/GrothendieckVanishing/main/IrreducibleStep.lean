@@ -350,10 +350,16 @@ theorem IrreduciblePosVanishing
   by_cases hpos : topologicalKrullDim X > 0
   · obtain ⟨Z, hZ_closed, _, hZ_dim, hn_Z⟩ :=
       exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos
+    let i := TopCat.closedIncl hZ_closed
     let S := closedImmersionSES Z hZ_closed F
     have hSE := closedImmersionSES_shortExact Z hZ_closed F
     have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
-      PushforwardHVanishing Z hZ_closed _ n (ih (TopCat.of Z) n _ hZ_dim hn_Z)
+      by
+        simpa [S, closedImmersionSES, i] using
+          (PushforwardHVanishing Z hZ_closed
+            (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F).val)
+            ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F).cond n
+            (ih (TopCat.of Z) n ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F) hZ_dim hn_Z))
     have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
       directLimit_cohomology_vanishing S.X₁ n
         (fun f hf => epiImage_zeroOutsideInt_vanishing f hf ih n hn)
