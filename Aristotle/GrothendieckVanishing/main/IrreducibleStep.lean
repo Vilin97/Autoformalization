@@ -215,19 +215,21 @@ private theorem exists_section_generating_stalks
     Uses: minimum-index point, generator section, locally constant germ shrinking. -/
 theorem exists_good_section
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
-    {V : Opens X} {R : TopCat.Sheaf AddCommGrpCat.{u} X}
-    (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
-    (hR : ¬ IsZero R) :
+    {V : Opens X} {R : TopCat.Presheaf AddCommGrpCat.{u} X} (hRsh : R.IsSheaf)
+    (i : (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶ TopCat.Sheaf.zeroOutsideInt V)
+    [Mono i]
+    (hR : ¬ IsZero (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :
     ∃ (V' : Opens X) (_ : V' ≤ V) (_ : V' ≠ ⊥)
-      (s : R.val.obj (op V')),
+      (s : R.obj (op V')),
       ∀ (x : X) (_ : x ∈ V'),
         Function.Bijective (ConcreteCategory.hom
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-            (TopCat.Sheaf.zeroOutsideInt.sHom s).val)) := by
-  obtain ⟨V', hV'V, hV'ne, s, hgen⟩ :=
-    exists_section_generating_stalks (R := R.val) R.cond i (by simpa using hR)
+            (TopCat.Sheaf.zeroOutsideInt.sHom
+              (F := (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) s).val)) := by
+  let Rsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨R, hRsh⟩
+  obtain ⟨V', hV'V, hV'ne, s, hgen⟩ := exists_section_generating_stalks (R := R) hRsh i hR
   exact ⟨V', hV'V, hV'ne, s, fun x hx =>
-    sHom_stalk_bijective_at hV'V i s x hx (hgen x hx).1 (hgen x hx).2⟩
+    sHom_stalk_bijective_at (R := Rsh) hV'V i s x hx (hgen x hx).1 (hgen x hx).2⟩
 
 /-- **Structure lemma** (Hartshorne Step 4 core): a nonzero subsheaf of `zeroOutsideInt V`
     contains `zeroOutsideInt V'` for some nonempty open `V' ⊆ V`, with the inclusion
@@ -244,7 +246,8 @@ theorem subsheaf_contains_zeroOutsideInt
       (∀ (x : X) (_ : x ∈ V'),
         Function.Bijective (ConcreteCategory.hom
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map j.val))) := by
-  obtain ⟨V', hle, hne, s, hbij⟩ := exists_good_section i hR
+  obtain ⟨V', hle, hne, s, hbij⟩ :=
+    exists_good_section (R := R.val) R.cond i (by simpa using hR)
   refine ⟨V', hle, hne, TopCat.Sheaf.zeroOutsideInt.sHom s, ?_, hbij⟩
   haveI : ∀ x, Mono ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
       (TopCat.Sheaf.zeroOutsideInt.sHom s).val) := fun y => by
