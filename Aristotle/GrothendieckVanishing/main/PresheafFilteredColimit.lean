@@ -206,11 +206,7 @@ theorem filtered_colimit_exists_compatible_representatives
     {ι : Type u} (U : ι → Opens X)
     (sf : ∀ i, ToType (c.pt.obj (op (U i))))
     (hcompat : Presheaf.IsCompatible c.pt U sf)
-    {t : Finset ι}
-    (j₀ : J')
-    (x' : ∀ k, k ∈ t → ToType ((P.obj j₀).obj (op (U k))))
-    (hx' : ∀ k (hk : k ∈ t),
-      ConcreteCategory.hom ((c.ι.app j₀).app (op (U k))) (x' k hk) = sf k) :
+    {t : Finset ι} :
     ∃ (j₁ : J')
       (x'' : ∀ k : ↥t, ToType ((P.obj j₁).obj (op (U k.1)))),
       Presheaf.IsCompatible (P.obj j₁) (fun k : ↥t => U k.1) x'' ∧
@@ -218,6 +214,25 @@ theorem filtered_colimit_exists_compatible_representatives
   classical
   let ev V := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op V)
   have hcV : ∀ V, IsColimit ((ev V).mapCocone c) := fun V => isColimitOfPreserves (ev V) hc
+  choose j_all x_all hx_all using fun k =>
+    Concrete.isColimit_exists_rep _ (hcV (U k)) (sf k)
+  obtain ⟨j₀, hj₀⟩ := IsFiltered.sup_objs_exists (t.image j_all)
+  let g₀ : ∀ k, k ∈ t → (j_all k ⟶ j₀) :=
+    fun k hk => (hj₀ (Finset.mem_image_of_mem j_all hk)).some
+  let x' : ∀ k, k ∈ t → ToType ((P.obj j₀).obj (op (U k))) :=
+    fun k hk => ConcreteCategory.hom
+      ((P.map (g₀ k hk)).app (op (U k))) (x_all k)
+  have hx' : ∀ k (hk : k ∈ t),
+      ConcreteCategory.hom ((c.ι.app j₀).app (op (U k))) (x' k hk) = sf k := by
+    intro k hk
+    dsimp [x']
+    change ConcreteCategory.hom (((P.map (g₀ k hk)).app (op (U k))) ≫
+      (c.ι.app j₀).app (op (U k))) (x_all k) = sf k
+    rw [show (P.map (g₀ k hk)).app (op (U k)) ≫
+        (c.ι.app j₀).app (op (U k)) = (c.ι.app (j_all k)).app (op (U k)) from by
+      simpa [Functor.const_obj_map] using
+        congrArg (fun α => NatTrans.app α (op (U k))) (c.ι.naturality (g₀ k hk))]
+    exact hx_all k
   obtain ⟨j₁, g₁, hg₁⟩ : ∃ (j₁ : J') (g₁ : j₀ ⟶ j₁),
       ∀ (k : ι) (hk : k ∈ t) (l : ι) (hl : l ∈ t),
         ConcreteCategory.hom ((P.obj j₁).map (Opens.infLELeft (U k) (U l)).op)
@@ -442,9 +457,6 @@ theorem isSheaf_presheaf_filtered_colimit
     rw [SetLike.le_def]; intro x hx
     obtain ⟨i, hi, hxi⟩ := Set.mem_iUnion₂.mp (ht hx)
     exact Opens.mem_iSup.mpr ⟨i, Opens.mem_iSup.mpr ⟨hi, hxi⟩⟩
-  -- Setup: evaluation colimits
-  let ev V := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op V)
-  have hcV : ∀ V, IsColimit ((ev V).mapCocone c) := fun V => isColimitOfPreserves (ev V) hcP
   -- Separation: section zero on finite subcover is zero
   have hsep : ∀ (a : ToType (c.pt.obj (op (iSup U)))),
       (∀ k ∈ t, c.pt.map (Opens.leSupr U k).op a = 0) → a = 0 :=
@@ -452,29 +464,8 @@ theorem isSheaf_presheaf_filtered_colimit
       P hP hcP
       (fun k => le_iSup U k) hsup_le a ha
   -- Existence: construct a gluing section
-  classical
-  choose j_all x_all hx_all using fun k =>
-    Concrete.isColimit_exists_rep _ (hcV (U k)) (sf k)
-  -- Merge j_all k (k ∈ t) to common index
-  obtain ⟨j₀, hj₀⟩ := IsFiltered.sup_objs_exists (t.image j_all)
-  let g₀ : ∀ k, k ∈ t → (j_all k ⟶ j₀) :=
-    fun k hk => (hj₀ (Finset.mem_image_of_mem j_all hk)).some
-  -- Transport to j₀
-  let x' : ∀ k, k ∈ t → ToType ((P.obj j₀).obj (op (U k))) :=
-    fun k hk => ConcreteCategory.hom
-      ((P.map (g₀ k hk)).app (op (U k))) (x_all k)
-  -- x' still maps to sf_k in the colimit
-  have hx' : ∀ k (hk : k ∈ t),
-      ConcreteCategory.hom ((c.ι.app j₀).app (op (U k))) (x' k hk) = sf k := by
-    intro k hk; dsimp [x']
-    change ConcreteCategory.hom (((P.map (g₀ k hk)).app (op (U k))) ≫
-      (c.ι.app j₀).app (op (U k))) (x_all k) = sf k
-    rw [show (P.map (g₀ k hk)).app (op (U k)) ≫
-        (c.ι.app j₀).app (op (U k)) = (c.ι.app (j_all k)).app (op (U k)) from by
-      simpa using congrArg (fun α => NatTrans.app α (op (U k))) (c.ι.naturality (g₀ k hk))]
-    exact hx_all k
   obtain ⟨j₁, x'', hx''_compat, hx''⟩ := filtered_colimit_exists_compatible_representatives
-    P hcP U sf hcompat j₀ x' hx'
+    P hcP U sf hcompat
   obtain ⟨s, hs_k⟩ := colimit_exists_gluing_of_compatible_finite_subcover
     P hP U sf hsup_le j₁ x'' hx''_compat hx''
   refine ⟨s, fun i => ?_, fun s' hs' => ?_⟩
