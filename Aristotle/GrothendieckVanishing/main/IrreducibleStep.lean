@@ -313,12 +313,11 @@ theorem subsheaf_zeroOutsideInt_vanishing
     exact subsingleton_sheafH_of_shortExact_middle hSE m
       (zeroOutsideInt_cohomology_vanishing V' hV'ne ih m hm)
       (closedComplementVanishing V' hV'ne (C := S.X₃.val) S.X₃.cond m ih
-        (lt_trans (topologicalKrullDim_lt_of_isIrreducible_of_isClosed
+        (topologicalKrullDim_lt_coe_nat_of_isIrreducible_of_isClosed_of_lt_coe_nat_succ
           V'.2.isClosed_compl
           (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr
             (Opens.coe_eq_empty.not.mpr hV'ne)))
-          (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) _)
-            (lt_of_lt_of_le hm le_top))) hm)
+          (lt_of_lt_of_le hm (by exact_mod_cast Nat.le_succ m)))
         (fun x hxV' b => cokernel_stalk_zero_of_stalk_surj
           (F := (TopCat.Sheaf.zeroOutsideInt V').val) (G := R)
           (hF := (TopCat.Sheaf.zeroOutsideInt V').cond) (hG := hRsh)
