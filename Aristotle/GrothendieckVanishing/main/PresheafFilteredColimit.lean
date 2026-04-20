@@ -134,6 +134,56 @@ theorem filtered_colimit_kills_all_restrictions
     · exact transition_preserves_zero Y' g_cur
         (IsFiltered.leftToMax j_cur jk₀ ≫ h_eq) (homOfLE (hW k)) b₀ (hg_cur k hk)
 
+/-- If a representative of a colimit section restricts to zero in the cocone point,
+    then after some filtered transition its restriction is already zero. -/
+theorem filtered_colimit_restriction_eventually_zero_of_zero
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
+    {c : Cocone Y'} (hc : IsColimit c)
+    {U V : Opens X} (φ : U ⟶ V)
+    (a : ToType (c.pt.obj (op V)))
+    {j₀ : J'} (b₀ : ToType ((Y'.obj j₀).obj (op V)))
+    (hb₀ : ConcreteCategory.hom ((c.ι.app j₀).app (op V)) b₀ = a)
+    (ha : c.pt.map φ.op a = 0) :
+    ∃ (j' : J') (f : j₀ ⟶ j'),
+      ConcreteCategory.hom ((Y'.obj j').map φ.op)
+        (ConcreteCategory.hom ((Y'.map f).app (op V)) b₀) = 0 := by
+  let ev V := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op V)
+  have hcU : IsColimit ((ev U).mapCocone c) := isColimitOfPreserves (ev U) hc
+  have hcTyp := isColimitOfPreserves (CategoryTheory.forget AddCommGrpCat) hcU
+  have hnat : ConcreteCategory.hom (((ev U).mapCocone c).ι.app j₀)
+      (ConcreteCategory.hom ((Y'.obj j₀).map φ.op) b₀) =
+    ConcreteCategory.hom (c.pt.map φ.op) a := by
+    simp only [Functor.mapCocone_ι_app]
+    rw [← hb₀]
+    change ConcreteCategory.hom
+      ((Y'.obj j₀).map _ ≫ (c.ι.app j₀).app _) b₀ =
+      ConcreteCategory.hom
+      ((c.ι.app j₀).app _ ≫ (((Functor.const J').obj c.pt).obj j₀).map _) b₀
+    rw [(c.ι.app j₀).naturality φ.op]
+  have h0 : ((CategoryTheory.forget AddCommGrpCat).mapCocone
+      ((ev U).mapCocone c)).ι.app j₀
+      (ConcreteCategory.hom ((Y'.obj j₀).map φ.op) b₀) =
+    ((CategoryTheory.forget AddCommGrpCat).mapCocone
+      ((ev U).mapCocone c)).ι.app j₀ 0 := by
+    change ConcreteCategory.hom (((ev U).mapCocone c).ι.app j₀) _ =
+      ConcreteCategory.hom (((ev U).mapCocone c).ι.app j₀) 0
+    rw [hnat, ha, map_zero]
+  rw [Types.FilteredColimit.isColimit_eq_iff' hcTyp] at h0
+  obtain ⟨j', f, hf⟩ := h0
+  refine ⟨j', f, ?_⟩
+  have hf' : ConcreteCategory.hom (((Y' ⋙ ev U).map f))
+      (ConcreteCategory.hom ((Y'.obj j₀).map φ.op) b₀) = 0 := by
+    simpa [map_zero] using hf
+  change ConcreteCategory.hom (((Y'.map f).app (op V)) ≫ (Y'.obj j').map φ.op) b₀ = 0
+  rw [show ((Y'.map f).app (op V)) ≫ (Y'.obj j').map φ.op =
+    (Y'.obj j₀).map φ.op ≫ (Y'.map f).app (op U)
+    from ((Y'.map f).naturality φ.op).symm]
+  change ConcreteCategory.hom ((Y'.map f).app (op U))
+    (ConcreteCategory.hom ((Y'.obj j₀).map φ.op) b₀) = 0
+  simpa [ev] using hf'
+
 /-- A section of a filtered colimit that restricts to zero on a finite open cover is zero.
     Combines representative extraction, per-element eventual vanishing,
     merging to a common index, and sheaf separation. -/
@@ -153,38 +203,13 @@ theorem colimit_section_zero_of_zero_on_cover
   obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ (hcV V) a
   -- For each k ∈ t: ι(b₀|_{W_k}) = a|_{W_k} = 0, so eventually zero
   have h_ev_zero : ∀ k ∈ t, ∃ (jk : J') (fk : j₀ ⟶ jk),
-      ConcreteCategory.hom (((Y' ⋙ ev (W k)).map fk))
-        (ConcreteCategory.hom ((Y'.obj j₀).map (homOfLE (hW k)).op) b₀) = 0 := by
+      ConcreteCategory.hom ((Y'.obj jk).map (homOfLE (hW k)).op)
+        (ConcreteCategory.hom ((Y'.map fk).app (op V)) b₀) = 0 := by
     intro k hk
-    have hcTyp := isColimitOfPreserves (CategoryTheory.forget AddCommGrpCat) (hcV (W k))
-    have hnat_k : ConcreteCategory.hom (((ev (W k)).mapCocone c).ι.app j₀)
-        (ConcreteCategory.hom ((Y'.obj j₀).map (homOfLE (hW k)).op) b₀) =
-      ConcreteCategory.hom (c.pt.map (homOfLE (hW k)).op) a := by
-      simp only [Functor.mapCocone_ι_app]; rw [← hb₀]
-      change ConcreteCategory.hom
-        ((Y'.obj j₀).map _ ≫ (c.ι.app j₀).app _) b₀ =
-        ConcreteCategory.hom
-        ((c.ι.app j₀).app _ ≫ (((Functor.const J').obj c.pt).obj j₀).map _) b₀
-      rw [(c.ι.app j₀).naturality (homOfLE (hW k)).op]
-    have h0 : ((CategoryTheory.forget AddCommGrpCat).mapCocone
-        ((ev (W k)).mapCocone c)).ι.app j₀
-        (ConcreteCategory.hom ((Y'.obj j₀).map (homOfLE (hW k)).op) b₀) =
-      ((CategoryTheory.forget AddCommGrpCat).mapCocone
-        ((ev (W k)).mapCocone c)).ι.app j₀ 0 := by
-      change ConcreteCategory.hom (((ev (W k)).mapCocone c).ι.app j₀) _ =
-        ConcreteCategory.hom (((ev (W k)).mapCocone c).ι.app j₀) 0
-      rw [hnat_k, ha k hk, map_zero]
-    rw [Types.FilteredColimit.isColimit_eq_iff' hcTyp] at h0
-    obtain ⟨jk, fk, hfk⟩ := h0
-    exact ⟨jk, fk, by simpa [map_zero] using hfk⟩
+    exact filtered_colimit_restriction_eventually_zero_of_zero
+      Y' hc (homOfLE (hW k)) a b₀ hb₀ (ha k hk)
   -- Merge via filtered_colimit_kills_all_restrictions
-  obtain ⟨j₁, g₀, hg₀⟩ := filtered_colimit_kills_all_restrictions
-      Y' hW j₀ b₀ t (by
-    intro k hk; obtain ⟨jk, fk, hfk⟩ := h_ev_zero k hk; refine ⟨jk, fk, ?_⟩
-    change ConcreteCategory.hom (((Y'.map fk).app (op V)) ≫
-      (Y'.obj jk).map (homOfLE (hW k)).op) b₀ = 0
-    rw [← ((Y'.map fk).naturality (homOfLE (hW k)).op)]
-    exact hfk)
+  obtain ⟨j₁, g₀, hg₀⟩ := filtered_colimit_kills_all_restrictions Y' hW j₀ b₀ t h_ev_zero
   -- Conclude: the transition is zero by sheaf separation, hence a = 0
   rw [← hb₀]; change ConcreteCategory.hom ((c.ι.app j₀).app (op V)) b₀ = 0
   have hnat : (c.ι.app j₀).app (op V) =
