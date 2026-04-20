@@ -154,6 +154,7 @@ theorem zeroOutsideInt_cohomology_vanishing
     (ih : VanishingIH.{u} (topologicalKrullDim X))
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) m) := by
+  let C := Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))
   -- m ≠ 0 (since m > dim X ≥ 0), write m = m' + 1
   have hm_ne : m ≠ 0 := by
     intro h; subst h; exact absurd hm (not_lt.mpr topologicalKrullDim_nonneg)
@@ -161,7 +162,7 @@ theorem zeroOutsideInt_cohomology_vanishing
   -- Step 2: apply zeroOutsideInt_vanishing, reducing to cokernel vanishing at m'
   apply zeroOutsideInt_vanishing V m'
   -- Cokernel vanishing at m': use closedComplementVanishing with m' > dim Vᶜ
-  exact closedComplementVanishing V hV _ m' ih
+  exact closedComplementVanishing V hV (C := C.val) C.cond m' ih
     (lt_coe_nat_of_lt_of_lt_coe_nat_succ
       (topologicalKrullDim_lt_of_isIrreducible_of_isClosed V.2.isClosed_compl
         (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr

@@ -295,7 +295,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
       (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel j)) inferInstance inferInstance
     exact subsingleton_sheafH_of_shortExact_middle hSE m
       (zeroOutsideInt_cohomology_vanishing V' hV'ne ih m hm)
-      (closedComplementVanishing V' hV'ne _ m ih
+      (closedComplementVanishing V' hV'ne (C := S.X₃.val) S.X₃.cond m ih
         (lt_trans (topologicalKrullDim_lt_of_isIrreducible_of_isClosed
           V'.2.isClosed_compl
           (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr
