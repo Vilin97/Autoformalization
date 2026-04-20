@@ -351,15 +351,17 @@ theorem IrreduciblePosVanishing
   · obtain ⟨Z, hZ_closed, _, hZ_dim, hn_Z⟩ :=
       exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos
     let i := TopCat.closedIncl hZ_closed
-    let S := closedImmersionSES Z hZ_closed F
-    have hSE := closedImmersionSES_shortExact Z hZ_closed F
+    let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F.val, F.cond⟩
+    let S := closedImmersionSES (Z := Z) (hZ := hZ_closed) (F := F.val) F.cond
+    have hSE := closedImmersionSES_shortExact (Z := Z) (hZ := hZ_closed) (F := F.val) F.cond
     have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
       by
-        simpa [S, closedImmersionSES, i] using
+        simpa [S, closedImmersionSES, i, Fsh] using
           (PushforwardHVanishing Z hZ_closed
-            (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F).val)
-            ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F).cond n
-            (ih (TopCat.of Z) n ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F) hZ_dim hn_Z))
+            (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh).val)
+            ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh).cond n
+            (ih (TopCat.of Z) n ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh)
+              hZ_dim hn_Z))
     have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
       directLimit_cohomology_vanishing S.X₁ n
         (fun f hf => epiImage_zeroOutsideInt_vanishing f hf ih n hn)

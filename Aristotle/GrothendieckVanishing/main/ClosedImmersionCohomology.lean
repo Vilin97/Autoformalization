@@ -195,28 +195,29 @@ theorem PushforwardHVanishing
 -- epi via surjective on stalks
 theorem epi_unit_of_closedImmersion
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
     Epi ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
-      (TopCat.closedIncl hZ)).unit.app F) := by
+      (TopCat.closedIncl hZ)).unit.app (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
   let i := TopCat.closedIncl hZ
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
   let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
-  rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} (adj.unit.app F),
-    show Sheaf.IsLocallySurjective (adj.unit.app F) =
-      TopCat.Presheaf.IsLocallySurjective (adj.unit.app F).val from rfl,
+  rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} (adj.unit.app Fsh),
+    show Sheaf.IsLocallySurjective (adj.unit.app Fsh) =
+      TopCat.Presheaf.IsLocallySurjective (adj.unit.app Fsh).val from rfl,
     TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
   intro x; by_cases hxZ : (x : X) ∈ Z
   · -- x ∈ Z: stalk map is surjective (it's an iso)
-    haveI := TopCat.closedIncl_unit_stalk_isIso hZ F ⟨x, hxZ⟩
+    haveI := TopCat.closedIncl_unit_stalk_isIso hZ Fsh ⟨x, hxZ⟩
     exact (ConcreteCategory.bijective_of_isIso
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} ((TopCat.closedIncl hZ) ⟨x, hxZ⟩)).map
         ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
-          (TopCat.closedIncl hZ)).unit.app F).val)).2
+          (TopCat.closedIncl hZ)).unit.app Fsh).val)).2
   · -- x ∉ Z: target stalk is 0 (pushforward has zero stalk outside closed Z)
     exact fun b => ⟨0, by
       rw [pushforward_closedIncl_stalk_eq_zero
         (hs := hZ)
-        (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F).val)
-        (((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F).cond)
+        (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh).val)
+        (((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh).cond)
         hxZ b]
       exact map_zero _⟩
 
@@ -225,18 +226,19 @@ theorem epi_unit_of_closedImmersion
     inclusion of a closed subset. -/
 noncomputable def closedImmersionSES
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
     ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   let i := TopCat.closedIncl hZ
-  let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i).unit.app F
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+  let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i).unit.app Fsh
   ShortComplex.mk (kernel.ι η) η (kernel.condition η)
 
 theorem closedImmersionSES_shortExact
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
-    (closedImmersionSES Z hZ F).ShortExact := by
-  delta closedImmersionSES
-  haveI := epi_unit_of_closedImmersion Z hZ F
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
+    (closedImmersionSES (Z := Z) (hZ := hZ) (F := F) hF).ShortExact := by
+  unfold closedImmersionSES
+  haveI := epi_unit_of_closedImmersion (Z := Z) (hZ := hZ) (F := F) hF
   exact ShortComplex.ShortExact.mk'
     (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel _)) inferInstance inferInstance
 
@@ -264,14 +266,15 @@ theorem closedComplementVanishing
       (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
       (lt_of_lt_of_le hn le_top)
   let i := TopCat.closedIncl hYcl
-  let S := closedImmersionSES Y hYcl Csh
-  have hSE := closedImmersionSES_shortExact Y hYcl Csh
+  let S := closedImmersionSES (Z := Y) (hZ := hYcl) (F := C) hC
+  have hSE := closedImmersionSES_shortExact (Z := Y) (hZ := hYcl) (F := C) hC
   have hSX₁_zero : IsZero S.X₁ := by
     have hSX₁_zero' : IsZero ((⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
       sheaf_isZero_of_zero_stalks X S.X₁.cond (fun x a => by
         by_cases hxY : x ∈ Y
-        · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
-            TopCat.closedIncl_unit_stalk_isIso hYcl Csh ⟨x, hxY⟩
+        · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
+            simpa [S, closedImmersionSES, i, Csh] using
+              (TopCat.closedIncl_unit_stalk_isIso hYcl Csh ⟨x, hxY⟩)
           exact stalk_zero_of_ses_g_iso hSE x inferInstance a
         · exact stalk_zero_of_shortExact_kernel hSE x
             (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b) a)
@@ -281,7 +284,10 @@ theorem closedComplementVanishing
     (by
       simpa [S, closedImmersionSES, i] using
         (PushforwardHVanishing Y hYcl
-          (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Csh).val)
-          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Csh).cond n
-          (@ih (TopCat.of Y) _ n ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Csh)
+          (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj
+            (⟨C, hC⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)).val)
+          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj
+            (⟨C, hC⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)).cond n
+          (@ih (TopCat.of Y) _ n ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj
+            (⟨C, hC⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
             hY_dim_lt hn)))
