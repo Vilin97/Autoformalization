@@ -271,9 +271,11 @@ end FinsetGenerated
     `cohomology_vanishing_of_finitelyGenerated_vanishing` (colimit step). -/
 theorem directLimit_cohomology_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
-    (K : TopCat.Sheaf AddCommGrpCat.{u} X) (m : ℕ)
+    {K : TopCat.Presheaf AddCommGrpCat.{u} X} (hK : K.IsSheaf) (m : ℕ)
     (hzero : ∀ {G : TopCat.Sheaf AddCommGrpCat.{u} X} {V : Opens X}
       (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G), Epi f → Subsingleton (Sheaf.H G m)) :
-    Subsingleton (Sheaf.H K m) :=
-  cohomology_vanishing_of_finitelyGenerated_vanishing K m
+    Subsingleton (Sheaf.H (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
+  let Ksh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨K, hK⟩
+  change Subsingleton (Sheaf.H Ksh m)
+  exact cohomology_vanishing_of_finitelyGenerated_vanishing Ksh m
     (fun S _ => finsetGeneratedSheaf_vanishing m hzero S)
