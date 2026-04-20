@@ -313,15 +313,18 @@ theorem subsheaf_zeroOutsideInt_vanishing
     `subsheaf_zeroOutsideInt_vanishing` (Step 4). -/
 theorem epiImage_zeroOutsideInt_vanishing
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
-    {V : Opens X} {G : TopCat.Sheaf AddCommGrpCat.{u} X}
-    (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G) (hf : Epi f)
+    {V : Opens X} {G : TopCat.Presheaf AddCommGrpCat.{u} X} (hG : G.IsSheaf)
+    (f : TopCat.Sheaf.zeroOutsideInt V ⟶ (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (hf : Epi f)
     (ih : VanishingIH.{u} (topologicalKrullDim X))
     (m : ℕ) (hm : m > topologicalKrullDim X) :
-    Subsingleton (Sheaf.H G m) := by
+    Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
+  let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
+  change Subsingleton (Sheaf.H Gsh m)
   by_cases hV : V = ⊥
   · subst hV
-    have hZero : IsZero G := (isZero_zeroOutsideInt_bot X).of_epi f
-    exact _root_.sheafH_subsingleton_of_isZero G hZero m
+    have hZero : IsZero Gsh := (isZero_zeroOutsideInt_bot X).of_epi f
+    exact _root_.sheafH_subsingleton_of_isZero Gsh hZero m
   · let S := ShortComplex.mk (kernel.ι f) f (kernel.condition f)
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
@@ -365,7 +368,8 @@ theorem IrreduciblePosVanishing
               hZ_dim hn_Z))
     have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
       directLimit_cohomology_vanishing (K := S.X₁.val) S.X₁.cond n
-        (fun f hf => epiImage_zeroOutsideInt_vanishing f hf ih n hn)
+        (fun {G} {V} f hf =>
+          epiImage_zeroOutsideInt_vanishing (G := G.val) G.cond (V := V) f hf ih n hn)
     exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
   · -- dim ≤ 0: F is flasque on irreducible dim-0 space, use FlasqueVanishing
     push_neg at hpos
