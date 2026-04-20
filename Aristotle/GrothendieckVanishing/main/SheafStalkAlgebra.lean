@@ -121,17 +121,20 @@ theorem cokernel_stalk_zero_of_stalk_surj
     {X : TopCat.{u}}
     {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
     (hF : F.IsSheaf) (hG : G.IsSheaf)
-    (f : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (x : X)
+    (f : CategoryTheory.NatTrans F G) (x : X)
     (hf : Function.Surjective (ConcreteCategory.hom
-      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val)))
-    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj (Limits.cokernel f).val) :
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f)))
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
+      (Limits.cokernel (show (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
+        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from Sheaf.Hom.mk f)).val) :
     a = 0 := by
-  let S := ShortComplex.mk f (cokernel.π f) (cokernel.condition f)
+  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
+      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
+  let S := ShortComplex.mk fsh (cokernel.π fsh) (cokernel.condition fsh)
   have hepi : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.f.val) := by
-    simpa [S] using (AddCommGrpCat.epi_iff_surjective _).mpr hf
+    simpa [S, fsh] using (AddCommGrpCat.epi_iff_surjective _).mpr hf
   simpa [S] using stalk_zero_of_g_is_cokernel_of_stalk_epi
-    (S := S) (cokernelIsCokernel f) x hepi a
+    (S := S) (cokernelIsCokernel fsh) x hepi a
 
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
 
@@ -171,8 +174,9 @@ theorem zeroOutsideInt_cohomology_vanishing
       (G := (TopCat.Sheaf.zeroOutsideInt ⊤).val)
       (hF := (TopCat.Sheaf.zeroOutsideInt V).cond)
       (hG := (TopCat.Sheaf.zeroOutsideInt ⊤).cond)
-      (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)) x
-      (sheafifyMap_zeroOutside_openHom_stalk_surj Presheaf.constZ le_top x hxV) a)
+      (f := (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)).val)
+      (x := x)
+      (hf := sheafifyMap_zeroOutside_openHom_stalk_surj Presheaf.constZ le_top x hxV) a)
 
 
 /-- Stalks of `zeroOutsideInt V` vanish outside `V`. -/

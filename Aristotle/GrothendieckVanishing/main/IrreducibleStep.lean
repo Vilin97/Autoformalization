@@ -310,7 +310,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
         (fun x hxV' b => cokernel_stalk_zero_of_stalk_surj
           (F := (TopCat.Sheaf.zeroOutsideInt V').val) (G := R)
           (hF := (TopCat.Sheaf.zeroOutsideInt V').cond) (hG := hRsh)
-          j x (hj_stalk x hxV').2 b))
+          (f := j.val) (x := x) (hf := (hj_stalk x hxV').2) b))
 
 /-- **Steps 3C + 4 + LES** (Hartshorne III.2.7): any epi image of `zeroOutsideInt V` has
     vanishing cohomology in degree `m > dim X`. Uses third-term LES with
