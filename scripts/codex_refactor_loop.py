@@ -79,6 +79,20 @@ EVALUATOR_SCHEMA = {
 }
 
 
+def load_repo_env() -> None:
+    env_path = REPO_DIR / ".env"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        if key and key not in os.environ:
+            os.environ[key] = value.strip()
+
+
 def ensure_setup() -> None:
     result = subprocess.run(
         [str(SETUP_HOME_SCRIPT)],
@@ -322,6 +336,35 @@ def run_evaluator(cycle: int, strategy: str, diff: str, report: str, history: li
         return default_eval("Evaluator returned unparseable JSON")
 
 
+def send_telegram(message: str) -> None:
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "398863010")
+    if not token:
+        return
+    try:
+        result = subprocess.run(
+            [
+                "curl",
+                "-s",
+                "-X",
+                "POST",
+                f"https://api.telegram.org/bot{token}/sendMessage",
+                "-d",
+                f"chat_id={chat_id}",
+                "--data-urlencode",
+                f"text={message}",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+        if '"ok":false' in (result.stdout or ""):
+            print(f"Telegram error: {result.stdout[:200]}", file=sys.stderr)
+    except Exception as exc:
+        print(f"Telegram send failed: {exc}", file=sys.stderr)
+
+
 def apply_gates(sorry_before: int, sorry_after: int) -> None:
     if sorry_after > sorry_before:
         git("checkout", "--", ".", check=False)
@@ -442,6 +485,16 @@ def run_cycle(dry_run: bool = False, worker_only: bool = False) -> dict:
         git("commit", "-m", f"refactor: codex cycle {cycle} — {summary}", check=False)
         git("push", "origin", WORKING_BRANCH, check=False)
 
+    score = evaluation.get("progress_score", 0)
+    emoji = {-2: "🔴", -1: "🟠", 0: "⚪", 1: "🟢", 2: "🟢🟢"}.get(score, "⚪")
+    msg = f"{emoji} *Codex Refactor Cycle {cycle}*\n{evaluation.get('summary', 'no summary')}"
+    violations = evaluation.get("principle_violations", [])
+    if violations:
+        msg += f"\n⚠️ Violations: {', '.join(violations[:3])}"
+    if completed:
+        msg += f"\n✅ Completed: {', '.join(completed[:3])}"
+    send_telegram(msg)
+
     write_status(
         mode="idle",
         cycle=cycle,
@@ -452,6 +505,7 @@ def run_cycle(dry_run: bool = False, worker_only: bool = False) -> dict:
 
 
 def main() -> None:
+    load_repo_env()
     parser = argparse.ArgumentParser(description="Codex refactor loop")
     parser.add_argument("--loop", action="store_true", help="Run continuously")
     parser.add_argument("--interval", type=int, default=COOLDOWN, help="Seconds between cycles")
@@ -468,9 +522,14 @@ def main() -> None:
             while True:
                 try:
                     run_cycle(dry_run=args.dry_run, worker_only=args.worker_only)
+                except subprocess.TimeoutExpired:
+                    write_status(mode="error", error="Cycle timed out")
+                    print("Cycle timed out", file=sys.stderr)
+                    send_telegram("⏰ Codex refactor cycle timed out")
                 except Exception as exc:
                     write_status(mode="error", error=str(exc))
                     print(f"Cycle failed: {exc}", file=sys.stderr)
+                    send_telegram(f"❌ Codex refactor cycle failed: {exc}")
                 time.sleep(args.interval)
         else:
             run_cycle(dry_run=args.dry_run, worker_only=args.worker_only)
