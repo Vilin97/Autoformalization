@@ -166,19 +166,29 @@ theorem sheafH_exists_preimage_extClass {X : TopCat.{u}}
   exact ⟨y, hy⟩
 
 theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
     (hstalk : ∀ (x : X)
-      (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F.val), a = 0) :
-    IsZero F := by
-  have hZ : IsZero F.val := Functor.isZero F.val (fun ⟨U⟩ =>
+      (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F), a = 0) :
+    IsZero ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+  have hZ : IsZero F := Functor.isZero F (fun ⟨U⟩ =>
     @AddCommGrpCat.isZero_of_subsingleton _
-      ⟨fun s t => TopCat.Presheaf.section_ext F U s t fun x hx =>
-        (hstalk x _).trans (hstalk x _).symm⟩)
-  exact IsZero.mk
-    (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
-      fun U => (hZ.obj U).eq_zero_of_src (f.val.app U))) }⟩)
-    (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
-      fun U => (hZ.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
+      ⟨fun s t => by
+        apply hF.section_ext
+        intro x hx
+        obtain ⟨W, hxW, iU, iV, hEq⟩ := F.germ_eq x hx hx s t
+          ((hstalk x _).trans (hstalk x _).symm)
+        rw [Subsingleton.elim iU iV] at hEq
+        have hWU : W ≤ U := leOfHom iV
+        rw [Subsingleton.elim iV (homOfLE hWU)] at hEq
+        exact ⟨W, hWU, hxW, hEq⟩⟩)
+  have hFsh : IsZero Fsh := by
+    exact IsZero.mk
+      (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
+        fun U => (hZ.obj U).eq_zero_of_src (f.val.app U))) }⟩)
+      (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
+        fun U => (hZ.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
+  simpa [Fsh] using hFsh
 
 /-- If a sheaf is zero, then all its cohomology groups are subsingleton. -/
 theorem sheafH_subsingleton_of_isZero {X : TopCat.{u}}
@@ -434,7 +444,10 @@ instance sheafH_subsingleton_of_isEmpty {X : TopCat.{u}} [IsEmpty X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (n : ℕ) :
     Subsingleton (Sheaf.H F n) :=
   sheafH_subsingleton_of_isZero F
-    (sheaf_isZero_of_zero_stalks X F (fun x _ => (IsEmpty.false x).elim)) n
+    (by
+      have hF_zero : IsZero ((⟨F.val, F.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
+        sheaf_isZero_of_zero_stalks X F.cond (fun x _ => (IsEmpty.false x).elim)
+      simpa using hF_zero) n
 
 /-! ## Sheaf Cohomology Functor -/
 
