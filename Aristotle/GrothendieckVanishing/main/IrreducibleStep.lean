@@ -1,4 +1,5 @@
 import Aristotle.GrothendieckVanishing.main.SheafStalkAlgebra
+import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
 
 /-!
   IrreducibleStep.lean — Assembly: irreducible positive-dimension vanishing
@@ -429,4 +430,4 @@ theorem IrreduciblePosVanishing
     have hm_ne : n ≠ 0 := fun h => by
       subst h; exact absurd hn (not_lt.mpr topologicalKrullDim_nonneg)
     obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
-    exact inferInstance
+    exact sheafH_subsingleton_of_flasque_presheaf X hF m
