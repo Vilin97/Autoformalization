@@ -39,7 +39,7 @@ abbrev finsetGeneratedSheaf {X : TopCat.{u}}
     (S : Finset (SectionIndex F))
     [HasCoproduct fun σ : {σ // σ ∈ S} => zeroOutsideInt σ.1.1] :
     Sheaf AddCommGrpCat.{u} X :=
-  Limits.image (finsetGeneratorMap S)
+  familyGeneratedSheaf (fun σ : {σ // σ ∈ S} => σ.1.1) (fun σ => σ.1.2)
 
 /-- The canonical map from the coproduct of all `zeroOutsideInt U` indexed by local sections
 of `F` onto `F`. This is the formal Step 3A starting point for building finitely generated
@@ -48,7 +48,7 @@ abbrev allSectionMap {X : TopCat.{u}}
     (F : Sheaf AddCommGrpCat.{u} X)
     [HasCoproduct (fun σ : SectionIndex F => zeroOutsideInt σ.1)] :
     (∐ fun σ : SectionIndex F => zeroOutsideInt σ.1) ⟶ F :=
-  Sigma.desc (fun σ => zeroOutsideInt.sHom σ.2)
+  familyGeneratorMap (fun σ : SectionIndex F => σ.1) (fun σ => σ.2)
 
 instance allSectionMap_epi {X : TopCat.{u}}
     (F : Sheaf AddCommGrpCat.{u} X)
