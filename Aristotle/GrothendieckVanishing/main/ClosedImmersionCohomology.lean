@@ -70,30 +70,45 @@ theorem epi_pushforward_map_closedIncl
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     {F G : TopCat.Presheaf AddCommGrpCat.{u} (TopCat.of s)}
     (hF : F.IsSheaf) (hG : G.IsSheaf)
-    (f : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
-      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s))) [Epi f] :
+    (f : F ⟶ G)
+    (hf : Epi (show (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
+        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) from
+          Sheaf.Hom.mk f)) :
     Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hs)).map f) := by
+      (TopCat.closedIncl hs)).map (show
+        (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
+          (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) from
+            Sheaf.Hom.mk f)) := by
+  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
+      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) := Sheaf.Hom.mk f
+  letI : Epi fsh := by
+    simpa [fsh] using hf
   letI : Balanced (Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
-  rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u}]
+  change Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hs)).map fsh)
+  rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u}
+    ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hs)).map fsh)]
   change TopCat.Presheaf.IsLocallySurjective
     ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hs)).map f).val
+      (TopCat.closedIncl hs)).map fsh).val
+  have hf_loc : TopCat.Presheaf.IsLocallySurjective f := by
+    simpa [fsh] using
+      (show Sheaf.IsLocallySurjective fsh from
+        (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} fsh).mpr inferInstance)
   rw [TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
   intro x; by_cases hx : (x : X) ∈ s
   · let z : TopCat.of s := ⟨x, hx⟩
-    haveI : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map f.val) :=
+    haveI : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map f) :=
       (AddCommGrpCat.epi_iff_surjective _).mpr
         (((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
-            (T := f.val)).mp
-          ((Sheaf.isLocallySurjective_iff_epi'
-              AddCommGrpCat.{u} _).mpr inferInstance)) z)
+            (T := f)).mp hf_loc) z)
     have hnat : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
         ((TopCat.closedIncl hs) z)).map
-        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f.val) ≫
+        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f) ≫
       TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} (TopCat.closedIncl hs) G z =
     TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} (TopCat.closedIncl hs) F z ≫
-      (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map f.val := by
+      (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map f := by
       apply TopCat.Presheaf.stalk_hom_ext; intro U hU
       rw [TopCat.Presheaf.stalkFunctor_map_germ_assoc,
         TopCat.Presheaf.stalkPushforward_germ,
@@ -102,7 +117,7 @@ theorem epi_pushforward_map_closedIncl
     apply (AddCommGrpCat.epi_iff_surjective _).mp
     change Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
         ((TopCat.closedIncl hs) z)).map
-        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f.val))
+        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f))
     rw [← epi_comp_iff_of_isIso _ (TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
         (TopCat.closedIncl hs) G z), hnat]
     exact epi_comp _ _
@@ -117,7 +132,8 @@ instance closedIncl_pushforward_preservesEpis
   preserves {F G} f hf := by
     letI : Epi f := hf
     simpa using epi_pushforward_map_closedIncl
-      (hs := hs) (F := F.val) (G := G.val) F.cond G.cond f
+      (hs := hs) (F := F.val) (G := G.val) F.cond G.cond f.val
+      (by simpa using hf)
 
 instance closedIncl_pushforward_preservesMonos
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
