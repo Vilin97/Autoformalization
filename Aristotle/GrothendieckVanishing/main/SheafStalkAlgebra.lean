@@ -206,24 +206,37 @@ theorem isZero_zeroOutsideInt_bot (X : TopCat.{u}) :
 theorem exists_nonzero_stalk_in_V
     {X : TopCat.{u}} (V : Opens X)
     {R : TopCat.Presheaf AddCommGrpCat.{u} X} (hRsh : R.IsSheaf)
-    (i : (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶ TopCat.Sheaf.zeroOutsideInt V)
+    (i : R ⟶ (TopCat.Sheaf.zeroOutsideInt V).val)
     [Mono i]
-    (hR : ¬ IsZero (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :
+    (hR : ¬ IsZero R) :
     ∃ (x : X) (_ : x ∈ V)
       (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R),
       a ≠ 0 := by
   let Rsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨R, hRsh⟩
   by_contra! h; apply hR
-  have hR_zero : IsZero Rsh :=
+  have hRsh_zero : IsZero Rsh :=
     sheaf_isZero_of_zero_stalks X hRsh (fun x a => by
       by_cases hx : (x : X) ∈ (V : Set X)
       · exact h x hx a
-      · haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
-          (C := AddCommGrpCat.{u}) (X := X) x
-        exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
-          (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) i)
-          ((stalk_zeroOutsideInt_zero_outside V x hx _).trans (map_zero _).symm))
-  simpa [Rsh] using hR_zero
+      · have hi_inj : Function.Injective
+            ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map i) :=
+          TopCat.Presheaf.stalkFunctor_map_injective_of_app_injective (f := i)
+            (fun U =>
+              (ConcreteCategory.mono_iff_injective_of_preservesPullback (i.app (op U))).mp
+                ((NatTrans.mono_iff_mono_app i).mp inferInstance (op U))) x
+        exact hi_inj ((stalk_zeroOutsideInt_zero_outside V x hx _).trans (map_zero _).symm)
+      )
+  refine Functor.isZero R ?_
+  intro U
+  have hforget_eval :
+      (TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
+        (evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj U).PreservesZeroMorphisms := by
+    refine ⟨?_⟩
+    intro A B
+    rfl
+  simpa using Functor.map_isZero
+    (TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
+      (evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj U) hRsh_zero
 
 /-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
     is an integer multiple of the germ of the distinguished generator over `V`. -/
