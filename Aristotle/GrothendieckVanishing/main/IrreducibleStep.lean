@@ -323,22 +323,24 @@ theorem subsheaf_zeroOutsideInt_vanishing
           (hF := (TopCat.Sheaf.zeroOutsideInt V').cond) (hG := hRsh)
           (f := j) (x := x) (hf := (hj_stalk x hxV').2) b))
 
-/-- **Steps 3C + 4 + LES** (Hartshorne III.2.7): any epi image of `zeroOutsideInt V` has
-    vanishing cohomology in degree `m > dim X`. Uses third-term LES with
+/-- **Steps 3C + 4 + LES** (Hartshorne III.2.7): any locally surjective image of
+    `zeroOutsideInt V` has vanishing cohomology in degree `m > dim X`. Uses third-term LES with
     `zeroOutsideInt_cohomology_vanishing` (Step 5) and
     `subsheaf_zeroOutsideInt_vanishing` (Step 4). -/
-theorem epiImage_zeroOutsideInt_vanishing_of_sheaf_epi
+theorem epiImage_zeroOutsideInt_vanishing_of_locallySurjective
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     {V : Opens X} {G : TopCat.Presheaf AddCommGrpCat.{u} X} (hG : G.IsSheaf)
     (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G)
-    (hf : Epi (show TopCat.Sheaf.zeroOutsideInt V ⟶
-        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from Sheaf.Hom.mk f))
+    (hf : TopCat.Presheaf.IsLocallySurjective f)
     (ih : VanishingIH.{u} (topologicalKrullDim X))
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
   let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
   let fsh : TopCat.Sheaf.zeroOutsideInt V ⟶ Gsh := Sheaf.Hom.mk f
+  letI : Balanced (CategoryTheory.Sheaf (Opens.grothendieckTopology X)
+      AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
   haveI : Epi fsh := by
+    rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} fsh]
     simpa [fsh] using hf
   change Subsingleton (Sheaf.H Gsh m)
   by_cases hV : V = ⊥
@@ -369,11 +371,17 @@ theorem epiImage_zeroOutsideInt_vanishing
     Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
   let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
   let fsh : TopCat.Sheaf.zeroOutsideInt V ⟶ Gsh := Sheaf.Hom.mk f
-  have hf : Epi fsh := by
+  haveI : Epi fsh := by
     exact Sheaf.Hom.epi_of_presheaf_epi
       (J := Opens.grothendieckTopology X) (A := AddCommGrpCat.{u}) fsh
-  exact epiImage_zeroOutsideInt_vanishing_of_sheaf_epi (V := V) (G := G) hG f (by
-    simpa [fsh] using hf) ih m hm
+  letI : Balanced (CategoryTheory.Sheaf (Opens.grothendieckTopology X)
+      AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
+  have hf : TopCat.Presheaf.IsLocallySurjective f := by
+    simpa [fsh] using
+      (show Sheaf.IsLocallySurjective fsh from
+        (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} fsh).mpr inferInstance)
+  exact epiImage_zeroOutsideInt_vanishing_of_locallySurjective
+    (V := V) (G := G) hG f hf ih m hm
 
 -- Filtered diagram infrastructure, finitely generated vanishing, and
 -- directLimit_cohomology_vanishing are in FiniteGeneratorReduction.lean.
@@ -408,15 +416,8 @@ theorem IrreduciblePosVanishing
       directLimit_cohomology_vanishing (K := S.X₁.val) S.X₁.cond n
         (fun {G} (hG : G.IsSheaf) {V}
           (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G) hf => by
-          let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
-          let fsh : TopCat.Sheaf.zeroOutsideInt V ⟶ Gsh := Sheaf.Hom.mk f
-          letI : Balanced (CategoryTheory.Sheaf (Opens.grothendieckTopology X)
-              AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
-          have hf_epi : Epi fsh := by
-            rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} fsh]
-            simpa [fsh] using hf
-          exact epiImage_zeroOutsideInt_vanishing_of_sheaf_epi
-            (V := V) (G := G) hG f (by simpa [fsh] using hf_epi) ih n hn)
+          exact epiImage_zeroOutsideInt_vanishing_of_locallySurjective
+            (V := V) (G := G) hG f hf ih n hn)
     exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
   · -- dim ≤ 0: F is flasque on irreducible dim-0 space, use FlasqueVanishing
     push_neg at hpos
