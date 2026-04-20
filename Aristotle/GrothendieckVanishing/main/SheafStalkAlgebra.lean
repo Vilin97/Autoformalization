@@ -118,8 +118,10 @@ theorem sheafifyMap_zeroOutside_openHom_stalk_surj
     then to `F` by hypothesis; `cokernel.condition` gives zero. -/
 theorem cokernel_stalk_zero_of_stalk_surj
     {X : TopCat.{u}}
-    {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
-    (f : F ⟶ G) (x : X)
+    {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (hF : F.IsSheaf) (hG : G.IsSheaf)
+    (f : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
+      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (x : X)
     (hf : Function.Surjective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val)))
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj (Limits.cokernel f).val) :
@@ -131,7 +133,7 @@ theorem cokernel_stalk_zero_of_stalk_surj
   rw [← ConcreteCategory.comp_apply, ← Functor.map_comp,
     show f.val ≫ (cokernel.π f).val = 0 from
       congr_arg Sheaf.Hom.val (cokernel.condition f)]
-  obtain ⟨U, hxU, s, rfl⟩ := TopCat.Presheaf.germ_exist F.val x c
+  obtain ⟨U, hxU, s, rfl⟩ := TopCat.Presheaf.germ_exist F x c
   simp
 
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
@@ -166,7 +168,12 @@ theorem zeroOutsideInt_cohomology_vanishing
           (Opens.coe_eq_empty.not.mpr hV)))
         (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) _)
           (lt_of_lt_of_le hm le_top))) hm)
-    (fun x hxV a => cokernel_stalk_zero_of_stalk_surj _ x
+    (fun x hxV a => cokernel_stalk_zero_of_stalk_surj
+      (F := (TopCat.Sheaf.zeroOutsideInt V).val)
+      (G := (TopCat.Sheaf.zeroOutsideInt ⊤).val)
+      (hF := (TopCat.Sheaf.zeroOutsideInt V).cond)
+      (hG := (TopCat.Sheaf.zeroOutsideInt ⊤).cond)
+      (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)) x
       (sheafifyMap_zeroOutside_openHom_stalk_surj Presheaf.constZ le_top x hxV) a)
 
 
