@@ -112,7 +112,9 @@ private theorem exists_section_generating_stalks
                      obtain ⟨k, hk⟩ := hgen ⟨m⟩ hm
                      exact ⟨k, by simpa [mul_comm] using congrArg ULift.down hk⟩⟩
   have hP : ∃ n, P n := by
-    obtain ⟨x₀', hx₀'V, a₀', ha₀'⟩ := exists_nonzero_stalk_in_V V R i hR
+    have hR' : ¬ IsZero (⟨R.val, R.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := by
+      simpa using hR
+    obtain ⟨x₀', hx₀'V, a₀', ha₀'⟩ := @exists_nonzero_stalk_in_V _ V R.val R.cond i _ hR'
     have hH'_ne : H_at x₀' hx₀'V ≠ ⊥ := by
       rw [ne_eq, AddSubgroup.eq_bot_iff_forall]; push_neg
       obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x₀' hx₀'V (i_x x₀' a₀')
