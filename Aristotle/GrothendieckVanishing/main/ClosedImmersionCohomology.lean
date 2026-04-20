@@ -236,7 +236,11 @@ theorem epi_unit_of_closedImmersion
     TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
   intro x; by_cases hxZ : (x : X) ∈ Z
   · -- x ∈ Z: stalk map is surjective (it's an iso)
-    haveI := TopCat.closedIncl_unit_stalk_isIso hZ Fsh ⟨x, hxZ⟩
+    haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
+        ((TopCat.closedIncl hZ) ⟨x, hxZ⟩)).map (adj.unit.app Fsh).val) := by
+      simpa [Fsh] using
+        (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
+          (hs := hZ) (F := F) hF ⟨x, hxZ⟩)
     exact (ConcreteCategory.bijective_of_isIso
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} ((TopCat.closedIncl hZ) ⟨x, hxZ⟩)).map
         ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
@@ -304,7 +308,8 @@ theorem closedComplementVanishing
         by_cases hxY : x ∈ Y
         · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
             simpa [S, closedImmersionSES, i, Csh] using
-              (TopCat.closedIncl_unit_stalk_isIso hYcl Csh ⟨x, hxY⟩)
+              (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
+                (hs := hYcl) (F := C) hC ⟨x, hxY⟩)
           exact stalk_zero_of_ses_g_iso hSE x inferInstance a
         · exact stalk_zero_of_shortExact_kernel hSE x
             (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b) a)
