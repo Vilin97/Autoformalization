@@ -7,7 +7,7 @@ import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
   Provides:
   1. `closedIncl_pushforward_preservesEpis/Monos` (pushforward preserves epis/monos)
   2. `closedIncl_pushforward_shortExact` (pushforward preserves ShortExact)
-  3. `PushforwardHVanishing` (pushforward preserves cohomological vanishing)
+  3. `PushforwardHIso` / `PushforwardHVanishing` (pushforward preserves cohomology)
   4. `epi_unit_of_closedImmersion` (adjunction unit is epi)
   5. `closedImmersionSES` (short exact sequence from closed immersion)
 
@@ -35,7 +35,7 @@ abbrev VanishingIH (dimX : WithBot ℕ∞) : Prop :=
 
 ReducibleVanishing and IrreduciblePosVanishing require two building blocks:
 
-1. PushforwardHVanishing: pushforward along closed immersion preserves vanishing
+1. PushforwardHIso: pushforward along closed immersion preserves cohomology
    (adjunction + mono preservation + exactness of i_*)
 2. closedImmersionSES: the adjunction unit F -> i_*(i^*F) gives a short exact sequence
 -/
@@ -138,56 +138,85 @@ theorem closedIncl_pushforward_shortExact
   exact ShortComplex.ShortExact.mk'
     (hSE.exact.map_of_mono_of_preservesKernel _ hSE.mono_f inferInstance) ‹_› ‹_›
 
--- Pushforward along closed immersion preserves cohomological vanishing.
--- Proof by induction: n=0 via sections, n=1 via Ext^0 surjectivity, n≥2 via LES dimension shift.
+-- Pushforward along closed immersion preserves sheaf cohomology.
+-- Proof by induction: n=0 via sections, n=1 via the cokernel model of H¹,
+-- n≥2 via source/target dimension-shift isomorphisms and the induction hypothesis on X₃.
+noncomputable def PushforwardHIso
+    {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
+    {G : TopCat.Presheaf AddCommGrpCat.{u} (TopCat.of Z)} (hG : G.IsSheaf)
+    (n : ℕ) :
+    AddCommGrpCat.of (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) n) ≅
+      AddCommGrpCat.of (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+        (TopCat.closedIncl hZ)).obj (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))) n) := by
+  let Gsh : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z) := ⟨G, hG⟩
+  let i := TopCat.closedIncl hZ
+  suffices ∀ (m : ℕ) (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)),
+      AddCommGrpCat.of (Sheaf.H G' m) ≅
+        AddCommGrpCat.of (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') m) from
+    this n Gsh
+  intro m; induction m with
+  | zero =>
+    intro G'
+    let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G'
+    let topIso : G'.val.obj (op ⊤) ≅ F'.val.obj (op ⊤) := eqToIso (by
+      change G'.val.obj (op ⊤) = G'.val.obj (op ((Opens.map i).obj ⊤))
+      rw [Opens.map_top])
+    exact (sheafH0NatIsoSections (X := TopCat.of Z)).app G' ≪≫
+      topIso ≪≫ ((sheafH0NatIsoSections (X := X)).app F').symm
+  | succ k ih_push =>
+    intro G'
+    classical
+    let ip : InjectivePresentation G' := Classical.choice (EnoughInjectives.presentation G')
+    let S := ip.shortComplex
+    let SX := S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)
+    have hSE_X : SX.ShortExact :=
+      closedIncl_pushforward_shortExact hZ ip.shortExact_shortComplex
+    haveI : IsFlasqueSheaf SX.X₂ := by
+      constructor; intro U V j
+      change Epi (S.X₂.val.map ((Opens.map i).op.map j.op))
+      exact IsFlasqueSheaf.epi_map ((Opens.map i).map j)
+    cases k with
+    | zero =>
+      let hH1_src :
+          cokernel (S.g.val.app (op ⊤)) ≅ AddCommGrpCat.of (Sheaf.H G' 1) := by
+        simpa [S] using
+          sheafH1_cokernel_iso_of_subsingleton_middle ip.shortExact_shortComplex
+            (Ext.subsingleton_of_injective _ _ 0)
+      let hH1_tgt :
+          cokernel (S.g.val.app (op ⊤)) ≅ AddCommGrpCat.of (Sheaf.H SX.X₁ 1) := by
+        simpa [S, SX, Opens.map_top i] using
+          sheafH1_cokernel_iso_of_subsingleton_middle hSE_X
+            (inferInstance : Subsingleton (Sheaf.H SX.X₂ 1))
+      exact hH1_src.symm ≪≫ hH1_tgt
+    | succ m =>
+      let hShift_src :
+          AddCommGrpCat.of (Sheaf.H S.X₃ (m + 1)) ≅
+            AddCommGrpCat.of (Sheaf.H G' (m + 2)) := by
+        simpa [S] using
+          sheafH_extClassIso_of_subsingleton_middle ip.shortExact_shortComplex (m + 1)
+            (Ext.subsingleton_of_injective _ _ m)
+            (Ext.subsingleton_of_injective _ _ (m + 1))
+      let hShift_tgt :
+          AddCommGrpCat.of (Sheaf.H SX.X₃ (m + 1)) ≅
+            AddCommGrpCat.of (Sheaf.H SX.X₁ (m + 2)) :=
+        sheafH_extClassIso_of_subsingleton_middle hSE_X (m + 1)
+          (inferInstance : Subsingleton (Sheaf.H SX.X₂ (m + 1)))
+          (inferInstance : Subsingleton (Sheaf.H SX.X₂ (m + 2)))
+      exact hShift_src.symm ≪≫ ih_push S.X₃ ≪≫ hShift_tgt
+
 theorem PushforwardHVanishing
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     {G : TopCat.Presheaf AddCommGrpCat.{u} (TopCat.of Z)} (hG : G.IsSheaf)
     (n : ℕ) (h : Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) n)) :
     Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
       (TopCat.closedIncl hZ)).obj (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))) n) := by
-  let Gsh : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z) := ⟨G, hG⟩
-  let i := TopCat.closedIncl hZ
-  suffices ∀ (m : ℕ) (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)),
-      Subsingleton (Sheaf.H G' m) →
-      Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') m) from
-    this n Gsh h
-  intro m; induction m with
-  | zero =>
-    intro G' hG'
-    let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G'
-    have hsec : Subsingleton (G'.val.obj (op ⊤)) := by
-      letI := hG'; exact (sheafH0EquivSections G').toEquiv.subsingleton_congr.mp ‹_›
-    have hobj : F'.val.obj (op ⊤) = G'.val.obj (op ⊤) := by
-      change G'.val.obj (op ((Opens.map i).obj ⊤)) = G'.val.obj (op ⊤)
-      rw [Opens.map_top]
-    constructor; intro a b
-    apply (sheafH0EquivSections F').injective
-    exact @Subsingleton.elim (F'.val.obj (op ⊤)) (hobj ▸ hsec) _ _
-  | succ k ih_push =>
-    intro G' hG'
-    obtain ⟨ip⟩ := EnoughInjectives.presentation G'
-    have hSE_X : (ip.shortComplex.map
-        (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).ShortExact :=
-      closedIncl_pushforward_shortExact hZ ip.shortExact_shortComplex
-    haveI : IsFlasqueSheaf (ip.shortComplex.map
-        (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).X₂ := by
-      constructor; intro U V j
-      change Epi (ip.shortComplex.X₂.val.map ((Opens.map i).op.map j.op))
-      exact IsFlasqueSheaf.epi_map ((Opens.map i).map j)
-    cases k with
-    | zero =>
-      exact sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map i
-        ip.shortExact_shortComplex hSE_X (Opens.map_top i) hG'
-    | succ m =>
-      haveI := hG'
-      haveI : Subsingleton (Sheaf.H
-          ((ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).X₃) (m + 1)) :=
-        ih_push ip.shortComplex.X₃ (sheafH_dimension_shift_X₃ ip.shortExact_shortComplex m)
-      haveI : Subsingleton (Sheaf.H
-          ((ip.shortComplex.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)).X₂) (m + 2)) :=
-        FlasqueVanishing _ _ (m + 1)
-      exact sheafH_dimension_shift_of_both hSE_X (m + 1)
+  let e :
+      Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) n ≃
+        Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+          (TopCat.closedIncl hZ)).obj (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))) n :=
+    Equiv.ofBijective (ConcreteCategory.hom (PushforwardHIso Z hZ hG n).hom)
+      (ConcreteCategory.bijective_of_isIso (PushforwardHIso Z hZ hG n).hom)
+  exact (e.subsingleton_congr).mp h
 
 -- The adjunction unit F → i_*(i^*F) is epi for closed immersions.
 -- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).
@@ -283,7 +312,10 @@ theorem closedComplementVanishing
   exact subsingleton_sheafH_of_shortExact_middle hSE n
     (_root_.sheafH_subsingleton_of_isZero S.X₁ hSX₁_zero n)
     (by
-      simpa [S, closedImmersionSES, i, CY] using
-        (PushforwardHVanishing Y hYcl
-          (G := CY.val) CY.cond n
-          (ih (TopCat.of Y) n (G := CY.val) CY.cond hY_dim_lt hn)))
+      let e : Sheaf.H CY n ≃ Sheaf.H S.X₃ n := by
+        simpa [S, closedImmersionSES, i, CY] using
+          Equiv.ofBijective
+            (ConcreteCategory.hom (PushforwardHIso Y hYcl CY.cond n).hom)
+            (ConcreteCategory.bijective_of_isIso (PushforwardHIso Y hYcl CY.cond n).hom)
+      exact (e.subsingleton_congr).mp
+        (ih (TopCat.of Y) n (G := CY.val) CY.cond hY_dim_lt hn))
