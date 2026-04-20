@@ -279,7 +279,7 @@ theorem subsheaf_contains_zeroOutsideInt
 theorem subsheaf_zeroOutsideInt_vanishing
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     {V : Opens X} {R : TopCat.Presheaf AddCommGrpCat.{u} X} (hRsh : R.IsSheaf)
-    (i : (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶ TopCat.Sheaf.zeroOutsideInt V)
+    (i : R ⟶ (TopCat.Sheaf.zeroOutsideInt V).val)
     [Mono i]
     (ih : VanishingIH.{u} (topologicalKrullDim X))
     (m : ℕ) (hm : m > topologicalKrullDim X) :
@@ -290,8 +290,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
   · exact _root_.sheafH_subsingleton_of_isZero Rsh hR m
   · obtain ⟨V', hV'le, hV'ne, j, hj_mono, hj_stalk⟩ :=
       (by
-        haveI : Mono i.val := Functor.map_mono (TopCat.Sheaf.forget AddCommGrpCat.{u} X) i
-        exact subsheaf_contains_zeroOutsideInt (R := R) hRsh i.val (by
+        exact subsheaf_contains_zeroOutsideInt (R := R) hRsh i (by
         intro hR0
         exact hR (IsZero.of_full_of_faithful_of_isZero
           (TopCat.Sheaf.forget AddCommGrpCat.{u} X) Rsh hR0)))
@@ -335,12 +334,13 @@ theorem epiImage_zeroOutsideInt_vanishing
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
     haveI : Subsingleton (Sheaf.H S.X₂ m) := zeroOutsideInt_cohomology_vanishing V hV ih m hm
+    haveI : Mono ((kernel.ι f).val) :=
+      Functor.map_mono (TopCat.Sheaf.forget AddCommGrpCat.{u} X) (kernel.ι f)
     have hX₁ :
         Subsingleton
           (Sheaf.H (⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) (m + 1)) :=
       subsheaf_zeroOutsideInt_vanishing (R := S.X₁.val) S.X₁.cond
-        (show (⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-            TopCat.Sheaf.zeroOutsideInt V from kernel.ι f)
+        ((kernel.ι f).val)
         ih (m + 1) (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
     haveI : Subsingleton (Sheaf.H S.X₁ (m + 1)) := by simpa using hX₁
     exact sheafH_dimension_shift_X₃_of_both hSE m
