@@ -234,8 +234,9 @@ theorem finsetGeneratedSheaf_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
     {K : TopCat.Sheaf AddCommGrpCat.{u} X}
     (m : ℕ)
-    (hzero : ∀ {G : TopCat.Sheaf AddCommGrpCat.{u} X} {V : Opens X}
-      (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G), Epi f → Subsingleton (Sheaf.H G m))
+    (hzero : ∀ {G : TopCat.Presheaf AddCommGrpCat.{u} X} (hG : G.IsSheaf) {V : Opens X}
+      (f : TopCat.Sheaf.zeroOutsideInt V ⟶ (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)),
+      Epi f → Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m))
     (S : Finset (TopCat.Sheaf.SectionIndex K))
     [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
     Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m) := by
@@ -257,10 +258,12 @@ theorem finsetGeneratedSheaf_vanishing
       inferInstance inferInstance
     have hCoker : Subsingleton (Sheaf.H SC.X₃ m) :=
       haveI := imageIncl_cokernel_epi (K := K) (σ₀ := σ₀) (S' := S')
-      hzero (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} =>
-            TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
-          factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫
-          cokernel.π (finsetImageInclGen K h_sub)) inferInstance
+      by
+        simpa using hzero SC.X₃.cond
+          (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} =>
+              TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
+            factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫
+            cokernel.π (finsetImageInclGen K h_sub)) inferInstance
     exact subsingleton_sheafH_of_shortExact_middle hSE m ih hCoker
 
 end FinsetGenerated
@@ -272,8 +275,9 @@ end FinsetGenerated
 theorem directLimit_cohomology_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
     {K : TopCat.Presheaf AddCommGrpCat.{u} X} (hK : K.IsSheaf) (m : ℕ)
-    (hzero : ∀ {G : TopCat.Sheaf AddCommGrpCat.{u} X} {V : Opens X}
-      (f : TopCat.Sheaf.zeroOutsideInt V ⟶ G), Epi f → Subsingleton (Sheaf.H G m)) :
+    (hzero : ∀ {G : TopCat.Presheaf AddCommGrpCat.{u} X} (hG : G.IsSheaf) {V : Opens X}
+      (f : TopCat.Sheaf.zeroOutsideInt V ⟶ (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)),
+      Epi f → Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m)) :
     Subsingleton (Sheaf.H (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
   let Ksh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨K, hK⟩
   change Subsingleton (Sheaf.H Ksh m)

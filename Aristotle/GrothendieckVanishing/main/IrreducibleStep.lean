@@ -367,8 +367,8 @@ theorem IrreduciblePosVanishing
             (ih (TopCat.of Z) n (G := FZ.val) FZ.cond hZ_dim hn_Z))
     have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
       directLimit_cohomology_vanishing (K := S.X₁.val) S.X₁.cond n
-        (fun {G} {V} f hf =>
-          epiImage_zeroOutsideInt_vanishing (G := G.val) G.cond (V := V) f hf ih n hn)
+        (fun {G} (hG : G.IsSheaf) {V} f hf =>
+          epiImage_zeroOutsideInt_vanishing (V := V) (G := G) hG f hf ih n hn)
     exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
   · -- dim ≤ 0: F is flasque on irreducible dim-0 space, use FlasqueVanishing
     push_neg at hpos
