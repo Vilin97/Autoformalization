@@ -55,6 +55,33 @@ instance closedIncl_stalkPushforward_isIso {X : TopCat.{u}} {s : Set X} {hs : Is
   Presheaf.stalkPushforward.stalkPushforward_iso_of_isInducing
     C (closedIncl_isInducing hs) F x
 
+lemma opensMap_range_isBasis_of_isInducing {X Y : TopCat.{u}} {f : X ⟶ Y}
+    (hf : Topology.IsInducing f) :
+    Opens.IsBasis (Set.range (Opens.map f).obj) := by
+  rw [Opens.isBasis_iff_nbhd]
+  intro U x hx
+  refine ⟨U, ?_, hx, le_rfl⟩
+  refine ⟨hf.functorObj U, ?_⟩
+  simpa using hf.map_functorObj U
+
+lemma opensMap_isCoverDense_of_isInducing {X Y : TopCat.{u}} {f : X ⟶ Y}
+    (hf : Topology.IsInducing f) :
+    (Opens.map f).IsCoverDense (Opens.grothendieckTopology X) := by
+  rw [TopCat.Opens.coverDense_iff_isBasis]
+  exact opensMap_range_isBasis_of_isInducing hf
+
+instance opensMap_isLocallyFull {X Y : TopCat.{u}} (f : X ⟶ Y) :
+    (Opens.map f).IsLocallyFull (Opens.grothendieckTopology X) where
+  functorPushforward_imageSieve_mem := by
+    intro U V i
+    rw [Opens.grothendieckTopology]
+    intro x hx
+    refine ⟨(Opens.map f).obj (U ⊓ V), (Opens.map f).map (Opens.infLELeft U V), ?_, ?_⟩
+    · refine ⟨U ⊓ V, Opens.infLELeft U V, 𝟙 _, ?_, by simp⟩
+      refine ⟨Opens.infLERight U V, ?_⟩
+      exact Subsingleton.elim _ _
+    · exact ⟨hx, i.le hx⟩
+
 theorem locallyInjective_stalkFunctor_map_injective
     {C : Type*} [Category.{u} C] [HasColimits C]
     {FC : C → C → Type*} {CC : C → Type u}
@@ -104,202 +131,6 @@ theorem stalkFunctor_map_iso_toSheafify
       ((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
         (T := CategoryTheory.toSheafify (Opens.grothendieckTopology X) P)).mp hls) x
 
-theorem closedIncl_presheaf_counit_stalk_comp
-    {C : Type*} [Category C] [HasColimits C]
-    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    (F : TopCat.Presheaf C (TopCat.of s)) (x : TopCat.of s) :
-    (TopCat.Presheaf.stalkPullbackIso C (closedIncl hs)
-      ((TopCat.Presheaf.pushforward C (closedIncl hs)).obj F) x).hom ≫
-      (TopCat.Presheaf.stalkFunctor C x).map
-        ((TopCat.Presheaf.pushforwardPullbackAdjunction C
-          (closedIncl hs)).counit.app F) =
-      F.stalkPushforward C (closedIncl hs) x := by
-  apply TopCat.Presheaf.stalk_hom_ext; intro U hU
-  change ((TopCat.Presheaf.pushforward C (closedIncl hs)).obj F).germ U
-      ((closedIncl hs) x) hU ≫
-        TopCat.Presheaf.stalkPullbackHom C (closedIncl hs)
-          ((TopCat.Presheaf.pushforward C (closedIncl hs)).obj F) x ≫
-        (TopCat.Presheaf.stalkFunctor C x).map
-          ((TopCat.Presheaf.pushforwardPullbackAdjunction C
-            (closedIncl hs)).counit.app F) =
-      ((TopCat.Presheaf.pushforward C (closedIncl hs)).obj F).germ U
-        ((closedIncl hs) x) hU ≫ F.stalkPushforward C (closedIncl hs) x
-  rw [TopCat.Presheaf.germ_stalkPullbackHom_assoc, TopCat.Presheaf.stalkFunctor_map_germ,
-    TopCat.Presheaf.stalkPushforward_germ]
-  have htri :=
-    CategoryTheory.Functor.lanUnit_app_app_lanAdjunction_counit_app_app
-      ((TopologicalSpace.Opens.map (closedIncl hs)).op) F (op U)
-  have htri' :
-      ((TopCat.Presheaf.pushforwardPullbackAdjunction C (closedIncl hs)).unit.app
-            ((TopCat.Presheaf.pushforward C (closedIncl hs)).obj F)).app (op U) ≫
-        ((TopCat.Presheaf.pushforwardPullbackAdjunction C
-            (closedIncl hs)).counit.app F).app
-          (op ((Opens.map (closedIncl hs)).obj U)) =
-      𝟙 (F.obj (op ((Opens.map (closedIncl hs)).obj U))) := by
-    simpa [TopCat.Presheaf.pushforwardPullbackAdjunction, TopCat.Presheaf.pushforward] using htri
-  rw [← Category.assoc, htri']; simp
-
-private theorem closedIncl_counit_val_eq_sheafifyLift
-    {C : Type*} [Category.{u} C]
-    {FC : C → C → Type*} {CC : C → Type u}
-    [∀ (X Y : C), FunLike (FC X Y) (CC X) (CC Y)]
-    [ConcreteCategory C FC]
-    [HasColimits C] [HasLimits C]
-    [PreservesLimits (forget C)]
-    [PreservesFilteredColimits (forget C)]
-    [(forget C).ReflectsIsomorphisms]
-    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    (F : TopCat.Sheaf C (TopCat.of s)) :
-    let K := Opens.grothendieckTopology (TopCat.of s)
-    let _ : (Opens.map (closedIncl hs)).IsContinuous (Opens.grothendieckTopology X) K :=
-      Functor.isContinuous_of_coverPreserving
-        (compatiblePreserving_opens_map (closedIncl hs))
-        (coverPreserving_opens_map (closedIncl hs))
-    (((CategoryTheory.Functor.sheafPullbackConstruction.sheafAdjunctionContinuous
-        (G := Opens.map (closedIncl hs)) C
-        (Opens.grothendieckTopology X) K).counit.app F).val) =
-      CategoryTheory.sheafifyLift K
-        ((TopCat.Presheaf.pushforwardPullbackAdjunction C (closedIncl hs)).counit.app F.val)
-        F.cond := by
-  intro K _
-  let P : (TopCat.of s).Presheaf C :=
-    (TopCat.Presheaf.pullback C (closedIncl hs)).obj
-      ((TopCat.Presheaf.pushforward C (closedIncl hs)).obj F.val)
-  let η := (TopCat.Presheaf.pushforwardPullbackAdjunction C (closedIncl hs)).counit.app F.val
-  let Q := ((Opens.map (closedIncl hs)).sheafPushforwardContinuous C
-      (Opens.grothendieckTopology X) K).obj F
-  let adj₀ := (((Opens.map (closedIncl hs)).op.lanAdjunction C).comp
-      (CategoryTheory.sheafificationAdjunction K C))
-  have hraw :=
-    CategoryTheory.Adjunction.map_restrictFullyFaithful_counit_app
-      (adj := adj₀)
-      (hiC := fullyFaithfulSheafToPresheaf (Opens.grothendieckTopology X) C)
-      (hiD := Functor.FullyFaithful.id _)
-      (L := CategoryTheory.Functor.sheafPullbackConstruction.sheafPullback
-        (Opens.map (closedIncl hs)) C (Opens.grothendieckTopology X) K)
-      (R := (Opens.map (closedIncl hs)).sheafPushforwardContinuous
-        C (Opens.grothendieckTopology X) K)
-      (comm1 := Iso.refl _)
-      (comm2 := Iso.refl _)
-      F
-  apply CategoryTheory.sheafifyLift_unique
-  have hcomp := congrArg (fun f => CategoryTheory.toSheafify K P ≫ f.val) hraw
-  have hcomp' :
-      CategoryTheory.toSheafify K P ≫
-          (((CategoryTheory.Functor.sheafPullbackConstruction.sheafAdjunctionContinuous
-              (G := Opens.map (closedIncl hs)) C
-              (Opens.grothendieckTopology X) K).counit.app F).val) =
-        CategoryTheory.toSheafify K P ≫
-          (𝟙 ((CategoryTheory.presheafToSheaf K C).obj
-            ((Opens.map (closedIncl hs)).op.lan.obj Q.val)).val) ≫
-          CategoryTheory.sheafifyLift K
-            (((Opens.map (closedIncl hs)).op.lan.map
-                (𝟙 ((Opens.map (closedIncl hs)).op ⋙ F.val))) ≫
-              ((Opens.map (closedIncl hs)).op.lanAdjunction C).counit.app F.val)
-            F.cond := by
-    simpa [adj₀, Q, P, TopCat.Presheaf.pushforward, TopCat.Sheaf.pushforward,
-      CategoryTheory.Functor.sheafPullbackConstruction.sheafAdjunctionContinuous,
-      CategoryTheory.Adjunction.comp_counit_app,
-      CategoryTheory.sheafificationAdjunction_counit_app_val,
-      CategoryTheory.sheafifyMap_sheafifyLift, Category.id_comp, Category.comp_id] using hcomp
-  have hlan_id :
-      (Opens.map (closedIncl hs)).op.lan.map (𝟙 ((Opens.map (closedIncl hs)).op ⋙ F.val)) =
-        𝟙 ((Opens.map (closedIncl hs)).op.lan.obj ((Opens.map (closedIncl hs)).op ⋙ F.val)) := by
-    simp
-  calc
-    CategoryTheory.toSheafify K P ≫
-        (((CategoryTheory.Functor.sheafPullbackConstruction.sheafAdjunctionContinuous
-            (G := Opens.map (closedIncl hs)) C
-            (Opens.grothendieckTopology X) K).counit.app F).val) =
-      CategoryTheory.toSheafify K P ≫
-        (𝟙 ((CategoryTheory.presheafToSheaf K C).obj
-          ((Opens.map (closedIncl hs)).op.lan.obj Q.val)).val) ≫
-        CategoryTheory.sheafifyLift K
-          (((Opens.map (closedIncl hs)).op.lan.map
-              (𝟙 ((Opens.map (closedIncl hs)).op ⋙ F.val))) ≫
-            ((Opens.map (closedIncl hs)).op.lanAdjunction C).counit.app F.val)
-          F.cond := hcomp'
-    _ =
-      ((Opens.map (closedIncl hs)).op.lan.map (𝟙 ((Opens.map (closedIncl hs)).op ⋙ F.val))) ≫
-        ((Opens.map (closedIncl hs)).op.lanAdjunction C).counit.app F.val := by
-        erw [Category.id_comp]
-        exact CategoryTheory.toSheafify_sheafifyLift K
-            (((Opens.map (closedIncl hs)).op.lan.map
-                (𝟙 ((Opens.map (closedIncl hs)).op ⋙ F.val))) ≫
-              ((Opens.map (closedIncl hs)).op.lanAdjunction C).counit.app F.val)
-            F.cond
-    _ =
-      ((Opens.map (closedIncl hs)).op.lanAdjunction C).counit.app F.val := by
-        rw [hlan_id, Category.id_comp]
-    _ = η := by
-        simp [η, TopCat.Presheaf.pushforwardPullbackAdjunction, TopCat.Presheaf.pullback]
-
-private theorem closedIncl_sheafAdj_counit_isIso
-    {C : Type*} [Category.{u} C]
-    {FC : C → C → Type*} {CC : C → Type u}
-    [∀ (X Y : C), FunLike (FC X Y) (CC X) (CC Y)]
-    [ConcreteCategory C FC]
-    [HasColimits C] [HasLimits C]
-    [PreservesLimits (forget C)]
-    [PreservesFilteredColimits (forget C)]
-    [(forget C).ReflectsIsomorphisms]
-    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    (F : TopCat.Sheaf C (TopCat.of s)) :
-    let K := Opens.grothendieckTopology (TopCat.of s)
-    let _ : (Opens.map (closedIncl hs)).IsContinuous (Opens.grothendieckTopology X) K :=
-      Functor.isContinuous_of_coverPreserving
-        (compatiblePreserving_opens_map (closedIncl hs))
-        (coverPreserving_opens_map (closedIncl hs))
-    IsIso ((CategoryTheory.Functor.sheafPullbackConstruction.sheafAdjunctionContinuous
-      (G := Opens.map (closedIncl hs)) C
-      (Opens.grothendieckTopology X) K).counit.app F) := by
-  intro K _
-  haveI : HasWeakSheafify K C := inferInstance
-  haveI : K.WEqualsLocallyBijective C := inferInstance
-  let P : (TopCat.of s).Presheaf C :=
-    (TopCat.Presheaf.pullback C (closedIncl hs)).obj
-      ((TopCat.Presheaf.pushforward C (closedIncl hs)).obj F.val)
-  let η := (TopCat.Presheaf.pushforwardPullbackAdjunction C (closedIncl hs)).counit.app F.val
-  have hval := closedIncl_counit_val_eq_sheafifyLift hs F
-  have hstalk :
-      ∀ x : TopCat.of s,
-        IsIso ((TopCat.Presheaf.stalkFunctor C x).map
-          ((CategoryTheory.Functor.sheafPullbackConstruction.sheafAdjunctionContinuous
-            (G := Opens.map (closedIncl hs)) C
-            (Opens.grothendieckTopology X) K).counit.app F).val) := by
-    intro x; rw [hval]
-    let T := TopCat.Presheaf.stalkFunctor (X := TopCat.of s) C x
-    have hcomp0 :
-        CategoryTheory.toSheafify K P ≫ CategoryTheory.sheafifyLift K η F.cond = η :=
-      CategoryTheory.toSheafify_sheafifyLift K η F.cond
-    haveI : IsIso (T.map (CategoryTheory.toSheafify K P)) :=
-      stalkFunctor_map_iso_toSheafify P x
-    haveI : IsIso (T.map η) := by
-      dsimp [η]
-      let e :=
-        TopCat.Presheaf.stalkPullbackIso C (closedIncl hs)
-          ((TopCat.Presheaf.pushforward C (closedIncl hs)).obj F.val) x
-      have hη_eq :
-          T.map ((TopCat.Presheaf.pushforwardPullbackAdjunction C
-            (closedIncl hs)).counit.app F.val) =
-            e.inv ≫ TopCat.Presheaf.stalkPushforward C
-              (closedIncl hs) F.val x := by
-        conv_lhs => rw [← e.inv_hom_id_assoc (T.map _)]
-        rw [closedIncl_presheaf_counit_stalk_comp hs F.val x]
-      rw [hη_eq]; infer_instance
-    have hsheafifyLift_eq :
-        T.map (CategoryTheory.sheafifyLift K η F.cond) =
-          inv (T.map (CategoryTheory.toSheafify K P)) ≫ T.map η := by
-      conv_lhs => rw [← IsIso.inv_hom_id_assoc (T.map (CategoryTheory.toSheafify K P))
-        (T.map (CategoryTheory.sheafifyLift K η F.cond))]
-      rw [← Functor.map_comp, hcomp0]
-    rw [hsheafifyLift_eq]; infer_instance
-  letI (x : TopCat.of s) := hstalk x
-  exact TopCat.Presheaf.isIso_of_stalkFunctor_map_iso
-    (f := (CategoryTheory.Functor.sheafPullbackConstruction.sheafAdjunctionContinuous
-      (G := Opens.map (closedIncl hs)) C
-      (Opens.grothendieckTopology X) K).counit.app F)
-
 theorem closedIncl_counit_isIso
     {C : Type*} [Category.{u} C]
     {FC : C → C → Type*} {CC : C → Type u}
@@ -312,26 +143,38 @@ theorem closedIncl_counit_isIso
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     (F : TopCat.Sheaf C (TopCat.of s)) :
     IsIso ((TopCat.Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)).counit.app F) := by
-  let K := Opens.grothendieckTopology (TopCat.of s)
-  let _ : (Opens.map (closedIncl hs)).IsContinuous (Opens.grothendieckTopology X) K :=
-    Functor.isContinuous_of_coverPreserving
-      (compatiblePreserving_opens_map (closedIncl hs))
+  letI : (Opens.map (closedIncl hs)).IsCoverDense
+      (Opens.grothendieckTopology (TopCat.of s)) :=
+    opensMap_isCoverDense_of_isInducing (closedIncl_isInducing hs)
+  letI : (Opens.map (closedIncl hs)).IsLocallyFull
+      (Opens.grothendieckTopology (TopCat.of s)) :=
+    opensMap_isLocallyFull (closedIncl hs)
+  letI : (Opens.map (closedIncl hs)).IsContinuous
+      (Opens.grothendieckTopology X) (Opens.grothendieckTopology (TopCat.of s)) :=
+    CategoryTheory.Functor.IsCoverDense.isContinuous
+      (J := Opens.grothendieckTopology X)
+      (K := Opens.grothendieckTopology (TopCat.of s))
+      (G := Opens.map (closedIncl hs))
       (coverPreserving_opens_map (closedIncl hs))
-  haveI := closedIncl_sheafAdj_counit_isIso hs F
-  have hcompare :
-      (TopCat.Sheaf.pullbackIso C (closedIncl hs)).hom.app
-          ((TopCat.Sheaf.pushforward C (closedIncl hs)).obj F) ≫
-        (CategoryTheory.Functor.sheafPullbackConstruction.sheafAdjunctionContinuous
-          (G := Opens.map (closedIncl hs)) C
-          (Opens.grothendieckTopology X) K).counit.app F =
-      (TopCat.Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)).counit.app F := by
-    convert
-      (CategoryTheory.Adjunction.leftAdjointUniq_hom_app_counit
-        (TopCat.Sheaf.pullbackPushforwardAdjunction C (closedIncl hs))
-        (CategoryTheory.Functor.sheafPullbackConstruction.sheafAdjunctionContinuous
-          (G := Opens.map (closedIncl hs)) C
-          (Opens.grothendieckTopology X) K) F) using 1
-  rw [← hcompare]; infer_instance
+  haveI : (TopCat.Sheaf.pushforward C (closedIncl hs)).Full := by
+    simpa [TopCat.Sheaf.pushforward] using
+      (CategoryTheory.Functor.IsCoverDense.full_sheafPushforwardContinuous
+        (J := Opens.grothendieckTopology X)
+        (K := Opens.grothendieckTopology (TopCat.of s))
+        (G := Opens.map (closedIncl hs)) :
+          ((Opens.map (closedIncl hs)).sheafPushforwardContinuous
+            C (Opens.grothendieckTopology X)
+            (Opens.grothendieckTopology (TopCat.of s))).Full)
+  haveI : (TopCat.Sheaf.pushforward C (closedIncl hs)).Faithful := by
+    simpa [TopCat.Sheaf.pushforward] using
+      (CategoryTheory.Functor.IsCoverDense.faithful_sheafPushforwardContinuous
+        (J := Opens.grothendieckTopology X)
+        (K := Opens.grothendieckTopology (TopCat.of s))
+        (G := Opens.map (closedIncl hs)) :
+          ((Opens.map (closedIncl hs)).sheafPushforwardContinuous
+            C (Opens.grothendieckTopology X)
+            (Opens.grothendieckTopology (TopCat.of s))).Faithful)
+  infer_instance
 
 -- Stalk pullback hom naturality
 lemma stalkPullbackHom_naturality
