@@ -247,6 +247,20 @@ theorem lt_coe_nat_of_lt_of_lt_coe_nat_succ {a b : WithBot ℕ∞} {n : ℕ}
   rw [ENat.coe_lt_coe] at hbn
   exact lt_of_lt_of_le hab (by exact_mod_cast Nat.lt_succ_iff.mp hbn)
 
+/-- On an irreducible space, a proper closed subset has dimension `< n` whenever the ambient
+space has dimension `< n + 1`. This packages the standard closed-subspace strict inequality
+followed by the predecessor step in `WithBot ℕ∞`. -/
+theorem topologicalKrullDim_lt_coe_nat_of_isIrreducible_of_isClosed_of_lt_coe_nat_succ
+    {X : Type u} [TopologicalSpace X] [IrreducibleSpace X] {Y : Set X}
+    (hY : IsClosed Y) (hne : Y ≠ Set.univ) {n : ℕ}
+    (hn : topologicalKrullDim X < ↑↑(n + 1 : ℕ)) :
+    topologicalKrullDim Y < ↑↑(n : ℕ) := by
+  exact lt_coe_nat_of_lt_of_lt_coe_nat_succ
+    (topologicalKrullDim_lt_of_isIrreducible_of_isClosed hY hne
+      (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := X) Y)
+        (lt_of_lt_of_le hn le_top)))
+    hn
+
 /-- On an irreducible space of positive Krull dimension, one can choose a proper
 closed subset `Z ⊊ X` of strictly smaller Krull dimension, and the ambient cohomological bound
 `n > dim X` automatically implies `n > dim Z`. This isolates the closed-subset selection used at

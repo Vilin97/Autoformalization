@@ -163,12 +163,11 @@ theorem zeroOutsideInt_cohomology_vanishing
   apply zeroOutsideInt_vanishing V m'
   -- Cokernel vanishing at m': use closedComplementVanishing with m' > dim Vᶜ
   exact closedComplementVanishing V hV (C := C.val) C.cond m' ih
-    (lt_coe_nat_of_lt_of_lt_coe_nat_succ
-      (topologicalKrullDim_lt_of_isIrreducible_of_isClosed V.2.isClosed_compl
-        (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr
-          (Opens.coe_eq_empty.not.mpr hV)))
-        (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) _)
-          (lt_of_lt_of_le hm le_top))) hm)
+    (topologicalKrullDim_lt_coe_nat_of_isIrreducible_of_isClosed_of_lt_coe_nat_succ
+      V.2.isClosed_compl
+      (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr
+        (Opens.coe_eq_empty.not.mpr hV)))
+      hm)
     (fun x hxV a => cokernel_stalk_zero_of_stalk_surj
       (F := (TopCat.Sheaf.zeroOutsideInt V).val)
       (G := (TopCat.Sheaf.zeroOutsideInt ⊤).val)

@@ -26,6 +26,7 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `sheafH0_surj_of_epi_app_top`: surjectivity on top sections gives H^0 surjectivity
 * `sheafH_subsingleton_H1_via_epi_app_top`: H^1 vanishing via surjective top sections
 * `sheafH_subsingleton_H1_of_flasque`: flasque sheaves have vanishing `H¹`
+* `sheafH_subsingleton_H1_of_flasque_presheaf`: presheaf-boundary wrapper for the same fact
 * `sheafH_subsingleton_H1_of_flasque_of_epi_app_top`: flasque-middle-term `H¹` vanishing
 -/
 
@@ -543,6 +544,14 @@ theorem sheafH_subsingleton_H1_of_flasque {X : TopCat.{u}}
         epi_comp' (inferInstance : Epi ((Sheaf.Γ (Opens.grothendieckTopology X)
           AddCommGrpCat).map ip.shortComplex.g)) (IsIso.epi_of_iso _)
       exact epi_of_epi_fac hfac.symm)
+
+/-- Presheaf-boundary wrapper for `sheafH_subsingleton_H1_of_flasque`: if a presheaf is a
+    sheaf and the induced bundled sheaf is flasque, then its `H¹` is subsingleton. -/
+theorem sheafH_subsingleton_H1_of_flasque_presheaf {X : TopCat.{u}}
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
+    [IsFlasqueSheaf ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))] :
+    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1) := by
+  simpa using sheafH_subsingleton_H1_of_flasque ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
 
 /-- Sheaf-level `H¹` vanishing criterion with flasque middle term:
     if `X₂` is flasque and `g.app(⊤)` is epi in a short exact sequence
