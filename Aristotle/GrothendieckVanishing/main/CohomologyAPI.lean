@@ -58,6 +58,37 @@ theorem ext_dimension_shift_X₃ (Z : C') {S : ShortComplex C'} (hS : S.ShortExa
   obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₃ _ hS b rfl (@Subsingleton.elim _ h₁ _ _)
   rw [← hc, ← hd, @Subsingleton.elim _ h₂ c d]
 
+/-- If the middle cohomology groups in degrees `n` and `n + 1` are subsingleton, then the
+    connecting morphism `Ext^n(Z, X₃) → Ext^(n+1)(Z, X₁)` is bijective. -/
+theorem extClass_postcomp_bijective_of_subsingleton_middle
+    (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
+    (h₂n : Subsingleton (Ext Z S.X₂ n))
+    (h₂succ : Subsingleton (Ext Z S.X₂ (n + 1))) :
+    Function.Bijective (hS.extClass.postcomp Z (rfl : n + 1 = n + 1)) := by
+  refine ⟨?_, ?_⟩
+  · intro x y hxy
+    have hzero : (x - y).comp hS.extClass rfl = 0 := by
+      change (hS.extClass.postcomp Z (rfl : n + 1 = n + 1)) (x - y) = 0
+      rw [map_sub, hxy, sub_self]
+    obtain ⟨z, hz⟩ := Ext.covariant_sequence_exact₃ Z hS (x - y) rfl hzero
+    have hz0 : z = 0 := Subsingleton.elim _ _
+    apply sub_eq_zero.mp
+    rw [← hz, hz0, Ext.zero_comp]
+  · intro x
+    obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₁ Z hS x
+      (@Subsingleton.elim _ h₂succ _ _) rfl
+    exact ⟨y, hy⟩
+
+/-- The connecting morphism in the covariant long exact sequence as an additive equivalence,
+    assuming the middle cohomology groups in degrees `n` and `n + 1` vanish. -/
+noncomputable def extClass_postcompAddEquiv_of_subsingleton_middle
+    (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
+    (h₂n : Subsingleton (Ext Z S.X₂ n))
+    (h₂succ : Subsingleton (Ext Z S.X₂ (n + 1))) :
+    Ext Z S.X₃ n ≃+ Ext Z S.X₁ (n + 1) :=
+  AddEquiv.ofBijective (hS.extClass.postcomp Z (rfl : n + 1 = n + 1))
+    (extClass_postcomp_bijective_of_subsingleton_middle Z hS n h₂n h₂succ)
+
 /-- Naturality of the extension class: given a morphism `φ : S₁ ⟶ S₂` of short exact sequences,
     the connecting homomorphism commutes with the induced maps on Ext groups.
     Proved via the triangulated category axiom TR3 (`complete_distinguished_triangle_morphism₁`),
@@ -475,3 +506,48 @@ theorem sheafCohomologyFunctor_map_extClass_of_map_eq {X : TopCat.{u}}
       (y.comp hS₁.extClass rfl) =
     z.comp hS₂.extClass rfl := by
   rw [sheafCohomologyFunctor_map_extClass_naturality hS₁ hS₂ φ n y, hy]
+
+/-- The sheaf-cohomology connecting morphism as an additive equivalence, assuming the middle
+    sheaf cohomology groups in degrees `n` and `n + 1` are subsingleton. -/
+noncomputable def sheafH_extClassAddEquiv_of_subsingleton_middle {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) (n : ℕ)
+    (h₂n : Subsingleton (Sheaf.H S.X₂ n))
+    (h₂succ : Subsingleton (Sheaf.H S.X₂ (n + 1))) :
+    Sheaf.H S.X₃ n ≃+ Sheaf.H S.X₁ (n + 1) :=
+  extClass_postcompAddEquiv_of_subsingleton_middle _ hS n h₂n h₂succ
+
+/-- The sheaf-cohomology connecting morphism as an `AddCommGrpCat` isomorphism, assuming the
+    middle sheaf cohomology groups in degrees `n` and `n + 1` are subsingleton. -/
+noncomputable def sheafH_extClassIso_of_subsingleton_middle {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) (n : ℕ)
+    (h₂n : Subsingleton (Sheaf.H S.X₂ n))
+    (h₂succ : Subsingleton (Sheaf.H S.X₂ (n + 1))) :
+    AddCommGrpCat.of (Sheaf.H S.X₃ n) ≅ AddCommGrpCat.of (Sheaf.H S.X₁ (n + 1)) :=
+  (sheafH_extClassAddEquiv_of_subsingleton_middle hS n h₂n h₂succ).toAddCommGrpIso
+
+@[simp] theorem sheafH_extClassIso_of_subsingleton_middle_hom_apply {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) (n : ℕ)
+    (h₂n : Subsingleton (Sheaf.H S.X₂ n))
+    (h₂succ : Subsingleton (Sheaf.H S.X₂ (n + 1)))
+    (y : Sheaf.H S.X₃ n) :
+    ConcreteCategory.hom
+        ((sheafH_extClassIso_of_subsingleton_middle hS n h₂n h₂succ).hom) y =
+      y.comp hS.extClass rfl := by
+  rfl
+
+/-- Naturality of the sheaf-level connecting isomorphism for morphisms of short exact
+    sequences, under the corresponding middle-degree vanishing hypotheses. -/
+theorem sheafH_extClassIso_of_subsingleton_middle_natural {X : TopCat.{u}}
+    {S₁ S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS₁ : S₁.ShortExact) (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂) (n : ℕ)
+    (h₁₂n : Subsingleton (Sheaf.H S₁.X₂ n))
+    (h₁₂succ : Subsingleton (Sheaf.H S₁.X₂ (n + 1)))
+    (h₂₂n : Subsingleton (Sheaf.H S₂.X₂ n))
+    (h₂₂succ : Subsingleton (Sheaf.H S₂.X₂ (n + 1))) :
+    (sheafH_extClassIso_of_subsingleton_middle hS₁ n h₁₂n h₁₂succ).hom ≫
+        (sheafCohomologyFunctor X (n + 1)).map φ.τ₁ =
+      (sheafCohomologyFunctor X n).map φ.τ₃ ≫
+        (sheafH_extClassIso_of_subsingleton_middle hS₂ n h₂₂n h₂₂succ).hom := by
+  ext y
+  simpa [sheafH_extClassIso_of_subsingleton_middle_hom_apply] using
+    (sheafCohomologyFunctor_map_extClass_naturality hS₁ hS₂ φ n y)
