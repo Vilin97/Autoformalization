@@ -99,18 +99,20 @@ private theorem ReducibleVanishing'
 theorem grothendieck_vanishing_of_irreducible
     (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
     (ih_irred : ∀ (Y : TopCat.{u}) [TopologicalSpace.NoetherianSpace Y]
       [IrreducibleSpace Y] (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y ≤ topologicalKrullDim X →
       m > topologicalKrullDim Y → Subsingleton (Sheaf.H G m)) :
-    Subsingleton (Sheaf.H F n) := by
+    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+  change Subsingleton (Sheaf.H Fsh n)
   by_cases hEmpty : IsEmpty X
-  · exact sheafH_subsingleton_of_isEmpty F n
+  · exact sheafH_subsingleton_of_isEmpty Fsh n
   · rw [not_isEmpty_iff] at hEmpty
     by_cases hIrred : IrreducibleSpace X
-    · exact @ih_irred X _ hIrred n F le_rfl hn
-    · exact ReducibleVanishing' X n hn (F := F.val) F.cond hIrred
+    · exact @ih_irred X _ hIrred n Fsh le_rfl hn
+    · exact ReducibleVanishing' X n hn (F := F) hF hIrred
         (fun Y [_] [_] G hle hY => ih_irred Y n G hle hY)
 
 /-! ## Main theorem -/
@@ -126,9 +128,10 @@ theorem GrothendieckVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{
       topologicalKrullDim X = d → n > d → Subsingleton (Sheaf.H F n))
     (topologicalKrullDim X) (fun d ih X _ n F hd hn => by
       -- Reduce to irreducible X
-      apply grothendieck_vanishing_of_irreducible X n (hd ▸ hn) F
-      intro Y _ _ m G hle hY
-      exact IrreduciblePosVanishing (F := G.val) G.cond m hY
-        (fun Z _ m' G' hlt hG' =>
-          ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle)) Z m' G' rfl hG'))
+      simpa using
+        (grothendieck_vanishing_of_irreducible X n (hd ▸ hn) (F := F.val) F.cond
+          (fun Y _ _ m G hle hY =>
+            IrreduciblePosVanishing (F := G.val) G.cond m hY
+              (fun Z _ m' G' hlt hG' =>
+                ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle)) Z m' G' rfl hG'))))
     X n F rfl h
