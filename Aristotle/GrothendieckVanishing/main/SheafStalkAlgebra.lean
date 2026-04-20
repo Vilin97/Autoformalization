@@ -1,3 +1,4 @@
+import Aristotle.GrothendieckVanishing.main.CohomologyAPI
 import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
 import Aristotle.GrothendieckVanishing.main.FiniteGeneratorReduction
@@ -114,8 +115,8 @@ theorem sheafifyMap_zeroOutside_openHom_stalk_surj
     rw [← ConcreteCategory.comp_apply, hnat.symm, ConcreteCategory.comp_apply, hp]⟩
 
 /-- Cokernel stalk vanishes at points where the map is stalk-surjective.
-    Proof: `cokernel.π` is epi hence stalk-surjective, so every stalk element lifts to `G`,
-    then to `F` by hypothesis; `cokernel.condition` gives zero. -/
+    This is the stalk-level cokernel-of-epi argument applied to
+    `F ⟶ G ⟶ cokernel f`. -/
 theorem cokernel_stalk_zero_of_stalk_surj
     {X : TopCat.{u}}
     {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
@@ -126,15 +127,11 @@ theorem cokernel_stalk_zero_of_stalk_surj
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val)))
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj (Limits.cokernel f).val) :
     a = 0 := by
-  obtain ⟨b, rfl⟩ := ((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
-    (cokernel.π f).val).mp ((Sheaf.isLocallySurjective_iff_epi'
-    (φ := cokernel.π f)).mpr inferInstance)) x a
-  obtain ⟨c, rfl⟩ := hf b
-  rw [← ConcreteCategory.comp_apply, ← Functor.map_comp,
-    show f.val ≫ (cokernel.π f).val = 0 from
-      congr_arg Sheaf.Hom.val (cokernel.condition f)]
-  obtain ⟨U, hxU, s, rfl⟩ := TopCat.Presheaf.germ_exist F x c
-  simp
+  let S := ShortComplex.mk f (cokernel.π f) (cokernel.condition f)
+  have hepi : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.f.val) := by
+    simpa [S] using (AddCommGrpCat.epi_iff_surjective _).mpr hf
+  simpa [S] using stalk_zero_of_g_is_cokernel_of_stalk_epi
+    (S := S) (cokernelIsCokernel f) x hepi a
 
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
 

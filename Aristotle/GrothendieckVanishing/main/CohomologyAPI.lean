@@ -233,6 +233,40 @@ theorem stalk_zero_of_shortExact_kernel
     (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) S.f)
     ((hX₂ _).trans (map_zero _).symm)
 
+/-- If `S.g` is a cokernel of `S.f`, then at any point where the stalk map of `f`
+is epi, the stalk of `S.X₃` vanishes. -/
+theorem stalk_zero_of_g_is_cokernel_of_stalk_epi
+    {X : TopCat.{u}} {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hg : IsColimit (CokernelCofork.ofπ S.g S.zero)) (x : X)
+    (hepi : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.f.val))
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₃.val) :
+    a = 0 := by
+  let T : TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
+    TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙ TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  haveI : ∀ U : Opens X, Decidable (x ∈ U) := fun _ => Classical.dec _
+  haveI : T.IsLeftAdjoint :=
+    (stalkSkyscraperSheafAdjunction (C := AddCommGrpCat.{u}) (X := X) (p₀ := x)).isLeftAdjoint
+  haveI : Epi (T.map S.f) := by
+    simpa [T] using hepi
+  have hzero_map : T.map S.f ≫ T.map S.g = 0 := by
+    rw [← T.map_comp, S.zero, Functor.map_zero]
+  have hcolim : IsColimit (CokernelCofork.ofπ (T.map S.g) hzero_map) := by
+    simpa [T, hzero_map] using CokernelCofork.mapIsColimit _ hg T
+  have hzero : IsZero (T.obj S.X₃) := CokernelCofork.IsColimit.isZero_of_epi hcolim
+  haveI := AddCommGrpCat.subsingleton_of_isZero hzero
+  change T.obj S.X₃ at a
+  change (a : T.obj S.X₃) = 0
+  exact Subsingleton.elim _ _
+
+/-- Short exact sequence version of `stalk_zero_of_g_is_cokernel_of_stalk_epi`. -/
+theorem stalk_zero_of_shortExact_cokernel
+    {X : TopCat.{u}} {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hSE : S.ShortExact) (x : X)
+    (hepi : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.f.val))
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₃.val) :
+    a = 0 :=
+  stalk_zero_of_g_is_cokernel_of_stalk_epi hSE.gIsCokernel x hepi a
+
 /-! ## H⁰ ≅ Sections -/
 
 /-- `H F 0` is equivalent to sections on `⊤`. -/
