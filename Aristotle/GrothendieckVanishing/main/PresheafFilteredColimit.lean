@@ -1715,6 +1715,130 @@ theorem sheafH_filtered_colimit_comparison_isIso_one
   infer_instance
 
 /-- On a Noetherian space and for a filtered diagram, the canonical comparison morphism
+    `colim H^n(F_j) ⟶ H^n(colim F_j)` is an isomorphism in every degree. -/
+theorem sheafH_filtered_colimit_comparison_isIso
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (n : ℕ) (c' : Cocone Y') (hc' : IsColimit c') :
+    IsIso (sheafH_filtered_colimit_comparison Y' n c') := by
+  let P : ℕ → Prop := fun n =>
+    ∀ {J' : Type u} [SmallCategory J'] [IsFiltered J']
+      (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+      (c' : Cocone Y') (hc' : IsColimit c'),
+      IsIso (sheafH_filtered_colimit_comparison Y' n c')
+  have hP : ∀ n, P n := by
+    intro n
+    induction n with
+    | zero =>
+        intro J' _ _ Y' c' hc'
+        exact sheafH_filtered_colimit_comparison_isIso_zero Y' c' hc'
+    | succ n ih =>
+        cases n with
+        | zero =>
+            intro J' _ _ Y' c' hc'
+            exact sheafH_filtered_colimit_comparison_isIso_one Y' c' hc'
+        | succ m =>
+            intro J' _ _ Y' c' hc'
+            letI : Zero (TopCat.Sheaf AddCommGrpCat.{u} X) := Limits.HasZeroObject.zero' _
+            let Inj := sheafH_filtered_colimit_succ_Inj Y'
+            let injCocone := sheafH_filtered_colimit_succ_injCocone Y'
+            let qCocone := sheafH_filtered_colimit_succ_quotientCocone Y' c' hc'
+            have hqColim : IsColimit qCocone :=
+              sheafH_filtered_colimit_succ_quotientCocone_isColimit Y' c' hc'
+            have h_quot :
+                IsIso
+                  (sheafH_filtered_colimit_comparison
+                    (sheafH_filtered_colimit_succ_quotient Y') (m + 1) qCocone) :=
+              ih (Y' := sheafH_filtered_colimit_succ_quotient Y') (c' := qCocone) hqColim
+            letI :
+                IsIso
+                  (sheafH_filtered_colimit_comparison
+                    (sheafH_filtered_colimit_succ_quotient Y') (m + 1) qCocone) := h_quot
+            have hInj : ∀ j, Injective (Inj.obj j) := by
+              intro j
+              let fac :=
+                IsGrothendieckAbelian.monoMapFactorizationDataRlp
+                  (C := TopCat.Sheaf AddCommGrpCat.{u} X) (0 : Y'.obj j ⟶ 0)
+              change Injective fac.Z
+              simpa only [injective_iff_rlp_monomorphisms_zero,
+                (isZero_zero (TopCat.Sheaf AddCommGrpCat.{u} X)).eq_of_tgt fac.p 0] using fac.hp
+            have h_mid_n : ∀ j, Subsingleton (Sheaf.H (Inj.obj j) (m + 1)) := by
+              intro j
+              letI : Injective (Inj.obj j) := hInj j
+              exact Ext.subsingleton_of_injective _ _ m
+            have h_mid_succ : ∀ j, Subsingleton (Sheaf.H (Inj.obj j) (m + 2)) := by
+              intro j
+              letI : Injective (Inj.obj j) := hInj j
+              exact Ext.subsingleton_of_injective _ _ (m + 1)
+            haveI hFlasqueInj : IsFlasqueSheaf injCocone.pt :=
+              isFlasque_filtered_colimit Inj
+                (fun j => by
+                  letI : Injective (Inj.obj j) := hInj j
+                  exact isFlasque_of_injective (Inj.obj j))
+                (colimit.isColimit Inj)
+            have h_colim_n : Subsingleton (Sheaf.H injCocone.pt (m + 1)) := by
+              exact FlasqueVanishing _ _ m
+            have h_colim_succ : Subsingleton (Sheaf.H injCocone.pt (m + 2)) := by
+              exact FlasqueVanishing _ _ (m + 1)
+            let domainIso :=
+              sheafH_filtered_colimit_succ_shiftDomainIso Y' (m + 1) h_mid_n h_mid_succ
+            let codomainIso :=
+              sheafH_filtered_colimit_succ_shiftCodomainIso
+                Y' c' hc' (m + 1) h_colim_n h_colim_succ
+            have hcompat :
+                domainIso.hom ≫ sheafH_filtered_colimit_comparison Y' (m + 2) c' =
+                  sheafH_filtered_colimit_comparison
+                      (sheafH_filtered_colimit_succ_quotient Y') (m + 1) qCocone ≫
+                    codomainIso.hom := by
+              simpa [domainIso, codomainIso] using
+                sheafH_filtered_colimit_comparison_succ_compatibility
+                  (Y' := Y') (c' := c') (hc' := hc') (n := m + 1)
+                  h_mid_n h_mid_succ h_colim_n h_colim_succ
+            have hrewrite :
+                sheafH_filtered_colimit_comparison Y' (m + 2) c' =
+                  domainIso.inv ≫
+                    sheafH_filtered_colimit_comparison
+                      (sheafH_filtered_colimit_succ_quotient Y') (m + 1) qCocone ≫
+                    codomainIso.hom := by
+              calc
+                sheafH_filtered_colimit_comparison Y' (m + 2) c'
+                    = 𝟙 _ ≫ sheafH_filtered_colimit_comparison Y' (m + 2) c' := by simp
+                _ = domainIso.inv ≫ domainIso.hom ≫
+                      sheafH_filtered_colimit_comparison Y' (m + 2) c' := by simp
+                _ = domainIso.inv ≫
+                      (sheafH_filtered_colimit_comparison
+                        (sheafH_filtered_colimit_succ_quotient Y') (m + 1) qCocone ≫
+                          codomainIso.hom) := by rw [hcompat]
+                _ = domainIso.inv ≫
+                      sheafH_filtered_colimit_comparison
+                        (sheafH_filtered_colimit_succ_quotient Y') (m + 1) qCocone ≫
+                      codomainIso.hom := by simp [Category.assoc]
+            rw [hrewrite]
+            infer_instance
+  exact hP n Y' c' hc'
+
+/-- The canonical comparison isomorphism `colim H^n(F_j) ≅ H^n(colim F_j)` for filtered
+    diagrams on Noetherian spaces. -/
+noncomputable def sheafH_filtered_colimit_comparison_iso
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (n : ℕ) (c' : Cocone Y') (hc' : IsColimit c') :
+    colimit (Y' ⋙ sheafCohomologyFunctor X n) ≅ AddCommGrpCat.of (Sheaf.H c'.pt n) := by
+  letI := sheafH_filtered_colimit_comparison_isIso (Y' := Y') (n := n) (c' := c') hc'
+  exact asIso (sheafH_filtered_colimit_comparison Y' n c')
+
+@[simp] theorem sheafH_filtered_colimit_comparison_iso_hom
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (n : ℕ) (c' : Cocone Y') (hc' : IsColimit c') :
+    (sheafH_filtered_colimit_comparison_iso Y' n c' hc').hom =
+      sheafH_filtered_colimit_comparison Y' n c' := by
+  simp [sheafH_filtered_colimit_comparison_iso]
+
+/-- On a Noetherian space and for a filtered diagram, the canonical comparison morphism
     `colim H^n(F_j) ⟶ H^n(colim F_j)` is epi. -/
 theorem sheafH_filtered_colimit_comparison_epi
     {X : TopCat.{u}} [NoetherianSpace X]
