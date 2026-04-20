@@ -7,8 +7,8 @@ API for topological Krull dimension on irreducible spaces.
 
 ## Main results
 
-- `irreducibleCloseds_unique_of_dim_zero`: on an irreducible space with dim ≤ 0,
-  every irreducible closed set is the whole space
+- `TopologicalSpace.IrreducibleCloseds.eq_univ_of_topologicalKrullDim_nonpos`: on an
+  irreducible space with dim ≤ 0, every irreducible closed set is the whole space
 - `opens_eq_bot_or_top_of_irreducibleSpace_dim_zero`: on an irreducible dim-0 space,
   the only opens are ⊥ and ⊤
 - `topologicalKrullDim_nonneg`: non-empty spaces have dim ≥ 0
@@ -27,22 +27,37 @@ open CategoryTheory TopologicalSpace Limits
 
 /-! ## Irreducible spaces of dimension 0 -/
 
-/-- On an irreducible space with topologicalKrullDim ≤ 0, every irreducible closed set
+namespace TopologicalSpace
+namespace IrreducibleCloseds
+
+variable {X : Type u} [TopologicalSpace X]
+
+/-- On an irreducible space with topologicalKrullDim ≤ 0, every irreducible closed subset
     equals the whole space. -/
-theorem irreducibleCloseds_unique_of_dim_zero {X : Type u} [TopologicalSpace X]
-    [IrreducibleSpace X] (hdim : topologicalKrullDim X ≤ 0)
-    (S : IrreducibleCloseds X) : (S : Set X) = Set.univ :=
+theorem eq_univ_of_topologicalKrullDim_nonpos [IrreducibleSpace X]
+    (S : IrreducibleCloseds X) (hdim : topologicalKrullDim X ≤ 0) :
+    (S : Set X) = Set.univ :=
   le_antisymm (Set.subset_univ _)
     ((Order.krullDim_nonpos_iff_forall_isMax).mp hdim S
       (show S ≤ ⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩ from
         Set.subset_univ _))
 
+end IrreducibleCloseds
+end TopologicalSpace
+
+/-- On an irreducible space with topologicalKrullDim ≤ 0, every irreducible closed set
+    equals the whole space. -/
+theorem irreducibleCloseds_unique_of_dim_zero {X : Type u} [TopologicalSpace X]
+    [IrreducibleSpace X] (hdim : topologicalKrullDim X ≤ 0)
+    (S : IrreducibleCloseds X) : (S : Set X) = Set.univ :=
+  S.eq_univ_of_topologicalKrullDim_nonpos hdim
+
 /-- On an irreducible space of dimension 0, every point is dense. -/
 theorem closure_singleton_eq_univ_of_dim_zero {X : Type u} [TopologicalSpace X]
     [IrreducibleSpace X] (hdim : topologicalKrullDim X ≤ 0)
     (x : X) : closure ({x} : Set X) = Set.univ :=
-  irreducibleCloseds_unique_of_dim_zero hdim
-    ⟨closure {x}, isIrreducible_singleton.closure, isClosed_closure⟩
+  TopologicalSpace.IrreducibleCloseds.eq_univ_of_topologicalKrullDim_nonpos
+    (X := X) ⟨closure {x}, isIrreducible_singleton.closure, isClosed_closure⟩ hdim
 
 /-- On an irreducible space of dimension ≤ 0, the only opens are ⊥ and ⊤.
     Every point is dense, so any nonempty open contains every point. -/
