@@ -558,6 +558,9 @@ theorem isFlasque_filtered_colimit
 /-! ### Sheaf cohomology commutes with filtered colimits
 
 The main results:
+- `sheafH_filtered_colimit_comparison`: the canonical map
+  `colim H^n(F_j) ⟶ H^n(colim F_j)`
+- `sheafH_filtered_colimit_comparison_epi`: this canonical comparison is epi
 - `sheafH_filtered_colimit_surj`: every element of `H^n(colim F_j)` comes from some `H^n(F_j)`
   via the canonical map. The proof uses per-object functorial injective embeddings via Mathlib's
   `IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp` and dimension shifting.
@@ -686,6 +689,42 @@ theorem sheafH_filtered_colimit_surj
     exact (sheafCohomologyFunctor_map_extClass_of_map_eq (hSE_j j₀) hSE
       (ShortComplex.homMk (c'.ι.app j₀) (injCocone.ι.app j₀)
         (qCocone.ι.app j₀) (hfac_ι j₀) (cokernel.π_desc _ _ _).symm) n hy_j).trans hy
+
+/-- The canonical comparison morphism `colim H^n(F_j) ⟶ H^n(colim F_j)` induced by a cocone. -/
+noncomputable def sheafH_filtered_colimit_comparison
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (n : ℕ) (c' : Cocone Y') :
+    colimit (Y' ⋙ sheafCohomologyFunctor X n) ⟶ AddCommGrpCat.of (Sheaf.H c'.pt n) :=
+  colimit.desc _ ((sheafCohomologyFunctor X n).mapCocone c')
+
+@[simp] theorem colimit_ι_sheafH_filtered_colimit_comparison
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (n : ℕ) (c' : Cocone Y') (j : J') :
+    colimit.ι (Y' ⋙ sheafCohomologyFunctor X n) j ≫
+        sheafH_filtered_colimit_comparison Y' n c' =
+      (sheafCohomologyFunctor X n).map (c'.ι.app j) := by
+  simp [sheafH_filtered_colimit_comparison]
+
+/-- The canonical comparison morphism `colim H^n(F_j) ⟶ H^n(colim F_j)` is epi. -/
+theorem sheafH_filtered_colimit_comparison_epi
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (n : ℕ) (c' : Cocone Y') (hc' : IsColimit c') :
+    Epi (sheafH_filtered_colimit_comparison Y' n c') := by
+  rw [AddCommGrpCat.epi_iff_surjective]
+  intro x
+  obtain ⟨j, y, hy⟩ := sheafH_filtered_colimit_surj n Y' c' hc' x
+  refine ⟨ConcreteCategory.hom (colimit.ι (Y' ⋙ sheafCohomologyFunctor X n) j) y, ?_⟩
+  change ConcreteCategory.hom
+      ((colimit.ι (Y' ⋙ sheafCohomologyFunctor X n) j) ≫
+        sheafH_filtered_colimit_comparison Y' n c') y = x
+  rw [colimit_ι_sheafH_filtered_colimit_comparison]
+  exact hy
 
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
     If `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
