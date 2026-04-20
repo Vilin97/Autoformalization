@@ -64,16 +64,15 @@ theorem pushforward_closedIncl_stalk_eq_zero
     inf_le_left)).op) sU)]
 
 /-- Pushforward along a closed immersion preserves epis: if `f : F ⟶ G` is epi in
-    sheaves on the closed subspace, then `i_*(f)` is epi in sheaves on the ambient space.
+    presheaves on the closed subspace, then `i_*(f)` is epi in sheaves on the ambient
+    space whenever `f` is locally surjective.
     Proof: stalkwise surjectivity (identity on the closed set, zero outside). -/
-theorem epi_pushforward_map_closedIncl
+theorem epi_pushforward_map_closedIncl_of_locallySurjective
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     {F G : TopCat.Presheaf AddCommGrpCat.{u} (TopCat.of s)}
     (hF : F.IsSheaf) (hG : G.IsSheaf)
     (f : F ⟶ G)
-    (hf : Epi (show (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
-        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) from
-          Sheaf.Hom.mk f)) :
+    (hf_loc : TopCat.Presheaf.IsLocallySurjective f) :
     Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
       (TopCat.closedIncl hs)).map (show
         (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
@@ -81,8 +80,6 @@ theorem epi_pushforward_map_closedIncl
             Sheaf.Hom.mk f)) := by
   let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
       (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) := Sheaf.Hom.mk f
-  letI : Epi fsh := by
-    simpa [fsh] using hf
   letI : Balanced (Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
   change Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
       (TopCat.closedIncl hs)).map fsh)
@@ -92,10 +89,6 @@ theorem epi_pushforward_map_closedIncl
   change TopCat.Presheaf.IsLocallySurjective
     ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
       (TopCat.closedIncl hs)).map fsh).val
-  have hf_loc : TopCat.Presheaf.IsLocallySurjective f := by
-    simpa [fsh] using
-      (show Sheaf.IsLocallySurjective fsh from
-        (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} fsh).mpr inferInstance)
   rw [TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
   intro x; by_cases hx : (x : X) ∈ s
   · let z : TopCat.of s := ⟨x, hx⟩
@@ -125,15 +118,47 @@ theorem epi_pushforward_map_closedIncl
     rw [pushforward_closedIncl_stalk_eq_zero (hs := hs) (G := G) hG hx b]
     exact ⟨0, AddMonoidHom.map_zero _⟩
 
+/-- Wrapper around `epi_pushforward_map_closedIncl_of_locallySurjective`: an epi of
+    sheaves on the closed subspace pushes forward to an epi on the ambient space. -/
+theorem epi_pushforward_map_closedIncl
+    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
+    {F G : TopCat.Presheaf AddCommGrpCat.{u} (TopCat.of s)}
+    (hF : F.IsSheaf) (hG : G.IsSheaf)
+    (f : F ⟶ G)
+    (hf : Epi (show (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
+        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) from
+          Sheaf.Hom.mk f)) :
+    Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
+      (TopCat.closedIncl hs)).map (show
+        (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
+          (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) from
+            Sheaf.Hom.mk f)) := by
+  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
+      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) := Sheaf.Hom.mk f
+  letI : Epi fsh := by
+    simpa [fsh] using hf
+  letI : Balanced (Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
+  have hf_loc : TopCat.Presheaf.IsLocallySurjective f := by
+    simpa [fsh] using
+      (show Sheaf.IsLocallySurjective fsh from
+        (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} fsh).mpr inferInstance)
+  simpa [fsh] using
+    epi_pushforward_map_closedIncl_of_locallySurjective
+      (hs := hs) (F := F) (G := G) hF hG f hf_loc
+
 instance closedIncl_pushforward_preservesEpis
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
     (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
       (TopCat.closedIncl hs)).PreservesEpimorphisms where
   preserves {F G} f hf := by
     letI : Epi f := hf
-    simpa using epi_pushforward_map_closedIncl
-      (hs := hs) (F := F.val) (G := G.val) F.cond G.cond f.val
-      (by simpa using hf)
+    letI : Balanced (Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
+    have hf_loc : TopCat.Presheaf.IsLocallySurjective f.val := by
+      simpa using
+        (show Sheaf.IsLocallySurjective f from
+          (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} f).mpr inferInstance)
+    simpa using epi_pushforward_map_closedIncl_of_locallySurjective
+      (hs := hs) (F := F.val) (G := G.val) F.cond G.cond f.val hf_loc
 
 instance closedIncl_pushforward_preservesMonos
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
