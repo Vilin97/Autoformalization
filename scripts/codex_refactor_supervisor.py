@@ -47,6 +47,20 @@ DEFAULT_MODEL = os.environ.get("CODEX_REFACTOR_MODEL", "gpt-5.4")
 DEFAULT_REASONING_EFFORT = os.environ.get("CODEX_REFACTOR_REASONING_EFFORT", "xhigh")
 
 
+def load_repo_env() -> None:
+    env_path = REPO_DIR / ".env"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        if key and key not in os.environ:
+            os.environ[key] = value.strip()
+
+
 class FileLock:
     def __init__(self, path: Path):
         self.path = path
@@ -214,6 +228,35 @@ def run_codex(prompt: str, output_path: Path) -> tuple[int, str]:
     return result.returncode, text
 
 
+def send_telegram(message: str) -> None:
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "398863010")
+    if not token:
+        return
+    try:
+        result = subprocess.run(
+            [
+                "curl",
+                "-s",
+                "-X",
+                "POST",
+                f"https://api.telegram.org/bot{token}/sendMessage",
+                "-d",
+                f"chat_id={chat_id}",
+                "--data-urlencode",
+                f"text={message}",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+        if '"ok":false' in (result.stdout or ""):
+            print(f"Telegram error: {result.stdout[:200]}", file=sys.stderr)
+    except Exception as exc:
+        print(f"Telegram send failed: {exc}", file=sys.stderr)
+
+
 def run_supervisor_audit() -> dict:
     ensure_setup()
     SUPERVISOR_REPORTS.mkdir(parents=True, exist_ok=True)
@@ -236,6 +279,7 @@ def run_supervisor_audit() -> dict:
 
 
 def main() -> None:
+    load_repo_env()
     parser = argparse.ArgumentParser(description="Codex refactor supervisor")
     parser.add_argument("--loop", action="store_true", help="Run continuously")
     parser.add_argument("--interval", type=int, default=COOLDOWN, help="Seconds between audits")
@@ -262,10 +306,15 @@ def main() -> None:
                 record["worker_stopped"] = stopped
                 record["worker_restarted_pid"] = restarted_pid
                 append_history(record)
+                report_name = Path(record["report_path"]).name
+                send_telegram(
+                    f"🛡️ *Codex Supervisor Audit*\nexit={record['exit_code']}\nreport={report_name}"
+                )
                 write_status(mode="idle", **record)
             except Exception as exc:
                 write_status(mode="error", error=str(exc))
                 print(f"Supervisor audit failed: {exc}", file=sys.stderr)
+                send_telegram(f"❌ Codex supervisor audit failed: {exc}")
             if not args.loop:
                 break
             time.sleep(args.interval)
