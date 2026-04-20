@@ -555,12 +555,15 @@ theorem isFlasque_filtered_colimit
       (congrArg ConcreteCategory.hom ((c.ι.app j₀).val.naturality i.op).symm)) a₀,
     ha₀]; exact hb₀
 
-/-! ### Sheaf cohomology commutes with filtered colimits
+/-! ### Sheaf cohomology and filtered colimits
 
-The main results:
-- `sheafH_filtered_colimit_comparison`: the canonical map
-  `colim H^n(F_j) ⟶ H^n(colim F_j)`
-- `sheafH_filtered_colimit_comparison_epi`: this canonical comparison is epi
+The formal comparison map
+`sheafH_filtered_colimit_comparison : colim H^n(F_j) ⟶ H^n(colim F_j)`
+is defined for any small diagram and cocone by `colimit.desc`.
+
+The genuinely geometric input starts afterwards:
+- `sheafH_filtered_colimit_comparison_epi`: on Noetherian spaces and filtered diagrams,
+  this canonical comparison is epi
 - `sheafH_filtered_colimit_surj`: every element of `H^n(colim F_j)` comes from some `H^n(F_j)`
   via the canonical map. The proof uses per-object functorial injective embeddings via Mathlib's
   `IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp` and dimension shifting.
@@ -692,16 +695,16 @@ theorem sheafH_filtered_colimit_surj
 
 /-- The canonical comparison morphism `colim H^n(F_j) ⟶ H^n(colim F_j)` induced by a cocone. -/
 noncomputable def sheafH_filtered_colimit_comparison
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     (n : ℕ) (c' : Cocone Y') :
     colimit (Y' ⋙ sheafCohomologyFunctor X n) ⟶ AddCommGrpCat.of (Sheaf.H c'.pt n) :=
   colimit.desc _ ((sheafCohomologyFunctor X n).mapCocone c')
 
 @[simp] theorem colimit_ι_sheafH_filtered_colimit_comparison
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     (n : ℕ) (c' : Cocone Y') (j : J') :
     colimit.ι (Y' ⋙ sheafCohomologyFunctor X n) j ≫
@@ -709,7 +712,8 @@ noncomputable def sheafH_filtered_colimit_comparison
       (sheafCohomologyFunctor X n).map (c'.ι.app j) := by
   simp [sheafH_filtered_colimit_comparison]
 
-/-- The canonical comparison morphism `colim H^n(F_j) ⟶ H^n(colim F_j)` is epi. -/
+/-- On a Noetherian space and for a filtered diagram, the canonical comparison morphism
+    `colim H^n(F_j) ⟶ H^n(colim F_j)` is epi. -/
 theorem sheafH_filtered_colimit_comparison_epi
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
