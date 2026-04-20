@@ -137,7 +137,8 @@ theorem GrothendieckVanishing (X : TopCat.{u}) [NoetherianSpace X]
         (grothendieck_vanishing_of_irreducible X n (hd ▸ hn) (F := F) hF
           (fun Y _ _ m G hle hY =>
             IrreduciblePosVanishing (F := G.val) G.cond m hY
-              (fun Z _ m' G' hlt hG' =>
-                ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle))
-                  Z m' G'.val G'.cond rfl hG'))))
+              (by
+                intro Z _ m' G' hG' hlt hm'
+                exact ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle))
+                  Z m' G' hG' rfl hm'))))
     X n F hF rfl h
