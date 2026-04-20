@@ -118,20 +118,26 @@ theorem grothendieck_vanishing_of_irreducible
 /-! ## Main theorem -/
 
 /-- **Grothendieck's vanishing theorem** (Hartshorne III, Theorem 2.7). -/
-theorem GrothendieckVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    [NoetherianSpace X] (n : ℕ) (h : n > topologicalKrullDim X) :
-    Subsingleton (Sheaf.H F n) := by
+theorem GrothendieckVanishing (X : TopCat.{u}) [NoetherianSpace X]
+    (n : ℕ) (h : n > topologicalKrullDim X)
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
+    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+  change Subsingleton (Sheaf.H Fsh n)
   have hwf : WellFounded (fun (a b : WithBot ℕ∞) => a < b) := IsWellFounded.wf
   exact hwf.induction (C := fun d =>
     ∀ (X : TopCat.{u}) [NoetherianSpace X]
-      (n : ℕ) (F : TopCat.Sheaf AddCommGrpCat.{u} X),
-      topologicalKrullDim X = d → n > d → Subsingleton (Sheaf.H F n))
-    (topologicalKrullDim X) (fun d ih X _ n F hd hn => by
+      (n : ℕ) (F : TopCat.Presheaf AddCommGrpCat.{u} X) (hF : F.IsSheaf),
+      topologicalKrullDim X = d → n > d →
+        Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
+    (topologicalKrullDim X) (fun d ih X _ n F hF hd hn => by
+      let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
       -- Reduce to irreducible X
-      simpa using
-        (grothendieck_vanishing_of_irreducible X n (hd ▸ hn) (F := F.val) F.cond
+      simpa [Fsh] using
+        (grothendieck_vanishing_of_irreducible X n (hd ▸ hn) (F := F) hF
           (fun Y _ _ m G hle hY =>
             IrreduciblePosVanishing (F := G.val) G.cond m hY
               (fun Z _ m' G' hlt hG' =>
-                ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle)) Z m' G' rfl hG'))))
-    X n F rfl h
+                ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle))
+                  Z m' G'.val G'.cond rfl hG'))))
+    X n F hF rfl h
