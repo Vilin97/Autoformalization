@@ -60,17 +60,18 @@ private theorem ReducibleVanishing'
     have hZ_closed := isClosed_of_mem_irreducibleComponents Z hZ_comp
     have hZ_irred := hZ_comp.1
     let i := TopCat.closedIncl hZ_closed
-    let S := closedImmersionSES Z hZ_closed G
-    have hSE := closedImmersionSES_shortExact Z hZ_closed G
+    let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G.val, G.cond⟩
+    let S := closedImmersionSES (Z := Z) (hZ := hZ_closed) (F := G.val) G.cond
+    have hSE := closedImmersionSES_shortExact (Z := Z) (hZ := hZ_closed) (F := G.val) G.cond
     have hpush : Subsingleton (Sheaf.H S.X₃ n) := by
       haveI : IrreducibleSpace (TopCat.of Z) :=
         isIrreducible_iff_irreducibleSpace.mp hZ_irred
-      simpa [S, closedImmersionSES, i] using
+      simpa [S, closedImmersionSES, i, Gsh] using
         (PushforwardHVanishing Z hZ_closed
-          (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj G).val)
-          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj G).cond
+          (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Gsh).val)
+          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Gsh).cond
           n
-          (ih_irred (TopCat.of Z) ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj G)
+          (ih_irred (TopCat.of Z) ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Gsh)
             (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z)
             (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z) hn)))
     have hker : Subsingleton (Sheaf.H S.X₁ n) := by
@@ -78,8 +79,9 @@ private theorem ReducibleVanishing'
       intro x hx a
       by_cases hxZ : x ∈ Z
       · -- closedIncl_unit_stalk_isIso: iso on stalks at z ∈ Z
-        haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) :=
-          TopCat.closedIncl_unit_stalk_isIso hZ_closed G ⟨x, hxZ⟩
+        haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
+          simpa [S, closedImmersionSES, i, Gsh] using
+            (TopCat.closedIncl_unit_stalk_isIso hZ_closed Gsh ⟨x, hxZ⟩)
         exact stalk_zero_of_ses_g_iso hSE x inferInstance a
       · have hx' : x ∉ ⋃₀ ((insert Z s' : Finset (Set X)) : Set (Set X)) := by
           simp only [Finset.coe_insert, Set.sUnion_insert, Set.mem_union] at hx ⊢
