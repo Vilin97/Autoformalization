@@ -68,8 +68,10 @@ theorem pushforward_closedIncl_stalk_eq_zero
     Proof: stalkwise surjectivity (identity on the closed set, zero outside). -/
 theorem epi_pushforward_map_closedIncl
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    {F G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)}
-    (f : F ⟶ G) [Epi f] :
+    {F G : TopCat.Presheaf AddCommGrpCat.{u} (TopCat.of s)}
+    (hF : F.IsSheaf) (hG : G.IsSheaf)
+    (f : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
+      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s))) [Epi f] :
     Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
       (TopCat.closedIncl hs)).map f) := by
   letI : Balanced (Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
@@ -89,8 +91,8 @@ theorem epi_pushforward_map_closedIncl
     have hnat : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
         (ConcreteCategory.hom (TopCat.closedIncl hs) z)).map
         ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f.val) ≫
-      TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} (TopCat.closedIncl hs) G.val z =
-    TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} (TopCat.closedIncl hs) F.val z ≫
+      TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} (TopCat.closedIncl hs) G z =
+    TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} (TopCat.closedIncl hs) F z ≫
       (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map f.val := by
       apply TopCat.Presheaf.stalk_hom_ext; intro U hU
       rw [TopCat.Presheaf.stalkFunctor_map_germ_assoc,
@@ -102,17 +104,20 @@ theorem epi_pushforward_map_closedIncl
         ((ConcreteCategory.hom (TopCat.closedIncl hs)) z)).map
         ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f.val))
     rw [← epi_comp_iff_of_isIso _ (TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
-        (TopCat.closedIncl hs) G.val z), hnat]
+        (TopCat.closedIncl hs) G z), hnat]
     exact epi_comp _ _
   · intro b
-    rw [pushforward_closedIncl_stalk_eq_zero (hs := hs) (G := G.val) G.cond hx b]
+    rw [pushforward_closedIncl_stalk_eq_zero (hs := hs) (G := G) hG hx b]
     exact ⟨0, AddMonoidHom.map_zero _⟩
 
 instance closedIncl_pushforward_preservesEpis
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
     (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
       (TopCat.closedIncl hs)).PreservesEpimorphisms where
-  preserves f := epi_pushforward_map_closedIncl hs f
+  preserves {F G} f hf := by
+    letI : Epi f := hf
+    simpa using epi_pushforward_map_closedIncl
+      (hs := hs) (F := F.val) (G := G.val) F.cond G.cond f
 
 instance closedIncl_pushforward_preservesMonos
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
