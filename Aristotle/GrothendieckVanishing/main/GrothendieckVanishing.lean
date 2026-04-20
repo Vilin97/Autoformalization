@@ -121,7 +121,7 @@ theorem GrothendieckVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{
       -- Reduce to irreducible X
       apply grothendieck_vanishing_of_irreducible X n (hd ▸ hn) F
       intro Y _ _ m G hle hY
-      exact IrreduciblePosVanishing G m hY
+      exact IrreduciblePosVanishing (F := G.val) G.cond m hY
         (fun Z _ m' G' hlt hG' =>
           ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle)) Z m' G' rfl hG'))
     X n F rfl h

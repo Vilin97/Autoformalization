@@ -343,17 +343,18 @@ theorem epiImage_zeroOutsideInt_vanishing
     Covers both dim > 0 (closed immersion + induction) and dim ≤ 0 (flasque). -/
 theorem IrreduciblePosVanishing
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
     (n : ℕ) (hn : n > topologicalKrullDim X)
     (ih : VanishingIH.{u} (topologicalKrullDim X)) :
-    Subsingleton (Sheaf.H F n) := by
+    Subsingleton (Sheaf.H (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+  change Subsingleton (Sheaf.H Fsh n)
   by_cases hpos : topologicalKrullDim X > 0
   · obtain ⟨Z, hZ_closed, _, hZ_dim, hn_Z⟩ :=
       exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos
     let i := TopCat.closedIncl hZ_closed
-    let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F.val, F.cond⟩
-    let S := closedImmersionSES (Z := Z) (hZ := hZ_closed) (F := F.val) F.cond
-    have hSE := closedImmersionSES_shortExact (Z := Z) (hZ := hZ_closed) (F := F.val) F.cond
+    let S := closedImmersionSES (Z := Z) (hZ := hZ_closed) (F := F) hF
+    have hSE := closedImmersionSES_shortExact (Z := Z) (hZ := hZ_closed) (F := F) hF
     have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
       by
         simpa [S, closedImmersionSES, i, Fsh] using
@@ -368,11 +369,11 @@ theorem IrreduciblePosVanishing
     exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
   · -- dim ≤ 0: F is flasque on irreducible dim-0 space, use FlasqueVanishing
     push_neg at hpos
-    haveI : IsFlasqueSheaf F := ⟨fun {U V} i => by
+    haveI : IsFlasqueSheaf Fsh := ⟨fun {U V} i => by
       rcases opens_eq_bot_or_top_of_irreducibleSpace_dim_zero hpos U with rfl | rfl
-      · exact F.isTerminalOfEmpty.isZero.epi _
+      · exact Fsh.isTerminalOfEmpty.isZero.epi _
       · have hV := le_antisymm le_top (homOfLE le_top ≫ i |>.le); subst hV
-        rw [Subsingleton.elim i (𝟙 ⊤), op_id, F.val.map_id]; infer_instance⟩
+        rw [Subsingleton.elim i (𝟙 ⊤), op_id, F.map_id]; infer_instance⟩
     have hm_ne : n ≠ 0 := fun h => by
       subst h; exact absurd hn (not_lt.mpr topologicalKrullDim_nonneg)
     obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
