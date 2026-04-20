@@ -19,37 +19,42 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
     (providing torsion-freeness needed for injectivity). -/
 private theorem sHom_stalk_bijective_at
     {X : TopCat.{u}} {V U : Opens X} (hUV : U ≤ V)
-    {R : TopCat.Sheaf AddCommGrpCat.{u} X}
-    (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
-    (s : R.val.obj (op U))
+    {R : TopCat.Presheaf AddCommGrpCat.{u} X} (hRsh : R.IsSheaf)
+    (i : (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
+    (s : R.obj (op U))
     (x : X) (hxU : x ∈ U)
     -- germ(s, x) ≠ 0 (needed for injectivity; without this, stalk(R,x) could be 0
     -- while stalk(zeroOutsideInt U, x) ≅ ℤ, making the map non-injective)
-    (hs_ne : R.presheaf.germ U x hxU s ≠ 0)
+    (hs_ne : R.germ U x hxU s ≠ 0)
     -- Every stalk element of R at x is an integer multiple of germ(s, x)
-    (hgen : ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R.val),
-      ∃ k : ℤ, a = k • R.presheaf.germ U x hxU s) :
+    (hgen : ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R),
+      ∃ k : ℤ, a = k • R.germ U x hxU s) :
     Function.Bijective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-        (TopCat.Sheaf.zeroOutsideInt.sHom s).val)) := by
+        (TopCat.Sheaf.zeroOutsideInt.sHom (F := ⟨R, hRsh⟩) s).val)) := by
+  let Rsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨R, hRsh⟩
   let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  let sHom_x := ConcreteCategory.hom (T.map (TopCat.Sheaf.zeroOutsideInt.sHom s).val)
+  let sHom_x := ConcreteCategory.hom (T.map (TopCat.Sheaf.zeroOutsideInt.sHom (F := Rsh) s).val)
   let i_x := ConcreteCategory.hom (T.map i.val)
   let FT := TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙ T
   haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
   haveI : Mono (FT.map i) := Functor.map_mono FT i
   have hi_inj : Function.Injective i_x :=
     (ConcreteCategory.mono_iff_injective_of_preservesPullback (FT.map i)).mp inferInstance
-  have hi_s_ne : i_x (R.presheaf.germ U x hxU s) ≠ 0 :=
+  have hi_s_ne : i_x (R.germ U x hxU s) ≠ 0 :=
     fun h => hs_ne (hi_inj (h.trans (map_zero i_x).symm))
   obtain ⟨c, hc⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x (hUV hxU)
-    (i_x (R.presheaf.germ U x hxU s))
+    (i_x (R.germ U x hxU s))
   have hc_ne : c ≠ 0 := fun hc0 => by rw [hc0, zero_smul] at hc; exact hi_s_ne hc
+  have h_sHom_app :
+      (TopCat.Sheaf.zeroOutsideInt.sHom (F := Rsh) s).val.app (op U)
+        (TopCat.Sheaf.zeroOutsideInt.generator U) = s :=
+    TopCat.Sheaf.zeroOutsideInt.sHom_app_generator (F := Rsh) s
   have h_sHom_gen : sHom_x ((TopCat.Sheaf.zeroOutsideInt U).presheaf.germ U x hxU
-      (TopCat.Sheaf.zeroOutsideInt.generator U)) = R.presheaf.germ U x hxU s := by
-    show T.map (TopCat.Sheaf.zeroOutsideInt.sHom s).val _ = _
+      (TopCat.Sheaf.zeroOutsideInt.generator U)) = R.germ U x hxU s := by
+    show T.map (TopCat.Sheaf.zeroOutsideInt.sHom (F := Rsh) s).val _ = _
     rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
-    congr 1; exact TopCat.Sheaf.zeroOutsideInt.sHom_app_generator s
+    simpa using congrArg (R.germ U x hxU) h_sHom_app
   have h_surj : Function.Surjective sHom_x := by
     intro a; obtain ⟨k, hk⟩ := hgen a
     exact ⟨k • (TopCat.Sheaf.zeroOutsideInt U).presheaf.germ U x hxU
@@ -59,8 +64,8 @@ private theorem sHom_stalk_bijective_at
     obtain ⟨n, rfl⟩ := stalk_zeroOutsideInt_eq_zsmul_generator U x hxU a
     obtain ⟨m, rfl⟩ := stalk_zeroOutsideInt_eq_zsmul_generator U x hxU b
     simp only [map_zsmul, h_sHom_gen] at hab
-    have h_i : n • i_x (R.presheaf.germ U x hxU s) =
-        m • i_x (R.presheaf.germ U x hxU s) := by rw [← map_zsmul, ← map_zsmul, hab]
+    have h_i : n • i_x (R.germ U x hxU s) =
+        m • i_x (R.germ U x hxU s) := by rw [← map_zsmul, ← map_zsmul, hab]
     rw [hc, smul_comm n, smul_comm m, ← mul_smul, ← mul_smul] at h_i
     rw [mul_left_cancel₀ hc_ne (zsmul_generator_injective V x (hUV hxU) h_i)]
   exact ⟨h_inj, h_surj⟩
@@ -226,10 +231,9 @@ theorem exists_good_section
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
             (TopCat.Sheaf.zeroOutsideInt.sHom
               (F := (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) s).val)) := by
-  let Rsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨R, hRsh⟩
   obtain ⟨V', hV'V, hV'ne, s, hgen⟩ := exists_section_generating_stalks (R := R) hRsh i hR
   exact ⟨V', hV'V, hV'ne, s, fun x hx =>
-    sHom_stalk_bijective_at (R := Rsh) hV'V i s x hx (hgen x hx).1 (hgen x hx).2⟩
+    sHom_stalk_bijective_at (R := R) hV'V hRsh i s x hx (hgen x hx).1 (hgen x hx).2⟩
 
 /-- **Structure lemma** (Hartshorne Step 4 core): a nonzero subsheaf of `zeroOutsideInt V`
     contains `zeroOutsideInt V'` for some nonempty open `V' ⊆ V`, with the inclusion
