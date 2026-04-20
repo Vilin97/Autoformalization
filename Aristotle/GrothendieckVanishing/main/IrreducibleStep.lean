@@ -356,16 +356,15 @@ theorem IrreduciblePosVanishing
   · obtain ⟨Z, hZ_closed, _, hZ_dim, hn_Z⟩ :=
       exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos
     let i := TopCat.closedIncl hZ_closed
+    let FZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh)
     let S := closedImmersionSES (Z := Z) (hZ := hZ_closed) (F := F) hF
     have hSE := closedImmersionSES_shortExact (Z := Z) (hZ := hZ_closed) (F := F) hF
     have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
       by
-        simpa [S, closedImmersionSES, i, Fsh] using
+        simpa [S, closedImmersionSES, i, Fsh, FZ] using
           (PushforwardHVanishing Z hZ_closed
-            (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh).val)
-            ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh).cond n
-            (ih (TopCat.of Z) n ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh)
-              hZ_dim hn_Z))
+            (G := FZ.val) FZ.cond n
+            (ih (TopCat.of Z) n (G := FZ.val) FZ.cond hZ_dim hn_Z))
     have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
       directLimit_cohomology_vanishing (K := S.X₁.val) S.X₁.cond n
         (fun {G} {V} f hf =>

@@ -23,13 +23,13 @@ universe u
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
 /-- The induction hypothesis for Grothendieck vanishing: vanishing holds for all
-    sheaves on all spaces of strictly smaller Krull dimension than X. -/
+    sheaf-valued presheaves on all spaces of strictly smaller Krull dimension than X. -/
 abbrev VanishingIH (dimX : WithBot ℕ∞) : Prop :=
   ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-    (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
+    (m : ℕ) {G : TopCat.Presheaf AddCommGrpCat.{u} Y} (hG : G.IsSheaf),
     topologicalKrullDim Y < dimX →
     m > topologicalKrullDim Y →
-    Subsingleton (Sheaf.H G m)
+    Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} Y) m)
 
 /-! ## Building blocks for the closed-open decomposition
 
@@ -266,6 +266,7 @@ theorem closedComplementVanishing
       (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
       (lt_of_lt_of_le hn le_top)
   let i := TopCat.closedIncl hYcl
+  let CY := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Csh)
   let S := closedImmersionSES (Z := Y) (hZ := hYcl) (F := C) hC
   have hSE := closedImmersionSES_shortExact (Z := Y) (hZ := hYcl) (F := C) hC
   have hSX₁_zero : IsZero S.X₁ := by
@@ -282,12 +283,7 @@ theorem closedComplementVanishing
   exact subsingleton_sheafH_of_shortExact_middle hSE n
     (_root_.sheafH_subsingleton_of_isZero S.X₁ hSX₁_zero n)
     (by
-      simpa [S, closedImmersionSES, i] using
+      simpa [S, closedImmersionSES, i, CY] using
         (PushforwardHVanishing Y hYcl
-          (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj
-            (⟨C, hC⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)).val)
-          ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj
-            (⟨C, hC⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)).cond n
-          (@ih (TopCat.of Y) _ n ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj
-            (⟨C, hC⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-            hY_dim_lt hn)))
+          (G := CY.val) CY.cond n
+          (ih (TopCat.of Y) n (G := CY.val) CY.cond hY_dim_lt hn)))
