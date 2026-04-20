@@ -165,8 +165,8 @@ private noncomputable def finsetGenCocone_isColimit :
 end FilteredDiagram
 
 /-- **Hartshorne III, Ex. 2.9 core**: on a Noetherian space, if `H^m = 0` for all finitely generated
-    subsheaves of `K`, then `H^m(K) = 0`. Applies `sheafH_preserves_filtered_colimits`
-    to the filtered diagram of finitely generated subsheaves. -/
+    subsheaves of `K`, then `H^m(K) = 0`. Uses the filtered-colimit comparison isomorphism
+    for the diagram of finitely generated subsheaves and transports zero across it. -/
 theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
     {K : TopCat.Presheaf AddCommGrpCat.{u} X} (hK : K.IsSheaf) (m : ℕ)
@@ -175,9 +175,24 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
       [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
       Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)) :
     Subsingleton (Sheaf.H (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
-  simpa [finsetGenCocone] using
-    sheafH_preserves_filtered_colimits (finsetGenFunctor hK) (finsetGenCocone hK)
-      (finsetGenCocone_isColimit hK) m (fun S => hfg S)
+  have hZeroDiagram : IsZero (finsetGenFunctor hK ⋙ sheafCohomologyFunctor X m) := by
+    refine Functor.isZero _ ?_
+    intro S
+    haveI : Subsingleton (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m) := hfg S
+    simpa [finsetGenFunctor, sheafCohomologyFunctor_obj] using
+      (AddCommGrpCat.isZero_of_subsingleton
+        (AddCommGrpCat.of (Sheaf.H (TopCat.Sheaf.finsetGeneratedSheaf S) m)))
+  have hZeroColim :
+      IsZero (colimit (finsetGenFunctor hK ⋙ sheafCohomologyFunctor X m)) :=
+    (colimit.isColimit _).isZero_pt hZeroDiagram
+  have hZeroTarget :
+      IsZero (AddCommGrpCat.of
+        (Sheaf.H (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m)) := by
+    simpa [finsetGenCocone] using
+      IsZero.of_iso hZeroColim
+        (sheafH_preserves_filtered_colimits (finsetGenFunctor hK) (finsetGenCocone hK)
+          (finsetGenCocone_isColimit hK) m).symm
+  simpa using AddCommGrpCat.subsingleton_of_isZero hZeroTarget
 
 section FinsetGenerated
 open scoped Classical

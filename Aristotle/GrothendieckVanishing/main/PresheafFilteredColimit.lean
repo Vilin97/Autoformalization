@@ -24,8 +24,8 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
   - `isFlasque_filtered_colimit`: filtered colimits of flasque sheaves are flasque
 
   ## Sheaf cohomology and filtered colimits
-  - `sheafH_preserves_filtered_colimits`: if `H^n(F_j) = 0` for all pieces of a filtered
-    diagram, then `H^n(colim F_j) = 0`
+  - `sheafH_preserves_filtered_colimits`: the canonical comparison
+    `colim H^n(F_j) ≅ H^n(colim F_j)` on filtered diagrams
   - `sheafH_filtered_colimit_surj`: every element of `H^n(colim F_j)` comes from some
     `H^n(F_j)` via the canonical map
 -/
@@ -567,9 +567,8 @@ The genuinely geometric input starts afterwards:
 - `sheafH_filtered_colimit_surj`: every element of `H^n(colim F_j)` comes from some `H^n(F_j)`
   via the canonical map. The proof uses per-object functorial injective embeddings via Mathlib's
   `IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp` and dimension shifting.
-- `sheafH_preserves_filtered_colimits`: if `H^n(F_j) = 0` for all pieces of a filtered diagram,
-  then `H^n(colim F_j) = 0`. This is a direct corollary of surjectivity: every element of
-  `H^n(colim)` lifts to some `H^n(F_j) = 0`, hence is zero. -/
+- `sheafH_preserves_filtered_colimits`: packages the preceding isomorphism result as the
+  canonical comparison `colim H^n(F_j) ≅ H^n(colim F_j)`. -/
 
 section SheafHFilteredColimitSucc
 
@@ -1856,19 +1855,13 @@ theorem sheafH_filtered_colimit_comparison_epi
   rw [colimit_ι_sheafH_filtered_colimit_comparison]
   exact hy
 
-/-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces.
-    If `H^n(F_j) = 0` for all pieces of a filtered diagram, then `H^n(colim F_j) = 0`.
-    Derived from `sheafH_filtered_colimit_surj`: every element lifts to some `H^n(F_j) = 0`. -/
-theorem sheafH_preserves_filtered_colimits
+/-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces:
+    the canonical comparison `colim H^n(F_j) ≅ H^n(colim F_j)`. -/
+noncomputable def sheafH_preserves_filtered_colimits
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     (c' : Cocone Y') (hc' : IsColimit c')
-    (n : ℕ)
-    (hvan : ∀ j, Subsingleton (Sheaf.H (Y'.obj j) n)) :
-    Subsingleton (Sheaf.H c'.pt n) := by
-  constructor; intro x y
-  obtain ⟨jx, ex, hex⟩ := sheafH_filtered_colimit_surj n Y' c' hc' x
-  obtain ⟨jy, ey, hey⟩ := sheafH_filtered_colimit_surj n Y' c' hc' y
-  rw [← hex, ← hey, @Subsingleton.elim _ (hvan jx) ex 0,
-      @Subsingleton.elim _ (hvan jy) ey 0, map_zero, map_zero]
+    (n : ℕ) :
+    colimit (Y' ⋙ sheafCohomologyFunctor X n) ≅ AddCommGrpCat.of (Sheaf.H c'.pt n) :=
+  sheafH_filtered_colimit_comparison_iso Y' n c' hc'
