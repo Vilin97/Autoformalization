@@ -268,8 +268,10 @@ theorem finsetGeneratedSheaf_vanishing
     {K : TopCat.Presheaf AddCommGrpCat.{u} X} (hK : K.IsSheaf)
     (m : ℕ)
     (hzero : ∀ {G : TopCat.Presheaf AddCommGrpCat.{u} X} (hG : G.IsSheaf) {V : Opens X}
-      (f : TopCat.Sheaf.zeroOutsideInt V ⟶ (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)),
-      Epi f → Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m))
+      (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G),
+      Epi (show TopCat.Sheaf.zeroOutsideInt V ⟶
+          (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from Sheaf.Hom.mk f) →
+      Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m))
     (S : Finset
       (TopCat.Sheaf.SectionIndex (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)))
     [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
@@ -293,13 +295,19 @@ theorem finsetGeneratedSheaf_vanishing
       (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel (finsetImageInclGen hK h_sub)))
       inferInstance inferInstance
     have hCoker : Subsingleton (Sheaf.H SC.X₃ m) :=
-      haveI := imageIncl_cokernel_epi (K := K) hK (σ₀ := σ₀) (S' := S')
       by
-        simpa using hzero SC.X₃.cond
-          (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} =>
-              TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
-            factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫
-            cokernel.π (finsetImageInclGen hK h_sub)) inferInstance
+        let g :
+            TopCat.Sheaf.zeroOutsideInt σ₀.1 ⟶ SC.X₃ :=
+          Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1)
+            ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
+          factorThruImage (TopCat.Sheaf.finsetGeneratorMap (insert σ₀ S')) ≫
+          cokernel.π (finsetImageInclGen hK h_sub)
+        haveI : Epi g := by
+          simpa [g, SC, h_sub] using
+            imageIncl_cokernel_epi (K := K) hK (σ₀ := σ₀) (S' := S')
+        have hg : Epi (show TopCat.Sheaf.zeroOutsideInt σ₀.1 ⟶ SC.X₃ from Sheaf.Hom.mk g.val) := by
+          simpa [g] using (inferInstance : Epi g)
+        simpa [g] using hzero SC.X₃.cond g.val hg
     exact subsingleton_sheafH_of_shortExact_middle hSE m ih hCoker
 
 end FinsetGenerated
@@ -312,8 +320,10 @@ theorem directLimit_cohomology_vanishing
     {X : TopCat.{u}} [NoetherianSpace X]
     {K : TopCat.Presheaf AddCommGrpCat.{u} X} (hK : K.IsSheaf) (m : ℕ)
     (hzero : ∀ {G : TopCat.Presheaf AddCommGrpCat.{u} X} (hG : G.IsSheaf) {V : Opens X}
-      (f : TopCat.Sheaf.zeroOutsideInt V ⟶ (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)),
-      Epi f → Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m)) :
+      (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G),
+      Epi (show TopCat.Sheaf.zeroOutsideInt V ⟶
+          (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from Sheaf.Hom.mk f) →
+      Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m)) :
     Subsingleton (Sheaf.H (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
   exact cohomology_vanishing_of_finitelyGenerated_vanishing hK m
     (fun S _ => finsetGeneratedSheaf_vanishing hK m hzero S)

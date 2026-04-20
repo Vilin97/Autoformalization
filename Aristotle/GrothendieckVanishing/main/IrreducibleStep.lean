@@ -316,11 +316,10 @@ theorem subsheaf_zeroOutsideInt_vanishing
     vanishing cohomology in degree `m > dim X`. Uses third-term LES with
     `zeroOutsideInt_cohomology_vanishing` (Step 5) and
     `subsheaf_zeroOutsideInt_vanishing` (Step 4). -/
-theorem epiImage_zeroOutsideInt_vanishing
+private theorem epiImage_zeroOutsideInt_vanishing_of_sheaf_epi
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     {V : Opens X} {G : TopCat.Presheaf AddCommGrpCat.{u} X} (hG : G.IsSheaf)
-    (f : TopCat.Sheaf.zeroOutsideInt V ⟶ (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (hf : Epi f)
+    (f : TopCat.Sheaf.zeroOutsideInt V ⟶ (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) [Epi f]
     (ih : VanishingIH.{u} (topologicalKrullDim X))
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
@@ -344,6 +343,20 @@ theorem epiImage_zeroOutsideInt_vanishing
         ih (m + 1) (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
     haveI : Subsingleton (Sheaf.H S.X₁ (m + 1)) := by simpa using hX₁
     exact sheafH_dimension_shift_X₃_of_both hSE m
+
+theorem epiImage_zeroOutsideInt_vanishing
+    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
+    {V : Opens X} {G : TopCat.Presheaf AddCommGrpCat.{u} X} (hG : G.IsSheaf)
+    (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G) [Epi f]
+    (ih : VanishingIH.{u} (topologicalKrullDim X))
+    (m : ℕ) (hm : m > topologicalKrullDim X) :
+    Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
+  let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
+  let fsh : TopCat.Sheaf.zeroOutsideInt V ⟶ Gsh := Sheaf.Hom.mk f
+  haveI : Epi fsh := by
+    exact Sheaf.Hom.epi_of_presheaf_epi
+      (J := Opens.grothendieckTopology X) (A := AddCommGrpCat.{u}) fsh
+  exact epiImage_zeroOutsideInt_vanishing_of_sheaf_epi (V := V) (G := G) hG fsh ih m hm
 
 -- Filtered diagram infrastructure, finitely generated vanishing, and
 -- directLimit_cohomology_vanishing are in FiniteGeneratorReduction.lean.
@@ -376,8 +389,13 @@ theorem IrreduciblePosVanishing
           (ih (TopCat.of Z) n (G := FZ.val) FZ.cond hZ_dim hn_Z)
     have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
       directLimit_cohomology_vanishing (K := S.X₁.val) S.X₁.cond n
-        (fun {G} (hG : G.IsSheaf) {V} f hf =>
-          epiImage_zeroOutsideInt_vanishing (V := V) (G := G) hG f hf ih n hn)
+        (fun {G} (hG : G.IsSheaf) {V}
+          (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G) hf => by
+          let fsh : TopCat.Sheaf.zeroOutsideInt V ⟶
+              (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
+          haveI : Epi fsh := by simpa [fsh] using hf
+          exact epiImage_zeroOutsideInt_vanishing_of_sheaf_epi
+            (V := V) (G := G) hG fsh ih n hn)
     exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
   · -- dim ≤ 0: F is flasque on irreducible dim-0 space, use FlasqueVanishing
     push_neg at hpos
