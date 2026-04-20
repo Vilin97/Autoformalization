@@ -64,47 +64,92 @@ theorem topologicalKrullDim_nonneg {X : Type u} [TopologicalSpace X]
   obtain ⟨x⟩ := ‹Nonempty X›
   exact ⟨⟨closure {x}, isIrreducible_singleton.closure, isClosed_closure⟩⟩
 
+namespace TopologicalSpace
+namespace IrreducibleCloseds
+
+variable {X : Type u} [TopologicalSpace X]
+
+/-- The height of an irreducible closed subset in the inclusion order. -/
+noncomputable def height (S : IrreducibleCloseds X) : ℕ∞ :=
+  Order.height S
+
+@[simp] theorem height_eq_order_height (S : IrreducibleCloseds X) :
+    S.height = Order.height S :=
+  rfl
+
+@[gcongr] theorem height_mono : Monotone (height (X := X)) := by
+  intro S T hST
+  simpa [height] using (Order.height_mono hST)
+
+theorem height_add_one_le {S T : IrreducibleCloseds X} (hST : S < T) :
+    S.height + 1 ≤ T.height := by
+  simpa [height] using (Order.height_add_one_le hST)
+
+theorem height_le_topologicalKrullDim (S : IrreducibleCloseds X) :
+    S.height ≤ topologicalKrullDim X := by
+  simpa [height, topologicalKrullDim] using (Order.height_le_krullDim S)
+
+theorem height_le_height_map_of_isInducing {Y : Type*} [TopologicalSpace Y] {f : Y → X}
+    (hf : Topology.IsInducing f) (S : IrreducibleCloseds Y) :
+    S.height ≤ (IrreducibleCloseds.map f hf.continuous S).height := by
+  simpa [height] using Order.height_le_height_apply_of_strictMono
+    (IrreducibleCloseds.map f hf.continuous)
+    (IrreducibleCloseds.map_strictMono_of_isInducing hf)
+    S
+
+end IrreducibleCloseds
+
+/-- The topological Krull dimension is the supremum of the heights of irreducible closed sets. -/
+theorem topologicalKrullDim_eq_iSup_height (X : Type u) [TopologicalSpace X] :
+    topologicalKrullDim X = ⨆ S : IrreducibleCloseds X, ↑S.height := by
+  simpa [IrreducibleCloseds.height, topologicalKrullDim] using
+    (Order.krullDim_eq_iSup_height (α := IrreducibleCloseds X))
+
+end TopologicalSpace
+
 /-- For each s : IrreducibleCloseds Y, height(s) + 1 ≤ topologicalKrullDim X. -/
 private lemma height_add_one_le_dim {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
     {Y : Set X} (hY : IsClosed Y) (hne : Y ≠ Set.univ)
     (s : IrreducibleCloseds Y) :
-    (Order.height s : WithBot ℕ∞) + 1 ≤ topologicalKrullDim X := by
+    (s.height : WithBot ℕ∞) + 1 ≤ topologicalKrullDim X := by
+  let t : IrreducibleCloseds X :=
+    ⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩
   set f : IrreducibleCloseds Y → IrreducibleCloseds X :=
     IrreducibleCloseds.map (Subtype.val : Y → X) continuous_subtype_val
-  have hf_strict : StrictMono f :=
-    IrreducibleCloseds.map_strictMono_of_isInducing Topology.IsInducing.subtypeVal
-  have h_height_le : Order.height s ≤ Order.height (f s) :=
-    Order.height_le_height_apply_of_strictMono f hf_strict s
-  have h_lt_top : f s < ⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩ := by
+  have h_height_le : s.height ≤ (f s).height :=
+    IrreducibleCloseds.height_le_height_map_of_isInducing Topology.IsInducing.subtypeVal s
+  have h_lt_top : f s < t := by
     refine lt_of_le_of_ne (Set.subset_univ _) fun h_eq => hne ?_
     have h_sub : (f s : Set X) ⊆ Y :=
       closure_minimal (fun _ ⟨⟨_, hy⟩, _, rfl⟩ => hy) hY
-    rwa [show (f s : Set X) = Set.univ from congrArg IrreducibleCloseds.carrier h_eq,
-      Set.univ_subset_iff] at h_sub
-  have h_height_add_one : (Order.height (f s) : WithBot ℕ∞) + 1 ≤
-      (Order.height (⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩ :
-        IrreducibleCloseds X)) := by
-    convert Order.height_add_one_le h_lt_top
-    norm_cast
+    have h_eq' : (f s : Set X) = Set.univ := by
+      simpa [t] using congrArg IrreducibleCloseds.carrier h_eq
+    rwa [h_eq', Set.univ_subset_iff] at h_sub
+  have h_height_add_one : ((f s).height : WithBot ℕ∞) + 1 ≤ t.height := by
+    exact_mod_cast IrreducibleCloseds.height_add_one_le h_lt_top
   refine le_trans ?_ (h_height_add_one.trans ?_)
-  · gcongr; norm_cast
-  · convert Order.height_le_krullDim _
+  · gcongr
+    exact_mod_cast h_height_le
+  · simpa [t] using (IrreducibleCloseds.height_le_topologicalKrullDim t : _)
 
 private lemma iSup_height_add_one_eq {Y : Type u} [TopologicalSpace Y]
     [Nonempty (IrreducibleCloseds Y)] :
-    (⨆ s : IrreducibleCloseds Y, (Order.height s : WithBot ℕ∞)) + 1 =
-    ⨆ s : IrreducibleCloseds Y, ((Order.height s : WithBot ℕ∞) + 1) := by
-  have bdd : BddAbove (Set.range (fun s : IrreducibleCloseds Y => Order.height s)) :=
+    (⨆ s : IrreducibleCloseds Y, (s.height : WithBot ℕ∞)) + 1 =
+    ⨆ s : IrreducibleCloseds Y, ((s.height : WithBot ℕ∞) + 1) := by
+  have bdd : BddAbove (Set.range (fun s : IrreducibleCloseds Y => IrreducibleCloseds.height s)) :=
     OrderTop.bddAbove _
   conv_lhs =>
-    rw [show (⨆ s : IrreducibleCloseds Y, (Order.height s : WithBot ℕ∞)) =
-        ↑(⨆ s, Order.height s) from
-      (WithBot.coe_iSup (f := fun s => Order.height s) bdd).symm]
-  rw [show (↑(⨆ s, Order.height s) : WithBot ℕ∞) + 1 = ↑((⨆ s, Order.height s) + 1) from
+    rw [show (⨆ s : IrreducibleCloseds Y, (s.height : WithBot ℕ∞)) =
+        ↑(⨆ s : IrreducibleCloseds Y, IrreducibleCloseds.height s) from
+      (WithBot.coe_iSup (f := fun s : IrreducibleCloseds Y => IrreducibleCloseds.height s) bdd).symm]
+  rw [show (↑(⨆ s : IrreducibleCloseds Y, IrreducibleCloseds.height s) : WithBot ℕ∞) + 1 =
+      ↑((⨆ s : IrreducibleCloseds Y, IrreducibleCloseds.height s) + 1) from
     by push_cast; ring]
-  rw [ENat.iSup_add, WithBot.coe_iSup (f := fun s => Order.height s + 1) (OrderTop.bddAbove _)]
+  rw [ENat.iSup_add,
+    WithBot.coe_iSup (f := fun s : IrreducibleCloseds Y => IrreducibleCloseds.height s + 1)
+      (OrderTop.bddAbove _)]
   simp_rw [show ∀ s : IrreducibleCloseds Y,
-      (↑(Order.height s + 1 : ℕ∞) : WithBot ℕ∞) = (↑(Order.height s) : WithBot ℕ∞) + 1 from
+      (↑(s.height + 1 : ℕ∞) : WithBot ℕ∞) = (↑(s.height) : WithBot ℕ∞) + 1 from
     by intro s; push_cast; ring]
 
 /-- Unconditional: topologicalKrullDim Y + 1 ≤ topologicalKrullDim X for
@@ -114,8 +159,10 @@ theorem topologicalKrullDim_add_one_le_of_isIrreducible_of_isClosed {X : Type u}
     (hne : Y ≠ Set.univ) :
     topologicalKrullDim Y + 1 ≤ topologicalKrullDim X := by
   rcases isEmpty_or_nonempty (IrreducibleCloseds Y) with h | h
-  · simp [topologicalKrullDim, Order.krullDim_eq_iSup_height]
-  · rw [topologicalKrullDim, Order.krullDim_eq_iSup_height, iSup_height_add_one_eq]
+  · rw [topologicalKrullDim_eq_iSup_height]
+    letI := h
+    simp
+  · rw [topologicalKrullDim_eq_iSup_height, iSup_height_add_one_eq]
     exact iSup_le (fun s => height_add_one_le_dim hY hne s)
 
 /-- On an irreducible space, a proper closed subset with finite Krull dimension has
@@ -171,5 +218,3 @@ theorem exists_closed_subset_lt_dim_of_irreducible_pos
       (lt_of_le_of_lt (topologicalKrullDim_subspace_le X a.carrier)
         (lt_of_lt_of_le hn le_top))
   refine ⟨a.carrier, a.isClosed', hZ_ne_univ, hZ_dim, lt_trans hZ_dim hn⟩
-
-
