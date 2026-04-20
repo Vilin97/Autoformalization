@@ -44,19 +44,20 @@ ReducibleVanishing and IrreduciblePosVanishing require two building blocks:
     if `x ∉ s`, every element of `stalk(i_*(G), x)` is zero. -/
 theorem pushforward_closedIncl_stalk_eq_zero
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s))
+    {G : TopCat.Presheaf AddCommGrpCat.{u} (TopCat.of s)} (hG : G.IsSheaf)
     {x : X} (hx : x ∉ s)
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
-      ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G).val) :
+      ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G)) :
     a = 0 := by
-  let F' := (TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G.val
+  let Gsh : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s) := ⟨G, hG⟩
+  let F' := (TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G
   obtain ⟨U, hxU, sU, rfl⟩ := F'.germ_exist x a
   let W : Opens X := U ⊓ ⟨sᶜ, hs.isOpen_compl⟩
   have hW_bot : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ :=
     le_antisymm (fun ⟨_, hy⟩ h => absurd hy h.2) bot_le
   haveI : Subsingleton (F'.obj (op W)) := AddCommGrpCat.subsingleton_of_isZero (by
-    change IsZero (G.val.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
-    rw [hW_bot]; exact G.isTerminalOfEmpty.isZero)
+    change IsZero (G.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
+    rw [hW_bot]; exact Gsh.isTerminalOfEmpty.isZero)
   rw [← TopCat.Presheaf.germ_res_apply F'
     (homOfLE (show W ≤ U from inf_le_left)) x ⟨hxU, hx⟩ sU]
   simp [Subsingleton.eq_zero (ConcreteCategory.hom (F'.map (homOfLE (show W ≤ U from
@@ -104,7 +105,7 @@ theorem epi_pushforward_map_closedIncl
         (TopCat.closedIncl hs) G.val z), hnat]
     exact epi_comp _ _
   · intro b
-    rw [pushforward_closedIncl_stalk_eq_zero hs G hx b]
+    rw [pushforward_closedIncl_stalk_eq_zero (hs := hs) (G := G.val) G.cond hx b]
     exact ⟨0, AddMonoidHom.map_zero _⟩
 
 instance closedIncl_pushforward_preservesEpis
@@ -206,7 +207,12 @@ theorem epi_unit_of_closedImmersion
           (TopCat.closedIncl hZ)).unit.app F).val)).2
   · -- x ∉ Z: target stalk is 0 (pushforward has zero stalk outside closed Z)
     exact fun b => ⟨0, by
-      rw [pushforward_closedIncl_stalk_eq_zero hZ _ hxZ b]; exact map_zero _⟩
+      rw [pushforward_closedIncl_stalk_eq_zero
+        (hs := hZ)
+        (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F).val)
+        (((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj F).cond)
+        hxZ b]
+      exact map_zero _⟩
 
 /-- The short exact sequence `0 → ker(η) → F → i_*(i^*F) → 0` from a closed immersion,
     where `η` is the pullback-pushforward adjunction unit and `i : Z ↪ X` is the
