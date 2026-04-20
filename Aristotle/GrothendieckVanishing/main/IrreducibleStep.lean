@@ -316,30 +316,35 @@ theorem subsheaf_zeroOutsideInt_vanishing
     vanishing cohomology in degree `m > dim X`. Uses third-term LES with
     `zeroOutsideInt_cohomology_vanishing` (Step 5) and
     `subsheaf_zeroOutsideInt_vanishing` (Step 4). -/
-private theorem epiImage_zeroOutsideInt_vanishing_of_sheaf_epi
+theorem epiImage_zeroOutsideInt_vanishing_of_sheaf_epi
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     {V : Opens X} {G : TopCat.Presheaf AddCommGrpCat.{u} X} (hG : G.IsSheaf)
-    (f : TopCat.Sheaf.zeroOutsideInt V ⟶ (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) [Epi f]
+    (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G)
+    (hf : Epi (show TopCat.Sheaf.zeroOutsideInt V ⟶
+        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from Sheaf.Hom.mk f))
     (ih : VanishingIH.{u} (topologicalKrullDim X))
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
   let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
+  let fsh : TopCat.Sheaf.zeroOutsideInt V ⟶ Gsh := Sheaf.Hom.mk f
+  haveI : Epi fsh := by
+    simpa [fsh] using hf
   change Subsingleton (Sheaf.H Gsh m)
   by_cases hV : V = ⊥
   · subst hV
-    have hZero : IsZero Gsh := (isZero_zeroOutsideInt_bot X).of_epi f
+    have hZero : IsZero Gsh := (isZero_zeroOutsideInt_bot X).of_epi fsh
     exact _root_.sheafH_subsingleton_of_isZero Gsh hZero m
-  · let S := ShortComplex.mk (kernel.ι f) f (kernel.condition f)
+  · let S := ShortComplex.mk (kernel.ι fsh) fsh (kernel.condition fsh)
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
+      (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel fsh)) inferInstance inferInstance
     haveI : Subsingleton (Sheaf.H S.X₂ m) := zeroOutsideInt_cohomology_vanishing V hV ih m hm
-    haveI : Mono ((kernel.ι f).val) :=
-      Functor.map_mono (TopCat.Sheaf.forget AddCommGrpCat.{u} X) (kernel.ι f)
+    haveI : Mono ((kernel.ι fsh).val) :=
+      Functor.map_mono (TopCat.Sheaf.forget AddCommGrpCat.{u} X) (kernel.ι fsh)
     have hX₁ :
         Subsingleton
           (Sheaf.H (⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) (m + 1)) :=
       subsheaf_zeroOutsideInt_vanishing (R := S.X₁.val) S.X₁.cond
-        ((kernel.ι f).val)
+        ((kernel.ι fsh).val)
         ih (m + 1) (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
     haveI : Subsingleton (Sheaf.H S.X₁ (m + 1)) := by simpa using hX₁
     exact sheafH_dimension_shift_X₃_of_both hSE m
@@ -353,10 +358,11 @@ theorem epiImage_zeroOutsideInt_vanishing
     Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
   let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
   let fsh : TopCat.Sheaf.zeroOutsideInt V ⟶ Gsh := Sheaf.Hom.mk f
-  haveI : Epi fsh := by
+  have hf : Epi fsh := by
     exact Sheaf.Hom.epi_of_presheaf_epi
       (J := Opens.grothendieckTopology X) (A := AddCommGrpCat.{u}) fsh
-  exact epiImage_zeroOutsideInt_vanishing_of_sheaf_epi (V := V) (G := G) hG fsh ih m hm
+  exact epiImage_zeroOutsideInt_vanishing_of_sheaf_epi (V := V) (G := G) hG f (by
+    simpa [fsh] using hf) ih m hm
 
 -- Filtered diagram infrastructure, finitely generated vanishing, and
 -- directLimit_cohomology_vanishing are in FiniteGeneratorReduction.lean.
@@ -391,11 +397,8 @@ theorem IrreduciblePosVanishing
       directLimit_cohomology_vanishing (K := S.X₁.val) S.X₁.cond n
         (fun {G} (hG : G.IsSheaf) {V}
           (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G) hf => by
-          let fsh : TopCat.Sheaf.zeroOutsideInt V ⟶
-              (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
-          haveI : Epi fsh := by simpa [fsh] using hf
           exact epiImage_zeroOutsideInt_vanishing_of_sheaf_epi
-            (V := V) (G := G) hG fsh ih n hn)
+            (V := V) (G := G) hG f hf ih n hn)
     exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
   · -- dim ≤ 0: F is flasque on irreducible dim-0 space, use FlasqueVanishing
     push_neg at hpos
