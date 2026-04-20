@@ -197,15 +197,17 @@ theorem isZero_zeroOutsideInt_bot (X : TopCat.{u}) :
 /-- A nonzero subsheaf of `zeroOutsideInt V` has a nonzero stalk at some point of `V`. -/
 theorem exists_nonzero_stalk_in_V
     {X : TopCat.{u}} (V : Opens X)
-    (R : TopCat.Sheaf AddCommGrpCat.{u} X)
-    (i : R ⟶ TopCat.Sheaf.zeroOutsideInt V) [Mono i]
-    (hR : ¬ IsZero R) :
+    {R : TopCat.Presheaf AddCommGrpCat.{u} X} (hRsh : R.IsSheaf)
+    (i : (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶ TopCat.Sheaf.zeroOutsideInt V)
+    [Mono i]
+    (hR : ¬ IsZero (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :
     ∃ (x : X) (_ : x ∈ V)
-      (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R.val),
+      (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R),
       a ≠ 0 := by
+  let Rsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨R, hRsh⟩
   by_contra! h; apply hR
-  have hR_zero : IsZero ((⟨R.val, R.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
-    sheaf_isZero_of_zero_stalks X R.cond (fun x a => by
+  have hR_zero : IsZero Rsh :=
+    sheaf_isZero_of_zero_stalks X hRsh (fun x a => by
       by_cases hx : (x : X) ∈ (V : Set X)
       · exact h x hx a
       · haveI := TopCat.Presheaf.stalkFunctor_preserves_mono
@@ -213,7 +215,7 @@ theorem exists_nonzero_stalk_in_V
         exact (AddCommGrpCat.mono_iff_injective _).mp (Functor.map_mono
           (TopCat.Sheaf.forget _ _ ⋙ TopCat.Presheaf.stalkFunctor _ x) i)
           ((stalk_zeroOutsideInt_zero_outside V x hx _).trans (map_zero _).symm))
-  simpa using hR_zero
+  simpa [Rsh] using hR_zero
 
 /-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
     is an integer multiple of the germ of the distinguished generator over `V`. -/
