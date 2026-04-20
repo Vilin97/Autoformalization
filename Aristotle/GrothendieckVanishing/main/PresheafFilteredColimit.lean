@@ -1174,6 +1174,182 @@ theorem sheafH_filtered_colimit_comparison_isIso_zero
   rw [← sheafH_filtered_colimit_comparison_zero_iso_hom (Y' := Y') (c' := c') (hc' := hc')]
   infer_instance
 
+private noncomputable def sheafH_filtered_colimit_h1_sectionsFunctor
+    {X : TopCat.{u}} :
+    TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
+  sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u} ⋙
+    (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)
+
+private noncomputable def sheafH_filtered_colimit_h1_gTopNat
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    [Zero (TopCat.Sheaf AddCommGrpCat.{u} X)] :
+    (sheafH_filtered_colimit_succ_Inj Y' ⋙ sheafH_filtered_colimit_h1_sectionsFunctor) ⟶
+      (sheafH_filtered_colimit_succ_quotient Y' ⋙ sheafH_filtered_colimit_h1_sectionsFunctor) :=
+  { app := fun j =>
+      ((cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val.app (op ⊤))
+    naturality := fun j j' f => by
+      have hπ :
+          cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
+              (sheafH_filtered_colimit_succ_quotient Y').map f =
+            ((sheafH_filtered_colimit_succ_Inj Y').map f) ≫
+              cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j') := by
+        dsimp [sheafH_filtered_colimit_succ_quotient]
+        exact cokernel.π_desc _ _ _
+      exact congrArg
+        (fun α :
+          ((sheafH_filtered_colimit_succ_Inj Y').obj j) ⟶
+            (sheafH_filtered_colimit_succ_quotient Y').obj j' =>
+          α.val.app (op ⊤)) hπ.symm }
+
+private noncomputable def sheafH_filtered_colimit_h1_cokernelFunctor
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    [Zero (TopCat.Sheaf AddCommGrpCat.{u} X)] :
+    J' ⥤ AddCommGrpCat.{u} :=
+  { obj := fun j => cokernel ((sheafH_filtered_colimit_h1_gTopNat Y').app j)
+    map := fun {j j'} f =>
+      cokernel.map
+        ((sheafH_filtered_colimit_h1_gTopNat Y').app j)
+        ((sheafH_filtered_colimit_h1_gTopNat Y').app j')
+        (((sheafH_filtered_colimit_succ_Inj Y').map f).val.app (op ⊤))
+        (((sheafH_filtered_colimit_succ_quotient Y').map f).val.app (op ⊤))
+        (by
+          simpa [sheafH_filtered_colimit_h1_sectionsFunctor] using
+            ((sheafH_filtered_colimit_h1_gTopNat Y').naturality f).symm)
+    map_id := fun j => by
+      apply (cancel_epi (cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j))).mp
+      rw [cokernel.π_desc]
+      have hq' :
+          (sheafH_filtered_colimit_succ_quotient Y').map (𝟙 j) =
+            𝟙 ((sheafH_filtered_colimit_succ_quotient Y').obj j) := by
+        simp [sheafH_filtered_colimit_succ_quotient, cokernel.map]
+      have hq :
+          ((sheafH_filtered_colimit_succ_quotient Y').map (𝟙 j)).val.app (op ⊤) =
+            𝟙 (((sheafH_filtered_colimit_succ_quotient Y').obj j).val.obj (op ⊤)) := by
+        rw [hq']
+        rfl
+      rw [hq]
+      exact Category.id_comp
+        (cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j))
+    map_comp := fun {j j' j''} f g => by
+      apply (cancel_epi (cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j))).mp
+      rw [cokernel.π_desc, ← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
+      have hq' :
+          (sheafH_filtered_colimit_succ_quotient Y').map (f ≫ g) =
+            (sheafH_filtered_colimit_succ_quotient Y').map f ≫
+              (sheafH_filtered_colimit_succ_quotient Y').map g := by
+        simp [sheafH_filtered_colimit_succ_quotient, cokernel.map, Functor.map_comp]
+      have hq :
+          ((sheafH_filtered_colimit_succ_quotient Y').map (f ≫ g)).val.app (op ⊤) =
+            ((sheafH_filtered_colimit_succ_quotient Y').map f).val.app (op ⊤) ≫
+              ((sheafH_filtered_colimit_succ_quotient Y').map g).val.app (op ⊤) := by
+        rw [hq']
+        rfl
+      rw [hq]
+      simp [Category.assoc] }
+
+private noncomputable def sheafH_filtered_colimit_h1_cokernelFunctorIso
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    [Zero (TopCat.Sheaf AddCommGrpCat.{u} X)] :
+    sheafH_filtered_colimit_h1_cokernelFunctor Y' ≅
+      cokernel (sheafH_filtered_colimit_h1_gTopNat Y') :=
+  NatIso.ofComponents
+    (fun j =>
+      (PreservesCokernel.iso
+        ((CategoryTheory.evaluation J' AddCommGrpCat.{u}).obj j)
+        (sheafH_filtered_colimit_h1_gTopNat Y')).symm)
+    (fun {j j'} f => by
+      let e_j :=
+        PreservesCokernel.iso
+          ((CategoryTheory.evaluation J' AddCommGrpCat.{u}).obj j)
+          (sheafH_filtered_colimit_h1_gTopNat Y')
+      let e_j' :=
+        PreservesCokernel.iso
+          ((CategoryTheory.evaluation J' AddCommGrpCat.{u}).obj j')
+          (sheafH_filtered_colimit_h1_gTopNat Y')
+      apply (cancel_epi
+        (cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j))).mp
+      have hπj :
+          cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j) ≫
+              e_j.inv =
+            (cokernel.π (sheafH_filtered_colimit_h1_gTopNat Y')).app j := by
+        symm
+        exact (Iso.eq_comp_inv e_j).2 (by
+          simpa using (PreservesCokernel.π_iso_hom
+          ((CategoryTheory.evaluation J' AddCommGrpCat.{u}).obj j)
+          (sheafH_filtered_colimit_h1_gTopNat Y')))
+      have hπj' :
+          cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j') ≫
+              e_j'.inv =
+            (cokernel.π (sheafH_filtered_colimit_h1_gTopNat Y')).app j' := by
+        symm
+        exact (Iso.eq_comp_inv e_j').2 (by
+          simpa using (PreservesCokernel.π_iso_hom
+          ((CategoryTheory.evaluation J' AddCommGrpCat.{u}).obj j')
+          (sheafH_filtered_colimit_h1_gTopNat Y')))
+      change cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j) ≫
+          (sheafH_filtered_colimit_h1_cokernelFunctor Y').map f ≫ e_j'.inv =
+        cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j) ≫
+          e_j.inv ≫
+            (cokernel (sheafH_filtered_colimit_h1_gTopNat Y')).map f
+      dsimp [sheafH_filtered_colimit_h1_cokernelFunctor]
+      rw [show cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j) ≫
+            cokernel.map ((sheafH_filtered_colimit_h1_gTopNat Y').app j)
+              ((sheafH_filtered_colimit_h1_gTopNat Y').app j')
+              (((sheafH_filtered_colimit_succ_Inj Y').map f).val.app (op ⊤))
+              (((sheafH_filtered_colimit_succ_quotient Y').map f).val.app (op ⊤))
+              (by
+                simpa [sheafH_filtered_colimit_h1_sectionsFunctor] using
+                  ((sheafH_filtered_colimit_h1_gTopNat Y').naturality f).symm) ≫
+            e_j'.inv =
+          (cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j) ≫
+              cokernel.map ((sheafH_filtered_colimit_h1_gTopNat Y').app j)
+                ((sheafH_filtered_colimit_h1_gTopNat Y').app j')
+                (((sheafH_filtered_colimit_succ_Inj Y').map f).val.app (op ⊤))
+                (((sheafH_filtered_colimit_succ_quotient Y').map f).val.app (op ⊤))
+                (by
+                  simpa [sheafH_filtered_colimit_h1_sectionsFunctor] using
+                    ((sheafH_filtered_colimit_h1_gTopNat Y').naturality f).symm)) ≫
+            e_j'.inv by
+          simp [Category.assoc]]
+      rw [cokernel.π_desc, Category.assoc, hπj']
+      have hπj_assoc :
+          cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j) ≫
+              e_j.inv ≫ (cokernel (sheafH_filtered_colimit_h1_gTopNat Y')).map f =
+            (cokernel.π (sheafH_filtered_colimit_h1_gTopNat Y')).app j ≫
+              (cokernel (sheafH_filtered_colimit_h1_gTopNat Y')).map f := by
+        rw [← Category.assoc, hπj]
+      rw [hπj_assoc]
+      simpa [Category.assoc] using
+        (cokernel.π (sheafH_filtered_colimit_h1_gTopNat Y')).naturality f)
+
+private noncomputable def sheafH_filtered_colimit_h1_stageNatIso
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    [Zero (TopCat.Sheaf AddCommGrpCat.{u} X)]
+    (h_mid : ∀ j, Subsingleton (Sheaf.H ((sheafH_filtered_colimit_succ_Inj Y').obj j) 1)) :
+    sheafH_filtered_colimit_h1_cokernelFunctor Y' ≅
+      Y' ⋙ sheafCohomologyFunctor X 1 :=
+  NatIso.ofComponents
+    (fun j =>
+      sheafH1_cokernel_iso_of_subsingleton_middle
+        (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y') j) (h_mid j))
+    (fun {j j'} f => by
+      ext y
+      simpa [sheafCohomologyFunctor_map_apply] using congrArg
+        (fun m => AddCommGrpCat.Hom.hom m y)
+        (sheafH1_cokernel_iso_of_subsingleton_middle_natural
+          (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y') j)
+          (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y') j')
+          (sheafH_filtered_colimit_succ_stage_map_hom (Y' := Y') f)
+          (h_mid j) (h_mid j')))
+
 /-- On a Noetherian space and for a filtered diagram, the canonical comparison morphism
     `colim H^n(F_j) ⟶ H^n(colim F_j)` is epi. -/
 theorem sheafH_filtered_colimit_comparison_epi
