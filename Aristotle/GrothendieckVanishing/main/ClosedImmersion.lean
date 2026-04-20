@@ -40,6 +40,10 @@ namespace TopCat
 def closedIncl {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) : TopCat.of s ⟶ X :=
   TopCat.ofHom ⟨Subtype.val, hs.isClosedEmbedding_subtypeVal.continuous⟩
 
+@[simp]
+theorem coe_closedIncl {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
+    (closedIncl hs : s → X) = Subtype.val := rfl
+
 lemma closedIncl_isClosedEmbedding {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
     Topology.IsClosedEmbedding (closedIncl hs) :=
   hs.isClosedEmbedding_subtypeVal
@@ -47,6 +51,16 @@ lemma closedIncl_isClosedEmbedding {X : TopCat.{u}} {s : Set X} (hs : IsClosed s
 lemma closedIncl_isInducing {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
     Topology.IsInducing (closedIncl hs) :=
   (closedIncl_isClosedEmbedding hs).isInducing
+
+theorem closedIncl_map_eq_bot_of_le_compl {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
+    {U : Opens X} (hU : U ≤ ⟨sᶜ, hs.isOpen_compl⟩) :
+    (Opens.map (closedIncl hs)).obj U = ⊥ := by
+  ext x
+  constructor
+  · intro hx
+    exact False.elim (hU hx x.2)
+  · intro hx
+    simp at hx
 
 instance closedIncl_stalkPushforward_isIso {X : TopCat.{u}} {s : Set X} {hs : IsClosed s}
     {C : Type*} [Category.{u} C] [HasColimits C]
