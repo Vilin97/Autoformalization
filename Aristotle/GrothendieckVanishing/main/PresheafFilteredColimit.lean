@@ -459,6 +459,43 @@ theorem colimit_restrict_eq_of_eq_on_finite_subcover
       congr 1
     · exact (hcompat i k).symm
 
+/-- On a Noetherian space, a filtered colimit cocone of presheaves is a sheaf if all
+    diagram objects are sheaves. Proof: compactness reduces the sheaf condition to finite
+    covers, then filtered colimit merging passes from per-piece data to glued data. -/
+theorem isSheaf_of_isColimit_of_isSheaf
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (P : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
+    (hP : ∀ j, TopCat.Presheaf.IsSheaf (P.obj j))
+    (c : Cocone P) (hc : IsColimit c) :
+    TopCat.Presheaf.IsSheaf c.pt := by
+  rw [TopCat.Presheaf.isSheaf_iff_isSheafUniqueGluing]
+  intro ι U sf hcompat
+  obtain ⟨t, ht⟩ := (NoetherianSpace.isCompact (↑(iSup U) : Set X)).elim_finite_subcover
+    (fun i => ↑(U i)) (fun i => (U i).isOpen) (by simp [Opens.coe_iSup])
+  have hsup_le : iSup U ≤ ⨆ i ∈ t, U i := by
+    rw [SetLike.le_def]
+    intro x hx
+    obtain ⟨i, hi, hxi⟩ := Set.mem_iUnion₂.mp (ht hx)
+    exact Opens.mem_iSup.mpr ⟨i, Opens.mem_iSup.mpr ⟨hi, hxi⟩⟩
+  have hsep : ∀ (a : ToType (c.pt.obj (op (iSup U)))),
+      (∀ k ∈ t, c.pt.map (Opens.leSupr U k).op a = 0) → a = 0 :=
+    fun a ha => colimit_section_zero_of_zero_on_cover
+      P hP hc
+      (fun k => le_iSup U k) hsup_le a ha
+  obtain ⟨j₁, x'', hx''_compat, hx''⟩ := filtered_colimit_exists_compatible_representatives
+    P hc U sf hcompat
+  obtain ⟨s, hs_k⟩ := colimit_exists_gluing_of_compatible_finite_subcover
+    P hP U sf hsup_le j₁ x'' hx''_compat hx''
+  refine ⟨s, fun i => ?_, fun s' hs' => ?_⟩
+  · exact colimit_restrict_eq_of_eq_on_finite_subcover
+      P hP hc U sf hcompat hsup_le s hs_k i
+  · have h0 : s' - s = 0 := hsep (s' - s) (fun k hk => by
+      show c.pt.map (Opens.leSupr U k).op (s' - s) = 0
+      rw [map_sub, sub_eq_zero]
+      exact (hs' k).trans (hs_k k hk).symm)
+    rwa [sub_eq_zero] at h0
+
 /-- On a Noetherian space, the presheaf-level filtered colimit of sheaves is a sheaf.
     Proof: Noetherian compactness reduces the sheaf condition to finite covers, then
     filtered colimit merging passes from per-piece data to glued data. -/
@@ -468,40 +505,10 @@ theorem isSheaf_presheaf_filtered_colimit
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     (c : Cocone (Y' ⋙ sheafToPresheaf _ _)) (hc : IsColimit c) :
     TopCat.Presheaf.IsSheaf c.pt := by
-  let P : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} := Y' ⋙ sheafToPresheaf _ _
-  have hP : ∀ j, TopCat.Presheaf.IsSheaf (P.obj j) := by
-    intro j
-    simpa [P] using (Y'.obj j).cond
-  have hcP : IsColimit c := hc
-  rw [TopCat.Presheaf.isSheaf_iff_isSheafUniqueGluing]
-  intro ι U sf hcompat
-  -- Noetherian → finite subcover
-  obtain ⟨t, ht⟩ := (NoetherianSpace.isCompact (↑(iSup U) : Set X)).elim_finite_subcover
-    (fun i => ↑(U i)) (fun i => (U i).isOpen) (by simp [Opens.coe_iSup])
-  have hsup_le : iSup U ≤ ⨆ i ∈ t, U i := by
-    rw [SetLike.le_def]; intro x hx
-    obtain ⟨i, hi, hxi⟩ := Set.mem_iUnion₂.mp (ht hx)
-    exact Opens.mem_iSup.mpr ⟨i, Opens.mem_iSup.mpr ⟨hi, hxi⟩⟩
-  -- Separation: section zero on finite subcover is zero
-  have hsep : ∀ (a : ToType (c.pt.obj (op (iSup U)))),
-      (∀ k ∈ t, c.pt.map (Opens.leSupr U k).op a = 0) → a = 0 :=
-    fun a ha => colimit_section_zero_of_zero_on_cover
-      P hP hcP
-      (fun k => le_iSup U k) hsup_le a ha
-  -- Existence: construct a gluing section
-  obtain ⟨j₁, x'', hx''_compat, hx''⟩ := filtered_colimit_exists_compatible_representatives
-    P hcP U sf hcompat
-  obtain ⟨s, hs_k⟩ := colimit_exists_gluing_of_compatible_finite_subcover
-    P hP U sf hsup_le j₁ x'' hx''_compat hx''
-  refine ⟨s, fun i => ?_, fun s' hs' => ?_⟩
-  · exact colimit_restrict_eq_of_eq_on_finite_subcover
-      P hP hcP U sf hcompat hsup_le s hs_k i
-  · -- Uniqueness from hsep
-    have h0 : s' - s = 0 := hsep (s' - s) (fun k hk => by
-      show c.pt.map (Opens.leSupr U k).op (s' - s) = 0
-      rw [map_sub, sub_eq_zero]
-      exact (hs' k).trans (hs_k k hk).symm)
-    rwa [sub_eq_zero] at h0
+  simpa using isSheaf_of_isColimit_of_isSheaf
+    (P := Y' ⋙ sheafToPresheaf _ _)
+    (hP := fun j => (Y'.obj j).cond)
+    (c := c) (hc := hc)
 
 /-- On a Noetherian space, `sheafToPresheaf` creates filtered colimits of sheaves. -/
 noncomputable def createsFilteredColimit
