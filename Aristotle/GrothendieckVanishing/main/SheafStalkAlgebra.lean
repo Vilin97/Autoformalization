@@ -45,8 +45,6 @@ theorem zeroOutsideInt_vanishing
     (hCoker : Subsingleton (Sheaf.H (Limits.cokernel
       (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))) m)) :
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) (m + 1)) := by
-  haveI : IsFlasqueSheaf (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) :=
-    isFlasqueSheaf_zeroOutsideInt_top X
   have hfsh : Mono (TopCat.Sheaf.zeroOutsideInt.openHom
       (le_top : V ≤ (⊤ : Opens X))) := by
     infer_instance
@@ -56,7 +54,14 @@ theorem zeroOutsideInt_vanishing
       (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u})
       (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ (⊤ : Opens X)))).1 hfsh
   have hTop : Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) (m + 1)) := by
-    simpa using FlasqueVanishing X (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) m
+    let F : TopCat.Presheaf AddCommGrpCat.{u} X :=
+      (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).val
+    have hF : F.IsSheaf := by
+      simpa [F] using (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).cond
+    letI : IsFlasqueSheaf ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+      simpa [F, hF] using isFlasqueSheaf_zeroOutsideInt_top X
+    simpa [F, hF] using
+      (sheafH_subsingleton_of_flasque_presheaf (X := X) (F := F) hF m)
   exact sheafH_dimension_shift_of_mono_presheaf
     (F := (TopCat.Sheaf.zeroOutsideInt V).val)
     (G := (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).val)
