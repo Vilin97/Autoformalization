@@ -430,12 +430,36 @@ theorem epi_app_of_shortExact_of_epi_restrictions {X : TopCat.{u}}
     (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS)
     hX₁_epi U
 
+/-- If `0 → F₁ → F₂ → F₃ → 0` is short exact on associated sheaves and
+`⟨F₁, h₁⟩` is flasque, then `g(U) : F₂(U) → F₃(U)` is epi. -/
+theorem epi_app_of_shortExact_flasque_presheaf {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃}
+    (hfg : f ≫ g = 0)
+    (hS : (sheafShortComplexOfPresheaf h₁ h₂ h₃ (f := f) (g := g) hfg).ShortExact)
+    [IsFlasqueSheaf (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)]
+    (U : Opens X) :
+    Epi (g.app (op U)) := by
+  exact epi_app_of_shortExact_of_epi_restrictions_presheaf
+    (F₁ := F₁) (F₂ := F₂) (F₃ := F₃) h₁ h₂ h₃ hfg hS
+    (fun {_ _} i => by
+      simpa using
+        (IsFlasqueSheaf.epi_map
+          (F := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) i)) U
+
 -- Zorn argument for surjectivity of sections (Nugent, PR #35790).
 theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) [IsFlasqueSheaf S.X₁] (U : Opens X) :
-    Epi (S.g.val.app (op U)) :=
-  epi_app_of_shortExact_of_epi_restrictions hS (fun {_ _} i => IsFlasqueSheaf.epi_map i) U
+    Epi (S.g.val.app (op U)) := by
+  letI : IsFlasqueSheaf (⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := by
+    simpa using (inferInstance : IsFlasqueSheaf S.X₁)
+  simpa using epi_app_of_shortExact_flasque_presheaf
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val) (shortComplex_val_zero (S := S))
+    (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS) U
 
 /-- Presheaf-boundary form of quotient-preserves-flasqueness:
     if `0 → F₁ → F₂ → F₃ → 0` is short exact on the associated sheaves and
