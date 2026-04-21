@@ -437,6 +437,40 @@ theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
     Epi (S.g.val.app (op U)) :=
   epi_app_of_shortExact_of_epi_restrictions hS (fun {_ _} i => IsFlasqueSheaf.epi_map i) U
 
+/-- Presheaf-boundary form of quotient-preserves-flasqueness:
+    if `0 → F₁ → F₂ → F₃ → 0` is short exact on the associated sheaves and
+    `⟨F₁, h₁⟩`, `⟨F₂, h₂⟩` are flasque, then `⟨F₃, h₃⟩` is flasque. -/
+theorem isFlasque_X₃_of_shortExact_presheaf {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃}
+    (hfg : f ≫ g = 0)
+    (hS : (sheafShortComplexOfPresheaf h₁ h₂ h₃ (f := f) (g := g) hfg).ShortExact)
+    [IsFlasqueSheaf (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)]
+    [IsFlasqueSheaf (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)] :
+    IsFlasqueSheaf (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := by
+  constructor
+  intro U V j
+  have hg_U : Epi (g.app (op U)) :=
+    epi_app_of_shortExact_of_epi_restrictions_presheaf
+      (F₁ := F₁) (F₂ := F₂) (F₃ := F₃) h₁ h₂ h₃ hfg hS
+      (fun {_ _} i => by
+        simpa using
+          (IsFlasqueSheaf.epi_map
+            (F := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) i)) U
+  have hres₂ : Epi (F₂.map j.op) := by
+    simpa using
+      (IsFlasqueSheaf.epi_map
+        (F := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) j)
+  rw [AddCommGrpCat.epi_iff_surjective] at hg_U hres₂ ⊢
+  intro z
+  obtain ⟨w, hw⟩ := hg_U z
+  obtain ⟨x, hx⟩ := hres₂ w
+  exact ⟨ConcreteCategory.hom (g.app (op V)) x, by
+    have := congrArg (· x) (g.naturality j.op)
+    simp only [AddCommGrpCat.hom_comp] at this
+    exact this.symm.trans (by simp [hx, hw])⟩
+
 /-- **Quotient preserves flasqueness** (Nugent, PR #35790).
     If `F'` and `G` are flasque in `0 -> F' -> G -> H -> 0`, then `H` is flasque.
     Follows from `epi_app_of_shortExact_flasque`: the restriction map for `H` factors
@@ -445,16 +479,15 @@ theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact) [IsFlasqueSheaf S.X₁] [IsFlasqueSheaf S.X₂] :
     IsFlasqueSheaf S.X₃ := by
-  constructor; intro U V j
-  have hg_U : Epi (S.g.val.app (op U)) := epi_app_of_shortExact_flasque hS U
-  have hres₂ : Epi (S.X₂.val.map j.op) := IsFlasqueSheaf.epi_map j
-  rw [AddCommGrpCat.epi_iff_surjective] at hg_U hres₂ ⊢
-  intro z; obtain ⟨w, hw⟩ := hg_U z
-  obtain ⟨x, hx⟩ := hres₂ w
-  exact ⟨ConcreteCategory.hom (S.g.val.app (op V)) x, by
-    have := congrArg (· x) (S.g.val.naturality j.op)
-    simp only [AddCommGrpCat.hom_comp] at this
-    exact this.symm.trans (by simp [hx, hw])⟩
+  letI : IsFlasqueSheaf (⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := by
+    simpa using (inferInstance : IsFlasqueSheaf S.X₁)
+  letI : IsFlasqueSheaf (⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := by
+    simpa using (inferInstance : IsFlasqueSheaf S.X₂)
+  simpa using isFlasque_X₃_of_shortExact_presheaf
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val) (shortComplex_val_zero (S := S))
+    (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS)
 
 -- Injective sheaves are flasque.
 -- Uses zeroOutsideInt generator/sHom/openHom API + Injective.factors.
