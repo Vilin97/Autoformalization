@@ -65,18 +65,6 @@ private theorem ReducibleVanishing'
     let GZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Gsh)
     let S := closedImmersionSES (Z := Z) (hZ := hZ_closed) (F := G) hG
     have hSE := closedImmersionSES_shortExact (Z := Z) (hZ := hZ_closed) (F := G) hG
-    have hpush : Subsingleton (Sheaf.H S.X₃ n) := by
-      haveI : IrreducibleSpace (TopCat.of Z) :=
-        isIrreducible_iff_irreducibleSpace.mp hZ_irred
-      let e : Sheaf.H GZ n ≃ Sheaf.H S.X₃ n := by
-        simpa [S, closedImmersionSES, i, Gsh, GZ] using
-          Equiv.ofBijective
-            (ConcreteCategory.hom (PushforwardHIso Z hZ_closed GZ.cond n).hom)
-            (ConcreteCategory.bijective_of_isIso (PushforwardHIso Z hZ_closed GZ.cond n).hom)
-      exact (e.subsingleton_congr).mp
-        (ih_irred (TopCat.of Z) (G := GZ.val) GZ.cond
-          (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z)
-          (topologicalKrullDim_subspace_lt_of_lt (X := (↑X : Type u)) Z hn))
     have hker : Subsingleton (Sheaf.H S.X₁ n) := by
       have hker' :
           Subsingleton
@@ -95,7 +83,16 @@ private theorem ReducibleVanishing'
             push_neg; exact ⟨hxZ, hx⟩
           exact stalk_zero_of_shortExact_kernel hSE x (fun b => hG_stalks x hx' b) a
       simpa using hker'
-    exact subsingleton_sheafH_of_shortExact_middle hSE n hker hpush
+    exact subsingleton_sheafH_of_closedImmersion_middle_presheaf
+      (Z := Z) (hZ := hZ_closed) (F := G) hG n
+      (by simpa [S] using hker)
+      (by
+        haveI : IrreducibleSpace (TopCat.of Z) :=
+          isIrreducible_iff_irreducibleSpace.mp hZ_irred
+        simpa [i, Gsh, GZ] using
+          ih_irred (TopCat.of Z) (G := GZ.val) GZ.cond
+            (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z)
+            (topologicalKrullDim_subspace_lt_of_lt (X := (↑X : Type u)) Z hn))
 
 theorem grothendieck_vanishing_of_irreducible
     (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X]

@@ -405,23 +405,16 @@ theorem IrreduciblePosVanishing
     let i := TopCat.closedIncl hZ_closed
     let FZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh)
     let S := closedImmersionSES (Z := Z) (hZ := hZ_closed) (F := F) hF
-    have hSE := closedImmersionSES_shortExact (Z := Z) (hZ := hZ_closed) (F := F) hF
-    have hPush : Subsingleton (Sheaf.H S.X₃ n) :=
-      by
-        let e : Sheaf.H FZ n ≃ Sheaf.H S.X₃ n := by
-          simpa [S, closedImmersionSES, i, Fsh, FZ] using
-            Equiv.ofBijective
-              (ConcreteCategory.hom (PushforwardHIso Z hZ_closed FZ.cond n).hom)
-              (ConcreteCategory.bijective_of_isIso (PushforwardHIso Z hZ_closed FZ.cond n).hom)
-        exact (e.subsingleton_congr).mp
-          (ih (TopCat.of Z) n (G := FZ.val) FZ.cond hZ_dim hn_Z)
     have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
       directLimit_cohomology_vanishing (K := S.X₁.val) S.X₁.cond n
         (fun {G} (hG : G.IsSheaf) {V}
           (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G) hf => by
           exact epiImage_zeroOutsideInt_vanishing_of_locallySurjective
             (V := V) (G := G) hG f hf ih n hn)
-    exact subsingleton_sheafH_of_shortExact_middle hSE n hKer hPush
+    exact subsingleton_sheafH_of_closedImmersion_middle_presheaf
+      (Z := Z) (hZ := hZ_closed) (F := F) hF n
+      (by simpa [S] using hKer)
+      (by simpa [i, Fsh, FZ] using ih (TopCat.of Z) n (G := FZ.val) FZ.cond hZ_dim hn_Z)
   · -- dim ≤ 0: F is flasque on irreducible dim-0 space, use FlasqueVanishing
     push_neg at hpos
     haveI : IsFlasqueSheaf Fsh := ⟨fun {U V} i => by
