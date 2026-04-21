@@ -275,18 +275,7 @@ theorem sheafH_comp_extClass_naturality {X : TopCat.{u}}
     (by simpa using congrArg Sheaf.Hom.val φ.comm₂₃)
     n y
 
-/-- In a short exact sequence of sheaves, if `H^(n+1)(X₂)` is subsingleton then every
-    `H^(n+1)(X₁)` class lifts along the connecting morphism from some `H^n(X₃)` class. -/
-theorem sheafH_exists_preimage_extClass {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) (n : ℕ)
-    (h₂ : Subsingleton (Sheaf.H S.X₂ (n + 1)))
-    (x : Sheaf.H S.X₁ (n + 1)) :
-    ∃ y : Sheaf.H S.X₃ n, y.comp hS.extClass rfl = x := by
-  obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₁ _ hS x (@Subsingleton.elim _ h₂ _ _) rfl
-  exact ⟨y, hy⟩
-
-/-- Presheaf-boundary wrapper for `sheafH_exists_preimage_extClass`: if
-`0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves and
+/-- If `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves and
 `H^(n+1)(F₂)` is subsingleton, then every `H^(n+1)(F₁)` class comes from some `H^n(F₃)`
 class via the connecting morphism. -/
 theorem sheafH_exists_preimage_extClass_presheaf {X : TopCat.{u}}
@@ -320,7 +309,24 @@ theorem sheafH_exists_preimage_extClass_presheaf {X : TopCat.{u}}
     simpa [S] using hS
   have h₂' : Subsingleton (Sheaf.H S.X₂ (n + 1)) := by
     simpa [S] using h₂H
-  simpa [S] using sheafH_exists_preimage_extClass (S := S) hS' n h₂' x
+  obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₁ _ hS' x (@Subsingleton.elim _ h₂' _ _) rfl
+  exact ⟨y, by simpa [S] using hy⟩
+
+/-- Sheaf-level wrapper for `sheafH_exists_preimage_extClass_presheaf`. -/
+theorem sheafH_exists_preimage_extClass {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) (n : ℕ)
+    (h₂ : Subsingleton (Sheaf.H S.X₂ (n + 1)))
+    (x : Sheaf.H S.X₁ (n + 1)) :
+    ∃ y : Sheaf.H S.X₃ n, y.comp hS.extClass rfl = x := by
+  simpa using sheafH_exists_preimage_extClass_presheaf
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+    (by simpa using hS)
+    n
+    (by simpa using h₂)
+    x
 
 theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
     {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
@@ -435,38 +441,20 @@ theorem stalk_zero_of_shortExact_cokernel
 
 /-! ## H⁰ ≅ Sections -/
 
+/-- If `F` is a sheaf, then `H F 0` is equivalent to sections on `⊤`. -/
+noncomputable def sheafH0EquivSections_presheaf {X : TopCat.{u}}
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
+    Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 0 ≃+ F.obj (op ⊤) :=
+  Ext.addEquiv₀.trans
+    (((constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat
+        Limits.isTerminalTop).homAddEquiv _ ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))).trans
+      (AddCommGrpCat.uliftZMultiplesAddEquiv _))
+
 /-- `H F 0` is equivalent to sections on `⊤`. -/
 noncomputable def sheafH0EquivSections {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
-    Sheaf.H F 0 ≃+ F.val.obj (op ⊤) :=
-  Ext.addEquiv₀.trans
-    (((constantSheafAdj (Opens.grothendieckTopology X) AddCommGrpCat
-        Limits.isTerminalTop).homAddEquiv _ F).trans
-      (AddCommGrpCat.uliftZMultiplesAddEquiv _))
-
-/-- Presheaf-boundary wrapper for `sheafH0EquivSections`: if `F` is a sheaf, then `H F 0`
-    is equivalent to sections on `⊤`. -/
-noncomputable def sheafH0EquivSections_presheaf {X : TopCat.{u}}
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
-    Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 0 ≃+ F.obj (op ⊤) := by
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  simpa [Fsh] using sheafH0EquivSections Fsh
-
-/-- Naturality of `sheafH0EquivSections`: composing `x` with `mk₀ f` at degree 0
-    corresponds to applying `f.app(⊤)` at the sections level. -/
-lemma sheafH0EquivSections_natural {X : TopCat.{u}}
-    {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G) (x : Sheaf.H F 0) :
-    sheafH0EquivSections G (x.comp (Ext.mk₀ f) (add_zero 0)) =
-    ConcreteCategory.hom (f.val.app (op ⊤)) (sheafH0EquivSections F x) := by
-  conv_lhs => rw [show x = Ext.mk₀ (Ext.addEquiv₀ x) from
-    (Ext.mk₀_addEquiv₀_apply x).symm, Ext.mk₀_comp_mk₀]
-  unfold sheafH0EquivSections
-  simp only [AddEquiv.trans_apply]
-  have key : Ext.addEquiv₀ (Ext.mk₀ (Ext.addEquiv₀ x ≫ f)) = Ext.addEquiv₀ x ≫ f :=
-    Ext.addEquiv₀.apply_symm_apply _
-  erw [Adjunction.homAddEquiv_apply, Adjunction.homAddEquiv_apply, key,
-    Adjunction.homEquiv_naturality_right, Adjunction.homAddEquiv_apply]
-  rfl
+    Sheaf.H F 0 ≃+ F.val.obj (op ⊤) := by
+  simpa using sheafH0EquivSections_presheaf (F := F.val) F.cond
 
 /-- Presheaf-boundary naturality of `sheafH0EquivSections_presheaf`: composing `x`
     with `mk₀ (Sheaf.Hom.mk f)` at degree 0 corresponds to applying `f.app(⊤)` on
@@ -480,9 +468,29 @@ lemma sheafH0EquivSections_presheaf_natural {X : TopCat.{u}}
     ConcreteCategory.hom (f.app (op ⊤)) (sheafH0EquivSections_presheaf hF x) := by
   let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
   let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
-  simpa [sheafH0EquivSections_presheaf, Fsh, Gsh] using
-    (sheafH0EquivSections_natural
-      (F := Fsh) (G := Gsh) (f := Sheaf.Hom.mk f) (x := x))
+  let fsh : Fsh ⟶ Gsh := Sheaf.Hom.mk f
+  conv_lhs => rw [show x = Ext.mk₀ (Ext.addEquiv₀ x) from
+    (Ext.mk₀_addEquiv₀_apply x).symm, Ext.mk₀_comp_mk₀]
+  unfold sheafH0EquivSections_presheaf
+  simp only [AddEquiv.trans_apply]
+  have key :
+      Ext.addEquiv₀ (Ext.mk₀ (Ext.addEquiv₀ x ≫ fsh)) = Ext.addEquiv₀ x ≫ fsh :=
+    by
+      change Ext.addEquiv₀ (Ext.addEquiv₀.symm (Ext.addEquiv₀ x ≫ fsh)) = Ext.addEquiv₀ x ≫ fsh
+      simpa using Ext.addEquiv₀.apply_symm_apply (Ext.addEquiv₀ x ≫ fsh)
+  erw [Adjunction.homAddEquiv_apply, Adjunction.homAddEquiv_apply, key,
+    Adjunction.homEquiv_naturality_right, Adjunction.homAddEquiv_apply]
+  rfl
+
+/-- Naturality of `sheafH0EquivSections`: composing `x` with `mk₀ f` at degree 0
+    corresponds to applying `f.app(⊤)` at the sections level. -/
+lemma sheafH0EquivSections_natural {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G) (x : Sheaf.H F 0) :
+    sheafH0EquivSections G (x.comp (Ext.mk₀ f) (add_zero 0)) =
+    ConcreteCategory.hom (f.val.app (op ⊤)) (sheafH0EquivSections F x) := by
+  simpa [sheafH0EquivSections] using
+    (sheafH0EquivSections_presheaf_natural
+      (F := F.val) (G := G.val) F.cond G.cond (f := f.val) (x := x))
 
 set_option maxHeartbeats 800000 in
 /-- Presheaf-boundary form of `H¹(X₁)` as the cokernel of top sections: if
