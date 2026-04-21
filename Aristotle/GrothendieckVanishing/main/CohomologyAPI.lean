@@ -29,8 +29,8 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `sheafH0EquivSections_presheaf_natural`: presheaf-boundary naturality of the above
 * `sheafH1_cokernel_iso_of_subsingleton_middle`: `H¹(X₁)` as the cokernel of
   `X₂(⊤) → X₃(⊤)` when `H¹(X₂)=0`
-* `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf`: presheaf-boundary wrapper for
-  the same `H¹` cokernel identification
+* `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf`: presheaf-boundary form of the
+  same `H¹` cokernel identification
 * `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural`: presheaf-boundary
   naturality for the same `H¹` cokernel identification
 * `sheafH_extClassIso_of_subsingleton_middle_presheaf`: presheaf-boundary wrapper for
@@ -405,91 +405,8 @@ lemma sheafH0EquivSections_presheaf_natural {X : TopCat.{u}}
     (sheafH0EquivSections_natural
       (F := Fsh) (G := Gsh) (f := Sheaf.Hom.mk f) (x := x))
 
-/-- If `H¹(X₂)=0` in a short exact sequence `0 → X₁ → X₂ → X₃ → 0`, then `H¹(X₁)` is the
-    cokernel of the map on top sections `X₂(⊤) → X₃(⊤)`. -/
-noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
-    (h₂ : Subsingleton (Sheaf.H S.X₂ 1)) :
-    cokernel (S.g.val.app (op ⊤)) ≅ AddCommGrpCat.of (Sheaf.H S.X₁ 1) := by
-  let δ : S.X₃.val.obj (op ⊤) ⟶ AddCommGrpCat.of (Sheaf.H S.X₁ 1) :=
-    AddCommGrpCat.ofHom <|
-      AddMonoidHom.mk'
-        (fun t => ((sheafH0EquivSections S.X₃).symm t).comp hS.extClass rfl)
-        (by
-          intro a b
-          change (((sheafH0EquivSections S.X₃).symm (a + b)).comp hS.extClass rfl) =
-            (((sheafH0EquivSections S.X₃).symm a).comp hS.extClass rfl) +
-              (((sheafH0EquivSections S.X₃).symm b).comp hS.extClass rfl)
-          rw [map_add, Ext.add_comp])
-  have hδ : S.g.val.app (op ⊤) ≫ δ = 0 := by
-    ext s
-    let y : Sheaf.H S.X₂ 0 := (sheafH0EquivSections S.X₂).symm s
-    have hy :
-        y.comp (Ext.mk₀ S.g) (add_zero 0) =
-          (sheafH0EquivSections S.X₃).symm
-            (ConcreteCategory.hom (S.g.val.app (op ⊤)) s) := by
-      apply (sheafH0EquivSections S.X₃).injective
-      rw [sheafH0EquivSections_natural, AddEquiv.apply_symm_apply]
-      exact (AddEquiv.apply_symm_apply (sheafH0EquivSections S.X₃)
-        (ConcreteCategory.hom (S.g.val.app (op ⊤)) s)).symm
-    change (((sheafH0EquivSections S.X₃).symm
-        (ConcreteCategory.hom (S.g.val.app (op ⊤)) s)).comp hS.extClass rfl) = 0
-    rw [← hy, Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀ S.g) hS.extClass rfl,
-      hS.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
-  let πH : cokernel (S.g.val.app (op ⊤)) ⟶ AddCommGrpCat.of (Sheaf.H S.X₁ 1) :=
-    cokernel.desc _ δ hδ
-  have hπH_epi : Epi πH := by
-    rw [AddCommGrpCat.epi_iff_surjective]
-    intro x
-    obtain ⟨y, hy⟩ := sheafH_exists_preimage_extClass hS 0 h₂ x
-    refine ⟨ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤)))
-      (sheafH0EquivSections S.X₃ y), ?_⟩
-    simpa [πH, δ] using hy
-  have hπH_mono : Mono πH := by
-    rw [AddCommGrpCat.mono_iff_injective]
-    intro a b hab
-    obtain ⟨sa, hsa⟩ := (AddCommGrpCat.epi_iff_surjective
-      (cokernel.π (S.g.val.app (op ⊤)))).mp inferInstance a
-    obtain ⟨sb, hsb⟩ := (AddCommGrpCat.epi_iff_surjective
-      (cokernel.π (S.g.val.app (op ⊤)))).mp inferInstance b
-    rw [← hsa, ← hsb] at hab ⊢
-    have hab' :
-        (((sheafH0EquivSections S.X₃).symm sa).comp hS.extClass rfl) =
-          (((sheafH0EquivSections S.X₃).symm sb).comp hS.extClass rfl) := by
-      simpa [πH, δ] using hab
-    have hzero :
-        ((((sheafH0EquivSections S.X₃).symm (sa - sb)).comp hS.extClass rfl) : Sheaf.H S.X₁ 1) = 0 := by
-      have hsub :
-          ((((sheafH0EquivSections S.X₃).symm sa).comp hS.extClass rfl) -
-              (((sheafH0EquivSections S.X₃).symm sb).comp hS.extClass rfl)) = 0 := by
-        rw [sub_eq_zero]
-        exact hab'
-      rw [map_sub, sub_eq_add_neg, Ext.add_comp, Ext.neg_comp]
-      simpa [sub_eq_add_neg] using hsub
-    obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₃ _ hS
-      ((sheafH0EquivSections S.X₃).symm (sa - sb)) rfl hzero
-    have hy_sec :
-        ConcreteCategory.hom (S.g.val.app (op ⊤))
-            (sheafH0EquivSections S.X₂ y) =
-          sa - sb := by
-      simpa [hy] using
-        (sheafH0EquivSections_natural (f := S.g) (x := y)).symm
-    change ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤))) sa =
-      ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤))) sb
-    rw [← sub_eq_zero]
-    have hq :
-        ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤))) (sa - sb) = 0 := by
-      rw [← hy_sec]
-      change ConcreteCategory.hom
-        ((S.g.val.app (op ⊤)) ≫ cokernel.π (S.g.val.app (op ⊤)))
-        (sheafH0EquivSections S.X₂ y) = 0
-      rw [cokernel.condition]
-      simp
-    simpa [map_sub] using hq
-  haveI : IsIso πH := isIso_of_mono_of_epi πH
-  exact asIso πH
-
-/-- Presheaf-boundary wrapper for `sheafH1_cokernel_iso_of_subsingleton_middle`: if
+set_option maxHeartbeats 800000 in
+/-- Presheaf-boundary form of `H¹(X₁)` as the cokernel of top sections: if
 `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves and
 `H¹(F₂)=0`, then `H¹(F₁)` is the cokernel of `g.app(⊤)`. -/
 noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle_presheaf {X : TopCat.{u}}
@@ -508,20 +425,139 @@ noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle_presheaf {X : TopC
     (h₂H : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1)) :
     cokernel (g.app (op ⊤)) ≅
       AddCommGrpCat.of (Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1) := by
+  let F₁sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₁, h₁⟩
+  let F₂sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₂, h₂⟩
+  let F₃sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₃, h₃⟩
   let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
-    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₁ := F₁sh)
+    (X₂ := F₂sh)
+    (X₃ := F₃sh)
     (Sheaf.Hom.mk f)
     (Sheaf.Hom.mk g)
     (by
       apply Sheaf.Hom.ext
       simpa using hfg)
   have hS' : S.ShortExact := by
-    simpa [S] using hS
-  have h₂H' : Subsingleton (Sheaf.H S.X₂ 1) := by
-    simpa [S] using h₂H
-  simpa [S] using sheafH1_cokernel_iso_of_subsingleton_middle (S := S) hS' h₂H'
+    simpa [S, F₁sh, F₂sh, F₃sh] using hS
+  change cokernel (S.g.val.app (op ⊤)) ≅ AddCommGrpCat.of (Sheaf.H S.X₁ 1)
+  let δ : S.X₃.val.obj (op ⊤) ⟶ AddCommGrpCat.of (Sheaf.H S.X₁ 1) :=
+    AddCommGrpCat.ofHom <|
+      AddMonoidHom.mk'
+        (fun t => ((sheafH0EquivSections_presheaf h₃).symm t).comp hS'.extClass rfl)
+        (by
+          intro a b
+          change
+            (((sheafH0EquivSections_presheaf h₃).symm (a + b)).comp hS'.extClass rfl) =
+              (((sheafH0EquivSections_presheaf h₃).symm a).comp hS'.extClass rfl) +
+                (((sheafH0EquivSections_presheaf h₃).symm b).comp hS'.extClass rfl)
+          rw [map_add, Ext.add_comp])
+  have hδ : S.g.val.app (op ⊤) ≫ δ = 0 := by
+    ext s
+    let y : Sheaf.H S.X₂ 0 :=
+      (sheafH0EquivSections_presheaf h₂).symm s
+    have hy :
+        y.comp (Ext.mk₀ S.g) (add_zero 0) =
+          (sheafH0EquivSections_presheaf h₃).symm
+            (ConcreteCategory.hom (S.g.val.app (op ⊤)) s) := by
+      apply (sheafH0EquivSections_presheaf h₃).injective
+      rw [sheafH0EquivSections_presheaf_natural, AddEquiv.apply_symm_apply]
+      exact (AddEquiv.apply_symm_apply (sheafH0EquivSections_presheaf h₃)
+        (ConcreteCategory.hom (S.g.val.app (op ⊤)) s)).symm
+    change (((sheafH0EquivSections_presheaf h₃).symm
+        (ConcreteCategory.hom (S.g.val.app (op ⊤)) s)).comp hS'.extClass rfl) = 0
+    rw [← hy, Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀ S.g) hS'.extClass rfl,
+      hS'.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
+  let πH : cokernel (S.g.val.app (op ⊤)) ⟶ AddCommGrpCat.of (Sheaf.H S.X₁ 1) :=
+    cokernel.desc _ δ hδ
+  have hπH_epi : Epi πH := by
+    rw [AddCommGrpCat.epi_iff_surjective]
+    intro x
+    obtain ⟨y, hy⟩ := sheafH_exists_preimage_extClass_presheaf
+      h₁ h₂ h₃ hfg hS 0 h₂H x
+    have hy' : y.comp hS'.extClass rfl = x := by
+      simpa [S, F₁sh, F₂sh, F₃sh] using hy
+    refine ⟨ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤)))
+      (sheafH0EquivSections_presheaf h₃ y), ?_⟩
+    simpa [πH, δ] using hy'
+  have hπH_mono : Mono πH := by
+    rw [AddCommGrpCat.mono_iff_injective]
+    intro a b hab
+    obtain ⟨sa, hsa⟩ := (AddCommGrpCat.epi_iff_surjective
+      (cokernel.π (S.g.val.app (op ⊤)))).mp inferInstance a
+    obtain ⟨sb, hsb⟩ := (AddCommGrpCat.epi_iff_surjective
+      (cokernel.π (S.g.val.app (op ⊤)))).mp inferInstance b
+    rw [← hsa, ← hsb] at hab ⊢
+    have hab' :
+        (((sheafH0EquivSections_presheaf h₃).symm sa).comp hS'.extClass rfl) =
+          (((sheafH0EquivSections_presheaf h₃).symm sb).comp hS'.extClass rfl) := by
+      simpa [πH, δ] using hab
+    have hzero :
+        ((((sheafH0EquivSections_presheaf h₃).symm (sa - sb)).comp hS'.extClass rfl) :
+            Sheaf.H S.X₁ 1) = 0 := by
+      have hsub :
+          ((((sheafH0EquivSections_presheaf h₃).symm sa).comp hS'.extClass rfl) -
+              (((sheafH0EquivSections_presheaf h₃).symm sb).comp hS'.extClass rfl)) = 0 := by
+        rw [sub_eq_zero]
+        exact hab'
+      rw [map_sub, sub_eq_add_neg, Ext.add_comp, Ext.neg_comp]
+      simpa [sub_eq_add_neg] using hsub
+    obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₃ _ hS'
+      ((sheafH0EquivSections_presheaf h₃).symm (sa - sb)) rfl hzero
+    have hy_sec :
+        ConcreteCategory.hom (S.g.val.app (op ⊤))
+            (sheafH0EquivSections_presheaf h₂ y) =
+          sa - sb := by
+      exact (sheafH0EquivSections_presheaf_natural h₂ h₃ (f := g) (x := y)).symm.trans <|
+        by
+          simpa using congrArg (sheafH0EquivSections_presheaf h₃) hy
+    change ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤))) sa =
+      ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤))) sb
+    rw [← sub_eq_zero]
+    have hq :
+        ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤))) (sa - sb) = 0 := by
+      rw [← hy_sec]
+      change ConcreteCategory.hom
+        (S.g.val.app (op ⊤) ≫ cokernel.π (S.g.val.app (op ⊤)))
+        (sheafH0EquivSections_presheaf h₂ y) = 0
+      rw [cokernel.condition]
+      simp
+    simpa [map_sub] using hq
+  haveI : IsIso πH := isIso_of_mono_of_epi πH
+  exact asIso πH
+
+/-- Sheaf-level wrapper for `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf`. -/
+noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
+    (h₂ : Subsingleton (Sheaf.H S.X₂ 1)) :
+    cokernel (S.g.val.app (op ⊤)) ≅ AddCommGrpCat.of (Sheaf.H S.X₁ 1) := by
+  simpa using sheafH1_cokernel_iso_of_subsingleton_middle_presheaf
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+    (by simpa using hS)
+    (by simpa using h₂)
+
+@[simp] theorem sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_hom_π {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
+    (hS : (ShortComplex.mk
+      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f)
+      (Sheaf.Hom.mk g)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg)).ShortExact)
+    (h₂H : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1))
+    (s : F₃.obj (op ⊤)) :
+    ConcreteCategory.hom
+        ((sheafH1_cokernel_iso_of_subsingleton_middle_presheaf h₁ h₂ h₃ hfg hS h₂H).hom)
+        (ConcreteCategory.hom (cokernel.π (g.app (op ⊤))) s) =
+      ((sheafH0EquivSections_presheaf h₃).symm s).comp hS.extClass rfl := by
+  simp [sheafH1_cokernel_iso_of_subsingleton_middle_presheaf]
 
 @[simp] theorem sheafH1_cokernel_iso_of_subsingleton_middle_hom_π {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
@@ -530,66 +566,14 @@ noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle_presheaf {X : TopC
         ((sheafH1_cokernel_iso_of_subsingleton_middle hS h₂).hom)
         (ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤))) s) =
       ((sheafH0EquivSections S.X₃).symm s).comp hS.extClass rfl := by
-  simp [sheafH1_cokernel_iso_of_subsingleton_middle]
-
-/-- Naturality of `sheafH1_cokernel_iso_of_subsingleton_middle` for a morphism of short exact
-    sequences. -/
-theorem sheafH1_cokernel_iso_of_subsingleton_middle_natural {X : TopCat.{u}}
-    {S₁ S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS₁ : S₁.ShortExact) (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂)
-    (h₁₂ : Subsingleton (Sheaf.H S₁.X₂ 1))
-    (h₂₂ : Subsingleton (Sheaf.H S₂.X₂ 1)) :
-    cokernel.map (S₁.g.val.app (op ⊤)) (S₂.g.val.app (op ⊤))
-        (φ.τ₂.val.app (op ⊤)) (φ.τ₃.val.app (op ⊤))
-        (by
-          simpa using congrArg
-            (fun α : S₁.X₂ ⟶ S₂.X₃ => α.val.app (op ⊤)) φ.comm₂₃.symm) ≫
-      (sheafH1_cokernel_iso_of_subsingleton_middle hS₂ h₂₂).hom =
-    (sheafH1_cokernel_iso_of_subsingleton_middle hS₁ h₁₂).hom ≫
-      AddCommGrpCat.ofHom
-        (AddMonoidHom.mk'
-          (fun t => t.comp (Ext.mk₀ φ.τ₁) (add_zero 1))
-          (by
-            intro a b
-            change ((a + b).comp (Ext.mk₀ φ.τ₁) (add_zero 1)) =
-              (a.comp (Ext.mk₀ φ.τ₁) (add_zero 1)) + (b.comp (Ext.mk₀ φ.τ₁) (add_zero 1))
-            rw [Ext.add_comp])) := by
-  apply (cancel_epi (cokernel.π (S₁.g.val.app (op ⊤)))).mp
-  rw [cokernel.π_desc_assoc, Category.assoc]
-  ext s
-  have hs :
-      (((sheafH0EquivSections S₁.X₃).symm s).comp (Ext.mk₀ φ.τ₃) (add_zero 0)) =
-        (sheafH0EquivSections S₂.X₃).symm
-          (ConcreteCategory.hom (φ.τ₃.val.app (op ⊤)) s) := by
-    apply (sheafH0EquivSections S₂.X₃).injective
-    rw [sheafH0EquivSections_natural, AddEquiv.apply_symm_apply]
-    exact (AddEquiv.apply_symm_apply (sheafH0EquivSections S₂.X₃)
-      (ConcreteCategory.hom (φ.τ₃.val.app (op ⊤)) s)).symm
-  change ConcreteCategory.hom
-      (cokernel.π (S₂.g.val.app (op ⊤)) ≫
-        (sheafH1_cokernel_iso_of_subsingleton_middle hS₂ h₂₂).hom)
-      (ConcreteCategory.hom (φ.τ₃.val.app (op ⊤)) s) =
-    ConcreteCategory.hom
-      ((sheafH1_cokernel_iso_of_subsingleton_middle hS₁ h₁₂).hom ≫
-        AddCommGrpCat.ofHom
-          (AddMonoidHom.mk'
-            (fun t => t.comp (Ext.mk₀ φ.τ₁) (add_zero 1))
-            (by
-              intro a b
-              change ((a + b).comp (Ext.mk₀ φ.τ₁) (add_zero 1)) =
-                (a.comp (Ext.mk₀ φ.τ₁) (add_zero 1)) + (b.comp (Ext.mk₀ φ.τ₁) (add_zero 1))
-              rw [Ext.add_comp])))
-      (ConcreteCategory.hom (cokernel.π (S₁.g.val.app (op ⊤))) s)
-  simp only [ConcreteCategory.comp_apply]
-  rw [sheafH1_cokernel_iso_of_subsingleton_middle_hom_π,
-    sheafH1_cokernel_iso_of_subsingleton_middle_hom_π]
-  change (((sheafH0EquivSections S₂.X₃).symm
-        (ConcreteCategory.hom (φ.τ₃.val.app (op ⊤)) s)).comp hS₂.extClass rfl) =
-      ((((sheafH0EquivSections S₁.X₃).symm s).comp hS₁.extClass rfl).comp
-        (Ext.mk₀ φ.τ₁) (add_zero 1))
-  rw [← hs]
-  exact (sheafH_comp_extClass_naturality hS₁ hS₂ φ 0
-    ((sheafH0EquivSections S₁.X₃).symm s)).symm
+  simpa using sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_hom_π
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+    (by simpa using hS)
+    (by simpa using h₂)
+    s
 
 /-- Presheaf-boundary `H¹`-vanishing criterion for surjective top sections:
     if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves
@@ -1346,25 +1330,25 @@ theorem sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural {X : TopCat
     (sheafH1_cokernel_iso_of_subsingleton_middle_presheaf
       h₁₁ h₁₂ h₁₃ hfg₁ hS₁ h₁₂H).hom ≫
       (sheafCohomologyFunctor X 1).map (Sheaf.Hom.mk τ₁) := by
-  let S₁ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
-    (X₁ := (⟨F₁₁, h₁₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₂ := (⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₃ := (⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (Sheaf.Hom.mk f₁)
-    (Sheaf.Hom.mk g₁)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hfg₁)
-  let S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
-    (X₁ := (⟨F₂₁, h₂₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₂ := (⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₃ := (⟨F₂₃, h₂₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (Sheaf.Hom.mk f₂)
-    (Sheaf.Hom.mk g₂)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hfg₂)
-  let φ : S₁ ⟶ S₂ := ShortComplex.homMk
+  let φ :
+      ShortComplex.mk
+        (X₁ := (⟨F₁₁, h₁₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (X₂ := (⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (X₃ := (⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (Sheaf.Hom.mk f₁)
+        (Sheaf.Hom.mk g₁)
+        (by
+          apply Sheaf.Hom.ext
+          simpa using hfg₁) ⟶
+      ShortComplex.mk
+        (X₁ := (⟨F₂₁, h₂₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (X₂ := (⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (X₃ := (⟨F₂₃, h₂₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (Sheaf.Hom.mk f₂)
+        (Sheaf.Hom.mk g₂)
+        (by
+          apply Sheaf.Hom.ext
+          simpa using hfg₂) := ShortComplex.homMk
     (Sheaf.Hom.mk τ₁)
     (Sheaf.Hom.mk τ₂)
     (Sheaf.Hom.mk τ₃)
@@ -1374,17 +1358,78 @@ theorem sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural {X : TopCat
     (by
       apply Sheaf.Hom.ext
       simpa using hτ₂₃)
-  have hS₁' : S₁.ShortExact := by
-    simpa [S₁] using hS₁
-  have hS₂' : S₂.ShortExact := by
-    simpa [S₂] using hS₂
-  have h₁₂H' : Subsingleton (Sheaf.H S₁.X₂ 1) := by
-    simpa [S₁] using h₁₂H
-  have h₂₂H' : Subsingleton (Sheaf.H S₂.X₂ 1) := by
-    simpa [S₂] using h₂₂H
-  simpa [S₁, S₂, φ] using
-    (sheafH1_cokernel_iso_of_subsingleton_middle_natural
-      (S₁ := S₁) (S₂ := S₂) hS₁' hS₂' φ h₁₂H' h₂₂H')
+  apply (cancel_epi (cokernel.π (g₁.app (op ⊤)))).mp
+  rw [cokernel.π_desc_assoc, Category.assoc]
+  ext s
+  have hs :
+      (((sheafH0EquivSections_presheaf h₁₃).symm s).comp
+          (Ext.mk₀ (Sheaf.Hom.mk τ₃)) (add_zero 0)) =
+        (sheafH0EquivSections_presheaf h₂₃).symm
+          (ConcreteCategory.hom (τ₃.app (op ⊤)) s) := by
+    apply (sheafH0EquivSections_presheaf h₂₃).injective
+    rw [sheafH0EquivSections_presheaf_natural, AddEquiv.apply_symm_apply]
+    exact (AddEquiv.apply_symm_apply (sheafH0EquivSections_presheaf h₂₃)
+      (ConcreteCategory.hom (τ₃.app (op ⊤)) s)).symm
+  change ConcreteCategory.hom
+      (cokernel.π (g₂.app (op ⊤)) ≫
+        (sheafH1_cokernel_iso_of_subsingleton_middle_presheaf
+          h₂₁ h₂₂ h₂₃ hfg₂ hS₂ h₂₂H).hom)
+      (ConcreteCategory.hom (τ₃.app (op ⊤)) s) =
+    ConcreteCategory.hom
+      ((sheafH1_cokernel_iso_of_subsingleton_middle_presheaf
+          h₁₁ h₁₂ h₁₃ hfg₁ hS₁ h₁₂H).hom ≫
+        (sheafCohomologyFunctor X 1).map (Sheaf.Hom.mk τ₁))
+      (ConcreteCategory.hom (cokernel.π (g₁.app (op ⊤))) s)
+  simp only [ConcreteCategory.comp_apply]
+  rw [sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_hom_π,
+    sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_hom_π]
+  change (((sheafH0EquivSections_presheaf h₂₃).symm
+        (ConcreteCategory.hom (τ₃.app (op ⊤)) s)).comp hS₂.extClass rfl) =
+      ((((sheafH0EquivSections_presheaf h₁₃).symm s).comp hS₁.extClass rfl).comp
+        (Ext.mk₀ (Sheaf.Hom.mk τ₁)) (add_zero 1))
+  rw [← hs]
+  simpa [φ] using
+    (sheafH_comp_extClass_naturality hS₁ hS₂ φ 0
+      ((sheafH0EquivSections_presheaf h₁₃).symm s)).symm
+
+/-- Sheaf-level wrapper for
+`sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural`. -/
+theorem sheafH1_cokernel_iso_of_subsingleton_middle_natural {X : TopCat.{u}}
+    {S₁ S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS₁ : S₁.ShortExact) (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂)
+    (h₁₂ : Subsingleton (Sheaf.H S₁.X₂ 1))
+    (h₂₂ : Subsingleton (Sheaf.H S₂.X₂ 1)) :
+    cokernel.map (S₁.g.val.app (op ⊤)) (S₂.g.val.app (op ⊤))
+        (φ.τ₂.val.app (op ⊤)) (φ.τ₃.val.app (op ⊤))
+        (by
+          simpa using congrArg
+            (fun α : S₁.X₂ ⟶ S₂.X₃ => α.val.app (op ⊤)) φ.comm₂₃.symm) ≫
+      (sheafH1_cokernel_iso_of_subsingleton_middle hS₂ h₂₂).hom =
+    (sheafH1_cokernel_iso_of_subsingleton_middle hS₁ h₁₂).hom ≫
+      AddCommGrpCat.ofHom
+        (AddMonoidHom.mk'
+          (fun t => t.comp (Ext.mk₀ φ.τ₁) (add_zero 1))
+          (by
+            intro a b
+            change ((a + b).comp (Ext.mk₀ φ.τ₁) (add_zero 1)) =
+              (a.comp (Ext.mk₀ φ.τ₁) (add_zero 1)) + (b.comp (Ext.mk₀ φ.τ₁) (add_zero 1))
+            rw [Ext.add_comp])) := by
+  simpa using sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural
+    (F₁₁ := S₁.X₁.val) (F₁₂ := S₁.X₂.val) (F₁₃ := S₁.X₃.val)
+    (F₂₁ := S₂.X₁.val) (F₂₂ := S₂.X₂.val) (F₂₃ := S₂.X₃.val)
+    S₁.X₁.cond S₁.X₂.cond S₁.X₃.cond
+    S₂.X₁.cond S₂.X₂.cond S₂.X₃.cond
+    (f₁ := S₁.f.val) (g₁ := S₁.g.val)
+    (show S₁.f.val ≫ S₁.g.val = 0 from congrArg Sheaf.Hom.val S₁.zero)
+    (f₂ := S₂.f.val) (g₂ := S₂.g.val)
+    (show S₂.f.val ≫ S₂.g.val = 0 from congrArg Sheaf.Hom.val S₂.zero)
+    (by simpa using hS₁)
+    (by simpa using hS₂)
+    (τ₁ := φ.τ₁.val) (τ₂ := φ.τ₂.val) (τ₃ := φ.τ₃.val)
+    (by simpa using congrArg Sheaf.Hom.val φ.comm₁₂)
+    (by simpa using congrArg Sheaf.Hom.val φ.comm₂₃)
+    (by simpa using h₁₂)
+    (by simpa using h₂₂)
 
 /-- The degree-`0` sheaf cohomology functor is naturally isomorphic to taking sections on `⊤`. -/
 noncomputable def sheafH0NatIsoSections {X : TopCat.{u}} :
