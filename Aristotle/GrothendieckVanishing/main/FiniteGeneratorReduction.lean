@@ -283,11 +283,16 @@ theorem finsetGeneratedSheaf_vanishing
     exact h S
   intro T; induction T using Finset.induction with
   | empty =>
-    exact _root_.sheafH_subsingleton_of_isZero _ (by
-      apply IsZero.of_iso (isZero_zero _) (imageZero' _)
-      apply Sigma.hom_ext
-      intro ⟨σ, hσ⟩
-      simp at hσ) m
+    simpa using sheafH_subsingleton_of_isZero_presheaf
+      (F := (TopCat.Presheaf.finsetGeneratedSheaf hK ∅).val)
+      (hF := (TopCat.Presheaf.finsetGeneratedSheaf hK ∅).cond)
+      (hzero := by
+        simpa using (show IsZero (TopCat.Presheaf.finsetGeneratedSheaf hK ∅) from by
+          apply IsZero.of_iso (isZero_zero _) (imageZero' _)
+          apply Sigma.hom_ext
+          intro ⟨σ, hσ⟩
+          simp at hσ))
+      m
   | @insert σ₀ S' _ ih =>
     let h_sub := Finset.subset_insert σ₀ S'
     let SC := ShortComplex.mk (finsetImageInclGen hK h_sub)
