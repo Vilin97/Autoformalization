@@ -21,9 +21,13 @@ API for topological Krull dimension on irreducible spaces.
   inequality under a natural-number upper bound on the closed subspace dimension
 - `topologicalKrullDim_pos_iff_exists_irreducibleCloseds_ne_univ`: on an irreducible
   space, `dim > 0` iff there is a proper irreducible closed subset
+- `exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos`: on an irreducible
+  space of positive finite Krull dimension, there exists a proper closed subset of
+  strictly smaller dimension
 - `lt_coe_nat_of_lt_of_lt_coe_nat_succ`: in `WithBot ℕ∞`, from `a < b < ↑↑(n+1)` deduce `a < ↑↑n`
 - `exists_closed_subset_lt_dim_of_irreducible_pos`: on an irreducible space of
-  positive Krull dimension, there exists a proper closed subset of strictly smaller dimension
+  positive Krull dimension, the above closed subset also inherits the ambient
+  natural-number bound
 -/
 
 universe u
@@ -304,22 +308,34 @@ theorem topologicalKrullDim_lt_coe_nat_of_isIrreducible_of_isClosed_of_lt_coe_na
     (topologicalKrullDim_lt_of_isIrreducible_of_isClosed hY hne (lt_of_lt_of_le hY_lt le_top))
     hn
 
+/-- On an irreducible space of positive finite Krull dimension, one can choose a proper
+closed subset `Z ⊊ X` of strictly smaller Krull dimension. This isolates the structural
+closed-subset choice from the separate task of passing numerical bounds to `Z`. -/
+theorem exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos
+    {X : Type u} [TopologicalSpace X] [IrreducibleSpace X] {n : ℕ}
+    (hpos : topologicalKrullDim X > 0) (hn : topologicalKrullDim X < ↑↑(n : ℕ)) :
+    ∃ Z : Set X, IsClosed Z ∧ Z ≠ Set.univ ∧
+      topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X := by
+  obtain ⟨Z, hZ_ne_univ⟩ :=
+    topologicalKrullDim_pos_iff_exists_irreducibleCloseds_ne_univ (X := X) |>.mp hpos
+  have hZ_lt_nat :
+      topologicalKrullDim (TopCat.of (Z : Set X)) < ↑↑(n : ℕ) := by
+    simpa using topologicalKrullDim_subspace_lt_of_lt (X := X) (Z : Set X) hn
+  refine ⟨Z, Z.isClosed, hZ_ne_univ, ?_⟩
+  exact topologicalKrullDim_lt_of_isIrreducible_of_isClosed_of_lt_coe_nat
+    (X := X) Z.isClosed hZ_ne_univ hZ_lt_nat
+
 /-- On an irreducible space of positive Krull dimension, one can choose a proper
 closed subset `Z ⊊ X` of strictly smaller Krull dimension, and the ambient cohomological bound
 `n > dim X` automatically implies `n > dim Z`. This isolates the closed-subset selection used at
 the start of Hartshorne Step 3. -/
 theorem exists_closed_subset_lt_dim_of_irreducible_pos
-    (X : TopCat.{u}) [IrreducibleSpace X]
+    {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0) :
     ∃ Z : Set X, IsClosed Z ∧ Z ≠ Set.univ ∧
       topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X ∧
       ↑n > topologicalKrullDim (TopCat.of Z) := by
-  obtain ⟨Z, hZ_ne_univ⟩ :=
-    topologicalKrullDim_pos_iff_exists_irreducibleCloseds_ne_univ.mp hpos
-  have hZ_lt_nat :
-      topologicalKrullDim (TopCat.of (Z : Set X)) < ↑n :=
-    topologicalKrullDim_subspace_lt_of_lt (X := (↑X : Type u)) (Z : Set X) hn
-  have hZ_dim : topologicalKrullDim (TopCat.of (Z : Set X)) < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed_of_lt_coe_nat Z.isClosed hZ_ne_univ
-      hZ_lt_nat
-  refine ⟨Z, Z.isClosed, hZ_ne_univ, hZ_dim, lt_trans hZ_dim hn⟩
+  obtain ⟨Z, hZ_closed, hZ_ne_univ, hZ_dim⟩ :=
+    exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos (X := X) hpos <|
+      by simpa [gt_iff_lt] using hn
+  exact ⟨Z, hZ_closed, hZ_ne_univ, hZ_dim, lt_trans hZ_dim hn⟩

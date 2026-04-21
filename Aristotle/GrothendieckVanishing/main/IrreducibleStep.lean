@@ -400,8 +400,11 @@ theorem IrreduciblePosVanishing
   let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
   change Subsingleton (Sheaf.H Fsh n)
   by_cases hpos : topologicalKrullDim X > 0
-  · obtain ⟨Z, hZ_closed, _, hZ_dim, hn_Z⟩ :=
-      exists_closed_subset_lt_dim_of_irreducible_pos X n hn hpos
+  · obtain ⟨Z, hZ_closed, _, hZ_dim⟩ :=
+      exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos (X := X) hpos <|
+        by simpa [gt_iff_lt] using hn
+    have hn_Z : n > topologicalKrullDim (TopCat.of Z) := by
+      simpa [gt_iff_lt] using lt_trans hZ_dim (by simpa [gt_iff_lt] using hn)
     let i := TopCat.closedIncl hZ_closed
     let FZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh)
     let S := closedImmersionSES (Z := Z) (hZ := hZ_closed) (F := F) hF
