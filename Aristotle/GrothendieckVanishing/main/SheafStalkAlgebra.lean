@@ -45,13 +45,27 @@ theorem zeroOutsideInt_vanishing
     (hCoker : Subsingleton (Sheaf.H (Limits.cokernel
       (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))) m)) :
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) (m + 1)) := by
-  let f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)
-  let S := ShortComplex.mk f (cokernel.π f) (cokernel.condition f)
-  have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
-    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel f)) inferInstance inferInstance
-  haveI : IsFlasqueSheaf S.X₂ := isFlasqueSheaf_zeroOutsideInt_top X
-  haveI := hCoker
-  exact sheafH_dimension_shift_of_both hSE m
+  haveI : IsFlasqueSheaf (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) :=
+    isFlasqueSheaf_zeroOutsideInt_top X
+  have hfsh : Mono (TopCat.Sheaf.zeroOutsideInt.openHom
+      (le_top : V ≤ (⊤ : Opens X))) := by
+    infer_instance
+  haveI : Mono ((TopCat.Sheaf.zeroOutsideInt.openHom
+      (le_top : V ≤ (⊤ : Opens X))).val) := by
+    exact (Sheaf.Hom.mono_iff_presheaf_mono
+      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u})
+      (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ (⊤ : Opens X)))).1 hfsh
+  have hTop : Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) (m + 1)) := by
+    simpa using FlasqueVanishing X (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) m
+  exact sheafH_dimension_shift_of_mono_presheaf
+    (F := (TopCat.Sheaf.zeroOutsideInt V).val)
+    (G := (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).val)
+    (hF := (TopCat.Sheaf.zeroOutsideInt V).cond)
+    (hG := (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).cond)
+    (f := (TopCat.Sheaf.zeroOutsideInt.openHom
+      (le_top : V ≤ (⊤ : Opens X))).val)
+    (n := m)
+    hCoker hTop
 
 /-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
     any germ in the larger zero-outside presheaf can be lifted by restricting to `W ∩ V ≤ V`

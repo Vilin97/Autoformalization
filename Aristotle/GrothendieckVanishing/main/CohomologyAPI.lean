@@ -31,6 +31,7 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `sheafH_subsingleton_H1_of_flasque`: flasque sheaves have vanishing `H¹`
 * `sheafH_subsingleton_H1_of_flasque_presheaf`: presheaf-boundary wrapper for the same fact
 * `sheafH_subsingleton_H1_of_flasque_of_epi_app_top`: flasque-middle-term `H¹` vanishing
+* `sheafH_dimension_shift_of_mono_presheaf`: presheaf-boundary forward dimension shift
 * `sheafH_dimension_shift_X₃_of_locallySurjective_presheaf`: presheaf-boundary reverse
   dimension shift for locally surjective morphisms
 -/
@@ -607,6 +608,35 @@ theorem sheafH_dimension_shift_of_both {X : TopCat.{u}}
     [Subsingleton (Sheaf.H S.X₂ (n + 1))] :
     Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
   ext_dimension_shift _ hS n ‹_› ‹_›
+
+/-- Presheaf-boundary forward dimension shift for a monomorphism:
+    if `f : F ⟶ G` is mono between sheaf-valued presheaves, the cokernel sheaf of
+    `Sheaf.Hom.mk f` has subsingleton `H^n`, and `G` has subsingleton `H^(n+1)`,
+    then `F` has subsingleton `H^(n+1)`. -/
+theorem sheafH_dimension_shift_of_mono_presheaf {X : TopCat.{u}}
+    {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (hF : F.IsSheaf) (hG : G.IsSheaf)
+    (f : F ⟶ G) [Mono f] (n : ℕ)
+    (h₃ : Subsingleton (Sheaf.H (cokernel (show
+      (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
+        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from
+          Sheaf.Hom.mk f)) n))
+    (h₂ : Subsingleton (Sheaf.H ((⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1))) :
+    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)) := by
+  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
+      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
+  haveI : Mono fsh := by
+    exact (Sheaf.Hom.mono_iff_presheaf_mono
+      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) fsh).2 inferInstance
+  let S := ShortComplex.mk fsh (cokernel.π fsh) (cokernel.condition fsh)
+  have hS : S.ShortExact := ShortComplex.ShortExact.mk'
+    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel fsh))
+    inferInstance inferInstance
+  haveI : Subsingleton (Sheaf.H S.X₃ n) := by
+    simpa [S, fsh] using h₃
+  haveI : Subsingleton (Sheaf.H S.X₂ (n + 1)) := by
+    simpa [S] using h₂
+  simpa [S] using sheafH_dimension_shift_of_both (S := S) hS n
 
 /-- Dimension shifting at `Sheaf.H` level with injective middle term:
     if `X₂` is injective and `H^n(X₃)=0`, then `H^(n+1)(X₁)=0`. -/
