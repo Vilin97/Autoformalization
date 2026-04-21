@@ -31,6 +31,8 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `sheafH_subsingleton_H1_of_flasque`: flasque sheaves have vanishing `H¹`
 * `sheafH_subsingleton_H1_of_flasque_presheaf`: presheaf-boundary wrapper for the same fact
 * `sheafH_subsingleton_H1_of_flasque_of_epi_app_top`: flasque-middle-term `H¹` vanishing
+* `sheafH_dimension_shift_X₃_of_locallySurjective_presheaf`: presheaf-boundary reverse
+  dimension shift for locally surjective morphisms
 -/
 
 universe u
@@ -633,6 +635,36 @@ theorem sheafH_dimension_shift_X₃_of_both {X : TopCat.{u}}
     [Subsingleton (Sheaf.H S.X₁ (n + 1))] :
     Subsingleton (Sheaf.H S.X₃ n) :=
   ext_dimension_shift_X₃ _ hS n ‹_› ‹_›
+
+/-- Presheaf-boundary reverse dimension shift for a locally surjective morphism:
+    if `f : F ⟶ G` is locally surjective, `H^n(F)` is subsingleton, and
+    `H^(n+1)(kernel (Sheaf.Hom.mk f))` is subsingleton, then `H^n(G)` is subsingleton. -/
+theorem sheafH_dimension_shift_X₃_of_locallySurjective_presheaf {X : TopCat.{u}}
+    {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (hF : F.IsSheaf) (hG : G.IsSheaf)
+    (f : F ⟶ G) (hf : TopCat.Presheaf.IsLocallySurjective f) (n : ℕ)
+    (h₂ : Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
+    (h₁ : Subsingleton (Sheaf.H
+      (kernel (Sheaf.Hom.mk f :
+        (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
+          (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)))
+      (n + 1))) :
+    Subsingleton (Sheaf.H ((⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
+  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
+      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
+  letI : Balanced (CategoryTheory.Sheaf (Opens.grothendieckTopology X)
+      AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
+  haveI : Epi fsh := by
+    rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} fsh]
+    simpa [fsh] using hf
+  let S := ShortComplex.mk (kernel.ι fsh) fsh (kernel.condition fsh)
+  have hS : S.ShortExact := ShortComplex.ShortExact.mk'
+    (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel fsh)) inferInstance inferInstance
+  haveI : Subsingleton (Sheaf.H S.X₂ n) := by
+    simpa [S, fsh] using h₂
+  haveI : Subsingleton (Sheaf.H S.X₁ (n + 1)) := by
+    simpa [S, fsh] using h₁
+  simpa [S, fsh] using sheafH_dimension_shift_X₃_of_both (S := S) hS n
 
 -- If both ends of a short exact sequence have vanishing H^n, so does the middle.
 theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
