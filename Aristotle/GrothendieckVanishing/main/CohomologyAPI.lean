@@ -27,7 +27,9 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
   `X₂(⊤) → X₃(⊤)` when `H¹(X₂)=0`
 * `epi_app_top_of_subsingleton_sheafH1`: H^1 vanishing gives surjectivity on top sections
 * `sheafH0_surj_of_epi_app_top`: surjectivity on top sections gives H^0 surjectivity
-* `sheafH_subsingleton_H1_via_epi_app_top`: H^1 vanishing via surjective top sections
+* `sheafH_subsingleton_H1_via_epi_app_top_presheaf`: presheaf-boundary H^1 vanishing via
+  surjective top sections
+* `sheafH_subsingleton_H1_via_epi_app_top`: sheaf-level wrapper for the same fact
 * `sheafH_subsingleton_H1_of_flasque`: flasque sheaves have vanishing `H¹`
 * `sheafH_subsingleton_H1_of_flasque_presheaf`: presheaf-boundary wrapper for the same fact
 * `sheafH_subsingleton_H1_of_flasque_of_epi_app_top`: flasque-middle-term `H¹` vanishing
@@ -518,6 +520,43 @@ theorem sheafH_subsingleton_H1_via_surj {X : TopCat.{u}}
     Subsingleton (Sheaf.H S.X₁ 1) :=
   subsingleton_H1_via_surj _ hSE h₂ h_surj
 
+/-- Presheaf-boundary `H¹` vanishing criterion from surjective top sections:
+    if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves,
+    `H¹(F₂)=0`, and `g.app(⊤)` is epi, then `H¹(F₁)=0`. -/
+theorem sheafH_subsingleton_H1_via_epi_app_top_presheaf {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
+    (hSE : (ShortComplex.mk
+      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f)
+      (Sheaf.Hom.mk g)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg)).ShortExact)
+    (h₂H : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1))
+    (hg : Epi (g.app (op ⊤))) :
+    Subsingleton (Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1) := by
+  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
+    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (Sheaf.Hom.mk f)
+    (Sheaf.Hom.mk g)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hfg)
+  have hS : S.ShortExact := by
+    simpa [S] using hSE
+  have h₂' : Subsingleton (Sheaf.H S.X₂ 1) := by
+    simpa [S] using h₂H
+  have hg' : Epi (S.g.val.app (op ⊤)) := by
+    simpa [S] using hg
+  simpa [S] using
+    sheafH_subsingleton_H1_via_surj (S := S) hS h₂' (sheafH0_surj_of_epi_app_top _ hg')
+
 /-- Sheaf-level `H¹` vanishing criterion from surjective top sections:
     if `H¹(X₂)=0` and `g.app(⊤)` is epi in a short exact sequence
     `0 → X₁ → X₂ → X₃ → 0`, then `H¹(X₁)=0`. -/
@@ -525,8 +564,15 @@ theorem sheafH_subsingleton_H1_via_epi_app_top {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
     (h₂ : Subsingleton (Sheaf.H S.X₂ 1))
     (hg : Epi (S.g.val.app (op ⊤))) :
-    Subsingleton (Sheaf.H S.X₁ 1) :=
-  sheafH_subsingleton_H1_via_surj hSE h₂ (sheafH0_surj_of_epi_app_top _ hg)
+    Subsingleton (Sheaf.H S.X₁ 1) := by
+  simpa using sheafH_subsingleton_H1_via_epi_app_top_presheaf
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+    (by simpa using hSE)
+    (by simpa using h₂)
+    (by simpa using hg)
 
 /-- Sheaf-level `H¹` vanishing criterion with injective middle term:
     if `X₂` is injective and `g.app(⊤)` is epi in a short exact sequence
@@ -577,8 +623,19 @@ theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
     [IsFlasqueSheaf S.X₂]
     (hg : Epi (S.g.val.app (op ⊤))) :
-    Subsingleton (Sheaf.H S.X₁ 1) :=
-  sheafH_subsingleton_H1_via_epi_app_top hSE (sheafH_subsingleton_H1_of_flasque S.X₂) hg
+    Subsingleton (Sheaf.H S.X₁ 1) := by
+  letI : IsFlasqueSheaf ((⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+    simpa using (inferInstance : IsFlasqueSheaf S.X₂)
+  simpa using sheafH_subsingleton_H1_via_epi_app_top_presheaf
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+    (by simpa using hSE)
+    (by
+      simpa using
+        (sheafH_subsingleton_H1_of_flasque_presheaf (F := S.X₂.val) S.X₂.cond))
+    (by simpa using hg)
 
 /-- Sheaf-level `H¹` vanishing criterion for a pushed-forward short exact sequence:
     if the mapped middle term is flasque and the source sequence has `H¹(X₁)=0`,
@@ -592,13 +649,13 @@ theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map {X Y : TopCat.{u}}
     (h_top : (Opens.map f).obj ⊤ = ⊤)
     (h₁ : Subsingleton (Sheaf.H S.X₁ 1)) :
     Subsingleton (Sheaf.H ((S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f)).X₁) 1) := by
-  refine sheafH_subsingleton_H1_of_flasque_of_epi_app_top
+  exact sheafH_subsingleton_H1_of_flasque_of_epi_app_top
     (S := S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f))
     (hSE := hSE_map)
-    ?_
-  change Epi (S.g.val.app (op ((Opens.map f).obj ⊤)))
-  rw [h_top]
-  exact epi_app_top_of_subsingleton_sheafH1 hSE h₁
+    (hg := by
+      change Epi (S.g.val.app (op ((Opens.map f).obj ⊤)))
+      rw [h_top]
+      exact epi_app_top_of_subsingleton_sheafH1 hSE h₁)
 
 /-- General dimension shifting at `Sheaf.H` level: if `H^n(X₃)=0` and `H^(n+1)(X₂)=0`
     in a short exact sequence `0 → X₁ → X₂ → X₃ → 0`, then `H^(n+1)(X₁)=0`. -/
