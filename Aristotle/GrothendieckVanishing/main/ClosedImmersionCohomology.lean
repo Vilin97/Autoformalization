@@ -243,15 +243,31 @@ noncomputable def PushforwardHIso
           AddCommGrpCat.of (Sheaf.H S.X₃ (m + 1)) ≅
             AddCommGrpCat.of (Sheaf.H G' (m + 2)) := by
         simpa [S] using
-          sheafH_extClassIso_of_subsingleton_middle ip.shortExact_shortComplex (m + 1)
-            (Ext.subsingleton_of_injective _ _ m)
-            (Ext.subsingleton_of_injective _ _ (m + 1))
+          sheafH_extClassIso_of_subsingleton_middle_presheaf
+            S.X₁.cond S.X₂.cond S.X₃.cond
+            (f := S.f.val) (g := S.g.val)
+            (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+            (by simpa [S] using ip.shortExact_shortComplex)
+            (m + 1)
+            (by simpa [S] using
+              (Ext.subsingleton_of_injective _ _ m : Subsingleton (Sheaf.H S.X₂ (m + 1))))
+            (by simpa [S] using
+              (Ext.subsingleton_of_injective _ _ (m + 1) :
+                Subsingleton (Sheaf.H S.X₂ (m + 2))))
       let hShift_tgt :
           AddCommGrpCat.of (Sheaf.H SX.X₃ (m + 1)) ≅
-            AddCommGrpCat.of (Sheaf.H SX.X₁ (m + 2)) :=
-        sheafH_extClassIso_of_subsingleton_middle hSE_X (m + 1)
-          (inferInstance : Subsingleton (Sheaf.H SX.X₂ (m + 1)))
-          (inferInstance : Subsingleton (Sheaf.H SX.X₂ (m + 2)))
+            AddCommGrpCat.of (Sheaf.H SX.X₁ (m + 2)) := by
+        simpa [SX] using
+          sheafH_extClassIso_of_subsingleton_middle_presheaf
+            SX.X₁.cond SX.X₂.cond SX.X₃.cond
+            (f := SX.f.val) (g := SX.g.val)
+            (show SX.f.val ≫ SX.g.val = 0 from congrArg Sheaf.Hom.val SX.zero)
+            (by simpa [SX] using hSE_X)
+            (m + 1)
+            (by simpa [SX] using
+              (inferInstance : Subsingleton (Sheaf.H SX.X₂ (m + 1))))
+            (by simpa [SX] using
+              (inferInstance : Subsingleton (Sheaf.H SX.X₂ (m + 2))))
       exact hShift_src.symm ≪≫ ih_push S.X₃ ≪≫ hShift_tgt
 
 theorem PushforwardHVanishing
