@@ -53,20 +53,6 @@ theorem eq_univ_of_topologicalKrullDim_nonpos [IrreducibleSpace X]
 end IrreducibleCloseds
 end TopologicalSpace
 
-/-- On an irreducible space with topologicalKrullDim ≤ 0, every irreducible closed set
-    equals the whole space. -/
-theorem irreducibleCloseds_unique_of_dim_zero {X : Type u} [TopologicalSpace X]
-    [IrreducibleSpace X] (hdim : topologicalKrullDim X ≤ 0)
-    (S : IrreducibleCloseds X) : (S : Set X) = Set.univ :=
-  S.eq_univ_of_topologicalKrullDim_nonpos hdim
-
-/-- On an irreducible space of dimension 0, every point is dense. -/
-theorem closure_singleton_eq_univ_of_dim_zero {X : Type u} [TopologicalSpace X]
-    [IrreducibleSpace X] (hdim : topologicalKrullDim X ≤ 0)
-    (x : X) : closure ({x} : Set X) = Set.univ :=
-  TopologicalSpace.IrreducibleCloseds.eq_univ_of_topologicalKrullDim_nonpos
-    (X := X) ⟨closure {x}, isIrreducible_singleton.closure, isClosed_closure⟩ hdim
-
 /-- On an irreducible space of dimension ≤ 0, the only opens are ⊥ and ⊤.
     Every point is dense, so any nonempty open contains every point. -/
 theorem opens_eq_bot_or_top_of_irreducibleSpace_dim_zero
@@ -75,7 +61,10 @@ theorem opens_eq_bot_or_top_of_irreducibleSpace_dim_zero
     U = ⊥ ∨ U = ⊤ := by
   by_cases hne : (U : Set X).Nonempty
   · right; ext x; refine ⟨fun _ => trivial, fun _ => by_contra fun hx => ?_⟩
-    have := closure_singleton_eq_univ_of_dim_zero hdim x ▸
+    have hclosure : closure ({x} : Set X) = Set.univ :=
+      TopologicalSpace.IrreducibleCloseds.eq_univ_of_topologicalKrullDim_nonpos
+        (X := X) ⟨closure {x}, isIrreducible_singleton.closure, isClosed_closure⟩ hdim
+    have := hclosure ▸
       closure_minimal (Set.singleton_subset_iff.mpr hx) U.isOpen.isClosed_compl
     exact this (Set.mem_univ hne.some) hne.some_mem
   · exact Or.inl (Opens.ext (Set.not_nonempty_iff_eq_empty.mp hne))
