@@ -42,6 +42,11 @@ instance (X : TopCat.{u}) : IsGrothendieckAbelian.{u} (TopCat.Sheaf AddCommGrpCa
 instance {C : Type*} [Category C] {D : Type*} [Category D] [Preadditive D] :
     (Functor.const Cᵒᵖ : D ⥤ Cᵒᵖ ⥤ D).Additive where
 
+instance {C : Type*} [Category C] [Preadditive C] {X : TopCat.{u}} :
+    Preadditive (TopCat.Presheaf C X) := by
+  delta TopCat.Presheaf
+  infer_instance
+
 instance {X : TopCat.{u}} :
     (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive :=
   inferInstanceAs ((Functor.const (Opens X)ᵒᵖ ⋙
@@ -76,37 +81,55 @@ statement that can be attacked independently.
 class IsFlasqueSheaf {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X) : Prop where
   epi_map : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op)
 
+private def sheafShortComplexOfPresheaf {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0) :
+    ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+  ShortComplex.mk
+    (Sheaf.Hom.mk f : (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶ ⟨F₂, h₂⟩)
+    (Sheaf.Hom.mk g : (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶ ⟨F₃, h₃⟩)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hfg)
+
+@[simp] private lemma sheafShortComplexOfPresheaf_f_val {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    {h₁ : F₁.IsSheaf} {h₂ : F₂.IsSheaf} {h₃ : F₃.IsSheaf}
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} {hfg : f ≫ g = 0} :
+    (sheafShortComplexOfPresheaf h₁ h₂ h₃ (f := f) (g := g) hfg).f.val = f := rfl
+
+@[simp] private lemma sheafShortComplexOfPresheaf_g_val {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    {h₁ : F₁.IsSheaf} {h₂ : F₂.IsSheaf} {h₃ : F₃.IsSheaf}
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} {hfg : f ≫ g = 0} :
+    (sheafShortComplexOfPresheaf h₁ h₂ h₃ (f := f) (g := g) hfg).g.val = g := rfl
+
+private lemma shortComplex_val_zero {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} :
+    S.f.val ≫ S.g.val = (0 : S.X₁.val ⟶ S.X₃.val) :=
+  congrArg Sheaf.Hom.val S.zero
+
+private lemma sheafShortComplexOfPresheaf_shortExact_of_shortExact {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) :
+    (sheafShortComplexOfPresheaf S.X₁.cond S.X₂.cond S.X₃.cond
+      (f := S.f.val) (g := S.g.val) (shortComplex_val_zero (S := S))).ShortExact := by
+  simpa [sheafShortComplexOfPresheaf] using hS
+
 -- For a SES of sheafified presheaves, the evaluated sequence at V is exact:
 -- if g_V(x) = 0, then x is in the image of f_V.
 lemma sections_exact_of_shortExact_presheaf {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃}
-    (hfg : (let F₁sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₁, h₁⟩
-      let F₂sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₂, h₂⟩
-      let F₃sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₃, h₃⟩
-      let fsh : F₁sh ⟶ F₂sh := Sheaf.Hom.mk f
-      let gsh : F₂sh ⟶ F₃sh := Sheaf.Hom.mk g
-      fsh ≫ gsh = 0))
-    (hS : (let F₁sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₁, h₁⟩
-      let F₂sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₂, h₂⟩
-      let F₃sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₃, h₃⟩
-      let fsh : F₁sh ⟶ F₂sh := Sheaf.Hom.mk f
-      let gsh : F₂sh ⟶ F₃sh := Sheaf.Hom.mk g
-      let Ssh : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk fsh gsh hfg
-      Ssh.ShortExact))
+    (hfg : f ≫ g = 0)
+    (hS : (sheafShortComplexOfPresheaf h₁ h₂ h₃ (f := f) (g := g) hfg).ShortExact)
     (V : Opens X) (x : F₂.obj (op V))
     (hx : ConcreteCategory.hom (g.app (op V)) x = 0) :
     ∃ a : F₁.obj (op V),
       ConcreteCategory.hom (f.app (op V)) a = x := by
-  let F₁sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₁, h₁⟩
-  let F₂sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₂, h₂⟩
-  let F₃sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₃, h₃⟩
-  let fsh : F₁sh ⟶ F₂sh := Sheaf.Hom.mk f
-  let gsh : F₂sh ⟶ F₃sh := Sheaf.Hom.mk g
-  let Ssh : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk fsh gsh hfg
-  have hSsh : Ssh.ShortExact := by
-    simpa [F₁sh, F₂sh, F₃sh, fsh, gsh, Ssh] using hS
+  let Ssh := sheafShortComplexOfPresheaf h₁ h₂ h₃ (f := f) (g := g) hfg
+  have hSsh : Ssh.ShortExact := hS
   let sectV := (sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op V)
   haveI : sectV.PreservesZeroMorphisms :=
     inferInstanceAs ((sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)).PreservesZeroMorphisms)
@@ -114,7 +137,7 @@ lemma sections_exact_of_shortExact_presheaf {X : TopCat.{u}}
     show PreservesLimit _ (sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)) from inferInstance
   have hexact : (Ssh.map sectV).Exact :=
     hSsh.exact.map_of_mono_of_preservesKernel sectV hSsh.mono_f inferInstance
-  simpa [F₁sh, F₂sh, F₃sh, fsh, gsh, Ssh] using
+  simpa [Ssh, sheafShortComplexOfPresheaf] using
     (ShortComplex.ab_exact_iff _).mp hexact x hx
 
 -- For a SES of sheaves, the evaluated sequence at V is exact:
@@ -129,9 +152,8 @@ lemma sections_exact_of_shortExact {X : TopCat.{u}}
   simpa using sections_exact_of_shortExact_presheaf
     (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
     S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val) S.zero
-    (hS := by
-      simpa using hS)
+    (f := S.f.val) (g := S.g.val) (shortComplex_val_zero (S := S))
+    (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS)
     V x hx
 
 /-! ### Zero condition and mono for the evaluated short complex -/
@@ -220,19 +242,8 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃}
-    (hfg : (let F₁sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₁, h₁⟩
-      let F₂sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₂, h₂⟩
-      let F₃sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₃, h₃⟩
-      let fsh : F₁sh ⟶ F₂sh := Sheaf.Hom.mk f
-      let gsh : F₂sh ⟶ F₃sh := Sheaf.Hom.mk g
-      fsh ≫ gsh = 0))
-    (hS : (let F₁sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₁, h₁⟩
-      let F₂sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₂, h₂⟩
-      let F₃sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₃, h₃⟩
-      let fsh : F₁sh ⟶ F₂sh := Sheaf.Hom.mk f
-      let gsh : F₂sh ⟶ F₃sh := Sheaf.Hom.mk g
-      let Ssh : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk fsh gsh hfg
-      Ssh.ShortExact))
+    (hfg : f ≫ g = 0)
+    (hS : (sheafShortComplexOfPresheaf h₁ h₂ h₃ (f := f) (g := g) hfg).ShortExact)
     (hX₁_epi : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F₁.map i.op))
     {U : Opens X} {s : F₃.obj (op U)}
     {V₀ : Opens X} {t₀ : F₂.obj (op V₀)}
@@ -262,7 +273,7 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
   obtain ⟨ahat, hahat⟩ := (AddCommGrpCat.epi_iff_surjective _).mp
     (hX₁_epi (homOfLE inf_le_right : V₀ ⊓ W ⟶ W)) a
   have hfg_app : f.app (op W) ≫ g.app (op W) = 0 := by
-    simpa using congrArg (fun α => α.val.app (op W)) hfg
+    simpa using congrArg (fun α => α.app (op W)) hfg
   set t'' := t' + f.app (op W) ahat with ht''_def
   have hgt'' : g.app (op W) t'' = F₃.map (homOfLE hWU).op s := by
     simp only [ht''_def, map_add, show g.app (op W) (f.app (op W) ahat) = 0 from by
@@ -380,38 +391,20 @@ theorem epi_app_of_shortExact_of_epi_restrictions_presheaf {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃}
-    (hfg : (let F₁sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₁, h₁⟩
-      let F₂sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₂, h₂⟩
-      let F₃sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₃, h₃⟩
-      let fsh : F₁sh ⟶ F₂sh := Sheaf.Hom.mk f
-      let gsh : F₂sh ⟶ F₃sh := Sheaf.Hom.mk g
-      fsh ≫ gsh = 0))
-    (hS : (let F₁sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₁, h₁⟩
-      let F₂sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₂, h₂⟩
-      let F₃sh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F₃, h₃⟩
-      let fsh : F₁sh ⟶ F₂sh := Sheaf.Hom.mk f
-      let gsh : F₂sh ⟶ F₃sh := Sheaf.Hom.mk g
-      let Ssh : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk fsh gsh hfg
-      Ssh.ShortExact))
+    (hfg : f ≫ g = 0)
+    (hS : (sheafShortComplexOfPresheaf h₁ h₂ h₃ (f := f) (g := g) hfg).ShortExact)
     (hX₁_epi : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F₁.map i.op))
     (U : Opens X) :
     Epi (g.app (op U)) := by
   rw [AddCommGrpCat.epi_iff_surjective]
   intro s
-  have hShortExact :
-      (ShortComplex.mk
-        (Sheaf.Hom.mk f : (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶ ⟨F₂, h₂⟩)
-        (Sheaf.Hom.mk g : (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶ ⟨F₃, h₃⟩)
-        (by simpa using hfg)).ShortExact := by
-    simpa using hS
-  haveI : Epi
-      (Sheaf.Hom.mk g : (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶ ⟨F₃, h₃⟩) := by
-    simpa using hShortExact.epi_g
+  let Ssh := sheafShortComplexOfPresheaf h₁ h₂ h₃ (f := f) (g := g) hfg
+  have hSsh : Ssh.ShortExact := hS
+  haveI : Epi Ssh.g := by
+    simpa [Ssh] using hSsh.epi_g
   have hls : TopCat.Presheaf.IsLocallySurjective g := by
-    simpa using
-      (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u}
-        (Sheaf.Hom.mk g : (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶ ⟨F₃, h₃⟩)).mpr
-        inferInstance
+    simpa [Ssh] using
+      (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} Ssh.g).mpr inferInstance
   obtain ⟨⟨V₀, t₀⟩, ⟨hV₀U, ht₀⟩, hmax⟩ :=
     @zorn_le₀ _ (sigmaPreorder (F₂ := F₂)) {p | IsPartialLift (F₃ := F₃) (g := g) U s p}
       (fun c hcP hchain =>
@@ -433,9 +426,8 @@ theorem epi_app_of_shortExact_of_epi_restrictions {X : TopCat.{u}}
   simpa using epi_app_of_shortExact_of_epi_restrictions_presheaf
     (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
     S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val) S.zero
-    (hS := by
-      simpa using hS)
+    (f := S.f.val) (g := S.g.val) (shortComplex_val_zero (S := S))
+    (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS)
     hX₁_epi U
 
 -- Zorn argument for surjectivity of sections (Nugent, PR #35790).
