@@ -21,6 +21,8 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `sheafH_subsingleton_of_isZero_presheaf`: presheaf-boundary wrapper for the same fact
 * `stalk_zero_of_ses_g_iso`: stalk vanishing from SES with iso on `g`
 * `stalk_zero_of_shortExact_kernel`: stalk vanishing from SES kernel
+* `sheafH_exists_preimage_extClass_presheaf`: presheaf-boundary wrapper for lifting
+  cohomology classes through the connecting morphism
 * `sheafH0EquivSections`: H^0(F) ≃+ F(⊤)
 * `sheafH0EquivSections_presheaf`: presheaf-boundary wrapper for `H^0(F) ≃+ F(⊤)`
 * `sheafH0EquivSections_natural`: naturality of the above
@@ -203,6 +205,43 @@ theorem sheafH_exists_preimage_extClass {X : TopCat.{u}}
     ∃ y : Sheaf.H S.X₃ n, y.comp hS.extClass rfl = x := by
   obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₁ _ hS x (@Subsingleton.elim _ h₂ _ _) rfl
   exact ⟨y, hy⟩
+
+/-- Presheaf-boundary wrapper for `sheafH_exists_preimage_extClass`: if
+`0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves and
+`H^(n+1)(F₂)` is subsingleton, then every `H^(n+1)(F₁)` class comes from some `H^n(F₃)`
+class via the connecting morphism. -/
+theorem sheafH_exists_preimage_extClass_presheaf {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
+    (hS : (ShortComplex.mk
+      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f)
+      (Sheaf.Hom.mk g)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg)).ShortExact)
+    (n : ℕ)
+    (h₂H : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)))
+    (x : Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)) :
+    ∃ y : Sheaf.H ((⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n,
+      y.comp hS.extClass rfl = x := by
+  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
+    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (Sheaf.Hom.mk f)
+    (Sheaf.Hom.mk g)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hfg)
+  have hS' : S.ShortExact := by
+    simpa [S] using hS
+  have h₂' : Subsingleton (Sheaf.H S.X₂ (n + 1)) := by
+    simpa [S] using h₂H
+  simpa [S] using sheafH_exists_preimage_extClass (S := S) hS' n h₂' x
 
 theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
     {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
