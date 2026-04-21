@@ -38,6 +38,8 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `sheafH_subsingleton_H1_via_epi_app_top_presheaf`: presheaf-boundary H^1 vanishing via
   surjective top sections
 * `sheafH_subsingleton_H1_via_epi_app_top`: sheaf-level wrapper for the same fact
+* `sheafH_subsingleton_H1_of_injective_of_epi_app_top_presheaf`: presheaf-boundary
+  injective-middle-term `H¹` vanishing
 * `sheafH_subsingleton_H1_of_flasque`: flasque sheaves have vanishing `H¹`
 * `sheafH_subsingleton_H1_of_flasque_presheaf`: presheaf-boundary wrapper for the same fact
 * `sheafH_subsingleton_H1_of_flasque_of_epi_app_top_presheaf`: presheaf-boundary
@@ -618,6 +620,31 @@ theorem sheafH_subsingleton_H1_via_epi_app_top {X : TopCat.{u}}
     (by simpa using h₂)
     (by simpa using hg)
 
+/-- Presheaf-boundary `H¹` vanishing criterion with injective middle term:
+    if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves,
+    `⟨F₂, h₂⟩` is injective, and `g.app(⊤)` is epi, then `H¹(F₁)=0`. -/
+theorem sheafH_subsingleton_H1_of_injective_of_epi_app_top_presheaf {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
+    (hSE : (ShortComplex.mk
+      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f)
+      (Sheaf.Hom.mk g)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg)).ShortExact)
+    [Injective ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))]
+    (hg : Epi (g.app (op ⊤))) :
+    Subsingleton (Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1) := by
+  simpa using sheafH_subsingleton_H1_via_epi_app_top_presheaf
+    (F₁ := F₁) (F₂ := F₂) (F₃ := F₃)
+    h₁ h₂ h₃ hfg hSE
+    (Ext.subsingleton_of_injective _ _ 0)
+    hg
+
 /-- Sheaf-level `H¹` vanishing criterion with injective middle term:
     if `X₂` is injective and `g.app(⊤)` is epi in a short exact sequence
     `0 → X₁ → X₂ → X₃ → 0`, then `H¹(X₁)=0`. -/
@@ -625,8 +652,16 @@ theorem sheafH_subsingleton_H1_of_injective_of_epi_app_top {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
     [Injective S.X₂]
     (hg : Epi (S.g.val.app (op ⊤))) :
-    Subsingleton (Sheaf.H S.X₁ 1) :=
-  sheafH_subsingleton_H1_via_epi_app_top hSE (Ext.subsingleton_of_injective _ _ 0) hg
+    Subsingleton (Sheaf.H S.X₁ 1) := by
+  letI : Injective ((⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+    simpa using (inferInstance : Injective S.X₂)
+  simpa using sheafH_subsingleton_H1_of_injective_of_epi_app_top_presheaf
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+    (by simpa using hSE)
+    (by simpa using hg)
 
 /-- Flasque sheaves have vanishing `H¹`. This isolates the base case of flasque
     cohomological vanishing in the general sheaf-cohomology API. -/
