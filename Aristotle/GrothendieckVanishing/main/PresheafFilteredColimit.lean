@@ -1255,8 +1255,30 @@ theorem sheafH_filtered_colimit_surj_presheaf
     show ConcreteCategory.hom
         ((sheafCohomologyFunctor X (n + 1)).map ((csh.ι.app j₀))) x_j = x
     rw [show x_j = y_j.comp (hSE_j j₀).extClass rfl from rfl]
-    exact (sheafCohomologyFunctor_map_extClass_of_map_eq (hSE_j j₀) hSE
-      (sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j₀) n hy_j).trans hy
+    exact (sheafCohomologyFunctor_map_extClass_of_map_eq_presheaf
+      (h₁₁ := (Ysh.obj j₀).cond)
+      (h₁₂ := ((sheafH_filtered_colimit_succ_Inj Ysh).obj j₀).cond)
+      (h₁₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).cond)
+      (h₂₁ := csh.pt.cond)
+      (h₂₂ := (sheafH_filtered_colimit_succ_injCocone Ysh).pt.cond)
+      (h₂₃ := qCocone.pt.cond)
+      (f₁ := ((sheafH_filtered_colimit_succ_eta Ysh).app j₀).val)
+      (g₁ := (cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).val)
+      (sheafH_filtered_colimit_succ_stage_hfg (Y' := Ysh) j₀)
+      (f₂ := ι'.val)
+      (g₂ := (cokernel.π ι').val)
+      (sheafH_filtered_colimit_succ_iota_hfg (Y' := Ysh) csh hcsh)
+      (hSE_j j₀) hSE
+      (τ₁ := (csh.ι.app j₀).val)
+      (τ₂ := ((sheafH_filtered_colimit_succ_injCocone Ysh).ι.app j₀).val)
+      (τ₃ := (qCocone.ι.app j₀).val)
+      (by
+        simpa using congrArg Sheaf.Hom.val
+          ((sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j₀).comm₁₂))
+      (by
+        simpa using congrArg Sheaf.Hom.val
+          ((sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j₀).comm₂₃))
+      n hy_j).trans hy
 
 /-- **Sheaf cohomology commutes with filtered colimits (surjectivity)** on Noetherian spaces.
     Every element of `H^n(colim F_j)` comes from some `H^n(F_j)` via the canonical map.

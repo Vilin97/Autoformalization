@@ -182,19 +182,98 @@ end ExtDimShift
 
 /-! ## Stalks and zero sheaves -/
 
+/-- Presheaf-boundary naturality of the connecting map on sheaf cohomology for a morphism
+    of short exact sequences of presheaves. This packages `extClass_naturality` together
+    with the two associativity rewrites needed to move between nested `comp` expressions
+    and composition with the connecting class. -/
+theorem sheafH_comp_extClass_naturality_presheaf {X : TopCat.{u}}
+    {F₁₁ F₁₂ F₁₃ F₂₁ F₂₂ F₂₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁₁ : F₁₁.IsSheaf) (h₁₂ : F₁₂.IsSheaf) (h₁₃ : F₁₃.IsSheaf)
+    (h₂₁ : F₂₁.IsSheaf) (h₂₂ : F₂₂.IsSheaf) (h₂₃ : F₂₃.IsSheaf)
+    {f₁ : F₁₁ ⟶ F₁₂} {g₁ : F₁₂ ⟶ F₁₃} (hfg₁ : f₁ ≫ g₁ = 0)
+    {f₂ : F₂₁ ⟶ F₂₂} {g₂ : F₂₂ ⟶ F₂₃} (hfg₂ : f₂ ≫ g₂ = 0)
+    (hS₁ : (ShortComplex.mk
+      (X₁ := (⟨F₁₁, h₁₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f₁)
+      (Sheaf.Hom.mk g₁)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg₁)).ShortExact)
+    (hS₂ : (ShortComplex.mk
+      (X₁ := (⟨F₂₁, h₂₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₂₃, h₂₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f₂)
+      (Sheaf.Hom.mk g₂)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg₂)).ShortExact)
+    {τ₁ : F₁₁ ⟶ F₂₁} {τ₂ : F₁₂ ⟶ F₂₂} {τ₃ : F₁₃ ⟶ F₂₃}
+    (hτ₁₂ : τ₁ ≫ f₂ = f₁ ≫ τ₂)
+    (hτ₂₃ : τ₂ ≫ g₂ = g₁ ≫ τ₃)
+    (n : ℕ)
+    (y : Sheaf.H ((⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) :
+    (y.comp hS₁.extClass rfl).comp (Ext.mk₀ (Sheaf.Hom.mk τ₁)) (add_zero (n + 1)) =
+      (y.comp (Ext.mk₀ (Sheaf.Hom.mk τ₃)) (add_zero n)).comp hS₂.extClass rfl := by
+  let φ :
+      ShortComplex.mk
+        (X₁ := (⟨F₁₁, h₁₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (X₂ := (⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (X₃ := (⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (Sheaf.Hom.mk f₁)
+        (Sheaf.Hom.mk g₁)
+        (by
+          apply Sheaf.Hom.ext
+          simpa using hfg₁) ⟶
+      ShortComplex.mk
+        (X₁ := (⟨F₂₁, h₂₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (X₂ := (⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (X₃ := (⟨F₂₃, h₂₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (Sheaf.Hom.mk f₂)
+        (Sheaf.Hom.mk g₂)
+        (by
+          apply Sheaf.Hom.ext
+          simpa using hfg₂) := ShortComplex.homMk
+    (Sheaf.Hom.mk τ₁)
+    (Sheaf.Hom.mk τ₂)
+    (Sheaf.Hom.mk τ₃)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hτ₁₂)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hτ₂₃)
+  have hcomp :
+      y.comp (hS₁.extClass.comp (Ext.mk₀ (Sheaf.Hom.mk τ₁)) (add_zero 1)) rfl =
+        y.comp ((Ext.mk₀ (Sheaf.Hom.mk τ₃)).comp hS₂.extClass (zero_add 1)) rfl := by
+    exact congrArg (fun t => y.comp t rfl) (extClass_naturality hS₁ hS₂ φ).symm
+  simpa [Ext.comp_assoc_of_third_deg_zero, Ext.comp_assoc_of_second_deg_zero] using hcomp
+
 /-- Naturality of the connecting map on sheaf cohomology for a morphism of short exact
-    sequences. This packages `extClass_naturality` together with the two associativity
-    rewrites needed to move between nested `comp` expressions and composition with the
-    connecting class. -/
+    sequences. -/
 theorem sheafH_comp_extClass_naturality {X : TopCat.{u}}
     {S₁ S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS₁ : S₁.ShortExact) (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂) (n : ℕ)
     (y : Sheaf.H S₁.X₃ n) :
     (y.comp hS₁.extClass rfl).comp (Ext.mk₀ φ.τ₁) (add_zero (n + 1)) =
       (y.comp (Ext.mk₀ φ.τ₃) (add_zero n)).comp hS₂.extClass rfl := by
-  rw [Ext.comp_assoc_of_third_deg_zero]
-  rw [← extClass_naturality hS₁ hS₂ φ]
-  rw [← Ext.comp_assoc_of_second_deg_zero]
+  simpa using sheafH_comp_extClass_naturality_presheaf
+    (F₁₁ := S₁.X₁.val) (F₁₂ := S₁.X₂.val) (F₁₃ := S₁.X₃.val)
+    (F₂₁ := S₂.X₁.val) (F₂₂ := S₂.X₂.val) (F₂₃ := S₂.X₃.val)
+    S₁.X₁.cond S₁.X₂.cond S₁.X₃.cond
+    S₂.X₁.cond S₂.X₂.cond S₂.X₃.cond
+    (f₁ := S₁.f.val) (g₁ := S₁.g.val)
+    (show S₁.f.val ≫ S₁.g.val = 0 from congrArg Sheaf.Hom.val S₁.zero)
+    (f₂ := S₂.f.val) (g₂ := S₂.g.val)
+    (show S₂.f.val ≫ S₂.g.val = 0 from congrArg Sheaf.Hom.val S₂.zero)
+    (by simpa using hS₁)
+    (by simpa using hS₂)
+    (τ₁ := φ.τ₁.val) (τ₂ := φ.τ₂.val) (τ₃ := φ.τ₃.val)
+    (by simpa using congrArg Sheaf.Hom.val φ.comm₁₂)
+    (by simpa using congrArg Sheaf.Hom.val φ.comm₂₃)
+    n y
 
 /-- In a short exact sequence of sheaves, if `H^(n+1)(X₂)` is subsingleton then every
     `H^(n+1)(X₁)` class lifts along the connecting morphism from some `H^n(X₃)` class. -/
@@ -1330,34 +1409,6 @@ theorem sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural {X : TopCat
     (sheafH1_cokernel_iso_of_subsingleton_middle_presheaf
       h₁₁ h₁₂ h₁₃ hfg₁ hS₁ h₁₂H).hom ≫
       (sheafCohomologyFunctor X 1).map (Sheaf.Hom.mk τ₁) := by
-  let φ :
-      ShortComplex.mk
-        (X₁ := (⟨F₁₁, h₁₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-        (X₂ := (⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-        (X₃ := (⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-        (Sheaf.Hom.mk f₁)
-        (Sheaf.Hom.mk g₁)
-        (by
-          apply Sheaf.Hom.ext
-          simpa using hfg₁) ⟶
-      ShortComplex.mk
-        (X₁ := (⟨F₂₁, h₂₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-        (X₂ := (⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-        (X₃ := (⟨F₂₃, h₂₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-        (Sheaf.Hom.mk f₂)
-        (Sheaf.Hom.mk g₂)
-        (by
-          apply Sheaf.Hom.ext
-          simpa using hfg₂) := ShortComplex.homMk
-    (Sheaf.Hom.mk τ₁)
-    (Sheaf.Hom.mk τ₂)
-    (Sheaf.Hom.mk τ₃)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hτ₁₂)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hτ₂₃)
   apply (cancel_epi (cokernel.π (g₁.app (op ⊤)))).mp
   rw [cokernel.π_desc_assoc, Category.assoc]
   ext s
@@ -1388,8 +1439,9 @@ theorem sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural {X : TopCat
       ((((sheafH0EquivSections_presheaf h₁₃).symm s).comp hS₁.extClass rfl).comp
         (Ext.mk₀ (Sheaf.Hom.mk τ₁)) (add_zero 1))
   rw [← hs]
-  simpa [φ] using
-    (sheafH_comp_extClass_naturality hS₁ hS₂ φ 0
+  simpa using
+    (sheafH_comp_extClass_naturality_presheaf
+      h₁₁ h₁₂ h₁₃ h₂₁ h₂₂ h₂₃ hfg₁ hfg₂ hS₁ hS₂ hτ₁₂ hτ₂₃ 0
       ((sheafH0EquivSections_presheaf h₁₃).symm s)).symm
 
 /-- Sheaf-level wrapper for
@@ -1452,7 +1504,47 @@ noncomputable def sheafH0NatIsoSections {X : TopCat.{u}} :
       (sheafH0EquivSections F).symm x := rfl
 
 /-- Functor-level naturality of the connecting morphism on sheaf cohomology. This is the
-    `sheafCohomologyFunctor`-packaged form of `sheafH_comp_extClass_naturality`. -/
+    `sheafCohomologyFunctor`-packaged form of
+    `sheafH_comp_extClass_naturality_presheaf`. -/
+theorem sheafCohomologyFunctor_map_extClass_naturality_presheaf {X : TopCat.{u}}
+    {F₁₁ F₁₂ F₁₃ F₂₁ F₂₂ F₂₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁₁ : F₁₁.IsSheaf) (h₁₂ : F₁₂.IsSheaf) (h₁₃ : F₁₃.IsSheaf)
+    (h₂₁ : F₂₁.IsSheaf) (h₂₂ : F₂₂.IsSheaf) (h₂₃ : F₂₃.IsSheaf)
+    {f₁ : F₁₁ ⟶ F₁₂} {g₁ : F₁₂ ⟶ F₁₃} (hfg₁ : f₁ ≫ g₁ = 0)
+    {f₂ : F₂₁ ⟶ F₂₂} {g₂ : F₂₂ ⟶ F₂₃} (hfg₂ : f₂ ≫ g₂ = 0)
+    (hS₁ : (ShortComplex.mk
+      (X₁ := (⟨F₁₁, h₁₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f₁)
+      (Sheaf.Hom.mk g₁)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg₁)).ShortExact)
+    (hS₂ : (ShortComplex.mk
+      (X₁ := (⟨F₂₁, h₂₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₂₃, h₂₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f₂)
+      (Sheaf.Hom.mk g₂)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg₂)).ShortExact)
+    {τ₁ : F₁₁ ⟶ F₂₁} {τ₂ : F₁₂ ⟶ F₂₂} {τ₃ : F₁₃ ⟶ F₂₃}
+    (hτ₁₂ : τ₁ ≫ f₂ = f₁ ≫ τ₂)
+    (hτ₂₃ : τ₂ ≫ g₂ = g₁ ≫ τ₃)
+    (n : ℕ)
+    (y : Sheaf.H ((⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) :
+    ConcreteCategory.hom
+        ((sheafCohomologyFunctor X (n + 1)).map (Sheaf.Hom.mk τ₁))
+      (y.comp hS₁.extClass rfl) =
+    (ConcreteCategory.hom ((sheafCohomologyFunctor X n).map (Sheaf.Hom.mk τ₃)) y).comp
+      hS₂.extClass rfl := by
+  rw [sheafCohomologyFunctor_map_apply, sheafCohomologyFunctor_map_apply]
+  exact sheafH_comp_extClass_naturality_presheaf
+    h₁₁ h₁₂ h₁₃ h₂₁ h₂₂ h₂₃ hfg₁ hfg₂ hS₁ hS₂ hτ₁₂ hτ₂₃ n y
+
+/-- Functor-level naturality of the connecting morphism on sheaf cohomology. -/
 theorem sheafCohomologyFunctor_map_extClass_naturality {X : TopCat.{u}}
     {S₁ S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS₁ : S₁.ShortExact) (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂) (n : ℕ)
@@ -1460,13 +1552,64 @@ theorem sheafCohomologyFunctor_map_extClass_naturality {X : TopCat.{u}}
     ConcreteCategory.hom ((sheafCohomologyFunctor X (n + 1)).map φ.τ₁)
       (y.comp hS₁.extClass rfl) =
     (ConcreteCategory.hom ((sheafCohomologyFunctor X n).map φ.τ₃) y).comp hS₂.extClass rfl := by
-  rw [sheafCohomologyFunctor_map_apply, sheafCohomologyFunctor_map_apply]
-  exact sheafH_comp_extClass_naturality hS₁ hS₂ φ n y
+  simpa using sheafCohomologyFunctor_map_extClass_naturality_presheaf
+    (F₁₁ := S₁.X₁.val) (F₁₂ := S₁.X₂.val) (F₁₃ := S₁.X₃.val)
+    (F₂₁ := S₂.X₁.val) (F₂₂ := S₂.X₂.val) (F₂₃ := S₂.X₃.val)
+    S₁.X₁.cond S₁.X₂.cond S₁.X₃.cond
+    S₂.X₁.cond S₂.X₂.cond S₂.X₃.cond
+    (f₁ := S₁.f.val) (g₁ := S₁.g.val)
+    (show S₁.f.val ≫ S₁.g.val = 0 from congrArg Sheaf.Hom.val S₁.zero)
+    (f₂ := S₂.f.val) (g₂ := S₂.g.val)
+    (show S₂.f.val ≫ S₂.g.val = 0 from congrArg Sheaf.Hom.val S₂.zero)
+    (by simpa using hS₁)
+    (by simpa using hS₂)
+    (τ₁ := φ.τ₁.val) (τ₂ := φ.τ₂.val) (τ₃ := φ.τ₃.val)
+    (by simpa using congrArg Sheaf.Hom.val φ.comm₁₂)
+    (by simpa using congrArg Sheaf.Hom.val φ.comm₂₃)
+    n y
 
 /-- If `y` maps to `z` on the `X₃` side of a morphism of short exact sequences, then the
     corresponding extension class of `y` maps to the extension class of `z` on the `X₁`
     side. This packages `sheafCohomologyFunctor_map_extClass_naturality` with the
     downstream rewrite by the known `X₃`-side equality. -/
+theorem sheafCohomologyFunctor_map_extClass_of_map_eq_presheaf {X : TopCat.{u}}
+    {F₁₁ F₁₂ F₁₃ F₂₁ F₂₂ F₂₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁₁ : F₁₁.IsSheaf) (h₁₂ : F₁₂.IsSheaf) (h₁₃ : F₁₃.IsSheaf)
+    (h₂₁ : F₂₁.IsSheaf) (h₂₂ : F₂₂.IsSheaf) (h₂₃ : F₂₃.IsSheaf)
+    {f₁ : F₁₁ ⟶ F₁₂} {g₁ : F₁₂ ⟶ F₁₃} (hfg₁ : f₁ ≫ g₁ = 0)
+    {f₂ : F₂₁ ⟶ F₂₂} {g₂ : F₂₂ ⟶ F₂₃} (hfg₂ : f₂ ≫ g₂ = 0)
+    (hS₁ : (ShortComplex.mk
+      (X₁ := (⟨F₁₁, h₁₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f₁)
+      (Sheaf.Hom.mk g₁)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg₁)).ShortExact)
+    (hS₂ : (ShortComplex.mk
+      (X₁ := (⟨F₂₁, h₂₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₂₃, h₂₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f₂)
+      (Sheaf.Hom.mk g₂)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg₂)).ShortExact)
+    {τ₁ : F₁₁ ⟶ F₂₁} {τ₂ : F₁₂ ⟶ F₂₂} {τ₃ : F₁₃ ⟶ F₂₃}
+    (hτ₁₂ : τ₁ ≫ f₂ = f₁ ≫ τ₂)
+    (hτ₂₃ : τ₂ ≫ g₂ = g₁ ≫ τ₃)
+    (n : ℕ)
+    {y : Sheaf.H ((⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n}
+    {z : Sheaf.H ((⟨F₂₃, h₂₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n}
+    (hy : ConcreteCategory.hom ((sheafCohomologyFunctor X n).map (Sheaf.Hom.mk τ₃)) y = z) :
+    ConcreteCategory.hom ((sheafCohomologyFunctor X (n + 1)).map (Sheaf.Hom.mk τ₁))
+      (y.comp hS₁.extClass rfl) =
+    z.comp hS₂.extClass rfl := by
+  rw [sheafCohomologyFunctor_map_extClass_naturality_presheaf
+    h₁₁ h₁₂ h₁₃ h₂₁ h₂₂ h₂₃ hfg₁ hfg₂ hS₁ hS₂ hτ₁₂ hτ₂₃ n y, hy]
+
+/-- Sheaf-level wrapper for `sheafCohomologyFunctor_map_extClass_of_map_eq_presheaf`. -/
 theorem sheafCohomologyFunctor_map_extClass_of_map_eq {X : TopCat.{u}}
     {S₁ S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS₁ : S₁.ShortExact) (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂) (n : ℕ)
@@ -1475,7 +1618,21 @@ theorem sheafCohomologyFunctor_map_extClass_of_map_eq {X : TopCat.{u}}
     ConcreteCategory.hom ((sheafCohomologyFunctor X (n + 1)).map φ.τ₁)
       (y.comp hS₁.extClass rfl) =
     z.comp hS₂.extClass rfl := by
-  rw [sheafCohomologyFunctor_map_extClass_naturality hS₁ hS₂ φ n y, hy]
+  simpa using sheafCohomologyFunctor_map_extClass_of_map_eq_presheaf
+    (F₁₁ := S₁.X₁.val) (F₁₂ := S₁.X₂.val) (F₁₃ := S₁.X₃.val)
+    (F₂₁ := S₂.X₁.val) (F₂₂ := S₂.X₂.val) (F₂₃ := S₂.X₃.val)
+    S₁.X₁.cond S₁.X₂.cond S₁.X₃.cond
+    S₂.X₁.cond S₂.X₂.cond S₂.X₃.cond
+    (f₁ := S₁.f.val) (g₁ := S₁.g.val)
+    (show S₁.f.val ≫ S₁.g.val = 0 from congrArg Sheaf.Hom.val S₁.zero)
+    (f₂ := S₂.f.val) (g₂ := S₂.g.val)
+    (show S₂.f.val ≫ S₂.g.val = 0 from congrArg Sheaf.Hom.val S₂.zero)
+    (by simpa using hS₁)
+    (by simpa using hS₂)
+    (τ₁ := φ.τ₁.val) (τ₂ := φ.τ₂.val) (τ₃ := φ.τ₃.val)
+    (by simpa using congrArg Sheaf.Hom.val φ.comm₁₂)
+    (by simpa using congrArg Sheaf.Hom.val φ.comm₂₃)
+    n hy
 
 /-- The sheaf-cohomology connecting morphism as an additive equivalence, assuming the middle
     sheaf cohomology groups in degrees `n` and `n + 1` are subsingleton. -/
@@ -1644,49 +1801,11 @@ theorem sheafH_extClassIso_of_subsingleton_middle_presheaf_natural {X : TopCat.{
       (sheafCohomologyFunctor X n).map (Sheaf.Hom.mk τ₃) ≫
         (sheafH_extClassIso_of_subsingleton_middle_presheaf
           h₂₁ h₂₂ h₂₃ hfg₂ hS₂ n h₂₂n h₂₂succ).hom := by
-  let S₁ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
-    (X₁ := (⟨F₁₁, h₁₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₂ := (⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₃ := (⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (Sheaf.Hom.mk f₁)
-    (Sheaf.Hom.mk g₁)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hfg₁)
-  let S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
-    (X₁ := (⟨F₂₁, h₂₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₂ := (⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₃ := (⟨F₂₃, h₂₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (Sheaf.Hom.mk f₂)
-    (Sheaf.Hom.mk g₂)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hfg₂)
-  let φ : S₁ ⟶ S₂ := ShortComplex.homMk
-    (Sheaf.Hom.mk τ₁)
-    (Sheaf.Hom.mk τ₂)
-    (Sheaf.Hom.mk τ₃)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hτ₁₂)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hτ₂₃)
-  have hS₁' : S₁.ShortExact := by
-    simpa [S₁] using hS₁
-  have hS₂' : S₂.ShortExact := by
-    simpa [S₂] using hS₂
-  have h₁₂n' : Subsingleton (Sheaf.H S₁.X₂ n) := by
-    simpa [S₁] using h₁₂n
-  have h₁₂succ' : Subsingleton (Sheaf.H S₁.X₂ (n + 1)) := by
-    simpa [S₁] using h₁₂succ
-  have h₂₂n' : Subsingleton (Sheaf.H S₂.X₂ n) := by
-    simpa [S₂] using h₂₂n
-  have h₂₂succ' : Subsingleton (Sheaf.H S₂.X₂ (n + 1)) := by
-    simpa [S₂] using h₂₂succ
   ext y
-  simpa [S₁, S₂, φ, ConcreteCategory.comp_apply] using
-    (sheafCohomologyFunctor_map_extClass_naturality hS₁' hS₂' φ n y)
+  simpa [ConcreteCategory.comp_apply,
+    sheafH_extClassIso_of_subsingleton_middle_presheaf_hom_apply] using
+    (sheafCohomologyFunctor_map_extClass_naturality_presheaf
+      h₁₁ h₁₂ h₁₃ h₂₁ h₂₂ h₂₃ hfg₁ hfg₂ hS₁ hS₂ hτ₁₂ hτ₂₃ n y)
 
 /-- Sheaf-level wrapper for
 `sheafH_extClassIso_of_subsingleton_middle_presheaf_natural`. -/
