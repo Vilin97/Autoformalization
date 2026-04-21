@@ -1706,11 +1706,24 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso
         cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫ qCocone.ι.app j =
           (sheafH_filtered_colimit_succ_injCocone Y').ι.app j ≫ cokernel.π ι' := by
       exact cokernel.π_desc _ _ _
-    exact congrArg
+    exact (congrArg
       (fun β :
         ((sheafH_filtered_colimit_succ_Inj Y').obj j) ⟶ qCocone.pt =>
           β.val.app (op ⊤))
-      hπj
+      hπj)
+  let globalIso :
+      cokernel (sectionsFunctor.map (cokernel.π ι')) ≅
+        AddCommGrpCat.of (Sheaf.H c'.pt 1) := by
+    simpa [sectionsFunctor] using
+      (sheafH1_cokernel_iso_of_subsingleton_middle_presheaf
+        (h₁ := c'.pt.cond)
+        (h₂ := (sheafH_filtered_colimit_succ_injCocone Y').pt.cond)
+        (h₃ := qCocone.pt.cond)
+        (f := ι'.val)
+        (g := (cokernel.π ι').val)
+        (sheafH_filtered_colimit_succ_iota_hfg (Y' := Y') c' hc')
+        (sheafH_filtered_colimit_succ_shortExact Y' c' hc')
+        h_colim)
   exact
     (HasColimit.isoOfNatIso (sheafH_filtered_colimit_h1_stageNatIso Y' h_mid)).symm ≪≫
       HasColimit.isoOfNatIso (sheafH_filtered_colimit_h1_cokernelFunctorIso Y') ≪≫
@@ -1719,8 +1732,7 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso
       (cokernel.mapIso (f := (colim (J := J') (C := AddCommGrpCat.{u})).map
           (sheafH_filtered_colimit_h1_gTopNat Y'))
         (sectionsFunctor.map (cokernel.π ι')) eInj eQ hsq) ≪≫
-      sheafH1_cokernel_iso_of_subsingleton_middle
-        (sheafH_filtered_colimit_succ_shortExact Y' c' hc') h_colim
+      globalIso
 
 @[simp] theorem sheafH_filtered_colimit_comparison_one_iso_hom
     {X : TopCat.{u}} [NoetherianSpace X]
@@ -1832,11 +1844,11 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso
           cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫ qCocone.ι.app j =
             (sheafH_filtered_colimit_succ_injCocone Y').ι.app j ≫ cokernel.π ι' := by
         exact cokernel.π_desc _ _ _
-      exact congrArg
+      exact (congrArg
         (fun β :
           ((sheafH_filtered_colimit_succ_Inj Y').obj j) ⟶ qCocone.pt =>
             β.val.app (op ⊤))
-        hπj)
+        hπj))
   let globalIso :
       cokernel (sectionsFunctor.map (cokernel.π ι')) ≅
         AddCommGrpCat.of (Sheaf.H c'.pt 1) := by
