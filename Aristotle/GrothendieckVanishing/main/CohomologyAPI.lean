@@ -13,6 +13,7 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `extClass_naturality`: naturality of the extension class
 * `subsingleton_H1_via_surj`: H^1 vanishing via Ext^0 surjectivity
 * `subsingleton_sheafH_of_shortExact_middle`: LES consequence for Sheaf.H
+* `subsingleton_sheafH_of_shortExact_middle_presheaf`: presheaf-boundary middle-term wrapper
 * `sheafH_subsingleton_of_isEmpty`: empty-space vanishing
 * `sheafH_subsingleton_of_isEmpty_presheaf`: presheaf-boundary empty-space vanishing
 * `sheaf_isZero_of_zero_stalks`: zero stalks imply zero sheaf
@@ -646,6 +647,35 @@ theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
   obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ _ hS b
     (@Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _)
   rw [← hc, ← hd, @Subsingleton.elim _ h₁ c d]
+
+/-- Presheaf-boundary wrapper for `subsingleton_sheafH_of_shortExact_middle`: if
+`f : F ⟶ G` is mono between sheaf-valued presheaves, and the cohomology of `F`
+and of the cokernel sheaf of `Sheaf.Hom.mk f` are subsingleton in degree `n`,
+then so is the cohomology of `G`. -/
+theorem subsingleton_sheafH_of_shortExact_middle_presheaf {X : TopCat.{u}}
+    {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (hF : F.IsSheaf) (hG : G.IsSheaf)
+    (f : F ⟶ G) [Mono f] (n : ℕ)
+    (h₁ : Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
+    (h₃ : Subsingleton (Sheaf.H (cokernel (show
+      (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
+        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from
+          Sheaf.Hom.mk f)) n)) :
+    Subsingleton (Sheaf.H ((⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
+  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
+      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
+  haveI : Mono fsh := by
+    exact (Sheaf.Hom.mono_iff_presheaf_mono
+      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) fsh).2 inferInstance
+  let S := ShortComplex.mk fsh (cokernel.π fsh) (cokernel.condition fsh)
+  have hS : S.ShortExact := ShortComplex.ShortExact.mk'
+    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel fsh))
+    inferInstance inferInstance
+  have h₁' : Subsingleton (Sheaf.H S.X₁ n) := by
+    simpa [S] using h₁
+  have h₃' : Subsingleton (Sheaf.H S.X₃ n) := by
+    simpa [S, fsh] using h₃
+  simpa [S] using subsingleton_sheafH_of_shortExact_middle (S := S) hS n h₁' h₃'
 
 /-- On an empty space, all sheaf cohomology groups are subsingleton.
     Proof: when X is empty, all stalks are vacuously zero, so the sheaf is zero,
