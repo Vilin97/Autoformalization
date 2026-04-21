@@ -76,7 +76,7 @@ private theorem ReducibleVanishing'
       exact (e.subsingleton_congr).mp
         (ih_irred (TopCat.of Z) (G := GZ.val) GZ.cond
           (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z)
-          (lt_of_le_of_lt (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z) hn))
+          (topologicalKrullDim_subspace_lt_of_lt (X := (↑X : Type u)) Z hn))
     have hker : Subsingleton (Sheaf.H S.X₁ n) := by
       have hker' :
           Subsingleton
