@@ -1442,6 +1442,227 @@ theorem sheafH_filtered_colimit_comparison_sheafToPresheaf
       (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
       (hc_pt := c'.pt.cond) (n := n) (j := j))
 
+private noncomputable def sheafH_filtered_colimit_presheafCocone_isColimit
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    (c : Cocone Y) (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
+    IsColimit (sheafH_filtered_colimit_presheafCocone Y hY c hc_pt) := by
+  refine
+    { desc := fun s => ?_
+      fac := fun s j => ?_
+      uniq := fun s m hm => ?_ }
+  · let sVal : Cocone Y :=
+      { pt := s.pt.val
+        ι :=
+          { app := fun j => (s.ι.app j).val
+            naturality := fun _ _ f => congrArg Sheaf.Hom.val (s.ι.naturality f) } }
+    exact Sheaf.Hom.mk (hc.desc sVal)
+  · let sVal : Cocone Y :=
+      { pt := s.pt.val
+        ι :=
+          { app := fun j => (s.ι.app j).val
+            naturality := fun _ _ f => congrArg Sheaf.Hom.val (s.ι.naturality f) } }
+    exact Sheaf.Hom.ext (hc.fac sVal j)
+  · apply Sheaf.Hom.ext
+    let sVal : Cocone Y :=
+      { pt := s.pt.val
+        ι :=
+          { app := fun j => (s.ι.app j).val
+            naturality := fun _ _ f => congrArg Sheaf.Hom.val (s.ι.naturality f) } }
+    exact hc.hom_ext fun j => by
+      calc
+        c.ι.app j ≫ m.val = (s.ι.app j).val := congrArg Sheaf.Hom.val (hm j)
+        _ = c.ι.app j ≫ (hc.desc sVal) := (hc.fac sVal j).symm
+
+/-- Presheaf-boundary successor-step compatibility for the filtered-colimit comparison map:
+whenever the associated sheaf diagram and the colimit sheaf have vanishing injective-replacement
+cohomology in degrees `n` and `n + 1`, the degree-`n + 1` comparison is conjugate to the
+degree-`n` comparison for the quotient diagram. -/
+theorem sheafH_filtered_colimit_comparison_succ_compatibility_presheaf
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    [Zero (TopCat.Sheaf AddCommGrpCat.{u} X)]
+    (c : Cocone Y) (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
+    (n : ℕ)
+    (h_mid_n : ∀ j,
+      Subsingleton (Sheaf.H
+        ((sheafH_filtered_colimit_succ_Inj
+          (sheafH_filtered_colimit_presheafDiagram Y hY)).obj j) n))
+    (h_mid_succ : ∀ j,
+      Subsingleton (Sheaf.H
+        ((sheafH_filtered_colimit_succ_Inj
+          (sheafH_filtered_colimit_presheafDiagram Y hY)).obj j) (n + 1)))
+    (h_colim_n :
+      Subsingleton (Sheaf.H
+        (sheafH_filtered_colimit_succ_injCocone
+          (sheafH_filtered_colimit_presheafDiagram Y hY)).pt n))
+    (h_colim_succ :
+      Subsingleton (Sheaf.H
+        (sheafH_filtered_colimit_succ_injCocone
+          (sheafH_filtered_colimit_presheafDiagram Y hY)).pt (n + 1))) :
+    let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
+    let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
+    let hcsh := sheafH_filtered_colimit_presheafCocone_isColimit Y hY c hc hc_pt
+    (sheafH_filtered_colimit_succ_shiftDomainIso Ysh n h_mid_n h_mid_succ).hom ≫
+        sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt (n + 1) =
+      sheafH_filtered_colimit_comparison
+        (sheafH_filtered_colimit_succ_quotient Ysh) n
+        (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) ≫
+      (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
+        h_colim_n h_colim_succ).hom := by
+  let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
+  let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
+  let hcsh : IsColimit csh := sheafH_filtered_colimit_presheafCocone_isColimit Y hY c hc hc_pt
+  change
+    (sheafH_filtered_colimit_succ_shiftDomainIso Ysh n h_mid_n h_mid_succ).hom ≫
+        sheafH_filtered_colimit_comparison Ysh (n + 1) csh =
+      sheafH_filtered_colimit_comparison (sheafH_filtered_colimit_succ_quotient Ysh) n
+        (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) ≫
+      (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
+        h_colim_n h_colim_succ).hom
+  apply colimit.hom_ext
+  intro j
+  rw [show (sheafH_filtered_colimit_succ_shiftDomainIso Ysh n h_mid_n h_mid_succ).hom =
+      (HasColimit.isoOfNatIso (sheafH_filtered_colimit_succ_shiftNatIso Ysh n
+        h_mid_n h_mid_succ)).hom from rfl]
+  rw [HasColimit.isoOfNatIso_ι_hom_assoc]
+  rw [colimit_ι_sheafH_filtered_colimit_comparison]
+  have hqj := colimit_ι_sheafH_filtered_colimit_comparison
+    (X := X) (Y' := sheafH_filtered_colimit_succ_quotient Ysh) (n := n)
+    (c' := sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) j
+  have hqj_assoc :
+      (colimit.ι (sheafH_filtered_colimit_succ_quotient Ysh ⋙ sheafCohomologyFunctor X n) j ≫
+          sheafH_filtered_colimit_comparison (sheafH_filtered_colimit_succ_quotient Ysh) n
+            (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh)) ≫
+        (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
+          h_colim_n h_colim_succ).hom =
+      (sheafCohomologyFunctor X n).map
+          ((sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh).ι.app j) ≫
+        (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
+          h_colim_n h_colim_succ).hom := by
+    simpa [Category.assoc] using
+      congrArg
+        (fun t =>
+          t ≫ (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
+            h_colim_n h_colim_succ).hom) hqj
+  have hqj_assoc' :
+      colimit.ι (sheafH_filtered_colimit_succ_quotient Ysh ⋙ sheafCohomologyFunctor X n) j ≫
+          sheafH_filtered_colimit_comparison (sheafH_filtered_colimit_succ_quotient Ysh) n
+            (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) ≫
+        (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
+          h_colim_n h_colim_succ).hom =
+      (sheafCohomologyFunctor X n).map
+          ((sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh).ι.app j) ≫
+        (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
+          h_colim_n h_colim_succ).hom := by
+    exact hqj_assoc
+  rw [hqj_assoc']
+  change
+    (sheafH_extClassIso_of_subsingleton_middle_presheaf
+        (h₁ := (Ysh.obj j).cond)
+        (h₂ := ((sheafH_filtered_colimit_succ_Inj Ysh).obj j).cond)
+        (h₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j)).cond)
+        (f := ((sheafH_filtered_colimit_succ_eta Ysh).app j).val)
+        (g := (cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val)
+        (by
+          ext U
+          rename_i s
+          change AddCommGrpCat.Hom.hom
+              (((((sheafH_filtered_colimit_succ_eta Ysh).app j) ≫
+                    cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val).app
+                (op U)) s = 0
+          have happ :
+              (((sheafH_filtered_colimit_succ_eta Ysh).app j ≫
+                    cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val).app
+                (op U) =
+              NatTrans.app
+                (0 : (Ysh.obj j).val ⟶
+                  (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val) (op U) :=
+            NatTrans.congr_app
+              (congrArg (fun α => α.val)
+                (cokernel.condition ((sheafH_filtered_colimit_succ_eta Ysh).app j)))
+              (op U)
+          rw [happ]
+          simp)
+        (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Ysh) j) n
+        (h_mid_n j) (h_mid_succ j)).hom ≫
+      (sheafCohomologyFunctor X (n + 1)).map (csh.ι.app j) =
+    (sheafCohomologyFunctor X n).map
+        ((sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh).ι.app j) ≫
+      (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
+        h_colim_n h_colim_succ).hom
+  simpa [sheafH_filtered_colimit_succ_shiftNatIso,
+    sheafH_filtered_colimit_succ_shiftCodomainIso] using
+    (sheafH_extClassIso_of_subsingleton_middle_presheaf_natural
+      (h₁₁ := (Ysh.obj j).cond)
+      (h₁₂ := ((sheafH_filtered_colimit_succ_Inj Ysh).obj j).cond)
+      (h₁₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j)).cond)
+      (h₂₁ := csh.pt.cond)
+      (h₂₂ := (sheafH_filtered_colimit_succ_injCocone Ysh).pt.cond)
+      (h₂₃ := (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh).pt.cond)
+      (f₁ := ((sheafH_filtered_colimit_succ_eta Ysh).app j).val)
+      (g₁ := (cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val)
+      (by
+        ext U
+        rename_i s
+        change AddCommGrpCat.Hom.hom
+            (((((sheafH_filtered_colimit_succ_eta Ysh).app j) ≫
+                  cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val).app
+              (op U)) s = 0
+        have happ :
+            (((sheafH_filtered_colimit_succ_eta Ysh).app j ≫
+                  cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val).app
+              (op U) =
+            NatTrans.app
+              (0 : (Ysh.obj j).val ⟶
+                (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val) (op U) :=
+          NatTrans.congr_app
+            (congrArg (fun α => α.val)
+              (cokernel.condition ((sheafH_filtered_colimit_succ_eta Ysh).app j)))
+            (op U)
+        rw [happ]
+        simp)
+      (f₂ := (sheafH_filtered_colimit_succ_iota Ysh csh hcsh).val)
+      (g₂ := (cokernel.π (sheafH_filtered_colimit_succ_iota Ysh csh hcsh)).val)
+      (by
+        ext U
+        rename_i s
+        change AddCommGrpCat.Hom.hom
+            ((((sheafH_filtered_colimit_succ_iota Ysh csh hcsh ≫
+                  cokernel.π (sheafH_filtered_colimit_succ_iota Ysh csh hcsh)).val).app
+              (op U))) s = 0
+        have happ :
+            ((sheafH_filtered_colimit_succ_iota Ysh csh hcsh ≫
+                  cokernel.π (sheafH_filtered_colimit_succ_iota Ysh csh hcsh)).val).app
+                (op U) =
+              NatTrans.app
+                (0 : csh.pt.val ⟶
+                  (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh).pt.val) (op U) :=
+          NatTrans.congr_app
+            (congrArg (fun α => α.val)
+              (cokernel.condition (sheafH_filtered_colimit_succ_iota Ysh csh hcsh)))
+            (op U)
+        rw [happ]
+        simp)
+      (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Ysh) j)
+      (sheafH_filtered_colimit_succ_shortExact Ysh csh hcsh)
+      (τ₁ := (csh.ι.app j).val)
+      (τ₂ := ((sheafH_filtered_colimit_succ_injCocone Ysh).ι.app j).val)
+      (τ₃ := ((sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh).ι.app j).val)
+      (by
+        simpa using congrArg (fun α => α.val)
+          ((sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j).comm₁₂))
+      (by
+        simpa using congrArg (fun α => α.val)
+          ((sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j).comm₂₃))
+      n (h_mid_n j) (h_mid_succ j) h_colim_n h_colim_succ)
+
 /-- Successor-step compatibility for the filtered-colimit comparison map: whenever the
     stagewise and colimit injective replacement terms have vanishing cohomology in degrees
     `n` and `n + 1`, the comparison map in degree `n + 1` is conjugate to the comparison map
@@ -1602,25 +1823,6 @@ theorem sheafH_filtered_colimit_comparison_succ_compatibility
         simpa using congrArg (fun α => α.val)
           ((sheafH_filtered_colimit_succ_stage_hom Y' c' hc' j).comm₂₃))
       n (h_mid_n j) (h_mid_succ j) h_colim_n h_colim_succ)
-
-private noncomputable def sheafH_filtered_colimit_presheafCocone_isColimit
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-    (c : Cocone Y) (hc : IsColimit c)
-    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
-    IsColimit (sheafH_filtered_colimit_presheafCocone Y hY c hc_pt) := by
-  let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
-  let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
-  letI : CreatesColimit Ysh
-      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
-    createsFilteredColimit Ysh
-  simpa [Ysh, csh, sheafH_filtered_colimit_presheafDiagram,
-    sheafH_filtered_colimit_presheafCocone] using
-    (liftedColimitIsColimit
-      (F := sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-      (K := Ysh) (c := c) hc)
 
 private noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf_boundary
     {X : TopCat.{u}} [NoetherianSpace X]
@@ -2709,7 +2911,7 @@ theorem sheafH_filtered_colimit_comparison_isIso_presheaf
             letI : Zero (TopCat.Sheaf AddCommGrpCat.{u} X) := Limits.HasZeroObject.zero' _
             let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
             let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
-            have hcsh : IsColimit csh :=
+            let hcsh : IsColimit csh :=
               sheafH_filtered_colimit_presheafCocone_isColimit Y hY c hc hc_pt
             let Inj := sheafH_filtered_colimit_succ_Inj Ysh
             let injCocone := sheafH_filtered_colimit_succ_injCocone Ysh
@@ -2796,26 +2998,40 @@ theorem sheafH_filtered_colimit_comparison_isIso_presheaf
             let codomainIso :=
               sheafH_filtered_colimit_succ_shiftCodomainIso
                 Ysh csh hcsh (m + 1) h_colim_n h_colim_succ
-            have hcompat :
-                domainIso.hom ≫ sheafH_filtered_colimit_comparison Ysh (m + 2) csh =
+            have hcompare :
+                sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt (m + 1 + 1) =
+                  sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh := by
+              simpa [Ysh, csh] using
+                (sheafH_filtered_colimit_comparison_sheafToPresheaf
+                  (Y' := Ysh) (n := m + 1 + 1) (c' := csh))
+            have hcompat_presheaf :
+                domainIso.hom ≫
+                    sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt (m + 1 + 1) =
                   sheafH_filtered_colimit_comparison
                       (sheafH_filtered_colimit_succ_quotient Ysh) (m + 1) qCocone ≫
                     codomainIso.hom := by
-              simpa [domainIso, codomainIso] using
-                sheafH_filtered_colimit_comparison_succ_compatibility
-                  (Y' := Ysh) (c' := csh) (hc' := hcsh) (n := m + 1)
+              simpa [domainIso, codomainIso, qCocone, Ysh, csh, hcsh] using
+                sheafH_filtered_colimit_comparison_succ_compatibility_presheaf
+                  (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt) (n := m + 1)
                   h_mid_n h_mid_succ h_colim_n h_colim_succ
+            have hcompat :
+                domainIso.hom ≫ sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh =
+                  sheafH_filtered_colimit_comparison
+                      (sheafH_filtered_colimit_succ_quotient Ysh) (m + 1) qCocone ≫
+                    codomainIso.hom := by
+              rw [← hcompare]
+              exact hcompat_presheaf
             have hrewrite :
-                sheafH_filtered_colimit_comparison Ysh (m + 2) csh =
+                sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh =
                   domainIso.inv ≫
                     sheafH_filtered_colimit_comparison
                       (sheafH_filtered_colimit_succ_quotient Ysh) (m + 1) qCocone ≫
                     codomainIso.hom := by
               calc
-                sheafH_filtered_colimit_comparison Ysh (m + 2) csh
-                    = 𝟙 _ ≫ sheafH_filtered_colimit_comparison Ysh (m + 2) csh := by simp
+                sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh
+                    = 𝟙 _ ≫ sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh := by simp
                 _ = domainIso.inv ≫ domainIso.hom ≫
-                      sheafH_filtered_colimit_comparison Ysh (m + 2) csh := by simp
+                      sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh := by simp
                 _ = domainIso.inv ≫
                       (sheafH_filtered_colimit_comparison
                         (sheafH_filtered_colimit_succ_quotient Ysh) (m + 1) qCocone ≫
@@ -2825,7 +3041,7 @@ theorem sheafH_filtered_colimit_comparison_isIso_presheaf
                         (sheafH_filtered_colimit_succ_quotient Ysh) (m + 1) qCocone ≫
                       codomainIso.hom := by simp [Category.assoc]
             have hYshIso :
-                IsIso (sheafH_filtered_colimit_comparison Ysh (m + 2) csh) := by
+                IsIso (sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh) := by
               rw [hrewrite]
               infer_instance
             simpa [Ysh, csh, sheafH_presheafDiagram, sheafH_filtered_colimit_comparison_presheaf]
