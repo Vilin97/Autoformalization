@@ -14,6 +14,8 @@ API for topological Krull dimension on irreducible spaces.
 - `topologicalKrullDim_nonneg`: non-empty spaces have dim ≥ 0
 - `topologicalKrullDim_lt_of_isIrreducible_of_isClosed`: proper closed subsets of
   irreducible spaces with finite dim have strictly smaller dim
+- `topologicalKrullDim_lt_of_isIrreducible_of_isClosed_of_lt_coe_nat`: same strict
+  inequality under a natural-number upper bound on the closed subspace dimension
 - `topologicalKrullDim_pos_iff_exists_irreducibleCloseds_ne_univ`: on an irreducible
   space, `dim > 0` iff there is a proper irreducible closed subset
 - `lt_coe_nat_of_lt_of_lt_coe_nat_succ`: in `WithBot ℕ∞`, from `a < b < ↑↑(n+1)` deduce `a < ↑↑n`
@@ -213,6 +215,16 @@ theorem topologicalKrullDim_lt_of_isIrreducible_of_isClosed {X : Type u} [Topolo
       rw [← show (↑(v + 1) : WithBot ℕ∞) = ↑v + 1 from by push_cast; ring]
       exact WithBot.coe_lt_coe.mpr ((ENat.lt_add_one_iff hv_ne_top).mpr le_rfl)) h1
 
+/-- On an irreducible space, a proper closed subset with topological Krull dimension bounded
+above by a natural number has strictly smaller Krull dimension. This packages the standard
+finiteness bridge from `< n` to `< ⊤`. -/
+theorem topologicalKrullDim_lt_of_isIrreducible_of_isClosed_of_lt_coe_nat
+    {X : Type u} [TopologicalSpace X] [IrreducibleSpace X] {Y : Set X}
+    (hY : IsClosed Y) (hne : Y ≠ Set.univ) {n : ℕ}
+    (hn : topologicalKrullDim Y < ↑↑(n : ℕ)) :
+    topologicalKrullDim Y < topologicalKrullDim X := by
+  exact topologicalKrullDim_lt_of_isIrreducible_of_isClosed hY hne (lt_of_lt_of_le hn le_top)
+
 /-- On an irreducible space, positive topological Krull dimension is equivalent to the
 existence of a proper irreducible closed subset. -/
 theorem topologicalKrullDim_pos_iff_exists_irreducibleCloseds_ne_univ {X : Type u}
@@ -274,7 +286,6 @@ theorem exists_closed_subset_lt_dim_of_irreducible_pos
   obtain ⟨Z, hZ_ne_univ⟩ :=
     topologicalKrullDim_pos_iff_exists_irreducibleCloseds_ne_univ.mp hpos
   have hZ_dim : topologicalKrullDim (TopCat.of (Z : Set X)) < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed Z.isClosed hZ_ne_univ
-      (lt_of_le_of_lt (topologicalKrullDim_subspace_le X (Z : Set X))
-        (lt_of_lt_of_le hn le_top))
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed_of_lt_coe_nat Z.isClosed hZ_ne_univ
+      (lt_of_le_of_lt (topologicalKrullDim_subspace_le X (Z : Set X)) hn)
   refine ⟨Z, Z.isClosed, hZ_ne_univ, hZ_dim, lt_trans hZ_dim hn⟩

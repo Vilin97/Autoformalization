@@ -336,9 +336,9 @@ theorem closedComplementVanishing
   set Y := (V : Set X)ᶜ
   have hYcl : IsClosed Y := V.2.isClosed_compl
   have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed_of_lt_coe_nat hYcl
       (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
-      (lt_of_lt_of_le hn le_top)
+      hn
   let i := TopCat.closedIncl hYcl
   let CY := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Csh)
   let S := closedImmersionSES (Z := Y) (hZ := hYcl) (F := C) hC
