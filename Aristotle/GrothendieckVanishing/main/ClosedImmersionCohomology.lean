@@ -414,10 +414,11 @@ theorem closedComplementVanishing
   let Csh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨C, hC⟩
   set Y := (V : Set X)ᶜ
   have hYcl : IsClosed Y := V.2.isClosed_compl
+  have hY_dim_lt_top : topologicalKrullDim Y < ⊤ := lt_of_lt_of_le hn le_top
   have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed_of_lt_coe_nat hYcl
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl
       (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
-      hn
+      hY_dim_lt_top
   let i := TopCat.closedIncl hYcl
   let CY := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Csh)
   let S := closedImmersionSES (Z := Y) (hZ := hYcl) (F := C) hC
