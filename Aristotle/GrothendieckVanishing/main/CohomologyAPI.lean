@@ -29,6 +29,8 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
   the same `H¹` cokernel identification
 * `sheafH_extClassIso_of_subsingleton_middle_presheaf`: presheaf-boundary wrapper for
   the higher-degree connecting isomorphism
+* `sheafH_extClassIso_of_subsingleton_middle_presheaf_natural`: presheaf-boundary
+  naturality for the same connecting isomorphism
 * `epi_app_top_of_subsingleton_sheafH1`: H^1 vanishing gives surjectivity on top sections
 * `sheafH0_surj_of_epi_app_top`: surjectivity on top sections gives H^0 surjectivity
 * `sheafH_subsingleton_H1_via_epi_app_top_presheaf`: presheaf-boundary H^1 vanishing via
@@ -1041,3 +1043,87 @@ theorem sheafH_extClassIso_of_subsingleton_middle_natural {X : TopCat.{u}}
   ext y
   simpa [sheafH_extClassIso_of_subsingleton_middle_hom_apply] using
     (sheafCohomologyFunctor_map_extClass_naturality hS₁ hS₂ φ n y)
+
+/-- Presheaf-boundary naturality of `sheafH_extClassIso_of_subsingleton_middle_presheaf`
+    for a morphism between two short exact sequences of presheaves. -/
+theorem sheafH_extClassIso_of_subsingleton_middle_presheaf_natural {X : TopCat.{u}}
+    {F₁₁ F₁₂ F₁₃ F₂₁ F₂₂ F₂₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁₁ : F₁₁.IsSheaf) (h₁₂ : F₁₂.IsSheaf) (h₁₃ : F₁₃.IsSheaf)
+    (h₂₁ : F₂₁.IsSheaf) (h₂₂ : F₂₂.IsSheaf) (h₂₃ : F₂₃.IsSheaf)
+    {f₁ : F₁₁ ⟶ F₁₂} {g₁ : F₁₂ ⟶ F₁₃} (hfg₁ : f₁ ≫ g₁ = 0)
+    {f₂ : F₂₁ ⟶ F₂₂} {g₂ : F₂₂ ⟶ F₂₃} (hfg₂ : f₂ ≫ g₂ = 0)
+    (hS₁ : (ShortComplex.mk
+      (X₁ := (⟨F₁₁, h₁₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f₁)
+      (Sheaf.Hom.mk g₁)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg₁)).ShortExact)
+    (hS₂ : (ShortComplex.mk
+      (X₁ := (⟨F₂₁, h₂₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₂₃, h₂₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f₂)
+      (Sheaf.Hom.mk g₂)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg₂)).ShortExact)
+    {τ₁ : F₁₁ ⟶ F₂₁} {τ₂ : F₁₂ ⟶ F₂₂} {τ₃ : F₁₃ ⟶ F₂₃}
+    (hτ₁₂ : τ₁ ≫ f₂ = f₁ ≫ τ₂)
+    (hτ₂₃ : τ₂ ≫ g₂ = g₁ ≫ τ₃)
+    (n : ℕ)
+    (h₁₂n : Subsingleton (Sheaf.H ((⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
+    (h₁₂succ : Subsingleton (Sheaf.H ((⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)))
+    (h₂₂n : Subsingleton (Sheaf.H ((⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
+    (h₂₂succ : Subsingleton (Sheaf.H ((⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1))) :
+    (sheafH_extClassIso_of_subsingleton_middle_presheaf
+        h₁₁ h₁₂ h₁₃ hfg₁ hS₁ n h₁₂n h₁₂succ).hom ≫
+        (sheafCohomologyFunctor X (n + 1)).map (Sheaf.Hom.mk τ₁) =
+      (sheafCohomologyFunctor X n).map (Sheaf.Hom.mk τ₃) ≫
+        (sheafH_extClassIso_of_subsingleton_middle_presheaf
+          h₂₁ h₂₂ h₂₃ hfg₂ hS₂ n h₂₂n h₂₂succ).hom := by
+  let S₁ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
+    (X₁ := (⟨F₁₁, h₁₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₂ := (⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₃ := (⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (Sheaf.Hom.mk f₁)
+    (Sheaf.Hom.mk g₁)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hfg₁)
+  let S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
+    (X₁ := (⟨F₂₁, h₂₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₂ := (⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₃ := (⟨F₂₃, h₂₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (Sheaf.Hom.mk f₂)
+    (Sheaf.Hom.mk g₂)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hfg₂)
+  let φ : S₁ ⟶ S₂ := ShortComplex.homMk
+    (Sheaf.Hom.mk τ₁)
+    (Sheaf.Hom.mk τ₂)
+    (Sheaf.Hom.mk τ₃)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hτ₁₂)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hτ₂₃)
+  have hS₁' : S₁.ShortExact := by
+    simpa [S₁] using hS₁
+  have hS₂' : S₂.ShortExact := by
+    simpa [S₂] using hS₂
+  have h₁₂n' : Subsingleton (Sheaf.H S₁.X₂ n) := by
+    simpa [S₁] using h₁₂n
+  have h₁₂succ' : Subsingleton (Sheaf.H S₁.X₂ (n + 1)) := by
+    simpa [S₁] using h₁₂succ
+  have h₂₂n' : Subsingleton (Sheaf.H S₂.X₂ n) := by
+    simpa [S₂] using h₂₂n
+  have h₂₂succ' : Subsingleton (Sheaf.H S₂.X₂ (n + 1)) := by
+    simpa [S₂] using h₂₂succ
+  simpa [S₁, S₂, φ] using
+    (sheafH_extClassIso_of_subsingleton_middle_natural
+      (S₁ := S₁) (S₂ := S₂) hS₁' hS₂' φ n h₁₂n' h₁₂succ' h₂₂n' h₂₂succ')
