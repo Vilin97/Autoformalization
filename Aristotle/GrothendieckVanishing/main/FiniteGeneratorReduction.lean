@@ -184,13 +184,24 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
   have hZeroColim :
       IsZero (colimit (finsetGenFunctor hK ⋙ sheafCohomologyFunctor X m)) :=
     (colimit.isColimit _).isZero_pt hZeroDiagram
+  haveI : CreatesColimit (finsetGenFunctor hK)
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    createsFilteredColimit (finsetGenFunctor hK)
   have hZeroTarget :
       IsZero (AddCommGrpCat.of
         (Sheaf.H (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m)) := by
     simpa [finsetGenCocone] using
       IsZero.of_iso hZeroColim
-        (sheafH_preserves_filtered_colimits (finsetGenFunctor hK) (finsetGenCocone hK)
-          (finsetGenCocone_isColimit hK) m).symm
+        (sheafH_preserves_filtered_colimits_presheaf
+          (Y := finsetGenFunctor hK ⋙
+            sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+          (hY := fun j => (finsetGenFunctor hK).obj j |>.cond)
+          (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone
+            (finsetGenCocone hK))
+          (hc := isColimitOfPreserves
+            (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+            (finsetGenCocone_isColimit hK))
+          (hc_pt := hK) m).symm
   simpa using AddCommGrpCat.subsingleton_of_isZero hZeroTarget
 
 section FinsetGenerated
