@@ -178,15 +178,29 @@ theorem zeroOutsideInt_cohomology_vanishing
   have hm_ne : m ≠ 0 := by
     intro h; subst h; exact absurd hm (not_lt.mpr topologicalKrullDim_nonneg)
   obtain ⟨m', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
+  have hVcompl_lt_succ :
+      topologicalKrullDim (Set.compl (V : Set X)) < ↑↑(m' + 1 : ℕ) :=
+    topologicalKrullDim_subspace_lt_of_lt (X := X) (Set.compl (V : Set X))
+      (by simpa [gt_iff_lt] using hm)
+  have hVcompl_lt_X : topologicalKrullDim (Set.compl (V : Set X)) < topologicalKrullDim X :=
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed_of_lt_coe_nat
+      V.2.isClosed_compl
+      (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr
+        (Opens.coe_eq_empty.not.mpr hV)))
+      hVcompl_lt_succ
+  have hVcompl_lt_m' : topologicalKrullDim (Set.compl (V : Set X)) < ↑↑(m' : ℕ) := by
+    have hX_ne_bot : topologicalKrullDim X ≠ ⊥ := ne_bot_of_gt hVcompl_lt_X
+    lift topologicalKrullDim X to ℕ∞ using hX_ne_bot with xdim
+    norm_cast at hm
+    have hxdim_ne_top : xdim ≠ ⊤ := ne_top_of_lt hm
+    lift xdim to ℕ using hxdim_ne_top with x
+    rw [ENat.coe_lt_coe] at hm
+    exact lt_of_lt_of_le hVcompl_lt_X (by exact_mod_cast Nat.lt_succ_iff.mp hm)
   -- Step 2: apply zeroOutsideInt_vanishing, reducing to cokernel vanishing at m'
   apply zeroOutsideInt_vanishing V m'
   -- Cokernel vanishing at m': use closedComplementVanishing with m' > dim Vᶜ
   exact closedComplementVanishing V hV (C := C.val) C.cond m' ih
-    (topologicalKrullDim_lt_coe_nat_of_isIrreducible_of_isClosed_of_lt_coe_nat_succ
-      V.2.isClosed_compl
-      (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr
-        (Opens.coe_eq_empty.not.mpr hV)))
-      hm)
+    (by simpa [gt_iff_lt] using hVcompl_lt_m')
     (fun x hxV a => cokernel_stalk_zero_of_stalk_surj
       (F := (TopCat.Sheaf.zeroOutsideInt V).val)
       (G := (TopCat.Sheaf.zeroOutsideInt ⊤).val)
