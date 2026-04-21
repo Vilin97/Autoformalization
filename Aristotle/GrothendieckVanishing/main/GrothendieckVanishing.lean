@@ -52,12 +52,9 @@ private theorem ReducibleVanishing'
   intro s; induction s using Finset.induction_on with
   | empty =>
     intro _ G hG hG_stalks
-    let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
-    exact _root_.sheafH_subsingleton_of_isZero Gsh
+    exact sheafH_subsingleton_of_isZero_presheaf hG
       (by
-        have hG_zero : IsZero Gsh :=
-          sheaf_isZero_of_zero_stalks X hG (fun x a => hG_stalks x (by simp) a)
-        simpa [Gsh] using hG_zero) n
+        exact sheaf_isZero_of_zero_stalks X hG (fun x a => hG_stalks x (by simp) a)) n
   | @insert Z s' hZ_notin ih =>
     intro hs_irred G hG hG_stalks
     have hZ_comp := hs_irred Z (Finset.mem_insert_self Z s')

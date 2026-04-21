@@ -293,7 +293,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
   let Rsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨R, hRsh⟩
   change Subsingleton (Sheaf.H Rsh m)
   by_cases hR : IsZero Rsh
-  · exact _root_.sheafH_subsingleton_of_isZero Rsh hR m
+  · simpa [Rsh] using sheafH_subsingleton_of_isZero_presheaf hRsh hR m
   · obtain ⟨V', hV'le, hV'ne, j, hj_mono, hj_stalk⟩ :=
       (by
         exact subsheaf_contains_zeroOutsideInt (R := R) hRsh i (by
@@ -346,7 +346,7 @@ theorem epiImage_zeroOutsideInt_vanishing_of_locallySurjective
   by_cases hV : V = ⊥
   · subst hV
     have hZero : IsZero Gsh := (isZero_zeroOutsideInt_bot X).of_epi fsh
-    exact _root_.sheafH_subsingleton_of_isZero Gsh hZero m
+    simpa [Gsh] using sheafH_subsingleton_of_isZero_presheaf hG hZero m
   · let S := ShortComplex.mk (kernel.ι fsh) fsh (kernel.condition fsh)
     have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
       (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel fsh)) inferInstance inferInstance
