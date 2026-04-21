@@ -25,6 +25,8 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `sheafH0EquivSections_natural`: naturality of the above
 * `sheafH1_cokernel_iso_of_subsingleton_middle`: `H¹(X₁)` as the cokernel of
   `X₂(⊤) → X₃(⊤)` when `H¹(X₂)=0`
+* `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf`: presheaf-boundary wrapper for
+  the same `H¹` cokernel identification
 * `epi_app_top_of_subsingleton_sheafH1`: H^1 vanishing gives surjectivity on top sections
 * `sheafH0_surj_of_epi_app_top`: surjectivity on top sections gives H^0 surjectivity
 * `sheafH_subsingleton_H1_via_epi_app_top_presheaf`: presheaf-boundary H^1 vanishing via
@@ -399,6 +401,40 @@ noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle {X : TopCat.{u}}
     simpa [map_sub] using hq
   haveI : IsIso πH := isIso_of_mono_of_epi πH
   exact asIso πH
+
+/-- Presheaf-boundary wrapper for `sheafH1_cokernel_iso_of_subsingleton_middle`: if
+`0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves and
+`H¹(F₂)=0`, then `H¹(F₁)` is the cokernel of `g.app(⊤)`. -/
+noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle_presheaf {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
+    (hS : (ShortComplex.mk
+      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f)
+      (Sheaf.Hom.mk g)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg)).ShortExact)
+    (h₂H : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1)) :
+    cokernel (g.app (op ⊤)) ≅
+      AddCommGrpCat.of (Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1) := by
+  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
+    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (Sheaf.Hom.mk f)
+    (Sheaf.Hom.mk g)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hfg)
+  have hS' : S.ShortExact := by
+    simpa [S] using hS
+  have h₂H' : Subsingleton (Sheaf.H S.X₂ 1) := by
+    simpa [S] using h₂H
+  simpa [S] using sheafH1_cokernel_iso_of_subsingleton_middle (S := S) hS' h₂H'
 
 @[simp] theorem sheafH1_cokernel_iso_of_subsingleton_middle_hom_π {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
