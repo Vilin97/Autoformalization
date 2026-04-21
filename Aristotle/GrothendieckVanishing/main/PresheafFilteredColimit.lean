@@ -17,10 +17,11 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
   - `colimit_section_zero_of_zero_on_cover`: colimit section vanishing on finite cover is zero
     (no `NoetherianSpace` hypothesis needed)
 
-  ## Sheaf-level results
-  - `isSheaf_presheaf_filtered_colimit`: presheaf-level filtered colimit of sheaves is a sheaf
-    on Noetherian spaces
-  - `createsFilteredColimit`: `sheafToPresheaf` creates filtered colimits
+  ## Colimit/sheaf boundary results
+  - `isSheaf_of_isColimit_of_isSheaf`: a filtered colimit cocone of presheaves is a sheaf
+    on Noetherian spaces when each stage is already a sheaf
+  - `createsFilteredColimit`: `sheafToPresheaf` creates filtered colimits by applying the
+    presheaf-boundary theorem to a diagram of sheaves
   - `isFlasque_filtered_colimit_presheaf`: presheaf-boundary filtered colimits of
     stagewise flasque sheaves are flasque
   - `isFlasque_filtered_colimit`: filtered colimits of flasque sheaves are flasque
@@ -498,27 +499,18 @@ theorem isSheaf_of_isColimit_of_isSheaf
       exact (hs' k).trans (hs_k k hk).symm)
     rwa [sub_eq_zero] at h0
 
-/-- On a Noetherian space, the presheaf-level filtered colimit of sheaves is a sheaf.
-    Proof: Noetherian compactness reduces the sheaf condition to finite covers, then
-    filtered colimit merging passes from per-piece data to glued data. -/
-theorem isSheaf_presheaf_filtered_colimit
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (c : Cocone (Y' ⋙ sheafToPresheaf _ _)) (hc : IsColimit c) :
-    TopCat.Presheaf.IsSheaf c.pt := by
-  simpa using isSheaf_of_isColimit_of_isSheaf
-    (P := Y' ⋙ sheafToPresheaf _ _)
-    (hP := fun j => (Y'.obj j).cond)
-    (c := c) (hc := hc)
-
-/-- On a Noetherian space, `sheafToPresheaf` creates filtered colimits of sheaves. -/
+/-- On a Noetherian space, `sheafToPresheaf` creates filtered colimits of sheaves by
+    applying `isSheaf_of_isColimit_of_isSheaf` to the underlying presheaf diagram. -/
 noncomputable def createsFilteredColimit
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X) :
     CreatesColimit Y' (sheafToPresheaf _ _) :=
-  Sheaf.createsColimitOfIsSheaf Y' (fun c hc => isSheaf_presheaf_filtered_colimit Y' c hc)
+  Sheaf.createsColimitOfIsSheaf Y' (fun c hc =>
+    isSheaf_of_isColimit_of_isSheaf
+      (P := Y' ⋙ sheafToPresheaf _ _)
+      (hP := fun j => (Y'.obj j).cond)
+      (c := c) (hc := hc))
 
 /-! ### Filtered colimits of flasque sheaves
 
