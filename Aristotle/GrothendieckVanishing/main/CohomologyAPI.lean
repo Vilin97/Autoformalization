@@ -759,37 +759,53 @@ theorem sheafH_subsingleton_H1_of_injective_of_epi_app_top {X : TopCat.{u}}
     (by simpa using hSE)
     (by simpa using hg)
 
-/-- Flasque sheaves have vanishing `H¹`. This isolates the base case of flasque
-    cohomological vanishing in the general sheaf-cohomology API. -/
-theorem sheafH_subsingleton_H1_of_flasque {X : TopCat.{u}}
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) [IsFlasqueSheaf F] :
-    Subsingleton (Sheaf.H F 1) := by
-  obtain ⟨ip⟩ := EnoughInjectives.presentation F
-  have hSE := ip.shortExact_shortComplex
-  exact sheafH_subsingleton_H1_of_injective_of_epi_app_top hSE (by
-      haveI : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}).map
-          ip.shortComplex.g) := by
-        have h := epi_app_of_shortExact_flasque hSE ⊤
-        exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
-          ((Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).inv.naturality
-            ip.shortComplex.g).symm
-      have hfac := (Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).hom.naturality
-        ip.shortComplex.g
-      change Epi (((sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op ⊤)).map
-        ip.shortComplex.g)
-      haveI : Epi ((Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat).map ip.shortComplex.g ≫
-          (Sheaf.ΓNatIsoSheafSections _ _ Limits.isTerminalTop).hom.app ip.shortComplex.X₃) :=
-        epi_comp' (inferInstance : Epi ((Sheaf.Γ (Opens.grothendieckTopology X)
-          AddCommGrpCat).map ip.shortComplex.g)) (IsIso.epi_of_iso _)
-      exact epi_of_epi_fac hfac.symm)
-
 /-- Presheaf-boundary wrapper for `sheafH_subsingleton_H1_of_flasque`: if a presheaf is a
     sheaf and the induced bundled sheaf is flasque, then its `H¹` is subsingleton. -/
 theorem sheafH_subsingleton_H1_of_flasque_presheaf {X : TopCat.{u}}
     {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
     [IsFlasqueSheaf ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))] :
     Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1) := by
-  simpa using sheafH_subsingleton_H1_of_flasque ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+  obtain ⟨ip⟩ := EnoughInjectives.presentation Fsh
+  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ip.shortComplex
+  letI : Injective ((⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+    simpa [S] using (inferInstance : Injective S.X₂)
+  have hSE :
+      (ShortComplex.mk
+        (X₁ := (⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (X₂ := (⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (X₃ := (⟨S.X₃.val, S.X₃.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+        (Sheaf.Hom.mk S.f.val)
+        (Sheaf.Hom.mk S.g.val)
+        (by
+          apply Sheaf.Hom.ext
+          exact congrArg Sheaf.Hom.val S.zero)).ShortExact := by
+    simpa [S] using ip.shortExact_shortComplex
+  have hg : Epi (S.g.val.app (op ⊤)) := by
+    letI : IsFlasqueSheaf ((⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+      simpa [Fsh, S] using (inferInstance : IsFlasqueSheaf Fsh)
+    simpa [S] using epi_app_of_shortExact_flasque_presheaf
+      S.X₁.cond S.X₂.cond S.X₃.cond
+      (f := S.f.val) (g := S.g.val)
+      (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+      hSE ⊤
+  simpa [Fsh, S] using sheafH_subsingleton_H1_of_injective_of_epi_app_top_presheaf
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+    hSE hg
+
+/-- Flasque sheaves have vanishing `H¹`. This isolates the base case of flasque
+    cohomological vanishing in the general sheaf-cohomology API. -/
+theorem sheafH_subsingleton_H1_of_flasque {X : TopCat.{u}}
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) [IsFlasqueSheaf F] :
+    Subsingleton (Sheaf.H F 1) := by
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F.val, F.cond⟩
+  letI : IsFlasqueSheaf Fsh := by
+    simpa [Fsh] using (inferInstance : IsFlasqueSheaf F)
+  simpa [Fsh] using
+    (sheafH_subsingleton_H1_of_flasque_presheaf (X := X) (F := F.val) F.cond)
 
 /-- Presheaf-boundary `H¹` vanishing criterion with flasque middle term:
     if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves,
