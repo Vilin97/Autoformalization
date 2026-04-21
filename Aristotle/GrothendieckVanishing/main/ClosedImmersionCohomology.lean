@@ -366,7 +366,34 @@ theorem subsingleton_sheafH_of_closedImmersion_middle_presheaf
   have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
     simpa [S, closedImmersionSES, i, Fsh, FZ] using
       PushforwardHVanishing Z hZ FZ.cond n h₃'
-  simpa [Fsh] using subsingleton_sheafH_of_shortExact_middle hSE n h₁' hPush
+  haveI : Mono S.f := hSE.mono_f
+  haveI : Mono S.f.val := by
+    exact (Sheaf.Hom.mono_iff_presheaf_mono
+      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) S.f).1 inferInstance
+  have hCok :
+      Subsingleton
+        (Sheaf.H (cokernel (show S.X₁ ⟶ Fsh from Sheaf.Hom.mk S.f.val)) n) := by
+    let fsh : S.X₁ ⟶ Fsh := Sheaf.Hom.mk S.f.val
+    have hfsh : fsh = S.f := rfl
+    have hfshg : fsh ≫ S.g = 0 := by
+      change S.f ≫ S.g = 0
+      exact S.zero
+    let hSgCok : IsColimit (CokernelCofork.ofπ S.g hfshg) := by
+      simpa [hfsh, hfshg] using hSE.gIsCokernel
+    let e :=
+      (sheafCohomologyFunctor X n).mapIso
+        ((cokernelIsCokernel fsh).coconePointUniqueUpToIso
+          hSgCok)
+    haveI :
+        Subsingleton ↑((sheafCohomologyFunctor X n).obj
+          (CokernelCofork.ofπ S.g hfshg).pt) := by
+      simpa [sheafCohomologyFunctor_obj] using hPush
+    exact ⟨fun a b => by
+      apply (ConcreteCategory.bijective_of_isIso e.hom).1
+      exact Subsingleton.elim _ _⟩
+  simpa [Fsh] using
+    subsingleton_sheafH_of_shortExact_middle_presheaf
+      (F := S.X₁.val) (G := F) S.X₁.cond hF S.f.val n h₁' hCok
 
 /-- Vanishing for a sheaf supported on the complement of an open V, via closed-immersion SES.
     Given:
