@@ -21,6 +21,8 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
   - `isSheaf_presheaf_filtered_colimit`: presheaf-level filtered colimit of sheaves is a sheaf
     on Noetherian spaces
   - `createsFilteredColimit`: `sheafToPresheaf` creates filtered colimits
+  - `isFlasque_filtered_colimit_presheaf`: presheaf-boundary filtered colimits of
+    stagewise flasque sheaves are flasque
   - `isFlasque_filtered_colimit`: filtered colimits of flasque sheaves are flasque
 
   ## Sheaf cohomology and filtered colimits
@@ -530,8 +532,7 @@ This replaces the result that filtered colimits of injectives are injective for 
 purposes: we only need `H^n(colim I_j) = 0` for injective `I_j`, and `FlasqueVanishing`
 gives this since injective sheaves are flasque (`isFlasque_of_injective`). -/
 
-/-- Filtered colimits of flasque sheaves on Noetherian spaces are flasque. -/
-theorem isFlasque_filtered_colimit
+private theorem isFlasque_filtered_colimit_of_sheaf
     {X : TopCat.{u}} [NoetherianSpace X]
     {J : Type u} [SmallCategory J] [IsFiltered J]
     (F : J ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -554,6 +555,60 @@ theorem isFlasque_filtered_colimit
     congrFun (congrArg DFunLike.coe
       (congrArg ConcreteCategory.hom ((c.ι.app j₀).val.naturality i.op).symm)) a₀,
     ha₀]; exact hb₀
+
+/-- Filtered colimits of stagewise flasque sheaves on Noetherian spaces are flasque:
+    presheaf-boundary form. -/
+theorem isFlasque_filtered_colimit_presheaf
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J : Type u} [SmallCategory J] [IsFiltered J]
+    (F : J ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hF : ∀ j, TopCat.Presheaf.IsSheaf (F.obj j))
+    (hFlasque : ∀ j, IsFlasqueSheaf (⟨F.obj j, hF j⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    {c : Cocone F} (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
+    IsFlasqueSheaf (⟨c.pt, hc_pt⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := by
+  let Fsh : J ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
+    { obj := fun j => ⟨F.obj j, hF j⟩
+      map := fun f => Sheaf.Hom.mk (F.map f)
+      map_id := fun j => Sheaf.Hom.ext <| F.map_id j
+      map_comp := fun f g => Sheaf.Hom.ext <| F.map_comp f g }
+  let csh : Cocone Fsh :=
+    { pt := ⟨c.pt, hc_pt⟩
+      ι :=
+        { app := fun j => Sheaf.Hom.mk (c.ι.app j)
+          naturality := fun _ _ f => Sheaf.Hom.ext <| c.ι.naturality f } }
+  have hcsh : IsColimit csh := by
+    letI : CreatesColimit Fsh
+        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+      createsFilteredColimit Fsh
+    simpa [Fsh, csh] using
+      (liftedColimitIsColimit
+        (F := sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+        (K := Fsh) (c := c) hc)
+  simpa [Fsh, csh] using
+    (isFlasque_filtered_colimit_of_sheaf (F := Fsh) (hFlasque := hFlasque)
+      (c := csh) hcsh)
+
+/-- Filtered colimits of flasque sheaves on Noetherian spaces are flasque. -/
+theorem isFlasque_filtered_colimit
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J : Type u} [SmallCategory J] [IsFiltered J]
+    (F : J ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (hFlasque : ∀ j, IsFlasqueSheaf (F.obj j))
+    {c : Cocone F} (hc : IsColimit c) :
+    IsFlasqueSheaf c.pt := by
+  letI : CreatesColimit F
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    createsFilteredColimit F
+  simpa using
+    (isFlasque_filtered_colimit_presheaf
+      (F := F ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (hF := fun j => (F.obj j).cond)
+      (hFlasque := fun j => by simpa using hFlasque j)
+      (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c)
+      (hc := isColimitOfPreserves
+        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc)
+      (hc_pt := c.pt.cond))
 
 /-! ### Sheaf cohomology and filtered colimits
 
