@@ -302,12 +302,19 @@ theorem subsheaf_zeroOutsideInt_vanishing
           (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from
             Sheaf.Hom.mk j)
     have hC : Subsingleton (Sheaf.H C m) := by
-      exact closedComplementVanishing V' hV'ne (C := C.val) C.cond m ih
-        (topologicalKrullDim_lt_coe_nat_of_isIrreducible_of_isClosed_of_lt_coe_nat_succ
+      have hV'compl_lt_succ :
+          topologicalKrullDim (Set.compl (V' : Set X)) < ↑↑(m + 1 : ℕ) :=
+        topologicalKrullDim_subspace_lt_of_lt (X := X) (Set.compl (V' : Set X))
+          (lt_of_lt_of_le hm (by exact_mod_cast Nat.le_succ m))
+      have hV'compl_lt_X :
+          topologicalKrullDim (Set.compl (V' : Set X)) < topologicalKrullDim X :=
+        topologicalKrullDim_lt_of_isIrreducible_of_isClosed_of_lt_coe_nat
           V'.2.isClosed_compl
           (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr
             (Opens.coe_eq_empty.not.mpr hV'ne)))
-          (lt_of_lt_of_le hm (by exact_mod_cast Nat.le_succ m)))
+          hV'compl_lt_succ
+      exact closedComplementVanishing V' hV'ne (C := C.val) C.cond m ih
+        (by simpa [gt_iff_lt] using lt_trans hV'compl_lt_X hm)
         (fun x hxV' b => cokernel_stalk_zero_of_stalk_surj
           (F := (TopCat.Sheaf.zeroOutsideInt V').val) (G := R)
           (hF := (TopCat.Sheaf.zeroOutsideInt V').cond) (hG := hRsh)

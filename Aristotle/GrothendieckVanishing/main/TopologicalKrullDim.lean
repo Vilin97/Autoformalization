@@ -269,27 +269,6 @@ theorem topologicalKrullDim_pos_iff_exists_irreducibleCloseds_ne_univ {X : Type 
       simpa [T] using congrArg IrreducibleCloseds.carrier hZT
     simpa [topologicalKrullDim, gt_iff_lt] using (Order.krullDim_pos_iff.mpr ⟨Z, T, hZ_lt⟩)
 
-/-- On an irreducible space, a proper closed subset has dimension `< n` whenever the ambient
-space has dimension `< n + 1`. This packages the standard closed-subspace strict inequality
-followed by the predecessor step in `WithBot ℕ∞`. -/
-theorem topologicalKrullDim_lt_coe_nat_of_isIrreducible_of_isClosed_of_lt_coe_nat_succ
-    {X : Type u} [TopologicalSpace X] [IrreducibleSpace X] {Y : Set X}
-    (hY : IsClosed Y) (hne : Y ≠ Set.univ) {n : ℕ}
-    (hn : topologicalKrullDim X < ↑↑(n + 1 : ℕ)) :
-    topologicalKrullDim Y < ↑↑(n : ℕ) := by
-  have hY_lt_succ : topologicalKrullDim Y < ↑↑(n + 1 : ℕ) :=
-    topologicalKrullDim_subspace_lt_of_lt (X := X) Y hn
-  have hY_lt_X : topologicalKrullDim Y < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hY hne
-      (lt_of_lt_of_le hY_lt_succ le_top)
-  have hX_ne_bot : topologicalKrullDim X ≠ ⊥ := ne_bot_of_gt hY_lt_X
-  lift topologicalKrullDim X to ℕ∞ using hX_ne_bot with xdim
-  norm_cast at hn
-  have hxdim_ne_top : xdim ≠ ⊤ := ne_top_of_lt hn
-  lift xdim to ℕ using hxdim_ne_top with x
-  rw [ENat.coe_lt_coe] at hn
-  exact lt_of_lt_of_le hY_lt_X (by exact_mod_cast Nat.lt_succ_iff.mp hn)
-
 /-- On an irreducible space of positive finite Krull dimension, one can choose a proper
 closed subset `Z ⊊ X` of strictly smaller Krull dimension. This isolates the structural
 closed-subset choice from the separate task of passing numerical bounds to `Z`. -/
