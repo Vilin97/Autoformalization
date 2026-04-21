@@ -437,7 +437,7 @@ theorem closedComplementVanishing
   exact subsingleton_sheafH_of_closedImmersion_middle_presheaf
     (Z := Y) (hZ := hYcl) (F := C) hC n
     (by
-      simpa [S] using _root_.sheafH_subsingleton_of_isZero S.X₁ hSX₁_zero n)
+      simpa [S] using sheafH_subsingleton_of_isZero_presheaf S.X₁.cond hSX₁_zero n)
     (by
       simpa [i, Csh, CY] using
         ih (TopCat.of Y) n (G := CY.val) CY.cond hY_dim_lt hn)
