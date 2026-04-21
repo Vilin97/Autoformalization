@@ -1473,9 +1473,7 @@ theorem sheafH_filtered_colimit_comparison_succ_compatibility
           ((sheafH_filtered_colimit_succ_stage_hom Y' c' hc' j).comm₂₃))
       n (h_mid_n j) (h_mid_succ j) h_colim_n h_colim_succ)
 
-/-- In degree `0`, the filtered-colimit comparison is the canonical isomorphism obtained by
-transporting `H⁰ ≅ (-)(⊤)` across the created presheaf colimit and evaluation at `⊤`. -/
-noncomputable def sheafH_filtered_colimit_comparison_zero_iso
+private noncomputable def sheafH_filtered_colimit_comparison_zero_iso_sheaf
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -1493,12 +1491,12 @@ noncomputable def sheafH_filtered_colimit_comparison_zero_iso
       (colimit.isColimit (Y' ⋙ sectionsFunctor)).coconePointUniqueUpToIso hc_sections ≪≫
       ((sheafH0NatIsoSections (X := X)).app c'.pt).symm
 
-@[simp] theorem sheafH_filtered_colimit_comparison_zero_iso_hom
+@[simp] private theorem sheafH_filtered_colimit_comparison_zero_iso_sheaf_hom
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     (c' : Cocone Y') (hc' : IsColimit c') :
-    (sheafH_filtered_colimit_comparison_zero_iso Y' c' hc').hom =
+    (sheafH_filtered_colimit_comparison_zero_iso_sheaf Y' c' hc').hom =
       sheafH_filtered_colimit_comparison Y' 0 c' := by
   let sectionsFunctor :
       TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
@@ -1509,7 +1507,7 @@ noncomputable def sheafH_filtered_colimit_comparison_zero_iso
     isColimitOfPreserves sectionsFunctor hc'
   apply colimit.hom_ext
   intro j
-  simp only [sheafH_filtered_colimit_comparison_zero_iso, Iso.trans_hom]
+  simp only [sheafH_filtered_colimit_comparison_zero_iso_sheaf, Iso.trans_hom]
   rw [HasColimit.isoOfNatIso_ι_hom_assoc, colimit.comp_coconePointUniqueUpToIso_hom_assoc,
     colimit_ι_sheafH_filtered_colimit_comparison]
   change ((sheafH0NatIsoSections (X := X)).hom.app (Y'.obj j)) ≫
@@ -1521,15 +1519,14 @@ noncomputable def sheafH_filtered_colimit_comparison_zero_iso
   rw [← (sheafH0NatIsoSections (X := X)).hom.naturality_assoc (c'.ι.app j)]
   simp
 
-/-- On a Noetherian space and for a filtered diagram, the degree-`0` comparison morphism
-    `colim H⁰(F_j) ⟶ H⁰(colim F_j)` is an isomorphism. -/
-theorem sheafH_filtered_colimit_comparison_isIso_zero
+private theorem sheafH_filtered_colimit_comparison_isIso_zero_sheaf
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     (c' : Cocone Y') (hc' : IsColimit c') :
     IsIso (sheafH_filtered_colimit_comparison Y' 0 c') := by
-  rw [← sheafH_filtered_colimit_comparison_zero_iso_hom (Y' := Y') (c' := c') (hc' := hc')]
+  rw [← sheafH_filtered_colimit_comparison_zero_iso_sheaf_hom
+    (Y' := Y') (c' := c') (hc' := hc')]
   infer_instance
 
 private noncomputable def sheafH_filtered_colimit_h1_sectionsFunctor
@@ -1736,11 +1733,7 @@ private noncomputable def sheafH_filtered_colimit_h1_stageNatIso
               ((sheafH_filtered_colimit_succ_stage_map_hom (Y' := Y') f).comm₂₃))
           (h_mid j) (h_mid j')))
 
-/-- In degree `1`, the filtered-colimit comparison is obtained by identifying `H¹`
-with the cokernel of top sections for the injective-replacement short exact sequence,
-commuting filtered colimits with that cokernel, and then applying the colimit-level
-`H¹ ≅ cokernel` identification. -/
-noncomputable def sheafH_filtered_colimit_comparison_one_iso
+private noncomputable def sheafH_filtered_colimit_comparison_one_iso_sheaf
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -1865,12 +1858,12 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso
         (sectionsFunctor.map (cokernel.π ι')) eInj eQ hsq) ≪≫
       globalIso
 
-@[simp] theorem sheafH_filtered_colimit_comparison_one_iso_hom
+@[simp] private theorem sheafH_filtered_colimit_comparison_one_iso_sheaf_hom
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     (c' : Cocone Y') (hc' : IsColimit c') :
-    (sheafH_filtered_colimit_comparison_one_iso Y' c' hc').hom =
+    (sheafH_filtered_colimit_comparison_one_iso_sheaf Y' c' hc').hom =
       sheafH_filtered_colimit_comparison Y' 1 c' := by
   letI : Zero (TopCat.Sheaf AddCommGrpCat.{u} X) := Limits.HasZeroObject.zero' _
   let Inj := sheafH_filtered_colimit_succ_Inj Y'
@@ -2149,15 +2142,14 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso
       _ = (sheafCohomologyFunctor X 1).map (c'.ι.app j) := by simp [Category.assoc]
   simpa [stageIso, stageIsoH1] using hmain
 
-/-- On a Noetherian space and for a filtered diagram, the degree-`1` comparison morphism
-    `colim H¹(F_j) ⟶ H¹(colim F_j)` is an isomorphism. -/
-theorem sheafH_filtered_colimit_comparison_isIso_one
+private theorem sheafH_filtered_colimit_comparison_isIso_one_sheaf
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     (c' : Cocone Y') (hc' : IsColimit c') :
     IsIso (sheafH_filtered_colimit_comparison Y' 1 c') := by
-  rw [← sheafH_filtered_colimit_comparison_one_iso_hom (Y' := Y') (c' := c') (hc' := hc')]
+  rw [← sheafH_filtered_colimit_comparison_one_iso_sheaf_hom
+    (Y' := Y') (c' := c') (hc' := hc')]
   infer_instance
 
 /-- On a Noetherian space and for a filtered diagram, the canonical comparison morphism
@@ -2178,12 +2170,12 @@ theorem sheafH_filtered_colimit_comparison_isIso
     induction n with
     | zero =>
         intro J' _ _ Y' c' hc'
-        exact sheafH_filtered_colimit_comparison_isIso_zero Y' c' hc'
+        exact sheafH_filtered_colimit_comparison_isIso_zero_sheaf Y' c' hc'
     | succ n ih =>
         cases n with
         | zero =>
             intro J' _ _ Y' c' hc'
-            exact sheafH_filtered_colimit_comparison_isIso_one Y' c' hc'
+            exact sheafH_filtered_colimit_comparison_isIso_one_sheaf Y' c' hc'
         | succ m =>
             intro J' _ _ Y' c' hc'
             letI : Zero (TopCat.Sheaf AddCommGrpCat.{u} X) := Limits.HasZeroObject.zero' _
@@ -2323,6 +2315,25 @@ private theorem sheafH_filtered_colimit_presheafCocone_sheafToPresheaf
   cases c'
   rfl
 
+private noncomputable def sheafH_filtered_colimit_presheafCocone_isColimit
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    (c : Cocone Y) (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
+    IsColimit (sheafH_filtered_colimit_presheafCocone Y hY c hc_pt) := by
+  let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
+  let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
+  letI : CreatesColimit Ysh
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    createsFilteredColimit Ysh
+  simpa [Ysh, csh, sheafH_filtered_colimit_presheafDiagram,
+    sheafH_filtered_colimit_presheafCocone] using
+    (liftedColimitIsColimit
+      (F := sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (K := Ysh) (c := c) hc)
+
 /-- The cohomology diagram attached to a presheaf diagram whose stages are sheaves. -/
 noncomputable def sheafH_presheafDiagram
     {X : TopCat.{u}}
@@ -2373,6 +2384,284 @@ noncomputable def sheafH_filtered_colimit_comparison_presheaf
   simp [sheafH_presheafDiagram, sheafH_filtered_colimit_comparison_presheaf,
     sheafH_filtered_colimit_presheafCocone]
 
+/-- In degree `0`, the presheaf-boundary filtered-colimit comparison is the canonical
+isomorphism obtained from the associated sheaf diagram. -/
+noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    (c : Cocone Y) (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
+    colimit (sheafH_presheafDiagram Y hY 0) ≅
+      AddCommGrpCat.of (Sheaf.H (⟨c.pt, hc_pt⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) 0) := by
+  let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
+  let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
+  let hcsh : IsColimit csh :=
+    sheafH_filtered_colimit_presheafCocone_isColimit Y hY c hc hc_pt
+  simpa [Ysh, csh, sheafH_presheafDiagram] using
+    (sheafH_filtered_colimit_comparison_zero_iso_sheaf (Y' := Ysh) (c' := csh) hcsh)
+
+@[simp] theorem sheafH_filtered_colimit_comparison_zero_iso_presheaf_hom
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    (c : Cocone Y) (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
+    (sheafH_filtered_colimit_comparison_zero_iso_presheaf
+      (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt)).hom =
+      sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt 0 := by
+  let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
+  let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
+  let hcsh : IsColimit csh :=
+    sheafH_filtered_colimit_presheafCocone_isColimit Y hY c hc hc_pt
+  change (sheafH_filtered_colimit_comparison_zero_iso_sheaf Ysh csh hcsh).hom =
+    sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt 0
+  rw [sheafH_filtered_colimit_comparison_zero_iso_sheaf_hom]
+  rfl
+
+/-- On a Noetherian space and for a filtered diagram, the degree-`0` presheaf-boundary
+comparison morphism `colim H⁰(F_j) ⟶ H⁰(colim F_j)` is an isomorphism. -/
+theorem sheafH_filtered_colimit_comparison_isIso_zero_presheaf
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    (c : Cocone Y) (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
+    IsIso (sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt 0) := by
+  rw [← sheafH_filtered_colimit_comparison_zero_iso_presheaf_hom
+    (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt)]
+  infer_instance
+
+/-- In degree `1`, the presheaf-boundary filtered-colimit comparison is obtained from the
+degree-`1` sheaf comparison for the associated sheaf diagram. -/
+noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    (c : Cocone Y) (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
+    colimit (sheafH_presheafDiagram Y hY 1) ≅
+      AddCommGrpCat.of (Sheaf.H (⟨c.pt, hc_pt⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) 1) := by
+  let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
+  let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
+  let hcsh : IsColimit csh :=
+    sheafH_filtered_colimit_presheafCocone_isColimit Y hY c hc hc_pt
+  simpa [Ysh, csh, sheafH_presheafDiagram] using
+    (sheafH_filtered_colimit_comparison_one_iso_sheaf (Y' := Ysh) (c' := csh) hcsh)
+
+@[simp] theorem sheafH_filtered_colimit_comparison_one_iso_presheaf_hom
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    (c : Cocone Y) (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
+    (sheafH_filtered_colimit_comparison_one_iso_presheaf
+      (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt)).hom =
+      sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt 1 := by
+  let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
+  let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
+  let hcsh : IsColimit csh :=
+    sheafH_filtered_colimit_presheafCocone_isColimit Y hY c hc hc_pt
+  change (sheafH_filtered_colimit_comparison_one_iso_sheaf Ysh csh hcsh).hom =
+    sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt 1
+  rw [sheafH_filtered_colimit_comparison_one_iso_sheaf_hom]
+  rfl
+
+/-- On a Noetherian space and for a filtered diagram, the degree-`1` presheaf-boundary
+comparison morphism `colim H¹(F_j) ⟶ H¹(colim F_j)` is an isomorphism. -/
+theorem sheafH_filtered_colimit_comparison_isIso_one_presheaf
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    (c : Cocone Y) (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
+    IsIso (sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt 1) := by
+  rw [← sheafH_filtered_colimit_comparison_one_iso_presheaf_hom
+    (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt)]
+  infer_instance
+
+/-- In degree `0`, the filtered-colimit comparison is the canonical isomorphism obtained by
+transporting `H⁰ ≅ (-)(⊤)` across the created presheaf colimit and evaluation at `⊤`. -/
+noncomputable def sheafH_filtered_colimit_comparison_zero_iso
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (c' : Cocone Y') (hc' : IsColimit c') :
+    colimit (Y' ⋙ sheafCohomologyFunctor X 0) ≅ AddCommGrpCat.of (Sheaf.H c'.pt 0) := by
+  haveI : CreatesColimit Y'
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    createsFilteredColimit Y'
+  simpa [sheafH_presheafDiagram_sheafToPresheaf,
+    sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf,
+    sheafH_filtered_colimit_presheafCocone_sheafToPresheaf] using
+    (sheafH_filtered_colimit_comparison_zero_iso_presheaf
+      (Y := Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (hY := fun j => (Y'.obj j).cond)
+      (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
+      (hc := isColimitOfPreserves
+        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc')
+      (hc_pt := c'.pt.cond))
+
+@[simp] theorem sheafH_filtered_colimit_comparison_zero_iso_hom
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (c' : Cocone Y') (hc' : IsColimit c') :
+    (sheafH_filtered_colimit_comparison_zero_iso Y' c' hc').hom =
+      sheafH_filtered_colimit_comparison Y' 0 c' := by
+  haveI : CreatesColimit Y'
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    createsFilteredColimit Y'
+  change
+    (sheafH_filtered_colimit_comparison_zero_iso_presheaf
+      (Y := Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (hY := fun j => (Y'.obj j).cond)
+      (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
+      (hc := isColimitOfPreserves
+        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc')
+      (hc_pt := c'.pt.cond)).hom =
+        sheafH_filtered_colimit_comparison Y' 0 c'
+  rw [sheafH_filtered_colimit_comparison_zero_iso_presheaf_hom]
+  let Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
+    sheafH_filtered_colimit_presheafDiagram
+      (Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (fun j => (Y'.obj j).cond)
+  let csh : Cocone Ysh :=
+    sheafH_filtered_colimit_presheafCocone
+      (Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (fun j => (Y'.obj j).cond)
+      ((sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
+      c'.pt.cond
+  change sheafH_filtered_colimit_comparison Ysh 0 csh =
+    sheafH_filtered_colimit_comparison Y' 0 c'
+  have hYsh : Ysh = Y' := by
+    dsimp [Ysh]
+    exact sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf (Y' := Y')
+  subst Ysh
+  have hcsh : csh = c' := by
+    dsimp [csh]
+    exact sheafH_filtered_colimit_presheafCocone_sheafToPresheaf (Y' := Y') (c' := c')
+  subst csh
+  rfl
+
+/-- On a Noetherian space and for a filtered diagram, the degree-`0` comparison morphism
+    `colim H⁰(F_j) ⟶ H⁰(colim F_j)` is an isomorphism. -/
+theorem sheafH_filtered_colimit_comparison_isIso_zero
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (c' : Cocone Y') (hc' : IsColimit c') :
+    IsIso (sheafH_filtered_colimit_comparison Y' 0 c') := by
+  haveI : CreatesColimit Y'
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    createsFilteredColimit Y'
+  simpa [sheafH_presheafDiagram_sheafToPresheaf,
+    sheafH_filtered_colimit_comparison_presheaf,
+    sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf,
+    sheafH_filtered_colimit_presheafCocone_sheafToPresheaf] using
+    (sheafH_filtered_colimit_comparison_isIso_zero_presheaf
+      (Y := Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (hY := fun j => (Y'.obj j).cond)
+      (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
+      (hc := isColimitOfPreserves
+        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc')
+      (hc_pt := c'.pt.cond))
+
+/-- In degree `1`, the filtered-colimit comparison is obtained by identifying `H¹`
+with the cokernel of top sections for the injective-replacement short exact sequence,
+commuting filtered colimits with that cokernel, and then applying the colimit-level
+`H¹ ≅ cokernel` identification. -/
+noncomputable def sheafH_filtered_colimit_comparison_one_iso
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (c' : Cocone Y') (hc' : IsColimit c') :
+    colimit (Y' ⋙ sheafCohomologyFunctor X 1) ≅ AddCommGrpCat.of (Sheaf.H c'.pt 1) := by
+  haveI : CreatesColimit Y'
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    createsFilteredColimit Y'
+  simpa [sheafH_presheafDiagram_sheafToPresheaf,
+    sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf,
+    sheafH_filtered_colimit_presheafCocone_sheafToPresheaf] using
+    (sheafH_filtered_colimit_comparison_one_iso_presheaf
+      (Y := Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (hY := fun j => (Y'.obj j).cond)
+      (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
+      (hc := isColimitOfPreserves
+        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc')
+      (hc_pt := c'.pt.cond))
+
+@[simp] theorem sheafH_filtered_colimit_comparison_one_iso_hom
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (c' : Cocone Y') (hc' : IsColimit c') :
+    (sheafH_filtered_colimit_comparison_one_iso Y' c' hc').hom =
+      sheafH_filtered_colimit_comparison Y' 1 c' := by
+  haveI : CreatesColimit Y'
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    createsFilteredColimit Y'
+  change
+    (sheafH_filtered_colimit_comparison_one_iso_presheaf
+      (Y := Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (hY := fun j => (Y'.obj j).cond)
+      (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
+      (hc := isColimitOfPreserves
+        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc')
+      (hc_pt := c'.pt.cond)).hom =
+        sheafH_filtered_colimit_comparison Y' 1 c'
+  rw [sheafH_filtered_colimit_comparison_one_iso_presheaf_hom]
+  let Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
+    sheafH_filtered_colimit_presheafDiagram
+      (Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (fun j => (Y'.obj j).cond)
+  let csh : Cocone Ysh :=
+    sheafH_filtered_colimit_presheafCocone
+      (Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (fun j => (Y'.obj j).cond)
+      ((sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
+      c'.pt.cond
+  change sheafH_filtered_colimit_comparison Ysh 1 csh =
+    sheafH_filtered_colimit_comparison Y' 1 c'
+  have hYsh : Ysh = Y' := by
+    dsimp [Ysh]
+    exact sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf (Y' := Y')
+  subst Ysh
+  have hcsh : csh = c' := by
+    dsimp [csh]
+    exact sheafH_filtered_colimit_presheafCocone_sheafToPresheaf (Y' := Y') (c' := c')
+  subst csh
+  rfl
+
+/-- On a Noetherian space and for a filtered diagram, the degree-`1` comparison morphism
+    `colim H¹(F_j) ⟶ H¹(colim F_j)` is an isomorphism. -/
+theorem sheafH_filtered_colimit_comparison_isIso_one
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (c' : Cocone Y') (hc' : IsColimit c') :
+    IsIso (sheafH_filtered_colimit_comparison Y' 1 c') := by
+  haveI : CreatesColimit Y'
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    createsFilteredColimit Y'
+  simpa [sheafH_presheafDiagram_sheafToPresheaf,
+    sheafH_filtered_colimit_comparison_presheaf,
+    sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf,
+    sheafH_filtered_colimit_presheafCocone_sheafToPresheaf] using
+    (sheafH_filtered_colimit_comparison_isIso_one_presheaf
+      (Y := Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (hY := fun j => (Y'.obj j).cond)
+      (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
+      (hc := isColimitOfPreserves
+        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc')
+      (hc_pt := c'.pt.cond))
+
 /-- The concrete filtered-colimit comparison isomorphism, stated at the presheaf boundary:
 if the stages and the cocone point are sheaves, then the canonical comparison for the
 associated sheaf diagram is an isomorphism. -/
@@ -2387,15 +2676,8 @@ theorem sheafH_filtered_colimit_comparison_isIso_presheaf
     IsIso (sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt n) := by
   let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
   let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
-  have hcsh : IsColimit csh := by
-    letI : CreatesColimit Ysh
-        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
-      createsFilteredColimit Ysh
-    simpa [Ysh, csh, sheafH_filtered_colimit_presheafDiagram,
-      sheafH_filtered_colimit_presheafCocone] using
-      (liftedColimitIsColimit
-        (F := sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-        (K := Ysh) (c := c) hc)
+  have hcsh : IsColimit csh :=
+    sheafH_filtered_colimit_presheafCocone_isColimit Y hY c hc hc_pt
   simpa [Ysh, csh, sheafH_presheafDiagram, sheafH_filtered_colimit_comparison_presheaf] using
     (sheafH_filtered_colimit_comparison_isIso (Y' := Ysh) (n := n) (c' := csh) hcsh)
 
