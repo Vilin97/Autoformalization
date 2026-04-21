@@ -213,17 +213,26 @@ instance {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) : Mono (openHom h) := by
   delta openHom
   apply Functor.map_mono (presheafToSheaf _ _)
 
+abbrev sHomVal {X : TopCat.{u}} {U : Opens X} {F : Presheaf AddCommGrpCat.{u} X}
+    (hF : F.IsSheaf) (s : F.obj (op U)) : (zeroOutsideInt U).val ⟶ F :=
+  sheafifyLift _ (Presheaf.zeroOutside.sHom s) hF
+
 @[simps]
 def sHom {X : TopCat.{u}} {U : Opens X} {F : Sheaf AddCommGrpCat.{u} X}
     (s : F.presheaf.obj (op U)) : zeroOutsideInt U ⟶ F where
-  val := sheafifyLift _ (Presheaf.zeroOutside.sHom s) F.cond
+  val := sHomVal F.cond s
+
+theorem sHomVal_app_generator {X : TopCat.{u}} {U : Opens X}
+    {F : Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) (s : F.obj (op U)) :
+    (sHomVal hF s).app (op U) (generator U) = s := by
+  delta generator
+  erw [← ConcreteCategory.comp_apply, ← NatTrans.comp_app, toSheafify_sheafifyLift]
+  exact Presheaf.zeroOutside.sHom_app_generator s
 
 theorem sHom_app_generator {X : TopCat.{u}} {U : Opens X}
     {F : Sheaf AddCommGrpCat.{u} X} (s : F.presheaf.obj (op U)) :
     (sHom s).val.app (op U) (generator U) = s := by
-  delta generator
-  erw [sHom_val, ← ConcreteCategory.comp_apply, ← NatTrans.comp_app, toSheafify_sheafifyLift]
-  exact Presheaf.zeroOutside.sHom_app_generator s
+  exact sHomVal_app_generator F.cond s
 
 theorem openHom_val_app_generator {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U) :
     (openHom h).val.app (op V) (generator V) =

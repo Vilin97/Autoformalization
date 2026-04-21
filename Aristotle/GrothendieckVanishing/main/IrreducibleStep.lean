@@ -32,10 +32,9 @@ private theorem sHom_stalk_bijective_at
       ∃ k : ℤ, a = k • R.germ U x hxU s) :
     Function.Bijective (ConcreteCategory.hom
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-        (TopCat.Sheaf.zeroOutsideInt.sHom (F := ⟨R, hRsh⟩) s).val)) := by
-  let Rsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨R, hRsh⟩
+        (TopCat.Sheaf.zeroOutsideInt.sHomVal hRsh s))) := by
   let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  let sHom_x := ConcreteCategory.hom (T.map (TopCat.Sheaf.zeroOutsideInt.sHom (F := Rsh) s).val)
+  let sHom_x := ConcreteCategory.hom (T.map (TopCat.Sheaf.zeroOutsideInt.sHomVal hRsh s))
   let i_x := ConcreteCategory.hom (T.map i)
   have hi_inj : Function.Injective i_x :=
     TopCat.Presheaf.stalkFunctor_map_injective_of_app_injective (f := i)
@@ -48,12 +47,12 @@ private theorem sHom_stalk_bijective_at
     (i_x (R.germ U x hxU s))
   have hc_ne : c ≠ 0 := fun hc0 => by rw [hc0, zero_smul] at hc; exact hi_s_ne hc
   have h_sHom_app :
-      (TopCat.Sheaf.zeroOutsideInt.sHom (F := Rsh) s).val.app (op U)
+      (TopCat.Sheaf.zeroOutsideInt.sHomVal hRsh s).app (op U)
         (TopCat.Sheaf.zeroOutsideInt.generator U) = s :=
-    TopCat.Sheaf.zeroOutsideInt.sHom_app_generator (F := Rsh) s
+    TopCat.Sheaf.zeroOutsideInt.sHomVal_app_generator hRsh s
   have h_sHom_gen : sHom_x ((TopCat.Sheaf.zeroOutsideInt U).presheaf.germ U x hxU
       (TopCat.Sheaf.zeroOutsideInt.generator U)) = R.germ U x hxU s := by
-    show T.map (TopCat.Sheaf.zeroOutsideInt.sHom (F := Rsh) s).val _ = _
+    show T.map (TopCat.Sheaf.zeroOutsideInt.sHomVal hRsh s) _ = _
     rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
     simpa using congrArg (R.germ U x hxU) h_sHom_app
   have h_surj : Function.Surjective sHom_x := by
@@ -231,8 +230,7 @@ theorem exists_good_section
       ∀ (x : X) (_ : x ∈ V'),
         Function.Bijective (ConcreteCategory.hom
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-            (TopCat.Sheaf.zeroOutsideInt.sHom
-              (F := (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) s).val)) := by
+            (TopCat.Sheaf.zeroOutsideInt.sHomVal hRsh s))) := by
   obtain ⟨V', hV'V, hV'ne, s, hgen⟩ := exists_section_generating_stalks (R := R) hRsh i hR
   exact ⟨V', hV'V, hV'ne, s, fun x hx =>
     sHom_stalk_bijective_at (R := R) hV'V hRsh i s x hx (hgen x hx).1 (hgen x hx).2⟩
@@ -254,15 +252,14 @@ theorem subsheaf_contains_zeroOutsideInt
       (∀ (x : X) (_ : x ∈ V'),
         Function.Bijective (ConcreteCategory.hom
           ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map j))) := by
-  let Rsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨R, hRsh⟩
   obtain ⟨V', hle, hne, s, hbij⟩ :=
     exists_good_section (R := R) hRsh i hR
   let j : (TopCat.Sheaf.zeroOutsideInt V').val ⟶ R :=
-    (TopCat.Sheaf.zeroOutsideInt.sHom (F := Rsh) s).val
+    TopCat.Sheaf.zeroOutsideInt.sHomVal hRsh s
   have hj_bij : ∀ (x : X) (_ : x ∈ V'),
       Function.Bijective (ConcreteCategory.hom
         ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map j)) := by
-    simpa [j, Rsh] using hbij
+    simpa [j] using hbij
   refine ⟨V', hle, hne, j, ?_, hj_bij⟩
   haveI : ∀ x, Mono ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
       j) := fun y => by
