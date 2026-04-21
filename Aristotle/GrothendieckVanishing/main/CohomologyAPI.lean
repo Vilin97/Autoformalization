@@ -27,6 +27,8 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
   `X₂(⊤) → X₃(⊤)` when `H¹(X₂)=0`
 * `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf`: presheaf-boundary wrapper for
   the same `H¹` cokernel identification
+* `sheafH_extClassIso_of_subsingleton_middle_presheaf`: presheaf-boundary wrapper for
+  the higher-degree connecting isomorphism
 * `epi_app_top_of_subsingleton_sheafH1`: H^1 vanishing gives surjectivity on top sections
 * `sheafH0_surj_of_epi_app_top`: surjectivity on top sections gives H^0 surjectivity
 * `sheafH_subsingleton_H1_via_epi_app_top_presheaf`: presheaf-boundary H^1 vanishing via
@@ -982,6 +984,46 @@ noncomputable def sheafH_extClassIso_of_subsingleton_middle {X : TopCat.{u}}
         ((sheafH_extClassIso_of_subsingleton_middle hS n h₂n h₂succ).hom) y =
       y.comp hS.extClass rfl := by
   rfl
+
+/-- Presheaf-boundary wrapper for `sheafH_extClassIso_of_subsingleton_middle`: if
+`0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves and the
+middle cohomology groups in degrees `n` and `n + 1` are subsingleton, then the connecting
+morphism induces an isomorphism `H^n(F₃) ≅ H^(n+1)(F₁)`. -/
+noncomputable def sheafH_extClassIso_of_subsingleton_middle_presheaf {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
+    (hS : (ShortComplex.mk
+      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f)
+      (Sheaf.Hom.mk g)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg)).ShortExact)
+    (n : ℕ)
+    (h₂n : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
+    (h₂succ : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1))) :
+    AddCommGrpCat.of (Sheaf.H ((⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) ≅
+      AddCommGrpCat.of (Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)) := by
+  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
+    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (Sheaf.Hom.mk f)
+    (Sheaf.Hom.mk g)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hfg)
+  have hS' : S.ShortExact := by
+    simpa [S] using hS
+  have h₂n' : Subsingleton (Sheaf.H S.X₂ n) := by
+    simpa [S] using h₂n
+  have h₂succ' : Subsingleton (Sheaf.H S.X₂ (n + 1)) := by
+    simpa [S] using h₂succ
+  simpa [S] using
+    sheafH_extClassIso_of_subsingleton_middle (S := S) hS' n h₂n' h₂succ'
 
 /-- Naturality of the sheaf-level connecting isomorphism for morphisms of short exact
     sequences, under the corresponding middle-degree vanishing hypotheses. -/
