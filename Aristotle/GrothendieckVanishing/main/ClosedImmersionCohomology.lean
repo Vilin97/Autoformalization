@@ -316,6 +316,33 @@ theorem closedImmersionSES_shortExact
   exact ShortComplex.ShortExact.mk'
     (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel _)) inferInstance inferInstance
 
+/-- Closed-immersion presheaf wrapper: if the kernel term of the closed-immersion
+short exact sequence and the pullback to the closed subset have subsingleton
+cohomology in degree `n`, then so does the ambient sheaf. -/
+theorem subsingleton_sheafH_of_closedImmersion_middle_presheaf
+    {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) (n : ℕ)
+    (h₁ : Subsingleton
+      (Sheaf.H ((closedImmersionSES (Z := Z) (hZ := hZ) (F := F) hF).X₁) n))
+    (h₃ : Subsingleton
+      (Sheaf.H
+        ((TopCat.Sheaf.pullback AddCommGrpCat.{u} (TopCat.closedIncl hZ)).obj
+          (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n)) :
+    Subsingleton (Sheaf.H (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
+  let i := TopCat.closedIncl hZ
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+  let FZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh)
+  let S := closedImmersionSES (Z := Z) (hZ := hZ) (F := F) hF
+  have hSE := closedImmersionSES_shortExact (Z := Z) (hZ := hZ) (F := F) hF
+  have h₁' : Subsingleton (Sheaf.H S.X₁ n) := by
+    simpa [S] using h₁
+  have h₃' : Subsingleton (Sheaf.H FZ n) := by
+    simpa [i, Fsh, FZ] using h₃
+  have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
+    simpa [S, closedImmersionSES, i, Fsh, FZ] using
+      PushforwardHVanishing Z hZ FZ.cond n h₃'
+  simpa [Fsh] using subsingleton_sheafH_of_shortExact_middle hSE n h₁' hPush
+
 /-- Vanishing for a sheaf supported on the complement of an open V, via closed-immersion SES.
     Given:
     - C is a sheaf on irreducible Noetherian X
@@ -355,13 +382,10 @@ theorem closedComplementVanishing
         · exact stalk_zero_of_shortExact_kernel hSE x
             (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b) a)
     simpa using hSX₁_zero'
-  exact subsingleton_sheafH_of_shortExact_middle hSE n
-    (_root_.sheafH_subsingleton_of_isZero S.X₁ hSX₁_zero n)
+  exact subsingleton_sheafH_of_closedImmersion_middle_presheaf
+    (Z := Y) (hZ := hYcl) (F := C) hC n
     (by
-      let e : Sheaf.H CY n ≃ Sheaf.H S.X₃ n := by
-        simpa [S, closedImmersionSES, i, CY] using
-          Equiv.ofBijective
-            (ConcreteCategory.hom (PushforwardHIso Y hYcl CY.cond n).hom)
-            (ConcreteCategory.bijective_of_isIso (PushforwardHIso Y hYcl CY.cond n).hom)
-      exact (e.subsingleton_congr).mp
-        (ih (TopCat.of Y) n (G := CY.val) CY.cond hY_dim_lt hn))
+      simpa [S] using _root_.sheafH_subsingleton_of_isZero S.X₁ hSX₁_zero n)
+    (by
+      simpa [i, Csh, CY] using
+        ih (TopCat.of Y) n (G := CY.val) CY.cond hY_dim_lt hn)
