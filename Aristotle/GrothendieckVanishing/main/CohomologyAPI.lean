@@ -33,8 +33,8 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
   same `H¹` cokernel identification
 * `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural`: presheaf-boundary
   naturality for the same `H¹` cokernel identification
-* `sheafH_extClassIso_of_subsingleton_middle_presheaf`: presheaf-boundary wrapper for
-  the higher-degree connecting isomorphism
+* `sheafH_extClassIso_of_subsingleton_middle_presheaf`: presheaf-boundary form of the
+  higher-degree connecting isomorphism
 * `sheafH_extClassIso_of_subsingleton_middle_presheaf_natural`: presheaf-boundary
   naturality for the same connecting isomorphism
 * `epi_app_top_of_subsingleton_sheafH1_presheaf`: presheaf-boundary H^1 vanishing gives
@@ -1486,26 +1486,7 @@ noncomputable def sheafH_extClassAddEquiv_of_subsingleton_middle {X : TopCat.{u}
     Sheaf.H S.X₃ n ≃+ Sheaf.H S.X₁ (n + 1) :=
   extClass_postcompAddEquiv_of_subsingleton_middle _ hS n h₂n h₂succ
 
-/-- The sheaf-cohomology connecting morphism as an `AddCommGrpCat` isomorphism, assuming the
-    middle sheaf cohomology groups in degrees `n` and `n + 1` are subsingleton. -/
-noncomputable def sheafH_extClassIso_of_subsingleton_middle {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) (n : ℕ)
-    (h₂n : Subsingleton (Sheaf.H S.X₂ n))
-    (h₂succ : Subsingleton (Sheaf.H S.X₂ (n + 1))) :
-    AddCommGrpCat.of (Sheaf.H S.X₃ n) ≅ AddCommGrpCat.of (Sheaf.H S.X₁ (n + 1)) :=
-  (sheafH_extClassAddEquiv_of_subsingleton_middle hS n h₂n h₂succ).toAddCommGrpIso
-
-@[simp] theorem sheafH_extClassIso_of_subsingleton_middle_hom_apply {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) (n : ℕ)
-    (h₂n : Subsingleton (Sheaf.H S.X₂ n))
-    (h₂succ : Subsingleton (Sheaf.H S.X₂ (n + 1)))
-    (y : Sheaf.H S.X₃ n) :
-    ConcreteCategory.hom
-        ((sheafH_extClassIso_of_subsingleton_middle hS n h₂n h₂succ).hom) y =
-      y.comp hS.extClass rfl := by
-  rfl
-
-/-- Presheaf-boundary wrapper for `sheafH_extClassIso_of_subsingleton_middle`: if
+/-- Presheaf-boundary form of the higher-degree connecting isomorphism: if
 `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves and the
 middle cohomology groups in degrees `n` and `n + 1` are subsingleton, then the connecting
 morphism induces an isomorphism `H^n(F₃) ≅ H^(n+1)(F₁)`. -/
@@ -1543,24 +1524,85 @@ noncomputable def sheafH_extClassIso_of_subsingleton_middle_presheaf {X : TopCat
   have h₂succ' : Subsingleton (Sheaf.H S.X₂ (n + 1)) := by
     simpa [S] using h₂succ
   simpa [S] using
-    sheafH_extClassIso_of_subsingleton_middle (S := S) hS' n h₂n' h₂succ'
+    (extClass_postcompAddEquiv_of_subsingleton_middle _ hS' n h₂n' h₂succ').toAddCommGrpIso
 
-/-- Naturality of the sheaf-level connecting isomorphism for morphisms of short exact
-    sequences, under the corresponding middle-degree vanishing hypotheses. -/
-theorem sheafH_extClassIso_of_subsingleton_middle_natural {X : TopCat.{u}}
-    {S₁ S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS₁ : S₁.ShortExact) (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂) (n : ℕ)
-    (h₁₂n : Subsingleton (Sheaf.H S₁.X₂ n))
-    (h₁₂succ : Subsingleton (Sheaf.H S₁.X₂ (n + 1)))
-    (h₂₂n : Subsingleton (Sheaf.H S₂.X₂ n))
-    (h₂₂succ : Subsingleton (Sheaf.H S₂.X₂ (n + 1))) :
-    (sheafH_extClassIso_of_subsingleton_middle hS₁ n h₁₂n h₁₂succ).hom ≫
-        (sheafCohomologyFunctor X (n + 1)).map φ.τ₁ =
-      (sheafCohomologyFunctor X n).map φ.τ₃ ≫
-        (sheafH_extClassIso_of_subsingleton_middle hS₂ n h₂₂n h₂₂succ).hom := by
-  ext y
-  simpa [sheafH_extClassIso_of_subsingleton_middle_hom_apply] using
-    (sheafCohomologyFunctor_map_extClass_naturality hS₁ hS₂ φ n y)
+@[simp] theorem sheafH_extClassIso_of_subsingleton_middle_presheaf_hom_apply {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
+    (hS : (ShortComplex.mk
+      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f)
+      (Sheaf.Hom.mk g)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg)).ShortExact)
+    (n : ℕ)
+    (h₂n : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
+    (h₂succ : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)))
+    (y : Sheaf.H ((⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) :
+    ConcreteCategory.hom
+        ((sheafH_extClassIso_of_subsingleton_middle_presheaf
+            h₁ h₂ h₃ hfg hS n h₂n h₂succ).hom) y =
+      y.comp hS.extClass rfl := by
+  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
+    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (Sheaf.Hom.mk f)
+    (Sheaf.Hom.mk g)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hfg)
+  have hS' : S.ShortExact := by
+    simpa [S] using hS
+  have h₂n' : Subsingleton (Sheaf.H S.X₂ n) := by
+    simpa [S] using h₂n
+  have h₂succ' : Subsingleton (Sheaf.H S.X₂ (n + 1)) := by
+    simpa [S] using h₂succ
+  change (extClass_postcompAddEquiv_of_subsingleton_middle _ hS' n h₂n' h₂succ') y =
+      y.comp hS.extClass rfl
+  have hh : hS' = hS := by
+    apply Subsingleton.elim
+  subst hh
+  rfl
+
+/-- Sheaf-level wrapper for `sheafH_extClassIso_of_subsingleton_middle_presheaf`. -/
+noncomputable def sheafH_extClassIso_of_subsingleton_middle {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) (n : ℕ)
+    (h₂n : Subsingleton (Sheaf.H S.X₂ n))
+    (h₂succ : Subsingleton (Sheaf.H S.X₂ (n + 1))) :
+    AddCommGrpCat.of (Sheaf.H S.X₃ n) ≅ AddCommGrpCat.of (Sheaf.H S.X₁ (n + 1)) := by
+  simpa using sheafH_extClassIso_of_subsingleton_middle_presheaf
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+    (by simpa using hS)
+    n
+    (by simpa using h₂n)
+    (by simpa using h₂succ)
+
+@[simp] theorem sheafH_extClassIso_of_subsingleton_middle_hom_apply {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) (n : ℕ)
+    (h₂n : Subsingleton (Sheaf.H S.X₂ n))
+    (h₂succ : Subsingleton (Sheaf.H S.X₂ (n + 1)))
+    (y : Sheaf.H S.X₃ n) :
+    ConcreteCategory.hom
+        ((sheafH_extClassIso_of_subsingleton_middle hS n h₂n h₂succ).hom) y =
+      y.comp hS.extClass rfl := by
+  simpa using sheafH_extClassIso_of_subsingleton_middle_presheaf_hom_apply
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+    (by simpa using hS)
+    n
+    (by simpa using h₂n)
+    (by simpa using h₂succ)
+    y
 
 /-- Presheaf-boundary naturality of `sheafH_extClassIso_of_subsingleton_middle_presheaf`
     for a morphism between two short exact sequences of presheaves. -/
@@ -1642,6 +1684,39 @@ theorem sheafH_extClassIso_of_subsingleton_middle_presheaf_natural {X : TopCat.{
     simpa [S₂] using h₂₂n
   have h₂₂succ' : Subsingleton (Sheaf.H S₂.X₂ (n + 1)) := by
     simpa [S₂] using h₂₂succ
-  simpa [S₁, S₂, φ] using
-    (sheafH_extClassIso_of_subsingleton_middle_natural
-      (S₁ := S₁) (S₂ := S₂) hS₁' hS₂' φ n h₁₂n' h₁₂succ' h₂₂n' h₂₂succ')
+  ext y
+  simpa [S₁, S₂, φ, ConcreteCategory.comp_apply] using
+    (sheafCohomologyFunctor_map_extClass_naturality hS₁' hS₂' φ n y)
+
+/-- Sheaf-level wrapper for
+`sheafH_extClassIso_of_subsingleton_middle_presheaf_natural`. -/
+theorem sheafH_extClassIso_of_subsingleton_middle_natural {X : TopCat.{u}}
+    {S₁ S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS₁ : S₁.ShortExact) (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂) (n : ℕ)
+    (h₁₂n : Subsingleton (Sheaf.H S₁.X₂ n))
+    (h₁₂succ : Subsingleton (Sheaf.H S₁.X₂ (n + 1)))
+    (h₂₂n : Subsingleton (Sheaf.H S₂.X₂ n))
+    (h₂₂succ : Subsingleton (Sheaf.H S₂.X₂ (n + 1))) :
+    (sheafH_extClassIso_of_subsingleton_middle hS₁ n h₁₂n h₁₂succ).hom ≫
+        (sheafCohomologyFunctor X (n + 1)).map φ.τ₁ =
+      (sheafCohomologyFunctor X n).map φ.τ₃ ≫
+        (sheafH_extClassIso_of_subsingleton_middle hS₂ n h₂₂n h₂₂succ).hom := by
+  simpa using sheafH_extClassIso_of_subsingleton_middle_presheaf_natural
+    (F₁₁ := S₁.X₁.val) (F₁₂ := S₁.X₂.val) (F₁₃ := S₁.X₃.val)
+    (F₂₁ := S₂.X₁.val) (F₂₂ := S₂.X₂.val) (F₂₃ := S₂.X₃.val)
+    S₁.X₁.cond S₁.X₂.cond S₁.X₃.cond
+    S₂.X₁.cond S₂.X₂.cond S₂.X₃.cond
+    (f₁ := S₁.f.val) (g₁ := S₁.g.val)
+    (show S₁.f.val ≫ S₁.g.val = 0 from congrArg Sheaf.Hom.val S₁.zero)
+    (f₂ := S₂.f.val) (g₂ := S₂.g.val)
+    (show S₂.f.val ≫ S₂.g.val = 0 from congrArg Sheaf.Hom.val S₂.zero)
+    (by simpa using hS₁)
+    (by simpa using hS₂)
+    (τ₁ := φ.τ₁.val) (τ₂ := φ.τ₂.val) (τ₃ := φ.τ₃.val)
+    (by simpa using congrArg Sheaf.Hom.val φ.comm₁₂)
+    (by simpa using congrArg Sheaf.Hom.val φ.comm₂₃)
+    n
+    (by simpa using h₁₂n)
+    (by simpa using h₁₂succ)
+    (by simpa using h₂₂n)
+    (by simpa using h₂₂succ)
