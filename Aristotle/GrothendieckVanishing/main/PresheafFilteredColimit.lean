@@ -1108,19 +1108,20 @@ theorem sheafH_filtered_colimit_surj
     have hc_psh := isColimitOfPreserves (sheafToPresheaf _ _) hc'
     have hc_top := isColimitOfPreserves
       ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)) hc_psh
-    let x_sec := sheafH0EquivSections c'.pt x
+    let x_sec := sheafH0EquivSections_presheaf c'.pt.cond x
     obtain ⟨j, s_j, hs_j⟩ := Concrete.isColimit_exists_rep _ hc_top x_sec
-    let y := (sheafH0EquivSections (Y'.obj j)).symm s_j
+    let y := (sheafH0EquivSections_presheaf (Y'.obj j).cond).symm s_j
     refine ⟨j, y, ?_⟩
     have h_nat :
-        sheafH0EquivSections c'.pt
+        sheafH0EquivSections_presheaf c'.pt.cond
           (ConcreteCategory.hom ((sheafCohomologyFunctor X 0).map (c'.ι.app j)) y) =
         ConcreteCategory.hom ((c'.ι.app j).val.app (op ⊤))
-          (sheafH0EquivSections (Y'.obj j) y) := by
+          (sheafH0EquivSections_presheaf (Y'.obj j).cond y) := by
       simpa [sheafCohomologyFunctor_map_apply] using
-        (sheafH0EquivSections_natural (f := c'.ι.app j) (x := y))
-    apply (sheafH0EquivSections c'.pt).injective
-    change sheafH0EquivSections c'.pt
+        (sheafH0EquivSections_presheaf_natural
+          (hF := (Y'.obj j).cond) (hG := c'.pt.cond) (f := (c'.ι.app j).val) (x := y))
+    apply (sheafH0EquivSections_presheaf c'.pt.cond).injective
+    change sheafH0EquivSections_presheaf c'.pt.cond
       (ConcreteCategory.hom ((sheafCohomologyFunctor X 0).map (c'.ι.app j)) y) = x_sec
     rw [h_nat, AddEquiv.apply_symm_apply]
     exact hs_j

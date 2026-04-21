@@ -22,7 +22,9 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `stalk_zero_of_ses_g_iso`: stalk vanishing from SES with iso on `g`
 * `stalk_zero_of_shortExact_kernel`: stalk vanishing from SES kernel
 * `sheafH0EquivSections`: H^0(F) ≃+ F(⊤)
+* `sheafH0EquivSections_presheaf`: presheaf-boundary wrapper for `H^0(F) ≃+ F(⊤)`
 * `sheafH0EquivSections_natural`: naturality of the above
+* `sheafH0EquivSections_presheaf_natural`: presheaf-boundary naturality of the above
 * `sheafH1_cokernel_iso_of_subsingleton_middle`: `H¹(X₁)` as the cokernel of
   `X₂(⊤) → X₃(⊤)` when `H¹(X₂)=0`
 * `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf`: presheaf-boundary wrapper for
@@ -324,6 +326,14 @@ noncomputable def sheafH0EquivSections {X : TopCat.{u}}
         Limits.isTerminalTop).homAddEquiv _ F).trans
       (AddCommGrpCat.uliftZMultiplesAddEquiv _))
 
+/-- Presheaf-boundary wrapper for `sheafH0EquivSections`: if `F` is a sheaf, then `H F 0`
+    is equivalent to sections on `⊤`. -/
+noncomputable def sheafH0EquivSections_presheaf {X : TopCat.{u}}
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
+    Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 0 ≃+ F.obj (op ⊤) := by
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+  simpa [Fsh] using sheafH0EquivSections Fsh
+
 /-- Naturality of `sheafH0EquivSections`: composing `x` with `mk₀ f` at degree 0
     corresponds to applying `f.app(⊤)` at the sections level. -/
 lemma sheafH0EquivSections_natural {X : TopCat.{u}}
@@ -339,6 +349,22 @@ lemma sheafH0EquivSections_natural {X : TopCat.{u}}
   erw [Adjunction.homAddEquiv_apply, Adjunction.homAddEquiv_apply, key,
     Adjunction.homEquiv_naturality_right, Adjunction.homAddEquiv_apply]
   rfl
+
+/-- Presheaf-boundary naturality of `sheafH0EquivSections_presheaf`: composing `x`
+    with `mk₀ (Sheaf.Hom.mk f)` at degree 0 corresponds to applying `f.app(⊤)` on
+    sections. -/
+lemma sheafH0EquivSections_presheaf_natural {X : TopCat.{u}}
+    {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (hF : F.IsSheaf) (hG : G.IsSheaf) (f : F ⟶ G)
+    (x : Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 0) :
+    sheafH0EquivSections_presheaf hG
+      (x.comp (Ext.mk₀ (Sheaf.Hom.mk f)) (add_zero 0)) =
+    ConcreteCategory.hom (f.app (op ⊤)) (sheafH0EquivSections_presheaf hF x) := by
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+  let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
+  simpa [sheafH0EquivSections_presheaf, Fsh, Gsh] using
+    (sheafH0EquivSections_natural
+      (F := Fsh) (G := Gsh) (f := Sheaf.Hom.mk f) (x := x))
 
 /-- If `H¹(X₂)=0` in a short exact sequence `0 → X₁ → X₂ → X₃ → 0`, then `H¹(X₁)` is the
     cokernel of the map on top sections `X₂(⊤) → X₃(⊤)`. -/
