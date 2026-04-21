@@ -1158,7 +1158,12 @@ theorem sheafH_filtered_colimit_surj
     have hSE_j : ∀ j, (ShortComplex.mk (η.app j) (cokernel.π (η.app j))
         (cokernel.condition (η.app j))).ShortExact :=
       sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y')
-    obtain ⟨y, hy⟩ := sheafH_exists_preimage_extClass hSE n hI x
+    obtain ⟨y, hy⟩ := sheafH_exists_preimage_extClass_presheaf
+      S.X₁.cond S.X₂.cond S.X₃.cond
+      (f := S.f.val) (g := S.g.val)
+      (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+      (by simpa using hSE) n
+      (by simpa using hI) x
     obtain ⟨j₀, y_j, hy_j⟩ := ih (Y' := Q) qCocone hqColim y
     haveI : Mono (η.app j₀) := sheafH_filtered_colimit_succ_eta_mono (Y' := Y') j₀
     let x_j : Sheaf.H (Y'.obj j₀) (n + 1) := y_j.comp (hSE_j j₀).extClass rfl
