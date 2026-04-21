@@ -1143,8 +1143,13 @@ theorem sheafH_filtered_colimit_surj
     haveI hFlasqueInj : IsFlasqueSheaf (colimit Inj) :=
       isFlasque_filtered_colimit Inj (fun j => inferInstance) (colimit.isColimit Inj)
     have hI : Subsingleton (Sheaf.H injCocone.pt (n + 1)) := by
-      change Subsingleton (Sheaf.H (colimit Inj) (n + 1))
-      exact FlasqueVanishing _ _ n
+      let F : TopCat.Presheaf AddCommGrpCat.{u} X := injCocone.pt.val
+      have hF : F.IsSheaf := by
+        simpa [F] using injCocone.pt.cond
+      letI : IsFlasqueSheaf ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+        simpa [F, hF] using hFlasqueInj
+      simpa [F, hF] using
+        (sheafH_subsingleton_of_flasque_presheaf (X := X) (F := F) hF n)
     let Q := sheafH_filtered_colimit_succ_quotient Y'
     let qCocone := sheafH_filtered_colimit_succ_quotientCocone Y' c' hc'
     have hqColim : IsColimit qCocone :=
@@ -2093,9 +2098,21 @@ theorem sheafH_filtered_colimit_comparison_isIso
                   exact isFlasque_of_injective (Inj.obj j))
                 (colimit.isColimit Inj)
             have h_colim_n : Subsingleton (Sheaf.H injCocone.pt (m + 1)) := by
-              exact FlasqueVanishing _ _ m
+              let F : TopCat.Presheaf AddCommGrpCat.{u} X := injCocone.pt.val
+              have hF : F.IsSheaf := by
+                simpa [F] using injCocone.pt.cond
+              letI : IsFlasqueSheaf ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+                simpa [F, hF] using hFlasqueInj
+              simpa [F, hF] using
+                (sheafH_subsingleton_of_flasque_presheaf (X := X) (F := F) hF m)
             have h_colim_succ : Subsingleton (Sheaf.H injCocone.pt (m + 2)) := by
-              exact FlasqueVanishing _ _ (m + 1)
+              let F : TopCat.Presheaf AddCommGrpCat.{u} X := injCocone.pt.val
+              have hF : F.IsSheaf := by
+                simpa [F] using injCocone.pt.cond
+              letI : IsFlasqueSheaf ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+                simpa [F, hF] using hFlasqueInj
+              simpa [F, hF] using
+                (sheafH_subsingleton_of_flasque_presheaf (X := X) (F := F) hF (m + 1))
             let domainIso :=
               sheafH_filtered_colimit_succ_shiftDomainIso Y' (m + 1) h_mid_n h_mid_succ
             let codomainIso :=
