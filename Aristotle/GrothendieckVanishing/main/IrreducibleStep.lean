@@ -287,29 +287,22 @@ theorem subsheaf_zeroOutsideInt_vanishing
     (ih : VanishingIH.{u} (topologicalKrullDim X))
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
-  let Rsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨R, hRsh⟩
-  change Subsingleton (Sheaf.H Rsh m)
-  by_cases hR : IsZero Rsh
-  · simpa [Rsh] using sheafH_subsingleton_of_isZero_presheaf hRsh hR m
+  by_cases hR : IsZero (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)
+  · simpa using sheafH_subsingleton_of_isZero_presheaf hRsh hR m
   · obtain ⟨V', hV'le, hV'ne, j, hj_mono, hj_stalk⟩ :=
       (by
         exact subsheaf_contains_zeroOutsideInt (R := R) hRsh i (by
         intro hR0
         exact hR (IsZero.of_full_of_faithful_of_isZero
-          (TopCat.Sheaf.forget AddCommGrpCat.{u} X) Rsh hR0)))
+          (TopCat.Sheaf.forget AddCommGrpCat.{u} X)
+          (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) hR0)))
     haveI : Mono j := hj_mono
-    let jsh : TopCat.Sheaf.zeroOutsideInt V' ⟶ Rsh := Sheaf.Hom.mk j
-    haveI : Mono jsh := by
-      exact
-        (Sheaf.Hom.mono_iff_presheaf_mono
-          (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) jsh).2 inferInstance
-    let S := ShortComplex.mk jsh (cokernel.π jsh) (cokernel.condition jsh)
-    have hSE : S.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel jsh))
-      inferInstance inferInstance
-    exact subsingleton_sheafH_of_shortExact_middle hSE m
-      (zeroOutsideInt_cohomology_vanishing V' hV'ne ih m hm)
-      (closedComplementVanishing V' hV'ne (C := S.X₃.val) S.X₃.cond m ih
+    let C : TopCat.Sheaf AddCommGrpCat.{u} X :=
+      cokernel (show (TopCat.Sheaf.zeroOutsideInt V') ⟶
+          (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from
+            Sheaf.Hom.mk j)
+    have hC : Subsingleton (Sheaf.H C m) := by
+      exact closedComplementVanishing V' hV'ne (C := C.val) C.cond m ih
         (topologicalKrullDim_lt_coe_nat_of_isIrreducible_of_isClosed_of_lt_coe_nat_succ
           V'.2.isClosed_compl
           (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr
@@ -318,7 +311,12 @@ theorem subsheaf_zeroOutsideInt_vanishing
         (fun x hxV' b => cokernel_stalk_zero_of_stalk_surj
           (F := (TopCat.Sheaf.zeroOutsideInt V').val) (G := R)
           (hF := (TopCat.Sheaf.zeroOutsideInt V').cond) (hG := hRsh)
-          (f := j) (x := x) (hf := (hj_stalk x hxV').2) b))
+          (f := j) (x := x) (hf := (hj_stalk x hxV').2) b)
+    exact subsingleton_sheafH_of_shortExact_middle_presheaf
+      (hF := (TopCat.Sheaf.zeroOutsideInt V').cond) (hG := hRsh)
+      (f := j) m
+      (zeroOutsideInt_cohomology_vanishing V' hV'ne ih m hm)
+      (by simpa [C] using hC)
 
 /-- **Steps 3C + 4 + LES** (Hartshorne III.2.7): any locally surjective image of
     `zeroOutsideInt V` has vanishing cohomology in degree `m > dim X`. Uses third-term LES with
