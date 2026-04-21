@@ -182,12 +182,14 @@ theorem zeroOutsideInt_cohomology_vanishing
       topologicalKrullDim (Set.compl (V : Set X)) < ↑↑(m' + 1 : ℕ) :=
     topologicalKrullDim_subspace_lt_of_lt (X := X) (Set.compl (V : Set X))
       (by simpa [gt_iff_lt] using hm)
+  have hVcompl_lt_top : topologicalKrullDim (Set.compl (V : Set X)) < ⊤ :=
+    lt_of_lt_of_le hVcompl_lt_succ le_top
   have hVcompl_lt_X : topologicalKrullDim (Set.compl (V : Set X)) < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed_of_lt_coe_nat
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed
       V.2.isClosed_compl
       (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr
         (Opens.coe_eq_empty.not.mpr hV)))
-      hVcompl_lt_succ
+      hVcompl_lt_top
   have hVcompl_lt_m' : topologicalKrullDim (Set.compl (V : Set X)) < ↑↑(m' : ℕ) := by
     have hX_ne_bot : topologicalKrullDim X ≠ ⊥ := ne_bot_of_gt hVcompl_lt_X
     lift topologicalKrullDim X to ℕ∞ using hX_ne_bot with xdim

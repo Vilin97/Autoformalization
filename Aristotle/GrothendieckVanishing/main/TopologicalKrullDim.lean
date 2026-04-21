@@ -17,8 +17,6 @@ API for topological Krull dimension on irreducible spaces.
   finite, then `dim Y < dim X`
 - `topologicalKrullDim_lt_of_isIrreducible_of_isClosed`: proper closed subsets of
   irreducible spaces with finite dim have strictly smaller dim
-- `topologicalKrullDim_lt_of_isIrreducible_of_isClosed_of_lt_coe_nat`: same strict
-  inequality under a natural-number upper bound on the closed subspace dimension
 - `topologicalKrullDim_pos_iff_exists_irreducibleCloseds_ne_univ`: on an irreducible
   space, `dim > 0` iff there is a proper irreducible closed subset
 - `exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos`: on an irreducible
@@ -236,18 +234,6 @@ theorem topologicalKrullDim_lt_of_isIrreducible_of_isClosed {X : Type u} [Topolo
   exact topologicalKrullDim_lt_of_add_one_le_of_lt_top
     (topologicalKrullDim_add_one_le_of_isIrreducible_of_isClosed hY hne) hfin
 
-/-- On an irreducible space, a proper closed subset with topological Krull dimension bounded
-above by a natural number has strictly smaller Krull dimension. This packages the standard
-finiteness bridge from `< n` to `< ⊤`. -/
-theorem topologicalKrullDim_lt_of_isIrreducible_of_isClosed_of_lt_coe_nat
-    {X : Type u} [TopologicalSpace X] [IrreducibleSpace X] {Y : Set X}
-    (hY : IsClosed Y) (hne : Y ≠ Set.univ) {n : ℕ}
-    (hn : topologicalKrullDim Y < ↑↑(n : ℕ)) :
-    topologicalKrullDim Y < topologicalKrullDim X := by
-  exact topologicalKrullDim_lt_of_add_one_le_of_lt_top
-    (topologicalKrullDim_add_one_le_of_isIrreducible_of_isClosed hY hne)
-    (lt_of_lt_of_le hn le_top)
-
 /-- On an irreducible space, positive topological Krull dimension is equivalent to the
 existence of a proper irreducible closed subset. -/
 theorem topologicalKrullDim_pos_iff_exists_irreducibleCloseds_ne_univ {X : Type u}
@@ -282,9 +268,11 @@ theorem exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos
   have hZ_lt_nat :
       topologicalKrullDim (TopCat.of (Z : Set X)) < ↑↑(n : ℕ) := by
     simpa using topologicalKrullDim_subspace_lt_of_lt (X := X) (Z : Set X) hn
+  have hZ_lt_top : topologicalKrullDim (TopCat.of (Z : Set X)) < ⊤ :=
+    lt_of_lt_of_le hZ_lt_nat le_top
   refine ⟨Z, Z.isClosed, hZ_ne_univ, ?_⟩
-  exact topologicalKrullDim_lt_of_isIrreducible_of_isClosed_of_lt_coe_nat
-    (X := X) Z.isClosed hZ_ne_univ hZ_lt_nat
+  exact topologicalKrullDim_lt_of_isIrreducible_of_isClosed
+    (X := X) Z.isClosed hZ_ne_univ hZ_lt_top
 
 /-- On an irreducible space of positive Krull dimension, one can choose a proper
 closed subset `Z ⊊ X` of strictly smaller Krull dimension, and the ambient cohomological bound
