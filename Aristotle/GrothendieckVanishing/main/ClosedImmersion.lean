@@ -24,6 +24,7 @@ import Mathlib.Topology.Sheaves.Stalks
   - `closedIncl`: closed inclusion `s ↪ X` as a morphism in `TopCat`
   - `closedIncl_isClosedEmbedding`, `closedIncl_isInducing`: basic properties
   - `stalkFunctor_map_iso_toSheafify`: stalk of sheafification map is an iso
+  - `closedIncl_counit_isIso_presheaf`: presheaf-boundary counit iso for closed subspace
   - `closedIncl_counit_isIso`: pushforward–pullback counit is an iso on closed subspace
   - `closedIncl_unit_stalk_isIso`: adjunction unit is a stalk iso at points in the subspace
 -/
@@ -145,7 +146,7 @@ theorem stalkFunctor_map_iso_toSheafify
       ((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
         (T := CategoryTheory.toSheafify (Opens.grothendieckTopology X) P)).mp hls) x
 
-theorem closedIncl_counit_isIso
+theorem closedIncl_counit_isIso_presheaf
     {C : Type*} [Category.{u} C]
     {FC : C → C → Type*} {CC : C → Type u}
     [∀ (X Y : C), FunLike (FC X Y) (CC X) (CC Y)]
@@ -155,8 +156,11 @@ theorem closedIncl_counit_isIso
     [PreservesFilteredColimits (forget C)]
     [(forget C).ReflectsIsomorphisms]
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    (F : TopCat.Sheaf C (TopCat.of s)) :
-    IsIso ((TopCat.Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)).counit.app F) := by
+    {F : TopCat.Presheaf C (TopCat.of s)} (hF : F.IsSheaf) :
+    IsIso ((TopCat.Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)).counit.app
+      (⟨F, hF⟩ : TopCat.Sheaf C (TopCat.of s))) := by
+  let Fsh : TopCat.Sheaf C (TopCat.of s) := ⟨F, hF⟩
+  change IsIso ((TopCat.Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)).counit.app Fsh)
   letI : (Opens.map (closedIncl hs)).IsCoverDense
       (Opens.grothendieckTopology (TopCat.of s)) :=
     opensMap_isCoverDense_of_isInducing (closedIncl_isInducing hs)
@@ -189,6 +193,21 @@ theorem closedIncl_counit_isIso
             C (Opens.grothendieckTopology X)
             (Opens.grothendieckTopology (TopCat.of s))).Faithful)
   infer_instance
+
+theorem closedIncl_counit_isIso
+    {C : Type*} [Category.{u} C]
+    {FC : C → C → Type*} {CC : C → Type u}
+    [∀ (X Y : C), FunLike (FC X Y) (CC X) (CC Y)]
+    [ConcreteCategory C FC]
+    [HasColimits C] [HasLimits C]
+    [PreservesLimits (forget C)]
+    [PreservesFilteredColimits (forget C)]
+    [(forget C).ReflectsIsomorphisms]
+    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
+    (F : TopCat.Sheaf C (TopCat.of s)) :
+    IsIso ((TopCat.Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)).counit.app F) := by
+  simpa using
+    (closedIncl_counit_isIso_presheaf (C := C) (hs := hs) (F := F.val) F.cond)
 
 -- Stalk pullback hom naturality
 lemma stalkPullbackHom_naturality
@@ -235,7 +254,10 @@ theorem closedIncl_unit_stalk_isIso
   let adj := Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)
   let pb := Sheaf.pullback C (closedIncl hs)
   let η := adj.unit.app Fsh
-  haveI : IsIso (adj.counit.app (pb.obj Fsh)) := closedIncl_counit_isIso hs (pb.obj Fsh)
+  haveI : IsIso (adj.counit.app (pb.obj Fsh)) := by
+    simpa using
+      (closedIncl_counit_isIso_presheaf (C := C) (hs := hs)
+        (F := (pb.obj Fsh).val) (pb.obj Fsh).cond)
   haveI : IsIso (pb.map η) := by
     have htri : pb.map η ≫ adj.counit.app (pb.obj Fsh) = 𝟙 _ :=
       adj.left_triangle_components Fsh
