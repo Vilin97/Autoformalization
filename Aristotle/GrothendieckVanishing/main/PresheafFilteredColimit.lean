@@ -567,6 +567,8 @@ The genuinely geometric input starts afterwards:
 - `sheafH_filtered_colimit_surj`: every element of `H^n(colim F_j)` comes from some `H^n(F_j)`
   via the canonical map. The proof uses per-object functorial injective embeddings via Mathlib's
   `IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp` and dimension shifting.
+- `sheafH_preserves_filtered_colimits_presheaf`: the filtered-colimit comparison isomorphism
+  for a presheaf diagram whose stages and cocone point are sheaves
 - `sheafH_preserves_filtered_colimits`: packages the preceding isomorphism result as the
   canonical comparison `colim H^n(F_j) ≅ H^n(colim F_j)`. -/
 
@@ -2269,6 +2271,37 @@ theorem sheafH_filtered_colimit_comparison_epi
   exact hy
 
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces:
+    presheaf form. If the stages and cocone point are sheaves, the canonical comparison
+    `colim H^n(F_j) ≅ H^n(colim F_j)` holds for the associated sheaf diagram. -/
+noncomputable def sheafH_preserves_filtered_colimits_presheaf
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    (c : Cocone Y) (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
+    (n : ℕ) := by
+  let Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
+    { obj := fun j => ⟨Y.obj j, hY j⟩
+      map := fun f => Sheaf.Hom.mk (Y.map f)
+      map_id := fun j => Sheaf.Hom.ext <| Y.map_id j
+      map_comp := fun f g => Sheaf.Hom.ext <| Y.map_comp f g }
+  let csh : Cocone Ysh :=
+    { pt := ⟨c.pt, hc_pt⟩
+      ι :=
+        { app := fun j => Sheaf.Hom.mk (c.ι.app j)
+          naturality := fun _ _ f => Sheaf.Hom.ext <| c.ι.naturality f } }
+  have hcsh : IsColimit csh := by
+    letI : CreatesColimit Ysh
+        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+      createsFilteredColimit Ysh
+    simpa [Ysh, csh] using
+      (liftedColimitIsColimit
+        (F := sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+        (K := Ysh) (c := c) hc)
+  simpa [Ysh, csh] using sheafH_filtered_colimit_comparison_iso Ysh n csh hcsh
+
+/-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces:
     the canonical comparison `colim H^n(F_j) ≅ H^n(colim F_j)`. -/
 noncomputable def sheafH_preserves_filtered_colimits
     {X : TopCat.{u}} [NoetherianSpace X]
@@ -2276,5 +2309,15 @@ noncomputable def sheafH_preserves_filtered_colimits
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     (c' : Cocone Y') (hc' : IsColimit c')
     (n : ℕ) :
-    colimit (Y' ⋙ sheafCohomologyFunctor X n) ≅ AddCommGrpCat.of (Sheaf.H c'.pt n) :=
-  sheafH_filtered_colimit_comparison_iso Y' n c' hc'
+    colimit (Y' ⋙ sheafCohomologyFunctor X n) ≅ AddCommGrpCat.of (Sheaf.H c'.pt n) := by
+  haveI : CreatesColimit Y'
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    createsFilteredColimit Y'
+  simpa using
+    (sheafH_preserves_filtered_colimits_presheaf
+      (Y := Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (hY := fun j => (Y'.obj j).cond)
+      (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
+      (hc := isColimitOfPreserves
+        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc')
+      (hc_pt := c'.pt.cond) (n := n))
