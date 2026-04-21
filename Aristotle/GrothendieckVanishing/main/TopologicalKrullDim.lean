@@ -204,6 +204,25 @@ theorem topologicalKrullDim_add_one_le_of_isIrreducible_of_isClosed {X : Type u}
   exact iSup_le (fun s =>
     IrreducibleCloseds.height_add_one_le_topologicalKrullDim_of_isClosed_of_ne_univ hY hne s)
 
+/-- In `WithBot ℕ∞`, a finite element lies strictly below any non-bottom upper bound on its
+successor. This is the standard bridge from `a + 1 ≤ b` to `a < b` once `a < ⊤`. -/
+theorem WithBot.lt_of_add_one_le_of_lt_top {a b : WithBot ℕ∞}
+    (hab : a + 1 ≤ b) (ha : a < ⊤) (hb : ⊥ < b) : a < b := by
+  rcases a with _ | a
+  · exact hb
+  · rcases b with _ | b
+    · cases (not_lt_of_ge le_rfl hb)
+    · change ((a : WithBot ℕ∞) < (⊤ : WithBot ℕ∞)) at ha
+      change ((a : WithBot ℕ∞) + 1 ≤ (b : WithBot ℕ∞)) at hab
+      change ((a : WithBot ℕ∞) < (b : WithBot ℕ∞))
+      have ha' : (a : ℕ∞) ≠ ⊤ := by
+        intro htop
+        simp [htop] at ha
+      have hlt : (a : ℕ∞) < a + 1 := (ENat.lt_add_one_iff ha').mpr le_rfl
+      have hab' : (((a + 1 : ℕ∞) : WithBot ℕ∞) ≤ (b : WithBot ℕ∞)) := by
+        simpa using hab
+      exact lt_of_lt_of_le (by exact_mod_cast hlt) hab'
+
 /-- On an irreducible space, a proper closed subset with finite Krull dimension has
     strictly smaller Krull dimension. The finiteness hypothesis excludes the case where
     both Y and X have infinite dimension. Proved by Aristotle (72e670ee). -/
@@ -212,16 +231,9 @@ theorem topologicalKrullDim_lt_of_isIrreducible_of_isClosed {X : Type u} [Topolo
     (hfin : topologicalKrullDim Y < ⊤) :
     topologicalKrullDim Y < topologicalKrullDim X := by
   have h1 := topologicalKrullDim_add_one_le_of_isIrreducible_of_isClosed hY hne
-  generalize topologicalKrullDim Y = x at h1 hfin ⊢
-  rcases x with _ | v
-  · rw [topologicalKrullDim]
-    have : Nonempty (IrreducibleCloseds X) :=
-      ⟨⟨Set.univ, IrreducibleSpace.isIrreducible_univ X, isClosed_univ⟩⟩
-    exact (WithBot.bot_lt_coe _).trans_le Order.krullDim_nonneg
-  · have hv_ne_top : v ≠ ⊤ := by intro h; subst h; exact absurd hfin (lt_irrefl _)
-    exact lt_of_lt_of_le (show (↑v : WithBot ℕ∞) < ↑v + 1 by
-      rw [← show (↑(v + 1) : WithBot ℕ∞) = ↑v + 1 from by push_cast; ring]
-      exact WithBot.coe_lt_coe.mpr ((ENat.lt_add_one_iff hv_ne_top).mpr le_rfl)) h1
+  have hX_nonbot : (⊥ : WithBot ℕ∞) < topologicalKrullDim X :=
+    lt_of_lt_of_le (WithBot.bot_lt_coe (0 : ℕ∞)) topologicalKrullDim_nonneg
+  exact WithBot.lt_of_add_one_le_of_lt_top h1 hfin hX_nonbot
 
 /-- On an irreducible space, a proper closed subset with topological Krull dimension bounded
 above by a natural number has strictly smaller Krull dimension. This packages the standard
