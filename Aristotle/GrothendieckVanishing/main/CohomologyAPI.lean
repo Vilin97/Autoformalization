@@ -33,8 +33,12 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
   the higher-degree connecting isomorphism
 * `sheafH_extClassIso_of_subsingleton_middle_presheaf_natural`: presheaf-boundary
   naturality for the same connecting isomorphism
-* `epi_app_top_of_subsingleton_sheafH1`: H^1 vanishing gives surjectivity on top sections
-* `sheafH0_surj_of_epi_app_top`: surjectivity on top sections gives H^0 surjectivity
+* `epi_app_top_of_subsingleton_sheafH1_presheaf`: presheaf-boundary H^1 vanishing gives
+  surjectivity on top sections
+* `epi_app_top_of_subsingleton_sheafH1`: sheaf-level wrapper for the same fact
+* `sheafH0_surj_of_epi_app_top_presheaf`: presheaf-boundary surjectivity on top sections
+  gives H^0 surjectivity
+* `sheafH0_surj_of_epi_app_top`: sheaf-level wrapper for the same fact
 * `sheafH_subsingleton_H1_via_epi_app_top_presheaf`: presheaf-boundary H^1 vanishing via
   surjective top sections
 * `sheafH_subsingleton_H1_via_epi_app_top`: sheaf-level wrapper for the same fact
@@ -512,34 +516,84 @@ theorem sheafH1_cokernel_iso_of_subsingleton_middle_natural {X : TopCat.{u}}
   exact (sheafH_comp_extClass_naturality hS₁ hS₂ φ 0
     ((sheafH0EquivSections S₁.X₃).symm s)).symm
 
-/-- In a short exact sequence of sheaves, `H¹(X₁)=0` implies the map on global sections
-    `X₂(⊤) → X₃(⊤)` is surjective. This packages the `H⁰/H¹` segment of the LES using
-    `sheafH0EquivSections`. -/
-theorem epi_app_top_of_subsingleton_sheafH1 {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
-    (h₁ : Subsingleton (Sheaf.H S.X₁ 1)) :
-    Epi (S.g.val.app (op ⊤)) := by
+/-- Presheaf-boundary `H¹`-vanishing criterion for surjective top sections:
+    if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves
+    and `H¹(F₁)=0`, then `g.app(⊤)` is epi. -/
+theorem epi_app_top_of_subsingleton_sheafH1_presheaf {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
+    (hSE : (ShortComplex.mk
+      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f)
+      (Sheaf.Hom.mk g)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg)).ShortExact)
+    (h₁H : Subsingleton (Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1)) :
+    Epi (g.app (op ⊤)) := by
+  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
+    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (Sheaf.Hom.mk f)
+    (Sheaf.Hom.mk g)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hfg)
+  have hS : S.ShortExact := by
+    simpa [S] using hSE
+  have h₁' : Subsingleton (Sheaf.H S.X₁ 1) := by
+    simpa [S] using h₁H
+  change Epi (S.g.val.app (op ⊤))
   rw [AddCommGrpCat.epi_iff_surjective]
   intro r
   let y : Sheaf.H S.X₃ 0 := (sheafH0EquivSections S.X₃).symm r
-  obtain ⟨z, hz⟩ := Ext.covariant_sequence_exact₃ _ hSE y rfl
-    (@Subsingleton.elim _ h₁ _ _)
+  obtain ⟨z, hz⟩ := Ext.covariant_sequence_exact₃ _ hS y rfl
+    (@Subsingleton.elim _ h₁' _ _)
   refine ⟨sheafH0EquivSections S.X₂ z, ?_⟩
   rw [← sheafH0EquivSections_natural, hz]
   simp [y]
 
-/-- If `f.app (op ⊤)` is surjective on sections, then every `H⁰` class of the target
-    lifts along `f`. This is the `H⁰`-surjectivity input used by
-    `sheafH_subsingleton_H1_via_surj`. -/
+/-- Sheaf-level wrapper for `epi_app_top_of_subsingleton_sheafH1_presheaf`. -/
+theorem epi_app_top_of_subsingleton_sheafH1 {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
+    (h₁ : Subsingleton (Sheaf.H S.X₁ 1)) :
+    Epi (S.g.val.app (op ⊤)) := by
+  simpa using epi_app_top_of_subsingleton_sheafH1_presheaf
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+    (by simpa using hSE)
+    (by simpa using h₁)
+
+/-- Presheaf-boundary `H⁰`-surjectivity from surjective top sections:
+    if `f.app (op ⊤)` is surjective on sections, then every `H⁰` class of the target
+    lifts along the bundled sheaf morphism `Sheaf.Hom.mk f`. -/
+theorem sheafH0_surj_of_epi_app_top_presheaf {X : TopCat.{u}}
+    {F G : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) (hG : G.IsSheaf)
+    (f : F ⟶ G) (hf : Epi (f.app (op ⊤))) :
+    ∀ y : Sheaf.H ((⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 0,
+      ∃ z : Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 0,
+        z.comp (Ext.mk₀ (Sheaf.Hom.mk f)) (add_zero 0) = y := by
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+  let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
+  intro y
+  obtain ⟨s, hs⟩ := (AddCommGrpCat.epi_iff_surjective _).mp hf (sheafH0EquivSections Gsh y)
+  refine ⟨(sheafH0EquivSections Fsh).symm s, ?_⟩
+  apply (sheafH0EquivSections Gsh).injective
+  rw [sheafH0EquivSections_natural, AddEquiv.apply_symm_apply, hs]
+
+/-- Sheaf-level wrapper for `sheafH0_surj_of_epi_app_top_presheaf`. -/
 theorem sheafH0_surj_of_epi_app_top {X : TopCat.{u}}
     {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G)
     (hf : Epi (f.val.app (op ⊤))) :
     ∀ y : Sheaf.H G 0, ∃ z : Sheaf.H F 0, z.comp (Ext.mk₀ f) (add_zero 0) = y := by
-  intro y
-  obtain ⟨s, hs⟩ := (AddCommGrpCat.epi_iff_surjective _).mp hf (sheafH0EquivSections G y)
-  refine ⟨(sheafH0EquivSections F).symm s, ?_⟩
-  apply (sheafH0EquivSections G).injective
-  rw [sheafH0EquivSections_natural, AddEquiv.apply_symm_apply, hs]
+  simpa using sheafH0_surj_of_epi_app_top_presheaf
+    (F := F.val) (G := G.val) F.cond G.cond f.val (by simpa using hf)
 
 /-- H^1 vanishing via Ext^0 surjectivity: if H^1(X₂)=0 and every Ext^0 element
     of X₃ lifts to X₂, then H^1(X₁)=0. Used in flasque, pushforward, and colimit proofs. -/
@@ -598,10 +652,12 @@ theorem sheafH_subsingleton_H1_via_epi_app_top_presheaf {X : TopCat.{u}}
     simpa [S] using hSE
   have h₂' : Subsingleton (Sheaf.H S.X₂ 1) := by
     simpa [S] using h₂H
-  have hg' : Epi (S.g.val.app (op ⊤)) := by
-    simpa [S] using hg
+  have h_surj : ∀ y : Sheaf.H S.X₃ 0,
+      ∃ z : Sheaf.H S.X₂ 0, z.comp (Ext.mk₀ S.g) (add_zero 0) = y := by
+    simpa [S] using
+      (sheafH0_surj_of_epi_app_top_presheaf (F := F₂) (G := F₃) h₂ h₃ g hg)
   simpa [S] using
-    sheafH_subsingleton_H1_via_surj (S := S) hS h₂' (sheafH0_surj_of_epi_app_top _ hg')
+    sheafH_subsingleton_H1_via_surj (S := S) hS h₂' h_surj
 
 /-- Sheaf-level `H¹` vanishing criterion from surjective top sections:
     if `H¹(X₂)=0` and `g.app(⊤)` is epi in a short exact sequence
@@ -762,7 +818,13 @@ theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map {X Y : TopCat.{u}}
     (by
       change Epi (S.g.val.app (op ((Opens.map f).obj ⊤)))
       rw [h_top]
-      exact epi_app_top_of_subsingleton_sheafH1 hSE h₁)
+      exact epi_app_top_of_subsingleton_sheafH1_presheaf
+        (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+        S.X₁.cond S.X₂.cond S.X₃.cond
+        (f := S.f.val) (g := S.g.val)
+        (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+        (by simpa using hSE)
+        (by simpa using h₁))
 
 /-- General dimension shifting at `Sheaf.H` level: if `H^n(X₃)=0` and `H^(n+1)(X₂)=0`
     in a short exact sequence `0 → X₁ → X₂ → X₃ → 0`, then `H^(n+1)(X₁)=0`. -/
