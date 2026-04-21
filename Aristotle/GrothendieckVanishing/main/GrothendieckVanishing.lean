@@ -113,7 +113,8 @@ theorem grothendieck_vanishing_of_irreducible
   let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
   change Subsingleton (Sheaf.H Fsh n)
   by_cases hEmpty : IsEmpty X
-  · exact sheafH_subsingleton_of_isEmpty Fsh n
+  · letI := hEmpty
+    simpa [Fsh] using sheafH_subsingleton_of_isEmpty_presheaf (F := F) hF n
   · rw [not_isEmpty_iff] at hEmpty
     by_cases hIrred : IrreducibleSpace X
     · exact ih_irred X n hF le_rfl hn
