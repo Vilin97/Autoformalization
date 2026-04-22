@@ -80,7 +80,8 @@ statement that can be attacked independently.
 class IsFlasqueSheaf {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X) : Prop where
   epi_map : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op)
 
-private def sheafShortComplexOfPresheaf {X : TopCat.{u}}
+/-- Turn a short complex of sheaf-valued presheaves into a short complex of sheaves. -/
+def sheafShortComplexOfPresheaf {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0) :
@@ -92,13 +93,15 @@ private def sheafShortComplexOfPresheaf {X : TopCat.{u}}
       apply Sheaf.Hom.ext
       simpa using hfg)
 
-@[simp] private lemma sheafShortComplexOfPresheaf_f_val {X : TopCat.{u}}
+/-- The left map in `sheafShortComplexOfPresheaf` is the original presheaf morphism. -/
+@[simp] lemma sheafShortComplexOfPresheaf_f_val {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     {h₁ : F₁.IsSheaf} {h₂ : F₂.IsSheaf} {h₃ : F₃.IsSheaf}
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} {hfg : f ≫ g = 0} :
     (sheafShortComplexOfPresheaf h₁ h₂ h₃ (f := f) (g := g) hfg).f.val = f := rfl
 
-@[simp] private lemma sheafShortComplexOfPresheaf_g_val {X : TopCat.{u}}
+/-- The right map in `sheafShortComplexOfPresheaf` is the original presheaf morphism. -/
+@[simp] lemma sheafShortComplexOfPresheaf_g_val {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     {h₁ : F₁.IsSheaf} {h₂ : F₂.IsSheaf} {h₃ : F₃.IsSheaf}
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} {hfg : f ≫ g = 0} :
@@ -109,7 +112,9 @@ private lemma shortComplex_val_zero {X : TopCat.{u}}
     S.f.val ≫ S.g.val = (0 : S.X₁.val ⟶ S.X₃.val) :=
   congrArg Sheaf.Hom.val S.zero
 
-private lemma sheafShortComplexOfPresheaf_shortExact_of_shortExact {X : TopCat.{u}}
+/-- A short exact sequence of sheaves remains short exact after viewing it through
+`sheafShortComplexOfPresheaf`. -/
+lemma sheafShortComplexOfPresheaf_shortExact_of_shortExact {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) :
     (sheafShortComplexOfPresheaf S.X₁.cond S.X₂.cond S.X₃.cond
       (f := S.f.val) (g := S.g.val) (shortComplex_val_zero (S := S))).ShortExact := by
