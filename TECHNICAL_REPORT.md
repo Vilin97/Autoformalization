@@ -63,7 +63,7 @@ Step 2: Irreducible, dim = 0 → constant sheaf is flasque → vanishing
 Step 3: Irreducible, dim ≥ 1 → write F as filtered colimit of f.g. subsheaves
     ↓ (FiniteGeneratorReduction + PresheafFilteredColimit)
 Step 4: Each f.g. subsheaf has finite filtration by extension-by-zero sheaves
-    ↓ (SheafStalkAlgebra + StalkGeneratorAlgebra + ZeroOutside)
+    ↓ (IrreducibleStep + ZeroOutside)
 Step 5: Extension-by-zero sheaves vanish by closed-open SES + IH on lower dim
     ↓ (IrreducibleStep + SetupCore)
 Step 6: Assemble via well-founded induction on Krull dimension
@@ -98,7 +98,7 @@ the result follows without Gabriel's theorem. The proof of `isFlasque_filtered_c
 GrothendieckVanishing.lean      ← Main theorem (assembles all cases)
 ├── DimZeroVanishing.lean       ← Irreducible dim=0: constant sheaf is flasque
 │   └── ConstantSheafFlasque.lean
-├── IrreducibleStep.lean        ← Irreducible dim≥1 (uses IrreduciblePosVanishing)
+├── IrreducibleStep.lean        ← Irreducible dim≥1, including stalk shrinking
 │   └── FiniteGeneratorReduction.lean ← Colimit step, filtered diagram, f.g. vanishing
 ├── ClosedOpenDecomposition.lean ← Reduction to irreducible spaces
 │   └── ReducibleVanishing.lean  ← Reducible case via Finset.induction
@@ -112,8 +112,6 @@ GrothendieckVanishing.lean      ← Main theorem (assembles all cases)
     ├── ZeroOutsideFinset.lean   ← Finset-indexed extension-by-zero
     ├── CohomologyIso.lean       ← H'(⊤, F) ≅ H(F) isomorphisms
     ├── PresheafFilteredColimit.lean ← Presheaf colimits are sheaves (Noetherian)
-    ├── SheafStalkAlgebra.lean   ← Stalk algebra, generator sections
-    ├── StalkGeneratorAlgebra.lean ← Stalk generator infrastructure
     └── Auxiliary.lean           ← Topology/dimension helpers
 ```
 
@@ -161,7 +159,7 @@ On April 1, an automated prover on the university server attempted to eliminate 
 
 **The irreducible step (Mar 29–Apr 2).** The case of irreducible X with dim ≥ 1 required ~2,000 lines of infrastructure across 6 files:
 - Extension-by-zero sheaf machinery (`ZeroOutside.lean`, ~760 lines): constructing Z_V (the constant sheaf extended by zero outside V), proving stalk computations, and establishing the closed-open short exact sequence.
-- Stalk algebra (`SheafStalkAlgebra.lean`, ~400 lines): proving that stalks of Z_V are isomorphic to ℤ at points in V and 0 outside, and that sections generate stalks.
+- Stalk shrinking (`IrreducibleStep.lean`, with `ZeroOutside.lean` support): proving that a nonzero subsheaf of Z_V has a nonzero stalk in V, then shrinking to a section whose germs generate all stalks on a nonempty open.
 - Finite generator reduction (`FiniteGeneratorReduction.lean`, ~620 lines): proving that every sheaf is a filtered colimit of finitely generated subsheaves, and that cohomology commutes with this colimit.
 
 Multiple false starts were discovered and corrected during this phase. The support-based approach for `IrreduciblePosVanishing` was found to be *"mathematically incorrect for irreducible X (kernel support = X)"* (Mar 29). An ACC/DCC confusion in the informal proof was caught and corrected. The sorry count fluctuated between 1 and 3, with the main blockers being `exists_good_section` (finding a section that generates stalks, proved Mar 30–Apr 1) and the filtered colimit step (proved Apr 2–4).

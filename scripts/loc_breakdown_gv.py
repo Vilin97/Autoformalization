@@ -28,7 +28,6 @@ SAMPLE_EVERY = 3
 # Order: cool (bottom) to warm (top) in the stack
 GROUPS = [
     ("Filtered colimit",   "#2ca02c", ["PresheafFilteredColimit.lean"]),
-    ("Stalk/generator",    "#17becf", ["SheafStalkAlgebra.lean", "StalkGeneratorAlgebra.lean"]),
     ("Extension-by-zero",  "#00bcd4", ["ZeroOutside.lean", "ZeroOutsideFinset.lean"]),
     ("Closed immersion",   "#5dade2", ["ClosedImmersion.lean"]),
     ("Setup/core",         "#1f77b4", ["SetupCore.lean", "Setup.lean", "CohomologyIso.lean", "Auxiliary.lean"]),

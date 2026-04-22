@@ -2,7 +2,6 @@ import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
 import Aristotle.GrothendieckVanishing.main.FiniteGeneratorReduction
 import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
-import Aristotle.GrothendieckVanishing.main.SheafStalkAlgebra
 import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
 import Aristotle.GrothendieckVanishing.main.ZeroOutside
 
@@ -10,6 +9,8 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutside
   IrreducibleStep.lean — Assembly: irreducible positive-dimension vanishing
 
   Key results:
+  - exists_nonzero_stalk_in_V: PROVED — a nonzero subsheaf of `zeroOutsideInt V`
+    has a nonzero stalk at some point of `V`
   - exists_section_generating_stalks: PROVED — uses Nat.find to choose x₀ with minimal
     image subgroup generator d, then divisibility d | d_x follows from minimality.
   - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
@@ -17,7 +18,9 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutside
     assembled where it is consumed
   - IrreduciblePosVanishing: assembles all pieces (FULLY PROVED)
 
-  Supporting stalk lemmas remain in `ZeroOutside.lean` and `SheafStalkAlgebra.lean`.
+  Supporting `zeroOutsideInt` stalk lemmas remain in `ZeroOutside.lean`; the
+  one-off nonzero-stalk entry lemma lives here immediately before the shrinking step
+  that uses it.
 -/
 
 universe u
@@ -78,6 +81,42 @@ theorem sHom_stalk_bijective_at
     rw [hc, smul_comm n, smul_comm m, ← mul_smul, ← mul_smul] at h_i
     rw [mul_left_cancel₀ hc_ne (zsmul_generator_injective V x (hUV hxU) h_i)]
   exact ⟨h_inj, h_surj⟩
+
+/-- A nonzero subsheaf of `zeroOutsideInt V` has a nonzero stalk at some point of `V`. -/
+theorem exists_nonzero_stalk_in_V
+    {X : TopCat.{u}} (V : Opens X)
+    {R : TopCat.Presheaf AddCommGrpCat.{u} X} (hRsh : R.IsSheaf)
+    (i : R ⟶ (TopCat.Sheaf.zeroOutsideInt V).val)
+    [Mono i]
+    (hR : ¬ IsZero R) :
+    ∃ (x : X) (_ : x ∈ V)
+      (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj R),
+      a ≠ 0 := by
+  let Rsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨R, hRsh⟩
+  by_contra! h
+  apply hR
+  have hRsh_zero : IsZero Rsh :=
+    sheaf_isZero_of_zero_stalks X hRsh (fun x a => by
+      by_cases hx : (x : X) ∈ (V : Set X)
+      · exact h x hx a
+      · have hi_inj : Function.Injective
+            ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map i) :=
+          TopCat.Presheaf.stalkFunctor_map_injective_of_app_injective (f := i)
+            (fun U =>
+              (ConcreteCategory.mono_iff_injective_of_preservesPullback (i.app (op U))).mp
+                ((NatTrans.mono_iff_mono_app i).mp inferInstance (op U))) x
+        exact hi_inj ((stalk_zeroOutsideInt_zero_outside V x hx _).trans (map_zero _).symm))
+  refine Functor.isZero R ?_
+  intro U
+  have hforget_eval :
+      (TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
+        (evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj U).PreservesZeroMorphisms := by
+    refine ⟨?_⟩
+    intro A B
+    rfl
+  simpa using Functor.map_isZero
+    (TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙
+      (evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj U) hRsh_zero
 
 /-- At each point `x ∈ V`, the image of the stalk of `R` under `i` is a subgroup of
     `stalk(zeroOutsideInt V, x) ≅ ULift ℤ`. By `ulift_int_subgroup_cyclic`, if this image
