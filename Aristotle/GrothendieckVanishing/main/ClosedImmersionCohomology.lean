@@ -53,10 +53,18 @@ theorem pushforward_closedIncl_stalk_eq_zero
   let F' := (TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G
   obtain ⟨U, hxU, sU, rfl⟩ := F'.germ_exist x a
   let W : Opens X := U ⊓ ⟨sᶜ, hs.isOpen_compl⟩
-  have hW_le : W ≤ ⟨sᶜ, hs.isOpen_compl⟩ := inf_le_right
+  have hW_map : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ := by
+    apply Opens.ext
+    have himage :
+        (TopCat.closedIncl hs : s → X) '' ((((Opens.map (TopCat.closedIncl hs)).obj W :
+          Opens (TopCat.of s)) : Set (TopCat.of s))) = ∅ := by
+      rw [TopCat.closedIncl_image_map_eq_inter hs W]
+      ext y
+      simp [W, and_left_comm, and_assoc]
+    simpa using Set.image_eq_empty.mp himage
   haveI : Subsingleton (F'.obj (op W)) := AddCommGrpCat.subsingleton_of_isZero (by
     change IsZero (G.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
-    rw [TopCat.closedIncl_map_eq_bot_of_le_compl hs hW_le]
+    rw [hW_map]
     exact Gsh.isTerminalOfEmpty.isZero)
   rw [← TopCat.Presheaf.germ_res_apply F'
     (homOfLE (show W ≤ U from inf_le_left)) x ⟨hxU, hx⟩ sU]
