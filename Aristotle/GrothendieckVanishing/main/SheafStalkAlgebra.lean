@@ -10,7 +10,6 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutside
   Split from IrreducibleStep.lean. Contains:
   - zeroOutsideInt cohomology vanishing (zeroOutsideInt_cohomology_vanishing)
   - isZero_zeroOutsideInt_bot: zeroOutsideInt ⊥ is zero
-  - stalk_zeroOutsideInt_zero_outside: stalks vanish outside support
   - exists_nonzero_stalk_in_V: nonzero subsheaf has nonzero stalk in V
   - stalk_zeroOutsideInt_eq_zsmul_generator: stalks are Z-multiples of generator
   - ulift_int_subgroup_cyclic: cyclic subgroup classification
@@ -109,22 +108,6 @@ theorem zeroOutsideInt_cohomology_vanishing
       (f := (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)).val)
       (x := x)
       (hf := sheafifyMap_zeroOutside_openHom_stalk_surj Presheaf.constZ le_top x hxV) a)
-
-
-/-- Stalks of `zeroOutsideInt V` vanish outside `V`. -/
-theorem stalk_zeroOutsideInt_zero_outside
-    {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∉ V)
-    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
-      (TopCat.Sheaf.zeroOutsideInt V).val) : a = 0 := by
-  let P := TopCat.Presheaf.constZ.zeroOutside V
-  let J := Opens.grothendieckTopology (T := X)
-  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  haveI : IsIso (T.map (toSheafify J P)) := stalkFunctor_map_iso_toSheafify P x
-  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J P))).2 a
-  obtain ⟨W, hxW, s, rfl⟩ := P.germ_exist x q
-  haveI := AddCommGrpCat.subsingleton_of_isZero
-    (TopCat.Presheaf.zeroOutside_isZero (F := TopCat.Presheaf.constZ) (fun h => hx (h hxW)))
-  simp [Subsingleton.eq_zero s, map_zero]
 
 /-- `zeroOutsideInt ⊥` is the zero sheaf (all stalks vanish). -/
 theorem isZero_zeroOutsideInt_bot (X : TopCat.{u}) :

@@ -9,6 +9,7 @@ import Aristotle.GrothendieckVanishing.main.ClosedImmersion
   - `constZ`: constant presheaf with value `ULift ℤ`
   - `zeroOutsideInt`: sheafified extension-by-zero of `constZ` on an open `U`
   - stalk surjectivity for `zeroOutside_openHom` and its sheafification on points of the support
+  - `stalk_zeroOutsideInt_zero_outside`: stalks of `zeroOutsideInt U` vanish off `U`
   - `sHom`: section-hom from a section `s ∈ F(U)` to a presheaf/sheaf morphism
   - `generator`: canonical generator of `(constZ.zeroOutside U).obj (op U)`
   - `familyGeneratorMap`: coproduct map from a family of `zeroOutsideInt`
@@ -369,6 +370,21 @@ theorem openHom_val_app_generator {X : TopCat.{u}} {V U : Opens X} (h : V ≤ U)
 end zeroOutsideInt
 
 open zeroOutsideInt
+
+/-- Stalks of `zeroOutsideInt V` vanish outside `V`. -/
+theorem _root_.stalk_zeroOutsideInt_zero_outside
+    {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∉ V)
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
+      (TopCat.Sheaf.zeroOutsideInt V).val) : a = 0 := by
+  let P := TopCat.Presheaf.constZ.zeroOutside V
+  let J := Opens.grothendieckTopology (T := X)
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  haveI : IsIso (T.map (toSheafify J P)) := stalkFunctor_map_iso_toSheafify P x
+  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J P))).2 a
+  obtain ⟨W, hxW, s, rfl⟩ := P.germ_exist x q
+  haveI := AddCommGrpCat.subsingleton_of_isZero
+    (TopCat.Presheaf.zeroOutside_isZero (F := TopCat.Presheaf.constZ) (fun h => hx (h hxW)))
+  simp [Subsingleton.eq_zero s, map_zero]
 
 /-- For a family of morphisms into `F`, the universal map from their coproduct into `F`. -/
 abbrev familyMap {C : Type*} [Category C] {X : TopCat.{u}} {ι : Type*}
