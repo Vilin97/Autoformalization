@@ -36,7 +36,7 @@ variable {X : TopCat.{u}} [NoetherianSpace X]
 
 /-- The functor `Finset(SectionIndex K) ⥤ Sheaf(X)` sending `S ↦ finsetGeneratedSheaf S`.
     Transition maps are the canonical image inclusions, which are monomorphisms. -/
-private noncomputable def finsetGenFunctor :
+noncomputable def finsetGenFunctor :
     Finset
         (TopCat.Presheaf.SectionIndex K) ⥤
       TopCat.Sheaf AddCommGrpCat.{u} X where
@@ -52,7 +52,7 @@ private noncomputable def finsetGenFunctor :
       TopCat.Presheaf.finsetImageInclGen_comp_ι]
 
 /-- Cocone with vertex `K`: the cocone maps are `image.ι : finsetGeneratedSheaf S ⟶ K`. -/
-private noncomputable def finsetGenCocone :
+noncomputable def finsetGenCocone :
     Cocone (finsetGenFunctor hK) :=
   Cocone.mk (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)
     { app := fun S => Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK S)
@@ -62,7 +62,7 @@ private noncomputable def finsetGenCocone :
 /-- The cocone is a colimit: `K` is the filtered colimit of its finitely generated subsheaves.
     Proof: the canonical map `colim → K` is mono (by AB5 + mono transitions) and epi
     (since `allSectionMap K` factors through it), hence an isomorphism. -/
-private noncomputable def finsetGenCocone_isColimit :
+noncomputable def finsetGenCocone_isColimit :
     IsColimit (finsetGenCocone hK) := by
   let Ksh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨K, hK⟩
   -- Show the comparison map colim → K is an iso, then transport IsColimit
