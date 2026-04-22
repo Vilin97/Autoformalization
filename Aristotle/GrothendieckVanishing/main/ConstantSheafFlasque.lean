@@ -10,7 +10,9 @@ universe u
 
 open CategoryTheory TopologicalSpace Limits Opposite GrothendieckTopology GrothendieckTopology.Plus
 
-private abbrev constPresheaf (X : Type u) [TopologicalSpace X]
+/-- The presheaf on `X` with constant value `A`. This is the presheaf input whose
+sheafification is the constant sheaf used in the irreducible flasqueness argument. -/
+abbrev constPresheaf (X : Type u) [TopologicalSpace X]
     (A : AddCommGrpCat.{u}) : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} :=
   (Functor.const (Opens X)ᵒᵖ).obj A
 
@@ -118,7 +120,8 @@ private theorem toPlus_surjective_of_firstPlus
     exact @Subsingleton.elim _ (hIbot ▸ ⟨fun x y =>
       Plus.sep _ ⟨⊥, hcov⟩ x y fun ⟨_, _, hf⟩ => absurd hf id⟩) _ _
 
-private theorem sheafify_constPresheaf_flasque_of_irreducible
+/-- On an irreducible space, the sheafification of the constant presheaf is flasque. -/
+theorem sheafify_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X] {A : AddCommGrpCat.{u}}
     {U V : Opens X} (i : U ⟶ V) :
     Epi (((Opens.grothendieckTopology X).sheafify (constPresheaf X A)).map i.op) := by
@@ -150,7 +153,8 @@ private theorem sheafify_constPresheaf_flasque_of_irreducible
       exact ⟨a, by rw [ConcreteCategory.comp_apply, ha]; exact hz⟩
     exact epi_of_epi_fac hfac
 
-private theorem presheafToSheaf_constPresheaf_flasque_of_irreducible
+/-- On an irreducible space, the presheaf-to-sheaf image of the constant presheaf is flasque. -/
+theorem presheafToSheaf_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X] {A : AddCommGrpCat.{u}}
     {U V : Opens X} (i : U ⟶ V) :
     Epi (((presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj (constPresheaf X A)).val.map i.op) := by
