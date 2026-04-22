@@ -1324,49 +1324,6 @@ theorem sheafH_dimension_shift_X₃_of_locallySurjective_presheaf {X : TopCat.{u
       (by simpa [S, fsh] using h₂)
       (by simpa [S, fsh] using h₁))
 
--- If both ends of a short exact sequence have vanishing H^n, so does the middle.
-theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (n : ℕ)
-    (h₁ : Subsingleton (Sheaf.H S.X₁ n))
-    (h₃ : Subsingleton (Sheaf.H S.X₃ n)) :
-    Subsingleton (Sheaf.H S.X₂ n) := by
-  constructor; intro a b
-  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ _ hS a
-    (@Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _)
-  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ _ hS b
-    (@Subsingleton.elim _ ((add_zero n) ▸ h₃) _ _)
-  rw [← hc, ← hd, @Subsingleton.elim _ h₁ c d]
-
-/-- Presheaf-boundary wrapper for `subsingleton_sheafH_of_shortExact_middle`: if
-`f : F ⟶ G` is mono between sheaf-valued presheaves, and the cohomology of `F`
-and of the cokernel sheaf of `Sheaf.Hom.mk f` are subsingleton in degree `n`,
-then so is the cohomology of `G`. -/
-theorem subsingleton_sheafH_of_shortExact_middle_presheaf {X : TopCat.{u}}
-    {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (hF : F.IsSheaf) (hG : G.IsSheaf)
-    (f : F ⟶ G) [Mono f] (n : ℕ)
-    (h₁ : Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
-    (h₃ : Subsingleton (Sheaf.H (cokernel (show
-      (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from
-          Sheaf.Hom.mk f)) n)) :
-    Subsingleton (Sheaf.H ((⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
-  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
-  haveI : Mono fsh := by
-    exact (Sheaf.Hom.mono_iff_presheaf_mono
-      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) fsh).2 inferInstance
-  let S := ShortComplex.mk fsh (cokernel.π fsh) (cokernel.condition fsh)
-  have hS : S.ShortExact := ShortComplex.ShortExact.mk'
-    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel fsh))
-    inferInstance inferInstance
-  have h₁' : Subsingleton (Sheaf.H S.X₁ n) := by
-    simpa [S] using h₁
-  have h₃' : Subsingleton (Sheaf.H S.X₃ n) := by
-    simpa [S, fsh] using h₃
-  simpa [S] using subsingleton_sheafH_of_shortExact_middle (S := S) hS n h₁' h₃'
-
 /-- On an empty space, all sheaf cohomology groups are subsingleton.
     Proof: when X is empty, all stalks are vacuously zero, so the sheaf is zero,
     and zero sheaves have subsingleton cohomology in all degrees. -/
@@ -1413,6 +1370,76 @@ theorem sheafCohomologyFunctor_map_apply (X : TopCat.{u}) (n : ℕ)
     (x : Sheaf.H F n) :
     ConcreteCategory.hom ((sheafCohomologyFunctor X n).map f) x =
     x.comp (Ext.mk₀ f) (add_zero n) := rfl
+
+-- If both ends of a short exact sequence have vanishing H^n, so does the middle.
+/-- Presheaf-boundary middle-term cohomology vanishing: if `f : F ⟶ G` is mono between
+sheaf-valued presheaves, and the cohomology of `F` and of the cokernel sheaf of
+`Sheaf.Hom.mk f` are subsingleton in degree `n`, then so is the cohomology of `G`. -/
+theorem subsingleton_sheafH_of_shortExact_middle_presheaf {X : TopCat.{u}}
+    {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (hF : F.IsSheaf) (hG : G.IsSheaf)
+    (f : F ⟶ G) [Mono f] (n : ℕ)
+    (h₁ : Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
+    (h₃ : Subsingleton (Sheaf.H (cokernel (show
+      (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
+        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from
+          Sheaf.Hom.mk f)) n)) :
+    Subsingleton (Sheaf.H ((⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
+  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
+      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
+  haveI : Mono fsh := by
+    exact (Sheaf.Hom.mono_iff_presheaf_mono
+      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) fsh).2 inferInstance
+  let S := ShortComplex.mk fsh (cokernel.π fsh) (cokernel.condition fsh)
+  have hS : S.ShortExact := ShortComplex.ShortExact.mk'
+    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel fsh))
+    inferInstance inferInstance
+  have h₁' : Subsingleton (Sheaf.H S.X₁ n) := by
+    simpa [S] using h₁
+  have h₃' : Subsingleton (Sheaf.H S.X₃ n) := by
+    simpa [S, fsh] using h₃
+  constructor
+  intro a b
+  obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ _ hS a
+    (@Subsingleton.elim _ ((add_zero n) ▸ h₃') _ _)
+  obtain ⟨d, hd⟩ := Ext.covariant_sequence_exact₂ _ hS b
+    (@Subsingleton.elim _ ((add_zero n) ▸ h₃') _ _)
+  rw [← hc, ← hd, @Subsingleton.elim _ h₁' c d]
+
+-- If both ends of a short exact sequence have vanishing H^n, so does the middle.
+theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact) (n : ℕ)
+    (h₁ : Subsingleton (Sheaf.H S.X₁ n))
+    (h₃ : Subsingleton (Sheaf.H S.X₃ n)) :
+    Subsingleton (Sheaf.H S.X₂ n) := by
+  haveI : Mono S.f := hS.mono_f
+  haveI : Mono S.f.val := by
+    exact (Sheaf.Hom.mono_iff_presheaf_mono
+      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) S.f).1 inferInstance
+  have hCok :
+      Subsingleton
+        (Sheaf.H (cokernel (show S.X₁ ⟶ S.X₂ from Sheaf.Hom.mk S.f.val)) n) := by
+    let fsh : S.X₁ ⟶ S.X₂ := Sheaf.Hom.mk S.f.val
+    have hfsh : fsh = S.f := rfl
+    have hfshg : fsh ≫ S.g = 0 := by
+      change S.f ≫ S.g = 0
+      exact S.zero
+    let hSgCok : IsColimit (CokernelCofork.ofπ S.g hfshg) := by
+      simpa [hfsh, hfshg] using hS.gIsCokernel
+    let e :=
+      (sheafCohomologyFunctor X n).mapIso
+        ((cokernelIsCokernel fsh).coconePointUniqueUpToIso
+          hSgCok)
+    haveI :
+        Subsingleton ↑((sheafCohomologyFunctor X n).obj
+          (CokernelCofork.ofπ S.g hfshg).pt) := by
+      simpa [sheafCohomologyFunctor_obj] using h₃
+    exact ⟨fun a b => by
+      apply (ConcreteCategory.bijective_of_isIso e.hom).1
+      exact Subsingleton.elim _ _⟩
+  simpa using subsingleton_sheafH_of_shortExact_middle_presheaf
+    (F := S.X₁.val) (G := S.X₂.val) S.X₁.cond S.X₂.cond S.f.val n h₁ hCok
 
 /-- Presheaf-boundary naturality of
 `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` for a morphism between two short
