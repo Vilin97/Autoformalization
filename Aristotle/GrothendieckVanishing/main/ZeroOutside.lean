@@ -246,6 +246,55 @@ theorem sHom_app_generator {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U))
   rw [congrArg ULift.down h1]
   simpa using one_zsmul s
 
+/-- The restriction of the distinguished generator of `constZ.zeroOutside V` to a smaller open
+`W ≤ V` corresponds to `1 : ULift ℤ` under the canonical identification with `ULift ℤ`. -/
+theorem resGen_eqToHom_eq_one
+    {X : TopCat.{u}} (V : Opens X) {W : Opens X} (hWV : W ≤ V)
+    (hObjW : (constZ.zeroOutside V).obj (op W) = AddCommGrpCat.of (ULift ℤ)) :
+    (AddCommGrpCat.Hom.hom (eqToHom hObjW))
+      (ConcreteCategory.hom ((constZ.zeroOutside V).map (homOfLE hWV).op)
+        (generator V)) = (1 : ULift ℤ) := by
+  unfold generator
+  simp only [TopCat.Presheaf.zeroOutside_map, dif_pos hWV, dif_pos (le_refl V),
+    ← ConcreteCategory.comp_apply, ← CategoryTheory.comp_apply, eqToHom_trans,
+    Functor.const_obj_map, Category.id_comp]
+  simp [show hObjW.symm.trans hObjW = rfl from Subsingleton.elim _ _]
+
+/-- At a point inside the support open, every stalk element of the presheaf `constZ.zeroOutside V`
+is an integer multiple of the germ of the distinguished generator over `V`. -/
+theorem presheaf_stalk_zeroOutside_eq_zsmul_generator
+    {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V)
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
+      (constZ.zeroOutside V)) :
+    ∃ n : ℤ,
+      a = n • ((constZ.zeroOutside V).germ V x hx (generator V)) := by
+  obtain ⟨W, hxW, s, rfl⟩ := (constZ.zeroOutside V).germ_exist x a
+  by_cases hWV : W ≤ V
+  · have hObjW : (TopCat.Presheaf.zeroOutside V constZ).obj (op W) =
+        AddCommGrpCat.of (ULift ℤ) := by
+      simp [TopCat.Presheaf.zeroOutside, hWV, constZ]
+    let w : ULift ℤ := (AddCommGrpCat.Hom.hom (eqToHom hObjW)) s
+    let genW : (constZ.zeroOutside V).obj (op W) :=
+      ConcreteCategory.hom ((constZ.zeroOutside V).map (homOfLE hWV).op) (generator V)
+    have hgenW_val : (AddCommGrpCat.Hom.hom (eqToHom hObjW)) genW = (1 : ULift ℤ) :=
+      resGen_eqToHom_eq_one V hWV hObjW
+    have hinj : Function.Injective (AddCommGrpCat.Hom.hom (eqToHom hObjW)) :=
+      (ConcreteCategory.bijective_of_isIso (eqToHom hObjW)).1
+    have hs_zsmul : s = w.down • genW := by
+      apply hinj
+      rw [map_zsmul, hgenW_val]
+      show w = w.down • (1 : ULift ℤ)
+      ext
+      simp
+    refine ⟨w.down, ?_⟩
+    rw [hs_zsmul, map_zsmul (ConcreteCategory.hom ((constZ.zeroOutside V).germ W x hxW))]
+    congr 1
+    exact TopCat.Presheaf.germ_res_apply (constZ.zeroOutside V)
+      (homOfLE hWV) x hxW (generator V)
+  · have hIsZero := TopCat.Presheaf.zeroOutside_isZero (F := constZ) hWV
+    haveI := AddCommGrpCat.subsingleton_of_isZero hIsZero
+    exact ⟨0, by simp [Subsingleton.eq_zero s, map_zero]⟩
+
 end zeroOutside
 
 end Presheaf
