@@ -414,7 +414,8 @@ theorem closedComplementVanishing
   let Csh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨C, hC⟩
   set Y := (V : Set X)ᶜ
   have hYcl : IsClosed Y := V.2.isClosed_compl
-  have hY_dim_lt_top : topologicalKrullDim Y < ⊤ := lt_of_lt_of_le hn le_top
+  have hY_dim_lt_top : topologicalKrullDim Y < ⊤ :=
+    topologicalKrullDim_lt_top_of_lt_nat (by simpa [gt_iff_lt] using hn)
   have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
     topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl
       (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
