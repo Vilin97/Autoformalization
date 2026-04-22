@@ -9,7 +9,6 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutside
 
   Split from IrreducibleStep.lean. Contains:
   - zeroOutsideInt cohomology vanishing (zeroOutsideInt_cohomology_vanishing)
-  - isZero_zeroOutsideInt_bot: zeroOutsideInt ⊥ is zero
   - exists_nonzero_stalk_in_V: nonzero subsheaf has nonzero stalk in V
   - ulift_int_subgroup_cyclic: cyclic subgroup classification
   - zsmul_generator_injective: injectivity of the ℤ-scalar action on the generator
@@ -107,15 +106,6 @@ theorem zeroOutsideInt_cohomology_vanishing
       (f := (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)).val)
       (x := x)
       (hf := sheafifyMap_zeroOutside_openHom_stalk_surj Presheaf.constZ le_top x hxV) a)
-
-/-- `zeroOutsideInt ⊥` is the zero sheaf (all stalks vanish). -/
-theorem isZero_zeroOutsideInt_bot (X : TopCat.{u}) :
-    IsZero (TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X)) := by
-  let F := TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X)
-  have hF_zero : IsZero ((⟨F.val, F.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
-    sheaf_isZero_of_zero_stalks X F.cond (fun x a =>
-      stalk_zeroOutsideInt_zero_outside ⊥ x (Opens.mem_bot.not.mpr (fun h => h.elim)) a)
-  simpa [F] using hF_zero
 
 /-- A nonzero subsheaf of `zeroOutsideInt V` has a nonzero stalk at some point of `V`. -/
 theorem exists_nonzero_stalk_in_V
