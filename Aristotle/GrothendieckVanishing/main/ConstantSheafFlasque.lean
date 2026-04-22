@@ -1,5 +1,6 @@
 import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
+import Aristotle.GrothendieckVanishing.main.ZeroOutside
 
 /-!
   ConstantSheafFlasque.lean — The constant sheaf on an irreducible space is flasque
@@ -169,3 +170,18 @@ theorem constantSheaf_flasque_of_irreducible
       A).val.map i.op) := by
   simpa [CategoryTheory.constantSheaf, constPresheaf] using
     (presheafToSheaf_constPresheaf_flasque_of_irreducible (X := X) (i := i))
+
+/-- `zeroOutsideInt ⊤` is flasque on an irreducible space: it is the sheafification of
+    `constZ.zeroOutside ⊤ ≅ constZ` (via `zeroOutside_top_iso`), and the constant sheaf
+    on an irreducible space is flasque (`constantSheaf_flasque_of_irreducible`). -/
+instance isFlasqueSheaf_zeroOutsideInt_top (X : TopCat.{u}) [IrreducibleSpace X] :
+    IsFlasqueSheaf (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) := by
+  constructor; intro U W i
+  let J := Opens.grothendieckTopology (T := X)
+  let A := AddCommGrpCat.of (ULift.{u} ℤ)
+  have h := constantSheaf_flasque_of_irreducible X A i
+  exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
+    (((sheafToPresheaf J AddCommGrpCat.{u}).mapIso
+      ((presheafToSheaf J AddCommGrpCat.{u}).mapIso
+        (TopCat.Presheaf.zeroOutside_top_iso (F := TopCat.Presheaf.constZ))).symm).hom.naturality
+      i.op).symm
