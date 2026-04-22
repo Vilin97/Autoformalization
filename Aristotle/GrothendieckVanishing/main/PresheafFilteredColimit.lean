@@ -1828,13 +1828,17 @@ private noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf_b
     (sheafH0EquivSections_presheaf_natural
       (hF := hY j) (hG := hc_pt) (f := c.ι.app j) (x := x)).symm
 
-private noncomputable def sheafH_filtered_colimit_h1_sectionsFunctor
+/-- The global-sections functor used in the degree-`1` filtered-colimit boundary
+construction. -/
+noncomputable def sheafH_filtered_colimit_h1_sectionsFunctor
     {X : TopCat.{u}} :
     TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
   sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u} ⋙
     (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)
 
-private noncomputable def sheafH_filtered_colimit_h1_gTopNat
+/-- The stagewise top-sections map from the injective replacement to its quotient in the
+degree-`1` filtered-colimit comparison. -/
+noncomputable def sheafH_filtered_colimit_h1_gTopNat
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -1857,7 +1861,9 @@ private noncomputable def sheafH_filtered_colimit_h1_gTopNat
             (sheafH_filtered_colimit_succ_quotient Y').obj j' =>
           α.val.app (op ⊤)) hπ.symm }
 
-private noncomputable def sheafH_filtered_colimit_h1_cokernelFunctor
+/-- The functor of stagewise cokernels of the top-sections maps used in the degree-`1`
+filtered-colimit boundary construction. -/
+noncomputable def sheafH_filtered_colimit_h1_cokernelFunctor
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -1905,7 +1911,9 @@ private noncomputable def sheafH_filtered_colimit_h1_cokernelFunctor
       rw [hq]
       simp [Category.assoc] }
 
-private noncomputable def sheafH_filtered_colimit_h1_cokernelFunctorIso
+/-- Evaluation at each diagram object identifies the stagewise cokernel functor with the
+cokernel of `sheafH_filtered_colimit_h1_gTopNat`. -/
+noncomputable def sheafH_filtered_colimit_h1_cokernelFunctorIso
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -1982,7 +1990,9 @@ private noncomputable def sheafH_filtered_colimit_h1_cokernelFunctorIso
       simpa [Category.assoc] using
         (cokernel.π (sheafH_filtered_colimit_h1_gTopNat Y')).naturality f)
 
-private noncomputable def sheafH_filtered_colimit_h1_stageNatIso
+/-- The stagewise identification of `H¹` with the cokernel of top sections for the
+injective-replacement short exact sequence used in the filtered-colimit comparison. -/
+noncomputable def sheafH_filtered_colimit_h1_stageNatIso
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -2032,7 +2042,9 @@ private noncomputable def sheafH_filtered_colimit_h1_stageNatIso
               ((sheafH_filtered_colimit_succ_stage_map_hom (Y' := Y') f).comm₂₃))
           (h_mid j) (h_mid j')))
 
-private noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary
+/-- The degree-`1` filtered-colimit comparison isomorphism on the sheaf diagram attached to
+a presheaf cocone, before rewriting it as `sheafH_filtered_colimit_comparison_presheaf`. -/
+noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
@@ -2156,7 +2168,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_bo
         (sectionsFunctor.map (cokernel.π ι')) eInj eQ hsq) ≪≫
       globalIso
 
-@[simp] private theorem sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary_hom
+@[simp] theorem sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary_hom
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
