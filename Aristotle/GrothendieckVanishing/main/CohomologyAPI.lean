@@ -28,6 +28,8 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `stalk_zero_of_g_is_cokernel_of_stalk_epi_presheaf`: presheaf-boundary stalk
   vanishing from a cokernel and stalk-epi hypothesis
 * `stalk_zero_of_g_is_cokernel_of_stalk_epi`: sheaf-level wrapper for the same fact
+* `cokernel_stalk_zero_of_stalk_surj`: actual-cokernel specialization of the same stalk
+  vanishing under stalk-surjectivity
 * `stalk_zero_of_shortExact_cokernel_presheaf`: presheaf-boundary short exact
   specialization of the same cokernel stalk vanishing
 * `stalk_zero_of_shortExact_cokernel`: sheaf-level wrapper for the same specialization
@@ -585,6 +587,51 @@ theorem stalk_zero_of_g_is_cokernel_of_stalk_epi
     (by simpa using hg)
     x
     (by simpa using hepi)
+    a
+
+/-- Actual-cokernel specialization of
+`stalk_zero_of_g_is_cokernel_of_stalk_epi_presheaf`: if the stalk map of `f` at `x`
+is surjective, then the stalk of `cokernel f` at `x` vanishes. -/
+theorem cokernel_stalk_zero_of_stalk_surj
+    {X : TopCat.{u}}
+    {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (hF : F.IsSheaf) (hG : G.IsSheaf)
+    (f : CategoryTheory.NatTrans F G) (x : X)
+    (hf : Function.Surjective (ConcreteCategory.hom
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f)))
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
+      (Limits.cokernel (show (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
+        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from Sheaf.Hom.mk f)).val) :
+    a = 0 := by
+  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
+      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
+  have hepi : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f) := by
+    simpa using (AddCommGrpCat.epi_iff_surjective _).mpr hf
+  simpa [fsh] using stalk_zero_of_g_is_cokernel_of_stalk_epi_presheaf
+    (F₁ := F)
+    (F₂ := G)
+    (F₃ := (Limits.cokernel fsh).val)
+    hF
+    hG
+    (Limits.cokernel fsh).cond
+    (f := f)
+    (g := (Limits.cokernel.π fsh).val)
+    (show f ≫ (Limits.cokernel.π fsh).val = 0 by
+      ext U s
+      change ConcreteCategory.hom (((fsh ≫ Limits.cokernel.π fsh).val.app U)) s = 0
+      have happ :
+          (((fsh ≫ Limits.cokernel.π fsh).val).app U) =
+            NatTrans.app
+              (0 : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X).val ⟶
+                (Limits.cokernel fsh).val) U := by
+        exact NatTrans.congr_app
+          (congrArg (fun α => α.val) (Limits.cokernel.condition fsh))
+          U
+      rw [happ]
+      simp)
+    (by simpa [fsh] using (cokernelIsCokernel fsh))
+    x
+    hepi
     a
 
 /-- Presheaf-boundary short exact sequence version of
