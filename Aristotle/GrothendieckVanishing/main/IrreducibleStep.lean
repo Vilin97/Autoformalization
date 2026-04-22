@@ -1,16 +1,23 @@
-import Aristotle.GrothendieckVanishing.main.SheafStalkAlgebra
+import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
+import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
+import Aristotle.GrothendieckVanishing.main.FiniteGeneratorReduction
 import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
+import Aristotle.GrothendieckVanishing.main.SheafStalkAlgebra
 import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
+import Aristotle.GrothendieckVanishing.main.ZeroOutside
 
 /-!
   IrreducibleStep.lean — Assembly: irreducible positive-dimension vanishing
 
-  Key results (unique to this file; supporting stalk lemmas are in
-  `ZeroOutside.lean` and `SheafStalkAlgebra.lean`):
+  Key results:
   - exists_section_generating_stalks: PROVED — uses Nat.find to choose x₀ with minimal
     image subgroup generator d, then divisibility d | d_x follows from minimality.
   - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
+  - zeroOutsideInt_vanishing / zeroOutsideInt_cohomology_vanishing: Step 5 vanishing
+    assembled where it is consumed
   - IrreduciblePosVanishing: assembles all pieces (FULLY PROVED)
+
+  Supporting stalk lemmas remain in `ZeroOutside.lean` and `SheafStalkAlgebra.lean`.
 -/
 
 universe u
@@ -276,6 +283,86 @@ theorem subsheaf_contains_zeroOutsideInt
       (TopCat.Presheaf.app_injective_of_stalkFunctor_map_injective j U.unop
         fun x _hx =>
           (ConcreteCategory.mono_iff_injective_of_preservesPullback _).1 inferInstance)
+
+/-! ## Step 4/5 vanishing assembly -/
+
+/-- **Step 5** (Hartshorne III.2.7): given vanishing of the cokernel of
+    `openHom(V ≤ ⊤)` at degree `m`, deduce vanishing of `zeroOutsideInt V` at
+    degree `m + 1`. Uses the SES `0 → zeroOutsideInt V → zeroOutsideInt ⊤ → cokernel → 0`
+    where `zeroOutsideInt ⊤ = Z_X` (constant sheaf, flasque on irreducible spaces). -/
+theorem zeroOutsideInt_vanishing
+    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
+    (V : Opens X) (m : ℕ)
+    (hCoker : Subsingleton (Sheaf.H (Limits.cokernel
+      (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))) m)) :
+    Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) (m + 1)) := by
+  have hfsh : Mono (TopCat.Sheaf.zeroOutsideInt.openHom
+      (le_top : V ≤ (⊤ : Opens X))) := by
+    infer_instance
+  haveI : Mono ((TopCat.Sheaf.zeroOutsideInt.openHom
+      (le_top : V ≤ (⊤ : Opens X))).val) := by
+    exact (Sheaf.Hom.mono_iff_presheaf_mono
+      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u})
+      (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ (⊤ : Opens X)))).1 hfsh
+  have hTop : Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) (m + 1)) := by
+    let F : TopCat.Presheaf AddCommGrpCat.{u} X :=
+      (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).val
+    have hF : F.IsSheaf := by
+      simpa [F] using (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).cond
+    letI : IsFlasqueSheaf ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+      simpa [F, hF] using isFlasqueSheaf_zeroOutsideInt_top X
+    simpa [F, hF] using
+      (sheafH_subsingleton_of_flasque_presheaf (X := X) (F := F) hF m)
+  exact sheafH_dimension_shift_of_mono_presheaf
+    (F := (TopCat.Sheaf.zeroOutsideInt V).val)
+    (G := (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).val)
+    (hF := (TopCat.Sheaf.zeroOutsideInt V).cond)
+    (hG := (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).cond)
+    (f := (TopCat.Sheaf.zeroOutsideInt.openHom
+      (le_top : V ≤ (⊤ : Opens X))).val)
+    (n := m)
+    hCoker hTop
+
+/-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
+    degree `m > dim X` on an irreducible Noetherian space.
+    Proof: write `m = m' + 1`, apply `zeroOutsideInt_vanishing` (SES + flasque), then prove
+    cokernel vanishing at `m'` via `closedImmersionSES` on `Vᶜ` + `PushforwardHVanishing`. -/
+theorem zeroOutsideInt_cohomology_vanishing
+    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
+    (V : Opens X) (hV : V ≠ ⊥)
+    (ih : VanishingIH.{u} (topologicalKrullDim X))
+    (m : ℕ) (hm : m > topologicalKrullDim X) :
+    Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) m) := by
+  let C := Limits.cokernel (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))
+  have hm_ne : m ≠ 0 := by
+    intro h; subst h; exact absurd hm (not_lt.mpr topologicalKrullDim_nonneg)
+  obtain ⟨m', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
+  have hVcompl_lt_succ :
+      topologicalKrullDim (Set.compl (V : Set X)) < ↑↑(m' + 1 : ℕ) :=
+    topologicalKrullDim_subspace_lt_of_lt (X := X) (Set.compl (V : Set X))
+      (by simpa [gt_iff_lt] using hm)
+  have hVcompl_lt_top : topologicalKrullDim (Set.compl (V : Set X)) < ⊤ :=
+    topologicalKrullDim_lt_top_of_lt_nat hVcompl_lt_succ
+  have hVcompl_lt_X : topologicalKrullDim (Set.compl (V : Set X)) < topologicalKrullDim X :=
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed
+      V.2.isClosed_compl
+      (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr
+        (Opens.coe_eq_empty.not.mpr hV)))
+      hVcompl_lt_top
+  have hVcompl_lt_m' : topologicalKrullDim (Set.compl (V : Set X)) < ↑↑(m' : ℕ) :=
+    topologicalKrullDim_lt_nat_of_lt_of_lt_nat_succ hVcompl_lt_X
+      (by simpa [gt_iff_lt] using hm)
+  apply zeroOutsideInt_vanishing V m'
+  exact closedComplementVanishing V hV (C := C.val) C.cond m' ih
+    (by simpa [gt_iff_lt] using hVcompl_lt_m')
+    (fun x hxV a => cokernel_stalk_zero_of_stalk_surj
+      (F := (TopCat.Sheaf.zeroOutsideInt V).val)
+      (G := (TopCat.Sheaf.zeroOutsideInt ⊤).val)
+      (hF := (TopCat.Sheaf.zeroOutsideInt V).cond)
+      (hG := (TopCat.Sheaf.zeroOutsideInt ⊤).cond)
+      (f := (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)).val)
+      (x := x)
+      (hf := sheafifyMap_zeroOutside_openHom_stalk_surj Presheaf.constZ le_top x hxV) a)
 
 /-- **Step 4** (Hartshorne III.2.7): any subsheaf of `zeroOutsideInt V` has vanishing
     cohomology in degree `m > dim X`. Uses `subsheaf_contains_zeroOutsideInt` to find
