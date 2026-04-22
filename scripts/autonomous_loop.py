@@ -8,7 +8,7 @@ the human in the loop for "keep going" / "look at WorkPlan.md" style prompts.
 
 Architecture:
   1. Git pull (pick up other agents' work)
-  2. Snapshot state (sorry list, WorkPlan.md, critique.md, LOG.md)
+  2. Snapshot state (sorry list, WorkPlan.md, critique.md, ProgressLog.md)
   3. WORKER: full Claude Code session (fresh, no context accumulation)
   4. Snapshot state again
   5. EVALUATOR: cheap LLM judges whether real progress was made
@@ -339,7 +339,7 @@ Your job: judge whether REAL progress was made, and decide what the next cycle s
 ## Git diff (this cycle)
 {git_diff[:4000] if git_diff else '(empty — no changes)'}
 
-## LOG.md entry (this cycle)
+## ProgressLog.md entry (this cycle)
 {log_entry[:2000] if log_entry else '(no log entry)'}
 
 ## Worker's own summary
@@ -495,7 +495,9 @@ def run_cycle(dry_run: bool = False, budget_usd: float = 5.0) -> dict:
 
     # 2. Snapshot before
     sorry_before = find_sorry_locations()
-    log_before = read_file_safe(REPO_DIR / "Aristotle" / "GrothendieckVanishing" / "LOG.md")
+    log_before = read_file_safe(
+        REPO_DIR / "Aristotle" / "GrothendieckVanishing" / "ProgressLog.md"
+    )
     print(f"  Sorry count before: {len(sorry_before)}")
 
     # 3. Load history and determine strategy
@@ -536,7 +538,9 @@ Do NOT continue with the same strategy that has failed for {stuck_count} cycles.
     # 5. Snapshot after
     sorry_after = find_sorry_locations()
     git_diff = git("diff", "--stat", "HEAD~1", check=False)
-    log_after = read_file_safe(REPO_DIR / "Aristotle" / "GrothendieckVanishing" / "LOG.md")
+    log_after = read_file_safe(
+        REPO_DIR / "Aristotle" / "GrothendieckVanishing" / "ProgressLog.md"
+    )
     # Extract just the new log entry
     log_entry = log_after[len(log_before):] if log_after.startswith(log_before) else log_after[-2000:]
     print(f"  Sorry count after: {len(sorry_after)}")

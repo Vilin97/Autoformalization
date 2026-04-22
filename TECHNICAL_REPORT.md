@@ -208,7 +208,7 @@ The development was organized around the same **babysit loop** used in the [VML 
 4. **`/simplify`** — refactor proofs, eliminate dead code
 5. **`/submit-aristotle`** — extract hard lemmas for Aristotle
 6. **`/check-aristotle`** — poll for completed Aristotle jobs
-7. **`/log`** — record progress in `LOG.md`
+7. **`/log`** — record progress in `ProgressLog.md`
 
 The loop ran for **648 documented `/babysit` invocations** over the project. Key adaptations from VML:
 - The critique/plan cycle was more important here due to the shifting proof strategy (multiple false starts on the filtered colimit step).
