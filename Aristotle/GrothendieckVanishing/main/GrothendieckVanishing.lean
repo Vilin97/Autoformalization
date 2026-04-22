@@ -77,11 +77,21 @@ private theorem ReducibleVanishing'
             simpa [S, closedImmersionSES, i, Gsh] using
               (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
                 (hs := hZ_closed) (F := G) hG ⟨x, hxZ⟩)
-          exact stalk_zero_of_ses_g_iso hSE x inferInstance a
+          exact stalk_zero_of_ses_g_iso_presheaf
+            S.X₁.cond S.X₂.cond S.X₃.cond
+            (f := S.f.val) (g := S.g.val)
+            (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+            (by simpa [S] using hSE)
+            x inferInstance a
         · have hx' : x ∉ ⋃₀ ((insert Z s' : Finset (Set X)) : Set (Set X)) := by
             simp only [Finset.coe_insert, Set.sUnion_insert, Set.mem_union] at hx ⊢
             push_neg; exact ⟨hxZ, hx⟩
-          exact stalk_zero_of_shortExact_kernel hSE x (fun b => hG_stalks x hx' b) a
+          exact stalk_zero_of_shortExact_kernel_presheaf
+            S.X₁.cond S.X₂.cond S.X₃.cond
+            (f := S.f.val) (g := S.g.val)
+            (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+            (by simpa [S] using hSE)
+            x (fun b => hG_stalks x hx' b) a
       simpa using hker'
     exact subsingleton_sheafH_of_closedImmersion_middle_presheaf
       (Z := Z) (hZ := hZ_closed) (F := G) hG n
