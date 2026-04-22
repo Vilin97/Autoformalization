@@ -34,58 +34,6 @@ open scoped Classical
 variable {X : TopCat.{u}} [NoetherianSpace X]
     {K : TopCat.Presheaf AddCommGrpCat.{u} X} (hK : K.IsSheaf)
 
-/-- Coproduct inclusion for general `S ⊆ S'`. -/
-private noncomputable def finsetCoproductInclGen
-    {S S' : Finset
-      (TopCat.Presheaf.SectionIndex K)}
-    (h : S ⊆ S') :
-    (∐ fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟶
-    (∐ fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1) :=
-  Sigma.desc fun σ =>
-    Sigma.ι (fun τ : {τ // τ ∈ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ.1, h σ.2⟩
-
-/-- Image inclusion for general `S ⊆ S'`: `finsetGeneratedSheaf S ⟶ finsetGeneratedSheaf S'`. -/
-private noncomputable def finsetImageInclGen
-    {S S' : Finset
-      (TopCat.Presheaf.SectionIndex K)}
-    (h : S ⊆ S') :
-    TopCat.Presheaf.finsetGeneratedSheaf hK S ⟶ TopCat.Presheaf.finsetGeneratedSheaf hK S' :=
-  Limits.image.lift
-    { I := TopCat.Presheaf.finsetGeneratedSheaf hK S'
-      m := Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK S')
-      e := finsetCoproductInclGen h ≫ factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK S')
-      fac := by
-        rw [Category.assoc, Limits.image.fac]
-        ext ⟨σ, hσ⟩
-        simp [finsetCoproductInclGen, TopCat.Presheaf.finsetGeneratorMap,
-              TopCat.Sheaf.familyMap] }
-
-omit [NoetherianSpace X] in
-private lemma finsetImageInclGen_comp_ι
-    {S S' : Finset
-      (TopCat.Presheaf.SectionIndex K)}
-    (h : S ⊆ S') :
-    finsetImageInclGen hK h ≫
-        Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK S') =
-      Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK S) := by
-  simpa [finsetImageInclGen] using
-    (Limits.image.lift_fac (f := TopCat.Presheaf.finsetGeneratorMap hK S)
-      { I := TopCat.Presheaf.finsetGeneratedSheaf hK S'
-        m := Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK S')
-        e := finsetCoproductInclGen h ≫ factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK S')
-        fac := by
-          rw [Category.assoc, Limits.image.fac]
-          ext ⟨σ, hσ⟩
-          simp [finsetCoproductInclGen, TopCat.Presheaf.finsetGeneratorMap,
-            TopCat.Sheaf.familyMap] })
-
-private instance finsetImageInclGen_mono
-    {S S' : Finset
-      (TopCat.Presheaf.SectionIndex K)}
-    (h : S ⊆ S') :
-    Mono (finsetImageInclGen hK h) :=
-  mono_of_mono_fac (finsetImageInclGen_comp_ι hK h)
-
 /-- The functor `Finset(SectionIndex K) ⥤ Sheaf(X)` sending `S ↦ finsetGeneratedSheaf S`.
     Transition maps are the canonical image inclusions, which are monomorphisms. -/
 private noncomputable def finsetGenFunctor :
@@ -93,14 +41,15 @@ private noncomputable def finsetGenFunctor :
         (TopCat.Presheaf.SectionIndex K) ⥤
       TopCat.Sheaf AddCommGrpCat.{u} X where
   obj S := TopCat.Presheaf.finsetGeneratedSheaf hK S
-  map h := finsetImageInclGen hK h.le
+  map h := TopCat.Presheaf.finsetImageInclGen hK h.le
   map_id S := by
     apply (cancel_mono (Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK S))).1
-    rw [finsetImageInclGen_comp_ι, Category.id_comp]
+    rw [TopCat.Presheaf.finsetImageInclGen_comp_ι, Category.id_comp]
   map_comp {S₁ S₂ S₃} h₁ h₂ := by
     apply (cancel_mono (Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK S₃))).1
-    rw [Category.assoc, finsetImageInclGen_comp_ι, finsetImageInclGen_comp_ι,
-        finsetImageInclGen_comp_ι]
+    rw [Category.assoc, TopCat.Presheaf.finsetImageInclGen_comp_ι,
+      TopCat.Presheaf.finsetImageInclGen_comp_ι,
+      TopCat.Presheaf.finsetImageInclGen_comp_ι]
 
 /-- Cocone with vertex `K`: the cocone maps are `image.ι : finsetGeneratedSheaf S ⟶ K`. -/
 private noncomputable def finsetGenCocone :
@@ -108,7 +57,7 @@ private noncomputable def finsetGenCocone :
   Cocone.mk (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)
     { app := fun S => Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK S)
       naturality := fun S S' h => by
-        simp [finsetGenFunctor, finsetImageInclGen_comp_ι] }
+        simp [finsetGenFunctor, TopCat.Presheaf.finsetImageInclGen_comp_ι] }
 
 /-- The cocone is a colimit: `K` is the filtered colimit of its finitely generated subsheaves.
     Proof: the canonical map `colim → K` is mono (by AB5 + mono transitions) and epi
@@ -126,7 +75,7 @@ private noncomputable def finsetGenCocone_isColimit :
     let α : finsetGenFunctor hK ⟶ (Functor.const _).obj Ksh :=
       { app := fun S => Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK S)
         naturality := fun S S' h => by
-          simp [finsetGenFunctor, finsetImageInclGen_comp_ι] }
+          simp [finsetGenFunctor, TopCat.Presheaf.finsetImageInclGen_comp_ι] }
     haveI : ∀ j, Mono (α.app j) := fun _ => inferInstance
     haveI := NatTrans.mono_of_mono_app α
     exact colim.map_mono' α (colimit.isColimit _) (isColimitConstCocone _ _) d
@@ -220,7 +169,7 @@ private theorem imageIncl_cokernel_epi :
       ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
       factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK (insert σ₀ S')) ≫
       cokernel.π
-        (finsetImageInclGen hK (Finset.subset_insert σ₀ S'))) := by
+        (TopCat.Presheaf.finsetImageInclGen hK (Finset.subset_insert σ₀ S'))) := by
   let h_sub := Finset.subset_insert σ₀ S'
   let proj : (∐ fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟶
       TopCat.Sheaf.zeroOutsideInt σ₀.1 :=
@@ -228,37 +177,29 @@ private theorem imageIncl_cokernel_epi :
       if h : σ.1 = σ₀ then
         eqToHom (by rw [h])
       else 0
-  have heq : finsetCoproductInclGen h_sub ≫
+  have heq : TopCat.Presheaf.finsetCoproductInclGen h_sub ≫
       factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK (insert σ₀ S')) =
-    factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK S') ≫ finsetImageInclGen hK h_sub := by
+    factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK S') ≫
+      TopCat.Presheaf.finsetImageInclGen hK h_sub := by
     apply (cancel_mono (Limits.image.ι
       (TopCat.Presheaf.finsetGeneratorMap hK (insert σ₀ S')))).1
     rw [Category.assoc, Limits.image.fac]
-    have hlf : finsetImageInclGen hK h_sub ≫
+    have hlf : TopCat.Presheaf.finsetImageInclGen hK h_sub ≫
         Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK (insert σ₀ S')) =
         Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK S') := by
-      simpa [finsetImageInclGen] using
-        (Limits.image.lift_fac (f := TopCat.Presheaf.finsetGeneratorMap hK S')
-          { I := TopCat.Presheaf.finsetGeneratedSheaf hK (insert σ₀ S')
-            m := Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK (insert σ₀ S'))
-            e := finsetCoproductInclGen h_sub ≫
-              factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK (insert σ₀ S'))
-            fac := by
-              rw [Category.assoc, Limits.image.fac]
-              ext ⟨σ, hσ⟩
-              simp [finsetCoproductInclGen, TopCat.Presheaf.finsetGeneratorMap,
-                TopCat.Sheaf.familyMap] })
+      simpa using TopCat.Presheaf.finsetImageInclGen_comp_ι
+        (F := K) hK h_sub
     rw [Category.assoc, hlf, Limits.image.fac]
     ext ⟨σ', hσ'⟩
-    simp [finsetCoproductInclGen, TopCat.Presheaf.finsetGeneratorMap,
+    simp [TopCat.Presheaf.finsetCoproductInclGen, TopCat.Presheaf.finsetGeneratorMap,
       TopCat.Sheaf.familyMap]
   have hfac : proj ≫
       (Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1)
         ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
       factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK (insert σ₀ S')) ≫
-      cokernel.π (finsetImageInclGen hK h_sub)) =
+      cokernel.π (TopCat.Presheaf.finsetImageInclGen hK h_sub)) =
     factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK (insert σ₀ S')) ≫
-      cokernel.π (finsetImageInclGen hK h_sub) := by
+      cokernel.π (TopCat.Presheaf.finsetImageInclGen hK h_sub) := by
     ext ⟨σ, hσ⟩
     simp only [proj]
     by_cases h : σ = σ₀
@@ -270,9 +211,9 @@ private theorem imageIncl_cokernel_epi :
       symm
       have hι : Sigma.ι (fun τ : {τ // τ ∈ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1)
           ⟨σ, Finset.mem_of_mem_insert_of_ne hσ h⟩ ≫
-          finsetCoproductInclGen h_sub =
+          TopCat.Presheaf.finsetCoproductInclGen h_sub =
         Sigma.ι (fun τ : {τ // τ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ, hσ⟩ := by
-        simp [finsetCoproductInclGen]
+        simp [TopCat.Presheaf.finsetCoproductInclGen]
       rw [← hι, Category.assoc, reassoc_of% heq]; simp [cokernel.condition]
   exact epi_of_epi_fac hfac
 
@@ -306,10 +247,11 @@ theorem finsetGeneratedSheaf_vanishing
       m
   | @insert σ₀ S' _ ih =>
     let h_sub := Finset.subset_insert σ₀ S'
-    let SC := ShortComplex.mk (finsetImageInclGen hK h_sub)
-      (cokernel.π (finsetImageInclGen hK h_sub)) (cokernel.condition _)
+    let SC := ShortComplex.mk (TopCat.Presheaf.finsetImageInclGen hK h_sub)
+      (cokernel.π (TopCat.Presheaf.finsetImageInclGen hK h_sub)) (cokernel.condition _)
     have hSE : SC.ShortExact := ShortComplex.ShortExact.mk'
-      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel (finsetImageInclGen hK h_sub)))
+      (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel
+        (TopCat.Presheaf.finsetImageInclGen hK h_sub)))
       inferInstance inferInstance
     have hCoker : Subsingleton (Sheaf.H SC.X₃ m) :=
       by
@@ -318,7 +260,7 @@ theorem finsetGeneratedSheaf_vanishing
           Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1)
             ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫
           factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK (insert σ₀ S')) ≫
-          cokernel.π (finsetImageInclGen hK h_sub)
+          cokernel.π (TopCat.Presheaf.finsetImageInclGen hK h_sub)
         haveI : Epi g := by
           simpa [g, SC, h_sub] using
             imageIncl_cokernel_epi (K := K) hK (σ₀ := σ₀) (S' := S')
