@@ -1,4 +1,5 @@
 import Mathlib
+import Aristotle.GrothendieckVanishing.main.ClosedImmersion
 
 /-!
   ZeroOutside.lean — Extension-by-zero presheaf and sheaf machinery
@@ -7,6 +8,7 @@ import Mathlib
   - `zeroOutside`: presheaf that is `F` on opens contained in `U` and zero elsewhere
   - `constZ`: constant presheaf with value `ULift ℤ`
   - `zeroOutsideInt`: sheafified extension-by-zero of `constZ` on an open `U`
+  - stalk surjectivity for `zeroOutside_openHom` and its sheafification on points of the support
   - `sHom`: section-hom from a section `s ∈ F(U)` to a presheaf/sheaf morphism
   - `generator`: canonical generator of `(constZ.zeroOutside U).obj (op U)`
   - `familyGeneratorMap`: coproduct map from a family of `zeroOutsideInt`
@@ -109,6 +111,68 @@ instance zeroOutside_hom_mono [HasPullbacks C] : Mono (zeroOutside_openHom (F :=
   · have : unop W ≤ U := le_trans hWV h
     simp [zeroOutside_openHom, hWV, this, IsIso.mono_of_iso]
   · simp [zeroOutside_openHom, hWV, zeroOutside_isZero (F := F) hWV, IsZero.mono, isZero_zero C]
+
+/-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
+    any germ in the larger zero-outside presheaf can be lifted by restricting to `W ∩ V ≤ V`
+    where the presheaf map is `eqToHom` (identity). -/
+theorem _root_.zeroOutside_openHom_stalk_surj
+    {X : TopCat.{u}} {F : TopCat.Presheaf AddCommGrpCat.{u} X}
+    {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
+    Function.Surjective (ConcreteCategory.hom
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
+        (TopCat.Presheaf.zeroOutside_openHom (F := F) h))) := by
+  intro g
+  obtain ⟨W, hxW, s, rfl⟩ := (F.zeroOutside U).germ_exist x g
+  set WV := W ⊓ V
+  have hWV_le_V : WV ≤ V := inf_le_right
+  have hWV_le_W : WV ≤ W := inf_le_left
+  have hxWV : x ∈ WV := ⟨hxW, hx⟩
+  have happ_iso : IsIso ((TopCat.Presheaf.zeroOutside_openHom (F := F) h).app (op WV)) := by
+    simp only [TopCat.Presheaf.zeroOutside_openHom, hWV_le_V, ↓reduceDIte]
+    infer_instance
+  let s_res := ConcreteCategory.hom ((F.zeroOutside U).map (homOfLE hWV_le_W).op) s
+  have h_bij := ConcreteCategory.bijective_of_isIso
+    ((TopCat.Presheaf.zeroOutside_openHom (F := F) h).app (op WV))
+  obtain ⟨t, ht⟩ := h_bij.2 s_res
+  refine ⟨(F.zeroOutside V).germ WV x hxWV t, ?_⟩
+  rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
+  change (F.zeroOutside U).germ WV x hxWV
+      ((TopCat.Presheaf.zeroOutside_openHom (F := F) h).app (op WV) t) =
+    (F.zeroOutside U).germ W x hxW s
+  rw [ht]
+  simp only [s_res]
+  convert ((F.zeroOutside U).germ_res_apply (homOfLE hWV_le_W) x hxWV s) using 1
+
+/-- The sheaf stalk map of `sheafifyMap (zeroOutside_openHom h)` at `x ∈ V` is surjective.
+    Transfers presheaf stalk surjectivity via `toSheafify_naturality` and
+    the fact that `stalk(toSheafify)` is an isomorphism. -/
+theorem _root_.sheafifyMap_zeroOutside_openHom_stalk_surj
+    {X : TopCat.{u}} (F : TopCat.Presheaf AddCommGrpCat.{u} X)
+    {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
+    Function.Surjective (ConcreteCategory.hom
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
+        (sheafifyMap (Opens.grothendieckTopology (T := X))
+          (TopCat.Presheaf.zeroOutside_openHom (F := F) h)))) := by
+  let J := Opens.grothendieckTopology (T := X)
+  let φ := TopCat.Presheaf.zeroOutside_openHom (F := F) h
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  let ηV := CategoryTheory.toSheafify J (F.zeroOutside V)
+  let ηU := CategoryTheory.toSheafify J (F.zeroOutside U)
+  have hnat : T.map φ ≫ T.map ηU =
+      T.map ηV ≫ T.map (CategoryTheory.sheafifyMap J φ) := by
+    dsimp [ηV, ηU]
+    rw [← T.map_comp, ← T.map_comp, CategoryTheory.toSheafify_naturality]
+  haveI : IsIso (T.map ηV) :=
+    stalkFunctor_map_iso_toSheafify _ x
+  haveI : IsIso (T.map ηU) :=
+    stalkFunctor_map_iso_toSheafify _ x
+  intro g
+  obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map ηU)).2 g
+  obtain ⟨p, hp⟩ := zeroOutside_openHom_stalk_surj h x hx q
+  exact ⟨ConcreteCategory.hom (T.map ηV) p, by
+    change ConcreteCategory.hom (T.map (CategoryTheory.sheafifyMap J φ))
+        (ConcreteCategory.hom (T.map ηV) p) = _
+    rw [← ConcreteCategory.comp_apply, hnat.symm, ConcreteCategory.comp_apply, hp]⟩
 
 end
 

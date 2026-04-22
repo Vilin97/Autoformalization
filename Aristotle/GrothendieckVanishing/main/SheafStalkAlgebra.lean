@@ -2,12 +2,12 @@ import Aristotle.GrothendieckVanishing.main.CohomologyAPI
 import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
 import Aristotle.GrothendieckVanishing.main.FiniteGeneratorReduction
+import Aristotle.GrothendieckVanishing.main.ZeroOutside
 
 /-!
   SheafStalkAlgebra.lean — Stalk algebra for sheaves of abelian groups
 
   Split from IrreducibleStep.lean. Contains:
-  - Stalk surjectivity for zeroOutside_openHom / sheafifyMap (any presheaf, not just constZ)
   - zeroOutsideInt cohomology vanishing (zeroOutsideInt_cohomology_vanishing)
   - isZero_zeroOutsideInt_bot: zeroOutsideInt ⊥ is zero
   - stalk_zeroOutsideInt_zero_outside: stalks vanish outside support
@@ -71,67 +71,6 @@ theorem zeroOutsideInt_vanishing
       (le_top : V ≤ (⊤ : Opens X))).val)
     (n := m)
     hCoker hTop
-
-/-- The presheaf stalk map of `zeroOutside_openHom h` at `x ∈ V` is surjective:
-    any germ in the larger zero-outside presheaf can be lifted by restricting to `W ∩ V ≤ V`
-    where the presheaf map is `eqToHom` (identity). -/
-theorem zeroOutside_openHom_stalk_surj
-    {X : TopCat.{u}} {F : TopCat.Presheaf AddCommGrpCat.{u} X}
-    {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
-    Function.Surjective (ConcreteCategory.hom
-      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-        (TopCat.Presheaf.zeroOutside_openHom (F := F) h))) := by
-  intro g; obtain ⟨W, hxW, s, rfl⟩ := (F.zeroOutside U).germ_exist x g
-  -- Restrict to W ⊓ V, where both presheaves agree with F
-  set WV := W ⊓ V
-  have hWV_le_V : WV ≤ V := inf_le_right
-  have hWV_le_W : WV ≤ W := inf_le_left
-  have hxWV : x ∈ WV := ⟨hxW, hx⟩
-  -- On WV, openHom is an iso (eqToHom)
-  have happ_iso : IsIso ((TopCat.Presheaf.zeroOutside_openHom
-    (F := F) h).app (op WV)) := by
-    simp only [TopCat.Presheaf.zeroOutside_openHom, hWV_le_V, ↓reduceDIte]; infer_instance
-  -- Use the iso to find a preimage of the restricted section
-  let s_res := ConcreteCategory.hom
-    ((F.zeroOutside U).map (homOfLE hWV_le_W).op) s
-  have h_bij := ConcreteCategory.bijective_of_isIso
-    ((TopCat.Presheaf.zeroOutside_openHom (F := F) h).app (op WV))
-  obtain ⟨t, ht⟩ := h_bij.2 s_res
-  refine ⟨(F.zeroOutside V).germ WV x hxWV t, ?_⟩
-  rw [TopCat.Presheaf.stalkFunctor_map_germ_apply]
-  change (F.zeroOutside U).germ WV x hxWV
-    ((TopCat.Presheaf.zeroOutside_openHom (F := F) h).app (op WV) t) =
-    (F.zeroOutside U).germ W x hxW s
-  rw [ht]; simp only [s_res]
-  convert ((F.zeroOutside U).germ_res_apply
-    (homOfLE hWV_le_W) x hxWV s) using 1
-
-/-- The sheaf stalk map of `sheafifyMap(zeroOutside_openHom h)` at `x ∈ V` is surjective.
-    Transfers presheaf stalk surjectivity via `toSheafify_naturality` and
-    the fact that `stalk(toSheafify)` is an isomorphism. -/
-theorem sheafifyMap_zeroOutside_openHom_stalk_surj
-    {X : TopCat.{u}} (F : TopCat.Presheaf AddCommGrpCat.{u} X)
-    {V U : Opens X} (h : V ≤ U) (x : X) (hx : x ∈ V) :
-    Function.Surjective (ConcreteCategory.hom
-      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map
-        (sheafifyMap (Opens.grothendieckTopology (T := X))
-          (TopCat.Presheaf.zeroOutside_openHom (F := F) h)))) := by
-  let J := Opens.grothendieckTopology (T := X)
-  let φ := TopCat.Presheaf.zeroOutside_openHom (F := F) h
-  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  have hnat : T.map φ ≫ T.map (toSheafify J _) =
-    T.map (toSheafify J _) ≫ T.map (sheafifyMap J φ) := by
-    rw [← T.map_comp, ← T.map_comp, toSheafify_naturality]
-  haveI : IsIso (T.map (toSheafify J (F.zeroOutside V))) :=
-    stalkFunctor_map_iso_toSheafify _ x
-  haveI : IsIso (T.map (toSheafify J (F.zeroOutside U))) :=
-    stalkFunctor_map_iso_toSheafify _ x
-  intro g; obtain ⟨q, rfl⟩ := (ConcreteCategory.bijective_of_isIso (T.map (toSheafify J _))).2 g
-  obtain ⟨p, hp⟩ := zeroOutside_openHom_stalk_surj h x hx q
-  exact ⟨ConcreteCategory.hom (T.map (toSheafify J _)) p, by
-    change ConcreteCategory.hom (T.map (sheafifyMap J φ))
-      (ConcreteCategory.hom (T.map (toSheafify J _)) p) = _
-    rw [← ConcreteCategory.comp_apply, hnat.symm, ConcreteCategory.comp_apply, hp]⟩
 
 /-! ## Sub-lemmas for Hartshorne III.2.7 Steps 3-5
 
