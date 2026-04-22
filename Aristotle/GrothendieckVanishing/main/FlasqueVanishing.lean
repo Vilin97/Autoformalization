@@ -11,8 +11,7 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutside
   2. `IsFlasqueSheaf`, `epi_app_of_shortExact_flasque`, `isFlasque_X₃_of_shortExact`
   3. `isFlasque_of_injective` (injective sheaves are flasque)
 
-  General stalk/zero-sheaf lemmas (`sheaf_isZero_of_zero_stalks`, `stalk_zero_of_ses_g_iso`,
-  `stalk_zero_of_shortExact_kernel`) are in `CohomologyAPI.lean`.
+  General zero-sheaf and stalk-vanishing APIs are in `CohomologyAPI.lean`.
 
   `FlasqueVanishing` itself is in `FlasqueCohomology.lean`.
   Split from SetupCore.lean for compilation performance.
