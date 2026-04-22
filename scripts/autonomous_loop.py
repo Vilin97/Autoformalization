@@ -8,7 +8,7 @@ the human in the loop for "keep going" / "look at WorkPlan.md" style prompts.
 
 Architecture:
   1. Git pull (pick up other agents' work)
-  2. Snapshot state (sorry list, WorkPlan.md, critique.md, ProgressLog.md)
+  2. Snapshot state (sorry list, WorkPlan.md, AdversarialCritique.md, ProgressLog.md)
   3. WORKER: full Claude Code session (fresh, no context accumulation)
   4. Snapshot state again
   5. EVALUATOR: cheap LLM judges whether real progress was made
@@ -230,7 +230,7 @@ you have no memory of previous cycles except what's in the persistent files.
 {strategy}
 
 ## Your instructions
-Read WorkPlan.md and critique.md in the active project directory for context.
+Read WorkPlan.md and AdversarialCritique.md in the active project directory for context.
 Then execute the full /babysit protocol: /critique, /plan, /submit-aristotle,
 /prove, /check-aristotle, /log, /cleanup, /simplify, /commit, /alert.
 
