@@ -181,6 +181,18 @@ private def IsPartialLift {X : TopCat.{u}}
   ∃ h : p.1 ≤ U, ConcreteCategory.hom (g.app (op p.1)) p.2 =
     ConcreteCategory.hom (F₃.map (homOfLE h).op) s
 
+private lemma isCompatible_restriction_family {X : TopCat.{u}}
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X}
+    {ι : Type*} (V : ι → Opens X) {U : Opens X} (s : F.obj (op U))
+    (hV : ∀ i, V i ≤ U) :
+    TopCat.Presheaf.IsCompatible F V
+      (fun i => ConcreteCategory.hom (F.map (homOfLE (hV i)).op) s) := by
+  intro i j
+  dsimp
+  rw [← CategoryTheory.comp_apply, ← CategoryTheory.comp_apply,
+    ← F.map_comp, ← F.map_comp]
+  exact congr_arg (F.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
+
 -- Chain of partial lifts has an upper bound via sheaf gluing.
 private lemma partialLift_chain_ub {X : TopCat.{u}}
     {F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
@@ -195,6 +207,8 @@ private lemma partialLift_chain_ub {X : TopCat.{u}}
   by_cases hc : c.Nonempty
   · let cV (p : c) := (p : Σ V : Opens X, F₂.obj (op V)).1
     let cs (p : c) := (p : Σ V : Opens X, F₂.obj (op V)).2
+    let gs (p : c) : F₃.obj (op (cV p)) :=
+      ConcreteCategory.hom (F₃.map (homOfLE ((hcP p.1 p.2).choose)).op) s
     set Vsup := ⨆ p, cV p
     have hVsup_le : Vsup ≤ U := iSup_le fun ⟨_, hp⟩ => (hcP _ hp).choose
     have hcompat : TopCat.Presheaf.IsCompatible F₂ cV cs := by
@@ -205,29 +219,27 @@ private lemma partialLift_chain_ub {X : TopCat.{u}}
       · rw [show (p.1).infLELeft q.1 = (p.1).infLERight q.1 ≫ homOfLE h from rfl,
           op_comp, Functor.map_comp, CategoryTheory.comp_apply, e]
     obtain ⟨t_gl, ht_gl, _⟩ := h₂.isSheafUniqueGluing cV cs hcompat
-    let gs (p : c) : F₃.obj (op (cV p)) :=
-      ConcreteCategory.hom (F₃.map (homOfLE ((hcP p.1 p.2).choose)).op) s
     have hcompat_gs : TopCat.Presheaf.IsCompatible F₃ cV gs := by
-      intro p q
-      dsimp [gs]
-      rw [← CategoryTheory.comp_apply, ← CategoryTheory.comp_apply,
-        ← F₃.map_comp, ← F₃.map_comp]
-      exact congr_arg (F₃.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
-    obtain ⟨_, _, hu_gl_uniq⟩ := h₃.isSheafUniqueGluing cV gs hcompat_gs
-    refine ⟨⟨Vsup, t_gl⟩, ⟨hVsup_le, ?_⟩, fun ⟨p, hp⟩ hpP =>
-      ⟨le_iSup cV ⟨⟨p, hp⟩, hpP⟩, ht_gl ⟨⟨p, hp⟩, hpP⟩⟩⟩
-    have hg_gl : TopCat.Presheaf.IsGluing F₃ cV gs
-        (ConcreteCategory.hom (g.app (op Vsup)) t_gl) := by
-      intro p
-      rw [← g.naturality_apply _ t_gl, ht_gl p]
-      simpa [gs] using (hcP p.1 p.2).choose_spec
-    have hs_gl : TopCat.Presheaf.IsGluing F₃ cV gs
-        (ConcreteCategory.hom (F₃.map (homOfLE hVsup_le).op) s) := by
-      intro p
-      dsimp [gs]
-      rw [← CategoryTheory.comp_apply, ← F₃.map_comp]
-      exact congr_arg (F₃.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
-    exact (hu_gl_uniq _ hg_gl).trans (hu_gl_uniq _ hs_gl).symm
+      simpa [gs] using
+        isCompatible_restriction_family (F := F₃) cV s (fun p => (hcP p.1 p.2).choose)
+    obtain ⟨_, _, hgs_uniq⟩ := h₃.isSheafUniqueGluing cV gs hcompat_gs
+    have hub_inP : IsPartialLift (F₃ := F₃) (g := g) U s ⟨Vsup, t_gl⟩ := by
+      refine ⟨hVsup_le, ?_⟩
+      have hg_gl : TopCat.Presheaf.IsGluing F₃ cV gs
+          (ConcreteCategory.hom (g.app (op Vsup)) t_gl) := by
+        intro p
+        rw [← g.naturality_apply _ t_gl, ht_gl p]
+        simpa [gs] using (hcP p.1 p.2).choose_spec
+      have hs_gl : TopCat.Presheaf.IsGluing F₃ cV gs
+          (ConcreteCategory.hom (F₃.map (homOfLE hVsup_le).op) s) := by
+        intro p
+        dsimp [gs]
+        rw [← CategoryTheory.comp_apply, ← F₃.map_comp]
+        exact congr_arg (F₃.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
+      exact (hgs_uniq _ hg_gl).trans (hgs_uniq _ hs_gl).symm
+    refine ⟨⟨Vsup, t_gl⟩, hub_inP, ?_⟩
+    intro ⟨p, hp⟩ hpP
+    exact ⟨le_iSup cV ⟨⟨p, hp⟩, hpP⟩, ht_gl ⟨⟨p, hp⟩, hpP⟩⟩
   · exact ⟨⟨⊥, 0⟩, ⟨bot_le, @Subsingleton.elim _
       (AddCommGrpCat.subsingleton_of_isZero
         ((TopCat.Sheaf.isTerminalOfEmpty
@@ -285,7 +297,7 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     rw [show F₂.map (homOfLE inf_le_right).op (f.app (op W) ahat) =
       f.app (op (V₀ ⊓ W)) (F₁.map (homOfLE inf_le_right).op ahat) from
       (f.naturality_apply (homOfLE inf_le_right).op ahat).symm, hahat, ha]; abel
-  -- Glue `t₀` and `t''` directly on the sheaf colimit open `iSup BU`.
+  -- Patch `t₀` and the adjusted local lift `t''`, then glue them on `iSup BU`.
   let BU : Bool → Opens X | false => V₀ | true => W
   let Bsf : (b : Bool) → F₂.obj (op (BU b)) | false => t₀ | true => t''
   have hcompat_glue : TopCat.Presheaf.IsCompatible F₂ BU Bsf := by
@@ -302,26 +314,20 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
           op_comp, Functor.map_comp, CategoryTheory.comp_apply,
           hcompat_patch]
   obtain ⟨t_new, ht_new, _⟩ := h₂.isSheafUniqueGluing BU Bsf hcompat_glue
-  have hBUU : iSup BU ≤ U := by
-    intro x hx
-    simp only [Opens.mem_iSup, BU] at hx
-    rcases hx with ⟨b, hx⟩
+  have hBU : ∀ b, BU b ≤ U := by
+    intro b
     cases b
-    · exact hV₀U hx
-    · exact hWU hx
-  have h_new_inP : IsPartialLift (F₃ := F₃) (g := g) U s ⟨iSup BU, t_new⟩ := by
+    · simpa [BU] using hV₀U
+    · simpa [BU] using hWU
+  have hBUU : iSup BU ≤ U := iSup_le hBU
+  let p_new : Σ V : Opens X, F₂.obj (op V) := ⟨iSup BU, t_new⟩
+  have hp_new : IsPartialLift (F₃ := F₃) (g := g) U s p_new := by
     refine ⟨hBUU, ?_⟩
-    let Bs : (b : Bool) → F₃.obj (op (BU b))
-      | false => ConcreteCategory.hom (F₃.map (homOfLE hV₀U).op) s
-      | true => ConcreteCategory.hom (F₃.map (homOfLE hWU).op) s
+    let Bs : (b : Bool) → F₃.obj (op (BU b)) :=
+      fun b => ConcreteCategory.hom (F₃.map (homOfLE (hBU b)).op) s
     have hcompat_Bs : TopCat.Presheaf.IsCompatible F₃ BU Bs := by
-      intro i j
-      cases i <;> cases j <;> dsimp [Bs, BU]
-      all_goals
-        rw [← CategoryTheory.comp_apply, ← CategoryTheory.comp_apply,
-          ← F₃.map_comp, ← F₃.map_comp]
-        exact congr_arg (F₃.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
-    obtain ⟨_, _, hu_gl_uniq⟩ := h₃.isSheafUniqueGluing BU Bs hcompat_Bs
+      simpa [Bs] using isCompatible_restriction_family (F := F₃) BU s hBU
+    obtain ⟨_, _, hBs_uniq⟩ := h₃.isSheafUniqueGluing BU Bs hcompat_Bs
     have hg_gl : TopCat.Presheaf.IsGluing F₃ BU Bs
         (ConcreteCategory.hom (g.app (op (iSup BU))) t_new) := by
       intro b
@@ -336,12 +342,15 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
         (simp only [BU, Bs]
          rw [← CategoryTheory.comp_apply, ← F₃.map_comp]
          exact congr_arg (F₃.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _)))
-    exact (hu_gl_uniq _ hg_gl).trans (hu_gl_uniq _ hs_gl).symm
+    exact (hBs_uniq _ hg_gl).trans (hBs_uniq _ hs_gl).symm
   have hxBU : x ∈ iSup BU := by
     simp only [Opens.mem_iSup, BU]
     exact ⟨true, hxW⟩
-  exact hxV₀ ((hmax _ h_new_inP ⟨le_iSup BU false, by
-    simpa [BU, Bsf] using ht_new false⟩).1 hxBU)
+  have h_extend : (sigmaPreorder (F₂ := F₂)).le ⟨V₀, t₀⟩ p_new := by
+    refine ⟨le_iSup BU false, ?_⟩
+    simpa [p_new, BU, Bsf] using ht_new false
+  have hp_new_le : (sigmaPreorder (F₂ := F₂)).le p_new ⟨V₀, t₀⟩ := hmax _ hp_new h_extend
+  exact hxV₀ (hp_new_le.1 hxBU)
 
 /-- If `0 → X₁ → X₂ → X₃ → 0` is short exact and every restriction map of the
 underlying presheaf `S.X₁.val` is epi, then `g(U) : X₂(U) → X₃(U)` is epi. -/
@@ -363,14 +372,17 @@ theorem epi_app_of_shortExact_of_epi_restrictions_presheaf {X : TopCat.{u}}
   have hls : TopCat.Presheaf.IsLocallySurjective g := by
     simpa [Ssh] using
       (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} Ssh.g).mpr inferInstance
-  obtain ⟨⟨V₀, t₀⟩, ⟨hV₀U, ht₀⟩, hmax⟩ :=
-    @zorn_le₀ _ (sigmaPreorder (F₂ := F₂)) {p | IsPartialLift (F₃ := F₃) (g := g) U s p}
+  let P : Set (Σ V : Opens X, F₂.obj (op V)) :=
+    {p | IsPartialLift (F₃ := F₃) (g := g) U s p}
+  obtain ⟨⟨V₀, t₀⟩, hpartial, hmax⟩ :=
+    @zorn_le₀ _ (sigmaPreorder (F₂ := F₂)) P
       (fun c hcP hchain =>
         partialLift_chain_ub (F₂ := F₂) (F₃ := F₃) h₂ h₃
           (U := U) (s := s) (fun p hp => hcP hp) hchain)
-  have := partialLift_maximal_eq_U
+  rcases hpartial with ⟨hV₀U, ht₀⟩
+  have hV₀_eq_U := partialLift_maximal_eq_U
     (F₁ := F₁) (F₂ := F₂) (F₃ := F₃) h₁ h₂ h₃ hfg hS hX₁_epi hV₀U ht₀ hls hmax
-  subst this
+  subst hV₀_eq_U
   exact ⟨t₀, by rw [ht₀]; simp⟩
 
 /-- If `0 → X₁ → X₂ → X₃ → 0` is short exact and every restriction map of the
