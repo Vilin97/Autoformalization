@@ -191,17 +191,17 @@ noncomputable def PushforwardHIso
       AddCommGrpCat.of (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
         (TopCat.closedIncl hZ)).obj (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))) n) := by
   let Gsh : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z) := ⟨G, hG⟩
-  let i := TopCat.closedIncl hZ
+  let closedIncl := TopCat.closedIncl hZ
   suffices ∀ (m : ℕ) (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)),
       AddCommGrpCat.of (Sheaf.H G' m) ≅
-        AddCommGrpCat.of (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G') m) from
+        AddCommGrpCat.of (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} closedIncl).obj G') m) from
     this n Gsh
   intro m; induction m with
   | zero =>
     intro G'
-    let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj G'
+    let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} closedIncl).obj G'
     let topIso : G'.val.obj (op ⊤) ≅ F'.val.obj (op ⊤) := eqToIso (by
-      change G'.val.obj (op ⊤) = G'.val.obj (op ((Opens.map i).obj ⊤))
+      change G'.val.obj (op ⊤) = G'.val.obj (op ((Opens.map closedIncl).obj ⊤))
       rw [Opens.map_top])
     exact (sheafH0NatIsoSections (X := TopCat.of Z)).app G' ≪≫
       topIso ≪≫ ((sheafH0NatIsoSections (X := X)).app F').symm
@@ -210,13 +210,13 @@ noncomputable def PushforwardHIso
     classical
     let ip : InjectivePresentation G' := Classical.choice (EnoughInjectives.presentation G')
     let S := ip.shortComplex
-    let SX := S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)
+    let SX := S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} closedIncl)
     have hSE_X : SX.ShortExact :=
       closedIncl_pushforward_shortExact hZ ip.shortExact_shortComplex
     haveI : IsFlasqueSheaf SX.X₂ := by
       constructor; intro U V j
-      change Epi (S.X₂.val.map ((Opens.map i).op.map j.op))
-      exact IsFlasqueSheaf.epi_map ((Opens.map i).map j)
+      change Epi (S.X₂.val.map ((Opens.map closedIncl).op.map j.op))
+      exact IsFlasqueSheaf.epi_map ((Opens.map closedIncl).map j)
     cases k with
     | zero =>
       let hH1_src :
@@ -231,7 +231,7 @@ noncomputable def PushforwardHIso
               Subsingleton (Sheaf.H S.X₂ 1)))
       let hH1_tgt :
           cokernel (S.g.val.app (op ⊤)) ≅ AddCommGrpCat.of (Sheaf.H SX.X₁ 1) := by
-        simpa [S, SX, Opens.map_top i] using
+        simpa [S, SX, Opens.map_top closedIncl] using
           sheafH1_cokernel_iso_of_subsingleton_middle_presheaf
             SX.X₁.cond SX.X₂.cond SX.X₃.cond
             (f := SX.f.val) (g := SX.g.val)
@@ -294,9 +294,9 @@ theorem epi_unit_of_closedImmersion
     {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
     Epi ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
       (TopCat.closedIncl hZ)).unit.app (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
-  let i := TopCat.closedIncl hZ
+  let closedIncl := TopCat.closedIncl hZ
   let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i
+  let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} closedIncl
   rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} (adj.unit.app Fsh),
     show Sheaf.IsLocallySurjective (adj.unit.app Fsh) =
       TopCat.Presheaf.IsLocallySurjective (adj.unit.app Fsh).val from rfl,
@@ -316,8 +316,8 @@ theorem epi_unit_of_closedImmersion
     exact fun b => ⟨0, by
       rw [pushforward_closedIncl_stalk_eq_zero
         (hs := hZ)
-        (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh).val)
-        (((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh).cond)
+        (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Fsh).val)
+        (((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Fsh).cond)
         hxZ b]
       exact map_zero _⟩
 
@@ -328,9 +328,9 @@ noncomputable def closedImmersionSES
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
     ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-  let i := TopCat.closedIncl hZ
+  let closedIncl := TopCat.closedIncl hZ
   let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} i).unit.app Fsh
+  let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} closedIncl).unit.app Fsh
   ShortComplex.mk (kernel.ι η) η (kernel.condition η)
 
 theorem closedImmersionSES_shortExact
@@ -355,17 +355,17 @@ theorem subsingleton_sheafH_of_closedImmersion_middle_presheaf
         ((TopCat.Sheaf.pullback AddCommGrpCat.{u} (TopCat.closedIncl hZ)).obj
           (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n)) :
     Subsingleton (Sheaf.H (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
-  let i := TopCat.closedIncl hZ
+  let closedIncl := TopCat.closedIncl hZ
   let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  let FZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh)
+  let FZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Fsh)
   let S := closedImmersionSES (Z := Z) (hZ := hZ) (F := F) hF
   have hSE := closedImmersionSES_shortExact (Z := Z) (hZ := hZ) (F := F) hF
   have h₁' : Subsingleton (Sheaf.H S.X₁ n) := by
     simpa [S] using h₁
   have h₃' : Subsingleton (Sheaf.H FZ n) := by
-    simpa [i, Fsh, FZ] using h₃
+    simpa [closedIncl, Fsh, FZ] using h₃
   have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
-    simpa [S, closedImmersionSES, i, Fsh, FZ] using
+    simpa [S, closedImmersionSES, closedIncl, Fsh, FZ] using
       PushforwardHVanishing Z hZ FZ.cond n h₃'
   haveI : Mono S.f := hSE.mono_f
   haveI : Mono S.f.val := by
@@ -421,8 +421,8 @@ theorem closedComplementVanishing
     topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl
       (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
       hY_dim_lt_top
-  let i := TopCat.closedIncl hYcl
-  let CY := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Csh)
+  let closedIncl := TopCat.closedIncl hYcl
+  let CY := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Csh)
   let S := closedImmersionSES (Z := Y) (hZ := hYcl) (F := C) hC
   have hSE := closedImmersionSES_shortExact (Z := Y) (hZ := hYcl) (F := C) hC
   have hSX₁_zero : IsZero S.X₁ := by
@@ -430,7 +430,7 @@ theorem closedComplementVanishing
       sheaf_isZero_of_zero_stalks X S.X₁.cond (fun x a => by
         by_cases hxY : x ∈ Y
         · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
-            simpa [S, closedImmersionSES, i, Csh] using
+            simpa [S, closedImmersionSES, closedIncl, Csh] using
               (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
                 (hs := hYcl) (F := C) hC ⟨x, hxY⟩)
           exact stalk_zero_of_ses_g_iso_presheaf
@@ -453,5 +453,5 @@ theorem closedComplementVanishing
     (by
       simpa [S] using sheafH_subsingleton_of_isZero_presheaf S.X₁.cond hSX₁_zero n)
     (by
-      simpa [i, Csh, CY] using
+      simpa [closedIncl, Csh, CY] using
         ih (TopCat.of Y) n (G := CY.val) CY.cond hY_dim_lt hn)
