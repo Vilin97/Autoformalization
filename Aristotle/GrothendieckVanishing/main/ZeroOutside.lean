@@ -437,6 +437,45 @@ theorem _root_.stalk_zeroOutsideInt_eq_zsmul_generator
   exact TopCat.Presheaf.stalkFunctor_map_germ_apply V x hx
     (toSheafify J P) (TopCat.Presheaf.zeroOutside.generator V)
 
+/-- The map `n ↦ n • gen` from `ℤ` into `stalk(zeroOutsideInt V, x)` is injective
+    for `x ∈ V`. -/
+theorem _root_.zsmul_generator_injective
+    {X : TopCat.{u}} (V : Opens X) (x : X) (hx : x ∈ V) :
+    Function.Injective (fun (n : ℤ) =>
+      n • ((TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V x hx
+        (TopCat.Sheaf.zeroOutsideInt.generator V))) := by
+  intro n m h
+  let P := TopCat.Presheaf.constZ.zeroOutside V
+  let J := Opens.grothendieckTopology (T := X)
+  let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
+  haveI : IsIso (T.map (toSheafify J P)) := stalkFunctor_map_iso_toSheafify P x
+  have hbij := ConcreteCategory.bijective_of_isIso (T.map (toSheafify J P))
+  have hgen_eq : ConcreteCategory.hom (T.map (toSheafify J P))
+      (P.germ V x hx (TopCat.Presheaf.zeroOutside.generator V)) =
+      (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V x hx
+        (TopCat.Sheaf.zeroOutsideInt.generator V) :=
+    TopCat.Presheaf.stalkFunctor_map_germ_apply V x hx
+      (toSheafify J P) (TopCat.Presheaf.zeroOutside.generator V)
+  set gen_P := TopCat.Presheaf.zeroOutside.generator V
+  have h' : P.germ V x hx (n • gen_P) = P.germ V x hx (m • gen_P) := by
+    rw [map_zsmul, map_zsmul]
+    apply hbij.1
+    simp only [map_zsmul, hgen_eq]
+    exact h
+  obtain ⟨W, hxW, iU, iV, hEq⟩ := P.germ_eq x hx hx _ _ h'
+  rw [Subsingleton.elim iU iV, map_zsmul, map_zsmul] at hEq
+  have hWV : W ≤ V := leOfHom iV
+  rw [Subsingleton.elim iV (homOfLE hWV)] at hEq
+  have hObjW : P.obj (op W) = AddCommGrpCat.of (ULift ℤ) := by
+    simp [P, TopCat.Presheaf.zeroOutside, hWV, TopCat.Presheaf.constZ]
+  set resGen := ConcreteCategory.hom (P.map (homOfLE hWV).op) gen_P
+  have hresGen_val : (AddCommGrpCat.Hom.hom (eqToHom hObjW)) resGen = (1 : ULift ℤ) :=
+    TopCat.Presheaf.zeroOutside.resGen_eqToHom_eq_one V hWV hObjW
+  have hEq_ULift : n • (1 : ULift ℤ) = m • (1 : ULift ℤ) := by
+    have := congrArg (AddCommGrpCat.Hom.hom (eqToHom hObjW)) hEq
+    rwa [map_zsmul, map_zsmul, hresGen_val] at this
+  simpa using congrArg ULift.down hEq_ULift
+
 /-- For a family of morphisms into `F`, the universal map from their coproduct into `F`. -/
 abbrev familyMap {C : Type*} [Category C] {X : TopCat.{u}} {ι : Type*}
     (G : ι → Sheaf C X) {F : Sheaf C X} (f : ∀ i, G i ⟶ F)
