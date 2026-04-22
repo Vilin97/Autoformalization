@@ -107,17 +107,13 @@ def sheafShortComplexOfPresheaf {X : TopCat.{u}}
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} {hfg : f ≫ g = 0} :
     (sheafShortComplexOfPresheaf h₁ h₂ h₃ (f := f) (g := g) hfg).g.val = g := rfl
 
-private lemma shortComplex_val_zero {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} :
-    S.f.val ≫ S.g.val = (0 : S.X₁.val ⟶ S.X₃.val) :=
-  congrArg Sheaf.Hom.val S.zero
-
 /-- A short exact sequence of sheaves remains short exact after viewing it through
 `sheafShortComplexOfPresheaf`. -/
 lemma sheafShortComplexOfPresheaf_shortExact_of_shortExact {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact) :
     (sheafShortComplexOfPresheaf S.X₁.cond S.X₂.cond S.X₃.cond
-      (f := S.f.val) (g := S.g.val) (shortComplex_val_zero (S := S))).ShortExact := by
+      (f := S.f.val) (g := S.g.val)
+      (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)).ShortExact := by
   simpa [sheafShortComplexOfPresheaf] using hS
 
 -- For a SES of sheafified presheaves, the evaluated sequence at V is exact:
@@ -165,7 +161,8 @@ lemma sections_exact_of_shortExact {X : TopCat.{u}}
   simpa using sections_exact_of_shortExact_presheaf
     (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
     S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val) (shortComplex_val_zero (S := S))
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
     (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS)
     V x hx
 
@@ -410,7 +407,8 @@ theorem epi_app_of_shortExact_of_epi_restrictions {X : TopCat.{u}}
   simpa using epi_app_of_shortExact_of_epi_restrictions_presheaf
     (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
     S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val) (shortComplex_val_zero (S := S))
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
     (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS)
     hX₁_epi U
 
@@ -442,7 +440,8 @@ theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
   simpa using epi_app_of_shortExact_flasque_presheaf
     (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
     S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val) (shortComplex_val_zero (S := S))
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
     (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS) U
 
 /-- Presheaf-boundary form of quotient-preserves-flasqueness:
@@ -494,7 +493,8 @@ theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
   simpa using isFlasque_X₃_of_shortExact_presheaf
     (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
     S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val) (shortComplex_val_zero (S := S))
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
     (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS)
 
 -- Injective sheaves are flasque.
