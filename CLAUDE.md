@@ -33,7 +33,8 @@ GitHub Actions runs `leanprover/lean-action@v1` on every push/PR (`.github/workf
 
 ## Code Structure
 
-Entry point: `Aristotle.lean` → imports `Aristotle.Basic` + `Aristotle.GrothendieckVanishing.main.main`
+Entry point: `Aristotle.lean` → imports `Aristotle.Basic` +
+`Aristotle.GrothendieckVanishing.main.Overview`
 
 All theorem files live in `Aristotle/GrothendieckVanishing/main/`. The proof proceeds by well-founded induction on Krull dimension:
 
