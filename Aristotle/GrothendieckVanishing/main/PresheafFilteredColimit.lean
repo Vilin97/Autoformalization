@@ -1757,7 +1757,9 @@ theorem sheafH_filtered_colimit_comparison_succ_compatibility
   simpa [Ysh, csh, Y, c, hcsh,
     sheafH_filtered_colimit_comparison_sheafToPresheaf] using hcompat
 
-private noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf_boundary
+/-- The degree-`0` filtered-colimit comparison isomorphism on the sheaf diagram attached to
+a presheaf cocone, before rewriting it as `sheafH_filtered_colimit_comparison_presheaf`. -/
+noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf_boundary
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
@@ -1788,7 +1790,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf_b
       (colimit.isColimit (Y ⋙ sectionsFunctor)).coconePointUniqueUpToIso hc_sections ≪≫
       ((sheafH0EquivSections_presheaf hc_pt).toAddCommGrpIso).symm
 
-@[simp] private theorem sheafH_filtered_colimit_comparison_zero_iso_presheaf_boundary_hom
+@[simp] theorem sheafH_filtered_colimit_comparison_zero_iso_presheaf_boundary_hom
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
