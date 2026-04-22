@@ -1,3 +1,4 @@
+import Aristotle.GrothendieckVanishing.main.ClosedImmersion
 import Aristotle.GrothendieckVanishing.main.CohomologyAPI
 import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
 
@@ -5,14 +6,13 @@ import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
   ClosedImmersionCohomology.lean — Closed immersion cohomology infrastructure
 
   Provides:
-  1. `closedIncl_pushforward_preservesEpis/Monos` (pushforward preserves epis/monos)
-  2. `closedIncl_pushforward_shortExact` (pushforward preserves ShortExact)
-  3. `PushforwardHIso` / `PushforwardHVanishing` (pushforward preserves cohomology)
-  4. `epi_unit_of_closedImmersion` (adjunction unit is epi)
-  5. `closedImmersionSES` (short exact sequence from closed immersion)
+  1. `PushforwardHIso` / `PushforwardHVanishing` (pushforward preserves cohomology)
+  2. `epi_unit_of_closedImmersion` (adjunction unit is epi)
+  3. `closedImmersionSES` (short exact sequence from closed immersion)
 
-  Depends on CohomologyAPI.lean for LES-facing `Sheaf.H` wrappers and on
-  FlasqueCohomology.lean for `FlasqueVanishing`. FlasqueVanishing.lean supplies
+  Depends on `ClosedImmersion.lean` for the closed-inclusion pushforward exactness API,
+  on `CohomologyAPI.lean` for LES-facing `Sheaf.H` wrappers, and on
+  `FlasqueCohomology.lean` for `FlasqueVanishing`. `FlasqueVanishing.lean` supplies
   `IsFlasqueSheaf` and `isFlasque_of_injective`.
 -/
 
@@ -35,150 +35,10 @@ abbrev VanishingIH (dimX : WithBot ℕ∞) : Prop :=
 
 ReducibleVanishing and IrreduciblePosVanishing require two building blocks:
 
-1. PushforwardHIso: pushforward along closed immersion preserves cohomology
-   (adjunction + mono preservation + exactness of i_*)
+1. PushforwardHIso: pushforward along closed immersion preserves cohomology,
+   using the pushforward exactness API from `ClosedImmersion.lean`
 2. closedImmersionSES: the adjunction unit F -> i_*(i^*F) gives a short exact sequence
 -/
-
-/-- Stalks of a pushforward along a closed inclusion vanish outside the closed set:
-    if `x ∉ s`, every element of `stalk(i_*(G), x)` is zero. -/
-theorem pushforward_closedIncl_stalk_eq_zero
-    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    {G : TopCat.Presheaf AddCommGrpCat.{u} (TopCat.of s)} (hG : G.IsSheaf)
-    {x : X} (hx : x ∉ s)
-    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
-      ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G)) :
-    a = 0 := by
-  let Gsh : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s) := ⟨G, hG⟩
-  let F' := (TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).obj G
-  obtain ⟨U, hxU, sU, rfl⟩ := F'.germ_exist x a
-  let W : Opens X := U ⊓ ⟨sᶜ, hs.isOpen_compl⟩
-  have hW_map : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ := by
-    exact TopCat.closedIncl_map_eq_bot_of_le_compl (hs := hs) (U := W) inf_le_right
-  haveI : Subsingleton (F'.obj (op W)) := AddCommGrpCat.subsingleton_of_isZero (by
-    change IsZero (G.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
-    rw [hW_map]
-    exact Gsh.isTerminalOfEmpty.isZero)
-  rw [← TopCat.Presheaf.germ_res_apply F'
-    (homOfLE (show W ≤ U from inf_le_left)) x ⟨hxU, hx⟩ sU]
-  simp [Subsingleton.eq_zero (ConcreteCategory.hom (F'.map (homOfLE (show W ≤ U from
-    inf_le_left)).op) sU)]
-
-/-- Pushforward along a closed immersion preserves epis: if `f : F ⟶ G` is epi in
-    presheaves on the closed subspace, then `i_*(f)` is epi in sheaves on the ambient
-    space whenever `f` is locally surjective.
-    Proof: stalkwise surjectivity (identity on the closed set, zero outside). -/
-theorem epi_pushforward_map_closedIncl_of_locallySurjective
-    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    {F G : TopCat.Presheaf AddCommGrpCat.{u} (TopCat.of s)}
-    (hF : F.IsSheaf) (hG : G.IsSheaf)
-    (f : F ⟶ G)
-    (hf_loc : TopCat.Presheaf.IsLocallySurjective f) :
-    Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hs)).map (show
-        (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
-          (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) from
-            Sheaf.Hom.mk f)) := by
-  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
-      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) := Sheaf.Hom.mk f
-  letI : Balanced (Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
-  change Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hs)).map fsh)
-  rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u}
-    ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hs)).map fsh)]
-  change TopCat.Presheaf.IsLocallySurjective
-    ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hs)).map fsh).val
-  rw [TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
-  intro x; by_cases hx : (x : X) ∈ s
-  · let z : TopCat.of s := ⟨x, hx⟩
-    haveI : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map f) :=
-      (AddCommGrpCat.epi_iff_surjective _).mpr
-        (((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
-            (T := f)).mp hf_loc) z)
-    have hnat : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
-        ((TopCat.closedIncl hs) z)).map
-        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f) ≫
-      TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} (TopCat.closedIncl hs) G z =
-    TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u} (TopCat.closedIncl hs) F z ≫
-      (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} z).map f := by
-      apply TopCat.Presheaf.stalk_hom_ext; intro U hU
-      rw [TopCat.Presheaf.stalkFunctor_map_germ_assoc,
-        TopCat.Presheaf.stalkPushforward_germ,
-        TopCat.Presheaf.stalkPushforward_germ_assoc,
-        TopCat.Presheaf.stalkFunctor_map_germ]; rfl
-    apply (AddCommGrpCat.epi_iff_surjective _).mp
-    change Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
-        ((TopCat.closedIncl hs) z)).map
-        ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)).map f))
-    rw [← epi_comp_iff_of_isIso _ (TopCat.Presheaf.stalkPushforward AddCommGrpCat.{u}
-        (TopCat.closedIncl hs) G z), hnat]
-    exact epi_comp _ _
-  · intro b
-    rw [pushforward_closedIncl_stalk_eq_zero (hs := hs) (G := G) hG hx b]
-    exact ⟨0, AddMonoidHom.map_zero _⟩
-
-/-- Wrapper around `epi_pushforward_map_closedIncl_of_locallySurjective`: an epi of
-    sheaves on the closed subspace pushes forward to an epi on the ambient space. -/
-theorem epi_pushforward_map_closedIncl
-    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    {F G : TopCat.Presheaf AddCommGrpCat.{u} (TopCat.of s)}
-    (hF : F.IsSheaf) (hG : G.IsSheaf)
-    (f : F ⟶ G)
-    (hf : Epi (show (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
-        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) from
-          Sheaf.Hom.mk f)) :
-    Epi ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hs)).map (show
-        (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
-          (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) from
-            Sheaf.Hom.mk f)) := by
-  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) ⟶
-      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s)) := Sheaf.Hom.mk f
-  letI : Epi fsh := by
-    simpa [fsh] using hf
-  letI : Balanced (Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
-  have hf_loc : TopCat.Presheaf.IsLocallySurjective f := by
-    simpa [fsh] using
-      (show Sheaf.IsLocallySurjective fsh from
-        (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} fsh).mpr inferInstance)
-  simpa [fsh] using
-    epi_pushforward_map_closedIncl_of_locallySurjective
-      (hs := hs) (F := F) (G := G) hF hG f hf_loc
-
-instance closedIncl_pushforward_preservesEpis
-    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
-    (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hs)).PreservesEpimorphisms where
-  preserves {F G} f hf := by
-    letI : Epi f := hf
-    letI : Balanced (Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
-    have hf_loc : TopCat.Presheaf.IsLocallySurjective f.val := by
-      simpa using
-        (show Sheaf.IsLocallySurjective f from
-          (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} f).mpr inferInstance)
-    simpa using epi_pushforward_map_closedIncl_of_locallySurjective
-      (hs := hs) (F := F.val) (G := G.val) F.cond G.cond f.val hf_loc
-
-instance closedIncl_pushforward_preservesMonos
-    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
-    (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hs)).PreservesMonomorphisms := inferInstance
-
--- Pushforward along closed immersion preserves ShortExact.
-theorem closedIncl_pushforward_shortExact
-    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of s))}
-    (hSE : S.ShortExact) :
-    (S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-        (TopCat.closedIncl hs))).ShortExact := by
-  let F := TopCat.Sheaf.pushforward AddCommGrpCat.{u} (TopCat.closedIncl hs)
-  haveI := hSE.mono_f; haveI := hSE.epi_g
-  haveI : Mono (F.map S.f) := inferInstance
-  haveI : Epi (F.map S.g) := inferInstance
-  exact ShortComplex.ShortExact.mk'
-    (hSE.exact.map_of_mono_of_preservesKernel _ hSE.mono_f inferInstance) ‹_› ‹_›
 
 -- Pushforward along closed immersion preserves sheaf cohomology.
 -- Proof by induction: n=0 via sections, n=1 via the cokernel model of H¹,
