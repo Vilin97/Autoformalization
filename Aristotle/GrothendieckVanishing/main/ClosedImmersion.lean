@@ -18,15 +18,23 @@ import Mathlib.Topology.Sheaves.SheafCondition.UniqueGluing
 import Mathlib.Topology.Sheaves.Stalks
 
 /-!
-  ClosedImmersion.lean — Closed inclusion API and stalk results
+# Closed immersions
 
-  Provides:
-  - `closedIncl`: closed inclusion `s ↪ X` as a morphism in `TopCat`
-  - `closedIncl_isClosedEmbedding`, `closedIncl_isInducing`: basic properties
-  - `stalkFunctor_map_iso_toSheafify`: stalk of sheafification map is an iso
-  - `closedIncl_counit_isIso_presheaf`: presheaf-boundary counit iso for closed subspace
-  - `closedIncl_counit_isIso`: pushforward–pullback counit is an iso on closed subspace
-  - `closedIncl_unit_stalk_isIso`: adjunction unit is a stalk iso at points in the subspace
+This module packages the `TopCat` API for the closed inclusion `closedIncl : TopCat.of s ⟶ X`
+and the stalk comparisons needed in the closed-immersion step of Grothendieck vanishing.
+
+Main results:
+- `closedIncl_isClosedEmbedding` and `closedIncl_isInducing` record the basic topology of
+  the closed inclusion.
+- `closedIncl_map_eq_bot_of_le_compl` shows that opens contained in the complement pull back
+  to `⊥` on the closed subspace.
+- `stalkFunctor_map_iso_toSheafify` identifies the stalk of sheafification with an isomorphism.
+- `closedIncl_counit_isIso_presheaf` and `closedIncl_counit_isIso` identify the
+  pushforward-pullback counit for presheaves and sheaves on the closed subspace.
+- `stalkPullbackHom_naturality` is the stalk-level naturality needed to compare the unit with
+  the counit isomorphism.
+- `closedIncl_unit_stalk_isIso` shows that the adjunction unit is an isomorphism on stalks at
+  points of the closed subset.
 -/
 
 open CategoryTheory TopologicalSpace Opposite Limits
