@@ -1324,8 +1324,8 @@ theorem sheafH_filtered_colimit_surj
       (isColimitOfPreserves
         (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc'))
 
-/-- The associated sheaf diagram attached to a presheaf diagram whose stages are sheaves. -/
-private def sheafH_filtered_colimit_presheafDiagram
+/-- The sheaf-valued diagram obtained by bundling a presheaf diagram whose stages are sheaves. -/
+def sheafH_filtered_colimit_presheafDiagram
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
@@ -1336,7 +1336,9 @@ private def sheafH_filtered_colimit_presheafDiagram
     map_id := fun j => Sheaf.Hom.ext <| Y.map_id j
     map_comp := fun f g => Sheaf.Hom.ext <| Y.map_comp f g }
 
-private def sheafH_filtered_colimit_presheafCocone
+/-- The sheaf-valued cocone obtained by bundling a presheaf cocone whose legs and point
+    satisfy the sheaf condition. -/
+def sheafH_filtered_colimit_presheafCocone
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
@@ -1348,7 +1350,9 @@ private def sheafH_filtered_colimit_presheafCocone
       { app := fun j => Sheaf.Hom.mk (c.ι.app j)
         naturality := fun _ _ f => Sheaf.Hom.ext <| c.ι.naturality f } }
 
-private theorem sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf
+/-- Bundling a sheaf-valued diagram after forgetting to presheaves recovers the original
+    diagram. -/
+theorem sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X) :
@@ -1358,7 +1362,9 @@ private theorem sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf
   cases Y'
   rfl
 
-private theorem sheafH_filtered_colimit_presheafCocone_sheafToPresheaf
+/-- Bundling a sheaf-valued cocone after forgetting to presheaves recovers the original
+    cocone. -/
+theorem sheafH_filtered_colimit_presheafCocone_sheafToPresheaf
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -1473,7 +1479,9 @@ theorem sheafH_filtered_colimit_comparison_sheafToPresheaf
       (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
       (hc_pt := c'.pt.cond) (n := n) (j := j))
 
-private noncomputable def sheafH_filtered_colimit_presheafCocone_isColimit
+/-- If a presheaf cocone is a colimit and its stages and point are sheaves, then the
+    bundled sheaf-valued cocone is also a colimit. -/
+noncomputable def sheafH_filtered_colimit_presheafCocone_isColimit
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
