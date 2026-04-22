@@ -41,6 +41,9 @@ Main results:
   the counit isomorphism.
 - `closedIncl_unit_stalk_isIso` shows that the adjunction unit is an isomorphism on stalks at
   points of the closed subset.
+- `epi_unit_of_closedImmersion` upgrades the adjunction unit to an epi of sheaves.
+- `closedImmersionSES` and `closedImmersionSES_shortExact` package the short exact sequence
+  `0 → ker(η) → F → i_*(i^*F) → 0` associated to a closed immersion.
 -/
 
 open CategoryTheory TopologicalSpace Opposite Limits
@@ -493,3 +496,58 @@ theorem closedIncl_unit_stalk_isIso
   exact IsIso.of_isIso_fac_right (stalkPullbackHom_naturality (closedIncl hs) η.val x)
 
 end TopCat
+
+-- The adjunction unit `F → i_*(i^*F)` is epi for closed immersions.
+theorem epi_unit_of_closedImmersion
+    {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
+    Epi ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
+      (TopCat.closedIncl hZ)).unit.app (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+  let closedIncl := TopCat.closedIncl hZ
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+  let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} closedIncl
+  letI : Balanced (Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    balanced_of_strongEpiCategory
+  rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} (adj.unit.app Fsh),
+    show Sheaf.IsLocallySurjective (adj.unit.app Fsh) =
+      TopCat.Presheaf.IsLocallySurjective (adj.unit.app Fsh).val from rfl,
+    TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
+  intro x
+  by_cases hxZ : (x : X) ∈ Z
+  · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
+        ((TopCat.closedIncl hZ) ⟨x, hxZ⟩)).map (adj.unit.app Fsh).val) := by
+      simpa [Fsh] using
+        (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
+          (hs := hZ) (F := F) hF ⟨x, hxZ⟩)
+    exact (ConcreteCategory.bijective_of_isIso
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} ((TopCat.closedIncl hZ) ⟨x, hxZ⟩)).map
+        ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
+          (TopCat.closedIncl hZ)).unit.app Fsh).val)).2
+  · exact fun b => ⟨0, by
+      rw [pushforward_closedIncl_stalk_eq_zero
+        (hs := hZ)
+        (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Fsh).val)
+        (((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Fsh).cond)
+        hxZ b]
+      exact map_zero _⟩
+
+/-- The short exact sequence `0 → ker(η) → F → i_*(i^*F) → 0` from a closed immersion,
+    where `η` is the pullback-pushforward adjunction unit and `i : Z ↪ X` is the
+    inclusion of a closed subset. -/
+noncomputable def closedImmersionSES
+    {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
+    ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+  let closedIncl := TopCat.closedIncl hZ
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+  let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} closedIncl).unit.app Fsh
+  ShortComplex.mk (kernel.ι η) η (kernel.condition η)
+
+theorem closedImmersionSES_shortExact
+    {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
+    (closedImmersionSES (Z := Z) (hZ := hZ) (F := F) hF).ShortExact := by
+  unfold closedImmersionSES
+  haveI := epi_unit_of_closedImmersion (Z := Z) (hZ := hZ) (F := F) hF
+  exact ShortComplex.ShortExact.mk'
+    (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel _)) inferInstance inferInstance
