@@ -285,13 +285,9 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     rw [show F₂.map (homOfLE inf_le_right).op (f.app (op W) ahat) =
       f.app (op (V₀ ⊓ W)) (F₁.map (homOfLE inf_le_right).op ahat) from
       (f.naturality_apply (homOfLE inf_le_right).op ahat).symm, hahat, ha]; abel
-  -- Binary glue t₀ and t'' to get t_new on V₀ ⊔ W
+  -- Glue `t₀` and `t''` directly on the sheaf colimit open `iSup BU`.
   let BU : Bool → Opens X | false => V₀ | true => W
   let Bsf : (b : Bool) → F₂.obj (op (BU b)) | false => t₀ | true => t''
-  have hsup_eq : ⨆ b, BU b = V₀ ⊔ W := le_antisymm
-    (iSup_le fun b => by cases b <;> simp [BU])
-    (by intro y hy; simp only [Opens.mem_iSup]; rcases hy with h | h;
-        exact ⟨false, h⟩; exact ⟨true, h⟩)
   have hcompat_glue : TopCat.Presheaf.IsCompatible F₂ BU Bsf := by
     intro i j; match i, j with
     | false, false | true, true => rfl
@@ -305,24 +301,16 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
         op_comp, Functor.map_comp, CategoryTheory.comp_apply,
           op_comp, Functor.map_comp, CategoryTheory.comp_apply,
           hcompat_patch]
-  obtain ⟨t_gl, ht_gl, _⟩ := h₂.isSheafUniqueGluing BU Bsf hcompat_glue
-  let t_new : F₂.obj (op (V₀ ⊔ W)) :=
-    ConcreteCategory.hom (F₂.map (eqToHom hsup_eq.symm).op) t_gl
-  have hBU_le : ∀ b, BU b ≤ V₀ ⊔ W := by
-    intro b
-    cases b <;> simp [BU]
-  have ht_new : ∀ b,
-      ConcreteCategory.hom (F₂.map (homOfLE (hBU_le b)).op) t_new = Bsf b := by
-    intro b
-    dsimp [t_new]
-    rw [← ConcreteCategory.comp_apply, ← F₂.map_comp]
-    have hle_b : homOfLE (hBU_le b) ≫ eqToHom hsup_eq.symm = Opens.leSupr BU b := by
-      cases b <;> exact Subsingleton.elim _ _
-    rw [show (eqToHom hsup_eq.symm).op ≫ (homOfLE (hBU_le b)).op = (Opens.leSupr BU b).op by
-      simpa using congr_arg Quiver.Hom.op hle_b]
-    exact ht_gl b
-  have h_new_inP : IsPartialLift (F₃ := F₃) (g := g) U s ⟨V₀ ⊔ W, t_new⟩ := by
-    refine ⟨sup_le hV₀U hWU, ?_⟩
+  obtain ⟨t_new, ht_new, _⟩ := h₂.isSheafUniqueGluing BU Bsf hcompat_glue
+  have hBUU : iSup BU ≤ U := by
+    intro x hx
+    simp only [Opens.mem_iSup, BU] at hx
+    rcases hx with ⟨b, hx⟩
+    cases b
+    · exact hV₀U hx
+    · exact hWU hx
+  have h_new_inP : IsPartialLift (F₃ := F₃) (g := g) U s ⟨iSup BU, t_new⟩ := by
+    refine ⟨hBUU, ?_⟩
     let Bs : (b : Bool) → F₃.obj (op (BU b))
       | false => ConcreteCategory.hom (F₃.map (homOfLE hV₀U).op) s
       | true => ConcreteCategory.hom (F₃.map (homOfLE hWU).op) s
@@ -333,14 +321,11 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
         rw [← CategoryTheory.comp_apply, ← CategoryTheory.comp_apply,
           ← F₃.map_comp, ← F₃.map_comp]
         exact congr_arg (F₃.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
-    have hBUU : iSup BU ≤ U := by
-      rw [hsup_eq]
-      exact sup_le hV₀U hWU
     obtain ⟨_, _, hu_gl_uniq⟩ := h₃.isSheafUniqueGluing BU Bs hcompat_Bs
     have hg_gl : TopCat.Presheaf.IsGluing F₃ BU Bs
-        (ConcreteCategory.hom (g.app (op (iSup BU))) t_gl) := by
+        (ConcreteCategory.hom (g.app (op (iSup BU))) t_new) := by
       intro b
-      rw [← g.naturality_apply _ t_gl, ht_gl b]
+      rw [← g.naturality_apply _ t_new, ht_new b]
       cases b <;> simp only [BU, Bsf, Bs]
       · exact ht₀
       · exact hgt''
@@ -351,38 +336,12 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
         (simp only [BU, Bs]
          rw [← CategoryTheory.comp_apply, ← F₃.map_comp]
          exact congr_arg (F₃.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _)))
-    have h_gl_eq :
-        ConcreteCategory.hom (g.app (op (iSup BU))) t_gl =
-          ConcreteCategory.hom (F₃.map (homOfLE hBUU).op) s := by
-      exact (hu_gl_uniq _ hg_gl).trans (hu_gl_uniq _ hs_gl).symm
-    have h_gl_eq' := congrArg
-      (ConcreteCategory.hom (F₃.map (eqToHom hsup_eq.symm).op)) h_gl_eq
-    have hnat :
-        ConcreteCategory.hom (g.app (op (V₀ ⊔ W))) t_new =
-          ConcreteCategory.hom (F₃.map (eqToHom hsup_eq.symm).op)
-            (ConcreteCategory.hom (g.app (op (iSup BU))) t_gl) := by
-      change ConcreteCategory.hom
-          (F₂.map (eqToHom hsup_eq.symm).op ≫ g.app (op (V₀ ⊔ W))) t_gl =
-        ConcreteCategory.hom
-          (g.app (op (iSup BU)) ≫ F₃.map (eqToHom hsup_eq.symm).op) t_gl
-      have hnat_fun :
-          ConcreteCategory.hom (F₂.map (eqToHom hsup_eq.symm).op ≫ g.app (op (V₀ ⊔ W))) =
-            ConcreteCategory.hom (g.app (op (iSup BU)) ≫ F₃.map (eqToHom hsup_eq.symm).op) := by
-        simpa using g.naturality (eqToHom hsup_eq.symm).op
-      have := congrArg (fun φ => φ t_gl) hnat_fun
-      simpa using this
-    have hcomp : eqToHom hsup_eq.symm ≫ homOfLE hBUU = homOfLE (sup_le hV₀U hWU) := by
-      exact Subsingleton.elim _ _
-    have h_rhs :
-        ConcreteCategory.hom (F₃.map (eqToHom hsup_eq.symm).op)
-            (ConcreteCategory.hom (F₃.map (homOfLE hBUU).op) s) =
-          ConcreteCategory.hom (F₃.map (homOfLE (sup_le hV₀U hWU)).op) s := by
-      rw [← ConcreteCategory.comp_apply, ← F₃.map_comp]
-      exact congrArg (fun α => ConcreteCategory.hom (F₃.map α) s) <| by
-        simpa using congr_arg Quiver.Hom.op hcomp
-    exact hnat.trans (h_gl_eq'.trans h_rhs)
-  exact hxV₀ ((hmax _ h_new_inP ⟨le_sup_left, by
-    have h0 := ht_new false; simp only [BU, Bsf] at h0; exact h0⟩).1 (Or.inr hxW))
+    exact (hu_gl_uniq _ hg_gl).trans (hu_gl_uniq _ hs_gl).symm
+  have hxBU : x ∈ iSup BU := by
+    simp only [Opens.mem_iSup, BU]
+    exact ⟨true, hxW⟩
+  exact hxV₀ ((hmax _ h_new_inP ⟨le_iSup BU false, by
+    simpa [BU, Bsf] using ht_new false⟩).1 hxBU)
 
 /-- If `0 → X₁ → X₂ → X₃ → 0` is short exact and every restriction map of the
 underlying presheaf `S.X₁.val` is epi, then `g(U) : X₂(U) → X₃(U)` is epi. -/
