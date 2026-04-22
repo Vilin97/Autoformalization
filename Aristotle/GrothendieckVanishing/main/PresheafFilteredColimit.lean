@@ -1709,19 +1709,9 @@ theorem sheafH_filtered_colimit_comparison_succ_compatibility
       (fun j => (Y'.obj j).cond)
       c
       c'.pt.cond
-  have hcsh : IsColimit csh := by
+  let hcsh : IsColimit csh := by
     dsimp [csh, Ysh, Y, c]
     simpa [sheafH_filtered_colimit_presheafCocone_sheafToPresheaf] using hc'
-  have h_mid_n_sh :
-      ∀ j, Subsingleton (Sheaf.H ((sheafH_filtered_colimit_succ_Inj Ysh).obj j) n) := h_mid_n
-  have h_mid_succ_sh :
-      ∀ j, Subsingleton (Sheaf.H ((sheafH_filtered_colimit_succ_Inj Ysh).obj j) (n + 1)) :=
-    h_mid_succ
-  have h_colim_n_sh :
-      Subsingleton (Sheaf.H (sheafH_filtered_colimit_succ_injCocone Ysh).pt n) := h_colim_n
-  have h_colim_succ_sh :
-      Subsingleton (Sheaf.H (sheafH_filtered_colimit_succ_injCocone Ysh).pt (n + 1)) :=
-    h_colim_succ
   have hcompat :=
     sheafH_filtered_colimit_comparison_succ_compatibility_presheaf
       (Y := Y)
@@ -1730,28 +1720,17 @@ theorem sheafH_filtered_colimit_comparison_succ_compatibility
       (hc_pt := c'.pt.cond)
       (hcsh := hcsh)
       (n := n)
-      h_mid_n_sh h_mid_succ_sh h_colim_n_sh h_colim_succ_sh
+      h_mid_n h_mid_succ h_colim_n h_colim_succ
   change
-    (sheafH_filtered_colimit_succ_shiftDomainIso Ysh n h_mid_n_sh h_mid_succ_sh).hom ≫
+    (sheafH_filtered_colimit_succ_shiftDomainIso Ysh n h_mid_n h_mid_succ).hom ≫
         sheafH_filtered_colimit_comparison_presheaf Y (fun j => (Y'.obj j).cond) c c'.pt.cond
           (n + 1) =
       sheafH_filtered_colimit_comparison (sheafH_filtered_colimit_succ_quotient Ysh) n
         (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) ≫
       (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
-        h_colim_n_sh h_colim_succ_sh).hom at hcompat
-  have hYsh : Ysh = Y' := by
-    dsimp [Ysh, Y]
-    exact sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf (Y' := Y')
-  subst Ysh
-  have hcsh_c : csh = c' := by
-    dsimp [csh, Y, c]
-    exact sheafH_filtered_colimit_presheafCocone_sheafToPresheaf (Y' := Y') (c' := c')
-  subst csh
-  have hhcsh : hcsh = hc' := by
-    apply Subsingleton.elim
-  subst hcsh
-  rw [sheafH_filtered_colimit_comparison_sheafToPresheaf] at hcompat
-  simpa [Y, c] using hcompat
+        h_colim_n h_colim_succ).hom at hcompat
+  simpa [Ysh, csh, Y, c, hcsh,
+    sheafH_filtered_colimit_comparison_sheafToPresheaf] using hcompat
 
 private noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf_boundary
     {X : TopCat.{u}} [NoetherianSpace X]
