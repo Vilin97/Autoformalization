@@ -5,7 +5,8 @@ import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
 /-!
   IrreducibleStep.lean — Assembly: irreducible positive-dimension vanishing
 
-  Key results (unique to this file; stalk algebra lemmas are in SheafStalkAlgebra.lean):
+  Key results (unique to this file; supporting stalk lemmas are in
+  `ZeroOutside.lean` and `SheafStalkAlgebra.lean`):
   - exists_section_generating_stalks: PROVED — uses Nat.find to choose x₀ with minimal
     image subgroup generator d, then divisibility d | d_x follows from minimality.
   - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
