@@ -19,7 +19,7 @@ open CategoryTheory TopologicalSpace Order Limits
 
 /-! ## Reduction to irreducible spaces -/
 
-private theorem ReducibleVanishing'
+theorem ReducibleVanishing'
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
     {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
