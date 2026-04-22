@@ -14,11 +14,11 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `subsingleton_H1_via_surj`: H^1 vanishing via Ext^0 surjectivity
 * `subsingleton_sheafH_of_shortExact_middle`: LES consequence for Sheaf.H
 * `subsingleton_sheafH_of_shortExact_middle_presheaf`: presheaf-boundary middle-term wrapper
-* `sheafH_subsingleton_of_isEmpty`: empty-space vanishing
 * `sheafH_subsingleton_of_isEmpty_presheaf`: presheaf-boundary empty-space vanishing
+* `sheafH_subsingleton_of_isEmpty`: sheaf-level wrapper for empty-space vanishing
 * `sheaf_isZero_of_zero_stalks`: zero stalks imply zero sheaf
-* `sheafH_subsingleton_of_isZero`: zero sheaf ⟹ subsingleton cohomology
-* `sheafH_subsingleton_of_isZero_presheaf`: presheaf-boundary wrapper for the same fact
+* `sheafH_subsingleton_of_isZero_presheaf`: presheaf-boundary zero-sheaf vanishing
+* `sheafH_subsingleton_of_isZero`: sheaf-level wrapper for the same fact
 * `stalk_zero_of_ses_g_iso`: stalk vanishing from SES with iso on `g`
 * `stalk_zero_of_shortExact_kernel`: stalk vanishing from SES kernel
 * `sheafH_exists_preimage_extClass_presheaf`: presheaf-boundary wrapper for lifting
@@ -353,22 +353,21 @@ theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
         fun U => (hZ.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
   simpa [Fsh] using hFsh
 
-/-- If a sheaf is zero, then all its cohomology groups are subsingleton. -/
-theorem sheafH_subsingleton_of_isZero {X : TopCat.{u}}
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsZero F) (n : ℕ) :
-    Subsingleton (Sheaf.H F n) :=
-  Ext.subsingleton_of_isZero_tgt hF n
-
-/-- Presheaf-boundary wrapper for `sheafH_subsingleton_of_isZero`: if a presheaf is a
-    sheaf and the induced bundled sheaf is zero, then its cohomology is subsingleton in
-    every degree. -/
+/-- If a presheaf is a sheaf and the induced bundled sheaf is zero, then its cohomology is
+    subsingleton in every degree. -/
 theorem sheafH_subsingleton_of_isZero_presheaf {X : TopCat.{u}}
     {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
     (hzero : IsZero ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))) (n : ℕ) :
-    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
+    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) :=
+  Ext.subsingleton_of_isZero_tgt hzero n
+
+/-- If a sheaf is zero, then all its cohomology groups are subsingleton. -/
+theorem sheafH_subsingleton_of_isZero {X : TopCat.{u}}
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsZero F) (n : ℕ) :
+    Subsingleton (Sheaf.H F n) := by
   simpa using
-    (sheafH_subsingleton_of_isZero
-      (F := (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (hF := hzero) (n := n))
+    (sheafH_subsingleton_of_isZero_presheaf
+      (F := F.val) (hF := F.cond) (hzero := by simpa using hF) (n := n))
 
 theorem stalk_zero_of_ses_g_iso
     {X : TopCat.{u}} {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
@@ -1324,27 +1323,23 @@ theorem sheafH_dimension_shift_X₃_of_locallySurjective_presheaf {X : TopCat.{u
       (by simpa [S, fsh] using h₂)
       (by simpa [S, fsh] using h₁))
 
+/-- If `X` is empty and `F` is a sheaf-valued presheaf, then the cohomology of the bundled
+sheaf `⟨F, hF⟩` is subsingleton in every degree. -/
+theorem sheafH_subsingleton_of_isEmpty_presheaf {X : TopCat.{u}} [IsEmpty X]
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) (n : ℕ) :
+    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
+  have hzero : IsZero ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
+    sheaf_isZero_of_zero_stalks X hF (fun x _ => (IsEmpty.false x).elim)
+  exact sheafH_subsingleton_of_isZero_presheaf hF hzero n
+
 /-- On an empty space, all sheaf cohomology groups are subsingleton.
     Proof: when X is empty, all stalks are vacuously zero, so the sheaf is zero,
     and zero sheaves have subsingleton cohomology in all degrees. -/
 instance sheafH_subsingleton_of_isEmpty {X : TopCat.{u}} [IsEmpty X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (n : ℕ) :
-    Subsingleton (Sheaf.H F n) :=
-  sheafH_subsingleton_of_isZero F
-    (by
-      have hF_zero : IsZero ((⟨F.val, F.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
-        sheaf_isZero_of_zero_stalks X F.cond (fun x _ => (IsEmpty.false x).elim)
-      simpa using hF_zero) n
-
-/-- Presheaf-boundary wrapper for empty-space vanishing: if `X` is empty and `F` is a
-sheaf-valued presheaf, then the cohomology of the bundled sheaf `⟨F, hF⟩` is subsingleton
-in every degree. -/
-theorem sheafH_subsingleton_of_isEmpty_presheaf {X : TopCat.{u}} [IsEmpty X]
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) (n : ℕ) :
-    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
+    Subsingleton (Sheaf.H F n) := by
   simpa using
-    (sheafH_subsingleton_of_isEmpty
-      (F := (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n := n))
+    (sheafH_subsingleton_of_isEmpty_presheaf (F := F.val) (hF := F.cond) (n := n))
 
 /-! ## Sheaf Cohomology Functor -/
 
