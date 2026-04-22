@@ -132,8 +132,17 @@ lemma sections_exact_of_shortExact_presheaf {X : TopCat.{u}}
   let sectV := (sheafSections (Opens.grothendieckTopology X) AddCommGrpCat).obj (op V)
   haveI : sectV.PreservesZeroMorphisms :=
     inferInstanceAs ((sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)).PreservesZeroMorphisms)
-  haveI : PreservesLimit (parallelPair Ssh.g 0) sectV :=
-    show PreservesLimit _ (sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V)) from inferInstance
+  let sectVForgetIso :
+      sectV ⋙ forget AddCommGrpCat.{u} ≅
+        sheafToPresheaf _ _ ⋙ (evaluation _ _).obj (op V) ⋙ forget AddCommGrpCat.{u} :=
+    Functor.isoWhiskerRight
+      (sheafSectionsNatIsoEvaluation
+        (J := Opens.grothendieckTopology X) (A := AddCommGrpCat.{u}) (X := V))
+      (forget AddCommGrpCat.{u})
+  haveI : PreservesLimitsOfShape WalkingParallelPair (sectV ⋙ forget AddCommGrpCat.{u}) :=
+    preservesLimitsOfShape_of_natIso sectVForgetIso.symm
+  haveI : PreservesLimitsOfShape WalkingParallelPair sectV :=
+    preservesLimitsOfShape_of_reflects_of_preserves sectV (forget AddCommGrpCat.{u})
   have hexact : (Ssh.map sectV).Exact :=
     hSsh.exact.map_of_mono_of_preservesKernel sectV hSsh.mono_f inferInstance
   simpa [Ssh, sheafShortComplexOfPresheaf] using
