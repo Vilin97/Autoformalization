@@ -13,6 +13,7 @@ API for topological Krull dimension on irreducible spaces.
   the only opens are ⊥ and ⊤
 - `topologicalKrullDim_nonneg`: non-empty spaces have dim ≥ 0
 - `topologicalKrullDim_subspace_lt_of_lt`: strict ambient upper bounds descend to subspaces
+- `topologicalKrullDim_lt_top_of_lt_nat`: natural-number upper bounds imply finiteness
 - `topologicalKrullDim_lt_nat_of_lt_of_lt_nat_succ`: if `dim Y < dim X < n + 1`, then
   `dim Y < n`
 - `topologicalKrullDim_lt_of_add_one_le_of_lt_top`: if `dim Y + 1 ≤ dim X` and `dim Y` is
@@ -84,6 +85,13 @@ theorem topologicalKrullDim_subspace_lt_of_lt {X : Type u} [TopologicalSpace X]
     (Y : Set X) {a : WithBot ℕ∞} (ha : topologicalKrullDim X < a) :
     topologicalKrullDim Y < a :=
   lt_of_le_of_lt (topologicalKrullDim_subspace_le X Y) ha
+
+/-- A natural-number upper bound on the topological Krull dimension implies that the
+dimension is finite. -/
+theorem topologicalKrullDim_lt_top_of_lt_nat {X : Type u} [TopologicalSpace X] {n : ℕ}
+    (hn : topologicalKrullDim X < ↑↑(n : ℕ)) :
+    topologicalKrullDim X < ⊤ :=
+  lt_of_lt_of_le hn le_top
 
 /-- If `Y` has strictly smaller topological Krull dimension than `X`, then any natural-number
 upper bound `dim X < n + 1` descends to the predecessor bound `dim Y < n`. -/
@@ -280,7 +288,7 @@ theorem exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos
       topologicalKrullDim (TopCat.of (Z : Set X)) < ↑↑(n : ℕ) := by
     simpa using topologicalKrullDim_subspace_lt_of_lt (X := X) (Z : Set X) hn
   have hZ_lt_top : topologicalKrullDim (TopCat.of (Z : Set X)) < ⊤ :=
-    lt_of_lt_of_le hZ_lt_nat le_top
+    topologicalKrullDim_lt_top_of_lt_nat hZ_lt_nat
   refine ⟨Z, Z.isClosed, hZ_ne_univ, ?_⟩
   exact topologicalKrullDim_lt_of_isIrreducible_of_isClosed
     (X := X) Z.isClosed hZ_ne_univ hZ_lt_top
