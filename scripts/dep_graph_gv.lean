@@ -1,5 +1,5 @@
 -- Import all GV modules via the top-level build target.
-import Aristotle.GrothendieckVanishing.main.main
+import Aristotle.GrothendieckVanishing.main.Overview
 
 /-!
 # Declaration dependency graph extractor for Grothendieck Vanishing

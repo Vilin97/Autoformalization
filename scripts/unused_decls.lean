@@ -1,4 +1,4 @@
-import Aristotle.GrothendieckVanishing.main.main
+import Aristotle.GrothendieckVanishing.main.Overview
 
 /-!
 # Unused project declarations finder
