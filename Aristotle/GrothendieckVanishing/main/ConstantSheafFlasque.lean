@@ -31,22 +31,16 @@ theorem toPlus_injective_of_const
   simpa [Meq.refine, Meq.mk] using
     congr_fun (congr_arg Subtype.val heq) (⟨V, f, hf⟩ : W.Arrow)
 
-private lemma cover_nonempty_arrow
-    {X : Type u} [TopologicalSpace X]
-    (U : Opens X) (hU : (U : Set X).Nonempty)
-    (S : (Opens.grothendieckTopology X).Cover U) :
-    ∃ I : S.Arrow, (I.Y : Set X).Nonempty := by
-  obtain ⟨x, hx⟩ := hU
-  obtain ⟨V, f, hf, hmem⟩ := S.2 x hx
-  exact ⟨⟨V, f, hf⟩, ⟨x, hmem⟩⟩
-
-private theorem toPlus_surjective_of_const
+theorem toPlus_surjective_of_const
     {X : Type u} [TopologicalSpace X] {A : AddCommGrpCat.{u}}
     (U : Opens X) (hU : (U : Set X).Nonempty) :
     Function.Surjective
       (ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U))) := by
   intro y; obtain ⟨S, x, hx⟩ := exists_rep y
-  obtain ⟨I₀, hI₀⟩ := cover_nonempty_arrow U hU S
+  obtain ⟨x₀, hx₀⟩ := hU
+  obtain ⟨V₀, f₀, hf₀, hx₀mem⟩ := S.2 x₀ hx₀
+  let I₀ : S.Arrow := ⟨V₀, f₀, hf₀⟩
+  have hI₀ : (I₀.Y : Set X).Nonempty := ⟨x₀, hx₀mem⟩
   refine ⟨x I₀, ?_⟩
   rw [hx, show x = Meq.mk S (x I₀) from Meq.ext _ _ fun I => by
       simpa [constPresheaf] using x.condition (Cover.Relation.mk' (fst := I) (snd := I₀)
@@ -56,7 +50,7 @@ private theorem toPlus_surjective_of_const
   apply Meq.ext; intro I
   simp [Meq.refine, Meq.mk, constPresheaf]
 
-private lemma toPlus_naturality_const
+theorem toPlus_naturality_const
     {X : Type u} [TopologicalSpace X] {A : AddCommGrpCat.{u}}
     {U V : Opens X} (i : U ⟶ V) (a : (constPresheaf X A).obj (op V)) :
     ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U)) a =
@@ -70,41 +64,16 @@ private lemma toPlus_naturality_const
           ((Opens.grothendieckTopology X).plusObj (constPresheaf X A)).map i.op) a := by rw [nat]
     _ = _ := ConcreteCategory.comp_apply _ _ _
 
-/-- Key lemma extracted from toPlus_surjective_of_firstPlus: preimages at different
-    arrows agree because of irreducibility (intersection is nonempty). -/
-private theorem toPlus_firstPlus_key
-    {X : Type u} [TopologicalSpace X] [IrreducibleSpace X] {A : AddCommGrpCat.{u}}
-    {U : Opens X} (S : (Opens.grothendieckTopology X).Cover U) (x : Meq ((Opens.grothendieckTopology X).plusObj (constPresheaf X A)) S)
-    (I₀ : S.Arrow) (hI₀ : (I₀.Y : Set X).Nonempty)
-    (a : (constPresheaf X A).obj (op U))
-    (ha : ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op I₀.Y)) a = x I₀)
-    (I : S.Arrow) (hI : (I.Y : Set X).Nonempty) :
-    x I = ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj (constPresheaf X A)).map I.f.op)
-      (ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U)) a) := by
-  obtain ⟨b, hb⟩ := toPlus_surjective_of_const I.Y hI (x I)
-  have hZne : ((I₀.Y ⊓ I.Y : Opens X) : Set X).Nonempty :=
-    nonempty_preirreducible_inter I₀.Y.isOpen I.Y.isOpen hI₀ hI
-  let R : S.Relation := Cover.Relation.mk' (fst := I₀) (snd := I)
-    ⟨I₀.Y ⊓ I.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩
-  have hcond := x.condition R
-  change ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj (constPresheaf X A)).map
-      (homOfLE inf_le_left).op) (x I₀) =
-    ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj (constPresheaf X A)).map
-      (homOfLE inf_le_right).op) (x I) at hcond
-  rw [← ha, ← hb] at hcond
-  rw [← toPlus_naturality_const (homOfLE (inf_le_left (a := I₀.Y) (b := I.Y))) a,
-      ← toPlus_naturality_const (homOfLE (inf_le_right (a := I₀.Y) (b := I.Y))) b] at hcond
-  have hab : a = b := toPlus_injective_of_const _ hZne a b hcond
-  rw [← hb, ← hab]
-  exact toPlus_naturality_const I.f a
-
-private theorem toPlus_surjective_of_firstPlus
+theorem toPlus_surjective_of_firstPlus
     {X : Type u} [TopologicalSpace X] [IrreducibleSpace X] {A : AddCommGrpCat.{u}}
     (U : Opens X) (hU : (U : Set X).Nonempty) :
     Function.Surjective (ConcreteCategory.hom
       (((Opens.grothendieckTopology X).toPlus ((Opens.grothendieckTopology X).plusObj (constPresheaf X A))).app (op U))) := by
   intro y; obtain ⟨S, x, hx⟩ := exists_rep y
-  obtain ⟨I₀, hI₀⟩ := cover_nonempty_arrow U hU S
+  obtain ⟨x₀, hx₀⟩ := hU
+  obtain ⟨V₀, f₀, hf₀, hx₀mem⟩ := S.2 x₀ hx₀
+  let I₀ : S.Arrow := ⟨V₀, f₀, hf₀⟩
+  have hI₀ : (I₀.Y : Set X).Nonempty := ⟨x₀, hx₀mem⟩
   obtain ⟨a, ha⟩ := toPlus_surjective_of_const I₀.Y hI₀ (x I₀)
   use ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U)) a
   rw [hx, toPlus_eq_mk, eq_mk_iff_exists]
@@ -112,7 +81,28 @@ private theorem toPlus_surjective_of_firstPlus
   apply Meq.ext; intro I
   simp only [Meq.refine, Meq.mk]
   by_cases hI : (I.Y : Set X).Nonempty
-  · exact (toPlus_firstPlus_key S x I₀ hI₀ a ha I hI).symm
+  · have hkey :
+        x I = ConcreteCategory.hom
+          (((Opens.grothendieckTopology X).plusObj (constPresheaf X A)).map I.f.op)
+            (ConcreteCategory.hom
+              (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U)) a) := by
+        obtain ⟨b, hb⟩ := toPlus_surjective_of_const I.Y hI (x I)
+        have hZne : ((I₀.Y ⊓ I.Y : Opens X) : Set X).Nonempty :=
+          nonempty_preirreducible_inter I₀.Y.isOpen I.Y.isOpen hI₀ hI
+        let R : S.Relation := Cover.Relation.mk' (fst := I₀) (snd := I)
+          ⟨I₀.Y ⊓ I.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩
+        have hcond := x.condition R
+        change ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj (constPresheaf X A)).map
+            (homOfLE inf_le_left).op) (x I₀) =
+          ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj (constPresheaf X A)).map
+            (homOfLE inf_le_right).op) (x I) at hcond
+        rw [← ha, ← hb] at hcond
+        rw [← toPlus_naturality_const (homOfLE (inf_le_left (a := I₀.Y) (b := I.Y))) a,
+            ← toPlus_naturality_const (homOfLE (inf_le_right (a := I₀.Y) (b := I.Y))) b] at hcond
+        have hab : a = b := toPlus_injective_of_const _ hZne a b hcond
+        rw [← hb, ← hab]
+        exact toPlus_naturality_const I.f a
+    exact hkey.symm
   · rw [Set.not_nonempty_iff_eq_empty] at hI
     have hIbot : I.Y = ⊥ := Opens.ext (by simpa using hI)
     have hcov : (⊥ : Sieve (⊥ : Opens X)) ∈ (Opens.grothendieckTopology X) ⊥ :=
