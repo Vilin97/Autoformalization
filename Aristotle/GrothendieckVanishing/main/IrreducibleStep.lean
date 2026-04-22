@@ -19,7 +19,7 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 /-- The stalk map of `sHom s` at `x ∈ U` is bijective when every stalk element of R at x
     is an integer multiple of `germ(s, x)`, and R embeds into `zeroOutsideInt V`
     (providing torsion-freeness needed for injectivity). -/
-private theorem sHom_stalk_bijective_at
+theorem sHom_stalk_bijective_at
     {X : TopCat.{u}} {V U : Opens X} (hUV : U ≤ V)
     {R : TopCat.Presheaf AddCommGrpCat.{u} X} (hRsh : R.IsSheaf)
     (i : R ⟶ (TopCat.Sheaf.zeroOutsideInt V).val) [Mono i]
@@ -80,7 +80,7 @@ private theorem sHom_stalk_bijective_at
     (1) `germ(s, x) ≠ 0`
     (2) every stalk element of `R` at `x` is an integer multiple of `germ(s, x)`.
     This is the hard "Noetherian shrinking" step of Hartshorne III.2.7, Step 4. -/
-private theorem exists_section_generating_stalks
+theorem exists_section_generating_stalks
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     {V : Opens X} {R : TopCat.Presheaf AddCommGrpCat.{u} X} (hRsh : R.IsSheaf)
     (i : R ⟶ (TopCat.Sheaf.zeroOutsideInt V).val)
