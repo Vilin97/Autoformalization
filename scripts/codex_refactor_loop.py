@@ -17,6 +17,7 @@ import os
 import subprocess
 import sys
 import time
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from string import Template
@@ -42,6 +43,7 @@ COOLDOWN = 300
 PLANNER_TIMEOUT = 1800
 WORKER_TIMEOUT = 10800
 EVALUATOR_TIMEOUT = 1800
+GATE_REPAIR_TIMEOUT = 3600
 HISTORY_WINDOW = 8
 DEFAULT_MODEL = os.environ.get("CODEX_REFACTOR_MODEL", "gpt-5.4")
 DEFAULT_REASONING_EFFORT = os.environ.get("CODEX_REFACTOR_REASONING_EFFORT", "xhigh")
@@ -77,6 +79,23 @@ EVALUATOR_SCHEMA = {
         "completed_task_lines",
     ],
 }
+
+
+@dataclass
+class GatePlan:
+    compile_targets: list[str]
+    requires_build: bool
+    checked_paths: list[str]
+    skipped_paths: list[str]
+
+
+@dataclass
+class GateFailure:
+    kind: str
+    message: str
+    details: str
+    command: str
+    plan: GatePlan
 
 
 def load_repo_env() -> None:
@@ -295,6 +314,27 @@ def run_worker(cycle: int, strategy: str) -> tuple[int, str]:
     )
 
 
+def run_gate_repair(cycle: int, strategy: str, failure: GateFailure, history: list[dict]) -> tuple[int, str]:
+    template = Template((PROMPTS_DIR / "codex_gate_repair.md").read_text())
+    prompt = template.safe_substitute(
+        cycle=cycle,
+        strategy=strategy[:6000],
+        principles=read_file_safe(PRINCIPLES_FILE),
+        history=format_history(history),
+        gate_failure=format_gate_failure(failure),
+        gate_checks=format_gate_plan(failure.plan),
+        diff=(git("diff", check=False) or "(no changes)")[:10000],
+    )
+    output_path = STATE_DIR / "codex_gate_repair_last_message.txt"
+    write_status(mode="gate_repair", cycle=cycle, gate_failure=failure.message)
+    return run_codex(
+        prompt,
+        timeout=GATE_REPAIR_TIMEOUT,
+        output_path=output_path,
+        model=DEFAULT_MODEL,
+    )
+
+
 def default_eval(msg: str) -> dict:
     return {
         "progress_score": 0,
@@ -365,13 +405,135 @@ def send_telegram(message: str) -> None:
         print(f"Telegram send failed: {exc}", file=sys.stderr)
 
 
-def apply_gates(sorry_before: int, sorry_after: int) -> None:
-    if sorry_after > sorry_before:
-        git("checkout", "--", ".", check=False)
-        raise RuntimeError(f"Gate failed: sorry count increased ({sorry_before} -> {sorry_after})")
+def is_gate_checked_lean_path(path: str) -> bool:
+    return path == "Aristotle.lean" or path.startswith("Aristotle/")
 
-    modified = [line for line in git("diff", "--name-only", "HEAD", check=False).splitlines() if line.endswith(".lean")]
-    for path in modified:
+
+def summarize_subprocess_output(result: subprocess.CompletedProcess[str], limit: int = 600) -> str:
+    text = (result.stderr or result.stdout or "").strip()
+    if not text:
+        return "(no stderr or stdout)"
+    return text[:limit]
+
+
+def parse_diff_name_status() -> list[tuple[str, list[str]]]:
+    result = subprocess.run(
+        ["git", "diff", "--name-status", "-z", "HEAD"],
+        cwd=REPO_DIR,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"git diff --name-status failed: {result.stderr[:300]}")
+    tokens = result.stdout.split("\0")
+    if tokens and tokens[-1] == "":
+        tokens.pop()
+    entries: list[tuple[str, list[str]]] = []
+    i = 0
+    while i < len(tokens):
+        status = tokens[i]
+        i += 1
+        code = status[:1]
+        if code in {"R", "C"}:
+            if i + 1 >= len(tokens):
+                break
+            entries.append((code, [tokens[i], tokens[i + 1]]))
+            i += 2
+        else:
+            if i >= len(tokens):
+                break
+            entries.append((code, [tokens[i]]))
+            i += 1
+    return entries
+
+
+def plan_gate_checks() -> GatePlan:
+    compile_targets: list[str] = []
+    checked_paths: list[str] = []
+    skipped_paths: list[str] = []
+    requires_build = False
+
+    for code, paths in parse_diff_name_status():
+        lean_paths = [path for path in paths if path.endswith(".lean")]
+        if not lean_paths:
+            continue
+        gated_paths = [path for path in lean_paths if is_gate_checked_lean_path(path)]
+        skipped_paths.extend(path for path in lean_paths if path not in gated_paths)
+        if not gated_paths:
+            continue
+
+        checked_paths.extend(gated_paths)
+        if code in {"A", "D", "R", "C", "T", "U"}:
+            requires_build = True
+
+        if code in {"R", "C"}:
+            target = paths[-1]
+            if target.endswith(".lean") and is_gate_checked_lean_path(target) and (REPO_DIR / target).exists():
+                compile_targets.append(target)
+            continue
+
+        target = gated_paths[0]
+        if code == "D":
+            continue
+        if (REPO_DIR / target).exists():
+            compile_targets.append(target)
+
+    return GatePlan(
+        compile_targets=list(dict.fromkeys(compile_targets)),
+        requires_build=requires_build,
+        checked_paths=list(dict.fromkeys(checked_paths)),
+        skipped_paths=list(dict.fromkeys(skipped_paths)),
+    )
+
+
+def format_gate_plan(plan: GatePlan) -> str:
+    lines: list[str] = []
+    if plan.compile_targets:
+        lines.append("Gate compile commands:")
+        lines.extend(f"- lake env lean {path}" for path in plan.compile_targets)
+    if plan.requires_build:
+        lines.append("- lake build")
+    if plan.skipped_paths:
+        lines.append("Skipped non-library Lean paths:")
+        lines.extend(f"- {path}" for path in plan.skipped_paths[:8])
+    if not lines:
+        lines.append("- No project Lean files changed.")
+    return "\n".join(lines)
+
+
+def format_gate_failure(failure: GateFailure) -> str:
+    lines = [
+        f"Kind: {failure.kind}",
+        f"Summary: {failure.message}",
+        f"Command: {failure.command}",
+        "Details:",
+        failure.details,
+        "",
+        format_gate_plan(failure.plan),
+    ]
+    return "\n".join(lines)
+
+
+def gate_failure_text(failure: GateFailure) -> str:
+    details = failure.details.strip()
+    if details and details != "(no stderr or stdout)":
+        return f"{failure.message}: {details}"
+    return failure.message
+
+
+def check_gates(sorry_before: int, sorry_after: int) -> GateFailure | None:
+    plan = plan_gate_checks()
+    if sorry_after > sorry_before:
+        return GateFailure(
+            kind="sorry_count",
+            message=f"sorry count increased ({sorry_before} -> {sorry_after})",
+            details="The project must stay at 0 sorrys after every cycle.",
+            command="count_sorrys",
+            plan=plan,
+        )
+
+    for path in plan.compile_targets:
         result = subprocess.run(
             ["lake", "env", "lean", path],
             cwd=REPO_DIR,
@@ -381,8 +543,32 @@ def apply_gates(sorry_before: int, sorry_after: int) -> None:
             timeout=600,
         )
         if result.returncode != 0:
-            git("checkout", "--", ".", check=False)
-            raise RuntimeError(f"Gate failed: {path} does not compile: {result.stderr[:400]}")
+            return GateFailure(
+                kind="compile",
+                message=f"{path} does not compile",
+                details=summarize_subprocess_output(result),
+                command=f"lake env lean {path}",
+                plan=plan,
+            )
+
+    if plan.requires_build:
+        result = subprocess.run(
+            ["lake", "build"],
+            cwd=REPO_DIR,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=1800,
+        )
+        if result.returncode != 0:
+            return GateFailure(
+                kind="build",
+                message="lake build failed after project Lean file add/delete/rename",
+                details=summarize_subprocess_output(result, limit=800),
+                command="lake build",
+                plan=plan,
+            )
+    return None
 
 
 def mark_completed_tasks(lines: list[str]) -> list[str]:
@@ -400,6 +586,59 @@ def mark_completed_tasks(lines: list[str]) -> list[str]:
             changed.append(needle)
     REVIEW_TASKS_FILE.write_text(text)
     return changed
+
+
+def record_gate_failure(
+    cycle: int,
+    ts: str,
+    worker_exit: int,
+    sorry_before: int,
+    sorry_after: int,
+    failure: GateFailure,
+    repair_attempted: bool,
+    repair_exit_code: int | None,
+) -> dict:
+    summary_prefix = "Gate failed after auto-repair" if repair_attempted else "Gate failed"
+    summary = f"{summary_prefix}: {gate_failure_text(failure)}"
+    recommendation = (
+        "Repair the previous cycle's mechanical gate failure before attempting new checklist work.\n"
+        f"{format_gate_plan(failure.plan)}"
+    )
+    evaluation = default_eval(summary)
+    evaluation["progress_score"] = -2
+    evaluation["summary"] = summary
+    evaluation["principle_violations"] = ["mechanical gate failed"]
+    evaluation["task_addressed"] = True
+    evaluation["stuck_on"] = failure.message
+    evaluation["strategy_recommendation"] = recommendation
+    evaluation["attempts_entry"] = (
+        f"{summary_prefix.lower()}: {failure.message} ({failure.command})"
+    )
+    with ATTEMPTS_FILE.open("a") as f:
+        f.write(f"\nCycle {cycle}: {evaluation['attempts_entry']}")
+    STRATEGY_FILE.write_text(recommendation + "\n")
+    record = {
+        "cycle": cycle,
+        "timestamp": ts,
+        "worker_exit_code": worker_exit,
+        "sorry_before": sorry_before,
+        "sorry_after": sorry_after,
+        "completed_task_lines": [],
+        "gate_failure": {
+            "kind": failure.kind,
+            "message": failure.message,
+            "details": failure.details,
+            "command": failure.command,
+            "compile_targets": failure.plan.compile_targets,
+            "requires_build": failure.plan.requires_build,
+            "skipped_paths": failure.plan.skipped_paths,
+        },
+        "gate_repair_attempted": repair_attempted,
+        "gate_repair_exit_code": repair_exit_code,
+        "evaluation": evaluation,
+    }
+    append_history(record)
+    return record
 
 
 class FileLock:
@@ -452,7 +691,27 @@ def run_cycle(dry_run: bool = False, worker_only: bool = False) -> dict:
 
     worker_exit, _worker_message = run_worker(cycle, strategy)
     sorry_after = count_sorrys()
-    apply_gates(sorry_before, sorry_after)
+    gate_repair_attempted = False
+    gate_repair_exit_code = None
+    gate_failure = check_gates(sorry_before, sorry_after)
+    if gate_failure is not None:
+        gate_repair_attempted = True
+        gate_repair_exit_code, _gate_repair_message = run_gate_repair(cycle, strategy, gate_failure, history)
+        sorry_after = count_sorrys()
+        gate_failure = check_gates(sorry_before, sorry_after)
+        if gate_failure is not None:
+            git("checkout", "--", ".", check=False)
+            record_gate_failure(
+                cycle=cycle,
+                ts=ts,
+                worker_exit=worker_exit,
+                sorry_before=sorry_before,
+                sorry_after=sorry_after,
+                failure=gate_failure,
+                repair_attempted=gate_repair_attempted,
+                repair_exit_code=gate_repair_exit_code,
+            )
+            raise RuntimeError(f"Gate failed after auto-repair: {gate_failure_text(gate_failure)}")
 
     diff = git("diff", check=False)
     report = read_file_safe(TASK_RESULTS_DIR / f"cycle_{cycle}.md")
@@ -471,6 +730,8 @@ def run_cycle(dry_run: bool = False, worker_only: bool = False) -> dict:
         "sorry_before": sorry_before,
         "sorry_after": sorry_after,
         "completed_task_lines": completed,
+        "gate_repair_attempted": gate_repair_attempted,
+        "gate_repair_exit_code": gate_repair_exit_code,
         "evaluation": evaluation,
     }
     append_history(record)
