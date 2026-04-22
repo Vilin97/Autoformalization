@@ -54,14 +54,7 @@ theorem pushforward_closedIncl_stalk_eq_zero
   obtain ⟨U, hxU, sU, rfl⟩ := F'.germ_exist x a
   let W : Opens X := U ⊓ ⟨sᶜ, hs.isOpen_compl⟩
   have hW_map : (Opens.map (TopCat.closedIncl hs)).obj W = ⊥ := by
-    apply Opens.ext
-    have himage :
-        (TopCat.closedIncl hs : s → X) '' ((((Opens.map (TopCat.closedIncl hs)).obj W :
-          Opens (TopCat.of s)) : Set (TopCat.of s))) = ∅ := by
-      rw [TopCat.closedIncl_image_map_eq_inter hs W]
-      ext y
-      simp [W, and_left_comm, and_assoc]
-    simpa using Set.image_eq_empty.mp himage
+    exact TopCat.closedIncl_map_eq_bot_of_le_compl (hs := hs) (U := W) inf_le_right
   haveI : Subsingleton (F'.obj (op W)) := AddCommGrpCat.subsingleton_of_isZero (by
     change IsZero (G.obj (op ((Opens.map (TopCat.closedIncl hs)).obj W)))
     rw [hW_map]
