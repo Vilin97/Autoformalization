@@ -13,6 +13,8 @@ API for topological Krull dimension on irreducible spaces.
   the only opens are ⊥ and ⊤
 - `topologicalKrullDim_nonneg`: non-empty spaces have dim ≥ 0
 - `topologicalKrullDim_subspace_lt_of_lt`: strict ambient upper bounds descend to subspaces
+- `topologicalKrullDim_lt_nat_of_lt_of_lt_nat_succ`: if `dim Y < dim X < n + 1`, then
+  `dim Y < n`
 - `topologicalKrullDim_lt_of_add_one_le_of_lt_top`: if `dim Y + 1 ≤ dim X` and `dim Y` is
   finite, then `dim Y < dim X`
 - `topologicalKrullDim_lt_of_isIrreducible_of_isClosed`: proper closed subsets of
@@ -82,6 +84,15 @@ theorem topologicalKrullDim_subspace_lt_of_lt {X : Type u} [TopologicalSpace X]
     (Y : Set X) {a : WithBot ℕ∞} (ha : topologicalKrullDim X < a) :
     topologicalKrullDim Y < a :=
   lt_of_le_of_lt (topologicalKrullDim_subspace_le X Y) ha
+
+/-- If `Y` has strictly smaller topological Krull dimension than `X`, then any natural-number
+upper bound `dim X < n + 1` descends to the predecessor bound `dim Y < n`. -/
+theorem topologicalKrullDim_lt_nat_of_lt_of_lt_nat_succ {X Y : Type u}
+    [TopologicalSpace X] [TopologicalSpace Y] {n : ℕ}
+    (hYX : topologicalKrullDim Y < topologicalKrullDim X)
+    (hXn : topologicalKrullDim X < ↑↑(n + 1 : ℕ)) :
+    topologicalKrullDim Y < ↑↑(n : ℕ) := by
+  exact lt_of_lt_of_le hYX ((WithBot.lt_add_one_iff).mp (by simpa using hXn))
 
 namespace TopologicalSpace
 namespace IrreducibleCloseds
