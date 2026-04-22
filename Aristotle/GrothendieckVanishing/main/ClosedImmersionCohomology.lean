@@ -22,15 +22,6 @@ universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
-/-- The induction hypothesis for Grothendieck vanishing: vanishing holds for all
-    sheaf-valued presheaves on all spaces of strictly smaller Krull dimension than X. -/
-abbrev VanishingIH (dimX : WithBot ℕ∞) : Prop :=
-  ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-    (m : ℕ) {G : TopCat.Presheaf AddCommGrpCat.{u} Y} (hG : G.IsSheaf),
-    topologicalKrullDim Y < dimX →
-    m > topologicalKrullDim Y →
-    Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} Y) m)
-
 /-! ## Closed-immersion cohomology consequences
 
 This file starts at the cohomological layer. The closed-immersion stalk, exactness, and

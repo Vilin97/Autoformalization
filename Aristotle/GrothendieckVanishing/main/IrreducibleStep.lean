@@ -327,6 +327,15 @@ theorem subsheaf_contains_zeroOutsideInt
 
 /-! ## Step 4/5 vanishing assembly -/
 
+/-- The induction hypothesis for Grothendieck vanishing: vanishing holds for all
+    sheaf-valued presheaves on all spaces of strictly smaller Krull dimension than X. -/
+abbrev VanishingIH (dimX : WithBot ℕ∞) : Prop :=
+  ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
+    (m : ℕ) {G : TopCat.Presheaf AddCommGrpCat.{u} Y} (hG : G.IsSheaf),
+    topologicalKrullDim Y < dimX →
+    m > topologicalKrullDim Y →
+    Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} Y) m)
+
 /-- Vanishing for a sheaf supported on the complement of an open `V`, via the
     closed-immersion SES on `Y = Vᶜ`. This is the support-vanishing input used by the
     Step 5 irreducible-space assembly immediately below. -/
