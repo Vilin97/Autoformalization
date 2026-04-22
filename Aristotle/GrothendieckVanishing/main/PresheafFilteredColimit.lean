@@ -1126,7 +1126,9 @@ noncomputable def sheafH_filtered_colimit_succ_shiftCodomainIso
       simp)
     (sheafH_filtered_colimit_succ_shortExact Y' c' hc') n h_colim_n h_colim_succ
 
-private theorem sheafH_filtered_colimit_succ_inj_subsingleton_presheaf
+/-- The filtered-colimit successor-step vanishing lemma for the injective replacement:
+the middle term of the induced short exact sequence has trivial cohomology in degree `n + 1`. -/
+theorem sheafH_filtered_colimit_succ_inj_subsingleton_presheaf
     [NoetherianSpace X] (n : ℕ)
     (hInj : ∀ j, Injective ((sheafH_filtered_colimit_succ_Inj Y').obj j)) :
     Subsingleton (Sheaf.H (sheafH_filtered_colimit_succ_injCocone Y').pt (n + 1)) := by
