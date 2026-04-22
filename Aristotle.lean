@@ -1,4 +1,3 @@
-import Aristotle.Basic
 import Aristotle.GrothendieckVanishing.main.Overview
 
 /-!
@@ -6,7 +5,7 @@ import Aristotle.GrothendieckVanishing.main.Overview
 
 Root import for the project.
 
-This module re-exports the lightweight `Aristotle.Basic` entrypoint together with the
+This module is the lightweight entrypoint for the repository. It re-exports the
 Grothendieck vanishing development assembled in
 `Aristotle.GrothendieckVanishing.main.Overview`.
 -/
