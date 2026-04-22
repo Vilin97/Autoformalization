@@ -206,7 +206,7 @@ theorem zeroOutsideInt_cohomology_vanishing
     topologicalKrullDim_subspace_lt_of_lt (X := X) (Set.compl (V : Set X))
       (by simpa [gt_iff_lt] using hm)
   have hVcompl_lt_top : topologicalKrullDim (Set.compl (V : Set X)) < ⊤ :=
-    lt_of_lt_of_le hVcompl_lt_succ le_top
+    topologicalKrullDim_lt_top_of_lt_nat hVcompl_lt_succ
   have hVcompl_lt_X : topologicalKrullDim (Set.compl (V : Set X)) < topologicalKrullDim X :=
     topologicalKrullDim_lt_of_isIrreducible_of_isClosed
       V.2.isClosed_compl
