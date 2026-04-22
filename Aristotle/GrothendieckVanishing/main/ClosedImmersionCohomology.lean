@@ -7,10 +7,11 @@ import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
 
   Provides:
   1. `PushforwardHIso` / `PushforwardHVanishing` (pushforward preserves cohomology)
-  2. `epi_unit_of_closedImmersion` (adjunction unit is epi)
-  3. `closedImmersionSES` (short exact sequence from closed immersion)
+  2. `subsingleton_sheafH_of_closedImmersion_middle_presheaf`
+  3. `closedComplementVanishing`
 
-  Depends on `ClosedImmersion.lean` for the closed-inclusion pushforward exactness API,
+  Depends on `ClosedImmersion.lean` for the closed-inclusion pushforward exactness and
+  adjunction-unit/SES API,
   on `CohomologyAPI.lean` for LES-facing `Sheaf.H` wrappers, and on
   `FlasqueCohomology.lean` for `FlasqueVanishing`. `FlasqueVanishing.lean` supplies
   `IsFlasqueSheaf` and `isFlasque_of_injective`.
@@ -31,13 +32,10 @@ abbrev VanishingIH (dimX : WithBot ℕ∞) : Prop :=
     m > topologicalKrullDim Y →
     Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} Y) m)
 
-/-! ## Building blocks for the closed-open decomposition
+/-! ## Closed-immersion cohomology consequences
 
-ReducibleVanishing and IrreduciblePosVanishing require two building blocks:
-
-1. PushforwardHIso: pushforward along closed immersion preserves cohomology,
-   using the pushforward exactness API from `ClosedImmersion.lean`
-2. closedImmersionSES: the adjunction unit F -> i_*(i^*F) gives a short exact sequence
+This file starts at the cohomological layer. The closed-immersion stalk, exactness, and
+adjunction-unit short exact sequence API now lives in `ClosedImmersion.lean`.
 -/
 
 -- Pushforward along closed immersion preserves sheaf cohomology.
@@ -144,63 +142,6 @@ theorem PushforwardHVanishing
     Equiv.ofBijective (ConcreteCategory.hom (PushforwardHIso Z hZ hG n).hom)
       (ConcreteCategory.bijective_of_isIso (PushforwardHIso Z hZ hG n).hom)
   exact (e.subsingleton_congr).mp h
-
--- The adjunction unit F → i_*(i^*F) is epi for closed immersions.
--- Proof: stalkwise surjective (identity on Z, maps to 0 outside Z).
--- Requires: stalkPushforward_iso_of_isInducing + stalk of i_*G = 0 outside Z.
--- epi via surjective on stalks
-theorem epi_unit_of_closedImmersion
-    {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
-    Epi ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
-      (TopCat.closedIncl hZ)).unit.app (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
-  let closedIncl := TopCat.closedIncl hZ
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} closedIncl
-  rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} (adj.unit.app Fsh),
-    show Sheaf.IsLocallySurjective (adj.unit.app Fsh) =
-      TopCat.Presheaf.IsLocallySurjective (adj.unit.app Fsh).val from rfl,
-    TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
-  intro x; by_cases hxZ : (x : X) ∈ Z
-  · -- x ∈ Z: stalk map is surjective (it's an iso)
-    haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
-        ((TopCat.closedIncl hZ) ⟨x, hxZ⟩)).map (adj.unit.app Fsh).val) := by
-      simpa [Fsh] using
-        (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
-          (hs := hZ) (F := F) hF ⟨x, hxZ⟩)
-    exact (ConcreteCategory.bijective_of_isIso
-      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} ((TopCat.closedIncl hZ) ⟨x, hxZ⟩)).map
-        ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
-          (TopCat.closedIncl hZ)).unit.app Fsh).val)).2
-  · -- x ∉ Z: target stalk is 0 (pushforward has zero stalk outside closed Z)
-    exact fun b => ⟨0, by
-      rw [pushforward_closedIncl_stalk_eq_zero
-        (hs := hZ)
-        (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Fsh).val)
-        (((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Fsh).cond)
-        hxZ b]
-      exact map_zero _⟩
-
-/-- The short exact sequence `0 → ker(η) → F → i_*(i^*F) → 0` from a closed immersion,
-    where `η` is the pullback-pushforward adjunction unit and `i : Z ↪ X` is the
-    inclusion of a closed subset. -/
-noncomputable def closedImmersionSES
-    {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
-    ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-  let closedIncl := TopCat.closedIncl hZ
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} closedIncl).unit.app Fsh
-  ShortComplex.mk (kernel.ι η) η (kernel.condition η)
-
-theorem closedImmersionSES_shortExact
-    {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
-    (closedImmersionSES (Z := Z) (hZ := hZ) (F := F) hF).ShortExact := by
-  unfold closedImmersionSES
-  haveI := epi_unit_of_closedImmersion (Z := Z) (hZ := hZ) (F := F) hF
-  exact ShortComplex.ShortExact.mk'
-    (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel _)) inferInstance inferInstance
 
 /-- Closed-immersion presheaf wrapper: if the kernel term of the closed-immersion
 short exact sequence and the pullback to the closed subset have subsingleton
