@@ -1,5 +1,6 @@
 import Aristotle.GrothendieckVanishing.main.SheafStalkAlgebra
 import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
+import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
 
 /-!
   IrreducibleStep.lean — Assembly: irreducible positive-dimension vanishing
@@ -302,12 +303,12 @@ theorem subsheaf_zeroOutsideInt_vanishing
           (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from
             Sheaf.Hom.mk j)
     have hC : Subsingleton (Sheaf.H C m) := by
-      have hV'compl_lt_succ :
-          topologicalKrullDim (Set.compl (V' : Set X)) < ↑↑(m + 1 : ℕ) :=
+      have hV'compl_lt_nat :
+          topologicalKrullDim (Set.compl (V' : Set X)) < ↑↑(m : ℕ) :=
         topologicalKrullDim_subspace_lt_of_lt (X := X) (Set.compl (V' : Set X))
-          (lt_of_lt_of_le hm (by exact_mod_cast Nat.le_succ m))
+          hm
       have hV'compl_lt_top : topologicalKrullDim (Set.compl (V' : Set X)) < ⊤ :=
-        lt_of_lt_of_le hV'compl_lt_succ le_top
+        topologicalKrullDim_lt_top_of_lt_nat hV'compl_lt_nat
       have hV'compl_lt_X :
           topologicalKrullDim (Set.compl (V' : Set X)) < topologicalKrullDim X :=
         topologicalKrullDim_lt_of_isIrreducible_of_isClosed
