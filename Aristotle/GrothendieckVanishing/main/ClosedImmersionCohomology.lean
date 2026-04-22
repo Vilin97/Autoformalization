@@ -8,7 +8,6 @@ import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
   Provides:
   1. `PushforwardHIso` / `PushforwardHVanishing` (pushforward preserves cohomology)
   2. `subsingleton_sheafH_of_closedImmersion_middle_presheaf`
-  3. `closedComplementVanishing`
 
   Depends on `ClosedImmersion.lean` for the closed-inclusion pushforward exactness and
   adjunction-unit/SES API,
@@ -196,63 +195,3 @@ theorem subsingleton_sheafH_of_closedImmersion_middle_presheaf
   simpa [Fsh] using
     subsingleton_sheafH_of_shortExact_middle_presheaf
       (F := S.X₁.val) (G := F) S.X₁.cond hF S.f.val n h₁' hCok
-
-/-- Vanishing for a sheaf supported on the complement of an open V, via closed-immersion SES.
-    Given:
-    - C is a sheaf on irreducible Noetherian X
-    - V ≠ ⊥ is an open with n > dim Vᶜ
-    - IH gives vanishing on all spaces of smaller dimension
-    - Stalks of C vanish at all points of V (the `hStalksOnV` hypothesis)
-    Concludes H^n(C) = 0 by building the SES on Y = Vᶜ. -/
-theorem closedComplementVanishing
-    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
-    (V : Opens X) (hV : V ≠ ⊥)
-    {C : TopCat.Presheaf AddCommGrpCat.{u} X} (hC : C.IsSheaf) (n : ℕ)
-    (ih : VanishingIH.{u} (topologicalKrullDim X))
-    (hn : ↑n > topologicalKrullDim (Set.compl (V : Set X)))
-    (hStalksOnV : ∀ x ∈ V,
-      ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj C), a = 0) :
-    Subsingleton (Sheaf.H (⟨C, hC⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
-  let Csh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨C, hC⟩
-  set Y := (V : Set X)ᶜ
-  have hYcl : IsClosed Y := V.2.isClosed_compl
-  have hY_dim_lt_top : topologicalKrullDim Y < ⊤ :=
-    topologicalKrullDim_lt_top_of_lt_nat (by simpa [gt_iff_lt] using hn)
-  have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
-    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl
-      (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
-      hY_dim_lt_top
-  let closedIncl := TopCat.closedIncl hYcl
-  let CY := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Csh)
-  let S := closedImmersionSES (Z := Y) (hZ := hYcl) (F := C) hC
-  have hSE := closedImmersionSES_shortExact (Z := Y) (hZ := hYcl) (F := C) hC
-  have hSX₁_zero : IsZero S.X₁ := by
-    have hSX₁_zero' : IsZero ((⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
-      sheaf_isZero_of_zero_stalks X S.X₁.cond (fun x a => by
-        by_cases hxY : x ∈ Y
-        · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
-            simpa [S, closedImmersionSES, closedIncl, Csh] using
-              (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
-                (hs := hYcl) (F := C) hC ⟨x, hxY⟩)
-          exact stalk_zero_of_ses_g_iso_presheaf
-            S.X₁.cond S.X₂.cond S.X₃.cond
-            (f := S.f.val) (g := S.g.val)
-            (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-            (by simpa [S] using hSE)
-            x inferInstance a
-        · exact stalk_zero_of_shortExact_kernel_presheaf
-            S.X₁.cond S.X₂.cond S.X₃.cond
-            (f := S.f.val) (g := S.g.val)
-            (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-            (by simpa [S] using hSE)
-            x
-            (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b)
-            a)
-    simpa using hSX₁_zero'
-  exact subsingleton_sheafH_of_closedImmersion_middle_presheaf
-    (Z := Y) (hZ := hYcl) (F := C) hC n
-    (by
-      simpa [S] using sheafH_subsingleton_of_isZero_presheaf S.X₁.cond hSX₁_zero n)
-    (by
-      simpa [closedIncl, Csh, CY] using
-        ih (TopCat.of Y) n (G := CY.val) CY.cond hY_dim_lt hn)

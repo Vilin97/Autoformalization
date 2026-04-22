@@ -14,6 +14,8 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutside
   - exists_section_generating_stalks: PROVED — uses Nat.find to choose x₀ with minimal
     image subgroup generator d, then divisibility d | d_x follows from minimality.
   - exists_good_section: PROVED — via exists_section_generating_stalks + sHom_stalk_bijective_at
+  - closedComplementVanishing: Step 4/5 support lemma for sheaves supported on a closed
+    complement, kept here with the irreducible-step vanishing assembly that uses it
   - zeroOutsideInt_vanishing / zeroOutsideInt_cohomology_vanishing: Step 5 vanishing
     assembled where it is consumed
   - IrreduciblePosVanishing: assembles all pieces (FULLY PROVED)
@@ -324,6 +326,62 @@ theorem subsheaf_contains_zeroOutsideInt
           (ConcreteCategory.mono_iff_injective_of_preservesPullback _).1 inferInstance)
 
 /-! ## Step 4/5 vanishing assembly -/
+
+/-- Vanishing for a sheaf supported on the complement of an open `V`, via the
+    closed-immersion SES on `Y = Vᶜ`. This is the support-vanishing input used by the
+    Step 5 irreducible-space assembly immediately below. -/
+theorem closedComplementVanishing
+    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
+    (V : Opens X) (hV : V ≠ ⊥)
+    {C : TopCat.Presheaf AddCommGrpCat.{u} X} (hC : C.IsSheaf) (n : ℕ)
+    (ih : VanishingIH.{u} (topologicalKrullDim X))
+    (hn : ↑n > topologicalKrullDim (Set.compl (V : Set X)))
+    (hStalksOnV : ∀ x ∈ V,
+      ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj C), a = 0) :
+    Subsingleton (Sheaf.H (⟨C, hC⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
+  let Csh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨C, hC⟩
+  set Y := (V : Set X)ᶜ
+  have hYcl : IsClosed Y := V.2.isClosed_compl
+  have hY_dim_lt_top : topologicalKrullDim Y < ⊤ :=
+    topologicalKrullDim_lt_top_of_lt_nat (by simpa [gt_iff_lt] using hn)
+  have hY_dim_lt : topologicalKrullDim Y < topologicalKrullDim X :=
+    topologicalKrullDim_lt_of_isIrreducible_of_isClosed hYcl
+      (Set.compl_ne_univ.mpr (Set.nonempty_iff_ne_empty.mpr (Opens.coe_eq_empty.not.mpr hV)))
+      hY_dim_lt_top
+  let closedIncl := TopCat.closedIncl hYcl
+  let CY := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Csh)
+  let S := closedImmersionSES (Z := Y) (hZ := hYcl) (F := C) hC
+  have hSE := closedImmersionSES_shortExact (Z := Y) (hZ := hYcl) (F := C) hC
+  have hSX₁_zero : IsZero S.X₁ := by
+    have hSX₁_zero' : IsZero ((⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
+      sheaf_isZero_of_zero_stalks X S.X₁.cond (fun x a => by
+        by_cases hxY : x ∈ Y
+        · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
+            simpa [S, closedImmersionSES, closedIncl, Csh] using
+              (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
+                (hs := hYcl) (F := C) hC ⟨x, hxY⟩)
+          exact stalk_zero_of_ses_g_iso_presheaf
+            S.X₁.cond S.X₂.cond S.X₃.cond
+            (f := S.f.val) (g := S.g.val)
+            (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+            (by simpa [S] using hSE)
+            x inferInstance a
+        · exact stalk_zero_of_shortExact_kernel_presheaf
+            S.X₁.cond S.X₂.cond S.X₃.cond
+            (f := S.f.val) (g := S.g.val)
+            (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+            (by simpa [S] using hSE)
+            x
+            (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b)
+            a)
+    simpa using hSX₁_zero'
+  exact subsingleton_sheafH_of_closedImmersion_middle_presheaf
+    (Z := Y) (hZ := hYcl) (F := C) hC n
+    (by
+      simpa [S] using sheafH_subsingleton_of_isZero_presheaf S.X₁.cond hSX₁_zero n)
+    (by
+      simpa [closedIncl, Csh, CY] using
+        ih (TopCat.of Y) n (G := CY.val) CY.cond hY_dim_lt hn)
 
 /-- **Step 5** (Hartshorne III.2.7): given vanishing of the cokernel of
     `openHom(V ≤ ⊤)` at degree `m`, deduce vanishing of `zeroOutsideInt V` at
