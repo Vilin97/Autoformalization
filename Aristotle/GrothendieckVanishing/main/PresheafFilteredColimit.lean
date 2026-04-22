@@ -18,6 +18,8 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
     (no `NoetherianSpace` hypothesis needed)
 
   ## Colimit/sheaf boundary results
+  - `colimit_existsUnique_gluing_of_compatible_finite_subcover`: a compatible family
+    has unique gluing once `iSup U` is controlled by a finite subcover
   - `isSheaf_of_isColimit_of_isSheaf`: a filtered colimit cocone of presheaves is a sheaf
     on Noetherian spaces when each stage is already a sheaf
   - `createsFilteredColimit`: `sheafToPresheaf` creates filtered colimits by applying the
@@ -462,6 +464,36 @@ theorem colimit_restrict_eq_of_eq_on_finite_subcover
       congr 1
     · exact (hcompat i k).symm
 
+/-- A compatible family in a filtered colimit admits a unique gluing once the total open
+    is dominated by a finite subcover. -/
+theorem colimit_existsUnique_gluing_of_compatible_finite_subcover
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (P : J' ⥤ (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
+    (hP : ∀ j, TopCat.Presheaf.IsSheaf (P.obj j))
+    {c : Cocone P} (hc : IsColimit c)
+    {ι : Type u} (U : ι → Opens X)
+    (sf : ∀ i, ToType (c.pt.obj (op (U i))))
+    (hcompat : Presheaf.IsCompatible c.pt U sf)
+    {t : Finset ι} (hsup_le : iSup U ≤ ⨆ k ∈ t, U k) :
+    ∃! s : ToType (c.pt.obj (op (iSup U))), Presheaf.IsGluing c.pt U sf s := by
+  obtain ⟨j₁, x'', hx''_compat, hx''⟩ := filtered_colimit_exists_compatible_representatives
+    P hc U sf hcompat
+  obtain ⟨s, hs_k⟩ := colimit_exists_gluing_of_compatible_finite_subcover
+    P hP U sf hsup_le j₁ x'' hx''_compat hx''
+  refine ⟨s, ?_, ?_⟩
+  · intro i
+    exact colimit_restrict_eq_of_eq_on_finite_subcover
+      P hP hc U sf hcompat hsup_le s hs_k i
+  · intro s' hs'
+    apply sub_eq_zero.mp
+    exact colimit_section_zero_of_zero_on_cover
+      P hP hc
+      (fun k => le_iSup U k) hsup_le (s' - s) (fun k hk => by
+        show c.pt.map (Opens.leSupr U k).op (s' - s) = 0
+        rw [map_sub, sub_eq_zero]
+        exact (hs' k).trans (hs_k k hk).symm)
+
 /-- On a Noetherian space, a filtered colimit cocone of presheaves is a sheaf if all
     diagram objects are sheaves. Proof: compactness reduces the sheaf condition to finite
     covers, then filtered colimit merging passes from per-piece data to glued data. -/
@@ -481,23 +513,8 @@ theorem isSheaf_of_isColimit_of_isSheaf
     intro x hx
     obtain ⟨i, hi, hxi⟩ := Set.mem_iUnion₂.mp (ht hx)
     exact Opens.mem_iSup.mpr ⟨i, Opens.mem_iSup.mpr ⟨hi, hxi⟩⟩
-  have hsep : ∀ (a : ToType (c.pt.obj (op (iSup U)))),
-      (∀ k ∈ t, c.pt.map (Opens.leSupr U k).op a = 0) → a = 0 :=
-    fun a ha => colimit_section_zero_of_zero_on_cover
-      P hP hc
-      (fun k => le_iSup U k) hsup_le a ha
-  obtain ⟨j₁, x'', hx''_compat, hx''⟩ := filtered_colimit_exists_compatible_representatives
-    P hc U sf hcompat
-  obtain ⟨s, hs_k⟩ := colimit_exists_gluing_of_compatible_finite_subcover
-    P hP U sf hsup_le j₁ x'' hx''_compat hx''
-  refine ⟨s, fun i => ?_, fun s' hs' => ?_⟩
-  · exact colimit_restrict_eq_of_eq_on_finite_subcover
-      P hP hc U sf hcompat hsup_le s hs_k i
-  · have h0 : s' - s = 0 := hsep (s' - s) (fun k hk => by
-      show c.pt.map (Opens.leSupr U k).op (s' - s) = 0
-      rw [map_sub, sub_eq_zero]
-      exact (hs' k).trans (hs_k k hk).symm)
-    rwa [sub_eq_zero] at h0
+  exact colimit_existsUnique_gluing_of_compatible_finite_subcover
+    P hP hc U sf hcompat hsup_le
 
 /-- On a Noetherian space, `sheafToPresheaf` creates filtered colimits of sheaves by
     applying `isSheaf_of_isColimit_of_isSheaf` to the underlying presheaf diagram. -/
