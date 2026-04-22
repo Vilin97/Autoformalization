@@ -109,6 +109,54 @@ abbrev finsetGeneratedSheaf {X : TopCat.{u}}
     (fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1)
     (fun σ => Sheaf.Hom.mk (TopCat.Sheaf.zeroOutsideInt.sHomVal hF σ.1.2))
 
+/-- Coproduct inclusion induced by `S ⊆ S'` on the finite generator coproducts. -/
+noncomputable def finsetCoproductInclGen {X : TopCat.{u}}
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X}
+    {S S' : Finset (SectionIndex F)}
+    (h : S ⊆ S') :
+    (∐ fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1) ⟶
+      (∐ fun σ : {σ // σ ∈ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1) :=
+  Sigma.desc fun σ =>
+    Sigma.ι (fun τ : {τ // τ ∈ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ.1, h σ.2⟩
+
+/-- Inclusion of finitely generated subsheaves induced by `S ⊆ S'`. -/
+noncomputable def finsetImageInclGen {X : TopCat.{u}}
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
+    {S S' : Finset (SectionIndex F)}
+    (h : S ⊆ S') :
+    finsetGeneratedSheaf hF S ⟶ finsetGeneratedSheaf hF S' :=
+  Limits.image.lift
+    { I := finsetGeneratedSheaf hF S'
+      m := Limits.image.ι (finsetGeneratorMap hF S')
+      e := finsetCoproductInclGen h ≫ factorThruImage (finsetGeneratorMap hF S')
+      fac := by
+        rw [Category.assoc, Limits.image.fac]
+        ext ⟨σ, hσ⟩
+        simp [finsetCoproductInclGen, finsetGeneratorMap, TopCat.Sheaf.familyMap] }
+
+theorem finsetImageInclGen_comp_ι {X : TopCat.{u}}
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
+    {S S' : Finset (SectionIndex F)}
+    (h : S ⊆ S') :
+    finsetImageInclGen hF h ≫ Limits.image.ι (finsetGeneratorMap hF S') =
+      Limits.image.ι (finsetGeneratorMap hF S) := by
+  simpa [finsetImageInclGen] using
+    (Limits.image.lift_fac (f := finsetGeneratorMap hF S)
+      { I := finsetGeneratedSheaf hF S'
+        m := Limits.image.ι (finsetGeneratorMap hF S')
+        e := finsetCoproductInclGen h ≫ factorThruImage (finsetGeneratorMap hF S')
+        fac := by
+          rw [Category.assoc, Limits.image.fac]
+          ext ⟨σ, hσ⟩
+          simp [finsetCoproductInclGen, finsetGeneratorMap, TopCat.Sheaf.familyMap] })
+
+instance finsetImageInclGen_mono {X : TopCat.{u}}
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
+    {S S' : Finset (SectionIndex F)}
+    (h : S ⊆ S') :
+    Mono (finsetImageInclGen hF h) :=
+  mono_of_mono_fac (finsetImageInclGen_comp_ι hF h)
+
 /-- The canonical map from the coproduct of all `zeroOutsideInt U` indexed by local sections
 of `F` onto the sheaf associated to `F`. This is the formal Step 3A starting point for
 building finitely generated subsheaves via images of smaller subcoproducts. -/
