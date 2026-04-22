@@ -1,4 +1,4 @@
-# Log — Grothendieck Vanishing
+# Progress Log — Grothendieck Vanishing
 
 ## 2026-04-05T01:15Z — Blueprint infrastructure + code quality cycle
 
