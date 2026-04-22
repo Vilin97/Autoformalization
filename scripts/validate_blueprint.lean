@@ -1,4 +1,4 @@
-import Aristotle.GrothendieckVanishing.main.Overview
+import Aristotle.GrothendieckVanishing.main.GrothendieckVanishingOverview
 
 /-!
 # Blueprint validator
