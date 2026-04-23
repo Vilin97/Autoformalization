@@ -6,7 +6,7 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutside
 
   Contains:
   - `familyGeneratorMap`, `familyGeneratedSheaf`, `familyGeneratedSheafι`
-  - `SectionIndex`, `finsetGeneratorMap`, `finsetGeneratedSheaf`
+  - `finsetGeneratorMap`, `finsetGeneratedSheaf`
   - `allSectionMap`: canonical epi from the coproduct of all `zeroOutsideInt`
 -/
 
@@ -55,12 +55,6 @@ theorem familyGeneratedSheaf_ι_eq {X : TopCat.{u}} {ι : Type*}
 end Sheaf
 
 namespace Presheaf
-
-/-- Indexing type for all local sections of a presheaf. -/
-abbrev SectionIndex {C : Type*} [Category C] {FC : C → C → Type*} {CC : C → Type*}
-    [∀ X Y, FunLike (FC X Y) (CC X) (CC Y)] [ConcreteCategory C FC] {X : TopCat.{u}}
-    (F : TopCat.Presheaf C X) :=
-  Σ U : Opens X, ToType (F.obj (op U))
 
 /-- The canonical map attached to a finite set of local sections. -/
 abbrev finsetGeneratorMap {X : TopCat.{u}}
@@ -169,12 +163,6 @@ instance allSectionMap_epi {X : TopCat.{u}}
 end Presheaf
 
 namespace Sheaf
-
-/-- Indexing type for all local sections of a sheaf. -/
-abbrev SectionIndex {C : Type*} [Category C] {FC : C → C → Type*} {CC : C → Type*}
-    [∀ X Y, FunLike (FC X Y) (CC X) (CC Y)] [ConcreteCategory C FC] {X : TopCat.{u}}
-    (F : Sheaf C X) :=
-  TopCat.Presheaf.SectionIndex F.presheaf
 
 /-- The canonical map attached to a finite set of local sections. -/
 abbrev finsetGeneratorMap {X : TopCat.{u}}
