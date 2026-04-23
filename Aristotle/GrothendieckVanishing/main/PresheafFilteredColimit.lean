@@ -903,43 +903,6 @@ theorem sheafH_filtered_colimit_succ_stage_shortExact (j : J') :
     (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel ((sheafH_filtered_colimit_succ_eta Y').app j)))
     inferInstance inferInstance
 
-private theorem sheafH_filtered_colimit_succ_stage_hfg (j : J') :
-    ((sheafH_filtered_colimit_succ_eta Y').app j).val ≫
-      (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val = 0 := by
-  ext U s
-  change ConcreteCategory.hom
-      ((((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-          cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val.app U) s = 0
-  have happ :
-      (((((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-            cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val).app
-          U) =
-        NatTrans.app
-          (0 : (Y'.obj j).val ⟶
-            (cokernel ((sheafH_filtered_colimit_succ_eta Y').app j)).val) U := by
-    exact NatTrans.congr_app
-      (congrArg (fun α => α.val)
-        (cokernel.condition ((sheafH_filtered_colimit_succ_eta Y').app j)))
-      U
-  rw [happ]
-  simp
-
-private theorem sheafH_filtered_colimit_succ_iota_hfg
-    (c' : Cocone Y') (hc' : IsColimit c') :
-    (sheafH_filtered_colimit_succ_iota Y' c' hc').val ≫
-      (cokernel.π (sheafH_filtered_colimit_succ_iota Y' c' hc')).val = 0 := by
-  ext U s
-  let ι' := sheafH_filtered_colimit_succ_iota Y' c' hc'
-  change ConcreteCategory.hom (((ι' ≫ cokernel.π ι').val).app U) s = 0
-  have happ :
-      (((ι' ≫ cokernel.π ι').val).app U) =
-        NatTrans.app (0 : c'.pt.val ⟶ (cokernel ι').val) U := by
-    exact NatTrans.congr_app
-      (congrArg (fun α => α.val) (cokernel.condition ι'))
-      U
-  rw [happ]
-  simp
-
 /-- The morphism between stagewise short exact sequences induced by a transition map in the
     filtered diagram. -/
 noncomputable def sheafH_filtered_colimit_succ_stage_map_hom
@@ -1283,10 +1246,42 @@ theorem sheafH_filtered_colimit_surj_presheaf
       (h₂₃ := qCocone.pt.cond)
       (f₁ := ((sheafH_filtered_colimit_succ_eta Ysh).app j₀).val)
       (g₁ := (cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).val)
-      (sheafH_filtered_colimit_succ_stage_hfg (Y' := Ysh) j₀)
+      (by
+        ext U s
+        change ConcreteCategory.hom
+            ((((sheafH_filtered_colimit_succ_eta Ysh).app j₀) ≫
+                cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).val.app
+              (op U)) s = 0
+        have happ :
+            (((((sheafH_filtered_colimit_succ_eta Ysh).app j₀) ≫
+                  cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).val).app
+                (op U)) =
+              NatTrans.app
+                (0 : (Ysh.obj j₀).val ⟶
+                  (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).val) (op U) := by
+          exact NatTrans.congr_app
+            (congrArg
+              (fun α :
+                Ysh.obj j₀ ⟶ cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j₀) =>
+                  α.val)
+              (cokernel.condition ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)))
+            (op U)
+        rw [happ]
+        simp)
       (f₂ := ι'.val)
       (g₂ := (cokernel.π ι').val)
-      (sheafH_filtered_colimit_succ_iota_hfg (Y' := Ysh) csh hcsh)
+      (by
+        ext U s
+        change ConcreteCategory.hom (((ι' ≫ cokernel.π ι').val).app (op U)) s = 0
+        have happ :
+            (((ι' ≫ cokernel.π ι').val).app (op U)) =
+              NatTrans.app (0 : csh.pt.val ⟶ (cokernel ι').val) (op U) := by
+          exact NatTrans.congr_app
+            (congrArg (fun α : csh.pt ⟶ cokernel ι' => α.val)
+              (cokernel.condition ι'))
+            (op U)
+        rw [happ]
+        simp)
       (hSE_j j₀) hSE
       (τ₁ := (csh.ι.app j₀).val)
       (τ₂ := ((sheafH_filtered_colimit_succ_injCocone Ysh).ι.app j₀).val)
@@ -2013,7 +2008,27 @@ noncomputable def sheafH_filtered_colimit_h1_stageNatIso
           (h₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Y').app j)).cond)
           (f := ((sheafH_filtered_colimit_succ_eta Y').app j).val)
           (g := (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val)
-          (sheafH_filtered_colimit_succ_stage_hfg (Y' := Y') j)
+          (by
+            ext U s
+            change ConcreteCategory.hom
+                ((((sheafH_filtered_colimit_succ_eta Y').app j) ≫
+                    cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val.app
+                  (op U)) s = 0
+            have happ :
+                (((((sheafH_filtered_colimit_succ_eta Y').app j) ≫
+                      cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val).app
+                    (op U)) =
+                  NatTrans.app
+                    (0 : (Y'.obj j).val ⟶
+                      (cokernel ((sheafH_filtered_colimit_succ_eta Y').app j)).val) (op U) := by
+              exact NatTrans.congr_app
+                (congrArg
+                  (fun α : Y'.obj j ⟶ cokernel ((sheafH_filtered_colimit_succ_eta Y').app j) =>
+                    α.val)
+                  (cokernel.condition ((sheafH_filtered_colimit_succ_eta Y').app j)))
+                (op U)
+            rw [happ]
+            simp)
           (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y') j)
           (h_mid j)))
     (fun {j j'} f => by
@@ -2029,10 +2044,51 @@ noncomputable def sheafH_filtered_colimit_h1_stageNatIso
           (h₂₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Y').app j')).cond)
           (f₁ := ((sheafH_filtered_colimit_succ_eta Y').app j).val)
           (g₁ := (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val)
-          (sheafH_filtered_colimit_succ_stage_hfg (Y' := Y') j)
+          (by
+            ext U s
+            change ConcreteCategory.hom
+                ((((sheafH_filtered_colimit_succ_eta Y').app j) ≫
+                    cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val.app
+                  (op U)) s = 0
+            have happ :
+                (((((sheafH_filtered_colimit_succ_eta Y').app j) ≫
+                      cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val).app
+                    (op U)) =
+                  NatTrans.app
+                    (0 : (Y'.obj j).val ⟶
+                      (cokernel ((sheafH_filtered_colimit_succ_eta Y').app j)).val) (op U) := by
+              exact NatTrans.congr_app
+                (congrArg
+                  (fun α : Y'.obj j ⟶ cokernel ((sheafH_filtered_colimit_succ_eta Y').app j) =>
+                    α.val)
+                  (cokernel.condition ((sheafH_filtered_colimit_succ_eta Y').app j)))
+                (op U)
+            rw [happ]
+            simp)
           (f₂ := ((sheafH_filtered_colimit_succ_eta Y').app j').val)
           (g₂ := (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j')).val)
-          (sheafH_filtered_colimit_succ_stage_hfg (Y' := Y') j')
+          (by
+            ext U s
+            change ConcreteCategory.hom
+                ((((sheafH_filtered_colimit_succ_eta Y').app j') ≫
+                    cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j')).val.app
+                  (op U)) s = 0
+            have happ :
+                (((((sheafH_filtered_colimit_succ_eta Y').app j') ≫
+                      cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j')).val).app
+                    (op U)) =
+                  NatTrans.app
+                    (0 : (Y'.obj j').val ⟶
+                      (cokernel ((sheafH_filtered_colimit_succ_eta Y').app j')).val) (op U) := by
+              exact NatTrans.congr_app
+                (congrArg
+                  (fun α :
+                    Y'.obj j' ⟶ cokernel ((sheafH_filtered_colimit_succ_eta Y').app j') =>
+                      α.val)
+                  (cokernel.condition ((sheafH_filtered_colimit_succ_eta Y').app j')))
+                (op U)
+            rw [happ]
+            simp)
           (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y') j)
           (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y') j')
           (τ₁ := (Y'.map f).val)
@@ -2159,7 +2215,18 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary
         (h₃ := qCocone.pt.cond)
         (f := ι'.val)
         (g := (cokernel.π ι').val)
-        (sheafH_filtered_colimit_succ_iota_hfg (Y' := Ysh) csh hcsh)
+        (by
+          ext U s
+          change ConcreteCategory.hom (((ι' ≫ cokernel.π ι').val).app (op U)) s = 0
+          have happ :
+              (((ι' ≫ cokernel.π ι').val).app (op U)) =
+                NatTrans.app (0 : csh.pt.val ⟶ (cokernel ι').val) (op U) := by
+            exact NatTrans.congr_app
+              (congrArg (fun α : csh.pt ⟶ cokernel ι' => α.val)
+                (cokernel.condition ι'))
+              (op U)
+          rw [happ]
+          simp)
         (sheafH_filtered_colimit_succ_shortExact Ysh csh hcsh)
         h_colim)
   exact
@@ -2298,7 +2365,18 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary
         (h₃ := qCocone.pt.cond)
         (f := ι'.val)
         (g := (cokernel.π ι').val)
-        (sheafH_filtered_colimit_succ_iota_hfg (Y' := Ysh) csh hcsh)
+        (by
+          ext U s
+          change ConcreteCategory.hom (((ι' ≫ cokernel.π ι').val).app (op U)) s = 0
+          have happ :
+              (((ι' ≫ cokernel.π ι').val).app (op U)) =
+                NatTrans.app (0 : csh.pt.val ⟶ (cokernel ι').val) (op U) := by
+            exact NatTrans.congr_app
+              (congrArg (fun α : csh.pt ⟶ cokernel ι' => α.val)
+                (cokernel.condition ι'))
+              (op U)
+          rw [happ]
+          simp)
         (sheafH_filtered_colimit_succ_shortExact Ysh csh hcsh)
         h_colim)
   let comparisonOne :=
@@ -2316,7 +2394,27 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary
       (h₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j)).cond)
       (f := ((sheafH_filtered_colimit_succ_eta Ysh).app j).val)
       (g := (cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val)
-      (sheafH_filtered_colimit_succ_stage_hfg (Y' := Ysh) j)
+      (by
+        ext U s
+        change ConcreteCategory.hom
+            ((((sheafH_filtered_colimit_succ_eta Ysh).app j) ≫
+                cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val.app
+              (op U)) s = 0
+        have happ :
+            (((((sheafH_filtered_colimit_succ_eta Ysh).app j) ≫
+                  cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val).app
+                (op U)) =
+              NatTrans.app
+                (0 : (Ysh.obj j).val ⟶
+                  (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val) (op U) := by
+          exact NatTrans.congr_app
+            (congrArg
+              (fun α : Ysh.obj j ⟶ cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j) =>
+                α.val)
+              (cokernel.condition ((sheafH_filtered_colimit_succ_eta Ysh).app j)))
+            (op U)
+        rw [happ]
+        simp)
       stageShort (h_mid j)
   let stageHom := sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j
   let stageCokMap :
@@ -2417,10 +2515,41 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary
         (h₂₃ := qCocone.pt.cond)
         (f₁ := ((sheafH_filtered_colimit_succ_eta Ysh).app j).val)
         (g₁ := (cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val)
-        (sheafH_filtered_colimit_succ_stage_hfg (Y' := Ysh) j)
+        (by
+          ext U s
+          change ConcreteCategory.hom
+              ((((sheafH_filtered_colimit_succ_eta Ysh).app j) ≫
+                  cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val.app
+                (op U)) s = 0
+          have happ :
+              (((((sheafH_filtered_colimit_succ_eta Ysh).app j) ≫
+                    cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val).app
+                  (op U)) =
+                NatTrans.app
+                  (0 : (Ysh.obj j).val ⟶
+                    (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val) (op U) := by
+            exact NatTrans.congr_app
+              (congrArg
+                (fun α : Ysh.obj j ⟶ cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j) =>
+                  α.val)
+                (cokernel.condition ((sheafH_filtered_colimit_succ_eta Ysh).app j)))
+              (op U)
+          rw [happ]
+          simp)
         (f₂ := ι'.val)
         (g₂ := (cokernel.π ι').val)
-        (sheafH_filtered_colimit_succ_iota_hfg (Y' := Ysh) csh hcsh)
+        (by
+          ext U s
+          change ConcreteCategory.hom (((ι' ≫ cokernel.π ι').val).app (op U)) s = 0
+          have happ :
+              (((ι' ≫ cokernel.π ι').val).app (op U)) =
+                NatTrans.app (0 : csh.pt.val ⟶ (cokernel ι').val) (op U) := by
+            exact NatTrans.congr_app
+              (congrArg (fun α : csh.pt ⟶ cokernel ι' => α.val)
+                (cokernel.condition ι'))
+              (op U)
+          rw [happ]
+          simp)
         stageShort
         (sheafH_filtered_colimit_succ_shortExact Ysh csh hcsh)
         (τ₁ := (csh.ι.app j).val)
