@@ -1,4 +1,4 @@
-import Mathlib
+import Aristotle.GrothendieckVanishing.main.ZeroOutside
 
 /-!
   GeneratedSubsheaf.lean — Generic coproduct-image API for generated subsheaves
@@ -10,6 +10,8 @@ import Mathlib
   - `TopCat.Sheaf.familyImage_ι_eq`: definitional API lemma for the inclusion
   - `TopCat.Presheaf.SectionIndex` / `TopCat.Sheaf.SectionIndex`: generic indexing types
     for local sections
+  - `TopCat.Presheaf.allSectionMap` / `TopCat.Sheaf.allSectionMap`: canonical coproduct maps
+    from all `zeroOutsideInt` generators, together with their `Epi` instances
 -/
 
 universe u
@@ -58,6 +60,41 @@ abbrev SectionIndex {C : Type*} [Category C] {FC : C → C → Type*} {CC : C �
     (F : TopCat.Presheaf C X) :=
   Σ U : Opens X, ToType (F.obj (op U))
 
+/-- The canonical map from the coproduct of all `zeroOutsideInt U` indexed by local sections
+of `F` onto the sheaf associated to `F`. This is the formal Step 3A starting point for
+building finitely generated subsheaves via images of smaller subcoproducts. -/
+abbrev allSectionMap {X : TopCat.{u}}
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
+    [HasCoproduct (fun σ : SectionIndex F => TopCat.Sheaf.zeroOutsideInt σ.1)] :
+    (∐ fun σ : SectionIndex F => TopCat.Sheaf.zeroOutsideInt σ.1) ⟶
+      (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) :=
+  TopCat.Sheaf.familyMap
+    (fun σ : SectionIndex F => TopCat.Sheaf.zeroOutsideInt σ.1)
+    (fun σ => Sheaf.Hom.mk (TopCat.Sheaf.zeroOutsideInt.sHomVal hF σ.2))
+
+instance allSectionMap_epi {X : TopCat.{u}}
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
+    [HasCoproduct (fun σ : SectionIndex F => TopCat.Sheaf.zeroOutsideInt σ.1)] :
+    Epi (allSectionMap hF) := by
+  letI : Balanced (CategoryTheory.Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    balanced_of_strongEpiCategory
+  rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat]
+  change TopCat.Presheaf.IsLocallySurjective (allSectionMap hF).val
+  rw [TopCat.Presheaf.isLocallySurjective_iff]
+  intro U t x hx
+  refine ⟨U, 𝟙 U, ?_, hx⟩
+  refine ⟨(Sigma.ι (fun σ : SectionIndex F => TopCat.Sheaf.zeroOutsideInt σ.1)
+      ⟨U, t⟩).val.app (op U) (TopCat.Sheaf.zeroOutsideInt.generator U), ?_⟩
+  change (((Sigma.ι (fun σ : SectionIndex F => TopCat.Sheaf.zeroOutsideInt σ.1)
+      ⟨U, t⟩) ≫ allSectionMap hF).val.app (op U) (TopCat.Sheaf.zeroOutsideInt.generator U)) =
+    TopCat.Presheaf.restrict t (𝟙 U)
+  rw [Sigma.ι_desc]
+  trans t
+  · simpa using TopCat.Sheaf.zeroOutsideInt.sHomVal_app_generator (F := F) hF t
+  · symm
+    change F.map (𝟙 (Opposite.op U)) t = t
+    simp
+
 end Presheaf
 
 namespace Sheaf
@@ -67,6 +104,26 @@ abbrev SectionIndex {C : Type*} [Category C] {FC : C → C → Type*} {CC : C �
     [∀ X Y, FunLike (FC X Y) (CC X) (CC Y)] [ConcreteCategory C FC] {X : TopCat.{u}}
     (F : Sheaf C X) :=
   TopCat.Presheaf.SectionIndex F.presheaf
+
+end Sheaf
+
+namespace Sheaf
+
+/-- The canonical map from the coproduct of all `zeroOutsideInt U` indexed by local sections
+of `F` onto `F`. This is the formal Step 3A starting point for building finitely generated
+subsheaves via images of smaller subcoproducts. -/
+abbrev allSectionMap {X : TopCat.{u}}
+    (F : Sheaf AddCommGrpCat.{u} X)
+    [HasCoproduct (fun σ : SectionIndex F => zeroOutsideInt σ.1)] :
+    (∐ fun σ : SectionIndex F => zeroOutsideInt σ.1) ⟶ F :=
+  TopCat.Presheaf.allSectionMap (F := F.presheaf) F.cond
+
+instance allSectionMap_epi {X : TopCat.{u}}
+    (F : Sheaf AddCommGrpCat.{u} X)
+    [HasCoproduct (fun σ : SectionIndex F => zeroOutsideInt σ.1)] :
+    Epi (allSectionMap F) := by
+  change Epi (TopCat.Presheaf.allSectionMap (F := F.presheaf) F.cond)
+  infer_instance
 
 end Sheaf
 
