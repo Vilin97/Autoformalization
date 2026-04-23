@@ -192,18 +192,6 @@ private def IsPartialLift {X : TopCat.{u}}
   ∃ h : p.1 ≤ U, ConcreteCategory.hom (g.app (op p.1)) p.2 =
     ConcreteCategory.hom (F₃.map (homOfLE h).op) s
 
-private lemma isCompatible_restriction_family {X : TopCat.{u}}
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X}
-    {ι : Type*} (V : ι → Opens X) {U : Opens X} (s : F.obj (op U))
-    (hV : ∀ i, V i ≤ U) :
-    TopCat.Presheaf.IsCompatible F V
-      (fun i => ConcreteCategory.hom (F.map (homOfLE (hV i)).op) s) := by
-  intro i j
-  dsimp
-  rw [← CategoryTheory.comp_apply, ← CategoryTheory.comp_apply,
-    ← F.map_comp, ← F.map_comp]
-  exact congr_arg (F.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
-
 -- Chain of partial lifts has an upper bound via sheaf gluing.
 private lemma partialLift_chain_ub {X : TopCat.{u}}
     {F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
@@ -231,8 +219,11 @@ private lemma partialLift_chain_ub {X : TopCat.{u}}
           op_comp, Functor.map_comp, CategoryTheory.comp_apply, e]
     obtain ⟨t_gl, ht_gl, _⟩ := h₂.isSheafUniqueGluing cV cs hcompat
     have hcompat_gs : TopCat.Presheaf.IsCompatible F₃ cV gs := by
-      simpa [gs] using
-        isCompatible_restriction_family (F := F₃) cV s (fun p => (hcP p.1 p.2).choose)
+      intro i j
+      dsimp [gs]
+      rw [← CategoryTheory.comp_apply, ← CategoryTheory.comp_apply,
+        ← F₃.map_comp, ← F₃.map_comp]
+      exact congr_arg (F₃.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
     obtain ⟨_, _, hgs_uniq⟩ := h₃.isSheafUniqueGluing cV gs hcompat_gs
     have hub_inP : IsPartialLift (F₃ := F₃) (g := g) U s ⟨Vsup, t_gl⟩ := by
       refine ⟨hVsup_le, ?_⟩
@@ -337,7 +328,11 @@ private lemma partialLift_maximal_eq_U {X : TopCat.{u}}
     let Bs : (b : Bool) → F₃.obj (op (BU b)) :=
       fun b => ConcreteCategory.hom (F₃.map (homOfLE (hBU b)).op) s
     have hcompat_Bs : TopCat.Presheaf.IsCompatible F₃ BU Bs := by
-      simpa [Bs] using isCompatible_restriction_family (F := F₃) BU s hBU
+      intro i j
+      dsimp [Bs]
+      rw [← CategoryTheory.comp_apply, ← CategoryTheory.comp_apply,
+        ← F₃.map_comp, ← F₃.map_comp]
+      exact congr_arg (F₃.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
     obtain ⟨_, _, hBs_uniq⟩ := h₃.isSheafUniqueGluing BU Bs hcompat_Bs
     have hg_gl : TopCat.Presheaf.IsGluing F₃ BU Bs
         (ConcreteCategory.hom (g.app (op (iSup BU))) t_new) := by
