@@ -1,6 +1,5 @@
 import Aristotle.GrothendieckVanishing.main.CohomologyAPI
 import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
-import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
 
 /-!
   # Presheaf filtered colimit is a sheaf on Noetherian spaces
