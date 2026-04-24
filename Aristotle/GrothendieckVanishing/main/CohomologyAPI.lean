@@ -1,4 +1,6 @@
-import Aristotle.GrothendieckVanishing.main.FlasqueVanishing
+import Mathlib
+import Aristotle.GrothendieckVanishing.main.ClosedImmersion
+import Aristotle.GrothendieckVanishing.main.ULiftInt
 
 /-!
 # Sheaf Cohomology API
@@ -64,13 +66,6 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `sheafH_subsingleton_H1_via_epi_app_top`: sheaf-level wrapper for the same fact
 * `sheafH_subsingleton_H1_of_injective_of_epi_app_top_presheaf`: presheaf-boundary
   injective-middle-term `H¹` vanishing
-* `sheafH_subsingleton_H1_of_flasque`: flasque sheaves have vanishing `H¹`
-* `sheafH_subsingleton_H1_of_flasque_presheaf`: presheaf-boundary wrapper for the same fact
-* `sheafH_subsingleton_H1_of_flasque_of_epi_app_top_presheaf`: presheaf-boundary
-  flasque-middle-term `H¹` vanishing
-* `sheafH_subsingleton_H1_of_flasque_of_epi_app_top`: flasque-middle-term `H¹` vanishing
-* `sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map_presheaf`: presheaf-boundary
-  pushed-forward flasque-middle-term `H¹` vanishing
 * `sheafH_dimension_shift_of_both_presheaf`: presheaf-boundary forward dimension shift
   for short exact sequences
 * `sheafH_dimension_shift_of_mono_presheaf`: presheaf-boundary forward dimension shift
@@ -87,6 +82,53 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
+
+instance : HasSeparator AddCommGrpCat.{u} where
+  hasSeparator := by
+    use AddCommGrpCat.of (ULift ℤ)
+    intro A B f g h
+    simp_all only [ObjectProperty.singleton_iff, AddCommGrpCat.ext_iff,
+      AddCommGrpCat.hom_comp, AddMonoidHom.coe_comp, Function.comp_apply, forall_eq',
+      ULift.forall]
+    intro x
+    specialize h (AddCommGrpCat.ofHom
+      (AddMonoidHom.mk' (fun y => y • x) fun y z => by simp only [add_smul])) 1
+    aesop
+
+instance : IsGrothendieckAbelian.{u} AddCommGrpCat.{u} where
+
+instance (X : TopCat.{u}) : IsGrothendieckAbelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+  inferInstanceAs (IsGrothendieckAbelian (CategoryTheory.Sheaf _ _))
+
+instance {C : Type*} [Category C] {D : Type*} [Category D] [Preadditive D] :
+    (Functor.const Cᵒᵖ : D ⥤ Cᵒᵖ ⥤ D).Additive where
+
+instance {C : Type*} [Category C] [Preadditive C] {X : TopCat.{u}} :
+    Preadditive (TopCat.Presheaf C X) := by
+  delta TopCat.Presheaf
+  infer_instance
+
+instance {X : TopCat.{u}} :
+    (constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive :=
+  inferInstanceAs ((Functor.const (Opens X)ᵒᵖ ⋙
+    presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive)
+
+/-! ## Projective ULift ℤ in AddCommGrpCat -/
+
+/-- `ULift ℤ` is projective in `AddCommGrpCat` (via the equivalence with `ModuleCat ℤ`). -/
+noncomputable instance ulift_int_projective :
+    Projective (AddCommGrpCat.of (ULift.{u} ℤ)) := by
+  set e := (forget₂ (ModuleCat.{u} ℤ) AddCommGrpCat.{u}).asEquivalence with he
+  have : e.inverse.PreservesEpimorphisms :=
+    ⟨fun f _ => e.symm.functor.map_epi f⟩
+  have hp := e.toAdjunction.map_projective _
+    (inferInstance : Projective (ModuleCat.of ℤ (ULift.{u} ℤ)))
+  simp only [he, Functor.asEquivalence, ModuleCat.forget₂_obj] at hp
+  exact hp
+
+noncomputable instance sheafHasExt (X : TopCat.{u}) :
+    HasExt.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+  hasExt_of_enoughInjectives _
 
 /-! ## Abstract Ext dimension shift helpers -/
 
@@ -1133,188 +1175,6 @@ theorem sheafH_subsingleton_H1_of_injective_of_epi_app_top {X : TopCat.{u}}
     (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
     (by simpa using hSE)
     (by simpa using hg)
-
-/-- Presheaf-boundary wrapper for `sheafH_subsingleton_H1_of_flasque`: if a presheaf is a
-    sheaf and the induced bundled sheaf is flasque, then its `H¹` is subsingleton. -/
-theorem sheafH_subsingleton_H1_of_flasque_presheaf {X : TopCat.{u}}
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
-    [IsFlasqueSheaf ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))] :
-    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1) := by
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  obtain ⟨ip⟩ := EnoughInjectives.presentation Fsh
-  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ip.shortComplex
-  letI : Injective ((⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
-    simpa [S] using (inferInstance : Injective S.X₂)
-  have hSE :
-      (ShortComplex.mk
-        (X₁ := (⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-        (X₂ := (⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-        (X₃ := (⟨S.X₃.val, S.X₃.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-        (Sheaf.Hom.mk S.f.val)
-        (Sheaf.Hom.mk S.g.val)
-        (by
-          apply Sheaf.Hom.ext
-          exact congrArg Sheaf.Hom.val S.zero)).ShortExact := by
-    simpa [S] using ip.shortExact_shortComplex
-  have hg : Epi (S.g.val.app (op ⊤)) := by
-    letI : IsFlasqueSheaf ((⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
-      simpa [Fsh, S] using (inferInstance : IsFlasqueSheaf Fsh)
-    simpa [S] using epi_app_of_shortExact_flasque_presheaf
-      S.X₁.cond S.X₂.cond S.X₃.cond
-      (f := S.f.val) (g := S.g.val)
-      (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-      hSE ⊤
-  simpa [Fsh, S] using sheafH_subsingleton_H1_of_injective_of_epi_app_top_presheaf
-    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-    S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val)
-    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-    hSE hg
-
-/-- Flasque sheaves have vanishing `H¹`. This isolates the base case of flasque
-    cohomological vanishing in the general sheaf-cohomology API. -/
-theorem sheafH_subsingleton_H1_of_flasque {X : TopCat.{u}}
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) [IsFlasqueSheaf F] :
-    Subsingleton (Sheaf.H F 1) := by
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F.val, F.cond⟩
-  letI : IsFlasqueSheaf Fsh := by
-    simpa [Fsh] using (inferInstance : IsFlasqueSheaf F)
-  simpa [Fsh] using
-    (sheafH_subsingleton_H1_of_flasque_presheaf (X := X) (F := F.val) F.cond)
-
-/-- Presheaf-boundary `H¹` vanishing criterion with flasque middle term:
-    if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves,
-    `⟨F₂, h₂⟩` is flasque, and `g.app(⊤)` is epi, then `H¹(F₁)=0`. -/
-theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top_presheaf {X : TopCat.{u}}
-    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
-    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
-    (hSE : (ShortComplex.mk
-      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (Sheaf.Hom.mk f)
-      (Sheaf.Hom.mk g)
-      (by
-        apply Sheaf.Hom.ext
-        simpa using hfg)).ShortExact)
-    [IsFlasqueSheaf ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))]
-    (hg : Epi (g.app (op ⊤))) :
-    Subsingleton (Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1) := by
-  simpa using sheafH_subsingleton_H1_via_epi_app_top_presheaf
-    (F₁ := F₁) (F₂ := F₂) (F₃ := F₃)
-    h₁ h₂ h₃ hfg hSE
-    (sheafH_subsingleton_H1_of_flasque_presheaf (F := F₂) h₂)
-    hg
-
-/-- Sheaf-level `H¹` vanishing criterion with flasque middle term:
-    if `X₂` is flasque and `g.app(⊤)` is epi in a short exact sequence
-    `0 → X₁ → X₂ → X₃ → 0`, then `H¹(X₁)=0`. -/
-theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
-    [IsFlasqueSheaf S.X₂]
-    (hg : Epi (S.g.val.app (op ⊤))) :
-    Subsingleton (Sheaf.H S.X₁ 1) := by
-  letI : IsFlasqueSheaf ((⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
-    simpa using (inferInstance : IsFlasqueSheaf S.X₂)
-  simpa using sheafH_subsingleton_H1_of_flasque_of_epi_app_top_presheaf
-    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-    S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val)
-    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-    (by simpa using hSE)
-    (by simpa using hg)
-
-/-- Presheaf-boundary `H¹` vanishing criterion for a pushed-forward short exact sequence:
-    if the pushed-forward middle term is flasque and the source sequence has `H¹(F₁)=0`,
-    then the pushed-forward kernel has vanishing `H¹`, provided the caller supplies the
-    identification of `i⁻¹(⊤)` with `⊤`. -/
-theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map_presheaf {X Y : TopCat.{u}}
-    (i : X ⟶ Y)
-    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
-    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
-    (hSE : (ShortComplex.mk
-      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (Sheaf.Hom.mk f)
-      (Sheaf.Hom.mk g)
-      (by
-        apply Sheaf.Hom.ext
-        simpa using hfg)).ShortExact)
-    (hSE_map : (ShortComplex.mk
-      (X₁ := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
-        ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)))
-      (X₂ := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
-        ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)))
-      (X₃ := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
-        ((⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)))
-      (Sheaf.Hom.mk ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} i).map f))
-      (Sheaf.Hom.mk ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} i).map g))
-      (by
-        apply Sheaf.Hom.ext
-        simpa using congrArg ((TopCat.Presheaf.pushforward AddCommGrpCat.{u} i).map) hfg)
-      ).ShortExact)
-    [IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
-      ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)))]
-    (h_top : (Opens.map i).obj ⊤ = ⊤)
-    (h₁H : Subsingleton (Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1)) :
-    Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
-      ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))) 1) := by
-  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
-    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (Sheaf.Hom.mk f)
-    (Sheaf.Hom.mk g)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hfg)
-  let T := S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} i)
-  letI : IsFlasqueSheaf ((⟨T.X₂.val, T.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} Y)) := by
-    simpa [S, T] using
-      (inferInstance : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} i).obj
-        ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))))
-  simpa [S, T] using sheafH_subsingleton_H1_of_flasque_of_epi_app_top_presheaf
-    (F₁ := T.X₁.val) (F₂ := T.X₂.val) (F₃ := T.X₃.val)
-    T.X₁.cond T.X₂.cond T.X₃.cond
-    (f := T.f.val) (g := T.g.val)
-    (show T.f.val ≫ T.g.val = 0 from congrArg Sheaf.Hom.val T.zero)
-    (by simpa [S, T] using hSE_map)
-    (by
-      change Epi (g.app (op ((Opens.map i).obj ⊤)))
-      rw [h_top]
-      exact epi_app_top_of_subsingleton_sheafH1_presheaf
-        (F₁ := F₁) (F₂ := F₂) (F₃ := F₃)
-        h₁ h₂ h₃ hfg hSE h₁H)
-
-/-- Sheaf-level `H¹` vanishing criterion for a pushed-forward short exact sequence:
-    if the mapped middle term is flasque and the source sequence has `H¹(X₁)=0`,
-    then `H¹` vanishes on the mapped kernel, provided the caller supplies the
-    identification of `f⁻¹(⊤)` with `⊤`. -/
-theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map {X Y : TopCat.{u}}
-    (f : X ⟶ Y)
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
-    (hSE_map : (S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f)).ShortExact)
-    [IsFlasqueSheaf ((S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f)).X₂)]
-    (h_top : (Opens.map f).obj ⊤ = ⊤)
-    (h₁ : Subsingleton (Sheaf.H S.X₁ 1)) :
-    Subsingleton (Sheaf.H ((S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f)).X₁) 1) := by
-  letI : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} f).obj
-      ((⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))) := by
-    simpa using (inferInstance :
-      IsFlasqueSheaf ((S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f)).X₂))
-  simpa using sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map_presheaf
-    (i := f)
-    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-    S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val)
-    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-    (by simpa using hSE)
-    (by simpa using hSE_map)
-    h_top
-    (by simpa using h₁)
 
 /-- Presheaf-boundary forward dimension shift for a short exact sequence:
     if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves,

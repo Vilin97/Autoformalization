@@ -52,7 +52,8 @@ universe u
 
 noncomputable section
 
-local instance (X : TopCat.{u}) : Abelian (TopCat.Sheaf AddCommGrpCat.{u} X) :=
+instance sheafAbelianAddCommGrp (X : TopCat.{u}) :
+    Abelian (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   inferInstanceAs (Abelian (CategoryTheory.Sheaf _ _))
 
 namespace TopCat
