@@ -733,6 +733,30 @@ noncomputable def sheafH_filtered_colimit_succ_quotientCocone
         simp [sheafH_filtered_colimit_succ_quotient, sheafH_filtered_colimit_succ_iota_fac,
           Functor.const_obj_map, Category.assoc, (sheafH_filtered_colimit_succ_injCocone Y').w f] }
 
+private noncomputable def sheafH_filtered_colimit_succ_liftedCocone
+    (s : Cocone (sheafH_filtered_colimit_succ_quotient Y')) :
+    Cocone (sheafH_filtered_colimit_succ_Inj Y') :=
+  Cocone.mk s.pt
+    { app := fun j =>
+        cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫ s.ι.app j
+      naturality := fun j j' a => by
+        dsimp
+        have hdesc :
+            cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
+                (sheafH_filtered_colimit_succ_quotient Y').map a =
+              (sheafH_filtered_colimit_succ_Inj Y').map a ≫
+                cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j') := by
+          simp [sheafH_filtered_colimit_succ_quotient]
+        rw [← Category.assoc, ← hdesc, Category.assoc, s.w]
+        simp }
+
+omit [IsFiltered J'] in
+@[simp]
+private theorem sheafH_filtered_colimit_succ_liftedCocone_ι_app
+    (s : Cocone (sheafH_filtered_colimit_succ_quotient Y')) (j : J') :
+    (sheafH_filtered_colimit_succ_liftedCocone Y' s).ι.app j =
+      cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫ s.ι.app j := rfl
+
 noncomputable def sheafH_filtered_colimit_succ_quotientCocone_isColimit
     (c' : Cocone Y') (hc' : IsColimit c') :
     IsColimit (sheafH_filtered_colimit_succ_quotientCocone Y' c' hc') := by
@@ -744,102 +768,19 @@ noncomputable def sheafH_filtered_colimit_succ_quotientCocone_isColimit
   have hπ (j) : cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫ qCocone.ι.app j =
       injCocone.ι.app j ≫ cokernel.π ι' := cokernel.π_desc _ _ _
   exact
-  { desc := fun s => cokernel.desc ι' (injColim.desc ⟨s.pt,
-      { app := fun j => cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫ s.ι.app j
-        naturality := fun j j' a => by
-          dsimp
-          have hdesc :
-              cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-                  (sheafH_filtered_colimit_succ_quotient Y').map a =
-                (sheafH_filtered_colimit_succ_Inj Y').map a ≫
-                  cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j') := by
-            simp [sheafH_filtered_colimit_succ_quotient, Category.assoc]
-          have hdesc_assoc :
-              ((sheafH_filtered_colimit_succ_Inj Y').map a ≫
-                  cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j')) ≫
-                s.ι.app j' =
-              (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-                  (sheafH_filtered_colimit_succ_quotient Y').map a) ≫
-                s.ι.app j' := by
-            simpa [Category.assoc] using
-              congrArg (fun m => m ≫ s.ι.app j') hdesc.symm
-          have hdesc_assoc' :
-              (sheafH_filtered_colimit_succ_Inj Y').map a ≫
-                  cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j') ≫
-                s.ι.app j' =
-              (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-                  (sheafH_filtered_colimit_succ_quotient Y').map a) ≫
-                s.ι.app j' := by
-            simpa [Category.assoc] using hdesc_assoc
-          rw [hdesc_assoc', Category.assoc, s.w]
-          simp }⟩) (hc'.hom_ext fun j => by
-      let lifted : Cocone Inj := ⟨s.pt,
-        { app := fun j => cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫ s.ι.app j
-          naturality := fun j j' a => by
-            dsimp
-            have hdesc :
-                cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-                    (sheafH_filtered_colimit_succ_quotient Y').map a =
-                  (sheafH_filtered_colimit_succ_Inj Y').map a ≫
-                    cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j') := by
-              simp [sheafH_filtered_colimit_succ_quotient]
-            have hdesc_assoc :
-                ((sheafH_filtered_colimit_succ_Inj Y').map a ≫
-                    cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j')) ≫
-                  s.ι.app j' =
-                (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-                    (sheafH_filtered_colimit_succ_quotient Y').map a) ≫
-                  s.ι.app j' := by
-              simpa [Category.assoc] using
-                congrArg (fun m => m ≫ s.ι.app j') hdesc.symm
-            have hdesc_assoc' :
-                (sheafH_filtered_colimit_succ_Inj Y').map a ≫
-                    cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j') ≫
-                  s.ι.app j' =
-                (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-                    (sheafH_filtered_colimit_succ_quotient Y').map a) ≫
-                  s.ι.app j' := by
-              simpa [Category.assoc] using hdesc_assoc
-            rw [hdesc_assoc', Category.assoc, s.w]
-            simp }⟩
-      have hfac_lifted :
-          injCocone.ι.app j ≫ injColim.desc lifted =
-            cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫ s.ι.app j := by
-        simpa [lifted, injCocone] using injColim.fac lifted j
-      rw [comp_zero]
-      conv_lhs =>
-        rw [← Category.assoc, sheafH_filtered_colimit_succ_iota_fac Y' c' hc' j, Category.assoc]
-      rw [hfac_lifted, ← Category.assoc, cokernel.condition, zero_comp])
+  { desc := fun s =>
+      let lifted := sheafH_filtered_colimit_succ_liftedCocone Y' s
+      cokernel.desc ι' (injColim.desc lifted) (hc'.hom_ext fun j => by
+        have hfac_lifted :
+            injCocone.ι.app j ≫ injColim.desc lifted =
+              cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫ s.ι.app j := by
+          simpa [lifted, injCocone] using injColim.fac lifted j
+        rw [comp_zero]
+        conv_lhs =>
+          rw [← Category.assoc, sheafH_filtered_colimit_succ_iota_fac Y' c' hc' j, Category.assoc]
+        rw [hfac_lifted, ← Category.assoc, cokernel.condition, zero_comp])
     fac := fun s j => (cancel_epi (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j))).mp (by
-      let lifted : Cocone Inj := ⟨s.pt,
-        { app := fun j => cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫ s.ι.app j
-          naturality := fun j j' a => by
-            dsimp
-            have hdesc :
-                cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-                    (sheafH_filtered_colimit_succ_quotient Y').map a =
-                  (sheafH_filtered_colimit_succ_Inj Y').map a ≫
-                    cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j') := by
-              simp [sheafH_filtered_colimit_succ_quotient]
-            have hdesc_assoc :
-                ((sheafH_filtered_colimit_succ_Inj Y').map a ≫
-                    cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j')) ≫
-                  s.ι.app j' =
-                (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-                    (sheafH_filtered_colimit_succ_quotient Y').map a) ≫
-                  s.ι.app j' := by
-              simpa [Category.assoc] using
-                congrArg (fun m => m ≫ s.ι.app j') hdesc.symm
-            have hdesc_assoc' :
-                (sheafH_filtered_colimit_succ_Inj Y').map a ≫
-                    cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j') ≫
-                  s.ι.app j' =
-                (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-                    (sheafH_filtered_colimit_succ_quotient Y').map a) ≫
-                  s.ι.app j' := by
-              simpa [Category.assoc] using hdesc_assoc
-            rw [hdesc_assoc', Category.assoc, s.w]
-            simp }⟩
+      let lifted := sheafH_filtered_colimit_succ_liftedCocone Y' s
       have hfac_lifted :
           injCocone.ι.app j ≫ injColim.desc lifted =
             cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫ s.ι.app j := by
@@ -847,35 +788,7 @@ noncomputable def sheafH_filtered_colimit_succ_quotientCocone_isColimit
       rw [← Category.assoc, hπ, Category.assoc, cokernel.π_desc, hfac_lifted])
     uniq := fun s m hm => (cancel_epi (cokernel.π ι')).mp (by
       rw [cokernel.π_desc]
-      let lifted : Cocone Inj := ⟨s.pt,
-        { app := fun j => cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫ s.ι.app j
-          naturality := fun j j' a => by
-            dsimp
-            have hdesc :
-                cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-                    (sheafH_filtered_colimit_succ_quotient Y').map a =
-                  (sheafH_filtered_colimit_succ_Inj Y').map a ≫
-                    cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j') := by
-              simp [sheafH_filtered_colimit_succ_quotient]
-            have hdesc_assoc :
-                ((sheafH_filtered_colimit_succ_Inj Y').map a ≫
-                    cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j')) ≫
-                  s.ι.app j' =
-                (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-                    (sheafH_filtered_colimit_succ_quotient Y').map a) ≫
-                  s.ι.app j' := by
-              simpa [Category.assoc] using
-                congrArg (fun m => m ≫ s.ι.app j') hdesc.symm
-            have hdesc_assoc' :
-                (sheafH_filtered_colimit_succ_Inj Y').map a ≫
-                    cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j') ≫
-                  s.ι.app j' =
-                (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
-                    (sheafH_filtered_colimit_succ_quotient Y').map a) ≫
-                  s.ι.app j' := by
-              simpa [Category.assoc] using hdesc_assoc
-            rw [hdesc_assoc', Category.assoc, s.w]
-            simp }⟩
+      let lifted := sheafH_filtered_colimit_succ_liftedCocone Y' s
       exact injColim.hom_ext fun j => by
         have hπ' :
             (colimit.cocone Inj).ι.app j ≫ cokernel.π ι' =
