@@ -5,15 +5,11 @@ import Aristotle.GrothendieckVanishing.main.ULiftInt
 /-!
 # Sheaf Cohomology API
 
-Centralizes results about sheaf cohomology `Sheaf.H` and its underlying `Ext` groups
-so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
+Centralizes results about sheaf cohomology `Sheaf.H`, keeping the underlying `Ext`
+calculations internal so downstream files never need to unfold `Sheaf.H` directly.
 
 ## Main results
 
-* `ext_dimension_shift` / `ext_dimension_shift_X₃`: dimension shifting via Ext LES
-* `Ext.subsingleton_of_isZero_tgt`: zero target ⟹ subsingleton Ext (general abelian category)
-* `extClass_naturality`: naturality of the extension class
-* `subsingleton_H1_via_surj`: H^1 vanishing via Ext^0 surjectivity
 * `subsingleton_sheafH_of_shortExact_middle`: LES consequence for Sheaf.H
 * `subsingleton_sheafH_of_shortExact_middle_presheaf`: presheaf-boundary middle-term wrapper
 * `sheafH_subsingleton_of_isEmpty_presheaf`: presheaf-boundary empty-space vanishing
@@ -132,14 +128,14 @@ noncomputable instance sheafHasExt (X : TopCat.{u}) :
     HasExt.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   hasExt_of_enoughInjectives _
 
-/-! ## Abstract Ext dimension shift helpers -/
+/-! ## Internal Ext helpers -/
 
 section ExtDimShift
 variable {C' : Type*} [Category C'] [Abelian C'] [HasExt C']
 
 /-- Dimension shift for Ext via LES: given `0 → X₁ → X₂ → X₃ → 0` short exact,
     `Ext^n(Z, X₃) = 0` and `Ext^{n+1}(Z, X₂) = 0` imply `Ext^{n+1}(Z, X₁) = 0`. -/
-theorem ext_dimension_shift (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
+private theorem ext_dimension_shift (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
     (h₃ : Subsingleton (Ext Z S.X₃ n))
     (h₂ : Subsingleton (Ext Z S.X₂ (n + 1))) :
     Subsingleton (Ext Z S.X₁ (n + 1)) := by
@@ -150,7 +146,7 @@ theorem ext_dimension_shift (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (
 
 /-- Reverse dimension shift: `Ext^n(Z, X₂) = 0` and `Ext^{n+1}(Z, X₁) = 0` imply
     `Ext^n(Z, X₃) = 0`. Uses exactness at X₃ in the covariant LES. -/
-theorem ext_dimension_shift_X₃ (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
+private theorem ext_dimension_shift_X₃ (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
     (h₂ : Subsingleton (Ext Z S.X₂ n))
     (h₁ : Subsingleton (Ext Z S.X₁ (n + 1))) :
     Subsingleton (Ext Z S.X₃ n) := by
@@ -161,7 +157,7 @@ theorem ext_dimension_shift_X₃ (Z : C') {S : ShortComplex C'} (hS : S.ShortExa
 
 /-- If the middle cohomology groups in degrees `n` and `n + 1` are subsingleton, then the
     connecting morphism `Ext^n(Z, X₃) → Ext^(n+1)(Z, X₁)` is bijective. -/
-theorem extClass_postcomp_bijective_of_subsingleton_middle
+private theorem extClass_postcomp_bijective_of_subsingleton_middle
     (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
     (h₂n : Subsingleton (Ext Z S.X₂ n))
     (h₂succ : Subsingleton (Ext Z S.X₂ (n + 1))) :
@@ -182,7 +178,7 @@ theorem extClass_postcomp_bijective_of_subsingleton_middle
 
 /-- The connecting morphism in the covariant long exact sequence as an additive equivalence,
     assuming the middle cohomology groups in degrees `n` and `n + 1` vanish. -/
-noncomputable def extClass_postcompAddEquiv_of_subsingleton_middle
+private noncomputable def extClass_postcompAddEquiv_of_subsingleton_middle
     (Z : C') {S : ShortComplex C'} (hS : S.ShortExact) (n : ℕ)
     (h₂n : Subsingleton (Ext Z S.X₂ n))
     (h₂succ : Subsingleton (Ext Z S.X₂ (n + 1))) :
@@ -194,7 +190,7 @@ noncomputable def extClass_postcompAddEquiv_of_subsingleton_middle
     the connecting homomorphism commutes with the induced maps on Ext groups.
     Proved via the triangulated category axiom TR3 (`complete_distinguished_triangle_morphism₁`),
     fullness/faithfulness of `singleFunctor`, and mono cancellation. -/
-lemma extClass_naturality {S₁ S₂ : ShortComplex C'} (hS₁ : S₁.ShortExact)
+private lemma extClass_naturality {S₁ S₂ : ShortComplex C'} (hS₁ : S₁.ShortExact)
     (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂) :
     (Ext.mk₀ φ.τ₃).comp hS₂.extClass (zero_add 1) =
     hS₁.extClass.comp (Ext.mk₀ φ.τ₁) (add_zero 1) := by
@@ -227,9 +223,10 @@ lemma extClass_naturality {S₁ S₂ : ShortComplex C'} (hS₁ : S₁.ShortExact
   haveI : Mono S₂.f := hS₂.mono_f
   exact (cancel_mono S₂.f).mp (by rw [← φ.comm₁₂.symm, h])
 
-/-- If `Y` is zero in an abelian category, `Ext X Y n` is subsingleton for all `X`, `n`.
+/-- Internal helper: if `Y` is zero in an abelian category, `Ext X Y n` is subsingleton
+    for all `X`, `n`.
     Proof: `𝟙 Y = 0` because `Y` is zero, so `x = x ∘ mk₀(𝟙 Y) = x ∘ mk₀(0) = x ∘ 0 = 0`. -/
-theorem Ext.subsingleton_of_isZero_tgt {X Y : C'} (hY : IsZero Y) (n : ℕ) :
+private theorem ext_subsingleton_of_isZero_tgt {X Y : C'} (hY : IsZero Y) (n : ℕ) :
     Subsingleton (Ext X Y n) :=
   ⟨fun a b => by
     have eq : ∀ x : Ext X Y n, x = 0 := fun x => by
@@ -243,9 +240,9 @@ end ExtDimShift
 /-! ## Stalks and zero sheaves -/
 
 /-- Presheaf-boundary naturality of the connecting map on sheaf cohomology for a morphism
-    of short exact sequences of presheaves. This packages `extClass_naturality` together
-    with the two associativity rewrites needed to move between nested `comp` expressions
-    and composition with the connecting class. -/
+    of short exact sequences of presheaves. This packages the underlying extension-class
+    naturality calculation with the associativity rewrites needed to move between nested
+    `comp` expressions and composition with the connecting class. -/
 theorem sheafH_comp_extClass_naturality_presheaf {X : TopCat.{u}}
     {F₁₁ F₁₂ F₁₃ F₂₁ F₂₂ F₂₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁₁ : F₁₁.IsSheaf) (h₁₂ : F₁₂.IsSheaf) (h₁₃ : F₁₃.IsSheaf)
@@ -419,7 +416,7 @@ theorem sheafH_subsingleton_of_isZero_presheaf {X : TopCat.{u}}
     {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
     (hzero : IsZero ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))) (n : ℕ) :
     Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) :=
-  Ext.subsingleton_of_isZero_tgt hzero n
+  ext_subsingleton_of_isZero_tgt hzero n
 
 /-- If a sheaf is zero, then all its cohomology groups are subsingleton. -/
 theorem sheafH_subsingleton_of_isZero {X : TopCat.{u}}
@@ -1024,9 +1021,8 @@ theorem sheafH0_surj_of_epi_app_top {X : TopCat.{u}}
   simpa using sheafH0_surj_of_epi_app_top_presheaf
     (F := F.val) (G := G.val) F.cond G.cond f.val (by simpa using hf)
 
-/-- H^1 vanishing via Ext^0 surjectivity: if H^1(X₂)=0 and every Ext^0 element
-    of X₃ lifts to X₂, then H^1(X₁)=0. Used in flasque, pushforward, and colimit proofs. -/
-theorem subsingleton_H1_via_surj {C' : Type*} [Category C'] [Abelian C'] [HasExt C']
+/-- Internal helper for `H^1` vanishing via degree-zero surjectivity. -/
+private theorem subsingleton_H1_via_surj {C' : Type*} [Category C'] [Abelian C'] [HasExt C']
     (Z : C') {S : ShortComplex C'} (hSE : S.ShortExact)
     (hJ : Subsingleton (Ext Z S.X₂ 1))
     (h_surj : ∀ y : Ext Z S.X₃ 0,
@@ -1039,8 +1035,8 @@ theorem subsingleton_H1_via_surj {C' : Type*} [Category C'] [Abelian C'] [HasExt
   simp only [← hc, ← hd, ← hc', ← hd', Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀ S.g)
     hSE.extClass rfl, hSE.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
 
-/-- Sheaf-level wrapper for `subsingleton_H1_via_surj`: if `H¹(X₂)=0` and every `H⁰`
-    class on `X₃` lifts along `g`, then `H¹(X₁)=0`. -/
+/-- Presheaf-boundary `H¹` vanishing via `H⁰`-surjectivity: if `H¹(X₂)=0` and every
+    `H⁰` class on `X₃` lifts along `g`, then `H¹(X₁)=0`. -/
 theorem sheafH_subsingleton_H1_via_surj_presheaf {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
