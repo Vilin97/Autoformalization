@@ -643,6 +643,79 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary
       _ = (sheafCohomologyFunctor X 1).map (csh.ι.app j) := by simp [Category.assoc]
   simpa [stageIso, stageIsoH1] using hmain
 
+/-- The degree-`0` filtered-colimit comparison isomorphism on the sheaf diagram attached to
+a presheaf cocone, before rewriting it as `sheafH_filtered_colimit_comparison_presheaf`. -/
+noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf_boundary
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    (c : Cocone Y) (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
+    colimit (sheafH_filtered_colimit_presheafDiagram Y hY ⋙ sheafCohomologyFunctor X 0) ≅
+      AddCommGrpCat.of (Sheaf.H (⟨c.pt, hc_pt⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) 0) := by
+  let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
+  let sectionsFunctor :
+      TopCat.Presheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
+    (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)
+  let h0Iso :
+      Ysh ⋙ sheafCohomologyFunctor X 0 ≅ Y ⋙ sectionsFunctor :=
+    NatIso.ofComponents
+      (fun j => (sheafH0EquivSections_presheaf (hY j)).toAddCommGrpIso)
+      (fun {j j'} f => by
+        ext x
+        simpa [sectionsFunctor, sheafCohomologyFunctor_map_apply] using
+          (sheafH0EquivSections_presheaf_natural
+            (hF := hY j) (hG := hY j') (f := Y.map f) (x := x)))
+  have hc_sections : IsColimit (sectionsFunctor.mapCocone c) := by
+    simpa [sectionsFunctor] using
+      (isColimitOfPreserves
+        ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)) hc)
+  exact
+    HasColimit.isoOfNatIso h0Iso ≪≫
+      (colimit.isColimit (Y ⋙ sectionsFunctor)).coconePointUniqueUpToIso hc_sections ≪≫
+      ((sheafH0EquivSections_presheaf hc_pt).toAddCommGrpIso).symm
+
+@[simp] theorem sheafH_filtered_colimit_comparison_zero_iso_presheaf_boundary_hom
+    {X : TopCat.{u}} [NoetherianSpace X]
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    (c : Cocone Y) (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
+    (sheafH_filtered_colimit_comparison_zero_iso_presheaf_boundary
+      (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt)).hom =
+      sheafH_filtered_colimit_comparison
+        (sheafH_filtered_colimit_presheafDiagram Y hY) 0
+        (sheafH_filtered_colimit_presheafCocone Y hY c hc_pt) := by
+  let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
+  let sectionsFunctor :
+      TopCat.Presheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
+    (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)
+  let h0Iso :
+      Ysh ⋙ sheafCohomologyFunctor X 0 ≅ Y ⋙ sectionsFunctor :=
+    NatIso.ofComponents
+      (fun j => (sheafH0EquivSections_presheaf (hY j)).toAddCommGrpIso)
+      (fun {j j'} f => by
+        ext x
+        simpa [sectionsFunctor, sheafCohomologyFunctor_map_apply] using
+          (sheafH0EquivSections_presheaf_natural
+            (hF := hY j) (hG := hY j') (f := Y.map f) (x := x)))
+  have hc_sections : IsColimit (sectionsFunctor.mapCocone c) := by
+    simpa [sectionsFunctor] using
+      (isColimitOfPreserves
+        ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)) hc)
+  apply colimit.hom_ext
+  intro j
+  simp only [sheafH_filtered_colimit_comparison_zero_iso_presheaf_boundary, Iso.trans_hom]
+  rw [HasColimit.isoOfNatIso_ι_hom_assoc, colimit.comp_coconePointUniqueUpToIso_hom_assoc,
+    colimit_ι_sheafH_filtered_colimit_comparison]
+  ext x
+  apply (sheafH0EquivSections_presheaf hc_pt).injective
+  simpa [sheafH_filtered_colimit_presheafCocone, sheafCohomologyFunctor_map_apply] using
+    (sheafH0EquivSections_presheaf_natural
+      (hF := hY j) (hG := hc_pt) (f := c.ι.app j) (x := x)).symm
+
 /-- In degree `0`, the presheaf-boundary filtered-colimit comparison is the canonical
 isomorphism obtained from the associated sheaf diagram. -/
 noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf
