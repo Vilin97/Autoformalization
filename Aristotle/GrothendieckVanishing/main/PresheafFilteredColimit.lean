@@ -2133,7 +2133,7 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary
   have h_mid : ∀ j, Subsingleton (Sheaf.H (Inj.obj j) 1) := by
     intro j
     letI : Injective (Inj.obj j) := hInj j
-    exact Ext.subsingleton_of_injective _ _ 0
+    exact sheafH_subsingleton_of_injective (Inj.obj j) 0
   have h_colim : Subsingleton (Sheaf.H (sheafH_filtered_colimit_succ_injCocone Ysh).pt 1) := by
     simpa using
       (sheafH_filtered_colimit_succ_inj_subsingleton_presheaf
@@ -2271,7 +2271,7 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary
   have h_mid : ∀ j, Subsingleton (Sheaf.H (Inj.obj j) 1) := by
     intro j
     letI : Injective (Inj.obj j) := hInj j
-    exact Ext.subsingleton_of_injective _ _ 0
+    exact sheafH_subsingleton_of_injective (Inj.obj j) 0
   have h_colim : Subsingleton (Sheaf.H (sheafH_filtered_colimit_succ_injCocone Ysh).pt 1) := by
     simpa using
       (sheafH_filtered_colimit_succ_inj_subsingleton_presheaf
@@ -2897,11 +2897,11 @@ theorem sheafH_filtered_colimit_comparison_isIso_presheaf
             have h_mid_n : ∀ j, Subsingleton (Sheaf.H (Inj.obj j) (m + 1)) := by
               intro j
               letI : Injective (Inj.obj j) := hInj j
-              exact Ext.subsingleton_of_injective _ _ m
+              exact sheafH_subsingleton_of_injective (Inj.obj j) m
             have h_mid_succ : ∀ j, Subsingleton (Sheaf.H (Inj.obj j) (m + 2)) := by
               intro j
               letI : Injective (Inj.obj j) := hInj j
-              exact Ext.subsingleton_of_injective _ _ (m + 1)
+              exact sheafH_subsingleton_of_injective (Inj.obj j) (m + 1)
             haveI hFlasqueInj : IsFlasqueSheaf injCocone.pt := by
               haveI : CreatesColimit Inj
                   (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=

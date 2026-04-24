@@ -64,6 +64,8 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
 * `sheafH_subsingleton_H1_via_epi_app_top_presheaf`: presheaf-boundary H^1 vanishing via
   surjective top sections
 * `sheafH_subsingleton_H1_via_epi_app_top`: sheaf-level wrapper for the same fact
+* `sheafH_subsingleton_of_injective`: positive-degree cohomology of an injective sheaf
+  is subsingleton
 * `sheafH_subsingleton_H1_of_injective_of_epi_app_top_presheaf`: presheaf-boundary
   injective-middle-term `H¹` vanishing
 * `sheafH_dimension_shift_of_both_presheaf`: presheaf-boundary forward dimension shift
@@ -79,7 +81,7 @@ so that downstream files never need to unfold `Sheaf.H` or use `Ext` directly.
   dimension shift for locally surjective morphisms
 -/
 
-universe u
+universe w' w v u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
@@ -1132,6 +1134,16 @@ theorem sheafH_subsingleton_H1_via_epi_app_top {X : TopCat.{u}}
     (by simpa using hSE)
     (by simpa using h₂)
     (by simpa using hg)
+
+/-- Positive-degree cohomology of an injective sheaf is subsingleton. -/
+theorem sheafH_subsingleton_of_injective
+    {C : Type u} [Category.{v} C] {J : GrothendieckTopology C}
+    [HasSheafify J AddCommGrpCat.{w}] [HasExt.{w'} (Sheaf J AddCommGrpCat.{w})]
+    (I : Sheaf J AddCommGrpCat.{w}) [Injective I] (n : ℕ) :
+    Subsingleton (Sheaf.H I (n + 1)) := by
+  simpa [Sheaf.H] using
+    (Ext.subsingleton_of_injective
+      ((constantSheaf J AddCommGrpCat.{w}).obj (AddCommGrpCat.of (ULift.{w} ℤ))) I n)
 
 /-- Presheaf-boundary `H¹` vanishing criterion with injective middle term:
     if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves,

@@ -75,7 +75,7 @@ noncomputable def PushforwardHIso
             (f := S.f.val) (g := S.g.val)
             (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
             (by simpa [S] using ip.shortExact_shortComplex)
-            (by simpa [S] using (Ext.subsingleton_of_injective _ _ 0 :
+            (by simpa [S] using (sheafH_subsingleton_of_injective S.X₂ 0 :
               Subsingleton (Sheaf.H S.X₂ 1)))
       let hH1_tgt :
           cokernel (S.g.val.app (op ⊤)) ≅ AddCommGrpCat.of (Sheaf.H SX.X₁ 1) := by
@@ -99,9 +99,10 @@ noncomputable def PushforwardHIso
             (by simpa [S] using ip.shortExact_shortComplex)
             (m + 1)
             (by simpa [S] using
-              (Ext.subsingleton_of_injective _ _ m : Subsingleton (Sheaf.H S.X₂ (m + 1))))
+              (sheafH_subsingleton_of_injective S.X₂ m :
+                Subsingleton (Sheaf.H S.X₂ (m + 1))))
             (by simpa [S] using
-              (Ext.subsingleton_of_injective _ _ (m + 1) :
+              (sheafH_subsingleton_of_injective S.X₂ (m + 1) :
                 Subsingleton (Sheaf.H S.X₂ (m + 2))))
       let hShift_tgt :
           AddCommGrpCat.of (Sheaf.H SX.X₃ (m + 1)) ≅
