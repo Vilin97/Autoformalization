@@ -13,7 +13,8 @@ Recent history:
 $history
 
 Rules:
-- Only target checklist items that are still `- [ ]`.
+- Target checklist items that are either `- [ ]` (not started) or `- [>]` (work in progress, multi-cycle).
+- A `- [>]` item means prior cycles started this and the `COMPLETE_IF:` criterion on the line below has not yet passed. Continuing a `- [>]` item is encouraged; do not restart it from scratch.
 - Respect phase order. Do not jump to later phases while earlier-phase unchecked items remain unless the earlier item is clearly blocked and you explicitly say why.
 - If the earliest unchecked item is an umbrella/sweep task rather than a declaration-anchored task, do not target the umbrella item directly. Instead, pick the highest-priority concrete declaration-anchored subtask in the same phase that advances it, or explicitly declare the umbrella item non-actionable for one cycle and move to the next concrete hard item.
 - Hard-item priority: while any unchecked item remains in Phases 1-4, do not choose polish, golf, docstring, naming, or file-placement cleanup from Phases 5-6 unless it is a necessary prerequisite for one specific unchecked Phase 1-4 item.

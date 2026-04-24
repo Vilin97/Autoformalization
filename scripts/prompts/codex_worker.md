@@ -24,6 +24,7 @@ Requirements:
 
 Execution policy:
 - Prefer finishing one unchecked item completely.
+- A `- [>]` item means multi-cycle work in progress; the loop will keep returning to it until its `COMPLETE_IF:` criterion passes. Continue from where prior cycles left off rather than re-planning it.
 - If the assigned checklist item is an umbrella/sweep item, still work on a concrete declaration-anchored subtask only; do not spend the cycle on a vague audit.
 - Prefer hard unchecked Phase 1-4 work over polish. Do not spend the cycle on golfing, docstrings, naming cleanup, or small wrapper deletion unless the strategy explicitly identifies it as necessary for one named harder unchecked item.
 - Do not spend a cycle on linter-warning cleanup while concrete unchecked Phase 1-4 items remain.

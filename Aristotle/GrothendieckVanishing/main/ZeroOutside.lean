@@ -25,13 +25,6 @@ noncomputable section
 
 namespace TopCat
 
-namespace Sheaf
-
-instance (X : TopCat.{u}) : Abelian.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
-  inferInstanceAs (Abelian (CategoryTheory.Sheaf _ _))
-
-end Sheaf
-
 namespace Presheaf
 
 open ZeroObject ConcreteCategory
@@ -391,9 +384,13 @@ theorem _root_.isZero_zeroOutsideInt_bot (X : TopCat.{u}) :
         rw [Subsingleton.elim iV (homOfLE hWU)] at hEq
         exact ⟨W, hWU, hxW, hEq⟩⟩)
   exact IsZero.mk
-    (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
+    (fun (G : TopCat.Sheaf AddCommGrpCat.{u} X) => ⟨{
+      default := (show F ⟶ G from Sheaf.Hom.mk (0 : F.val ⟶ G.val)),
+      uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
       fun U => (hF_val_zero.obj U).eq_zero_of_src (f.val.app U))) }⟩)
-    (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
+    (fun (G : TopCat.Sheaf AddCommGrpCat.{u} X) => ⟨{
+      default := (show G ⟶ F from Sheaf.Hom.mk (0 : G.val ⟶ F.val)),
+      uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
       fun U => (hF_val_zero.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
 
 /-- At a point inside the support open, every stalk element of `zeroOutsideInt V` is an integer

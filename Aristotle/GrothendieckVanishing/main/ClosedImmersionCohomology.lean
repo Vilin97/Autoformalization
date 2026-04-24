@@ -1,6 +1,6 @@
 import Aristotle.GrothendieckVanishing.main.ClosedImmersion
 import Aristotle.GrothendieckVanishing.main.CohomologyAPI
-import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
+import Aristotle.GrothendieckVanishing.main.FlasqueVanishing
 
 /-!
   ClosedImmersionCohomology.lean — Closed immersion cohomology infrastructure
@@ -12,8 +12,8 @@ import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
   Depends on `ClosedImmersion.lean` for the closed-inclusion pushforward exactness and
   adjunction-unit/SES API,
   on `CohomologyAPI.lean` for LES-facing `Sheaf.H` wrappers, and on
-  `FlasqueCohomology.lean` for `FlasqueVanishing`. `FlasqueVanishing.lean` supplies
-  `IsFlasqueSheaf` and `isFlasque_of_injective`.
+  `FlasqueVanishing.lean` for `FlasqueVanishing`, `IsFlasqueSheaf`, and
+  `isFlasque_of_injective`.
 -/
 
 set_option linter.unusedSimpArgs false

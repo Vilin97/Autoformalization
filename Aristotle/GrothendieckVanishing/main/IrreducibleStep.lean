@@ -1,7 +1,7 @@
 import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
 import Aristotle.GrothendieckVanishing.main.FiniteGeneratorReduction
-import Aristotle.GrothendieckVanishing.main.FlasqueCohomology
+import Aristotle.GrothendieckVanishing.main.FlasqueVanishing
 import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
 import Aristotle.GrothendieckVanishing.main.ZeroOutside
 

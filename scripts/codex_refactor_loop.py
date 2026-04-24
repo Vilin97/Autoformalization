@@ -40,18 +40,24 @@ PRINCIPLES_FILE = STATE_DIR / "principles.md"
 
 WORKING_BRANCH = "wip/grothendieck-vanishing"
 COOLDOWN = 300
+IDLE_COOLDOWN = 3600  # back off when recent cycles did nothing
+IDLE_SKIP_THRESHOLD = 3  # consecutive empty-diff+empty-completion cycles → idle backoff
 PLANNER_TIMEOUT = 1800
 WORKER_TIMEOUT = 10800
 EVALUATOR_TIMEOUT = 1800
+AUDITOR_TIMEOUT = 1800
 GATE_REPAIR_TIMEOUT = 3600
 HISTORY_WINDOW = 8
-DEFAULT_MODEL = os.environ.get("CODEX_REFACTOR_MODEL", "gpt-5.4")
+DEFAULT_MODEL = os.environ.get("CODEX_REFACTOR_MODEL", "gpt-5.5")
 DEFAULT_REASONING_EFFORT = os.environ.get("CODEX_REFACTOR_REASONING_EFFORT", "xhigh")
+EVALUATOR_MODEL = os.environ.get("CODEX_REFACTOR_EVALUATOR_MODEL", "claude-opus-4-7")
+AUDITOR_MODEL = os.environ.get("CODEX_REFACTOR_AUDITOR_MODEL", EVALUATOR_MODEL)
 
 CODEX_BIN = Path(os.environ.get("CODEX_BIN", "/gscratch/amath/vilin/conda/envs/codex/bin/codex"))
 CODEX_HOME_ROOT = Path(
     os.environ.get("CODEX_REFACTOR_HOME_ROOT", str(STATE_DIR / "codex-home"))
 )
+CLAUDE_BIN = Path(os.environ.get("CLAUDE_BIN", "/mmfs1/home/vilin/.local/bin/claude"))
 
 EVALUATOR_SCHEMA = {
     "type": "object",
@@ -78,6 +84,18 @@ EVALUATOR_SCHEMA = {
         "attempts_entry",
         "completed_task_lines",
     ],
+}
+
+AUDITOR_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "loop_done": {"type": "boolean"},
+        "added_lines": {"type": "array", "items": {"type": "string"}},
+        "audit_summary": {"type": "string"},
+        "principle_violations": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["loop_done", "added_lines", "audit_summary", "principle_violations"],
 }
 
 
@@ -232,9 +250,74 @@ def read_file_safe(path: Path, max_chars: int = 12000) -> str:
 def codex_env() -> dict[str, str]:
     env = os.environ.copy()
     env["HOME"] = str(CODEX_HOME_ROOT)
-    env["PATH"] = f"/tmp/lake-bin:/tmp/lean4-toolchain/bin:{env.get('PATH', '')}"
+    env["PATH"] = (
+        f"/gscratch/amath/vilin/conda/envs/codex/bin:/tmp/lake-bin:"
+        f"/tmp/lean4-toolchain/bin:{env.get('PATH', '')}"
+    )
     env.setdefault("CODEX_CI", "1")
     return env
+
+
+def run_claude(
+    prompt: str,
+    timeout: int,
+    schema: dict | None = None,
+    model: str = EVALUATOR_MODEL,
+    append_system_prompt: str | None = None,
+) -> tuple[int, dict | str]:
+    """Invoke Claude Code in headless print mode.
+
+    Returns (exit_code, parsed_structured_output | raw_result_text). When a
+    schema is supplied, the parsed `structured_output` field is returned; it
+    is the JSON-schema-validated response the model produced. Tool access
+    (Read, Bash, Grep, lean-lsp MCP) is granted via `bypassPermissions` so the
+    evaluator can verify claims on its own rather than trusting a truncated
+    diff.
+    """
+    if not CLAUDE_BIN.exists():
+        raise RuntimeError(f"Claude binary not found at {CLAUDE_BIN}")
+    cmd = [
+        str(CLAUDE_BIN),
+        "-p",
+        prompt,
+        "--output-format",
+        "json",
+        "--model",
+        model,
+        "--permission-mode",
+        "bypassPermissions",
+        "--add-dir",
+        str(REPO_DIR),
+    ]
+    if schema is not None:
+        cmd.extend(["--json-schema", json.dumps(schema)])
+    if append_system_prompt:
+        cmd.extend(["--append-system-prompt", append_system_prompt])
+    env = os.environ.copy()
+    env["PATH"] = f"/tmp/lake-bin:/tmp/lean4-toolchain/bin:{env.get('PATH', '')}"
+    result = subprocess.run(
+        cmd,
+        cwd=REPO_DIR,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=timeout,
+        env=env,
+    )
+    if result.returncode != 0:
+        return result.returncode, (result.stderr or result.stdout or "")[-4000:]
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return 1, result.stdout[-4000:]
+    if payload.get("is_error"):
+        return 1, payload.get("result", "") or payload.get("error", "")
+    if schema is not None:
+        structured = payload.get("structured_output")
+        if structured is None:
+            return 1, payload.get("result", "") or "no structured_output"
+        return 0, structured
+    return 0, payload.get("result", "")
 
 
 def run_codex(
@@ -351,29 +434,65 @@ def default_eval(msg: str) -> dict:
 
 def run_evaluator(cycle: int, strategy: str, diff: str, report: str, history: list[dict]) -> dict:
     template = Template((PROMPTS_DIR / "codex_evaluator.md").read_text())
+    # Diff/report are still useful as a first pass for Claude, but the model
+    # has tool access and will re-read the tree on its own; truncation is
+    # only a signal to nudge it toward re-reading rather than a hard cap.
     prompt = template.safe_substitute(
         cycle=cycle,
         principles=read_file_safe(PRINCIPLES_FILE),
-        strategy=strategy[:5000],
-        diff=diff[:10000] if diff else "(no changes)",
-        report=report[:6000] if report else "(no report)",
+        strategy=strategy[:8000],
+        diff=diff[:20000] if diff else "(no changes)",
+        report=report[:8000] if report else "(no report)",
         history=format_history(history),
     )
     output_path = STATE_DIR / "codex_evaluator_last_message.json"
-    write_status(mode="evaluator", cycle=cycle)
-    exit_code, output = run_codex(
+    write_status(mode="evaluator", cycle=cycle, evaluator_model=EVALUATOR_MODEL)
+    exit_code, payload = run_claude(
         prompt,
         timeout=EVALUATOR_TIMEOUT,
-        output_schema=EVALUATOR_SCHEMA,
-        output_path=output_path,
-        model=DEFAULT_MODEL,
+        schema=EVALUATOR_SCHEMA,
+        model=EVALUATOR_MODEL,
     )
-    if exit_code != 0:
-        return default_eval(f"Evaluator failed with exit code {exit_code}")
-    try:
-        return json.loads(output)
-    except json.JSONDecodeError:
-        return default_eval("Evaluator returned unparseable JSON")
+    if exit_code != 0 or not isinstance(payload, dict):
+        detail = payload if isinstance(payload, str) else "unknown"
+        return default_eval(f"Evaluator failed (exit {exit_code}): {detail[:300]}")
+    output_path.write_text(json.dumps(payload, indent=2))
+    return payload
+
+
+def run_auditor(cycle: int, history: list[dict]) -> dict:
+    template = Template((PROMPTS_DIR / "codex_auditor.md").read_text())
+    prompt = template.safe_substitute(
+        cycle=cycle,
+        history=format_history(history),
+    )
+    write_status(mode="auditor", cycle=cycle, auditor_model=AUDITOR_MODEL)
+    exit_code, payload = run_claude(
+        prompt,
+        timeout=AUDITOR_TIMEOUT,
+        schema=AUDITOR_SCHEMA,
+        model=AUDITOR_MODEL,
+    )
+    if exit_code != 0 or not isinstance(payload, dict):
+        detail = payload if isinstance(payload, str) else "unknown"
+        return {
+            "loop_done": False,
+            "added_lines": [],
+            "audit_summary": f"Auditor failed (exit {exit_code}): {str(detail)[:300]}",
+            "principle_violations": [],
+        }
+    (STATE_DIR / "codex_auditor_last_message.json").write_text(json.dumps(payload, indent=2))
+    return payload
+
+
+def has_unchecked_or_wip_items() -> bool:
+    if not REVIEW_TASKS_FILE.exists():
+        return False
+    for line in REVIEW_TASKS_FILE.read_text().splitlines():
+        stripped = line.lstrip()
+        if stripped.startswith("- [ ]") or stripped.startswith("- [>]"):
+            return True
+    return False
 
 
 def send_telegram(message: str) -> None:
@@ -571,21 +690,118 @@ def check_gates(sorry_before: int, sorry_after: int) -> GateFailure | None:
     return None
 
 
-def mark_completed_tasks(lines: list[str]) -> list[str]:
+def _complete_if_for(task_line: str, text: str) -> str | None:
+    """Find the COMPLETE_IF shell command immediately following a task line.
+
+    Format: a line like `      COMPLETE_IF: <shell>` (any indentation) directly
+    beneath the task line. Returns the shell string or None.
+    """
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        if line.rstrip() != task_line.rstrip():
+            continue
+        # Walk forward past blank lines and lookup the next non-blank.
+        j = i + 1
+        while j < len(lines) and lines[j].strip() == "":
+            j += 1
+        if j < len(lines):
+            stripped = lines[j].lstrip()
+            if stripped.startswith("COMPLETE_IF:"):
+                return stripped[len("COMPLETE_IF:"):].strip()
+        return None
+    return None
+
+
+def _complete_if_passes(shell_expr: str) -> bool:
+    result = subprocess.run(
+        ["bash", "-c", shell_expr],
+        cwd=REPO_DIR,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=120,
+    )
+    return result.returncode == 0
+
+
+def mark_completed_tasks(lines: list[str]) -> tuple[list[str], list[tuple[str, str]]]:
+    """Flip `- [ ]` / `- [>]` → `- [x]` for every candidate line whose
+    COMPLETE_IF passes (or which has no COMPLETE_IF).
+
+    Returns (flipped_lines, rejected) where rejected carries (line, reason)
+    for candidates whose COMPLETE_IF failed.
+    """
     if not lines:
-        return []
+        return [], []
     text = REVIEW_TASKS_FILE.read_text()
-    changed: list[str] = []
+    flipped: list[str] = []
+    rejected: list[tuple[str, str]] = []
     for line in lines:
-        needle = line
-        if needle.startswith("- [x]"):
-            needle = needle.replace("- [x]", "- [ ]", 1)
-        replacement = needle.replace("- [ ]", "- [x]", 1)
-        if needle in text:
-            text = text.replace(needle, replacement, 1)
-            changed.append(needle)
+        # Normalise — the evaluator may report the line with either marker.
+        needle_candidates = [line]
+        for prefix in ("- [x]", "- [ ]", "- [>]"):
+            if line.lstrip().startswith(prefix):
+                suffix = line.lstrip()[len(prefix):]
+                indent = line[: len(line) - len(line.lstrip())]
+                for alt in ("- [ ]", "- [>]"):
+                    cand = f"{indent}{alt}{suffix}"
+                    if cand not in needle_candidates:
+                        needle_candidates.append(cand)
+                break
+        matched = None
+        for cand in needle_candidates:
+            if cand in text:
+                matched = cand
+                break
+        if matched is None:
+            rejected.append((line, "task line not found in review_tasks.md"))
+            continue
+        criterion = _complete_if_for(matched, text)
+        if criterion is not None and not _complete_if_passes(criterion):
+            rejected.append((matched, f"COMPLETE_IF failed: {criterion}"))
+            continue
+        replacement = matched
+        for prefix in ("- [ ]", "- [>]"):
+            if prefix in replacement:
+                replacement = replacement.replace(prefix, "- [x]", 1)
+                break
+        text = text.replace(matched, replacement, 1)
+        flipped.append(matched)
     REVIEW_TASKS_FILE.write_text(text)
-    return changed
+    return flipped, rejected
+
+
+def promote_to_wip(task_line: str) -> bool:
+    """Upgrade a `- [ ]` line the planner just targeted to `- [>]` so we
+    remember it's in progress next cycle."""
+    if not task_line:
+        return False
+    text = REVIEW_TASKS_FILE.read_text()
+    if task_line not in text:
+        return False
+    if "- [>]" in task_line:
+        return False
+    upgraded = task_line.replace("- [ ]", "- [>]", 1)
+    if upgraded == task_line:
+        return False
+    REVIEW_TASKS_FILE.write_text(text.replace(task_line, upgraded, 1))
+    return True
+
+
+def recent_cycles_are_idle(history: list[dict], n: int = IDLE_SKIP_THRESHOLD) -> bool:
+    if len(history) < n:
+        return False
+    recent = history[-n:]
+    for record in recent:
+        if record.get("completed_task_lines"):
+            return False
+        # A cycle counts as non-idle if it had a real diff; the controller
+        # stores sorry_before/sorry_after but not a diff flag, so infer from
+        # evaluation.summary and attempts entries.
+        ev = record.get("evaluation", {})
+        if ev.get("task_addressed") and ev.get("progress_score", 0) > 0:
+            return False
+    return True
 
 
 def record_gate_failure(
@@ -683,8 +899,43 @@ def run_cycle(dry_run: bool = False, worker_only: bool = False) -> dict:
     git("checkout", WORKING_BRANCH, check=False)
     git("pull", "--rebase", "origin", WORKING_BRANCH, check=False)
 
+    # If the checklist has no actionable items, run the auditor against
+    # review.md. The auditor either appends fresh `- [ ]` lines (so the next
+    # cycle has work) or reports `loop_done: true`, in which case we skip the
+    # worker/evaluator entirely and let the caller back off.
+    if not has_unchecked_or_wip_items():
+        audit = run_auditor(cycle, history)
+        if audit.get("loop_done"):
+            write_status(
+                mode="idle_done",
+                cycle=cycle,
+                last_summary=audit.get("audit_summary", ""),
+                auditor_result=audit,
+            )
+            record = {
+                "cycle": cycle,
+                "timestamp": ts,
+                "auditor": audit,
+                "evaluation": default_eval(audit.get("audit_summary") or "auditor says done"),
+                "completed_task_lines": [],
+            }
+            append_history(record)
+            return record
+        added = audit.get("added_lines") or []
+        print(f"Auditor added {len(added)} new checklist lines.")
+
     sorry_before = count_sorrys()
     strategy = read_file_safe(STRATEGY_FILE) if worker_only else run_planner(cycle, history)
+
+    # Promote any `- [ ]` lines the planner just targeted to `- [>]` so the
+    # controller remembers they are in flight for future cycles.
+    promoted: list[str] = []
+    for line in strategy.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("- [ ]") and promote_to_wip(stripped):
+            promoted.append(stripped)
+    if promoted:
+        print(f"Promoted {len(promoted)} checklist items to - [>] WIP.")
 
     if dry_run:
         return {"cycle": cycle, "dry_run": True, "strategy": strategy}
@@ -716,7 +967,13 @@ def run_cycle(dry_run: bool = False, worker_only: bool = False) -> dict:
     diff = git("diff", check=False)
     report = read_file_safe(TASK_RESULTS_DIR / f"cycle_{cycle}.md")
     evaluation = run_evaluator(cycle, strategy, diff, report, history)
-    completed = mark_completed_tasks(evaluation.get("completed_task_lines", []))
+    completed, rejected = mark_completed_tasks(evaluation.get("completed_task_lines", []))
+    if rejected:
+        # Rejected completions are themselves valuable signal — surface them
+        # in the attempts log so future planners see what almost-passed.
+        with ATTEMPTS_FILE.open("a") as f:
+            for line, reason in rejected:
+                f.write(f"\nCycle {cycle}: rejected complete ({reason}): {line.strip()}")
 
     entry = evaluation.get("attempts_entry", "").strip()
     if entry:
@@ -754,7 +1011,12 @@ def run_cycle(dry_run: bool = False, worker_only: bool = False) -> dict:
         msg += f"\n⚠️ Violations: {', '.join(violations[:3])}"
     if completed:
         msg += f"\n✅ Completed: {', '.join(completed[:3])}"
-    send_telegram(msg)
+    # Suppress no-op / zero-progress notifications. The only interesting
+    # Telegram is one that reflects real forward motion (completions, non-zero
+    # score) or a regression (< 0).
+    should_notify = bool(completed) or score < 0 or score >= 2 or violations
+    if should_notify:
+        send_telegram(msg)
 
     write_status(
         mode="idle",
@@ -782,16 +1044,30 @@ def main() -> None:
         if args.loop:
             while True:
                 try:
-                    run_cycle(dry_run=args.dry_run, worker_only=args.worker_only)
+                    record = run_cycle(dry_run=args.dry_run, worker_only=args.worker_only)
                 except subprocess.TimeoutExpired:
                     write_status(mode="error", error="Cycle timed out")
                     print("Cycle timed out", file=sys.stderr)
                     send_telegram("⏰ Codex refactor cycle timed out")
+                    record = None
                 except Exception as exc:
                     write_status(mode="error", error=str(exc))
                     print(f"Cycle failed: {exc}", file=sys.stderr)
                     send_telegram(f"❌ Codex refactor cycle failed: {exc}")
-                time.sleep(args.interval)
+                    record = None
+                # Idle backoff: if the last few cycles produced no completions
+                # and no forward progress, sleep longer and skip Telegram
+                # spam until something changes on disk.
+                history = load_history()
+                sleep_seconds = args.interval
+                if recent_cycles_are_idle(history):
+                    sleep_seconds = max(args.interval, IDLE_COOLDOWN)
+                    print(
+                        f"Idle backoff: last {IDLE_SKIP_THRESHOLD} cycles produced no "
+                        f"progress; sleeping {sleep_seconds}s.",
+                        file=sys.stderr,
+                    )
+                time.sleep(sleep_seconds)
         else:
             run_cycle(dry_run=args.dry_run, worker_only=args.worker_only)
     finally:
