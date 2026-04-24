@@ -27,9 +27,6 @@ API for topological Krull dimension on irreducible spaces.
 - `exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos`: on an irreducible
   space of positive finite Krull dimension, there exists a proper closed subset of
   strictly smaller dimension
-- `exists_closed_subset_lt_dim_of_irreducible_pos`: on an irreducible space of
-  positive Krull dimension, the above closed subset also inherits the ambient
-  natural-number bound
 -/
 
 universe u
@@ -306,18 +303,3 @@ theorem exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos
   refine ⟨Z, Z.isClosed, hZ_ne_univ, ?_⟩
   exact topologicalKrullDim_lt_of_isIrreducible_of_isClosed
     (X := X) Z.isClosed hZ_ne_univ hZ_lt_top
-
-/-- On an irreducible space of positive Krull dimension, one can choose a proper
-closed subset `Z ⊊ X` of strictly smaller Krull dimension, and the ambient cohomological bound
-`n > dim X` automatically implies `n > dim Z`. This isolates the closed-subset selection used at
-the start of Hartshorne Step 3. -/
-theorem exists_closed_subset_lt_dim_of_irreducible_pos
-    {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
-    (n : ℕ) (hn : n > topologicalKrullDim X) (hpos : topologicalKrullDim X > 0) :
-    ∃ Z : Set X, IsClosed Z ∧ Z ≠ Set.univ ∧
-      topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X ∧
-      ↑n > topologicalKrullDim (TopCat.of Z) := by
-  obtain ⟨Z, hZ_closed, hZ_ne_univ, hZ_dim⟩ :=
-    exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos (X := X) hpos <|
-      by simpa [gt_iff_lt] using hn
-  exact ⟨Z, hZ_closed, hZ_ne_univ, hZ_dim, lt_trans hZ_dim hn⟩
