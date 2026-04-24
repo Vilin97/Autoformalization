@@ -3,7 +3,6 @@ import Mathlib.Algebra.Category.Grp.EpiMono
 import Mathlib.Algebra.Category.Grp.FilteredColimits
 import Mathlib.Algebra.Category.Grp.ForgetCorepresentable
 import Mathlib.Algebra.Category.Grp.Zero
-import Mathlib.Algebra.Homology.DerivedCategory.Ext.EnoughInjectives
 import Mathlib.Algebra.Homology.ShortComplex.Exact
 import Mathlib.CategoryTheory.Abelian.FunctorCategory
 import Mathlib.CategoryTheory.Adjunction.Additive
