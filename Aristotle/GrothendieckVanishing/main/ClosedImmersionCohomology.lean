@@ -6,7 +6,7 @@ import Aristotle.GrothendieckVanishing.main.FlasqueVanishing
   ClosedImmersionCohomology.lean — Closed immersion cohomology infrastructure
 
   Provides:
-  1. `PushforwardHIso` / `PushforwardHVanishing` (pushforward preserves cohomology)
+  1. `PushforwardHIso` (pushforward preserves cohomology by isomorphism)
   2. `subsingleton_sheafH_of_closedImmersion_middle_presheaf`
 
   Depends on `ClosedImmersion.lean` for the closed-inclusion pushforward exactness and
@@ -120,20 +120,6 @@ noncomputable def PushforwardHIso
               (inferInstance : Subsingleton (Sheaf.H SX.X₂ (m + 2))))
       exact hShift_src.symm ≪≫ ih_push S.X₃ ≪≫ hShift_tgt
 
-theorem PushforwardHVanishing
-    {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    {G : TopCat.Presheaf AddCommGrpCat.{u} (TopCat.of Z)} (hG : G.IsSheaf)
-    (n : ℕ) (h : Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) n)) :
-    Subsingleton (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-      (TopCat.closedIncl hZ)).obj (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))) n) := by
-  let e :
-      Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) n ≃
-        Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-          (TopCat.closedIncl hZ)).obj (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))) n :=
-    Equiv.ofBijective (ConcreteCategory.hom (PushforwardHIso Z hZ hG n).hom)
-      (ConcreteCategory.bijective_of_isIso (PushforwardHIso Z hZ hG n).hom)
-  exact (e.subsingleton_congr).mp h
-
 /-- Closed-immersion presheaf wrapper: if the kernel term of the closed-immersion
 short exact sequence and the pullback to the closed subset have subsingleton
 cohomology in degree `n`, then so does the ambient sheaf. -/
@@ -157,8 +143,13 @@ theorem subsingleton_sheafH_of_closedImmersion_middle_presheaf
   have h₃' : Subsingleton (Sheaf.H FZ n) := by
     simpa [closedIncl, Fsh, FZ] using h₃
   have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
+    let e :
+        Sheaf.H FZ n ≃
+          Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} closedIncl).obj FZ) n :=
+      Equiv.ofBijective (ConcreteCategory.hom (PushforwardHIso Z hZ FZ.cond n).hom)
+        (ConcreteCategory.bijective_of_isIso (PushforwardHIso Z hZ FZ.cond n).hom)
     simpa [S, closedImmersionSES, closedIncl, Fsh, FZ] using
-      PushforwardHVanishing Z hZ FZ.cond n h₃'
+      (e.subsingleton_congr).mp h₃'
   haveI : Mono S.f := hSE.mono_f
   haveI : Mono S.f.val := by
     exact (Sheaf.Hom.mono_iff_presheaf_mono
