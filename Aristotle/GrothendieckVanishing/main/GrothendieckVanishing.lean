@@ -10,12 +10,13 @@ import Aristotle.GrothendieckVanishing.main.IrreducibleStep
   The proof assembles (FULLY PROVED — 0 sorry's):
   - Reduction to irreducible: ReducibleVanishing',
     grothendieck_vanishing_of_irreducible
-  - IrreduciblePosVanishing (IrreducibleStep): irreducible case (all dimensions)
+  - irreducible dim-zero base case here; positive-dimensional irreducible step in
+    IrreducibleStep.lean
 -/
 
 universe u
 
-open CategoryTheory TopologicalSpace Order Limits
+open CategoryTheory TopologicalSpace Order Limits Opposite
 
 /-! ## Reduction to irreducible spaces -/
 
@@ -104,6 +105,24 @@ theorem ReducibleVanishing'
             (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z)
             (topologicalKrullDim_subspace_lt_of_lt (X := (↑X : Type u)) Z hn))
 
+private theorem irreducible_dim_zero_vanishing
+    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
+    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
+    (n : ℕ) (hn : n > topologicalKrullDim X)
+    (hdim : topologicalKrullDim X ≤ 0) :
+    Subsingleton (Sheaf.H (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
+  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+  change Subsingleton (Sheaf.H Fsh n)
+  haveI : IsFlasqueSheaf Fsh := ⟨fun {U V} i => by
+    rcases opens_eq_bot_or_top_of_irreducibleSpace_dim_zero hdim U with rfl | rfl
+    · exact Fsh.isTerminalOfEmpty.isZero.epi _
+    · have hV := le_antisymm le_top (homOfLE le_top ≫ i |>.le); subst hV
+      rw [Subsingleton.elim i (𝟙 ⊤), op_id, F.map_id]; infer_instance⟩
+  have hn_ne : n ≠ 0 := fun h => by
+    subst h; exact absurd hn (not_lt.mpr topologicalKrullDim_nonneg)
+  obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn_ne
+  exact sheafH_subsingleton_of_flasque_presheaf X hF m
+
 theorem grothendieck_vanishing_of_irreducible
     (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
@@ -145,10 +164,12 @@ theorem GrothendieckVanishing (X : TopCat.{u}) [NoetherianSpace X]
       -- Reduce to irreducible X
       simpa [Fsh] using
         (grothendieck_vanishing_of_irreducible X n (hd ▸ hn) (F := F) hF
-          (fun Y _ _ m {G} hG hle hY =>
-            IrreduciblePosVanishing (F := G) hG m hY
-              (by
-                intro Z _ m' G' hG' hlt hm'
-                exact ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle))
-                  Z m' G' hG' rfl hm'))))
+          (fun Y _ _ m {G} hG hle hY => by
+            by_cases hposY : topologicalKrullDim Y > 0
+            · exact IrreduciblePosVanishing (F := G) hG hposY m hY
+                (by
+                  intro Z _ m' G' hG' hlt hm'
+                  exact ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle))
+                    Z m' G' hG' rfl hm')
+            · exact irreducible_dim_zero_vanishing (F := G) hG m hY (le_of_not_gt hposY))))
     X n F hF rfl h
