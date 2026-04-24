@@ -1,6 +1,6 @@
 import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.ConstantSheafFlasque
-import Aristotle.GrothendieckVanishing.main.FiniteGeneratorReduction
+import Aristotle.GrothendieckVanishing.main.FinitelyGeneratedVanishing
 import Aristotle.GrothendieckVanishing.main.FlasqueVanishing
 import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
 import Aristotle.GrothendieckVanishing.main.ZeroOutside
@@ -592,7 +592,7 @@ theorem epiImage_zeroOutsideInt_vanishing
     (V := V) (G := G) hG f hf ih m hm
 
 -- Filtered diagram infrastructure, finitely generated vanishing, and
--- directLimit_cohomology_vanishing are in FiniteGeneratorReduction.lean.
+-- directLimit_cohomology_vanishing are in FinitelyGeneratedVanishing.lean.
 
 /-- **Irreducible vanishing** (Hartshorne III.2.7, irreducible case).
     Covers both dim > 0 (closed immersion + induction) and dim ≤ 0 (flasque). -/

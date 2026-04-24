@@ -3,7 +3,7 @@ import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
 
 /-!
-  FiniteGeneratorReduction.lean — Colimit step and finitely generated vanishing
+  FinitelyGeneratedVanishing.lean — Noetherian finitely generated vanishing reduction
 
   Key results:
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
