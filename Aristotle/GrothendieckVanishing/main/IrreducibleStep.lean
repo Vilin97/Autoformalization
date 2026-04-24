@@ -432,7 +432,8 @@ theorem zeroOutsideInt_vanishing
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
     degree `m > dim X` on an irreducible Noetherian space.
     Proof: write `m = m' + 1`, apply `zeroOutsideInt_vanishing` (SES + flasque), then prove
-    cokernel vanishing at `m'` via `closedImmersionSES` on `Vᶜ` + `PushforwardHVanishing`. -/
+    cokernel vanishing at `m'` via the closed-immersion middle-term API, which transports
+    cohomology along the `PushforwardHIso` closed-inclusion comparison. -/
 theorem zeroOutsideInt_cohomology_vanishing
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     (V : Opens X) (hV : V ≠ ⊥)
