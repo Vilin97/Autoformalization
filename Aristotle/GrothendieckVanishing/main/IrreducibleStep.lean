@@ -18,7 +18,7 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutside
     complement, kept here with the irreducible-step vanishing assembly that uses it
   - zeroOutsideInt_vanishing / zeroOutsideInt_cohomology_vanishing: Step 5 vanishing
     assembled where it is consumed
-  - IrreduciblePosVanishing: assembles all pieces (FULLY PROVED)
+  - IrreduciblePosVanishing: assembles the positive-dimensional irreducible step
 
   Supporting `zeroOutsideInt` stalk lemmas remain in `ZeroOutside.lean`; the
   one-off nonzero-stalk entry lemma lives here immediately before the shrinking step
@@ -628,43 +628,32 @@ theorem epiImage_zeroOutsideInt_vanishing
 -- Filtered diagram infrastructure, finitely generated vanishing, and
 -- directLimit_cohomology_vanishing are in FinitelyGeneratedVanishing.lean.
 
-/-- **Irreducible vanishing** (Hartshorne III.2.7, irreducible case).
-    Covers both dim > 0 (closed immersion + induction) and dim ≤ 0 (flasque). -/
+/-- **Irreducible positive-dimensional vanishing** (Hartshorne III.2.7, irreducible case).
+    Uses the closed immersion step and induction on a proper closed subset. -/
 theorem IrreduciblePosVanishing
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
     {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
+    (hpos : topologicalKrullDim X > 0)
     (n : ℕ) (hn : n > topologicalKrullDim X)
     (ih : VanishingIH.{u} (topologicalKrullDim X)) :
     Subsingleton (Sheaf.H (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
   let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
   change Subsingleton (Sheaf.H Fsh n)
-  by_cases hpos : topologicalKrullDim X > 0
-  · obtain ⟨Z, hZ_closed, _, hZ_dim⟩ :=
-      exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos (X := X) hpos <|
-        by simpa [gt_iff_lt] using hn
-    have hn_Z : n > topologicalKrullDim (TopCat.of Z) := by
-      simpa [gt_iff_lt] using lt_trans hZ_dim (by simpa [gt_iff_lt] using hn)
-    let i := TopCat.closedIncl hZ_closed
-    let FZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh)
-    let S := closedImmersionSES (Z := Z) (hZ := hZ_closed) (F := F) hF
-    have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
-      directLimit_cohomology_vanishing (K := S.X₁.val) S.X₁.cond n
-        (fun {G} (hG : G.IsSheaf) {V}
-          (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G) hf => by
-          exact epiImage_zeroOutsideInt_vanishing_of_locallySurjective
-            (V := V) (G := G) hG f hf ih n hn)
-    exact subsingleton_sheafH_of_closedImmersion_middle_presheaf
-      (Z := Z) (hZ := hZ_closed) (F := F) hF n
-      (by simpa [S] using hKer)
-      (by simpa [i, Fsh, FZ] using ih (TopCat.of Z) n (G := FZ.val) FZ.cond hZ_dim hn_Z)
-  · -- dim ≤ 0: F is flasque on irreducible dim-0 space, use FlasqueVanishing
-    push_neg at hpos
-    haveI : IsFlasqueSheaf Fsh := ⟨fun {U V} i => by
-      rcases opens_eq_bot_or_top_of_irreducibleSpace_dim_zero hpos U with rfl | rfl
-      · exact Fsh.isTerminalOfEmpty.isZero.epi _
-      · have hV := le_antisymm le_top (homOfLE le_top ≫ i |>.le); subst hV
-        rw [Subsingleton.elim i (𝟙 ⊤), op_id, F.map_id]; infer_instance⟩
-    have hm_ne : n ≠ 0 := fun h => by
-      subst h; exact absurd hn (not_lt.mpr topologicalKrullDim_nonneg)
-    obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm_ne
-    exact sheafH_subsingleton_of_flasque_presheaf X hF m
+  obtain ⟨Z, hZ_closed, _, hZ_dim⟩ :=
+    exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos (X := X) hpos <|
+      by simpa [gt_iff_lt] using hn
+  have hn_Z : n > topologicalKrullDim (TopCat.of Z) := by
+    simpa [gt_iff_lt] using lt_trans hZ_dim (by simpa [gt_iff_lt] using hn)
+  let i := TopCat.closedIncl hZ_closed
+  let FZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh)
+  let S := closedImmersionSES (Z := Z) (hZ := hZ_closed) (F := F) hF
+  have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
+    directLimit_cohomology_vanishing (K := S.X₁.val) S.X₁.cond n
+      (fun {G} (hG : G.IsSheaf) {V}
+        (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G) hf => by
+        exact epiImage_zeroOutsideInt_vanishing_of_locallySurjective
+          (V := V) (G := G) hG f hf ih n hn)
+  exact subsingleton_sheafH_of_closedImmersion_middle_presheaf
+    (Z := Z) (hZ := hZ_closed) (F := F) hF n
+    (by simpa [S] using hKer)
+    (by simpa [i, Fsh, FZ] using ih (TopCat.of Z) n (G := FZ.val) FZ.cond hZ_dim hn_Z)
