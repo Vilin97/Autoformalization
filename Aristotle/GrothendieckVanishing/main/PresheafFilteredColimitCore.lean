@@ -420,7 +420,7 @@ noncomputable def sheafH_filtered_colimit_succ_shiftNatIso
     (fun {j j'} f => by
       ext y
       simpa using congrArg (fun m => AddCommGrpCat.Hom.hom m y)
-        ((sheafH_extClassIso_of_subsingleton_middle_presheaf_natural
+        ((sheafH_succ_iso_of_subsingleton_middle_presheaf_natural
           (h₁₁ := (Y'.obj j).cond)
           (h₁₂ := ((sheafH_filtered_colimit_succ_Inj Y').obj j).cond)
           (h₁₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Y').app j)).cond)
@@ -1018,7 +1018,7 @@ private theorem sheafH_filtered_colimit_comparison_succ_compatibility_sheaf_aux
         h_colim_n h_colim_succ).hom
   simpa [sheafH_filtered_colimit_succ_shiftNatIso,
     sheafH_filtered_colimit_succ_shiftCodomainIso] using
-    (sheafH_extClassIso_of_subsingleton_middle_presheaf_natural
+    (sheafH_succ_iso_of_subsingleton_middle_presheaf_natural
       (h₁₁ := (Ysh.obj j).cond)
       (h₁₂ := ((sheafH_filtered_colimit_succ_Inj Ysh).obj j).cond)
       (h₁₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j)).cond)
