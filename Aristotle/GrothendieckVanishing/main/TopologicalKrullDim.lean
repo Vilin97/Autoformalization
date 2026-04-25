@@ -99,10 +99,10 @@ theorem topologicalKrullDim_subspace_lt_of_lt {X : Type u} [TopologicalSpace X]
 
 /-- A natural-number upper bound on the topological Krull dimension implies that the
 dimension is finite. -/
-theorem topologicalKrullDim_lt_top_of_lt_nat {X : Type u} [TopologicalSpace X] {n : ℕ}
-    (hn : topologicalKrullDim X < ↑↑(n : ℕ)) :
+theorem topologicalKrullDim_lt_top_of_lt_nat {X : Type u} [TopologicalSpace X] {m : ℕ}
+    (hm : topologicalKrullDim X < ↑↑(m : ℕ)) :
     topologicalKrullDim X < ⊤ :=
-  lt_of_lt_of_le hn le_top
+  lt_of_lt_of_le hm le_top
 
 /-- If `Y` has strictly smaller topological Krull dimension than `X`, then any natural-number
 upper bound `dim X < n + 1` descends to the predecessor bound `dim Y < n`. -/
@@ -289,17 +289,14 @@ theorem topologicalKrullDim_pos_iff_exists_irreducibleCloseds_ne_univ {X : Type 
 closed subset `Z ⊊ X` of strictly smaller Krull dimension. This isolates the structural
 closed-subset choice from the separate task of passing numerical bounds to `Z`. -/
 theorem exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos
-    {X : Type u} [TopologicalSpace X] [IrreducibleSpace X] {n : ℕ}
-    (hpos : topologicalKrullDim X > 0) (hn : topologicalKrullDim X < ↑↑(n : ℕ)) :
+    {X : Type u} [TopologicalSpace X] [IrreducibleSpace X]
+    (hpos : topologicalKrullDim X > 0) (hX_lt_top : topologicalKrullDim X < ⊤) :
     ∃ Z : Set X, IsClosed Z ∧ Z ≠ Set.univ ∧
       topologicalKrullDim (TopCat.of Z) < topologicalKrullDim X := by
   obtain ⟨Z, hZ_ne_univ⟩ :=
     topologicalKrullDim_pos_iff_exists_irreducibleCloseds_ne_univ (X := X) |>.mp hpos
-  have hZ_lt_nat :
-      topologicalKrullDim (TopCat.of (Z : Set X)) < ↑↑(n : ℕ) := by
-    simpa using topologicalKrullDim_subspace_lt_of_lt (X := X) (Z : Set X) hn
-  have hZ_lt_top : topologicalKrullDim (TopCat.of (Z : Set X)) < ⊤ :=
-    topologicalKrullDim_lt_top_of_lt_nat hZ_lt_nat
+  have hZ_lt_top : topologicalKrullDim (TopCat.of (Z : Set X)) < ⊤ := by
+    simpa using topologicalKrullDim_subspace_lt_of_lt (X := X) (Z : Set X) hX_lt_top
   refine ⟨Z, Z.isClosed, hZ_ne_univ, ?_⟩
   exact topologicalKrullDim_lt_of_isIrreducible_of_isClosed
     (X := X) Z.isClosed hZ_ne_univ hZ_lt_top

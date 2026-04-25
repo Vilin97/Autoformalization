@@ -639,9 +639,10 @@ theorem IrreduciblePosVanishing
     Subsingleton (Sheaf.H (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
   let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
   change Subsingleton (Sheaf.H Fsh n)
+  have hX_lt_top : topologicalKrullDim X < ⊤ :=
+    topologicalKrullDim_lt_top_of_lt_nat (by simpa [gt_iff_lt] using hn)
   obtain ⟨Z, hZ_closed, _, hZ_dim⟩ :=
-    exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos (X := X) hpos <|
-      by simpa [gt_iff_lt] using hn
+    exists_closed_subset_lt_topologicalKrullDim_of_irreducible_pos (X := X) hpos hX_lt_top
   have hn_Z : n > topologicalKrullDim (TopCat.of Z) := by
     simpa [gt_iff_lt] using lt_trans hZ_dim (by simpa [gt_iff_lt] using hn)
   let i := TopCat.closedIncl hZ_closed
