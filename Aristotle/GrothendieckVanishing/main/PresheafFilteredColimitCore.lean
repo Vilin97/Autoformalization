@@ -920,90 +920,31 @@ theorem sheafH_filtered_colimit_comparison_sheafToPresheaf
       (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
       (hc_pt := c'.pt.cond) (n := n) (j := j))
 
-/-- If a presheaf cocone is a colimit and its stages and point are sheaves, then the
-    bundled sheaf-valued cocone is also a colimit. -/
-noncomputable def sheafH_filtered_colimit_presheafCocone_isColimit
+private theorem sheafH_filtered_colimit_comparison_succ_compatibility_sheaf_aux
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-    (c : Cocone Y) (hc : IsColimit c)
-    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
-    IsColimit (sheafH_filtered_colimit_presheafCocone Y hY c hc_pt) := by
-  refine
-    { desc := fun s => ?_
-      fac := fun s j => ?_
-      uniq := fun s m hm => ?_ }
-  · let sVal : Cocone Y :=
-      { pt := s.pt.val
-        ι :=
-          { app := fun j => (s.ι.app j).val
-            naturality := fun _ _ f => congrArg Sheaf.Hom.val (s.ι.naturality f) } }
-    exact Sheaf.Hom.mk (hc.desc sVal)
-  · let sVal : Cocone Y :=
-      { pt := s.pt.val
-        ι :=
-          { app := fun j => (s.ι.app j).val
-            naturality := fun _ _ f => congrArg Sheaf.Hom.val (s.ι.naturality f) } }
-    exact Sheaf.Hom.ext (hc.fac sVal j)
-  · apply Sheaf.Hom.ext
-    let sVal : Cocone Y :=
-      { pt := s.pt.val
-        ι :=
-          { app := fun j => (s.ι.app j).val
-            naturality := fun _ _ f => congrArg Sheaf.Hom.val (s.ι.naturality f) } }
-    exact hc.hom_ext fun j => by
-      calc
-        c.ι.app j ≫ m.val = (s.ι.app j).val := congrArg Sheaf.Hom.val (hm j)
-        _ = c.ι.app j ≫ (hc.desc sVal) := (hc.fac sVal j).symm
-
-/-- Presheaf-boundary successor-step compatibility for the filtered-colimit comparison map:
-whenever the associated sheaf diagram and the colimit sheaf have vanishing injective-replacement
-cohomology in degrees `n` and `n + 1`, the degree-`n + 1` comparison is conjugate to the
-degree-`n` comparison for the quotient diagram. -/
-theorem sheafH_filtered_colimit_comparison_succ_compatibility_presheaf
-    {X : TopCat.{u}}
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
     [Zero (TopCat.Sheaf AddCommGrpCat.{u} X)]
-    (c : Cocone Y) (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
-    (hcsh : IsColimit (sheafH_filtered_colimit_presheafCocone Y hY c hc_pt))
+    (Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (csh : Cocone Ysh) (hcsh : IsColimit csh)
     (n : ℕ)
     (h_mid_n : ∀ j,
       Subsingleton (Sheaf.H
-        ((sheafH_filtered_colimit_succ_Inj
-          (sheafH_filtered_colimit_presheafDiagram Y hY)).obj j) n))
+        ((sheafH_filtered_colimit_succ_Inj Ysh).obj j) n))
     (h_mid_succ : ∀ j,
       Subsingleton (Sheaf.H
-        ((sheafH_filtered_colimit_succ_Inj
-          (sheafH_filtered_colimit_presheafDiagram Y hY)).obj j) (n + 1)))
+        ((sheafH_filtered_colimit_succ_Inj Ysh).obj j) (n + 1)))
     (h_colim_n :
       Subsingleton (Sheaf.H
-        (sheafH_filtered_colimit_succ_injCocone
-          (sheafH_filtered_colimit_presheafDiagram Y hY)).pt n))
+        (sheafH_filtered_colimit_succ_injCocone Ysh).pt n))
     (h_colim_succ :
       Subsingleton (Sheaf.H
-        (sheafH_filtered_colimit_succ_injCocone
-          (sheafH_filtered_colimit_presheafDiagram Y hY)).pt (n + 1))) :
-    let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
-    let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
-    (sheafH_filtered_colimit_succ_shiftDomainIso Ysh n h_mid_n h_mid_succ).hom ≫
-        sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt (n + 1) =
-      sheafH_filtered_colimit_comparison
-        (sheafH_filtered_colimit_succ_quotient Ysh) n
-        (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) ≫
-      (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
-        h_colim_n h_colim_succ).hom := by
-  let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
-  let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
-  change
+        (sheafH_filtered_colimit_succ_injCocone Ysh).pt (n + 1))) :
     (sheafH_filtered_colimit_succ_shiftDomainIso Ysh n h_mid_n h_mid_succ).hom ≫
         sheafH_filtered_colimit_comparison Ysh (n + 1) csh =
       sheafH_filtered_colimit_comparison (sheafH_filtered_colimit_succ_quotient Ysh) n
         (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) ≫
       (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
-        h_colim_n h_colim_succ).hom
+        h_colim_n h_colim_succ).hom := by
   apply colimit.hom_ext
   intro j
   rw [show (sheafH_filtered_colimit_succ_shiftDomainIso Ysh n h_mid_n h_mid_succ).hom =
@@ -1140,3 +1081,91 @@ theorem sheafH_filtered_colimit_comparison_succ_compatibility_presheaf
         simpa using congrArg (fun α => α.val)
           ((sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j).comm₂₃))
       n (h_mid_n j) (h_mid_succ j) h_colim_n h_colim_succ)
+
+/-- Presheaf-boundary successor-step compatibility for the filtered-colimit comparison map:
+whenever the associated sheaf diagram and the colimit sheaf have vanishing injective-replacement
+cohomology in degrees `n` and `n + 1`, the degree-`n + 1` comparison is conjugate to the
+degree-`n` comparison for the quotient diagram. -/
+theorem sheafH_filtered_colimit_comparison_succ_compatibility_presheaf
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    [Zero (TopCat.Sheaf AddCommGrpCat.{u} X)]
+    (c : Cocone Y) (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
+    (hcsh : IsColimit (sheafH_filtered_colimit_presheafCocone Y hY c hc_pt))
+    (n : ℕ)
+    (h_mid_n : ∀ j,
+      Subsingleton (Sheaf.H
+        ((sheafH_filtered_colimit_succ_Inj
+          (sheafH_filtered_colimit_presheafDiagram Y hY)).obj j) n))
+    (h_mid_succ : ∀ j,
+      Subsingleton (Sheaf.H
+        ((sheafH_filtered_colimit_succ_Inj
+          (sheafH_filtered_colimit_presheafDiagram Y hY)).obj j) (n + 1)))
+    (h_colim_n :
+      Subsingleton (Sheaf.H
+        (sheafH_filtered_colimit_succ_injCocone
+          (sheafH_filtered_colimit_presheafDiagram Y hY)).pt n))
+    (h_colim_succ :
+      Subsingleton (Sheaf.H
+        (sheafH_filtered_colimit_succ_injCocone
+          (sheafH_filtered_colimit_presheafDiagram Y hY)).pt (n + 1))) :
+    let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
+    let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
+    (sheafH_filtered_colimit_succ_shiftDomainIso Ysh n h_mid_n h_mid_succ).hom ≫
+        sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt (n + 1) =
+      sheafH_filtered_colimit_comparison
+        (sheafH_filtered_colimit_succ_quotient Ysh) n
+        (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) ≫
+      (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
+        h_colim_n h_colim_succ).hom := by
+  let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
+  let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
+  change
+    (sheafH_filtered_colimit_succ_shiftDomainIso Ysh n h_mid_n h_mid_succ).hom ≫
+        sheafH_filtered_colimit_comparison Ysh (n + 1) csh =
+      sheafH_filtered_colimit_comparison (sheafH_filtered_colimit_succ_quotient Ysh) n
+        (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) ≫
+      (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
+        h_colim_n h_colim_succ).hom
+  exact
+    sheafH_filtered_colimit_comparison_succ_compatibility_sheaf_aux
+      Ysh csh hcsh n h_mid_n h_mid_succ h_colim_n h_colim_succ
+
+/-- If a presheaf cocone is a colimit and its stages and point are sheaves, then the
+    bundled sheaf-valued cocone is also a colimit. -/
+noncomputable def sheafH_filtered_colimit_presheafCocone_isColimit
+    {X : TopCat.{u}}
+    {J' : Type u} [SmallCategory J'] [IsFiltered J']
+    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
+    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
+    (c : Cocone Y) (hc : IsColimit c)
+    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
+    IsColimit (sheafH_filtered_colimit_presheafCocone Y hY c hc_pt) := by
+  refine
+    { desc := fun s => ?_
+      fac := fun s j => ?_
+      uniq := fun s m hm => ?_ }
+  · let sVal : Cocone Y :=
+      { pt := s.pt.val
+        ι :=
+          { app := fun j => (s.ι.app j).val
+            naturality := fun _ _ f => congrArg Sheaf.Hom.val (s.ι.naturality f) } }
+    exact Sheaf.Hom.mk (hc.desc sVal)
+  · let sVal : Cocone Y :=
+      { pt := s.pt.val
+        ι :=
+          { app := fun j => (s.ι.app j).val
+            naturality := fun _ _ f => congrArg Sheaf.Hom.val (s.ι.naturality f) } }
+    exact Sheaf.Hom.ext (hc.fac sVal j)
+  · apply Sheaf.Hom.ext
+    let sVal : Cocone Y :=
+      { pt := s.pt.val
+        ι :=
+          { app := fun j => (s.ι.app j).val
+            naturality := fun _ _ f => congrArg Sheaf.Hom.val (s.ι.naturality f) } }
+    exact hc.hom_ext fun j => by
+      calc
+        c.ι.app j ≫ m.val = (s.ι.app j).val := congrArg Sheaf.Hom.val (hm j)
+        _ = c.ι.app j ≫ (hc.desc sVal) := (hc.fac sVal j).symm
