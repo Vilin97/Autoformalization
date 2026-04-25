@@ -8,7 +8,7 @@ This file collects the flasque-sheaf API used by the Grothendieck vanishing proo
 
 Main declarations:
 * `IsFlasqueSheaf`
-* `epi_app_of_shortExact_flasque`
+* `epi_app_of_shortExact_flasque_presheaf`
 * `isFlasque_X₃_of_shortExact`
 * `isFlasque_of_injective`
 * `sheafH_subsingleton_H1_of_flasque`
@@ -405,20 +405,6 @@ theorem epi_app_of_shortExact_flasque_presheaf {X : TopCat.{u}}
         (IsFlasqueSheaf.epi_map
           (F := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) i)) U
 
--- Zorn argument for surjectivity of sections (Nugent, PR #35790).
-theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) [IsFlasqueSheaf S.X₁] (U : Opens X) :
-    Epi (S.g.val.app (op U)) := by
-  letI : IsFlasqueSheaf (⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := by
-    simpa using (inferInstance : IsFlasqueSheaf S.X₁)
-  simpa using epi_app_of_shortExact_flasque_presheaf
-    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-    S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val)
-    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-    (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS) U
-
 /-- Presheaf-boundary form of quotient-preserves-flasqueness:
     if `0 → F₁ → F₂ → F₃ → 0` is short exact on the associated sheaves and
     `⟨F₁, h₁⟩`, `⟨F₂, h₂⟩` are flasque, then `⟨F₃, h₃⟩` is flasque. -/
@@ -455,7 +441,7 @@ theorem isFlasque_X₃_of_shortExact_presheaf {X : TopCat.{u}}
 
 /-- **Quotient preserves flasqueness** (Nugent, PR #35790).
     If `F'` and `G` are flasque in `0 -> F' -> G -> H -> 0`, then `H` is flasque.
-    Follows from `epi_app_of_shortExact_flasque`: the restriction map for `H` factors
+    Follows from `epi_app_of_shortExact_flasque_presheaf`: the restriction map for `H` factors
     through the epi `G(U) -> H(U)` composed with the restriction of `G`. -/
 theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
