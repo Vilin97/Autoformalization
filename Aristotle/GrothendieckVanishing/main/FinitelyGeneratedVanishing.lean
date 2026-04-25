@@ -14,7 +14,7 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
     Finset.induction (PROVED)
   - directLimit_cohomology_vanishing: from epi-image vanishing to all sheaves (PROVED)
 
-  Note: isFlasque_filtered_colimit, sheafH_preserves_filtered_colimits, and
+  Note: isFlasque_filtered_colimit_presheaf, sheafH_preserves_filtered_colimits, and
   sheafH_filtered_colimit_surj have been moved to PresheafFilteredColimit.lean.
 -/
 
