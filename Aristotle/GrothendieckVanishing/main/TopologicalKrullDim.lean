@@ -18,8 +18,6 @@ API for topological Krull dimension on irreducible spaces.
 - `topologicalKrullDim_lt_top_of_lt_nat`: natural-number upper bounds imply finiteness
 - `topologicalKrullDim_lt_nat_of_lt_of_lt_nat_succ`: if `dim Y < dim X < n + 1`, then
   `dim Y < n`
-- `topologicalKrullDim_lt_of_add_one_le_of_lt_top`: if `dim Y + 1 ≤ dim X` and `dim Y` is
-  finite, then `dim Y < dim X`
 - `topologicalKrullDim_lt_of_isIrreducible_of_isClosed`: proper closed subsets of
   irreducible spaces with finite dim have strictly smaller dim
 - `topologicalKrullDim_pos_iff_exists_irreducibleCloseds_ne_univ`: on an irreducible
@@ -228,7 +226,7 @@ theorem topologicalKrullDim_add_one_le_of_isIrreducible_of_isClosed {X : Type u}
 
 /-- If `topologicalKrullDim Y + 1 ≤ topologicalKrullDim X` and `Y` has finite dimension, then
     `Y` has strictly smaller topological Krull dimension than `X`. -/
-theorem topologicalKrullDim_lt_of_add_one_le_of_lt_top {X Y : Type u}
+private theorem topologicalKrullDim_lt_of_add_one_le_of_lt_top {X Y : Type u}
     [TopologicalSpace X] [TopologicalSpace Y] [Nonempty X]
     (h : topologicalKrullDim Y + 1 ≤ topologicalKrullDim X)
     (hfin : topologicalKrullDim Y < ⊤) :
