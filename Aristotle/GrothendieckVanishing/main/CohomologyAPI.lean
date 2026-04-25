@@ -33,8 +33,6 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
   `H¹` cokernel identification
 * `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural`: presheaf-boundary
   naturality for the same `H¹` cokernel identification
-* `sheafH_extClassAddEquiv_of_subsingleton_middle_presheaf`: presheaf-boundary additive
-  equivalence for the higher-degree connecting morphism
 * `sheafH_extClassIso_of_subsingleton_middle_presheaf`: presheaf-boundary form of the
   higher-degree connecting isomorphism
 * `sheafH_extClassIso_of_subsingleton_middle_presheaf_natural`: presheaf-boundary
@@ -1421,7 +1419,7 @@ theorem sheafCohomologyFunctor_map_extClass_of_map_eq_presheaf {X : TopCat.{u}}
 `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves and the
 middle cohomology groups in degrees `n` and `n + 1` are subsingleton, then the connecting
 morphism induces an additive equivalence `H^n(F₃) ≃+ H^(n+1)(F₁)`. -/
-noncomputable def sheafH_extClassAddEquiv_of_subsingleton_middle_presheaf {X : TopCat.{u}}
+private noncomputable def sheafH_extClassAddEquiv_of_subsingleton_middle_presheaf {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
@@ -1456,7 +1454,7 @@ noncomputable def sheafH_extClassAddEquiv_of_subsingleton_middle_presheaf {X : T
     simpa [S] using h₂succ
   simpa [S] using extClass_postcompAddEquiv_of_subsingleton_middle _ hS' n h₂n' h₂succ'
 
-@[simp] theorem sheafH_extClassAddEquiv_of_subsingleton_middle_presheaf_apply
+@[simp] private theorem sheafH_extClassAddEquiv_of_subsingleton_middle_presheaf_apply
     {X : TopCat.{u}} {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
