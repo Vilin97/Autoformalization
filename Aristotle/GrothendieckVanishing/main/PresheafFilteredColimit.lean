@@ -1005,36 +1005,6 @@ private theorem sheafH_filtered_colimit_comparison_isIso_presheaf
               (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt) (m := m) ih
   exact hP n Y hY c hc hc_pt
 
-/-- The concrete filtered-colimit comparison isomorphism, stated at the presheaf boundary:
-if the stages and the cocone point are sheaves, then the canonical comparison for the
-associated sheaf diagram is an isomorphism. -/
-noncomputable def sheafH_filtered_colimit_comparison_iso_presheaf
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-    (c : Cocone Y) (hc : IsColimit c)
-    (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
-    (n : ℕ) :
-    colimit (sheafH_presheafDiagram Y hY n) ≅
-      AddCommGrpCat.of (Sheaf.H (⟨c.pt, hc_pt⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
-  letI := sheafH_filtered_colimit_comparison_isIso_presheaf
-    (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt) (n := n)
-  exact asIso (sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt n)
-
-@[simp] theorem sheafH_filtered_colimit_comparison_iso_presheaf_hom
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-    (c : Cocone Y) (hc : IsColimit c)
-    (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
-    (n : ℕ) :
-    (sheafH_filtered_colimit_comparison_iso_presheaf
-      (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt) (n := n)).hom =
-      sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt n := by
-  simp [sheafH_filtered_colimit_comparison_iso_presheaf]
-
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces:
     presheaf form. If the stages and cocone point are sheaves, the canonical comparison
     `colim H^n(F_j) ≅ H^n(colim F_j)` holds for the associated sheaf diagram. -/
@@ -1047,9 +1017,10 @@ noncomputable def sheafH_preserves_filtered_colimits_presheaf
     (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
     (n : ℕ) :
     colimit (sheafH_presheafDiagram Y hY n) ≅
-      AddCommGrpCat.of (Sheaf.H (⟨c.pt, hc_pt⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) :=
-  sheafH_filtered_colimit_comparison_iso_presheaf
+      AddCommGrpCat.of (Sheaf.H (⟨c.pt, hc_pt⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
+  letI := sheafH_filtered_colimit_comparison_isIso_presheaf
     (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt) (n := n)
+  exact asIso (sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt n)
 
 /-- The presheaf-form filtered-colimit comparison isomorphism has epi hom. -/
 theorem sheafH_preserves_filtered_colimits_presheaf_hom_epi
