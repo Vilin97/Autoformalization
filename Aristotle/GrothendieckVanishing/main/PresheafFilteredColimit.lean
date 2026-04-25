@@ -311,7 +311,7 @@ private noncomputable def sheafH_filtered_colimit_h1_global_cokernel_iso
 
 /-- The degree-`1` filtered-colimit comparison isomorphism on the sheaf diagram attached to
 a presheaf cocone, before rewriting it as `sheafH_filtered_colimit_comparison_presheaf`. -/
-noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary
+private noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
@@ -645,7 +645,7 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary
 
 /-- The degree-`0` filtered-colimit comparison isomorphism on the sheaf diagram attached to
 a presheaf cocone, before rewriting it as `sheafH_filtered_colimit_comparison_presheaf`. -/
-noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf_boundary
+private noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf_boundary
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
@@ -718,7 +718,7 @@ noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf_boundary
 
 /-- In degree `0`, the presheaf-boundary filtered-colimit comparison is the canonical
 isomorphism obtained from the associated sheaf diagram. -/
-noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf
+private noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
@@ -752,7 +752,7 @@ noncomputable def sheafH_filtered_colimit_comparison_zero_iso_presheaf
 
 /-- On a Noetherian space and for a filtered diagram, the degree-`0` presheaf-boundary
 comparison morphism `colim H⁰(F_j) ⟶ H⁰(colim F_j)` is an isomorphism. -/
-theorem sheafH_filtered_colimit_comparison_isIso_zero_presheaf
+private theorem sheafH_filtered_colimit_comparison_isIso_zero_presheaf
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
@@ -768,7 +768,7 @@ theorem sheafH_filtered_colimit_comparison_isIso_zero_presheaf
 identifying `H¹` with the cokernel of top sections for the injective-replacement short
 exact sequence, commuting filtered colimits with that cokernel, and then applying the
 colimit-level `H¹ ≅ cokernel` identification. -/
-noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf
+private noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
@@ -802,7 +802,7 @@ noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf
 
 /-- On a Noetherian space and for a filtered diagram, the degree-`1` presheaf-boundary
 comparison morphism `colim H¹(F_j) ⟶ H¹(colim F_j)` is an isomorphism. -/
-theorem sheafH_filtered_colimit_comparison_isIso_one_presheaf
+private theorem sheafH_filtered_colimit_comparison_isIso_one_presheaf
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
