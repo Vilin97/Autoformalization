@@ -521,24 +521,6 @@ theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top_presheaf {X : TopCat.{u
     (sheafH_subsingleton_H1_of_flasque_presheaf (F := F₂) h₂)
     hg
 
-/-- Sheaf-level `H¹` vanishing criterion with flasque middle term:
-    if `X₂` is flasque and `g.app(⊤)` is epi in a short exact sequence
-    `0 → X₁ → X₂ → X₃ → 0`, then `H¹(X₁)=0`. -/
-theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
-    [IsFlasqueSheaf S.X₂]
-    (hg : Epi (S.g.val.app (op ⊤))) :
-    Subsingleton (Sheaf.H S.X₁ 1) := by
-  letI : IsFlasqueSheaf ((⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
-    simpa using (inferInstance : IsFlasqueSheaf S.X₂)
-  simpa using sheafH_subsingleton_H1_of_flasque_of_epi_app_top_presheaf
-    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-    S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val)
-    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-    (by simpa using hSE)
-    (by simpa using hg)
-
 /-- Presheaf-boundary `H¹` vanishing criterion for a pushed-forward short exact sequence:
     if the pushed-forward middle term is flasque and the source sequence has `H¹(F₁)=0`,
     then the pushed-forward kernel has vanishing `H¹`, provided the caller supplies the
