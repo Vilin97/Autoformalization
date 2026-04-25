@@ -585,33 +585,6 @@ theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map_presheaf {X Y : Top
         (F₁ := F₁) (F₂ := F₂) (F₃ := F₃)
         h₁ h₂ h₃ hfg hSE h₁H)
 
-/-- Sheaf-level `H¹` vanishing criterion for a pushed-forward short exact sequence:
-    if the mapped middle term is flasque and the source sequence has `H¹(X₁)=0`,
-    then `H¹` vanishes on the mapped kernel, provided the caller supplies the
-    identification of `f⁻¹(⊤)` with `⊤`. -/
-theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map {X Y : TopCat.{u}}
-    (f : X ⟶ Y)
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hSE : S.ShortExact)
-    (hSE_map : (S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f)).ShortExact)
-    [IsFlasqueSheaf ((S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f)).X₂)]
-    (h_top : (Opens.map f).obj ⊤ = ⊤)
-    (h₁ : Subsingleton (Sheaf.H S.X₁ 1)) :
-    Subsingleton (Sheaf.H ((S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f)).X₁) 1) := by
-  letI : IsFlasqueSheaf ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} f).obj
-      ((⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))) := by
-    simpa using (inferInstance :
-      IsFlasqueSheaf ((S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} f)).X₂))
-  simpa using sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map_presheaf
-    (i := f)
-    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-    S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val)
-    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-    (by simpa using hSE)
-    (by simpa using hSE_map)
-    h_top
-    (by simpa using h₁)
-
 /-- Presheaf-boundary form of `FlasqueVanishing`. -/
 theorem sheafH_subsingleton_of_flasque_presheaf
     (X : TopCat.{u}) {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
