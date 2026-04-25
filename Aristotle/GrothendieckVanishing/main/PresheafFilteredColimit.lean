@@ -15,7 +15,7 @@ open CategoryTheory TopologicalSpace Abelian Limits Opposite TopCat
 
 /-- The global-sections functor used in the degree-`1` filtered-colimit boundary
 construction. -/
-noncomputable def sheafH_filtered_colimit_h1_sectionsFunctor
+private noncomputable def sheafH_filtered_colimit_h1_sectionsFunctor
     {X : TopCat.{u}} :
     TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
   sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u} ⋙
@@ -23,7 +23,7 @@ noncomputable def sheafH_filtered_colimit_h1_sectionsFunctor
 
 /-- The stagewise top-sections map from the injective replacement to its quotient in the
 degree-`1` filtered-colimit comparison. -/
-noncomputable def sheafH_filtered_colimit_h1_gTopNat
+private noncomputable def sheafH_filtered_colimit_h1_gTopNat
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -48,7 +48,7 @@ noncomputable def sheafH_filtered_colimit_h1_gTopNat
 
 /-- The functor of stagewise cokernels of the top-sections maps used in the degree-`1`
 filtered-colimit boundary construction. -/
-noncomputable def sheafH_filtered_colimit_h1_cokernelFunctor
+private noncomputable def sheafH_filtered_colimit_h1_cokernelFunctor
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -98,7 +98,7 @@ noncomputable def sheafH_filtered_colimit_h1_cokernelFunctor
 
 /-- Evaluation at each diagram object identifies the stagewise cokernel functor with the
 cokernel of `sheafH_filtered_colimit_h1_gTopNat`. -/
-noncomputable def sheafH_filtered_colimit_h1_cokernelFunctorIso
+private noncomputable def sheafH_filtered_colimit_h1_cokernelFunctorIso
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
@@ -177,7 +177,7 @@ noncomputable def sheafH_filtered_colimit_h1_cokernelFunctorIso
 
 /-- The stagewise identification of `H¹` with the cokernel of top sections for the
 injective-replacement short exact sequence used in the filtered-colimit comparison. -/
-noncomputable def sheafH_filtered_colimit_h1_stageNatIso
+private noncomputable def sheafH_filtered_colimit_h1_stageNatIso
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
