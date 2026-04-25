@@ -1375,10 +1375,9 @@ private theorem sheafCohomologyFunctor_map_extClass_naturality_presheaf {X : Top
     h₁₁ h₁₂ h₁₃ h₂₁ h₂₂ h₂₃ hfg₁ hfg₂ hS₁ hS₂ hτ₁₂ hτ₂₃ n y
 
 /-- If `y` maps to `z` on the `X₃` side of a morphism of short exact sequences, then the
-    corresponding extension class of `y` maps to the extension class of `z` on the `X₁`
-    side. This packages `sheafCohomologyFunctor_map_extClass_naturality_presheaf` with the
-    downstream rewrite by the known `X₃`-side equality. -/
-theorem sheafCohomologyFunctor_map_extClass_of_map_eq_presheaf {X : TopCat.{u}}
+    successor-degree connecting morphism sends `y` to the connecting image of `z` on the
+    `X₁` side after applying sheaf cohomology functoriality. -/
+theorem sheafCohomologyFunctor_map_succ_of_map_eq_presheaf {X : TopCat.{u}}
     {F₁₁ F₁₂ F₁₃ F₂₁ F₂₂ F₂₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁₁ : F₁₁.IsSheaf) (h₁₂ : F₁₂.IsSheaf) (h₁₃ : F₁₃.IsSheaf)
     (h₂₁ : F₂₁.IsSheaf) (h₂₂ : F₂₂.IsSheaf) (h₂₃ : F₂₃.IsSheaf)
