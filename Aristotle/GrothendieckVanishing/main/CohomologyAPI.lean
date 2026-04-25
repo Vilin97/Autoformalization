@@ -230,7 +230,7 @@ end ExtDimShift
     of short exact sequences of presheaves. This packages the underlying extension-class
     naturality calculation with the associativity rewrites needed to move between nested
     `comp` expressions and composition with the connecting class. -/
-theorem sheafH_comp_extClass_naturality_presheaf {X : TopCat.{u}}
+private theorem sheafH_comp_extClass_naturality_presheaf {X : TopCat.{u}}
     {F₁₁ F₁₂ F₁₃ F₂₁ F₂₂ F₂₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁₁ : F₁₁.IsSheaf) (h₁₂ : F₁₂.IsSheaf) (h₁₃ : F₁₃.IsSheaf)
     (h₂₁ : F₂₁.IsSheaf) (h₂₂ : F₂₂.IsSheaf) (h₂₃ : F₂₃.IsSheaf)
