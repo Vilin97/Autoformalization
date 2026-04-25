@@ -91,14 +91,13 @@ The formal comparison map
 is defined for any small diagram and cocone by `colimit.desc`.
 
 The genuinely geometric input starts afterwards:
-- `sheafH_filtered_colimit_comparison_epi_presheaf`: at the presheaf boundary, if the
-  stages and cocone point are sheaves, the canonical comparison is epi
 - `sheafH_filtered_colimit_surj_presheaf`: every element of `H^n(colim F_j)` comes from some
   `H^n(F_j)`
   via the canonical map. The proof uses per-object functorial injective embeddings via Mathlib's
   `IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp` and dimension shifting.
 - `sheafH_preserves_filtered_colimits_presheaf`: the filtered-colimit comparison isomorphism
-  for a presheaf diagram whose stages and cocone point are sheaves. -/
+  for a presheaf diagram whose stages and cocone point are sheaves; its hom form is epi by
+  `sheafH_preserves_filtered_colimits_presheaf_hom_epi`. -/
 
 section SheafHFilteredColimitSucc
 

@@ -1034,17 +1034,3 @@ theorem sheafH_preserves_filtered_colimits_presheaf_hom_epi
     Epi ((sheafH_preserves_filtered_colimits_presheaf
       (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt) (n := n)).hom) := by
   infer_instance
-
-/-- The presheaf-boundary filtered-colimit comparison morphism is epi. -/
-theorem sheafH_filtered_colimit_comparison_epi_presheaf
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-    (c : Cocone Y) (hc : IsColimit c)
-    (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
-    (n : ℕ) :
-    Epi (sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt n) := by
-  simpa [sheafH_preserves_filtered_colimits_presheaf] using
-    (sheafH_preserves_filtered_colimits_presheaf_hom_epi
-      (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt) (n := n))
