@@ -389,7 +389,7 @@ noncomputable def sheafH_filtered_colimit_succ_shiftNatIso
       Y' ⋙ sheafCohomologyFunctor X (n + 1) :=
   NatIso.ofComponents
     (fun j =>
-      sheafH_extClassIso_of_subsingleton_middle_presheaf
+      sheafH_succ_iso_of_subsingleton_middle_presheaf
         (h₁ := (Y'.obj j).cond)
         (h₂ := ((sheafH_filtered_colimit_succ_Inj Y').obj j).cond)
         (h₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Y').app j)).cond)
@@ -505,7 +505,7 @@ noncomputable def sheafH_filtered_colimit_succ_shiftCodomainIso
     AddCommGrpCat.of
         (Sheaf.H (sheafH_filtered_colimit_succ_quotientCocone Y' c' hc').pt n) ≅
       AddCommGrpCat.of (Sheaf.H c'.pt (n + 1)) :=
-  sheafH_extClassIso_of_subsingleton_middle_presheaf
+  sheafH_succ_iso_of_subsingleton_middle_presheaf
     (h₁ := c'.pt.cond)
     (h₂ := (sheafH_filtered_colimit_succ_injCocone Y').pt.cond)
     (h₃ := (sheafH_filtered_colimit_succ_quotientCocone Y' c' hc').pt.cond)
@@ -983,7 +983,7 @@ private theorem sheafH_filtered_colimit_comparison_succ_compatibility_sheaf_aux
     exact hqj_assoc
   rw [hqj_assoc']
   change
-    (sheafH_extClassIso_of_subsingleton_middle_presheaf
+    (sheafH_succ_iso_of_subsingleton_middle_presheaf
         (h₁ := (Ysh.obj j).cond)
         (h₂ := ((sheafH_filtered_colimit_succ_Inj Ysh).obj j).cond)
         (h₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j)).cond)

@@ -33,7 +33,7 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
   `H¹` cokernel identification
 * `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural`: presheaf-boundary
   naturality for the same `H¹` cokernel identification
-* `sheafH_extClassIso_of_subsingleton_middle_presheaf`: presheaf-boundary form of the
+* `sheafH_succ_iso_of_subsingleton_middle_presheaf`: presheaf-boundary form of the
   higher-degree connecting isomorphism
 * `sheafH_extClassIso_of_subsingleton_middle_presheaf_natural`: presheaf-boundary
   naturality for the same connecting isomorphism
@@ -1500,7 +1500,7 @@ private noncomputable def sheafH_extClassAddEquiv_of_subsingleton_middle_preshea
 `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves and the
 middle cohomology groups in degrees `n` and `n + 1` are subsingleton, then the connecting
 morphism induces an isomorphism `H^n(F₃) ≅ H^(n+1)(F₁)`. -/
-noncomputable def sheafH_extClassIso_of_subsingleton_middle_presheaf {X : TopCat.{u}}
+noncomputable def sheafH_succ_iso_of_subsingleton_middle_presheaf {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
@@ -1521,7 +1521,7 @@ noncomputable def sheafH_extClassIso_of_subsingleton_middle_presheaf {X : TopCat
   (sheafH_extClassAddEquiv_of_subsingleton_middle_presheaf
     h₁ h₂ h₃ hfg hS n h₂n h₂succ).toAddCommGrpIso
 
-private theorem sheafH_extClassIso_of_subsingleton_middle_presheaf_hom_apply {X : TopCat.{u}}
+private theorem sheafH_succ_iso_of_subsingleton_middle_presheaf_hom_apply {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
@@ -1539,7 +1539,7 @@ private theorem sheafH_extClassIso_of_subsingleton_middle_presheaf_hom_apply {X 
     (h₂succ : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)))
     (y : Sheaf.H ((⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) :
     ConcreteCategory.hom
-        ((sheafH_extClassIso_of_subsingleton_middle_presheaf
+        ((sheafH_succ_iso_of_subsingleton_middle_presheaf
             h₁ h₂ h₃ hfg hS n h₂n h₂succ).hom) y =
       y.comp hS.extClass rfl := by
   change sheafH_extClassAddEquiv_of_subsingleton_middle_presheaf
@@ -1547,7 +1547,7 @@ private theorem sheafH_extClassIso_of_subsingleton_middle_presheaf_hom_apply {X 
   exact sheafH_extClassAddEquiv_of_subsingleton_middle_presheaf_apply
     h₁ h₂ h₃ hfg hS n h₂n h₂succ y
 
-/-- Presheaf-boundary naturality of `sheafH_extClassIso_of_subsingleton_middle_presheaf`
+/-- Presheaf-boundary naturality of `sheafH_succ_iso_of_subsingleton_middle_presheaf`
     for a morphism between two short exact sequences of presheaves. -/
 theorem sheafH_extClassIso_of_subsingleton_middle_presheaf_natural {X : TopCat.{u}}
     {F₁₁ F₁₂ F₁₃ F₂₁ F₂₂ F₂₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
@@ -1581,14 +1581,14 @@ theorem sheafH_extClassIso_of_subsingleton_middle_presheaf_natural {X : TopCat.{
     (h₁₂succ : Subsingleton (Sheaf.H ((⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)))
     (h₂₂n : Subsingleton (Sheaf.H ((⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
     (h₂₂succ : Subsingleton (Sheaf.H ((⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1))) :
-    (sheafH_extClassIso_of_subsingleton_middle_presheaf
+    (sheafH_succ_iso_of_subsingleton_middle_presheaf
         h₁₁ h₁₂ h₁₃ hfg₁ hS₁ n h₁₂n h₁₂succ).hom ≫
         (sheafCohomologyFunctor X (n + 1)).map (Sheaf.Hom.mk τ₁) =
       (sheafCohomologyFunctor X n).map (Sheaf.Hom.mk τ₃) ≫
-        (sheafH_extClassIso_of_subsingleton_middle_presheaf
+        (sheafH_succ_iso_of_subsingleton_middle_presheaf
           h₂₁ h₂₂ h₂₃ hfg₂ hS₂ n h₂₂n h₂₂succ).hom := by
   ext y
   simpa [ConcreteCategory.comp_apply,
-    sheafH_extClassIso_of_subsingleton_middle_presheaf_hom_apply] using
+    sheafH_succ_iso_of_subsingleton_middle_presheaf_hom_apply] using
     (sheafCohomologyFunctor_map_extClass_naturality_presheaf
       h₁₁ h₁₂ h₁₃ h₂₁ h₂₂ h₂₃ hfg₁ hfg₂ hS₁ hS₂ hτ₁₂ hτ₂₃ n y)
