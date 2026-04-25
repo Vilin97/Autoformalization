@@ -9,7 +9,7 @@ This file collects the flasque-sheaf API used by the Grothendieck vanishing proo
 Main declarations:
 * `IsFlasqueSheaf`
 * `epi_app_of_shortExact_flasque_presheaf`
-* `isFlasque_X₃_of_shortExact`
+* `isFlasque_X₃_of_shortExact_presheaf`
 * `isFlasque_of_injective`
 * `sheafH_subsingleton_H1_of_flasque`
 * `sheafH_subsingleton_of_flasque_presheaf`
@@ -438,25 +438,6 @@ theorem isFlasque_X₃_of_shortExact_presheaf {X : TopCat.{u}}
     have := congrArg (· x) (g.naturality j.op)
     simp only [AddCommGrpCat.hom_comp] at this
     exact this.symm.trans (by simp [hx, hw])⟩
-
-/-- **Quotient preserves flasqueness** (Nugent, PR #35790).
-    If `F'` and `G` are flasque in `0 -> F' -> G -> H -> 0`, then `H` is flasque.
-    Follows from `epi_app_of_shortExact_flasque_presheaf`: the restriction map for `H` factors
-    through the epi `G(U) -> H(U)` composed with the restriction of `G`. -/
-theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) [IsFlasqueSheaf S.X₁] [IsFlasqueSheaf S.X₂] :
-    IsFlasqueSheaf S.X₃ := by
-  letI : IsFlasqueSheaf (⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := by
-    simpa using (inferInstance : IsFlasqueSheaf S.X₁)
-  letI : IsFlasqueSheaf (⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := by
-    simpa using (inferInstance : IsFlasqueSheaf S.X₂)
-  simpa using isFlasque_X₃_of_shortExact_presheaf
-    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-    S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val)
-    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-    (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS)
 
 -- Injective sheaves are flasque.
 -- Uses zeroOutsideInt generator/sHom/openHom API + Injective.factors.
