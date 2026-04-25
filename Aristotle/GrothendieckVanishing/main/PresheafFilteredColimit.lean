@@ -972,7 +972,7 @@ private theorem sheafH_filtered_colimit_comparison_isIso_presheaf_succ_succ
 /-- The concrete filtered-colimit comparison isomorphism, stated at the presheaf boundary:
 if the stages and the cocone point are sheaves, then the canonical comparison for the
 associated sheaf diagram is an isomorphism. -/
-theorem sheafH_filtered_colimit_comparison_isIso_presheaf
+private theorem sheafH_filtered_colimit_comparison_isIso_presheaf
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
