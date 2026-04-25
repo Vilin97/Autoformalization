@@ -103,23 +103,6 @@ lemma sections_exact_of_shortExact_presheaf {X : TopCat.{u}}
   simpa [Ssh, sheafShortComplexOfPresheaf] using
     (ShortComplex.ab_exact_iff _).mp hexact x hx
 
--- For a SES of sheaves, the evaluated sequence at V is exact:
--- if g_V(x) = 0, then x is in the image of f_V.
-lemma sections_exact_of_shortExact {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact) (V : Opens X)
-    (x : S.X₂.val.obj (op V))
-    (hx : ConcreteCategory.hom (S.g.val.app (op V)) x = 0) :
-    ∃ a : S.X₁.val.obj (op V),
-      ConcreteCategory.hom (S.f.val.app (op V)) a = x := by
-  simpa using sections_exact_of_shortExact_presheaf
-    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-    S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val)
-    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-    (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS)
-    V x hx
-
 /-! ### Structured-arrow Zorn setup for partial lifts -/
 
 /-- Partial lifts of a section `s` along a morphism of sheaves. An object is an
@@ -155,7 +138,13 @@ private lemma under_exists_extension_containing {X : TopCat.{u}}
       sub_eq_zero]
     simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
     exact congr_arg (S.X₃.val.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
-  obtain ⟨a, ha⟩ := sections_exact_of_shortExact hS (V₀ ⊓ W) _ hdiff_ker
+  obtain ⟨a, ha⟩ := sections_exact_of_shortExact_presheaf
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+    (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS)
+    (V₀ ⊓ W) _ hdiff_ker
   obtain ⟨ahat, hahat⟩ := (AddCommGrpCat.epi_iff_surjective _).mp
     (hX₁_epi (homOfLE inf_le_right : V₀ ⊓ W ⟶ W)) a
   have hfg_app : S.f.val.app (op W) ≫ S.g.val.app (op W) = 0 := by
