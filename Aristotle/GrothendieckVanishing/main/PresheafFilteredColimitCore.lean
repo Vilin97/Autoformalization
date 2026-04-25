@@ -98,9 +98,7 @@ The genuinely geometric input starts afterwards:
   via the canonical map. The proof uses per-object functorial injective embeddings via Mathlib's
   `IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp` and dimension shifting.
 - `sheafH_preserves_filtered_colimits_presheaf`: the filtered-colimit comparison isomorphism
-  for a presheaf diagram whose stages and cocone point are sheaves
-- `sheafH_preserves_filtered_colimits`: packages the preceding isomorphism result as the
-  canonical comparison `colim H^n(F_j) ≅ H^n(colim F_j)`. -/
+  for a presheaf diagram whose stages and cocone point are sheaves. -/
 
 section SheafHFilteredColimitSucc
 

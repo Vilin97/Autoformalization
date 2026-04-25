@@ -9,12 +9,12 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
   - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
     colimit of its finitely generated subsheaves (PROVED)
   - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
-    implies H^m(K) = 0 (PROVED via sheafH_preserves_filtered_colimits)
+    implies H^m(K) = 0 (PROVED via sheafH_preserves_filtered_colimits_presheaf)
   - finsetGeneratedSheaf_vanishing: vanishing for finitely generated sheaves by
     Finset.induction (PROVED)
   - directLimit_cohomology_vanishing: from epi-image vanishing to all sheaves (PROVED)
 
-  Note: isFlasque_filtered_colimit_presheaf, sheafH_preserves_filtered_colimits, and
+  Note: isFlasque_filtered_colimit_presheaf, sheafH_preserves_filtered_colimits_presheaf, and
   sheafH_filtered_colimit_surj_presheaf live in the PresheafFilteredColimit modules.
 -/
 

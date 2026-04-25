@@ -1077,24 +1077,3 @@ theorem sheafH_filtered_colimit_comparison_epi_presheaf
   simpa [sheafH_preserves_filtered_colimits_presheaf] using
     (sheafH_preserves_filtered_colimits_presheaf_hom_epi
       (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt) (n := n))
-
-/-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces:
-    the canonical comparison `colim H^n(F_j) ≅ H^n(colim F_j)`. -/
-noncomputable def sheafH_preserves_filtered_colimits
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (c' : Cocone Y') (hc' : IsColimit c')
-    (n : ℕ) :
-    colimit (Y' ⋙ sheafCohomologyFunctor X n) ≅ AddCommGrpCat.of (Sheaf.H c'.pt n) := by
-  haveI : CreatesColimit Y'
-      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
-    createsFilteredColimit Y'
-  simpa using
-    (sheafH_preserves_filtered_colimits_presheaf
-      (Y := Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-      (hY := fun j => (Y'.obj j).cond)
-      (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
-      (hc := isColimitOfPreserves
-        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc')
-      (hc_pt := c'.pt.cond) (n := n))
