@@ -1521,7 +1521,7 @@ noncomputable def sheafH_extClassIso_of_subsingleton_middle_presheaf {X : TopCat
   (sheafH_extClassAddEquiv_of_subsingleton_middle_presheaf
     h₁ h₂ h₃ hfg hS n h₂n h₂succ).toAddCommGrpIso
 
-@[simp] theorem sheafH_extClassIso_of_subsingleton_middle_presheaf_hom_apply {X : TopCat.{u}}
+private theorem sheafH_extClassIso_of_subsingleton_middle_presheaf_hom_apply {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
