@@ -27,9 +27,7 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
   specialization of the same cokernel stalk vanishing
 * `sheafH_exists_preimage_extClass_presheaf`: presheaf-boundary wrapper for lifting
   cohomology classes through the connecting morphism
-* `sheafH0EquivSections`: H^0(F) ≃+ F(⊤)
 * `sheafH0EquivSections_presheaf`: presheaf-boundary wrapper for `H^0(F) ≃+ F(⊤)`
-* `sheafH0EquivSections_natural`: naturality of the above
 * `sheafH0EquivSections_presheaf_natural`: presheaf-boundary naturality of the above
 * `sheafH1_cokernel_iso_of_subsingleton_middle`: `H¹(X₁)` as the cokernel of
   `X₂(⊤) → X₃(⊤)` when `H¹(X₂)=0`
@@ -605,12 +603,6 @@ noncomputable def sheafH0EquivSections_presheaf {X : TopCat.{u}}
         Limits.isTerminalTop).homAddEquiv _ ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))).trans
       (AddCommGrpCat.uliftZMultiplesAddEquiv _))
 
-/-- `H F 0` is equivalent to sections on `⊤`. -/
-noncomputable def sheafH0EquivSections {X : TopCat.{u}}
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
-    Sheaf.H F 0 ≃+ F.val.obj (op ⊤) := by
-  simpa using sheafH0EquivSections_presheaf (F := F.val) F.cond
-
 /-- Presheaf-boundary naturality of `sheafH0EquivSections_presheaf`: composing `x`
     with `mk₀ (Sheaf.Hom.mk f)` at degree 0 corresponds to applying `f.app(⊤)` on
     sections. -/
@@ -636,16 +628,6 @@ lemma sheafH0EquivSections_presheaf_natural {X : TopCat.{u}}
   erw [Adjunction.homAddEquiv_apply, Adjunction.homAddEquiv_apply, key,
     Adjunction.homEquiv_naturality_right, Adjunction.homAddEquiv_apply]
   rfl
-
-/-- Naturality of `sheafH0EquivSections`: composing `x` with `mk₀ f` at degree 0
-    corresponds to applying `f.app(⊤)` at the sections level. -/
-lemma sheafH0EquivSections_natural {X : TopCat.{u}}
-    {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G) (x : Sheaf.H F 0) :
-    sheafH0EquivSections G (x.comp (Ext.mk₀ f) (add_zero 0)) =
-    ConcreteCategory.hom (f.val.app (op ⊤)) (sheafH0EquivSections F x) := by
-  simpa [sheafH0EquivSections] using
-    (sheafH0EquivSections_presheaf_natural
-      (F := F.val) (G := G.val) F.cond G.cond (f := f.val) (x := x))
 
 set_option maxHeartbeats 800000 in
 /-- Presheaf-boundary form of `H¹(X₁)` as the cokernel of top sections: if
@@ -807,7 +789,7 @@ noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle {X : TopCat.{u}}
     ConcreteCategory.hom
         ((sheafH1_cokernel_iso_of_subsingleton_middle hS h₂).hom)
         (ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤))) s) =
-      ((sheafH0EquivSections S.X₃).symm s).comp hS.extClass rfl := by
+      ((sheafH0EquivSections_presheaf S.X₃.cond).symm s).comp hS.extClass rfl := by
   simpa using sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_hom_π
     (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
     S.X₁.cond S.X₂.cond S.X₃.cond
@@ -851,11 +833,11 @@ theorem epi_app_top_of_subsingleton_sheafH1_presheaf {X : TopCat.{u}}
   change Epi (S.g.val.app (op ⊤))
   rw [AddCommGrpCat.epi_iff_surjective]
   intro r
-  let y : Sheaf.H S.X₃ 0 := (sheafH0EquivSections S.X₃).symm r
+  let y : Sheaf.H S.X₃ 0 := (sheafH0EquivSections_presheaf h₃).symm r
   obtain ⟨z, hz⟩ := Ext.covariant_sequence_exact₃ _ hS y rfl
     (@Subsingleton.elim _ h₁' _ _)
-  refine ⟨sheafH0EquivSections S.X₂ z, ?_⟩
-  rw [← sheafH0EquivSections_natural, hz]
+  refine ⟨sheafH0EquivSections_presheaf h₂ z, ?_⟩
+  rw [← sheafH0EquivSections_presheaf_natural h₂ h₃ (f := g), hz]
   simp [y]
 
 /-- Presheaf-boundary `H⁰`-surjectivity from surjective top sections:
@@ -867,13 +849,12 @@ theorem sheafH0_surj_of_epi_app_top_presheaf {X : TopCat.{u}}
     ∀ y : Sheaf.H ((⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 0,
       ∃ z : Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 0,
         z.comp (Ext.mk₀ (Sheaf.Hom.mk f)) (add_zero 0) = y := by
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
   intro y
-  obtain ⟨s, hs⟩ := (AddCommGrpCat.epi_iff_surjective _).mp hf (sheafH0EquivSections Gsh y)
-  refine ⟨(sheafH0EquivSections Fsh).symm s, ?_⟩
-  apply (sheafH0EquivSections Gsh).injective
-  rw [sheafH0EquivSections_natural, AddEquiv.apply_symm_apply, hs]
+  obtain ⟨s, hs⟩ := (AddCommGrpCat.epi_iff_surjective _).mp hf
+    (sheafH0EquivSections_presheaf hG y)
+  refine ⟨(sheafH0EquivSections_presheaf hF).symm s, ?_⟩
+  apply (sheafH0EquivSections_presheaf hG).injective
+  rw [sheafH0EquivSections_presheaf_natural hF hG (f := f), AddEquiv.apply_symm_apply, hs]
 
 /-- Internal helper for `H^1` vanishing via degree-zero surjectivity. -/
 private theorem subsingleton_H1_via_surj {C' : Type*} [Category C'] [Abelian C'] [HasExt C']
@@ -1368,20 +1349,22 @@ noncomputable def sheafH0NatIsoSections {X : TopCat.{u}} :
     sheafCohomologyFunctor X 0 ≅
       sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u} ⋙
         (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤) :=
-  NatIso.ofComponents (fun F => (sheafH0EquivSections F).toAddCommGrpIso) fun f => by
+  NatIso.ofComponents (fun F => (sheafH0EquivSections_presheaf F.cond).toAddCommGrpIso)
+    fun {F G} f => by
     ext x
     simpa [sheafCohomologyFunctor_map_apply] using
-      (sheafH0EquivSections_natural (f := f) (x := x))
+      (sheafH0EquivSections_presheaf_natural
+        (F := F.val) (G := G.val) F.cond G.cond (f := f.val) (x := x))
 
 @[simp] theorem sheafH0NatIsoSections_hom_app {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (x : Sheaf.H F 0) :
     ConcreteCategory.hom ((sheafH0NatIsoSections (X := X)).hom.app F) x =
-      sheafH0EquivSections F x := rfl
+      sheafH0EquivSections_presheaf F.cond x := rfl
 
 @[simp] theorem sheafH0NatIsoSections_inv_app {X : TopCat.{u}}
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (x : ToType (F.val.obj (op ⊤))) :
     ConcreteCategory.hom ((sheafH0NatIsoSections (X := X)).inv.app F) x =
-      (sheafH0EquivSections F).symm x := rfl
+      (sheafH0EquivSections_presheaf F.cond).symm x := rfl
 
 /-- Functor-level naturality of the connecting morphism on sheaf cohomology. This is the
     `sheafCohomologyFunctor`-packaged form of
