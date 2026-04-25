@@ -92,7 +92,7 @@ noncomputable def PushforwardHIso
           AddCommGrpCat.of (Sheaf.H S.X₃ (m + 1)) ≅
             AddCommGrpCat.of (Sheaf.H G' (m + 2)) := by
         simpa [S] using
-          sheafH_extClassIso_of_subsingleton_middle_presheaf
+          sheafH_succ_iso_of_subsingleton_middle_presheaf
             S.X₁.cond S.X₂.cond S.X₃.cond
             (f := S.f.val) (g := S.g.val)
             (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
@@ -108,7 +108,7 @@ noncomputable def PushforwardHIso
           AddCommGrpCat.of (Sheaf.H SX.X₃ (m + 1)) ≅
             AddCommGrpCat.of (Sheaf.H SX.X₁ (m + 2)) := by
         simpa [SX] using
-          sheafH_extClassIso_of_subsingleton_middle_presheaf
+          sheafH_succ_iso_of_subsingleton_middle_presheaf
             SX.X₁.cond SX.X₂.cond SX.X₃.cond
             (f := SX.f.val) (g := SX.g.val)
             (show SX.f.val ≫ SX.g.val = 0 from congrArg Sheaf.Hom.val SX.zero)
