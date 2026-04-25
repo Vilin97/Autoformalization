@@ -93,8 +93,6 @@ is defined for any small diagram and cocone by `colimit.desc`.
 The genuinely geometric input starts afterwards:
 - `sheafH_filtered_colimit_comparison_epi_presheaf`: at the presheaf boundary, if the
   stages and cocone point are sheaves, the canonical comparison is epi
-- `sheafH_filtered_colimit_comparison_epi`: on Noetherian spaces and filtered diagrams,
-  this canonical comparison is epi
 - `sheafH_filtered_colimit_surj_presheaf`: every element of `H^n(colim F_j)` comes from some
   `H^n(F_j)`
   via the canonical map. The proof uses per-object functorial injective embeddings via Mathlib's
