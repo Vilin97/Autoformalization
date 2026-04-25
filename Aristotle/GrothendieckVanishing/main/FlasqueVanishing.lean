@@ -11,7 +11,7 @@ Main declarations:
 * `epi_app_of_shortExact_flasque_presheaf`
 * `isFlasque_X₃_of_shortExact_presheaf`
 * `isFlasque_of_injective`
-* `sheafH_subsingleton_H1_of_flasque`
+* `sheafH_subsingleton_H1_of_flasque_presheaf`
 * `sheafH_subsingleton_of_flasque_presheaf`
 * `FlasqueVanishing`
 
@@ -459,7 +459,7 @@ instance isFlasque_of_injective {X : TopCat.{u}}
 
 /-! ## Cohomological vanishing for flasque sheaves -/
 
-/-- Presheaf-boundary wrapper for `sheafH_subsingleton_H1_of_flasque`: if a presheaf is a
+/-- Presheaf-boundary `H¹` vanishing criterion for flasque sheaves: if a presheaf is a
     sheaf and the induced bundled sheaf is flasque, then its `H¹` is subsingleton. -/
 theorem sheafH_subsingleton_H1_of_flasque_presheaf {X : TopCat.{u}}
     {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
@@ -495,17 +495,6 @@ theorem sheafH_subsingleton_H1_of_flasque_presheaf {X : TopCat.{u}}
     (f := S.f.val) (g := S.g.val)
     (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
     hSE hg
-
-/-- Flasque sheaves have vanishing `H¹`. This isolates the base case of flasque
-    cohomological vanishing. -/
-theorem sheafH_subsingleton_H1_of_flasque {X : TopCat.{u}}
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) [IsFlasqueSheaf F] :
-    Subsingleton (Sheaf.H F 1) := by
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F.val, F.cond⟩
-  letI : IsFlasqueSheaf Fsh := by
-    simpa [Fsh] using (inferInstance : IsFlasqueSheaf F)
-  simpa [Fsh] using
-    (sheafH_subsingleton_H1_of_flasque_presheaf (X := X) (F := F.val) F.cond)
 
 /-- Presheaf-boundary `H¹` vanishing criterion with flasque middle term:
     if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves,
