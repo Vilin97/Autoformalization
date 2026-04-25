@@ -25,8 +25,15 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
   vanishing under stalk-surjectivity
 * `stalk_zero_of_shortExact_cokernel_presheaf`: presheaf-boundary short exact
   specialization of the same cokernel stalk vanishing
+* `sheafH_succ_map_presheaf`: presheaf-boundary successor connecting morphism
+* `sheafH_succ_map_presheaf_natural_of_map_eq`: naturality of the successor connecting
+  morphism
+* `sheafH_succ_map_presheaf_eq_succ_iso_hom`: compatibility with the higher connecting
+  isomorphism
+* `sheafH_succ_map_exists_preimage_of_subsingleton_middle_presheaf`: successor-map
+  preimage wrapper
 * `sheafH_exists_preimage_of_subsingleton_middle_presheaf`: presheaf-boundary wrapper for lifting
-  cohomology classes through the connecting morphism
+  cohomology classes through the higher connecting isomorphism
 * `sheafH0EquivSections_presheaf`: presheaf-boundary wrapper for `H^0(F) ≃+ F(⊤)`
 * `sheafH0EquivSections_presheaf_natural`: presheaf-boundary naturality of the above
 * `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf`: presheaf-boundary form of the
@@ -293,10 +300,83 @@ private theorem sheafH_comp_extClass_naturality_presheaf {X : TopCat.{u}}
     exact congrArg (fun t => y.comp t rfl) (extClass_naturality hS₁ hS₂ φ).symm
   simpa [Ext.comp_assoc_of_third_deg_zero, Ext.comp_assoc_of_second_deg_zero] using hcomp
 
+/-- Presheaf-boundary successor connecting morphism attached to a short exact sequence.
+This packages the `H^n(F₃) → H^(n+1)(F₁)` map at the `Sheaf.H` level. -/
+noncomputable def sheafH_succ_map_presheaf {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
+    (hS : (ShortComplex.mk
+      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f)
+      (Sheaf.Hom.mk g)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg)).ShortExact)
+    (n : ℕ) :
+    AddCommGrpCat.of (Sheaf.H ((⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) ⟶
+      AddCommGrpCat.of (Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)) := by
+  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
+    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (Sheaf.Hom.mk f)
+    (Sheaf.Hom.mk g)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hfg)
+  have hS' : S.ShortExact := by
+    simpa [S] using hS
+  change AddCommGrpCat.of (Sheaf.H S.X₃ n) ⟶ AddCommGrpCat.of (Sheaf.H S.X₁ (n + 1))
+  exact AddCommGrpCat.ofHom <|
+    AddMonoidHom.mk'
+      (fun y => y.comp hS'.extClass rfl)
+      (by
+        intro a b
+        change (a + b).comp hS'.extClass rfl =
+          a.comp hS'.extClass rfl + b.comp hS'.extClass rfl
+        rw [Ext.add_comp])
+
+private theorem sheafH_succ_map_presheaf_apply {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
+    (hS : (ShortComplex.mk
+      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f)
+      (Sheaf.Hom.mk g)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg)).ShortExact)
+    (n : ℕ)
+    (y : Sheaf.H ((⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) :
+    ConcreteCategory.hom (sheafH_succ_map_presheaf h₁ h₂ h₃ hfg hS n) y =
+      y.comp hS.extClass rfl := by
+  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
+    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (Sheaf.Hom.mk f)
+    (Sheaf.Hom.mk g)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hfg)
+  have hS' : S.ShortExact := by
+    simpa [S] using hS
+  change y.comp hS'.extClass rfl = y.comp hS.extClass rfl
+  have hh : hS' = hS := by
+    apply Subsingleton.elim
+  subst hh
+  rfl
+
 /-- If `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves and
 `H^(n+1)(F₂)` is subsingleton, then every `H^(n+1)(F₁)` class comes from some `H^n(F₃)`
-class via the connecting morphism. -/
-theorem sheafH_exists_preimage_of_subsingleton_middle_presheaf {X : TopCat.{u}}
+class via the successor connecting morphism. -/
+theorem sheafH_succ_map_exists_preimage_of_subsingleton_middle_presheaf {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
@@ -313,7 +393,7 @@ theorem sheafH_exists_preimage_of_subsingleton_middle_presheaf {X : TopCat.{u}}
     (h₂H : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)))
     (x : Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)) :
     ∃ y : Sheaf.H ((⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n,
-      y.comp hS.extClass rfl = x := by
+      ConcreteCategory.hom (sheafH_succ_map_presheaf h₁ h₂ h₃ hfg hS n) y = x := by
   let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
     (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
     (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
@@ -328,7 +408,9 @@ theorem sheafH_exists_preimage_of_subsingleton_middle_presheaf {X : TopCat.{u}}
   have h₂' : Subsingleton (Sheaf.H S.X₂ (n + 1)) := by
     simpa [S] using h₂H
   obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₁ _ hS' x (@Subsingleton.elim _ h₂' _ _) rfl
-  exact ⟨y, by simpa [S] using hy⟩
+  refine ⟨y, ?_⟩
+  rw [sheafH_succ_map_presheaf_apply]
+  simpa [S] using hy
 
 theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
     {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
@@ -692,10 +774,12 @@ noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle_presheaf {X : TopC
   have hπH_epi : Epi πH := by
     rw [AddCommGrpCat.epi_iff_surjective]
     intro x
-    obtain ⟨y, hy⟩ := sheafH_exists_preimage_of_subsingleton_middle_presheaf
+    obtain ⟨y, hy⟩ := sheafH_succ_map_exists_preimage_of_subsingleton_middle_presheaf
       h₁ h₂ h₃ hfg hS 0 h₂H x
+    have hy_ext : y.comp hS.extClass rfl = x := by
+      rw [← hy, sheafH_succ_map_presheaf_apply]
     have hy' : y.comp hS'.extClass rfl = x := by
-      simpa [S, F₁sh, F₂sh, F₃sh] using hy
+      simpa [S, F₁sh, F₂sh, F₃sh] using hy_ext
     refine ⟨ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤)))
       (sheafH0EquivSections_presheaf h₃ y), ?_⟩
     simpa [πH, δ] using hy'
@@ -1414,6 +1498,47 @@ theorem sheafCohomologyFunctor_map_succ_of_map_eq_presheaf {X : TopCat.{u}}
   rw [sheafCohomologyFunctor_map_extClass_naturality_presheaf
     h₁₁ h₁₂ h₁₃ h₂₁ h₂₂ h₂₃ hfg₁ hfg₂ hS₁ hS₂ hτ₁₂ hτ₂₃ n y, hy]
 
+/-- Naturality of the successor connecting morphism packaged at the `Sheaf.H` level:
+if `y` maps to `z` on the quotient side of a morphism of short exact sequences, then their
+successor connecting images map to one another. -/
+theorem sheafH_succ_map_presheaf_natural_of_map_eq {X : TopCat.{u}}
+    {F₁₁ F₁₂ F₁₃ F₂₁ F₂₂ F₂₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁₁ : F₁₁.IsSheaf) (h₁₂ : F₁₂.IsSheaf) (h₁₃ : F₁₃.IsSheaf)
+    (h₂₁ : F₂₁.IsSheaf) (h₂₂ : F₂₂.IsSheaf) (h₂₃ : F₂₃.IsSheaf)
+    {f₁ : F₁₁ ⟶ F₁₂} {g₁ : F₁₂ ⟶ F₁₃} (hfg₁ : f₁ ≫ g₁ = 0)
+    {f₂ : F₂₁ ⟶ F₂₂} {g₂ : F₂₂ ⟶ F₂₃} (hfg₂ : f₂ ≫ g₂ = 0)
+    (hS₁ : (ShortComplex.mk
+      (X₁ := (⟨F₁₁, h₁₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₁₂, h₁₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f₁)
+      (Sheaf.Hom.mk g₁)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg₁)).ShortExact)
+    (hS₂ : (ShortComplex.mk
+      (X₁ := (⟨F₂₁, h₂₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂₂, h₂₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₂₃, h₂₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f₂)
+      (Sheaf.Hom.mk g₂)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg₂)).ShortExact)
+    {τ₁ : F₁₁ ⟶ F₂₁} {τ₂ : F₁₂ ⟶ F₂₂} {τ₃ : F₁₃ ⟶ F₂₃}
+    (hτ₁₂ : τ₁ ≫ f₂ = f₁ ≫ τ₂)
+    (hτ₂₃ : τ₂ ≫ g₂ = g₁ ≫ τ₃)
+    (n : ℕ)
+    {y : Sheaf.H ((⟨F₁₃, h₁₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n}
+    {z : Sheaf.H ((⟨F₂₃, h₂₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n}
+    (hy : ConcreteCategory.hom ((sheafCohomologyFunctor X n).map (Sheaf.Hom.mk τ₃)) y = z) :
+    ConcreteCategory.hom ((sheafCohomologyFunctor X (n + 1)).map (Sheaf.Hom.mk τ₁))
+      (ConcreteCategory.hom (sheafH_succ_map_presheaf h₁₁ h₁₂ h₁₃ hfg₁ hS₁ n) y) =
+    ConcreteCategory.hom (sheafH_succ_map_presheaf h₂₁ h₂₂ h₂₃ hfg₂ hS₂ n) z := by
+  rw [sheafH_succ_map_presheaf_apply, sheafH_succ_map_presheaf_apply]
+  exact sheafCohomologyFunctor_map_succ_of_map_eq_presheaf
+    h₁₁ h₁₂ h₁₃ h₂₁ h₂₂ h₂₃ hfg₁ hfg₂ hS₁ hS₂ hτ₁₂ hτ₂₃ n hy
+
 /-- Presheaf-boundary form of the higher-degree connecting additive equivalence: if
 `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves and the
 middle cohomology groups in degrees `n` and `n + 1` are subsingleton, then the connecting
@@ -1545,6 +1670,64 @@ private theorem sheafH_succ_iso_of_subsingleton_middle_presheaf_hom_apply {X : T
       h₁ h₂ h₃ hfg hS n h₂n h₂succ y = y.comp hS.extClass rfl
   exact sheafH_extClassAddEquiv_of_subsingleton_middle_presheaf_apply
     h₁ h₂ h₃ hfg hS n h₂n h₂succ y
+
+/-- The successor connecting morphism agrees with the higher connecting isomorphism when
+the middle cohomology groups in the adjacent degrees are both subsingleton. -/
+theorem sheafH_succ_map_presheaf_eq_succ_iso_hom {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
+    (hS : (ShortComplex.mk
+      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f)
+      (Sheaf.Hom.mk g)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg)).ShortExact)
+    (n : ℕ)
+    (h₂n : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
+    (h₂succ : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1))) :
+    sheafH_succ_map_presheaf h₁ h₂ h₃ hfg hS n =
+      (sheafH_succ_iso_of_subsingleton_middle_presheaf
+        h₁ h₂ h₃ hfg hS n h₂n h₂succ).hom := by
+  ext y
+  rw [sheafH_succ_map_presheaf_apply,
+    sheafH_succ_iso_of_subsingleton_middle_presheaf_hom_apply]
+
+/-- If `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves and
+the middle cohomology groups in degrees `n` and `n + 1` are subsingleton, then every
+`H^(n+1)(F₁)` class comes from some `H^n(F₃)` class through the higher connecting
+isomorphism. -/
+theorem sheafH_exists_preimage_of_subsingleton_middle_presheaf {X : TopCat.{u}}
+    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
+    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
+    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
+    (hS : (ShortComplex.mk
+      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+      (Sheaf.Hom.mk f)
+      (Sheaf.Hom.mk g)
+      (by
+        apply Sheaf.Hom.ext
+        simpa using hfg)).ShortExact)
+    (n : ℕ)
+    (h₂n : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
+    (h₂succ : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)))
+    (x : Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)) :
+    ∃ y : Sheaf.H ((⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n,
+      ConcreteCategory.hom
+          ((sheafH_succ_iso_of_subsingleton_middle_presheaf
+            h₁ h₂ h₃ hfg hS n h₂n h₂succ).hom) y = x := by
+  obtain ⟨y, hy⟩ :=
+    sheafH_succ_map_exists_preimage_of_subsingleton_middle_presheaf
+      h₁ h₂ h₃ hfg hS n h₂succ x
+  refine ⟨y, ?_⟩
+  rw [← sheafH_succ_map_presheaf_eq_succ_iso_hom
+    h₁ h₂ h₃ hfg hS n h₂n h₂succ]
+  exact hy
 
 /-- Presheaf-boundary naturality of `sheafH_succ_iso_of_subsingleton_middle_presheaf`
     for a morphism between two short exact sequences of presheaves. -/
