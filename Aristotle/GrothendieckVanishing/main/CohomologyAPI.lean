@@ -29,10 +29,8 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
   cohomology classes through the connecting morphism
 * `sheafH0EquivSections_presheaf`: presheaf-boundary wrapper for `H^0(F) ≃+ F(⊤)`
 * `sheafH0EquivSections_presheaf_natural`: presheaf-boundary naturality of the above
-* `sheafH1_cokernel_iso_of_subsingleton_middle`: `H¹(X₁)` as the cokernel of
-  `X₂(⊤) → X₃(⊤)` when `H¹(X₂)=0`
 * `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf`: presheaf-boundary form of the
-  same `H¹` cokernel identification
+  `H¹` cokernel identification
 * `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural`: presheaf-boundary
   naturality for the same `H¹` cokernel identification
 * `sheafH_extClassAddEquiv_of_subsingleton_middle_presheaf`: presheaf-boundary additive
@@ -749,19 +747,6 @@ noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle_presheaf {X : TopC
   haveI : IsIso πH := isIso_of_mono_of_epi πH
   exact asIso πH
 
-/-- Sheaf-level wrapper for `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf`. -/
-noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
-    (h₂ : Subsingleton (Sheaf.H S.X₂ 1)) :
-    cokernel (S.g.val.app (op ⊤)) ≅ AddCommGrpCat.of (Sheaf.H S.X₁ 1) := by
-  simpa using sheafH1_cokernel_iso_of_subsingleton_middle_presheaf
-    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-    S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val)
-    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-    (by simpa using hS)
-    (by simpa using h₂)
-
 @[simp] theorem sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_hom_π {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
@@ -782,22 +767,6 @@ noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle {X : TopCat.{u}}
         (ConcreteCategory.hom (cokernel.π (g.app (op ⊤))) s) =
       ((sheafH0EquivSections_presheaf h₃).symm s).comp hS.extClass rfl := by
   simp [sheafH1_cokernel_iso_of_subsingleton_middle_presheaf]
-
-@[simp] theorem sheafH1_cokernel_iso_of_subsingleton_middle_hom_π {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
-    (h₂ : Subsingleton (Sheaf.H S.X₂ 1)) (s : S.X₃.val.obj (op ⊤)) :
-    ConcreteCategory.hom
-        ((sheafH1_cokernel_iso_of_subsingleton_middle hS h₂).hom)
-        (ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤))) s) =
-      ((sheafH0EquivSections_presheaf S.X₃.cond).symm s).comp hS.extClass rfl := by
-  simpa using sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_hom_π
-    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-    S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val)
-    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-    (by simpa using hS)
-    (by simpa using h₂)
-    s
 
 /-- Presheaf-boundary `H¹`-vanishing criterion for surjective top sections:
     if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves
