@@ -659,7 +659,7 @@ theorem sheafH_filtered_colimit_surj_presheaf
     have hSE_j : ∀ j, (ShortComplex.mk (η.app j) (cokernel.π (η.app j))
         (cokernel.condition (η.app j))).ShortExact :=
       sheafH_filtered_colimit_succ_stage_shortExact (Y' := Ysh)
-    obtain ⟨y, hy⟩ := sheafH_exists_preimage_extClass_presheaf
+    obtain ⟨y, hy⟩ := sheafH_exists_preimage_of_subsingleton_middle_presheaf
       S.X₁.cond S.X₂.cond S.X₃.cond
       (f := S.f.val) (g := S.g.val)
       (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
