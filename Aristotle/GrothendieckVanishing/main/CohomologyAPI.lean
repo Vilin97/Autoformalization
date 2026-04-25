@@ -1338,7 +1338,7 @@ noncomputable def sheafH0NatIsoSections {X : TopCat.{u}} :
 /-- Functor-level naturality of the connecting morphism on sheaf cohomology. This is the
     `sheafCohomologyFunctor`-packaged form of
     `sheafH_comp_extClass_naturality_presheaf`. -/
-theorem sheafCohomologyFunctor_map_extClass_naturality_presheaf {X : TopCat.{u}}
+private theorem sheafCohomologyFunctor_map_extClass_naturality_presheaf {X : TopCat.{u}}
     {F₁₁ F₁₂ F₁₃ F₂₁ F₂₂ F₂₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁₁ : F₁₁.IsSheaf) (h₁₂ : F₁₂.IsSheaf) (h₁₃ : F₁₃.IsSheaf)
     (h₂₁ : F₂₁.IsSheaf) (h₂₂ : F₂₂.IsSheaf) (h₂₃ : F₂₃.IsSheaf)
