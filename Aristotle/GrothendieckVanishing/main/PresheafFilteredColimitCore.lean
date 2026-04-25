@@ -95,7 +95,8 @@ The genuinely geometric input starts afterwards:
   stages and cocone point are sheaves, the canonical comparison is epi
 - `sheafH_filtered_colimit_comparison_epi`: on Noetherian spaces and filtered diagrams,
   this canonical comparison is epi
-- `sheafH_filtered_colimit_surj`: every element of `H^n(colim F_j)` comes from some `H^n(F_j)`
+- `sheafH_filtered_colimit_surj_presheaf`: every element of `H^n(colim F_j)` comes from some
+  `H^n(F_j)`
   via the canonical map. The proof uses per-object functorial injective embeddings via Mathlib's
   `IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp` and dimension shifting.
 - `sheafH_preserves_filtered_colimits_presheaf`: the filtered-colimit comparison isomorphism
@@ -717,33 +718,6 @@ theorem sheafH_filtered_colimit_surj_presheaf
         simpa using congrArg Sheaf.Hom.val
           ((sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j₀).comm₂₃))
       n hy_j).trans hy
-
-/-- **Sheaf cohomology commutes with filtered colimits (surjectivity)** on Noetherian spaces.
-    Every element of `H^n(colim F_j)` comes from some `H^n(F_j)` via the canonical map.
-    Together with injectivity (not proved here), this gives `colim H^n(F_j) ≅ H^n(colim F_j)`. -/
-theorem sheafH_filtered_colimit_surj
-    {X : TopCat.{u}} [NoetherianSpace X]
-    (n : ℕ) :
-    ∀ {J' : Type u} [SmallCategory J'] [IsFiltered J']
-      (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-      (c' : Cocone Y') (_ : IsColimit c')
-      (x : Sheaf.H c'.pt n),
-    ∃ (j : J') (y : Sheaf.H (Y'.obj j) n),
-      ConcreteCategory.hom ((sheafCohomologyFunctor X n).map (c'.ι.app j)) y = x := by
-  intro J' inst1 inst2 Y' c' hc' x
-  letI := inst1
-  letI := inst2
-  haveI : CreatesColimit Y'
-      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
-    createsFilteredColimit Y'
-  simpa using
-    (sheafH_filtered_colimit_surj_presheaf (X := X) (n := n)
-      (Y := Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-      (hY := fun j => (Y'.obj j).cond)
-      (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
-      (hc_pt := c'.pt.cond) (x := x)
-      (isColimitOfPreserves
-        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc'))
 
 /-- The sheaf-valued diagram obtained by bundling a presheaf diagram whose stages are sheaves. -/
 def sheafH_filtered_colimit_presheafDiagram
