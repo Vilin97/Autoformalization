@@ -35,7 +35,7 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
   naturality for the same `H¹` cokernel identification
 * `sheafH_succ_iso_of_subsingleton_middle_presheaf`: presheaf-boundary form of the
   higher-degree connecting isomorphism
-* `sheafH_extClassIso_of_subsingleton_middle_presheaf_natural`: presheaf-boundary
+* `sheafH_succ_iso_of_subsingleton_middle_presheaf_natural`: presheaf-boundary
   naturality for the same connecting isomorphism
 * `epi_app_top_of_subsingleton_sheafH1_presheaf`: presheaf-boundary H^1 vanishing gives
   surjectivity on top sections
@@ -1549,7 +1549,7 @@ private theorem sheafH_succ_iso_of_subsingleton_middle_presheaf_hom_apply {X : T
 
 /-- Presheaf-boundary naturality of `sheafH_succ_iso_of_subsingleton_middle_presheaf`
     for a morphism between two short exact sequences of presheaves. -/
-theorem sheafH_extClassIso_of_subsingleton_middle_presheaf_natural {X : TopCat.{u}}
+theorem sheafH_succ_iso_of_subsingleton_middle_presheaf_natural {X : TopCat.{u}}
     {F₁₁ F₁₂ F₁₃ F₂₁ F₂₂ F₂₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁₁ : F₁₁.IsSheaf) (h₁₂ : F₁₂.IsSheaf) (h₁₃ : F₁₃.IsSheaf)
     (h₂₁ : F₂₁.IsSheaf) (h₂₂ : F₂₂.IsSheaf) (h₂₃ : F₂₃.IsSheaf)
