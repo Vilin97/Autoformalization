@@ -25,7 +25,7 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
   vanishing under stalk-surjectivity
 * `stalk_zero_of_shortExact_cokernel_presheaf`: presheaf-boundary short exact
   specialization of the same cokernel stalk vanishing
-* `sheafH_exists_preimage_extClass_presheaf`: presheaf-boundary wrapper for lifting
+* `sheafH_exists_preimage_of_subsingleton_middle_presheaf`: presheaf-boundary wrapper for lifting
   cohomology classes through the connecting morphism
 * `sheafH0EquivSections_presheaf`: presheaf-boundary wrapper for `H^0(F) ≃+ F(⊤)`
 * `sheafH0EquivSections_presheaf_natural`: presheaf-boundary naturality of the above
@@ -296,7 +296,7 @@ private theorem sheafH_comp_extClass_naturality_presheaf {X : TopCat.{u}}
 /-- If `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves and
 `H^(n+1)(F₂)` is subsingleton, then every `H^(n+1)(F₁)` class comes from some `H^n(F₃)`
 class via the connecting morphism. -/
-theorem sheafH_exists_preimage_extClass_presheaf {X : TopCat.{u}}
+theorem sheafH_exists_preimage_of_subsingleton_middle_presheaf {X : TopCat.{u}}
     {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
     (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
     {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
@@ -692,7 +692,7 @@ noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle_presheaf {X : TopC
   have hπH_epi : Epi πH := by
     rw [AddCommGrpCat.epi_iff_surjective]
     intro x
-    obtain ⟨y, hy⟩ := sheafH_exists_preimage_extClass_presheaf
+    obtain ⟨y, hy⟩ := sheafH_exists_preimage_of_subsingleton_middle_presheaf
       h₁ h₂ h₃ hfg hS 0 h₂H x
     have hy' : y.comp hS'.extClass rfl = x := by
       simpa [S, F₁sh, F₂sh, F₃sh] using hy
