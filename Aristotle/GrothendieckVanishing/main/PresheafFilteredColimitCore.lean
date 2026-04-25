@@ -681,7 +681,7 @@ theorem sheafH_filtered_colimit_surj_presheaf
     show ConcreteCategory.hom
         ((sheafCohomologyFunctor X (n + 1)).map ((csh.ι.app j₀))) x_j = x
     rw [show x_j = y_j.comp (hSE_j j₀).extClass rfl from rfl]
-    exact (sheafCohomologyFunctor_map_extClass_of_map_eq_presheaf
+    exact (sheafCohomologyFunctor_map_succ_of_map_eq_presheaf
       (h₁₁ := (Ysh.obj j₀).cond)
       (h₁₂ := ((sheafH_filtered_colimit_succ_Inj Ysh).obj j₀).cond)
       (h₁₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).cond)
