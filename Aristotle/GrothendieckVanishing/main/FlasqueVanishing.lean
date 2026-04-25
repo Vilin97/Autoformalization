@@ -245,7 +245,7 @@ private lemma under_exists_extension_containing {X : TopCat.{u}}
   refine ⟨t_new_under, h_extend, ?_⟩
   simpa [t_new_under] using hxBU
 
-private lemma structuredArrowsElementsSheafChainsBounded {X : TopCat.{u}}
+private lemma under_chain_upper_bound {X : TopCat.{u}}
     {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
     (g : F ⟶ G) {U : Opens X} (s : G.val.obj (op U))
     (c : Set (Under g s))
@@ -315,6 +315,14 @@ private lemma structuredArrowsElementsSheafChainsBounded {X : TopCat.{u}}
     (CategoryOfElements.homMk _ _ (homOfLE (le_iSup cV ⟨a, ha⟩)).op (by
       simpa [ub, cV, cs] using ht_gl ⟨a, ha⟩))
     (by cat_disch))
+
+private lemma structuredArrowsElementsSheafChainsBounded {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
+    (g : F ⟶ G) {U : Opens X} (s : G.val.obj (op U))
+    (c : Set (Under g s))
+    (hchain : IsChain (fun x y => Nonempty (y ⟶ x)) c) :
+    ∃ ub, ∀ a ∈ c, Nonempty (ub ⟶ a) := by
+  exact under_chain_upper_bound g s c hchain
 
 private lemma under_maximal_eq_top {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
