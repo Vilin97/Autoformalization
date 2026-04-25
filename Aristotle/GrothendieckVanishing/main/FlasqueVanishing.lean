@@ -387,22 +387,6 @@ theorem epi_app_of_shortExact_of_epi_restrictions_presheaf {X : TopCat.{u}}
       Subsingleton.elim _ _]
     simp⟩
 
-/-- If `0 → X₁ → X₂ → X₃ → 0` is short exact and every restriction map of the
-underlying presheaf `S.X₁.val` is epi, then `g(U) : X₂(U) → X₃(U)` is epi. -/
-theorem epi_app_of_shortExact_of_epi_restrictions {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact)
-    (hX₁_epi : ∀ {U V : Opens X} (i : U ⟶ V), Epi (S.X₁.val.map i.op))
-    (U : Opens X) :
-    Epi (S.g.val.app (op U)) := by
-  simpa using epi_app_of_shortExact_of_epi_restrictions_presheaf
-    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-    S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val)
-    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-    (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS)
-    hX₁_epi U
-
 /-- If `0 → F₁ → F₂ → F₃ → 0` is short exact on associated sheaves and
 `⟨F₁, h₁⟩` is flasque, then `g(U) : F₂(U) → F₃(U)` is epi. -/
 theorem epi_app_of_shortExact_flasque_presheaf {X : TopCat.{u}}
