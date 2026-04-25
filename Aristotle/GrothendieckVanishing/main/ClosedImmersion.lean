@@ -34,8 +34,8 @@ Main results:
   `closedIncl_pushforward_shortExact` package exactness of pushforward along the
   closed inclusion for `AddCommGrpCat`-valued sheaves.
 - `stalkFunctor_map_iso_toSheafify` identifies the stalk of sheafification with an isomorphism.
-- `closedIncl_counit_isIso_presheaf` and `closedIncl_counit_isIso` identify the
-  pushforward-pullback counit for presheaves and sheaves on the closed subspace.
+- `closedIncl_counit_isIso_presheaf` identifies the pushforward-pullback counit for
+  presheaves on the closed subspace carrying a sheaf condition.
 - `stalkPullbackHom_naturality` is the stalk-level naturality needed to compare the unit with
   the counit isomorphism.
 - `closedIncl_unit_stalk_isIso` shows that the adjunction unit is an isomorphism on stalks at
@@ -229,21 +229,6 @@ theorem closedIncl_counit_isIso_presheaf
             C (Opens.grothendieckTopology X)
             (Opens.grothendieckTopology (TopCat.of s))).Faithful)
   infer_instance
-
-theorem closedIncl_counit_isIso
-    {C : Type*} [Category.{u} C]
-    {FC : C → C → Type*} {CC : C → Type u}
-    [∀ (X Y : C), FunLike (FC X Y) (CC X) (CC Y)]
-    [ConcreteCategory C FC]
-    [HasColimits C] [HasLimits C]
-    [PreservesLimits (forget C)]
-    [PreservesFilteredColimits (forget C)]
-    [(forget C).ReflectsIsomorphisms]
-    {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    (F : TopCat.Sheaf C (TopCat.of s)) :
-    IsIso ((TopCat.Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)).counit.app F) := by
-  simpa using
-    (closedIncl_counit_isIso_presheaf (C := C) (hs := hs) (F := F.val) F.cond)
 
 end TopCat
 
