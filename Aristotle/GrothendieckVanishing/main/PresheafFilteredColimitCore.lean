@@ -5,8 +5,9 @@ import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
   # Noetherian filtered-colimit infrastructure for sheaf cohomology
 
   This file contains the Noetherian sheaf infrastructure used to compare sheaf
-  cohomology with filtered colimits: creation by `sheafToPresheaf`, flasqueness,
-  successor-stage dimension shifts, and presheaf-boundary comparison maps.
+  cohomology with filtered colimits: creation by `sheafToPresheaf`,
+  `isFlasque_filtered_colimit_presheaf`, successor-stage dimension shifts, and
+  presheaf-boundary comparison maps.
 -/
 
 universe u
@@ -82,27 +83,6 @@ theorem isFlasque_filtered_colimit_presheaf
       (congrArg ConcreteCategory.hom ((c.ι.app j₀).naturality i.op).symm)) a₀,
     ha₀]
   exact hb₀
-
-/-- Filtered colimits of flasque sheaves on Noetherian spaces are flasque. -/
-theorem isFlasque_filtered_colimit
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J : Type u} [SmallCategory J] [IsFiltered J]
-    (F : J ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (hFlasque : ∀ j, IsFlasqueSheaf (F.obj j))
-    {c : Cocone F} (hc : IsColimit c) :
-    IsFlasqueSheaf c.pt := by
-  letI : CreatesColimit F
-      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
-    createsFilteredColimit F
-  simpa using
-    (isFlasque_filtered_colimit_presheaf
-      (F := F ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-      (hF := fun j => (F.obj j).cond)
-      (hFlasque := fun j => by simpa using hFlasque j)
-      (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c)
-      (hc := isColimitOfPreserves
-        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc)
-      (hc_pt := c.pt.cond))
 
 /-! ### Sheaf cohomology and filtered colimits
 
