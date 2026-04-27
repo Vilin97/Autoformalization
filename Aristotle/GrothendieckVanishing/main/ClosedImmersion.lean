@@ -34,7 +34,7 @@ Main results:
   `closedIncl_pushforward_shortExact` package exactness of pushforward along the
   closed inclusion for `AddCommGrpCat`-valued sheaves.
 - `stalkFunctor_map_iso_toSheafify` identifies the stalk of sheafification with an isomorphism.
-- `closedIncl_counit_isIso_presheaf` identifies the pushforward-pullback counit for
+- `closedIncl_counit_isIso` identifies the pushforward-pullback counit for
   presheaves on the closed subspace carrying a sheaf condition.
 - `stalkPullbackHom_naturality` is the stalk-level naturality needed to compare the unit with
   the counit isomorphism.
@@ -182,7 +182,7 @@ theorem stalkFunctor_map_iso_toSheafify
       ((TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks
         (T := CategoryTheory.toSheafify (Opens.grothendieckTopology X) P)).mp hls) x
 
-theorem closedIncl_counit_isIso_presheaf
+theorem closedIncl_counit_isIso
     {C : Type*} [Category.{u} C]
     {FC : C → C → Type*} {CC : C → Type u}
     [∀ (X Y : C), FunLike (FC X Y) (CC X) (CC Y)]
@@ -192,11 +192,9 @@ theorem closedIncl_counit_isIso_presheaf
     [PreservesFilteredColimits (forget C)]
     [(forget C).ReflectsIsomorphisms]
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    {F : TopCat.Presheaf C (TopCat.of s)} (hF : F.IsSheaf) :
+    (F : TopCat.Sheaf C (TopCat.of s)) :
     IsIso ((TopCat.Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)).counit.app
-      (⟨F, hF⟩ : TopCat.Sheaf C (TopCat.of s))) := by
-  let Fsh : TopCat.Sheaf C (TopCat.of s) := ⟨F, hF⟩
-  change IsIso ((TopCat.Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)).counit.app Fsh)
+      F) := by
   letI : (Opens.map (closedIncl hs)).IsCoverDense
       (Opens.grothendieckTopology (TopCat.of s)) :=
     opensMap_isCoverDense_of_isInducing (closedIncl_isInducing hs)
@@ -415,24 +413,22 @@ theorem closedIncl_unit_stalk_isIso
     [PreservesFilteredColimits (forget C)]
     [(forget C).ReflectsIsomorphisms]
     {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    {F : TopCat.Presheaf C X} (hF : F.IsSheaf) (x : TopCat.of s) :
+    (F : TopCat.Sheaf C X) (x : TopCat.of s) :
     IsIso ((Presheaf.stalkFunctor C ((closedIncl hs) x)).map
       ((Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)).unit.app
-        (⟨F, hF⟩ : TopCat.Sheaf C X)).val) := by
-  let Fsh : TopCat.Sheaf C X := ⟨F, hF⟩
+        F).val) := by
   -- Use the triangle identity + counit iso
   let adj := Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)
   let pb := Sheaf.pullback C (closedIncl hs)
-  let η := adj.unit.app Fsh
-  haveI : IsIso (adj.counit.app (pb.obj Fsh)) := by
+  let η := adj.unit.app F
+  haveI : IsIso (adj.counit.app (pb.obj F)) := by
     simpa using
-      (closedIncl_counit_isIso_presheaf (C := C) (hs := hs)
-        (F := (pb.obj Fsh).val) (pb.obj Fsh).cond)
+      (closedIncl_counit_isIso (C := C) (hs := hs) (pb.obj F))
   haveI : IsIso (pb.map η) := by
-    have htri : pb.map η ≫ adj.counit.app (pb.obj Fsh) = 𝟙 _ :=
-      adj.left_triangle_components Fsh
-    rw [show pb.map η = inv (adj.counit.app (pb.obj Fsh)) from by
-      apply (cancel_mono (adj.counit.app (pb.obj Fsh))).mp; simp [htri]]
+    have htri : pb.map η ≫ adj.counit.app (pb.obj F) = 𝟙 _ :=
+      adj.left_triangle_components F
+    rw [show pb.map η = inv (adj.counit.app (pb.obj F)) from by
+      apply (cancel_mono (adj.counit.app (pb.obj F))).mp; simp [htri]]
     infer_instance
   -- Step 2: val stalk of pb.map(η) is iso
   haveI : IsIso (pb.map η).val := by
@@ -440,8 +436,8 @@ theorem closedIncl_unit_stalk_isIso
   let Tz := Presheaf.stalkFunctor C x
   -- Step 3: pullbackIso naturality
   let pi := Sheaf.pullbackIso C (closedIncl hs)
-  let piF := pi.hom.app Fsh
-  let piT := pi.hom.app ((Sheaf.pushforward C (closedIncl hs)).obj (pb.obj Fsh))
+  let piF := pi.hom.app F
+  let piT := pi.hom.app ((Sheaf.pushforward C (closedIncl hs)).obj (pb.obj F))
   haveI : IsIso piF.val := by show IsIso ((sheafToPresheaf _ _).map piF); infer_instance
   haveI : IsIso piT.val := by show IsIso ((sheafToPresheaf _ _).map piT); infer_instance
   have hnat : (pb.map η).val ≫ piT.val = piF.val ≫
@@ -455,9 +451,9 @@ theorem closedIncl_unit_stalk_isIso
     IsIso.of_isIso_fac_left hnat_stalk.symm
   -- Step 5: toSheafify naturality → pull.map(η.val) stalk is iso
   let K := Opens.grothendieckTopology (TopCat.of s)
-  let P₁ := (Presheaf.pullback C (closedIncl hs)).obj F
+  let P₁ := (Presheaf.pullback C (closedIncl hs)).obj F.val
   let P₂ := (Presheaf.pullback C (closedIncl hs)).obj
-    ((Sheaf.pushforward C (closedIncl hs)).obj (pb.obj Fsh)).val
+    ((Sheaf.pushforward C (closedIncl hs)).obj (pb.obj F)).val
   have hts : Tz.map ((Presheaf.pullback C (closedIncl hs)).map η.val) ≫
       Tz.map (CategoryTheory.toSheafify K P₂) =
     Tz.map (CategoryTheory.toSheafify K P₁) ≫ Tz.map
@@ -471,13 +467,13 @@ theorem closedIncl_unit_stalk_isIso
     IsIso.of_isIso_fac_right hts
   -- Step 6: stalkPull_nat → η.val stalk is iso
   haveI : IsIso (Presheaf.stalkPullbackHom C (closedIncl hs)
-      ((𝟭 (Sheaf C X)).obj Fsh).val x) := by
+      ((𝟭 (Sheaf C X)).obj F).val x) := by
     simpa using
-      (Presheaf.stalkPullbackIso C (closedIncl hs) ((𝟭 (Sheaf C X)).obj Fsh).val x).isIso_hom
+      (Presheaf.stalkPullbackIso C (closedIncl hs) ((𝟭 (Sheaf C X)).obj F).val x).isIso_hom
   haveI : IsIso (Presheaf.stalkPullbackHom C (closedIncl hs)
-      ((pb ⋙ Sheaf.pushforward C (closedIncl hs)).obj Fsh).val x) :=
+      ((pb ⋙ Sheaf.pushforward C (closedIncl hs)).obj F).val x) :=
     (Presheaf.stalkPullbackIso C (closedIncl hs)
-      ((pb ⋙ Sheaf.pushforward C (closedIncl hs)).obj Fsh).val x).isIso_hom
+      ((pb ⋙ Sheaf.pushforward C (closedIncl hs)).obj F).val x).isIso_hom
   exact IsIso.of_isIso_fac_right (stalkPullbackHom_naturality (closedIncl hs) η.val x)
 
 end TopCat
@@ -485,34 +481,33 @@ end TopCat
 -- The adjunction unit `F → i_*(i^*F)` is epi for closed immersions.
 theorem epi_unit_of_closedImmersion
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
     Epi ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
-      (TopCat.closedIncl hZ)).unit.app (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+      (TopCat.closedIncl hZ)).unit.app F) := by
   let closedIncl := TopCat.closedIncl hZ
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
   let adj := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} closedIncl
   letI : Balanced (Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
     balanced_of_strongEpiCategory
-  rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} (adj.unit.app Fsh),
-    show Sheaf.IsLocallySurjective (adj.unit.app Fsh) =
-      TopCat.Presheaf.IsLocallySurjective (adj.unit.app Fsh).val from rfl,
+  rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} (adj.unit.app F),
+    show Sheaf.IsLocallySurjective (adj.unit.app F) =
+      TopCat.Presheaf.IsLocallySurjective (adj.unit.app F).val from rfl,
     TopCat.Presheaf.locally_surjective_iff_surjective_on_stalks]
   intro x
   by_cases hxZ : (x : X) ∈ Z
   · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u}
-        ((TopCat.closedIncl hZ) ⟨x, hxZ⟩)).map (adj.unit.app Fsh).val) := by
-      simpa [Fsh] using
+        ((TopCat.closedIncl hZ) ⟨x, hxZ⟩)).map (adj.unit.app F).val) := by
+      simpa using
         (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
-          (hs := hZ) (F := F) hF ⟨x, hxZ⟩)
+          (hs := hZ) F ⟨x, hxZ⟩)
     exact (ConcreteCategory.bijective_of_isIso
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} ((TopCat.closedIncl hZ) ⟨x, hxZ⟩)).map
         ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
-          (TopCat.closedIncl hZ)).unit.app Fsh).val)).2
+          (TopCat.closedIncl hZ)).unit.app F).val)).2
   · exact fun b => ⟨0, by
       rw [pushforward_closedIncl_stalk_eq_zero
         (hs := hZ)
-        (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Fsh).val)
-        (((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Fsh).cond)
+        (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj F).val)
+        (((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj F).cond)
         hxZ b]
       exact map_zero _⟩
 
@@ -521,18 +516,17 @@ theorem epi_unit_of_closedImmersion
     inclusion of a closed subset. -/
 noncomputable def closedImmersionSES
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
     ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   let closedIncl := TopCat.closedIncl hZ
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} closedIncl).unit.app Fsh
+  let η := (TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u} closedIncl).unit.app F
   ShortComplex.mk (kernel.ι η) η (kernel.condition η)
 
 theorem closedImmersionSES_shortExact
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
-    (closedImmersionSES (Z := Z) (hZ := hZ) (F := F) hF).ShortExact := by
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
+    (closedImmersionSES (Z := Z) (hZ := hZ) F).ShortExact := by
   unfold closedImmersionSES
-  haveI := epi_unit_of_closedImmersion (Z := Z) (hZ := hZ) (F := F) hF
+  haveI := epi_unit_of_closedImmersion (Z := Z) (hZ := hZ) F
   exact ShortComplex.ShortExact.mk'
     (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel _)) inferInstance inferInstance
