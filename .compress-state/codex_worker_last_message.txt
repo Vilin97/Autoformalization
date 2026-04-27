@@ -1,16 +1,15 @@
-Completed cycle 18.
+Deleted the unused wrapper `epiImage_zeroOutsideInt_vanishing` from [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:563). Kept `epiImage_zeroOutsideInt_vanishing_of_locallySurjective` intact; it remains defined and called by `IrreduciblePosVanishing`.
 
-Deleted the six unused wrappers from [GeneratedSubsheaf.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean), leaving `familyMap` and `familyImage` intact. Wrote the report at [cycle_18.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_18.md).
+Wrote the required report at [.compress-state/codex_task_results/cycle_19.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_19.md:1).
 
 Verification passed:
-- post-delete `rg` found no target names in `main`
-- `lake env lean GeneratedSubsheaf.lean`
-- `lake env lean FinitelyGeneratedVanishing.lean`
-- `lake env lean ZeroOutsideFinset.lean`
-- `lake build` completed successfully
+- Exact-name `rg` after deletion: no `epiImage_zeroOutsideInt_vanishing` matches.
+- `_of_locallySurjective` search: definition plus call site remain.
+- `lake env lean Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean`
+- `lake build`
 
-LOC:
-- normalized: `5185 -> 5151` (`-34`)
-- raw `main/*.lean`: `6127 -> 6077` (`-50`)
+Metrics:
+- Normalized LOC: `5151` → `5131` (`-20`)
+- Raw `main/*.lean` `wc -l`: `6077` → `6056` (`-21`)
 
-No commit or push performed.
+I did not commit or push.

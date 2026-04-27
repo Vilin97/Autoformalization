@@ -563,27 +563,6 @@ theorem epiImage_zeroOutsideInt_vanishing_of_locallySurjective
         (zeroOutsideInt_cohomology_vanishing V hV ih m hm)
         hkernel
 
-theorem epiImage_zeroOutsideInt_vanishing
-    {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
-    {V : Opens X} {G : TopCat.Presheaf AddCommGrpCat.{u} X} (hG : G.IsSheaf)
-    (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G) [Epi f]
-    (ih : VanishingIH.{u} (topologicalKrullDim X))
-    (m : ℕ) (hm : m > topologicalKrullDim X) :
-    Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
-  let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
-  let fsh : TopCat.Sheaf.zeroOutsideInt V ⟶ Gsh := Sheaf.Hom.mk f
-  haveI : Epi fsh := by
-    exact Sheaf.Hom.epi_of_presheaf_epi
-      (J := Opens.grothendieckTopology X) (A := AddCommGrpCat.{u}) fsh
-  letI : Balanced (CategoryTheory.Sheaf (Opens.grothendieckTopology X)
-      AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
-  have hf : TopCat.Presheaf.IsLocallySurjective f := by
-    simpa [fsh] using
-      (show Sheaf.IsLocallySurjective fsh from
-        (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} fsh).mpr inferInstance)
-  exact epiImage_zeroOutsideInt_vanishing_of_locallySurjective
-    (V := V) (G := G) hG f hf ih m hm
-
 -- Filtered diagram infrastructure, finitely generated vanishing, and
 -- directLimit_cohomology_vanishing are in FinitelyGeneratedVanishing.lean.
 
