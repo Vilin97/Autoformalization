@@ -81,31 +81,31 @@ become unreachable, cascading the deletion).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH0NatIsoSections_inv_app\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
 - [x] Delete unused declaration `sheafH_dimension_shift_X₃_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_dimension_shift_X₃_presheaf\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
-- [ ] Delete unused declaration `sheafH_exists_preimage_of_subsingleton_middle_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `sheafH_exists_preimage_of_subsingleton_middle_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_exists_preimage_of_subsingleton_middle_presheaf\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
 - [x] Delete unused declaration `sheafH_subsingleton_of_isEmpty` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_subsingleton_of_isEmpty\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
-- [ ] Delete unused declaration `sheafH_succ_map_presheaf_eq_succ_iso_hom` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `sheafH_succ_map_presheaf_eq_succ_iso_hom` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_succ_map_presheaf_eq_succ_iso_hom\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
-- [ ] Delete unused declaration `sheafH_succ_map_presheaf_natural_of_map_eq` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `sheafH_succ_map_presheaf_natural_of_map_eq` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_succ_map_presheaf_natural_of_map_eq\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
 - [x] Delete unused declaration `stalk_zero_of_shortExact_cokernel_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) stalk_zero_of_shortExact_cokernel_presheaf\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
 - [x] Delete unused declaration `ulift_int_projective` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) ulift_int_projective\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
-- [ ] Delete unused declaration `IsFlasqueSheaf.casesOn` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `IsFlasqueSheaf.casesOn` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) IsFlasqueSheaf\.casesOn\b' Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean
-- [ ] Delete unused declaration `IsFlasqueSheaf.rec` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `IsFlasqueSheaf.rec` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) IsFlasqueSheaf\.rec\b' Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean
-- [ ] Delete unused declaration `IsFlasqueSheaf.recOn` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `IsFlasqueSheaf.recOn` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) IsFlasqueSheaf\.recOn\b' Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean
-- [ ] Delete unused declaration `sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map_presheaf` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map_presheaf` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map_presheaf\b' Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean
-- [ ] Delete unused declaration `sheafH_subsingleton_H1_of_flasque_of_epi_app_top_presheaf` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `sheafH_subsingleton_H1_of_flasque_of_epi_app_top_presheaf` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_subsingleton_H1_of_flasque_of_epi_app_top_presheaf\b' Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean
-- [ ] Delete unused declaration `sheafShortComplexOfPresheaf_f_val` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `sheafShortComplexOfPresheaf_f_val` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafShortComplexOfPresheaf_f_val\b' Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean
-- [ ] Delete unused declaration `sheafShortComplexOfPresheaf_g_val` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `sheafShortComplexOfPresheaf_g_val` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafShortComplexOfPresheaf_g_val\b' Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean
 - [x] Delete unused declaration `TopCat.Sheaf.SectionIndex` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Sheaf\.SectionIndex\b' Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean
@@ -133,29 +133,29 @@ become unreachable, cascading the deletion).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) epiImage_zeroOutsideInt_vanishing\b' Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean
 - [x] Delete unused declaration `sheafH_preserves_filtered_colimits_presheaf_hom_epi` from `PresheafFilteredColimit.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_preserves_filtered_colimits_presheaf_hom_epi\b' Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean
-- [ ] Delete unused declaration `sheafH_filtered_colimit_presheafCocone_sheafToPresheaf` from `PresheafFilteredColimitCore.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `sheafH_filtered_colimit_presheafCocone_sheafToPresheaf` from `PresheafFilteredColimitCore.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_filtered_colimit_presheafCocone_sheafToPresheaf\b' Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean
-- [ ] Delete unused declaration `sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf` from `PresheafFilteredColimitCore.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf` from `PresheafFilteredColimitCore.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf\b' Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean
-- [ ] Delete unused declaration `sheafH_filtered_colimit_surj_presheaf` from `PresheafFilteredColimitCore.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `sheafH_filtered_colimit_surj_presheaf` from `PresheafFilteredColimitCore.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_filtered_colimit_surj_presheaf\b' Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean
-- [ ] Delete unused declaration `sheafH_presheafDiagram_sheafToPresheaf` from `PresheafFilteredColimitCore.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `sheafH_presheafDiagram_sheafToPresheaf` from `PresheafFilteredColimitCore.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_presheafDiagram_sheafToPresheaf\b' Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean
-- [ ] Delete unused declaration `TopologicalSpace.IrreducibleCloseds.height_eq_order_height` from `TopologicalKrullDim.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopologicalSpace.IrreducibleCloseds.height_eq_order_height` from `TopologicalKrullDim.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopologicalSpace\.IrreducibleCloseds\.height_eq_order_height\b' Aristotle/GrothendieckVanishing/main/TopologicalKrullDim.lean
-- [ ] Delete unused declaration `TopologicalSpace.IrreducibleCloseds.height_mono` from `TopologicalKrullDim.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopologicalSpace.IrreducibleCloseds.height_mono` from `TopologicalKrullDim.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopologicalSpace\.IrreducibleCloseds\.height_mono\b' Aristotle/GrothendieckVanishing/main/TopologicalKrullDim.lean
-- [ ] Delete unused declaration `topologicalKrullDim_eq_bot_iff_isEmpty` from `TopologicalKrullDim.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `topologicalKrullDim_eq_bot_iff_isEmpty` from `TopologicalKrullDim.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) topologicalKrullDim_eq_bot_iff_isEmpty\b' Aristotle/GrothendieckVanishing/main/TopologicalKrullDim.lean
-- [ ] Delete unused declaration `TopCat.Presheaf.zeroOutside.sHom_app` from `ZeroOutside.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopCat.Presheaf.zeroOutside.sHom_app` from `ZeroOutside.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Presheaf\.zeroOutside\.sHom_app\b' Aristotle/GrothendieckVanishing/main/ZeroOutside.lean
-- [ ] Delete unused declaration `TopCat.Presheaf.zeroOutside_map` from `ZeroOutside.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopCat.Presheaf.zeroOutside_map` from `ZeroOutside.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Presheaf\.zeroOutside_map\b' Aristotle/GrothendieckVanishing/main/ZeroOutside.lean
-- [ ] Delete unused declaration `TopCat.Presheaf.zeroOutside_obj` from `ZeroOutside.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopCat.Presheaf.zeroOutside_obj` from `ZeroOutside.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Presheaf\.zeroOutside_obj\b' Aristotle/GrothendieckVanishing/main/ZeroOutside.lean
-- [ ] Delete unused declaration `TopCat.Presheaf.zeroOutside_openHom_app` from `ZeroOutside.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopCat.Presheaf.zeroOutside_openHom_app` from `ZeroOutside.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Presheaf\.zeroOutside_openHom_app\b' Aristotle/GrothendieckVanishing/main/ZeroOutside.lean
-- [ ] Delete unused declaration `TopCat.Sheaf.zeroOutsideInt.sHom_val` from `ZeroOutside.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopCat.Sheaf.zeroOutsideInt.sHom_val` from `ZeroOutside.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Sheaf\.zeroOutsideInt\.sHom_val\b' Aristotle/GrothendieckVanishing/main/ZeroOutside.lean
 
 ---
