@@ -103,6 +103,113 @@ lemma sections_exact_of_shortExact_presheaf {X : TopCat.{u}}
   simpa [Ssh, sheafShortComplexOfPresheaf] using
     (ShortComplex.ab_exact_iff _).mp hexact x hx
 
+private lemma presheaf_map_eq {X : TopCat.{u}}
+    (F : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u})
+    {U V : Opens X} (f g : U ⟶ V) (s : F.obj (op V)) :
+    F.map f.op s = F.map g.op s :=
+  congr_arg (F.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim f g))
+
+private lemma map_glued_eq_of_local_eq {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (g : F ⟶ G)
+    {ι : Type*} {U : Opens X} {B : ι → Opens X}
+    {s : G.val.obj (op U)} {sF : ∀ i, F.val.obj (op (B i))}
+    {t : F.val.obj (op (iSup B))}
+    (hBU : ∀ i, B i ≤ U)
+    (ht : TopCat.Presheaf.IsGluing F.val B sF t)
+    (hlocal : ∀ i, ConcreteCategory.hom (g.val.app (op (B i))) (sF i) =
+      ConcreteCategory.hom (G.val.map (homOfLE (hBU i)).op) s) :
+    ConcreteCategory.hom (g.val.app (op (iSup B))) t =
+      ConcreteCategory.hom (G.val.map (homOfLE (iSup_le hBU)).op) s := by
+  apply G.eq_of_locally_eq
+  intro i
+  rw [← g.val.naturality_apply _ t, ht i, hlocal i]
+  rw [← CategoryTheory.comp_apply, ← G.val.map_comp]
+  exact presheaf_map_eq G.val _ _ s
+
+private lemma exists_patch_of_shortExact {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact)
+    (hX₁_epi : ∀ {U V : Opens X} (i : U ⟶ V), Epi (S.X₁.val.map i.op))
+    {U V W : Opens X} {s : S.X₃.val.obj (op U)}
+    (hVU : V ≤ U) (hWU : W ≤ U)
+    {tV : S.X₂.val.obj (op V)} {tW : S.X₂.val.obj (op W)}
+    (htV : ConcreteCategory.hom (S.g.val.app (op V)) tV =
+      ConcreteCategory.hom (S.X₃.val.map (homOfLE hVU).op) s)
+    (htW : ConcreteCategory.hom (S.g.val.app (op W)) tW =
+      ConcreteCategory.hom (S.X₃.val.map (homOfLE hWU).op) s) :
+    ∃ tW' : S.X₂.val.obj (op W),
+      ConcreteCategory.hom (S.g.val.app (op W)) tW' =
+        ConcreteCategory.hom (S.X₃.val.map (homOfLE hWU).op) s ∧
+      S.X₂.val.map (homOfLE inf_le_right).op tW' =
+        S.X₂.val.map (homOfLE inf_le_left).op tV := by
+  have hdiff_ker : S.g.val.app (op (V ⊓ W))
+      (S.X₂.val.map (homOfLE inf_le_left).op tV -
+       S.X₂.val.map (homOfLE inf_le_right).op tW) = 0 := by
+    simp only [map_sub]
+    rw [S.g.val.naturality_apply _ tV, htV, S.g.val.naturality_apply _ tW, htW,
+      sub_eq_zero]
+    simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
+    exact presheaf_map_eq S.X₃.val _ _ s
+  obtain ⟨a, ha⟩ := sections_exact_of_shortExact_presheaf
+    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
+    S.X₁.cond S.X₂.cond S.X₃.cond
+    (f := S.f.val) (g := S.g.val)
+    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+    (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS)
+    (V ⊓ W) _ hdiff_ker
+  obtain ⟨ahat, hahat⟩ := (AddCommGrpCat.epi_iff_surjective _).mp
+    (hX₁_epi (homOfLE inf_le_right : V ⊓ W ⟶ W)) a
+  have hfg_app : S.f.val.app (op W) ≫ S.g.val.app (op W) = 0 := by
+    have hfg : S.f.val ≫ S.g.val = 0 := congrArg Sheaf.Hom.val S.zero
+    simpa using congrArg (fun α => α.app (op W)) hfg
+  let tW' := tW + S.f.val.app (op W) ahat
+  refine ⟨tW', ?_, ?_⟩
+  · simp only [tW', map_add, show S.g.val.app (op W) (S.f.val.app (op W) ahat) = 0 from by
+      show (S.f.val.app (op W) ≫ S.g.val.app (op W)) ahat = 0
+      rw [hfg_app]
+      simp,
+      add_zero, htW]
+  · simp only [tW', map_add]
+    rw [show S.X₂.val.map (homOfLE inf_le_right).op (S.f.val.app (op W) ahat) =
+      S.f.val.app (op (V ⊓ W)) (S.X₁.val.map (homOfLE inf_le_right).op ahat) from
+      (S.f.val.naturality_apply (homOfLE inf_le_right).op ahat).symm, hahat, ha]
+    abel
+
+private lemma bool_isCompatible_of_false_true_eq {X : TopCat.{u}}
+    (F : TopCat.Presheaf AddCommGrpCat.{u} X)
+    {B : Bool → Opens X} {sB : (b : Bool) → F.obj (op (B b))}
+    (h : F.map ((B false).infLERight (B true)).op (sB true) =
+      F.map ((B false).infLELeft (B true)).op (sB false)) :
+    TopCat.Presheaf.IsCompatible F B sB := by
+  intro i j
+  match i, j with
+  | false, false | true, true => rfl
+  | false, true => exact h.symm
+  | true, false =>
+    show F.map ((B true).infLELeft (B false)).op (sB true) =
+      F.map ((B true).infLERight (B false)).op (sB false)
+    rw [show (B true).infLELeft (B false) =
+          eqToHom (inf_comm (B true) (B false)) ≫ (B false).infLERight (B true)
+          from Subsingleton.elim _ _,
+        show (B true).infLERight (B false) =
+          eqToHom (inf_comm (B true) (B false)) ≫ (B false).infLELeft (B true)
+          from Subsingleton.elim _ _,
+      op_comp, Functor.map_comp, CategoryTheory.comp_apply,
+      op_comp, Functor.map_comp, CategoryTheory.comp_apply,
+      h]
+
+private abbrev underMk {X : TopCat.{u}} {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
+    (g : F ⟶ G) {U V : Opens X} (s : G.val.obj (op U))
+    (t : F.val.obj (op V)) (hVU : V ≤ U)
+    (ht : ConcreteCategory.hom (g.val.app (op V)) t =
+      ConcreteCategory.hom (G.val.map (homOfLE hVU).op) s) :
+    StructuredArrow ⟨op U, s⟩
+      (Functor.whiskerRight g.val (CategoryTheory.forget AddCommGrpCat.{u})).mapElements :=
+  StructuredArrow.mk (S := ⟨op U, s⟩)
+    (T := (Functor.whiskerRight g.val (CategoryTheory.forget AddCommGrpCat.{u})).mapElements)
+    (Y := ⟨op V, t⟩)
+    (CategoryOfElements.homMk _ _ (homOfLE hVU).op (by simpa using ht.symm))
+
 /-! ### Structured-arrow Zorn setup for partial lifts -/
 
 /-- Partial lifts of a section `s` along a morphism of sheaves. An object is an
@@ -130,109 +237,32 @@ private lemma under_exists_extension_containing {X : TopCat.{u}}
     simpa [V₀, t₀] using hmap.symm
   obtain ⟨W, iWU, ⟨t', ht'⟩, hxW⟩ := (hls.imageSieve_mem s) x hxU
   have hWU : W ≤ U := leOfHom iWU
-  have hdiff_ker : S.g.val.app (op (V₀ ⊓ W))
-      (S.X₂.val.map (homOfLE inf_le_left).op t₀ -
-       S.X₂.val.map (homOfLE inf_le_right).op t') = 0 := by
-    simp only [map_sub]
-    rw [S.g.val.naturality_apply _ t₀, ht₀, S.g.val.naturality_apply _ t', ht',
-      sub_eq_zero]
-    simp only [← CategoryTheory.comp_apply, ← Functor.map_comp, ← op_comp]
-    exact congr_arg (S.X₃.val.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
-  obtain ⟨a, ha⟩ := sections_exact_of_shortExact_presheaf
-    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-    S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val)
-    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-    (hS := sheafShortComplexOfPresheaf_shortExact_of_shortExact hS)
-    (V₀ ⊓ W) _ hdiff_ker
-  obtain ⟨ahat, hahat⟩ := (AddCommGrpCat.epi_iff_surjective _).mp
-    (hX₁_epi (homOfLE inf_le_right : V₀ ⊓ W ⟶ W)) a
-  have hfg_app : S.f.val.app (op W) ≫ S.g.val.app (op W) = 0 := by
-    have hfg : S.f.val ≫ S.g.val = 0 := congrArg Sheaf.Hom.val S.zero
-    simpa using congrArg (fun α => α.app (op W)) hfg
-  set t'' := t' + S.f.val.app (op W) ahat with ht''_def
-  have hgt'' : S.g.val.app (op W) t'' =
-      S.X₃.val.map (homOfLE hWU).op s := by
-    simp only [ht''_def, map_add, show S.g.val.app (op W) (S.f.val.app (op W) ahat) = 0 from by
-      show (S.f.val.app (op W) ≫ S.g.val.app (op W)) ahat = 0
-      rw [hfg_app]
-      simp,
-      add_zero, ht']
-    exact congr_arg (S.X₃.val.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
-  have hcompat_patch : S.X₂.val.map (homOfLE inf_le_right).op t'' =
-      S.X₂.val.map (homOfLE inf_le_left).op t₀ := by
-    simp only [ht''_def, map_add]
-    rw [show S.X₂.val.map (homOfLE inf_le_right).op (S.f.val.app (op W) ahat) =
-      S.f.val.app (op (V₀ ⊓ W)) (S.X₁.val.map (homOfLE inf_le_right).op ahat) from
-      (S.f.val.naturality_apply (homOfLE inf_le_right).op ahat).symm, hahat, ha]
-    abel
+  obtain ⟨t'', hgt'', hcompat_patch⟩ :=
+    exists_patch_of_shortExact hS hX₁_epi hV₀U hWU ht₀ ht'
   let BU : Bool → Opens X | false => V₀ | true => W
   let Bsf : (b : Bool) → S.X₂.val.obj (op (BU b)) | false => t₀ | true => t''
-  have hcompat_glue : TopCat.Presheaf.IsCompatible S.X₂.val BU Bsf := by
-    intro i j
-    match i, j with
-    | false, false | true, true => rfl
-    | false, true => exact hcompat_patch.symm
-    | true, false =>
-      show S.X₂.val.map (W.infLELeft V₀).op t'' =
-        S.X₂.val.map (W.infLERight V₀).op t₀
-      rw [show W.infLELeft V₀ = eqToHom (inf_comm W V₀) ≫ homOfLE inf_le_right
-            from Subsingleton.elim _ _,
-          show W.infLERight V₀ = eqToHom (inf_comm W V₀) ≫ homOfLE inf_le_left
-            from Subsingleton.elim _ _,
-        op_comp, Functor.map_comp, CategoryTheory.comp_apply,
-        op_comp, Functor.map_comp, CategoryTheory.comp_apply,
-        hcompat_patch]
+  have hcompat_glue : TopCat.Presheaf.IsCompatible S.X₂.val BU Bsf :=
+    bool_isCompatible_of_false_true_eq S.X₂.val hcompat_patch
   obtain ⟨t_new, ht_new, _⟩ := S.X₂.existsUnique_gluing BU Bsf hcompat_glue
-  have hBU : ∀ b, BU b ≤ U := by
-    intro b
-    cases b
-    · simpa [BU] using hV₀U
-    · simpa [BU] using hWU
+  have hBU : ∀ b, BU b ≤ U
+    | false => by simpa [BU] using hV₀U
+    | true => by simpa [BU] using hWU
   have hBUU : iSup BU ≤ U := iSup_le hBU
   have hgt_new : ConcreteCategory.hom (S.g.val.app (op (iSup BU))) t_new =
       ConcreteCategory.hom (S.X₃.val.map (homOfLE hBUU).op) s := by
-    let Bs : (b : Bool) → S.X₃.val.obj (op (BU b)) :=
-      fun b => ConcreteCategory.hom (S.X₃.val.map (homOfLE (hBU b)).op) s
-    have hcompat_Bs : TopCat.Presheaf.IsCompatible S.X₃.val BU Bs := by
-      intro i j
-      dsimp [Bs]
-      rw [← CategoryTheory.comp_apply, ← CategoryTheory.comp_apply,
-        ← S.X₃.val.map_comp, ← S.X₃.val.map_comp]
-      exact congr_arg (S.X₃.val.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
-    obtain ⟨_, _, hBs_uniq⟩ := S.X₃.existsUnique_gluing BU Bs hcompat_Bs
-    have hg_gl : TopCat.Presheaf.IsGluing S.X₃.val BU Bs
-        (ConcreteCategory.hom (S.g.val.app (op (iSup BU))) t_new) := by
-      intro b
-      rw [← S.g.val.naturality_apply _ t_new, ht_new b]
-      cases b <;> simp only [BU, Bsf, Bs]
-      · exact ht₀
-      · exact hgt''
-    have hs_gl : TopCat.Presheaf.IsGluing S.X₃.val BU Bs
-        (ConcreteCategory.hom (S.X₃.val.map (homOfLE hBUU).op) s) := by
-      intro b
-      cases b <;>
-        (simp only [BU, Bs]
-         rw [← CategoryTheory.comp_apply, ← S.X₃.val.map_comp]
-         exact congr_arg (S.X₃.val.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _)))
-    exact (hBs_uniq _ hg_gl).trans (hBs_uniq _ hs_gl).symm
-  have hxBU : x ∈ iSup BU := by
-    simp only [Opens.mem_iSup, BU]
-    exact ⟨true, hxW⟩
-  let t_new_under : Under S.g s :=
-    StructuredArrow.mk (S := ⟨op U, s⟩)
-      (T := (Functor.whiskerRight S.g.val
-        (CategoryTheory.forget AddCommGrpCat.{u})).mapElements)
-      (Y := ⟨op (iSup BU), t_new⟩)
-      (CategoryOfElements.homMk _ _ (homOfLE hBUU).op (by
-        simpa using hgt_new.symm))
-  have h_extend : Nonempty (t_new_under ⟶ t) := by
-    exact Nonempty.intro (StructuredArrow.homMk
+    apply map_glued_eq_of_local_eq S.g hBU ht_new
+    intro b
+    cases b <;> simp only [BU, Bsf]
+    · exact ht₀
+    · exact hgt''
+  have hxBU : x ∈ iSup BU := Opens.mem_iSup.mpr ⟨true, by simpa [BU] using hxW⟩
+  let t_new_under : Under S.g s := underMk S.g s t_new hBUU hgt_new
+  refine ⟨t_new_under, ?_, ?_⟩
+  · exact Nonempty.intro (StructuredArrow.homMk
       (CategoryOfElements.homMk _ _ (homOfLE (le_iSup BU false)).op (by
         simpa [t_new_under, V₀, t₀, BU, Bsf] using ht_new false))
       (by cat_disch))
-  refine ⟨t_new_under, h_extend, ?_⟩
-  simpa [t_new_under] using hxBU
+  · simpa [t_new_under] using hxBU
 
 private lemma under_chain_upper_bound {X : TopCat.{u}}
     {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
@@ -264,40 +294,13 @@ private lemma under_chain_upper_bound {X : TopCat.{u}}
         exact congrArg (ConcreteCategory.hom (F.val.map ((cV i).infLERight (cV j)).op)) hsec
   obtain ⟨t_gl, ht_gl, _⟩ := F.existsUnique_gluing cV cs hcompat
   have hVsup_le : iSup cV ≤ U := iSup_le fun j => leOfHom j.1.hom.val.unop
-  have hcompat_gs : TopCat.Presheaf.IsCompatible G.val cV
-      (fun j => ConcreteCategory.hom
-        (G.val.map (homOfLE (le_trans (le_iSup cV j) hVsup_le)).op) s) := by
-    intro i j
-    dsimp
-    rw [← CategoryTheory.comp_apply, ← CategoryTheory.comp_apply,
-      ← G.val.map_comp, ← G.val.map_comp]
-    exact congr_arg (G.val.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
-  obtain ⟨_, _, hgs_uniq⟩ := G.existsUnique_gluing cV _ hcompat_gs
   have hgt : ConcreteCategory.hom (g.val.app (op (iSup cV))) t_gl =
       ConcreteCategory.hom (G.val.map (homOfLE hVsup_le).op) s := by
-    have hg_gl : TopCat.Presheaf.IsGluing G.val cV
-        (fun j => ConcreteCategory.hom
-          (G.val.map (homOfLE (le_trans (le_iSup cV j) hVsup_le)).op) s)
-        (ConcreteCategory.hom (g.val.app (op (iSup cV))) t_gl) := by
-      intro j
-      rw [← g.val.naturality_apply _ t_gl, ht_gl j]
-      have hmap := CategoryOfElements.map_snd j.1.hom
-      simpa using hmap.symm
-    have hs_gl : TopCat.Presheaf.IsGluing G.val cV
-        (fun j => ConcreteCategory.hom
-          (G.val.map (homOfLE (le_trans (le_iSup cV j) hVsup_le)).op) s)
-        (ConcreteCategory.hom (G.val.map (homOfLE hVsup_le).op) s) := by
-      intro j
-      dsimp
-      rw [← CategoryTheory.comp_apply, ← G.val.map_comp]
-      exact congr_arg (G.val.map · s) (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
-    exact (hgs_uniq _ hg_gl).trans (hgs_uniq _ hs_gl).symm
-  let ub : Under g s :=
-    StructuredArrow.mk (S := ⟨op U, s⟩)
-      (T := (Functor.whiskerRight g.val (CategoryTheory.forget AddCommGrpCat.{u})).mapElements)
-      (Y := ⟨op (iSup cV), t_gl⟩)
-      (CategoryOfElements.homMk _ _ (homOfLE hVsup_le).op (by
-        simpa using hgt.symm))
+    apply map_glued_eq_of_local_eq g (fun j => le_trans (le_iSup cV j) hVsup_le) ht_gl
+    intro j
+    have hmap := CategoryOfElements.map_snd j.1.hom
+    simpa using hmap.symm
+  let ub : Under g s := underMk g s t_gl hVsup_le hgt
   refine ⟨ub, ?_⟩
   intro a ha
   exact Nonempty.intro (StructuredArrow.homMk
