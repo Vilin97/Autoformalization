@@ -1,11 +1,13 @@
 {
-  "progress_score": 1,
-  "summary": "Sheaf-reverted closed-immersion cluster (epi_unit_of_closedImmersion, closedImmersionSES{,_shortExact}, PushforwardHIso, closedIncl_counit_isIso, subsingleton_sheafH_of_closedImmersion_middle) and updated IrreducibleStep + GrothendieckVanishing call sites; -18 normalized / -17 raw LOC.",
+  "progress_score": 2,
+  "summary": "Sheaf-reverted CohomologyAPI dimension-shift cluster, deleted unused `sheafH_dimension_shift_X\u2083_presheaf` and single-use `sheafH_dimension_shift_X\u2083_of_both_presheaf`; -148 normalized / -163 raw LOC.",
   "principle_violations": [],
   "task_addressed": true,
-  "task_complete": false,
-  "stuck_on": "Total raw main/*.lean is 6972, still well above the <6500 COMPLETE_IF target; remaining presheaf-plus-IsSheaf APIs are in pushforward-exactness, ZeroOutside, PresheafFilteredColimit{,General}, and parts of IrreducibleStep/FlasqueVanishing.",
-  "strategy_recommendation": "Continue Phase-1 reversion in `Aristotle/GrothendieckVanishing/main/ZeroOutside.lean` and `PresheafFilteredColimitGeneral.lean` \u2014 both still package `(F : Presheaf) (hF : F.IsSheaf)` in public lemmas reachable from IrreducibleStep. Also worth reverting `pushforward_closedIncl_stalk_eq_zero` and `closedIncl_pushforward_shortExact` in ClosedImmersion.lean if they take presheaf+IsSheaf, and the `stalk_zero_of_ses_g_iso_presheaf` / `stalk_zero_of_shortExact_kernel_presheaf` cluster used at IrreducibleStep:399-419 and GrothendieckVanishing:80-94 (the `_presheaf` suffixes here suggest sheaf-bundled siblings could replace them and shrink three call sites).",
-  "attempts_entry": "cycle 6: Sheaf-reverted closed-immersion cluster (closedImmersionSES, PushforwardHIso, subsingleton_sheafH_of_closedImmersion_middle, etc.), updated IrreducibleStep + GrothendieckVanishing callers; -18 norm / -17 raw LOC; raw main/*.lean = 6972 (target <6500).",
-  "completed_task_lines": []
+  "task_complete": true,
+  "stuck_on": "Phase-1 raw target main/*.lean &lt;6500 still pending (currently 6809).",
+  "strategy_recommendation": "Continue Phase-1 sheaf-reversion: target `ZeroOutside.lean` and `PresheafFilteredColimitGeneral.lean` which still package `(F : Presheaf) (hF : F.IsSheaf)` in publicly-reachable lemmas, and the `stalk_zero_of_ses_g_iso_presheaf` / `stalk_zero_of_shortExact_kernel_presheaf` cluster used at `IrreducibleStep.lean:399-419` and `GrothendieckVanishing.lean:80-94`. Also a clean unused-decl deletion candidate from compress_tasks.md (e.g. `sheafH0NatIsoSections_hom_app`/`_inv_app`) is low-risk filler if scope allows.",
+  "attempts_entry": "cycle 7: score=2 loc_delta=-148 \u2014 dimension-shift cluster sheaf-reverted in CohomologyAPI; deleted unused `sheafH_dimension_shift_X\u2083_presheaf` and single-use `_of_both_presheaf`; updated FlasqueVanishing + IrreducibleStep callers; -148 normalized / -163 raw LOC.",
+  "completed_task_lines": [
+    "- [>] Delete unused declaration `sheafH_dimension_shift_X\u2083_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable)."
+  ]
 }

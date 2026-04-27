@@ -434,27 +434,13 @@ theorem zeroOutsideInt_vanishing
     (hCoker : Subsingleton (Sheaf.H (Limits.cokernel
       (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))) m)) :
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) (m + 1)) := by
-  have hfsh : Mono (TopCat.Sheaf.zeroOutsideInt.openHom
-      (le_top : V ≤ (⊤ : Opens X))) := by
-    infer_instance
-  haveI : Mono ((TopCat.Sheaf.zeroOutsideInt.openHom
-      (le_top : V ≤ (⊤ : Opens X))).val) := by
-    exact (Sheaf.Hom.mono_iff_presheaf_mono
-      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u})
-      (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ (⊤ : Opens X)))).1 hfsh
   have hTop : Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) (m + 1)) := by
     letI : IsFlasqueSheaf (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) := by
       simpa using isFlasqueSheaf_zeroOutsideInt_top X
     simpa using
       sheafH_subsingleton_of_flasque X (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) m
-  exact sheafH_dimension_shift_of_mono_presheaf
-    (F := (TopCat.Sheaf.zeroOutsideInt V).val)
-    (G := (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).val)
-    (hF := (TopCat.Sheaf.zeroOutsideInt V).cond)
-    (hG := (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).cond)
-    (f := (TopCat.Sheaf.zeroOutsideInt.openHom
-      (le_top : V ≤ (⊤ : Opens X))).val)
-    (n := m)
+  exact sheafH_dimension_shift_of_mono
+    (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ (⊤ : Opens X))) m
     hCoker hTop
 
 /-- **Step 5** (Hartshorne III.2.7): `zeroOutsideInt V` has vanishing cohomology in every
@@ -577,14 +563,9 @@ theorem epiImage_zeroOutsideInt_vanishing_of_locallySurjective
       (isZero_zeroOutsideInt_bot X).of_epi (show TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X) ⟶
         (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from Sheaf.Hom.mk f)
     simpa using sheafH_subsingleton_of_isZero_presheaf hG hZero m
-  · have hkernel :
-        Subsingleton (Sheaf.H
-          (kernel (Sheaf.Hom.mk f :
-            TopCat.Sheaf.zeroOutsideInt V ⟶
-              (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)))
-          (m + 1)) := by
-      let fsh : TopCat.Sheaf.zeroOutsideInt V ⟶
-          (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
+  · let fsh : TopCat.Sheaf.zeroOutsideInt V ⟶
+        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
+    have hkernel : Subsingleton (Sheaf.H (kernel fsh) (m + 1)) := by
       haveI : Mono (kernel.ι fsh).val :=
         Functor.map_mono (TopCat.Sheaf.forget AddCommGrpCat.{u} X) (kernel.ι fsh)
       simpa [fsh] using
@@ -592,9 +573,7 @@ theorem epiImage_zeroOutsideInt_vanishing_of_locallySurjective
           (R := (kernel fsh).val) (kernel fsh).cond (kernel.ι fsh).val
           ih (m + 1) (lt_trans hm (by exact_mod_cast Nat.lt_succ_of_le le_rfl))
     simpa using
-      sheafH_dimension_shift_X₃_of_locallySurjective_presheaf
-        (hF := (TopCat.Sheaf.zeroOutsideInt V).cond) (hG := hG)
-        f hf m
+      sheafH_dimension_shift_X₃_of_locallySurjective fsh (by simpa [fsh] using hf) m
         (zeroOutsideInt_cohomology_vanishing V hV ih m hm)
         hkernel
 
