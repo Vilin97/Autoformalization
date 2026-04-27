@@ -1,12 +1,16 @@
-Deleted the unused wrapper `epi_pushforward_map_closedIncl` from [ClosedImmersion.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean:303). Kept `epi_pushforward_map_closedIncl_of_locallySurjective`, which is still used by `closedIncl_pushforward_preservesEpis`.
+Completed cycle 13.
 
-Wrote the cycle report at [cycle_12.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_12.md:1).
+Deleted unused `epi_app_top_of_subsingleton_sheafH1` from [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:541) and removed its stale module-doc entry. `sheafH0_surj_of_epi_app_top` was left untouched.
 
 Verification passed:
-- `rg -n "epi_pushforward_map_closedIncl\b" Aristotle/GrothendieckVanishing/main` found no remaining references.
-- `lake env lean Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean` succeeded.
-- `lake build` succeeded, with unrelated existing linter warnings in untouched files.
+- `rg` for `epi_app_top_of_subsingleton_sheafH1(_presheaf)?` now returns no matches.
+- `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean` succeeded.
+- `lake build` succeeded, with only existing warnings in untouched files.
+- Strict `sorry`/`admit`/`axiom` search returned no matches.
 
 Metrics:
-- Normalized LOC: `5286 -> 5260` (`-26`)
-- Raw `main/*.lean` wc: `6264 -> 6235` (`-29`)
+- Normalized LOC: `5260 -> 5245` (`-15`)
+- Raw `main/*.lean` LOC: `6235 -> 6216` (`-19`)
+- `CohomologyAPI.lean`: `728 -> 713` normalized, `925 -> 906` raw
+
+Wrote the required report at [.compress-state/codex_task_results/cycle_13.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_13.md). I did not commit or push.

@@ -1,1 +1,1 @@
-Continue Phase-2 unused-decl deletion: the next checklist item is `epi_app_top_of_subsingleton_sheafH1_presheaf` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`. Verify it has no remaining references via `rg`, then delete the declaration along with any helpers that become unreachable solely from this deletion.
+Continue Phase-2 unused-decl deletion: next item is `sheafCohomologyFunctor_additive` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`. Verify with `rg` it has no remaining call sites, then delete it and any helpers that become unreachable.

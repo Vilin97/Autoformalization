@@ -11,3 +11,4 @@ Cycle 9: cycle 9: score=2 loc_delta=-76 — sheaf-reverted cokernel stalk-zero c
 Cycle 10: cycle 10: score=2 loc_delta=-337 normalized / -379 raw — sheafified PresheafFilteredColimitCore filtered-colimit boundary, deleted ~10 _presheaf shims, reworked degree-0/1/succ comparison-iso proofs to use Sheaf args directly; raw main/*.lean 6654→6275, Phase-1 <6500 target met.
 Cycle 11: cycle 11: deleted TopCat.coe_closedIncl and TopCat.closedIncl_image_map_eq_inter from ClosedImmersion.lean; -9 normalized / -11 raw LOC; lake build passed.
 Cycle 12: cycle 12: deleted unused `epi_pushforward_map_closedIncl` wrapper from ClosedImmersion.lean, -26 norm / -29 raw LOC.
+Cycle 13: cycle 13: deleted unused `epi_app_top_of_subsingleton_sheafH1` from CohomologyAPI.lean (-15 normalized / -19 raw LOC); lake env lean + lake build pass.
