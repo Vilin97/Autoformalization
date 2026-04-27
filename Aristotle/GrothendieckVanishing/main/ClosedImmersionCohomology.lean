@@ -7,7 +7,7 @@ import Aristotle.GrothendieckVanishing.main.FlasqueVanishing
 
   Provides:
   1. `PushforwardHIso` (pushforward preserves cohomology by isomorphism)
-  2. `subsingleton_sheafH_of_closedImmersion_middle_presheaf`
+  2. `subsingleton_sheafH_of_closedImmersion_middle`
 
   Depends on `ClosedImmersion.lean` for the closed-inclusion pushforward exactness and
   adjunction-unit/SES API,
@@ -33,18 +33,14 @@ adjunction-unit short exact sequence API now lives in `ClosedImmersion.lean`.
 -- n≥2 via source/target dimension-shift isomorphisms and the induction hypothesis on X₃.
 noncomputable def PushforwardHIso
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    {G : TopCat.Presheaf AddCommGrpCat.{u} (TopCat.of Z)} (hG : G.IsSheaf)
+    (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))
     (n : ℕ) :
-    AddCommGrpCat.of (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)) n) ≅
+    AddCommGrpCat.of (Sheaf.H G n) ≅
       AddCommGrpCat.of (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
-        (TopCat.closedIncl hZ)).obj (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))) n) := by
-  let Gsh : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z) := ⟨G, hG⟩
+        (TopCat.closedIncl hZ)).obj G) n) := by
   let closedIncl := TopCat.closedIncl hZ
-  suffices ∀ (m : ℕ) (G' : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z)),
-      AddCommGrpCat.of (Sheaf.H G' m) ≅
-        AddCommGrpCat.of (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} closedIncl).obj G') m) from
-    this n Gsh
-  intro m; induction m with
+  revert G
+  induction n with
   | zero =>
     intro G'
     let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} closedIncl).obj G'
@@ -108,35 +104,34 @@ noncomputable def PushforwardHIso
               (inferInstance : Subsingleton (Sheaf.H SX.X₂ (m + 2))))
       exact hShift_src.symm ≪≫ ih_push S.X₃ ≪≫ hShift_tgt
 
-/-- Closed-immersion presheaf wrapper: if the kernel term of the closed-immersion
+/-- Closed-immersion step: if the kernel term of the closed-immersion
 short exact sequence and the pullback to the closed subset have subsingleton
 cohomology in degree `n`, then so does the ambient sheaf. -/
-theorem subsingleton_sheafH_of_closedImmersion_middle_presheaf
+theorem subsingleton_sheafH_of_closedImmersion_middle
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) (n : ℕ)
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (n : ℕ)
     (h₁ : Subsingleton
-      (Sheaf.H ((closedImmersionSES (Z := Z) (hZ := hZ) (F := F) hF).X₁) n))
+      (Sheaf.H ((closedImmersionSES (Z := Z) (hZ := hZ) F).X₁) n))
     (h₃ : Subsingleton
       (Sheaf.H
         ((TopCat.Sheaf.pullback AddCommGrpCat.{u} (TopCat.closedIncl hZ)).obj
-          (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n)) :
-    Subsingleton (Sheaf.H (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
+          F) n)) :
+    Subsingleton (Sheaf.H F n) := by
   let closedIncl := TopCat.closedIncl hZ
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  let FZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Fsh)
-  let S := closedImmersionSES (Z := Z) (hZ := hZ) (F := F) hF
-  have hSE := closedImmersionSES_shortExact (Z := Z) (hZ := hZ) (F := F) hF
+  let FZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj F)
+  let S := closedImmersionSES (Z := Z) (hZ := hZ) F
+  have hSE := closedImmersionSES_shortExact (Z := Z) (hZ := hZ) F
   have h₁' : Subsingleton (Sheaf.H S.X₁ n) := by
     simpa [S] using h₁
   have h₃' : Subsingleton (Sheaf.H FZ n) := by
-    simpa [closedIncl, Fsh, FZ] using h₃
+    simpa [closedIncl, FZ] using h₃
   have hPush : Subsingleton (Sheaf.H S.X₃ n) := by
     let e :
         Sheaf.H FZ n ≃
           Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} closedIncl).obj FZ) n :=
-      Equiv.ofBijective (ConcreteCategory.hom (PushforwardHIso Z hZ FZ.cond n).hom)
-        (ConcreteCategory.bijective_of_isIso (PushforwardHIso Z hZ FZ.cond n).hom)
-    simpa [S, closedImmersionSES, closedIncl, Fsh, FZ] using
+      Equiv.ofBijective (ConcreteCategory.hom (PushforwardHIso Z hZ FZ n).hom)
+        (ConcreteCategory.bijective_of_isIso (PushforwardHIso Z hZ FZ n).hom)
+    simpa [S, closedImmersionSES, closedIncl, FZ] using
       (e.subsingleton_congr).mp h₃'
   haveI : Mono S.f := hSE.mono_f
   haveI : Mono S.f.val := by
@@ -144,8 +139,8 @@ theorem subsingleton_sheafH_of_closedImmersion_middle_presheaf
       (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) S.f).1 inferInstance
   have hCok :
       Subsingleton
-        (Sheaf.H (cokernel (show S.X₁ ⟶ Fsh from Sheaf.Hom.mk S.f.val)) n) := by
-    let fsh : S.X₁ ⟶ Fsh := Sheaf.Hom.mk S.f.val
+        (Sheaf.H (cokernel (show S.X₁ ⟶ F from Sheaf.Hom.mk S.f.val)) n) := by
+    let fsh : S.X₁ ⟶ F := Sheaf.Hom.mk S.f.val
     have hfsh : fsh = S.f := rfl
     have hfshg : fsh ≫ S.g = 0 := by
       change S.f ≫ S.g = 0
@@ -163,6 +158,6 @@ theorem subsingleton_sheafH_of_closedImmersion_middle_presheaf
     exact ⟨fun a b => by
       apply (ConcreteCategory.bijective_of_isIso e.hom).1
       exact Subsingleton.elim _ _⟩
-  simpa [Fsh] using
+  simpa using
     subsingleton_sheafH_of_shortExact_middle_presheaf
-      (F := S.X₁.val) (G := F) S.X₁.cond hF S.f.val n h₁' hCok
+      (F := S.X₁.val) (G := F.val) S.X₁.cond F.cond S.f.val n h₁' hCok

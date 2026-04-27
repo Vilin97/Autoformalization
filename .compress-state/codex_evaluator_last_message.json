@@ -1,13 +1,11 @@
 {
-  "progress_score": 2,
-  "summary": "Sheaf-reverted `isFlasque_filtered_colimit` and `sheafH_preserves_filtered_colimits` (deleting `_presheaf` wrappers + unused `_hom_epi`), updated all callers, -26 normalized / -31 raw LOC.",
+  "progress_score": 1,
+  "summary": "Sheaf-reverted closed-immersion cluster (epi_unit_of_closedImmersion, closedImmersionSES{,_shortExact}, PushforwardHIso, closedIncl_counit_isIso, subsingleton_sheafH_of_closedImmersion_middle) and updated IrreducibleStep + GrothendieckVanishing call sites; -18 normalized / -17 raw LOC.",
   "principle_violations": [],
   "task_addressed": true,
-  "task_complete": true,
-  "stuck_on": "Broader Phase-1 raw &lt;6500 target unmet (currently 6989); requires sheaf-reversion in ClosedImmersion*/IrreducibleStep and other multi-arg IsSheaf packagings.",
-  "strategy_recommendation": "Next cycle: continue Phase-1 sheaf-reversion in ClosedImmersionCohomology.lean \u2014 its `_presheaf` cluster is the largest remaining multi-arg `(F : Presheaf) (hF : IsSheaf)` site; bundle to `Sheaf` arguments and update callers in IrreducibleStep.lean. Also consider deleting `sheafH_filtered_colimit_presheafCocone_sheafToPresheaf` (next checklist item) if unreferenced.",
-  "attempts_entry": "cycle 5: score=2 loc_delta=-26 \u2014 bundled isFlasque_filtered_colimit + sheafH_preserves_filtered_colimits to Sheaf args, deleted unused _hom_epi; -26 norm / -31 raw.",
-  "completed_task_lines": [
-    "- [>] Delete unused declaration `sheafH_preserves_filtered_colimits_presheaf_hom_epi` from `PresheafFilteredColimit.lean` (and any helpers it depended on that become unreachable)."
-  ]
+  "task_complete": false,
+  "stuck_on": "Total raw main/*.lean is 6972, still well above the <6500 COMPLETE_IF target; remaining presheaf-plus-IsSheaf APIs are in pushforward-exactness, ZeroOutside, PresheafFilteredColimit{,General}, and parts of IrreducibleStep/FlasqueVanishing.",
+  "strategy_recommendation": "Continue Phase-1 reversion in `Aristotle/GrothendieckVanishing/main/ZeroOutside.lean` and `PresheafFilteredColimitGeneral.lean` \u2014 both still package `(F : Presheaf) (hF : F.IsSheaf)` in public lemmas reachable from IrreducibleStep. Also worth reverting `pushforward_closedIncl_stalk_eq_zero` and `closedIncl_pushforward_shortExact` in ClosedImmersion.lean if they take presheaf+IsSheaf, and the `stalk_zero_of_ses_g_iso_presheaf` / `stalk_zero_of_shortExact_kernel_presheaf` cluster used at IrreducibleStep:399-419 and GrothendieckVanishing:80-94 (the `_presheaf` suffixes here suggest sheaf-bundled siblings could replace them and shrink three call sites).",
+  "attempts_entry": "cycle 6: Sheaf-reverted closed-immersion cluster (closedImmersionSES, PushforwardHIso, subsingleton_sheafH_of_closedImmersion_middle, etc.), updated IrreducibleStep + GrothendieckVanishing callers; -18 norm / -17 raw LOC; raw main/*.lean = 6972 (target <6500).",
+  "completed_task_lines": []
 }

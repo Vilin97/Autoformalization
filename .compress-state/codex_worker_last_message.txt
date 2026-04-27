@@ -1,21 +1,20 @@
-Implemented cycle 5 scoped compression.
+Implemented cycle 6.
 
-Changed:
-- Bundled flasque colimit API in [PresheafFilteredColimitCore.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean:59): `isFlasque_filtered_colimit_presheaf` -> `isFlasque_filtered_colimit`.
-- Updated both flasque call sites to pass sheaf diagrams/cocones directly.
-- Bundled cohomology filtered-colimit endpoint in [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:926): `sheafH_preserves_filtered_colimits_presheaf` -> `sheafH_preserves_filtered_colimits`.
-- Deleted `sheafH_preserves_filtered_colimits_presheaf_hom_epi`.
-- Updated [FinitelyGeneratedVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:141) to call the bundled endpoint.
-- Wrote `.compress-state/codex_task_results/cycle_5.md`.
+Changed the closed-immersion cluster to bundled `Sheaf` arguments, including:
+- `closedImmersionSES`, `closedImmersionSES_shortExact`, `epi_unit_of_closedImmersion`
+- `PushforwardHIso`
+- renamed `subsingleton_sheafH_of_closedImmersion_middle_presheaf` to `subsingleton_sheafH_of_closedImmersion_middle`
+- renamed `closedIncl_counit_isIso_presheaf` to `closedIncl_counit_isIso`
+
+Updated direct call sites in `IrreducibleStep.lean` and `GrothendieckVanishing.lean`, and wrote the required report at [cycle_6.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_6.md).
 
 Verification passed:
-- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean`
-- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean`
-- `lake env lean Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean`
+- all four modified Lean files with `lake env lean`
 - `lake build`
+- no active `sorry`/`admit`/`axiom` declarations found
 
 LOC:
-- Normalized: `5971 -> 5945` (`-26`)
-- Raw `main/*.lean`: `7020 -> 6989` (`-31`)
+- normalized: `5945 -> 5927` (`-18`)
+- raw `main/*.lean`: `6989 -> 6972` (`-17`)
 
-The scoped work is complete; the broader `<6500` raw target remains open.
+No commit was made.

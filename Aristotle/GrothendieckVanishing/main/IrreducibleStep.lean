@@ -393,33 +393,31 @@ theorem closedComplementVanishing
       hY_dim_lt_top
   let closedIncl := TopCat.closedIncl hYcl
   let CY := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj Csh)
-  let S := closedImmersionSES (Z := Y) (hZ := hYcl) (F := C) hC
-  have hSE := closedImmersionSES_shortExact (Z := Y) (hZ := hYcl) (F := C) hC
+  let S := closedImmersionSES (Z := Y) (hZ := hYcl) Csh
+  have hSE := closedImmersionSES_shortExact (Z := Y) (hZ := hYcl) Csh
   have hSX₁_zero : IsZero S.X₁ := by
-    have hSX₁_zero' : IsZero ((⟨S.X₁.val, S.X₁.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
-      sheaf_isZero_of_zero_stalks X S.X₁.cond (fun x a => by
-        by_cases hxY : x ∈ Y
-        · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
-            simpa [S, closedImmersionSES, closedIncl, Csh] using
-              (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
-                (hs := hYcl) (F := C) hC ⟨x, hxY⟩)
-          exact stalk_zero_of_ses_g_iso_presheaf
-            S.X₁.cond S.X₂.cond S.X₃.cond
-            (f := S.f.val) (g := S.g.val)
-            (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-            (by simpa [S] using hSE)
-            x inferInstance a
-        · exact stalk_zero_of_shortExact_kernel_presheaf
-            S.X₁.cond S.X₂.cond S.X₃.cond
-            (f := S.f.val) (g := S.g.val)
-            (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-            (by simpa [S] using hSE)
-            x
-            (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b)
-            a)
-    simpa using hSX₁_zero'
-  exact subsingleton_sheafH_of_closedImmersion_middle_presheaf
-    (Z := Y) (hZ := hYcl) (F := C) hC n
+    exact sheaf_isZero_of_zero_stalks X S.X₁.cond (fun x a => by
+      by_cases hxY : x ∈ Y
+      · haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
+          simpa [S, closedImmersionSES, closedIncl, Csh] using
+            (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
+              (hs := hYcl) Csh ⟨x, hxY⟩)
+        exact stalk_zero_of_ses_g_iso_presheaf
+          S.X₁.cond S.X₂.cond S.X₃.cond
+          (f := S.f.val) (g := S.g.val)
+          (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+          (by simpa [S] using hSE)
+          x inferInstance a
+      · exact stalk_zero_of_shortExact_kernel_presheaf
+          S.X₁.cond S.X₂.cond S.X₃.cond
+          (f := S.f.val) (g := S.g.val)
+          (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+          (by simpa [S] using hSE)
+          x
+          (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b)
+          a)
+  exact subsingleton_sheafH_of_closedImmersion_middle
+    (Z := Y) (hZ := hYcl) Csh n
     (by
       simpa [S] using sheafH_subsingleton_of_isZero_presheaf S.X₁.cond hSX₁_zero n)
     (by
@@ -643,14 +641,14 @@ theorem IrreduciblePosVanishing
     simpa [gt_iff_lt] using lt_trans hZ_dim (by simpa [gt_iff_lt] using hn)
   let i := TopCat.closedIncl hZ_closed
   let FZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Fsh)
-  let S := closedImmersionSES (Z := Z) (hZ := hZ_closed) (F := F) hF
+  let S := closedImmersionSES (Z := Z) (hZ := hZ_closed) Fsh
   have hKer : Subsingleton (Sheaf.H S.X₁ n) :=
     directLimit_cohomology_vanishing (K := S.X₁.val) S.X₁.cond n
       (fun {G} (hG : G.IsSheaf) {V}
         (f : (TopCat.Sheaf.zeroOutsideInt V).val ⟶ G) hf => by
         exact epiImage_zeroOutsideInt_vanishing_of_locallySurjective
           (V := V) (G := G) hG f hf ih n hn)
-  exact subsingleton_sheafH_of_closedImmersion_middle_presheaf
-    (Z := Z) (hZ := hZ_closed) (F := F) hF n
+  exact subsingleton_sheafH_of_closedImmersion_middle
+    (Z := Z) (hZ := hZ_closed) Fsh n
     (by simpa [S] using hKer)
     (by simpa [i, Fsh, FZ] using ih (TopCat.of Z) n (G := FZ.val) FZ.cond hZ_dim hn_Z)
