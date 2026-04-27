@@ -79,7 +79,7 @@ become unreachable, cascading the deletion).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH0NatIsoSections_hom_app\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
 - [ ] Delete unused declaration `sheafH0NatIsoSections_inv_app` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH0NatIsoSections_inv_app\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
-- [ ] Delete unused declaration `sheafH_dimension_shift_X₃_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `sheafH_dimension_shift_X₃_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_dimension_shift_X₃_presheaf\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
 - [ ] Delete unused declaration `sheafH_exists_preimage_of_subsingleton_middle_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_exists_preimage_of_subsingleton_middle_presheaf\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean

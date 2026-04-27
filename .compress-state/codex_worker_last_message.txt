@@ -1,20 +1,20 @@
-Implemented cycle 6.
+Implemented cycle 7’s scoped compression.
 
-Changed the closed-immersion cluster to bundled `Sheaf` arguments, including:
-- `closedImmersionSES`, `closedImmersionSES_shortExact`, `epi_unit_of_closedImmersion`
-- `PushforwardHIso`
-- renamed `subsingleton_sheafH_of_closedImmersion_middle_presheaf` to `subsingleton_sheafH_of_closedImmersion_middle`
-- renamed `closedIncl_counit_isIso_presheaf` to `closedIncl_counit_isIso`
+Changed:
+- Reworked the dimension-shift cluster in [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:774) to use bundled `TopCat.Sheaf` arguments.
+- Deleted `sheafH_dimension_shift_X₃_presheaf`.
+- Deleted the now-single-use `sheafH_dimension_shift_X₃_of_both_presheaf`.
+- Updated call sites in [FlasqueVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean:412) and [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:442).
+- Wrote the required report at [.compress-state/codex_task_results/cycle_7.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_7.md).
 
-Updated direct call sites in `IrreducibleStep.lean` and `GrothendieckVanishing.lean`, and wrote the required report at [cycle_6.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_6.md).
+Metrics:
+- Normalized LOC: `5927` → `5779` (`-148`)
+- Raw `main/*.lean`: `6972` → `6809` (`-163`)
 
 Verification passed:
-- all four modified Lean files with `lake env lean`
+- `lake env lean` for `CohomologyAPI.lean`, `FlasqueVanishing.lean`, `IrreducibleStep.lean`, `GrothendieckVanishing.lean`
+- `lake build Aristotle.GrothendieckVanishing.main.CohomologyAPI`
 - `lake build`
-- no active `sorry`/`admit`/`axiom` declarations found
+- Old `_presheaf` dimension-shift names no longer appear in `main`.
 
-LOC:
-- normalized: `5945 -> 5927` (`-18`)
-- raw `main/*.lean`: `6989 -> 6972` (`-17`)
-
-No commit was made.
+The broader raw-LOC target `<6500` is still not complete; this cycle stayed within the requested dimension-shift cluster scope.

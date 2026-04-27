@@ -54,15 +54,10 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
   injective-middle-term `H¹` vanishing
 * `sheafH_dimension_shift_of_both`: sheaf-level forward dimension shift
   for short exact sequences
-* `sheafH_dimension_shift_of_mono_presheaf`: presheaf-boundary forward dimension shift
-* `sheafH_dimension_shift_presheaf`: presheaf-boundary forward dimension shift with
-  injective middle term
-* `sheafH_dimension_shift_X₃_presheaf`: presheaf-boundary reverse dimension shift with
-  injective middle term
-* `sheafH_dimension_shift_X₃_of_both_presheaf`: presheaf-boundary reverse dimension shift
-  for short exact sequences
-* `sheafH_dimension_shift_X₃_of_locallySurjective_presheaf`: presheaf-boundary reverse
-  dimension shift for locally surjective morphisms
+* `sheafH_dimension_shift_of_mono`: forward dimension shift for a monomorphism
+* `sheafH_dimension_shift_of_injective`: forward dimension shift with injective middle term
+* `sheafH_dimension_shift_X₃_of_locallySurjective`: reverse dimension shift for locally
+  surjective morphisms
 -/
 
 universe w' w v u
@@ -773,185 +768,53 @@ theorem sheafH_dimension_shift_of_both {X : TopCat.{u}}
     Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
   ext_dimension_shift _ hS n h₃H h₂H
 
-/-- Presheaf-boundary forward dimension shift for a monomorphism:
-    if `f : F ⟶ G` is mono between sheaf-valued presheaves, the cokernel sheaf of
-    `Sheaf.Hom.mk f` has subsingleton `H^n`, and `G` has subsingleton `H^(n+1)`,
-    then `F` has subsingleton `H^(n+1)`. -/
-theorem sheafH_dimension_shift_of_mono_presheaf {X : TopCat.{u}}
-    {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (hF : F.IsSheaf) (hG : G.IsSheaf)
+/-- Forward dimension shift for a monomorphism of sheaves:
+    if `f : F ⟶ G` is mono, the cokernel sheaf has subsingleton `H^n`, and
+    `G` has subsingleton `H^(n+1)`, then `F` has subsingleton `H^(n+1)`. -/
+theorem sheafH_dimension_shift_of_mono {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
     (f : F ⟶ G) [Mono f] (n : ℕ)
-    (h₃ : Subsingleton (Sheaf.H (cokernel (show
-      (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from
-          Sheaf.Hom.mk f)) n))
-    (h₂ : Subsingleton (Sheaf.H ((⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1))) :
-    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)) := by
-  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
-  haveI : Mono fsh := by
-    exact (Sheaf.Hom.mono_iff_presheaf_mono
-      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) fsh).2 inferInstance
-  let S := ShortComplex.mk fsh (cokernel.π fsh) (cokernel.condition fsh)
+    (h₃ : Subsingleton (Sheaf.H (cokernel f) n))
+    (h₂ : Subsingleton (Sheaf.H G (n + 1))) :
+    Subsingleton (Sheaf.H F (n + 1)) := by
+  let S := ShortComplex.mk f (cokernel.π f) (cokernel.condition f)
   have hS : S.ShortExact := ShortComplex.ShortExact.mk'
-    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel fsh))
+    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel f))
     inferInstance inferInstance
-  simpa [S, fsh] using
-    (sheafH_dimension_shift_of_both hS
-      n
-      (by simpa [S, fsh] using h₃)
-      (by simpa [S] using h₂))
-
-/-- Presheaf-boundary dimension shifting with injective middle term:
-    if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves,
-    `⟨F₂, h₂⟩` is injective, and `H^n(F₃)=0`, then `H^(n+1)(F₁)=0`. -/
-theorem sheafH_dimension_shift_presheaf {X : TopCat.{u}}
-    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
-    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
-    (hS : (ShortComplex.mk
-      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (Sheaf.Hom.mk f)
-      (Sheaf.Hom.mk g)
-      (by
-        apply Sheaf.Hom.ext
-        simpa using hfg)).ShortExact)
-    [Injective ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))]
-    (n : ℕ)
-    (h₃H : Subsingleton (Sheaf.H ((⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n)) :
-    Subsingleton (Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)) := by
-  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
-    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (Sheaf.Hom.mk f)
-    (Sheaf.Hom.mk g)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hfg)
-  have hS' : S.ShortExact := by
-    simpa [S] using hS
-  letI : Injective S.X₂ := by
-    simpa [S] using
-      (inferInstance : Injective ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)))
-  have h₃H' : Subsingleton (Sheaf.H S.X₃ n) := by
-    simpa [S] using h₃H
   simpa [S] using
-    ext_dimension_shift _ hS' n h₃H' (Ext.subsingleton_of_injective _ _ n)
+    sheafH_dimension_shift_of_both hS n (by simpa [S] using h₃) (by simpa [S] using h₂)
 
-/-- Presheaf-boundary reverse dimension shift with injective middle term:
-    if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves,
-    `⟨F₂, h₂⟩` is injective, and `H^(n+2)(F₁)=0`, then `H^(n+1)(F₃)=0`.
-    Requires degree at least `1`, since `Ext^0(Z, I)` need not vanish for injective `I`. -/
-theorem sheafH_dimension_shift_X₃_presheaf {X : TopCat.{u}}
-    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
-    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
-    (hS : (ShortComplex.mk
-      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (Sheaf.Hom.mk f)
-      (Sheaf.Hom.mk g)
-      (by
-        apply Sheaf.Hom.ext
-        simpa using hfg)).ShortExact)
-    [Injective ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))]
+/-- Forward dimension shifting with injective middle term:
+    if `0 → S.X₁ → S.X₂ → S.X₃ → 0` is short exact, `S.X₂` is injective,
+    and `H^n(S.X₃)=0`, then `H^(n+1)(S.X₁)=0`. -/
+theorem sheafH_dimension_shift_of_injective {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact)
+    [Injective S.X₂]
     (n : ℕ)
-    (h₁H : Subsingleton (Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 2))) :
-    Subsingleton (Sheaf.H ((⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1)) := by
-  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
-    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (Sheaf.Hom.mk f)
-    (Sheaf.Hom.mk g)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hfg)
-  have hS' : S.ShortExact := by
-    simpa [S] using hS
-  letI : Injective S.X₂ := by
-    simpa [S] using
-      (inferInstance : Injective ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)))
-  have h₁H' : Subsingleton (Sheaf.H S.X₁ (n + 2)) := by
-    simpa [S] using h₁H
-  simpa [S] using
-    ext_dimension_shift_X₃ _ hS' (n + 1) (Ext.subsingleton_of_injective _ _ n) h₁H'
+    (h₃H : Subsingleton (Sheaf.H S.X₃ n)) :
+    Subsingleton (Sheaf.H S.X₁ (n + 1)) :=
+  ext_dimension_shift _ hS n h₃H (Ext.subsingleton_of_injective _ _ n)
 
-/-- Presheaf-boundary reverse dimension shift for a short exact sequence:
-    if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves,
-    `H^n(F₂)=0`, and `H^(n+1)(F₁)=0`, then `H^n(F₃)=0`. -/
-theorem sheafH_dimension_shift_X₃_of_both_presheaf {X : TopCat.{u}}
-    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
-    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
-    (hS : (ShortComplex.mk
-      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (Sheaf.Hom.mk f)
-      (Sheaf.Hom.mk g)
-      (by
-        apply Sheaf.Hom.ext
-        simpa using hfg)).ShortExact)
-    (n : ℕ)
-    (h₂H : Subsingleton (Sheaf.H ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
-    (h₁H : Subsingleton (Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) (n + 1))) :
-    Subsingleton (Sheaf.H ((⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
-  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
-    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (Sheaf.Hom.mk f)
-    (Sheaf.Hom.mk g)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hfg)
-  have hS' : S.ShortExact := by
-    simpa [S] using hS
-  have h₂H' : Subsingleton (Sheaf.H S.X₂ n) := by
-    simpa [S] using h₂H
-  have h₁H' : Subsingleton (Sheaf.H S.X₁ (n + 1)) := by
-    simpa [S] using h₁H
-  simpa [S] using ext_dimension_shift_X₃ _ hS' n h₂H' h₁H'
-
-/-- Presheaf-boundary reverse dimension shift for a locally surjective morphism:
+/-- Reverse dimension shift for a locally surjective morphism:
     if `f : F ⟶ G` is locally surjective, `H^n(F)` is subsingleton, and
-    `H^(n+1)(kernel (Sheaf.Hom.mk f))` is subsingleton, then `H^n(G)` is subsingleton. -/
-theorem sheafH_dimension_shift_X₃_of_locallySurjective_presheaf {X : TopCat.{u}}
-    {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (hF : F.IsSheaf) (hG : G.IsSheaf)
-    (f : F ⟶ G) (hf : TopCat.Presheaf.IsLocallySurjective f) (n : ℕ)
-    (h₂ : Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
-    (h₁ : Subsingleton (Sheaf.H
-      (kernel (Sheaf.Hom.mk f :
-        (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-          (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)))
-      (n + 1))) :
-    Subsingleton (Sheaf.H ((⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
-  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
+    `H^(n+1)(kernel f)` is subsingleton, then `H^n(G)` is subsingleton. -/
+theorem sheafH_dimension_shift_X₃_of_locallySurjective {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
+    (f : F ⟶ G) (hf : TopCat.Presheaf.IsLocallySurjective f.val) (n : ℕ)
+    (h₂ : Subsingleton (Sheaf.H F n))
+    (h₁ : Subsingleton (Sheaf.H (kernel f) (n + 1))) :
+    Subsingleton (Sheaf.H G n) := by
   letI : Balanced (CategoryTheory.Sheaf (Opens.grothendieckTopology X)
       AddCommGrpCat.{u}) := balanced_of_strongEpiCategory
-  haveI : Epi fsh := by
-    rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} fsh]
-    simpa [fsh] using hf
-  let S := ShortComplex.mk (kernel.ι fsh) fsh (kernel.condition fsh)
+  haveI : Epi f := by
+    rw [← Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} f]
+    simpa using hf
+  let S := ShortComplex.mk (kernel.ι f) f (kernel.condition f)
   have hS : S.ShortExact := ShortComplex.ShortExact.mk'
-    (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel fsh)) inferInstance inferInstance
-  simpa [S, fsh] using
-    (sheafH_dimension_shift_X₃_of_both_presheaf
-      (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-      S.X₁.cond S.X₂.cond S.X₃.cond
-      (f := S.f.val) (g := S.g.val)
-      (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-      (by simpa [S] using hS)
-      n
-      (by simpa [S, fsh] using h₂)
-      (by simpa [S, fsh] using h₁))
+    (ShortComplex.exact_of_f_is_kernel _ (kernelIsKernel f)) inferInstance inferInstance
+  simpa [S] using
+    ext_dimension_shift_X₃ _ hS n (by simpa [S] using h₂) (by simpa [S] using h₁)
 
 /-- If `X` is empty and `F` is a sheaf-valued presheaf, then the cohomology of the bundled
 sheaf `⟨F, hF⟩` is subsingleton in every degree. -/

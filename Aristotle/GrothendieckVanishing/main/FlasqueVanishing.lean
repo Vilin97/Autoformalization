@@ -401,8 +401,6 @@ theorem sheafH_subsingleton_of_flasque
       let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ip.shortComplex
       letI : Injective S.X₂ := by
         simpa [S] using (inferInstance : Injective S.X₂)
-      letI : Injective ((⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
-        simpa using (inferInstance : Injective S.X₂)
       letI : IsFlasqueSheaf S.X₁ := by
         simpa [S] using (inferInstance : IsFlasqueSheaf F)
       letI : IsFlasqueSheaf S.X₃ := by
@@ -411,11 +409,8 @@ theorem sheafH_subsingleton_of_flasque
       have h₃H : Subsingleton (Sheaf.H S.X₃ (n + 1)) := by
         simpa using (ih S.X₃)
       simpa [S] using
-        (sheafH_dimension_shift_presheaf
-          (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-          S.X₁.cond S.X₂.cond S.X₃.cond
-          (f := S.f.val) (g := S.g.val)
-          (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+        (sheafH_dimension_shift_of_injective
+          (S := S)
           (by simpa [S] using ip.shortExact_shortComplex)
           (n + 1) h₃H)
 
