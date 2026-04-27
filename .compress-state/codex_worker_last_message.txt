@@ -1,12 +1,21 @@
-Done. The cokernel stalk-zero cluster is now sheaf-level in [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:356), `stalk_zero_of_shortExact_cokernel_presheaf` is deleted, and the two callers in [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:469) pass bundled sheaf morphisms directly.
+Implemented cycle 10.
+
+Changed:
+- Sheafified filtered-colimit boundary APIs in [PresheafFilteredColimitCore.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean).
+- Removed the presheaf diagram/cocone/comparison shim layer.
+- Reworked the comparison `IsIso` induction in [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean) to prove the sheaf-level comparison directly.
+- Updated the stale note in [FinitelyGeneratedVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean).
+- Wrote the required report at [.compress-state/codex_task_results/cycle_10.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_10.md).
+
+LOC:
+- Normalized: `5632 -> 5295` (`-337`)
+- Raw `main/*.lean`: `6654 -> 6275` (`-379`)
+- Phase-1 raw target `< 6500` is met.
 
 Verification passed:
-- `lake env lean` for `CohomologyAPI.lean`, `IrreducibleStep.lean`, and `GrothendieckVanishing.lean`
+- `lake env lean` on `PresheafFilteredColimitCore.lean`
+- `lake env lean` on `PresheafFilteredColimit.lean`
+- `lake env lean` on `FinitelyGeneratedVanishing.lean`
+- `lake env lean` on `GrothendieckVanishing.lean`
 - `lake build`
-- post-edit `rg` confirms the deleted/old `_presheaf` declarations are gone
-
-Metrics:
-- normalized LOC: `5708 -> 5632` (`-76`)
-- raw `main/*.lean`: `6735 -> 6654` (`-81`)
-
-Report written at [.compress-state/codex_task_results/cycle_9.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_9.md:1).
+- Actual `sorry` / `admit` / `axiom` grep over `main` returned no results.

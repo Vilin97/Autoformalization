@@ -94,7 +94,7 @@ The formal comparison map
 is defined for any small diagram and cocone by `colimit.desc`.
 
 The genuinely geometric input starts afterwards:
-- `sheafH_filtered_colimit_surj_presheaf`: every element of `H^n(colim F_j)` comes from some
+- `sheafH_filtered_colimit_surj`: every element of `H^n(colim F_j)` comes from some
   `H^n(F_j)`
   via the canonical map. The proof uses per-object functorial injective embeddings via Mathlib's
   `IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp` and dimension shifting.
@@ -405,7 +405,7 @@ noncomputable def sheafH_filtered_colimit_succ_shiftCodomainIso
 
 /-- The filtered-colimit successor-step vanishing lemma for the injective replacement:
 the middle term of the induced short exact sequence has trivial cohomology in degree `n + 1`. -/
-theorem sheafH_filtered_colimit_succ_inj_subsingleton_presheaf
+theorem sheafH_filtered_colimit_succ_inj_subsingleton
     [NoetherianSpace X] (n : ℕ)
     (hInj : ∀ j, Injective ((sheafH_filtered_colimit_succ_Inj Y').obj j)) :
     Subsingleton (Sheaf.H (sheafH_filtered_colimit_succ_injCocone Y').pt (n + 1)) := by
@@ -426,220 +426,96 @@ theorem sheafH_filtered_colimit_succ_inj_subsingleton_presheaf
 
 end SheafHFilteredColimitSucc
 
-/-- **Sheaf cohomology commutes with filtered colimits (surjectivity)** on Noetherian spaces.
-    Presheaf form: if the stages and cocone point are sheaves, every element of
-    `H^n(c.pt)` comes from some stage via the cocone map. -/
-theorem sheafH_filtered_colimit_surj_presheaf
+/-- **Sheaf cohomology commutes with filtered colimits (surjectivity)** on Noetherian spaces:
+    every element of `H^n(c'.pt)` comes from some stage via the cocone map. -/
+theorem sheafH_filtered_colimit_surj
     {X : TopCat.{u}} [NoetherianSpace X]
     (n : ℕ) :
     ∀ {J' : Type u} [SmallCategory J'] [IsFiltered J']
-      (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-      (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-      (c : Cocone Y) (_ : IsColimit c)
-      (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
-      (x : Sheaf.H (⟨c.pt, hc_pt⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n),
+      (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+      (c' : Cocone Y') (_ : IsColimit c')
+      (x : Sheaf.H c'.pt n),
     ∃ (j : J')
-      (y : Sheaf.H (⟨Y.obj j, hY j⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n),
+      (y : Sheaf.H (Y'.obj j) n),
       ConcreteCategory.hom
-        ((sheafCohomologyFunctor X n).map (Sheaf.Hom.mk (c.ι.app j))) y = x := by
+        ((sheafCohomologyFunctor X n).map (c'.ι.app j)) y = x := by
   induction n with
   | zero =>
-    intro J' inst1 inst2 Y hY c hc hc_pt x
+    intro J' inst1 inst2 Y' c' hc' x
     letI := inst1
     letI := inst2
+    haveI : CreatesColimit Y'
+        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+      createsFilteredColimit Y'
     have hc_top := isColimitOfPreserves
-      ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)) hc
-    let x_sec := sheafH0EquivSections_presheaf hc_pt x
+      ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤))
+      (isColimitOfPreserves
+        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc')
+    let x_sec := sheafH0EquivSections_presheaf c'.pt.cond x
     obtain ⟨j, s_j, hs_j⟩ := Concrete.isColimit_exists_rep _ hc_top x_sec
-    let y := (sheafH0EquivSections_presheaf (hY j)).symm s_j
+    let y := (sheafH0EquivSections_presheaf (Y'.obj j).cond).symm s_j
     refine ⟨j, y, ?_⟩
     have h_nat :
-        sheafH0EquivSections_presheaf hc_pt
+        sheafH0EquivSections_presheaf c'.pt.cond
           (ConcreteCategory.hom
-            ((sheafCohomologyFunctor X 0).map (Sheaf.Hom.mk (c.ι.app j))) y) =
-        ConcreteCategory.hom ((c.ι.app j).app (op ⊤))
-          (sheafH0EquivSections_presheaf (hY j) y) := by
+            ((sheafCohomologyFunctor X 0).map (c'.ι.app j)) y) =
+        ConcreteCategory.hom ((c'.ι.app j).val.app (op ⊤))
+          (sheafH0EquivSections_presheaf (Y'.obj j).cond y) := by
       simpa [sheafCohomologyFunctor_map_apply] using
         (sheafH0EquivSections_presheaf_natural
-          (hF := hY j) (hG := hc_pt) (f := c.ι.app j) (x := y))
-    apply (sheafH0EquivSections_presheaf hc_pt).injective
-    change sheafH0EquivSections_presheaf hc_pt
+          (hF := (Y'.obj j).cond) (hG := c'.pt.cond) (f := (c'.ι.app j).val) (x := y))
+    apply (sheafH0EquivSections_presheaf c'.pt.cond).injective
+    change sheafH0EquivSections_presheaf c'.pt.cond
       (ConcreteCategory.hom
-        ((sheafCohomologyFunctor X 0).map (Sheaf.Hom.mk (c.ι.app j))) y) = x_sec
+        ((sheafCohomologyFunctor X 0).map (c'.ι.app j)) y) = x_sec
     rw [h_nat, AddEquiv.apply_symm_apply]
     exact hs_j
   | succ n ih =>
-    intro J' inst1 inst2 Y hY c hc hc_pt x
+    intro J' inst1 inst2 Y' c' hc' x
     letI := inst1
     letI := inst2
-    let Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
-      { obj := fun j => ⟨Y.obj j, hY j⟩
-        map := fun f => Sheaf.Hom.mk (Y.map f)
-        map_id := fun j => Sheaf.Hom.ext <| Y.map_id j
-        map_comp := fun f g => Sheaf.Hom.ext <| Y.map_comp f g }
-    let csh : Cocone Ysh :=
-      { pt := ⟨c.pt, hc_pt⟩
-        ι :=
-          { app := fun j => Sheaf.Hom.mk (c.ι.app j)
-            naturality := fun _ _ f => Sheaf.Hom.ext <| c.ι.naturality f } }
-    have hcsh : IsColimit csh := by
-      letI : CreatesColimit Ysh (sheafToPresheaf (Opens.grothendieckTopology X)
-          AddCommGrpCat.{u}) := createsFilteredColimit Ysh
-      simpa [Ysh, csh] using
-        (liftedColimitIsColimit
-          (F := sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-          (K := Ysh) (c := c) hc)
     letI : Zero (TopCat.Sheaf AddCommGrpCat.{u} X) := Limits.HasZeroObject.zero' _
-    let Inj := sheafH_filtered_colimit_succ_Inj Ysh
-    let η := sheafH_filtered_colimit_succ_eta Ysh
-    let injCocone := sheafH_filtered_colimit_succ_injCocone Ysh
-    let S := sheafH_filtered_colimit_succ_shortComplex Ysh csh hcsh
-    have hSE : S.ShortExact := sheafH_filtered_colimit_succ_shortExact Ysh csh hcsh
+    let Inj := sheafH_filtered_colimit_succ_Inj Y'
+    let η := sheafH_filtered_colimit_succ_eta Y'
+    let injCocone := sheafH_filtered_colimit_succ_injCocone Y'
+    let S := sheafH_filtered_colimit_succ_shortComplex Y' c' hc'
+    have hSE : S.ShortExact := sheafH_filtered_colimit_succ_shortExact Y' c' hc'
     have hInj : ∀ j, Injective (Inj.obj j) := by
       intro j
       let ffData := MorphismProperty.functorialFactorizationData
         (MorphismProperty.monomorphisms (TopCat.Sheaf AddCommGrpCat.{u} X))
         (MorphismProperty.monomorphisms (TopCat.Sheaf AddCommGrpCat.{u} X)).rlp
-      change Injective (ffData.Z.obj (Arrow.mk (0 : Ysh.obj j ⟶ 0)))
+      change Injective (ffData.Z.obj (Arrow.mk (0 : Y'.obj j ⟶ 0)))
       exact IsGrothendieckAbelian.instInjectiveZMonomorphismsRlpMonoMapFactorizationDataRlpOfNatHom
     have hI : Subsingleton (Sheaf.H injCocone.pt (n + 1)) := by
       simpa [injCocone, Inj] using
-        (sheafH_filtered_colimit_succ_inj_subsingleton_presheaf
-          (X := X) (Y' := Ysh) n hInj)
-    let Q := sheafH_filtered_colimit_succ_quotient Ysh
-    let qCocone := sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh
+        (sheafH_filtered_colimit_succ_inj_subsingleton
+          (X := X) (Y' := Y') n hInj)
+    let Q := sheafH_filtered_colimit_succ_quotient Y'
+    let qCocone := sheafH_filtered_colimit_succ_quotientCocone Y' c' hc'
     have hqColim : IsColimit qCocone :=
-      sheafH_filtered_colimit_succ_quotientCocone_isColimit Ysh csh hcsh
+      sheafH_filtered_colimit_succ_quotientCocone_isColimit Y' c' hc'
     haveI : CreatesColimit Q
         (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
       createsFilteredColimit Q
     have hSE_j : ∀ j, (ShortComplex.mk (η.app j) (cokernel.π (η.app j))
         (cokernel.condition (η.app j))).ShortExact :=
-      sheafH_filtered_colimit_succ_stage_shortExact (Y' := Ysh)
+      sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y')
     obtain ⟨y, hy⟩ := sheafH_succ_map_exists_preimage_of_subsingleton_middle
       hSE n (by simpa using hI) x
     obtain ⟨j₀, y_j, hy_j⟩ := by
       simpa using
         (ih
-          (Y := Q ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-          (hY := fun j => (Q.obj j).cond)
-          (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone
-            qCocone)
-          (hc_pt := qCocone.pt.cond) (x := y)
-          (isColimitOfPreserves
-            (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hqColim))
-    haveI : Mono (η.app j₀) := sheafH_filtered_colimit_succ_eta_mono (Y' := Ysh) j₀
-    let x_j : Sheaf.H (Ysh.obj j₀) (n + 1) :=
+          (Y' := Q) (c' := qCocone) (x := y) hqColim)
+    haveI : Mono (η.app j₀) := sheafH_filtered_colimit_succ_eta_mono (Y' := Y') j₀
+    let x_j : Sheaf.H (Y'.obj j₀) (n + 1) :=
       ConcreteCategory.hom (sheafH_succ_map (hSE_j j₀) n) y_j
     refine ⟨j₀, x_j, ?_⟩
     show ConcreteCategory.hom
-        ((sheafCohomologyFunctor X (n + 1)).map ((csh.ι.app j₀))) x_j = x
+        ((sheafCohomologyFunctor X (n + 1)).map ((c'.ι.app j₀))) x_j = x
     rw [show x_j = ConcreteCategory.hom (sheafH_succ_map (hSE_j j₀) n) y_j from rfl]
     exact (sheafH_succ_map_natural_of_map_eq
-      (hSE_j j₀) hSE (sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j₀) n hy_j).trans hy
-
-/-- The sheaf-valued diagram obtained by bundling a presheaf diagram whose stages are sheaves. -/
-def sheafH_filtered_colimit_presheafDiagram
-    {X : TopCat.{u}}
-    {J' : Type u} [SmallCategory J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j)) :
-    J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X :=
-  { obj := fun j => ⟨Y.obj j, hY j⟩
-    map := fun f => Sheaf.Hom.mk (Y.map f)
-    map_id := fun j => Sheaf.Hom.ext <| Y.map_id j
-    map_comp := fun f g => Sheaf.Hom.ext <| Y.map_comp f g }
-
-/-- The sheaf-valued cocone obtained by bundling a presheaf cocone whose legs and point
-    satisfy the sheaf condition. -/
-def sheafH_filtered_colimit_presheafCocone
-    {X : TopCat.{u}}
-    {J' : Type u} [SmallCategory J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-    (c : Cocone Y) (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
-    Cocone (sheafH_filtered_colimit_presheafDiagram Y hY) :=
-  { pt := ⟨c.pt, hc_pt⟩
-    ι :=
-      { app := fun j => Sheaf.Hom.mk (c.ι.app j)
-        naturality := fun _ _ f => Sheaf.Hom.ext <| c.ι.naturality f } }
-
-/-- Bundling a sheaf-valued diagram after forgetting to presheaves recovers the original
-    diagram. -/
-theorem sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf
-    {X : TopCat.{u}}
-    {J' : Type u} [SmallCategory J']
-    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X) :
-    sheafH_filtered_colimit_presheafDiagram
-      (Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-      (fun j => (Y'.obj j).cond) = Y' := by
-  cases Y'
-  rfl
-
-/-- Bundling a sheaf-valued cocone after forgetting to presheaves recovers the original
-    cocone. -/
-theorem sheafH_filtered_colimit_presheafCocone_sheafToPresheaf
-    {X : TopCat.{u}}
-    {J' : Type u} [SmallCategory J']
-    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (c' : Cocone Y') :
-    sheafH_filtered_colimit_presheafCocone
-      (Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-      (fun j => (Y'.obj j).cond)
-      ((sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
-      c'.pt.cond = c' := by
-  cases Y'
-  cases c'
-  rfl
-
-/-- The cohomology diagram attached to a presheaf diagram whose stages are sheaves. -/
-noncomputable def sheafH_presheafDiagram
-    {X : TopCat.{u}}
-    {J' : Type u} [SmallCategory J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-    (n : ℕ) :
-    J' ⥤ AddCommGrpCat.{u} :=
-  sheafH_filtered_colimit_presheafDiagram Y hY ⋙ sheafCohomologyFunctor X n
-
-@[simp] theorem sheafH_presheafDiagram_sheafToPresheaf
-    {X : TopCat.{u}}
-    {J' : Type u} [SmallCategory J']
-    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (n : ℕ) :
-    sheafH_presheafDiagram
-      (Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-      (fun j => (Y'.obj j).cond) n =
-    Y' ⋙ sheafCohomologyFunctor X n := by
-  dsimp [sheafH_presheafDiagram]
-  rw [sheafH_filtered_colimit_presheafDiagram_sheafToPresheaf]
-
-/-- The canonical comparison morphism `colim H^n(F_j) ⟶ H^n(colim F_j)` at the presheaf
-boundary, assuming the stages and cocone point are sheaves. -/
-noncomputable def sheafH_filtered_colimit_comparison_presheaf
-    {X : TopCat.{u}}
-    {J' : Type u} [SmallCategory J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-    (c : Cocone Y) (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
-    (n : ℕ) :
-    colimit (sheafH_presheafDiagram Y hY n) ⟶
-      AddCommGrpCat.of (Sheaf.H (⟨c.pt, hc_pt⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) :=
-  colimit.desc _ ((sheafCohomologyFunctor X n).mapCocone
-    (sheafH_filtered_colimit_presheafCocone Y hY c hc_pt))
-
-@[simp] theorem colimit_ι_sheafH_filtered_colimit_comparison_presheaf
-    {X : TopCat.{u}}
-    {J' : Type u} [SmallCategory J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-    (c : Cocone Y) (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
-    (n : ℕ) (j : J') :
-    colimit.ι (sheafH_presheafDiagram Y hY n) j ≫
-        sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt n =
-      (sheafCohomologyFunctor X n).map (Sheaf.Hom.mk (c.ι.app j)) := by
-  simp [sheafH_presheafDiagram, sheafH_filtered_colimit_comparison_presheaf,
-    sheafH_filtered_colimit_presheafCocone]
+      (hSE_j j₀) hSE (sheafH_filtered_colimit_succ_stage_hom Y' c' hc' j₀) n hy_j).trans hy
 
 /-- The canonical comparison morphism `colim H^n(F_j) ⟶ H^n(colim F_j)` induced by a cocone. -/
 noncomputable def sheafH_filtered_colimit_comparison
@@ -648,24 +524,7 @@ noncomputable def sheafH_filtered_colimit_comparison
     (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
     (n : ℕ) (c' : Cocone Y') :
     colimit (Y' ⋙ sheafCohomologyFunctor X n) ⟶ AddCommGrpCat.of (Sheaf.H c'.pt n) :=
-  sheafH_filtered_colimit_comparison_presheaf
-    (Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-    (fun j => (Y'.obj j).cond)
-    ((sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
-    c'.pt.cond n
-
-theorem sheafH_filtered_colimit_comparison_sheafToPresheaf
-    {X : TopCat.{u}}
-    {J' : Type u} [SmallCategory J']
-    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (n : ℕ) (c' : Cocone Y') :
-    sheafH_filtered_colimit_comparison_presheaf
-      (Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-      (fun j => (Y'.obj j).cond)
-      ((sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
-      c'.pt.cond n =
-    sheafH_filtered_colimit_comparison Y' n c' := by
-  rfl
+  colimit.desc _ ((sheafCohomologyFunctor X n).mapCocone c')
 
 @[simp] theorem colimit_ι_sheafH_filtered_colimit_comparison
     {X : TopCat.{u}}
@@ -675,25 +534,13 @@ theorem sheafH_filtered_colimit_comparison_sheafToPresheaf
     colimit.ι (Y' ⋙ sheafCohomologyFunctor X n) j ≫
         sheafH_filtered_colimit_comparison Y' n c' =
       (sheafCohomologyFunctor X n).map (c'.ι.app j) := by
-  change colimit.ι
-      (sheafH_presheafDiagram
-        (Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-        (fun j => (Y'.obj j).cond) n) j ≫
-      sheafH_filtered_colimit_comparison_presheaf
-        (Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-        (fun j => (Y'.obj j).cond)
-        ((sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
-        c'.pt.cond n =
-    (sheafCohomologyFunctor X n).map (Sheaf.Hom.mk
-      (((sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c').ι.app j))
-  simpa [sheafH_presheafDiagram_sheafToPresheaf] using
-    (colimit_ι_sheafH_filtered_colimit_comparison_presheaf
-      (Y := Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-      (hY := fun j => (Y'.obj j).cond)
-      (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
-      (hc_pt := c'.pt.cond) (n := n) (j := j))
+  simp [sheafH_filtered_colimit_comparison]
 
-private theorem sheafH_filtered_colimit_comparison_succ_compatibility_sheaf_aux
+/-- Successor-step compatibility for the filtered-colimit comparison map: whenever the
+associated sheaf diagram and its colimit have vanishing injective-replacement cohomology in
+degrees `n` and `n + 1`, the degree-`n + 1` comparison is conjugate to the degree-`n`
+comparison for the quotient diagram. -/
+theorem sheafH_filtered_colimit_comparison_succ_compatibility
     {X : TopCat.{u}}
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
     [Zero (TopCat.Sheaf AddCommGrpCat.{u} X)]
@@ -771,91 +618,3 @@ private theorem sheafH_filtered_colimit_comparison_succ_compatibility_sheaf_aux
       (sheafH_filtered_colimit_succ_shortExact Ysh csh hcsh)
       (sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j)
       n (h_mid_n j) (h_mid_succ j) h_colim_n h_colim_succ)
-
-/-- Presheaf-boundary successor-step compatibility for the filtered-colimit comparison map:
-whenever the associated sheaf diagram and the colimit sheaf have vanishing injective-replacement
-cohomology in degrees `n` and `n + 1`, the degree-`n + 1` comparison is conjugate to the
-degree-`n` comparison for the quotient diagram. -/
-theorem sheafH_filtered_colimit_comparison_succ_compatibility_presheaf
-    {X : TopCat.{u}}
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-    [Zero (TopCat.Sheaf AddCommGrpCat.{u} X)]
-    (c : Cocone Y) (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
-    (hcsh : IsColimit (sheafH_filtered_colimit_presheafCocone Y hY c hc_pt))
-    (n : ℕ)
-    (h_mid_n : ∀ j,
-      Subsingleton (Sheaf.H
-        ((sheafH_filtered_colimit_succ_Inj
-          (sheafH_filtered_colimit_presheafDiagram Y hY)).obj j) n))
-    (h_mid_succ : ∀ j,
-      Subsingleton (Sheaf.H
-        ((sheafH_filtered_colimit_succ_Inj
-          (sheafH_filtered_colimit_presheafDiagram Y hY)).obj j) (n + 1)))
-    (h_colim_n :
-      Subsingleton (Sheaf.H
-        (sheafH_filtered_colimit_succ_injCocone
-          (sheafH_filtered_colimit_presheafDiagram Y hY)).pt n))
-    (h_colim_succ :
-      Subsingleton (Sheaf.H
-        (sheafH_filtered_colimit_succ_injCocone
-          (sheafH_filtered_colimit_presheafDiagram Y hY)).pt (n + 1))) :
-    let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
-    let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
-    (sheafH_filtered_colimit_succ_shiftDomainIso Ysh n h_mid_n h_mid_succ).hom ≫
-        sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt (n + 1) =
-      sheafH_filtered_colimit_comparison
-        (sheafH_filtered_colimit_succ_quotient Ysh) n
-        (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) ≫
-      (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
-        h_colim_n h_colim_succ).hom := by
-  let Ysh := sheafH_filtered_colimit_presheafDiagram Y hY
-  let csh := sheafH_filtered_colimit_presheafCocone Y hY c hc_pt
-  change
-    (sheafH_filtered_colimit_succ_shiftDomainIso Ysh n h_mid_n h_mid_succ).hom ≫
-        sheafH_filtered_colimit_comparison Ysh (n + 1) csh =
-      sheafH_filtered_colimit_comparison (sheafH_filtered_colimit_succ_quotient Ysh) n
-        (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) ≫
-      (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
-        h_colim_n h_colim_succ).hom
-  exact
-    sheafH_filtered_colimit_comparison_succ_compatibility_sheaf_aux
-      Ysh csh hcsh n h_mid_n h_mid_succ h_colim_n h_colim_succ
-
-/-- If a presheaf cocone is a colimit and its stages and point are sheaves, then the
-    bundled sheaf-valued cocone is also a colimit. -/
-noncomputable def sheafH_filtered_colimit_presheafCocone_isColimit
-    {X : TopCat.{u}}
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-    (c : Cocone Y) (hc : IsColimit c)
-    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
-    IsColimit (sheafH_filtered_colimit_presheafCocone Y hY c hc_pt) := by
-  refine
-    { desc := fun s => ?_
-      fac := fun s j => ?_
-      uniq := fun s m hm => ?_ }
-  · let sVal : Cocone Y :=
-      { pt := s.pt.val
-        ι :=
-          { app := fun j => (s.ι.app j).val
-            naturality := fun _ _ f => congrArg Sheaf.Hom.val (s.ι.naturality f) } }
-    exact Sheaf.Hom.mk (hc.desc sVal)
-  · let sVal : Cocone Y :=
-      { pt := s.pt.val
-        ι :=
-          { app := fun j => (s.ι.app j).val
-            naturality := fun _ _ f => congrArg Sheaf.Hom.val (s.ι.naturality f) } }
-    exact Sheaf.Hom.ext (hc.fac sVal j)
-  · apply Sheaf.Hom.ext
-    let sVal : Cocone Y :=
-      { pt := s.pt.val
-        ι :=
-          { app := fun j => (s.ι.app j).val
-            naturality := fun _ _ f => congrArg Sheaf.Hom.val (s.ι.naturality f) } }
-    exact hc.hom_ext fun j => by
-      calc
-        c.ι.app j ≫ m.val = (s.ι.app j).val := congrArg Sheaf.Hom.val (hm j)
-        _ = c.ι.app j ≫ (hc.desc sVal) := (hc.fac sVal j).symm
