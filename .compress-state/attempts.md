@@ -14,3 +14,4 @@ Cycle 12: cycle 12: deleted unused `epi_pushforward_map_closedIncl` wrapper from
 Cycle 13: cycle 13: deleted unused `epi_app_top_of_subsingleton_sheafH1` from CohomologyAPI.lean (-15 normalized / -19 raw LOC); lake env lean + lake build pass.
 Cycle 14: cycle 14: deleted unused `sheafCohomologyFunctor_additive`, `sheafH0NatIsoSections_hom_app`, `sheafH0NatIsoSections_inv_app` from CohomologyAPI.lean, -11 normalized LOC (-14 raw).
 Cycle 15: cycle 15: deleted unused `sheafCohomologyFunctor_obj` and `sheafH_subsingleton_of_isEmpty` from CohomologyAPI.lean (kept the _presheaf variant), updated two simp callers to unfold `sheafCohomologyFunctor` directly; -9 normalized LOC, -15 raw.
+Cycle 16: cycle 16: deleted unused `ulift_int_projective` instance from CohomologyAPI.lean, -9 normalized LOC (-13 raw). lake env lean + lake build pass.
