@@ -15,7 +15,7 @@ import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
   - directLimit_cohomology_vanishing: from epi-image vanishing to all sheaves (PROVED)
 
   Note: isFlasque_filtered_colimit, sheafH_preserves_filtered_colimits, and
-  sheafH_filtered_colimit_surj_presheaf live in the PresheafFilteredColimit modules.
+  sheafH_filtered_colimit_surj live in the PresheafFilteredColimit modules.
 -/
 
 universe u
