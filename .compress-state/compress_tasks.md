@@ -61,9 +61,9 @@ is a public declaration not transitively reached from `GrothendieckVanishing`.
 Verify reachability before deletion (private helpers it depends on may also
 become unreachable, cascading the deletion).
 
-- [ ] Delete unused declaration `TopCat.closedIncl_image_map_eq_inter` from `ClosedImmersion.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopCat.closedIncl_image_map_eq_inter` from `ClosedImmersion.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.closedIncl_image_map_eq_inter\b' Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean
-- [ ] Delete unused declaration `TopCat.coe_closedIncl` from `ClosedImmersion.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopCat.coe_closedIncl` from `ClosedImmersion.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.coe_closedIncl\b' Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean
 - [ ] Delete unused declaration `epi_pushforward_map_closedIncl` from `ClosedImmersion.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) epi_pushforward_map_closedIncl\b' Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean

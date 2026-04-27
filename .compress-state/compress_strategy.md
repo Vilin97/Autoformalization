@@ -1,1 +1,1 @@
-Phase-1 raw target met. Next cycle should pivot to Phase-2 unused-decl deletion (run `scripts/unused_decls.lean`) and/or continue Sheaf-reversion in PresheafFilteredColimitGeneral.lean and ZeroOutside.lean if any (F: Presheaf)(hF: IsSheaf) packaging remains. Avoid revisiting the now-clean filtered-colimit modules.
+Continue Phase-2 unused-decl deletion in ClosedImmersion.lean: next item is `epi_pushforward_map_closedIncl` (already on the checklist). After that, run `scripts/unused_decls.lean` to refresh the unused list and target the next isolated public decls.

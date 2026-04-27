@@ -1,21 +1,18 @@
-Implemented cycle 10.
+Done.
 
-Changed:
-- Sheafified filtered-colimit boundary APIs in [PresheafFilteredColimitCore.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean).
-- Removed the presheaf diagram/cocone/comparison shim layer.
-- Reworked the comparison `IsIso` induction in [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean) to prove the sheaf-level comparison directly.
-- Updated the stale note in [FinitelyGeneratedVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean).
-- Wrote the required report at [.compress-state/codex_task_results/cycle_10.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_10.md).
+Deleted the two scoped unused declarations from [ClosedImmersion.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean):
+- `TopCat.coe_closedIncl`
+- `TopCat.closedIncl_image_map_eq_inter`
 
-LOC:
-- Normalized: `5632 -> 5295` (`-337`)
-- Raw `main/*.lean`: `6654 -> 6275` (`-379`)
-- Phase-1 raw target `< 6500` is met.
+Wrote the required report: [.compress-state/codex_task_results/cycle_11.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_11.md)
 
 Verification passed:
-- `lake env lean` on `PresheafFilteredColimitCore.lean`
-- `lake env lean` on `PresheafFilteredColimit.lean`
-- `lake env lean` on `FinitelyGeneratedVanishing.lean`
-- `lake env lean` on `GrothendieckVanishing.lean`
+- `rg -n "coe_closedIncl|closedIncl_image_map_eq_inter" Aristotle/GrothendieckVanishing/main` returned no matches
+- `lake env lean Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean`
 - `lake build`
-- Actual `sorry` / `admit` / `axiom` grep over `main` returned no results.
+
+Metrics:
+- Normalized LOC: `5295 -> 5286` (`-9`)
+- Raw `main/*.lean` wc: `6275 -> 6264` (`-11`)
+
+`lake build` emitted existing warnings in unrelated files, but completed successfully.
