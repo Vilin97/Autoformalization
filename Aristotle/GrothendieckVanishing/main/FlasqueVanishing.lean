@@ -315,26 +315,6 @@ private lemma under_extend_by_one_open {X : TopCat.{u}}
   rw [hy_open]
   exact Opens.mem_iSup.mpr ⟨true, by simpa [T] using hxW⟩
 
-private lemma under_maximal_eq_top {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact)
-    (hX₁_epi : ∀ {U V : Opens X} (i : U ⟶ V), Epi (S.X₁.val.map i.op))
-    {U : Opens X} (s : S.X₃.val.obj (op U))
-    (hls : TopCat.Presheaf.IsLocallySurjective S.g.val)
-    (t : Under S.g s)
-    (hmax : ∀ y : Under S.g s, Nonempty (y ⟶ t) → Nonempty (t ⟶ y)) :
-    U ≤ t.right.1.unop := by
-  let V₀ : Opens X := t.right.1.unop
-  have hV₀U : V₀ ≤ U := leOfHom t.hom.val.unop
-  by_contra hnot
-  have hlt : V₀ < U := lt_of_le_not_ge hV₀U hnot
-  obtain ⟨x, hxU, hxV₀⟩ := Set.not_subset.mp hlt.2
-  obtain ⟨W, iWU, ⟨t', ht'⟩, hxW⟩ := (hls.imageSieve_mem s) x hxU
-  obtain ⟨y, hyt, hxy⟩ :=
-    under_extend_by_one_open hS hX₁_epi s t W (leOfHom iWU) t' ht' hxW
-  have h_back : Nonempty (t ⟶ y) := hmax y hyt
-  exact hxV₀ (leOfHom h_back.some.right.val.unop hxy)
-
 /-- If `0 → X₁ → X₂ → X₃ → 0` is short exact and every restriction map of the
 underlying presheaf `S.X₁.val` is epi, then `g(U) : X₂(U) → X₃(U)` is epi. -/
 theorem epi_app_of_shortExact_of_epi_restrictions_presheaf {X : TopCat.{u}}
@@ -372,12 +352,20 @@ theorem epi_app_of_shortExact_of_epi_restrictions_presheaf {X : TopCat.{u}}
     have hmap := CategoryOfElements.map_snd t.hom
     simpa [Ssh, V₀, t₀] using hmap.symm
   have hUleV₀ : U ≤ V₀ := by
-    simpa [Ssh, V₀] using
-      under_maximal_eq_top (S := Ssh) hSsh
+    by_contra hnot
+    have hlt : V₀ < U := lt_of_le_not_ge hV₀U hnot
+    obtain ⟨x, hxU, hxV₀⟩ := Set.not_subset.mp hlt.2
+    have hlsS : TopCat.Presheaf.IsLocallySurjective Ssh.g.val := by
+      simpa [Ssh] using hls
+    obtain ⟨W, iWU, ⟨t', ht'⟩, hxW⟩ := (hlsS.imageSieve_mem s) x hxU
+    obtain ⟨y, hyt, hxy⟩ :=
+      under_extend_by_one_open (S := Ssh) hSsh
         (by
           intro U V i
           simpa [Ssh] using hX₁_epi i)
-        s (by simpa [Ssh] using hls) t hmax
+        s t W (leOfHom iWU) t' ht' hxW
+    have h_back : Nonempty (t ⟶ y) := hmax y hyt
+    exact hxV₀ (leOfHom h_back.some.right.val.unop hxy)
   exact ⟨ConcreteCategory.hom (F₂.map (homOfLE hUleV₀).op) t₀, by
     rw [g.naturality_apply (homOfLE hUleV₀).op t₀, ht₀]
     rw [← CategoryTheory.comp_apply, ← F₃.map_comp]
