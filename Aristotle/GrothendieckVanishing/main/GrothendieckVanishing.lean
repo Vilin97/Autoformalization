@@ -121,7 +121,7 @@ private theorem irreducible_dim_zero_vanishing
   have hn_ne : n ≠ 0 := fun h => by
     subst h; exact absurd hn (not_lt.mpr topologicalKrullDim_nonneg)
   obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn_ne
-  exact sheafH_subsingleton_of_flasque_presheaf X hF m
+  exact sheafH_subsingleton_of_flasque X Fsh m
 
 theorem grothendieck_vanishing_of_irreducible
     (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X]

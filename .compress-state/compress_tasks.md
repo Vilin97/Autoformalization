@@ -45,7 +45,7 @@ highest-leverage area in the entire compress loop.
       removed from `CohomologyAPI.lean`.
       COMPLETE_IF: test $(wc -l < Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean) -lt 1200
 
-- [ ] Repeat the Phase-1 reversion across `FlasqueVanishing.lean`,
+- [>] Repeat the Phase-1 reversion across `FlasqueVanishing.lean`,
       `PresheafFilteredColimit{,Core,General}.lean`, `IrreducibleStep.lean`,
       `ClosedImmersion.lean`, `ClosedImmersionCohomology.lean`, and any other
       file with multi-arg `IsSheaf` packaging. Target: total `main/*.lean`

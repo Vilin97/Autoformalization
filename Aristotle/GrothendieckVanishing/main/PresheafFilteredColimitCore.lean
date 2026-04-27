@@ -426,13 +426,9 @@ theorem sheafH_filtered_colimit_succ_inj_subsingleton_presheaf
           (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
           (colimit.isColimit Inj))
         (hc_pt := injCocone.pt.cond))
-  let F : TopCat.Presheaf AddCommGrpCat.{u} X := injCocone.pt.val
-  have hF : F.IsSheaf := by
-    simpa [F, injCocone] using injCocone.pt.cond
-  letI : IsFlasqueSheaf ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
-    simpa [F, hF, injCocone] using hFlasque
-  simpa [F, hF, injCocone] using
-    (sheafH_subsingleton_of_flasque_presheaf (X := X) (F := F) hF n)
+  letI : IsFlasqueSheaf injCocone.pt := hFlasque
+  simpa [injCocone] using
+    (sheafH_subsingleton_of_flasque X injCocone.pt n)
 
 end SheafHFilteredColimitSucc
 

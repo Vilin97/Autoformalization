@@ -1,19 +1,14 @@
-Implemented cycle 2 compression.
+Implemented the Cycle 3 sheaf reversion.
 
-Key changes:
-- Replaced successor-map and H¹ cokernel `_presheaf` APIs with bundled sheaf short-complex APIs in [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean).
-- Updated callers in `PresheafFilteredColimitCore`, `PresheafFilteredColimit`, `ClosedImmersionCohomology`, and `FlasqueVanishing`.
-- Removed duplicate presheaf wrappers and single-use naturality plumbing.
-- Wrote the required report at [.compress-state/codex_task_results/cycle_2.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_2.md).
+Changed [FlasqueVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean) to delete the `sheafShortComplexOfPresheaf` bridge and replace the targeted `_presheaf` declarations with bundled `Sheaf` / `ShortComplex` APIs. Updated direct callers in `PresheafFilteredColimitCore`, `PresheafFilteredColimit`, `IrreducibleStep`, and `GrothendieckVanishing`.
+
+Metrics:
+- Normalized LOC: `6165 -> 6062` (`-103`)
+- Raw `main/*.lean`: `7235 -> 7120` (`-115`)
 
 Verification passed:
-- `lake env lean` on every modified Lean file
+- `lake env lean` for all five modified Lean files
 - `lake build`
-- no actual `sorry` / `admit` / `axiom` declarations found
+- `git diff --check`
 
-LOC:
-- Normalized: `6666 -> 6165` (`-501`)
-- Raw `main/*.lean`: `7763 -> 7235` (`-528`)
-- `CohomologyAPI.lean` raw: `1609 -> 1193`, satisfying the `<1200` gate
-
-`lake build` still reports unrelated existing linter warnings in some files, but no errors.
+I also wrote the required report at [cycle_3.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_3.md). The raw total is still above the later `6500` target, so remaining Phase 1 work is in the other sheaf-reversion clusters.

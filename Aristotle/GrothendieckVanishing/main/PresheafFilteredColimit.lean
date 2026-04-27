@@ -837,21 +837,9 @@ private theorem sheafH_filtered_colimit_comparison_isIso_presheaf_succ_succ
           (colimit.isColimit Inj))
         (hc_pt := injCocone.pt.cond))
   have h_colim_n : Subsingleton (Sheaf.H injCocone.pt (m + 1)) := by
-    let F : TopCat.Presheaf AddCommGrpCat.{u} X := injCocone.pt.val
-    have hF : F.IsSheaf := by
-      simpa [F] using injCocone.pt.cond
-    letI : IsFlasqueSheaf ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
-      simpa [F, hF] using hFlasqueInj
-    simpa [F, hF] using
-      (sheafH_subsingleton_of_flasque_presheaf (X := X) (F := F) hF m)
+    simpa using sheafH_subsingleton_of_flasque X injCocone.pt m
   have h_colim_succ : Subsingleton (Sheaf.H injCocone.pt (m + 2)) := by
-    let F : TopCat.Presheaf AddCommGrpCat.{u} X := injCocone.pt.val
-    have hF : F.IsSheaf := by
-      simpa [F] using injCocone.pt.cond
-    letI : IsFlasqueSheaf ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
-      simpa [F, hF] using hFlasqueInj
-    simpa [F, hF] using
-      (sheafH_subsingleton_of_flasque_presheaf (X := X) (F := F) hF (m + 1))
+    simpa using sheafH_subsingleton_of_flasque X injCocone.pt (m + 1)
   let domainIso :=
     sheafH_filtered_colimit_succ_shiftDomainIso Ysh (m + 1) h_mid_n h_mid_succ
   let codomainIso :=

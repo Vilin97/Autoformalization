@@ -445,14 +445,10 @@ theorem zeroOutsideInt_vanishing
       (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u})
       (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ (⊤ : Opens X)))).1 hfsh
   have hTop : Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) (m + 1)) := by
-    let F : TopCat.Presheaf AddCommGrpCat.{u} X :=
-      (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).val
-    have hF : F.IsSheaf := by
-      simpa [F] using (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).cond
-    letI : IsFlasqueSheaf ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
-      simpa [F, hF] using isFlasqueSheaf_zeroOutsideInt_top X
-    simpa [F, hF] using
-      (sheafH_subsingleton_of_flasque_presheaf (X := X) (F := F) hF m)
+    letI : IsFlasqueSheaf (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) := by
+      simpa using isFlasqueSheaf_zeroOutsideInt_top X
+    simpa using
+      sheafH_subsingleton_of_flasque X (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) m
   exact sheafH_dimension_shift_of_mono_presheaf
     (F := (TopCat.Sheaf.zeroOutsideInt V).val)
     (G := (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)).val)
