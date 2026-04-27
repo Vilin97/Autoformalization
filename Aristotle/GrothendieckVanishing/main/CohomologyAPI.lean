@@ -36,8 +36,6 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
   higher-degree connecting isomorphism
 * `sheafH_succ_iso_of_subsingleton_middle_natural`: sheaf-level
   naturality for the same connecting isomorphism
-* `epi_app_top_of_subsingleton_sheafH1`: sheaf-level H^1 vanishing gives
-  surjectivity on top sections
 * `sheafH0_surj_of_epi_app_top`: sheaf-level surjectivity on top sections
   gives H^0 surjectivity
 * `sheafH_subsingleton_H1_via_surj`: sheaf-level H^1 vanishing via
@@ -542,23 +540,6 @@ noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle {X : TopCat.{u}}
         (ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤))) s) =
       ((sheafH0EquivSections_presheaf S.X₃.cond).symm s).comp hS.extClass rfl := by
   simp [sheafH1_cokernel_iso_of_subsingleton_middle]
-
-/-- If `S` is short exact and `H¹(S.X₁)` is subsingleton, then `S.g` is surjective on
-    top sections. -/
-theorem epi_app_top_of_subsingleton_sheafH1 {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact)
-    (h₁H : Subsingleton (Sheaf.H S.X₁ 1)) :
-    Epi (S.g.val.app (op ⊤)) := by
-  rw [AddCommGrpCat.epi_iff_surjective]
-  intro r
-  let y : Sheaf.H S.X₃ 0 := (sheafH0EquivSections_presheaf S.X₃.cond).symm r
-  obtain ⟨z, hz⟩ := Ext.covariant_sequence_exact₃ _ hS y rfl
-    (@Subsingleton.elim _ h₁H _ _)
-  refine ⟨sheafH0EquivSections_presheaf S.X₂.cond z, ?_⟩
-  have hg : (Sheaf.Hom.mk S.g.val : S.X₂ ⟶ S.X₃) = S.g := by ext; rfl
-  rw [← sheafH0EquivSections_presheaf_natural S.X₂.cond S.X₃.cond (f := S.g.val), hg, hz]
-  simp [y]
 
 /-- If a sheaf morphism is surjective on top sections, then every degree-zero cohomology
     class of the target lifts along it. -/

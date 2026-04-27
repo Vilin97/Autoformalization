@@ -1,13 +1,13 @@
 {
   "progress_score": 2,
-  "summary": "Deleted unused public wrapper `epi_pushforward_map_closedIncl` from ClosedImmersion.lean, -26 normalized LOC.",
+  "summary": "Deleted unused `epi_app_top_of_subsingleton_sheafH1` from CohomologyAPI.lean, -15 normalized LOC.",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Continue Phase-2 unused-decl deletion: the next checklist item is `epi_app_top_of_subsingleton_sheafH1_presheaf` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`. Verify it has no remaining references via `rg`, then delete the declaration along with any helpers that become unreachable solely from this deletion.",
-  "attempts_entry": "cycle 12: deleted unused `epi_pushforward_map_closedIncl` wrapper from ClosedImmersion.lean, -26 norm / -29 raw LOC.",
+  "strategy_recommendation": "Continue Phase-2 unused-decl deletion: next item is `sheafCohomologyFunctor_additive` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`. Verify with `rg` it has no remaining call sites, then delete it and any helpers that become unreachable.",
+  "attempts_entry": "cycle 13: deleted unused `epi_app_top_of_subsingleton_sheafH1` from CohomologyAPI.lean (-15 normalized / -19 raw LOC); lake env lean + lake build pass.",
   "completed_task_lines": [
-    "- [>] Delete unused declaration `epi_pushforward_map_closedIncl` from `ClosedImmersion.lean` (and any helpers it depended on that become unreachable)."
+    "- [>] Delete unused declaration `epi_app_top_of_subsingleton_sheafH1_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable)."
   ]
 }
