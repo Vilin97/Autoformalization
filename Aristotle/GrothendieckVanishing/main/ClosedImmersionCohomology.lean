@@ -154,7 +154,7 @@ theorem subsingleton_sheafH_of_closedImmersion_middle
     haveI :
         Subsingleton ↑((sheafCohomologyFunctor X n).obj
           (CokernelCofork.ofπ S.g hfshg).pt) := by
-      simpa [sheafCohomologyFunctor_obj] using hPush
+      simpa [sheafCohomologyFunctor] using hPush
     exact ⟨fun a b => by
       apply (ConcreteCategory.bijective_of_isIso e.hom).1
       exact Subsingleton.elim _ _⟩

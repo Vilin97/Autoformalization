@@ -1,18 +1,8 @@
-Cycle 14 completed.
+Cycle 15 is complete.
 
-Changed:
-- Deleted `sheafCohomologyFunctor_additive`
-- Deleted `sheafH0NatIsoSections_hom_app`
-- Deleted `sheafH0NatIsoSections_inv_app`
-- Wrote report: [.compress-state/codex_task_results/cycle_14.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_14.md)
+Deleted `sheafH_subsingleton_of_isEmpty` and `sheafCohomologyFunctor_obj` from [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean), kept `sheafH_subsingleton_of_isEmpty_presheaf`, and replaced the two downstream uses with direct `sheafCohomologyFunctor` unfolding in [FinitelyGeneratedVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean) and [ClosedImmersionCohomology.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean). The stale `sheafCohomologyFunctor_map_succ_of_map_eq_presheaf` name is still absent.
 
-Verification:
-- `rg` for the three deleted names: no matches
-- `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`: passed
-- `lake build`: passed, with unrelated linter warnings in downstream files
+Metrics: normalized LOC `5234 -> 5225` (`-9`), raw `main/*.lean` wc `6202 -> 6187` (`-15`).
 
-Metrics:
-- Normalized LOC: `5245 -> 5234`, delta `-11`
-- Raw `main/*.lean` `wc -l`: `6216 -> 6202`, delta `-14`
-
-I did not commit or push. The workspace still has unrelated pre-existing dirty `.compress-state` files; I only changed [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean) and added the cycle report.
+Verification passed:
+`lake env lean` on all four requested files, clean `rg` for the deleted names, and full `lake build` passed. Build emitted only existing unrelated linter warnings. Report written to [.compress-state/codex_task_results/cycle_15.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_15.md).

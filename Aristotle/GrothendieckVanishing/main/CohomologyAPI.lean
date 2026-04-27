@@ -12,7 +12,6 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
 
 * `subsingleton_sheafH_of_shortExact_middle_presheaf`: presheaf-boundary middle-term wrapper
 * `sheafH_subsingleton_of_isEmpty_presheaf`: presheaf-boundary empty-space vanishing
-* `sheafH_subsingleton_of_isEmpty`: sheaf-level wrapper for empty-space vanishing
 * `sheaf_isZero_of_zero_stalks`: zero stalks imply zero sheaf
 * `sheafH_subsingleton_of_isZero_presheaf`: presheaf-boundary zero-sheaf vanishing
 * `stalk_zero_of_ses_g_iso`: stalk vanishing from SES with iso on `g`
@@ -675,15 +674,6 @@ theorem sheafH_subsingleton_of_isEmpty_presheaf {X : TopCat.{u}} [IsEmpty X]
     sheaf_isZero_of_zero_stalks X hF (fun x _ => (IsEmpty.false x).elim)
   exact sheafH_subsingleton_of_isZero_presheaf hF hzero n
 
-/-- On an empty space, all sheaf cohomology groups are subsingleton.
-    Proof: when X is empty, all stalks are vacuously zero, so the sheaf is zero,
-    and zero sheaves have subsingleton cohomology in all degrees. -/
-instance sheafH_subsingleton_of_isEmpty {X : TopCat.{u}} [IsEmpty X]
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (n : ℕ) :
-    Subsingleton (Sheaf.H F n) := by
-  simpa using
-    (sheafH_subsingleton_of_isEmpty_presheaf (F := F.val) (hF := F.cond) (n := n))
-
 /-! ## Sheaf Cohomology Functor -/
 
 /-- The sheaf cohomology functor `H^n : Sheaf(X, Ab) ⥤ Ab`, defined as the covariant
@@ -692,11 +682,6 @@ noncomputable def sheafCohomologyFunctor (X : TopCat.{u}) (n : ℕ) :
     TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
   extFunctorObj ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat).obj
     (AddCommGrpCat.of (ULift.{u} ℤ))) n
-
-@[simp]
-theorem sheafCohomologyFunctor_obj (X : TopCat.{u}) (n : ℕ)
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
-    (sheafCohomologyFunctor X n).obj F = AddCommGrpCat.of (Sheaf.H F n) := rfl
 
 @[simp]
 theorem sheafCohomologyFunctor_map_apply (X : TopCat.{u}) (n : ℕ)
