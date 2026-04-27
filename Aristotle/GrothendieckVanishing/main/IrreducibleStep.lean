@@ -402,18 +402,8 @@ theorem closedComplementVanishing
           simpa [S, closedImmersionSES, closedIncl, Csh] using
             (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
               (hs := hYcl) Csh ⟨x, hxY⟩)
-        exact stalk_zero_of_ses_g_iso_presheaf
-          S.X₁.cond S.X₂.cond S.X₃.cond
-          (f := S.f.val) (g := S.g.val)
-          (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-          (by simpa [S] using hSE)
-          x inferInstance a
-      · exact stalk_zero_of_shortExact_kernel_presheaf
-          S.X₁.cond S.X₂.cond S.X₃.cond
-          (f := S.f.val) (g := S.g.val)
-          (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-          (by simpa [S] using hSE)
-          x
+        exact stalk_zero_of_ses_g_iso S hSE x inferInstance a
+      · exact stalk_zero_of_shortExact_kernel S hSE x
           (fun b => hStalksOnV x (by rwa [Set.mem_compl_iff, not_not] at hxY) b)
           a)
   exact subsingleton_sheafH_of_closedImmersion_middle

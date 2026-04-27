@@ -15,10 +15,8 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
 * `sheafH_subsingleton_of_isEmpty`: sheaf-level wrapper for empty-space vanishing
 * `sheaf_isZero_of_zero_stalks`: zero stalks imply zero sheaf
 * `sheafH_subsingleton_of_isZero_presheaf`: presheaf-boundary zero-sheaf vanishing
-* `stalk_zero_of_ses_g_iso_presheaf`: presheaf-boundary stalk vanishing from SES with iso
-  on `g`
-* `stalk_zero_of_shortExact_kernel_presheaf`: presheaf-boundary stalk vanishing from SES
-  kernel
+* `stalk_zero_of_ses_g_iso`: stalk vanishing from SES with iso on `g`
+* `stalk_zero_of_shortExact_kernel`: stalk vanishing from SES kernel
 * `stalk_zero_of_g_is_cokernel_of_stalk_epi_presheaf`: presheaf-boundary stalk
   vanishing from a cokernel and stalk-epi hypothesis
 * `cokernel_stalk_zero_of_stalk_surj`: actual-cokernel specialization of the same stalk
@@ -304,106 +302,54 @@ theorem sheafH_subsingleton_of_isZero_presheaf {X : TopCat.{u}}
     Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) :=
   ext_subsingleton_of_isZero_tgt hzero n
 
-/-- Presheaf-boundary stalk vanishing: if `0 → F₁ → F₂ → F₃ → 0` is short exact after
-bundling the presheaves as sheaves, and the stalk map of `g` at `x` is an isomorphism,
-then the stalk of `F₁` at `x` vanishes. -/
-theorem stalk_zero_of_ses_g_iso_presheaf
+/-- In a short exact sequence `X₁ → X₂ → X₃`, if the stalk map of `g` at `x` is an
+isomorphism, then the stalk of `X₁` at `x` vanishes. -/
+theorem stalk_zero_of_ses_g_iso
     {X : TopCat.{u}}
-    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
-    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
-    (hS : (ShortComplex.mk
-      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (Sheaf.Hom.mk f)
-      (Sheaf.Hom.mk g)
-      (by
-        apply Sheaf.Hom.ext
-        simpa using hfg)).ShortExact)
+    (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)) (hS : S.ShortExact)
     (x : X)
-    (hiso : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map g))
-    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F₁) :
+    (hiso : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val))
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₁.val) :
     a = 0 := by
-  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
-    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (Sheaf.Hom.mk f)
-    (Sheaf.Hom.mk g)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hfg)
-  have hS' : S.ShortExact := by
-    simpa [S] using hS
   let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  let fsh :
-      (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-        (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
-  have hfsh_mono : Mono fsh := by
-    simpa [S, fsh] using hS'.mono_f
-  have hf_mono : Mono f := by
+  have hf_mono : Mono S.f.val := by
     exact (Sheaf.Hom.mono_iff_presheaf_mono
-      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) fsh).1 hfsh_mono
-  haveI : Mono fsh := by
+      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) S.f).1 hS.mono_f
+  haveI : Mono S.f := by
     exact (Sheaf.Hom.mono_iff_presheaf_mono
-      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) fsh).2 hf_mono
+      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) S.f).2 hf_mono
   haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
-  have hTf_mono : Mono (T.map f) := by
-    simpa [T, fsh] using (Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) fsh)
-  have hf0 : T.map f = 0 := by
-    have : T.map f ≫ T.map g = 0 := by
-      rw [← T.map_comp, hfg, Functor.map_zero]
-    rw [show T.map f = (T.map f ≫ T.map g) ≫ inv (T.map g) by simp, this, zero_comp]
+  have hTf_mono : Mono (T.map S.f.val) := by
+    simpa [T] using (Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f)
+  have hf0 : T.map S.f.val = 0 := by
+    have : T.map S.f.val ≫ T.map S.g.val = 0 := by
+      have hzero : S.f.val ≫ S.g.val = 0 := congrArg Sheaf.Hom.val S.zero
+      rw [← T.map_comp, hzero, Functor.map_zero]
+    rw [show T.map S.f.val = (T.map S.f.val ≫ T.map S.g.val) ≫ inv (T.map S.g.val) by simp,
+      this, zero_comp]
   exact (AddCommGrpCat.mono_iff_injective _).mp hTf_mono
-    (show ConcreteCategory.hom (T.map f) a = ConcreteCategory.hom (T.map f) 0 by simp [hf0])
+    (show ConcreteCategory.hom (T.map S.f.val) a = ConcreteCategory.hom (T.map S.f.val) 0 by
+      simp [hf0])
 
 /-- In a short exact sequence `X₁ → X₂ → X₃`, if all stalks of `X₂` at `x` vanish, then
     all stalks of `X₁` at `x` vanish (by mono-injectivity of `f`). -/
-theorem stalk_zero_of_shortExact_kernel_presheaf
+theorem stalk_zero_of_shortExact_kernel
     {X : TopCat.{u}}
-    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
-    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
-    (hS : (ShortComplex.mk
-      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (Sheaf.Hom.mk f)
-      (Sheaf.Hom.mk g)
-      (by
-        apply Sheaf.Hom.ext
-        simpa using hfg)).ShortExact)
+    (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)) (hS : S.ShortExact)
     (x : X)
-    (hX₂ : ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F₂), b = 0)
-    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F₁) :
+    (hX₂ : ∀ (b : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₂.val), b = 0)
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₁.val) :
     a = 0 := by
-  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
-    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (Sheaf.Hom.mk f)
-    (Sheaf.Hom.mk g)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hfg)
-  have hS' : S.ShortExact := by
-    simpa [S] using hS
   let T := TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  let fsh :
-      (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-        (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
-  have hfsh_mono : Mono fsh := by
-    simpa [S, fsh] using hS'.mono_f
-  have hf_mono : Mono f := by
+  have hf_mono : Mono S.f.val := by
     exact (Sheaf.Hom.mono_iff_presheaf_mono
-      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) fsh).1 hfsh_mono
-  haveI : Mono fsh := by
+      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) S.f).1 hS.mono_f
+  haveI : Mono S.f := by
     exact (Sheaf.Hom.mono_iff_presheaf_mono
-      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) fsh).2 hf_mono
+      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) S.f).2 hf_mono
   haveI := TopCat.Presheaf.stalkFunctor_preserves_mono (C := AddCommGrpCat.{u}) (X := X) x
-  have hTf_mono : Mono (T.map f) := by
-    simpa [T, fsh] using (Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) fsh)
+  have hTf_mono : Mono (T.map S.f.val) := by
+    simpa [T] using (Functor.map_mono (TopCat.Sheaf.forget _ _ ⋙ T) S.f)
   exact (AddCommGrpCat.mono_iff_injective _).mp hTf_mono
     ((hX₂ _).trans (map_zero _).symm)
 
