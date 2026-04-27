@@ -6,7 +6,7 @@ import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 
   This file contains the Noetherian sheaf infrastructure used to compare sheaf
   cohomology with filtered colimits: creation by `sheafToPresheaf`,
-  `isFlasque_filtered_colimit_presheaf`, successor-stage dimension shifts, and
+  `isFlasque_filtered_colimit`, successor-stage dimension shifts, and
   presheaf-boundary comparison maps.
 -/
 
@@ -55,33 +55,36 @@ On Noetherian spaces, `sheafToPresheaf` creates filtered colimits, so restrictio
 filtered colimits are colimits of restrictions. Filtered colimits in `AddCommGrpCat`
 preserve surjections, hence stagewise flasque sheaves have flasque colimit. -/
 
-/-- Filtered colimits of stagewise flasque sheaves on Noetherian spaces are flasque:
-    presheaf-boundary form. -/
-theorem isFlasque_filtered_colimit_presheaf
+/-- Filtered colimits of stagewise flasque sheaves on Noetherian spaces are flasque. -/
+theorem isFlasque_filtered_colimit
     {X : TopCat.{u}} [NoetherianSpace X]
     {J : Type u} [SmallCategory J] [IsFiltered J]
-    (F : J ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hF : ∀ j, TopCat.Presheaf.IsSheaf (F.obj j))
-    (hFlasque : ∀ j, IsFlasqueSheaf (⟨F.obj j, hF j⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    {c : Cocone F} (hc : IsColimit c)
-    (hc_pt : TopCat.Presheaf.IsSheaf c.pt) :
-    IsFlasqueSheaf (⟨c.pt, hc_pt⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := by
+    (F : J ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (hFlasque : ∀ j, IsFlasqueSheaf (F.obj j))
+    {c : Cocone F} (hc : IsColimit c) :
+    IsFlasqueSheaf c.pt := by
+  haveI : CreatesColimit F
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    createsFilteredColimit F
   constructor
   intro U V i
   rw [AddCommGrpCat.epi_iff_surjective]
   intro b
   have hc_U := isColimitOfPreserves
-    ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op U)) hc
+    ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op U))
+    (isColimitOfPreserves
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc)
   obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ hc_U b
-  obtain ⟨a₀, ha₀⟩ := (AddCommGrpCat.epi_iff_surjective _).mp ((hFlasque j₀).epi_map i) b₀
-  refine ⟨ConcreteCategory.hom ((c.ι.app j₀).app (op V)) a₀, ?_⟩
-  rw [show ConcreteCategory.hom (c.pt.map i.op)
-      (ConcreteCategory.hom ((c.ι.app j₀).app (op V)) a₀) =
-    ConcreteCategory.hom ((c.ι.app j₀).app (op U))
-      (ConcreteCategory.hom ((F.obj j₀).map i.op) a₀) from
+  obtain ⟨a₀, ha₀⟩ :=
+    (AddCommGrpCat.epi_iff_surjective _).mp ((hFlasque j₀).epi_map i) b₀
+  refine ⟨ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀, ?_⟩
+  rw [show ConcreteCategory.hom (c.pt.val.map i.op)
+      (ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀) =
+    ConcreteCategory.hom ((c.ι.app j₀).val.app (op U))
+      (ConcreteCategory.hom ((F.obj j₀).val.map i.op) a₀) from
     congrFun (congrArg DFunLike.coe
-      (congrArg ConcreteCategory.hom ((c.ι.app j₀).naturality i.op).symm)) a₀,
-    ha₀]
+      (congrArg ConcreteCategory.hom ((c.ι.app j₀).val.naturality i.op).symm)) a₀]
+  rw [ha₀]
   exact hb₀
 
 /-! ### Sheaf cohomology and filtered colimits
@@ -95,9 +98,8 @@ The genuinely geometric input starts afterwards:
   `H^n(F_j)`
   via the canonical map. The proof uses per-object functorial injective embeddings via Mathlib's
   `IsGrothendieckAbelian.instHasFunctorialFactorizationMonomorphismsRlp` and dimension shifting.
-- `sheafH_preserves_filtered_colimits_presheaf`: the filtered-colimit comparison isomorphism
-  for a presheaf diagram whose stages and cocone point are sheaves; its hom form is epi by
-  `sheafH_preserves_filtered_colimits_presheaf_hom_epi`. -/
+- `sheafH_preserves_filtered_colimits`: the filtered-colimit comparison isomorphism
+  for a sheaf diagram and a colimit cocone. -/
 
 section SheafHFilteredColimitSucc
 
@@ -409,23 +411,15 @@ theorem sheafH_filtered_colimit_succ_inj_subsingleton_presheaf
     Subsingleton (Sheaf.H (sheafH_filtered_colimit_succ_injCocone Y').pt (n + 1)) := by
   let Inj := sheafH_filtered_colimit_succ_Inj Y'
   let injCocone := sheafH_filtered_colimit_succ_injCocone Y'
-  haveI : CreatesColimit Inj
-      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
-    createsFilteredColimit Inj
   have hFlasque : IsFlasqueSheaf injCocone.pt := by
     simpa [Inj, injCocone] using
-      (isFlasque_filtered_colimit_presheaf
-        (F := Inj ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-        (hF := fun j => (Inj.obj j).cond)
+      (isFlasque_filtered_colimit
+        (F := Inj)
         (hFlasque := fun j => by
           letI : Injective (Inj.obj j) := hInj j
           simpa using (isFlasque_of_injective (Inj.obj j)))
-        (c := (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone
-          injCocone)
-        (hc := isColimitOfPreserves
-          (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-          (colimit.isColimit Inj))
-        (hc_pt := injCocone.pt.cond))
+        (c := injCocone)
+        (hc := colimit.isColimit Inj))
   letI : IsFlasqueSheaf injCocone.pt := hFlasque
   simpa [injCocone] using
     (sheafH_subsingleton_of_flasque X injCocone.pt n)

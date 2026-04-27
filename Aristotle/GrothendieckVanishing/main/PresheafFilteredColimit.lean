@@ -819,23 +819,14 @@ private theorem sheafH_filtered_colimit_comparison_isIso_presheaf_succ_succ
     letI : Injective (Inj.obj j) := hInj j
     exact sheafH_subsingleton_of_injective (Inj.obj j) (m + 1)
   haveI hFlasqueInj : IsFlasqueSheaf injCocone.pt := by
-    haveI : CreatesColimit Inj
-        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
-      createsFilteredColimit Inj
     simpa using
-      (isFlasque_filtered_colimit_presheaf
-        (F := Inj ⋙ sheafToPresheaf (Opens.grothendieckTopology X)
-          AddCommGrpCat.{u})
-        (hF := fun j => (Inj.obj j).cond)
+      (isFlasque_filtered_colimit
+        (F := Inj)
         (hFlasque := fun j => by
           letI : Injective (Inj.obj j) := hInj j
           simpa using (isFlasque_of_injective (Inj.obj j)))
-        (c := (sheafToPresheaf (Opens.grothendieckTopology X)
-          AddCommGrpCat.{u}).mapCocone injCocone)
-        (hc := isColimitOfPreserves
-          (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-          (colimit.isColimit Inj))
-        (hc_pt := injCocone.pt.cond))
+        (c := injCocone)
+        (hc := colimit.isColimit Inj))
   have h_colim_n : Subsingleton (Sheaf.H injCocone.pt (m + 1)) := by
     simpa using sheafH_subsingleton_of_flasque X injCocone.pt m
   have h_colim_succ : Subsingleton (Sheaf.H injCocone.pt (m + 2)) := by
@@ -931,31 +922,23 @@ private theorem sheafH_filtered_colimit_comparison_isIso_presheaf
   exact hP n Y hY c hc hc_pt
 
 /-- **Sheaf cohomology commutes with filtered colimits** on Noetherian spaces:
-    presheaf form. If the stages and cocone point are sheaves, the canonical comparison
-    `colim H^n(F_j) ≅ H^n(colim F_j)` holds for the associated sheaf diagram. -/
-noncomputable def sheafH_preserves_filtered_colimits_presheaf
+    the canonical comparison `colim H^n(F_j) ≅ H^n(colim F_j)` is an isomorphism. -/
+noncomputable def sheafH_preserves_filtered_colimits
     {X : TopCat.{u}} [NoetherianSpace X]
     {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-    (c : Cocone Y) (hc : IsColimit c)
-    (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
+    (Y' : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+    (c' : Cocone Y') (hc' : IsColimit c')
     (n : ℕ) :
-    colimit (sheafH_presheafDiagram Y hY n) ≅
-      AddCommGrpCat.of (Sheaf.H (⟨c.pt, hc_pt⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
-  letI := sheafH_filtered_colimit_comparison_isIso_presheaf
-    (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt) (n := n)
-  exact asIso (sheafH_filtered_colimit_comparison_presheaf Y hY c hc_pt n)
-
-/-- The presheaf-form filtered-colimit comparison isomorphism has epi hom. -/
-theorem sheafH_preserves_filtered_colimits_presheaf_hom_epi
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Y : J' ⥤ TopCat.Presheaf AddCommGrpCat.{u} X)
-    (hY : ∀ j, TopCat.Presheaf.IsSheaf (Y.obj j))
-    (c : Cocone Y) (hc : IsColimit c)
-    (hc_pt : TopCat.Presheaf.IsSheaf c.pt)
-    (n : ℕ) :
-    Epi ((sheafH_preserves_filtered_colimits_presheaf
-      (Y := Y) (hY := hY) (c := c) (hc := hc) (hc_pt := hc_pt) (n := n)).hom) := by
-  infer_instance
+    colimit (Y' ⋙ sheafCohomologyFunctor X n) ≅ AddCommGrpCat.of (Sheaf.H c'.pt n) := by
+  haveI : CreatesColimit Y'
+      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    createsFilteredColimit Y'
+  haveI : IsIso (sheafH_filtered_colimit_comparison Y' n c') := by
+    exact sheafH_filtered_colimit_comparison_isIso_presheaf
+      (Y' ⋙ sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+      (fun j => (Y'.obj j).cond)
+      ((sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone c')
+      (isColimitOfPreserves
+        (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc')
+      c'.pt.cond n
+  exact asIso (sheafH_filtered_colimit_comparison Y' n c')

@@ -131,7 +131,7 @@ become unreachable, cascading the deletion).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Sheaf\.finsetGeneratorMap\b' Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean
 - [ ] Delete unused declaration `epiImage_zeroOutsideInt_vanishing` from `IrreducibleStep.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) epiImage_zeroOutsideInt_vanishing\b' Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean
-- [ ] Delete unused declaration `sheafH_preserves_filtered_colimits_presheaf_hom_epi` from `PresheafFilteredColimit.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `sheafH_preserves_filtered_colimits_presheaf_hom_epi` from `PresheafFilteredColimit.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_preserves_filtered_colimits_presheaf_hom_epi\b' Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean
 - [ ] Delete unused declaration `sheafH_filtered_colimit_presheafCocone_sheafToPresheaf` from `PresheafFilteredColimitCore.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_filtered_colimit_presheafCocone_sheafToPresheaf\b' Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean
