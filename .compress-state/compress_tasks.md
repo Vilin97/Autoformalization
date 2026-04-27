@@ -65,7 +65,7 @@ become unreachable, cascading the deletion).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.closedIncl_image_map_eq_inter\b' Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean
 - [x] Delete unused declaration `TopCat.coe_closedIncl` from `ClosedImmersion.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.coe_closedIncl\b' Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean
-- [ ] Delete unused declaration `epi_pushforward_map_closedIncl` from `ClosedImmersion.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `epi_pushforward_map_closedIncl` from `ClosedImmersion.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) epi_pushforward_map_closedIncl\b' Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean
 - [ ] Delete unused declaration `epi_app_top_of_subsingleton_sheafH1_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) epi_app_top_of_subsingleton_sheafH1_presheaf\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
