@@ -91,7 +91,7 @@ become unreachable, cascading the deletion).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_succ_map_presheaf_natural_of_map_eq\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
 - [x] Delete unused declaration `stalk_zero_of_shortExact_cokernel_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) stalk_zero_of_shortExact_cokernel_presheaf\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
-- [ ] Delete unused declaration `ulift_int_projective` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `ulift_int_projective` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) ulift_int_projective\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
 - [ ] Delete unused declaration `IsFlasqueSheaf.casesOn` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) IsFlasqueSheaf\.casesOn\b' Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean

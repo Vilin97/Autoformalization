@@ -1,8 +1,12 @@
-Cycle 15 is complete.
-
-Deleted `sheafH_subsingleton_of_isEmpty` and `sheafCohomologyFunctor_obj` from [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean), kept `sheafH_subsingleton_of_isEmpty_presheaf`, and replaced the two downstream uses with direct `sheafCohomologyFunctor` unfolding in [FinitelyGeneratedVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean) and [ClosedImmersionCohomology.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean). The stale `sheafCohomologyFunctor_map_succ_of_map_eq_presheaf` name is still absent.
-
-Metrics: normalized LOC `5234 -> 5225` (`-9`), raw `main/*.lean` wc `6202 -> 6187` (`-15`).
+Deleted `ulift_int_projective` and its attached heading/docstring from [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:87). Wrote the cycle report at [cycle_16.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_16.md:1).
 
 Verification passed:
-`lake env lean` on all four requested files, clean `rg` for the deleted names, and full `lake build` passed. Build emitted only existing unrelated linter warnings. Report written to [.compress-state/codex_task_results/cycle_15.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_15.md).
+- `rg -n "\bulift_int_projective\b" Aristotle/GrothendieckVanishing/main` found no matches
+- `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`
+- `lake build` passed, with only existing unrelated linter warnings
+
+Metrics:
+- Normalized LOC: `5225` -> `5216` (`-9`)
+- Raw `main/*.lean` wc: `6187` -> `6174` (`-13`)
+
+I did not touch `.compress-state/compress_tasks.md`; the existing controller-state dirty files were left as they were.

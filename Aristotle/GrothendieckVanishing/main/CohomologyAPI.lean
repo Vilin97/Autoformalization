@@ -87,19 +87,6 @@ instance {X : TopCat.{u}} :
   inferInstanceAs ((Functor.const (Opens X)ᵒᵖ ⋙
     presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).Additive)
 
-/-! ## Projective ULift ℤ in AddCommGrpCat -/
-
-/-- `ULift ℤ` is projective in `AddCommGrpCat` (via the equivalence with `ModuleCat ℤ`). -/
-noncomputable instance ulift_int_projective :
-    Projective (AddCommGrpCat.of (ULift.{u} ℤ)) := by
-  set e := (forget₂ (ModuleCat.{u} ℤ) AddCommGrpCat.{u}).asEquivalence with he
-  have : e.inverse.PreservesEpimorphisms :=
-    ⟨fun f _ => e.symm.functor.map_epi f⟩
-  have hp := e.toAdjunction.map_projective _
-    (inferInstance : Projective (ModuleCat.of ℤ (ULift.{u} ℤ)))
-  simp only [he, Functor.asEquivalence, ModuleCat.forget₂_obj] at hp
-  exact hp
-
 noncomputable instance sheafHasExt (X : TopCat.{u}) :
     HasExt.{u} (TopCat.Sheaf AddCommGrpCat.{u} X) :=
   hasExt_of_enoughInjectives _

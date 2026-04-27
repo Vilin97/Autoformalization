@@ -1,15 +1,13 @@
 {
-  "progress_score": 2,
-  "summary": "Deleted unused `sheafCohomologyFunctor_obj` and `sheafH_subsingleton_of_isEmpty` from CohomologyAPI.lean, updated two simp call sites; -9 normalized LOC.",
+  "progress_score": 1,
+  "summary": "Deleted unused `ulift_int_projective` instance from CohomologyAPI.lean, -9 normalized LOC.",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Continue Phase-2 unused-decl deletion in CohomologyAPI.lean. Next candidates: `sheafH_dimension_shift_X\u2083_presheaf`, `sheafH_exists_preimage_of_subsingleton_middle_presheaf`, and `sheafH_succ_map_presheaf_eq_succ_iso_hom`. Verify each via `rg` for external callers before deleting; cascade any helpers that become unreachable.",
-  "attempts_entry": "cycle 15: deleted unused `sheafCohomologyFunctor_obj` and `sheafH_subsingleton_of_isEmpty` from CohomologyAPI.lean (kept the _presheaf variant), updated two simp callers to unfold `sheafCohomologyFunctor` directly; -9 normalized LOC, -15 raw.",
+  "strategy_recommendation": "Continue Phase-2 unused-decl deletion. Next live candidates: `IsFlasqueSheaf.casesOn` from FlasqueVanishing.lean, then later GeneratedSubsheaf/ZeroOutside entries. Verify each via `rg` for external callers before deleting.",
+  "attempts_entry": "cycle 16: deleted unused `ulift_int_projective` instance from CohomologyAPI.lean, -9 normalized LOC (-13 raw). lake env lean + lake build pass.",
   "completed_task_lines": [
-    "- [>] Delete unused declaration `sheafCohomologyFunctor_map_succ_of_map_eq_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).",
-    "- [>] Delete unused declaration `sheafCohomologyFunctor_obj` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).",
-    "- [>] Delete unused declaration `sheafH_subsingleton_of_isEmpty` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable)."
+    "- [>] Delete unused declaration `ulift_int_projective` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable)."
   ]
 }

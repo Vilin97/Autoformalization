@@ -1,1 +1,1 @@
-Continue Phase-2 unused-decl deletion in CohomologyAPI.lean. Next candidates: `sheafH_dimension_shift_X₃_presheaf`, `sheafH_exists_preimage_of_subsingleton_middle_presheaf`, and `sheafH_succ_map_presheaf_eq_succ_iso_hom`. Verify each via `rg` for external callers before deleting; cascade any helpers that become unreachable.
+Continue Phase-2 unused-decl deletion. Next live candidates: `IsFlasqueSheaf.casesOn` from FlasqueVanishing.lean, then later GeneratedSubsheaf/ZeroOutside entries. Verify each via `rg` for external callers before deleting.
