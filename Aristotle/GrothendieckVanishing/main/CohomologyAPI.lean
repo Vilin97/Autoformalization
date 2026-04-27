@@ -693,10 +693,6 @@ noncomputable def sheafCohomologyFunctor (X : TopCat.{u}) (n : ℕ) :
   extFunctorObj ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat).obj
     (AddCommGrpCat.of (ULift.{u} ℤ))) n
 
-noncomputable instance sheafCohomologyFunctor_additive (X : TopCat.{u}) (n : ℕ) :
-    (sheafCohomologyFunctor X n).Additive :=
-  inferInstanceAs (extFunctorObj _ n).Additive
-
 @[simp]
 theorem sheafCohomologyFunctor_obj (X : TopCat.{u}) (n : ℕ)
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
@@ -804,16 +800,6 @@ noncomputable def sheafH0NatIsoSections {X : TopCat.{u}} :
     simpa [sheafCohomologyFunctor_map_apply] using
       (sheafH0EquivSections_presheaf_natural
         (F := F.val) (G := G.val) F.cond G.cond (f := f.val) (x := x))
-
-@[simp] theorem sheafH0NatIsoSections_hom_app {X : TopCat.{u}}
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (x : Sheaf.H F 0) :
-    ConcreteCategory.hom ((sheafH0NatIsoSections (X := X)).hom.app F) x =
-      sheafH0EquivSections_presheaf F.cond x := rfl
-
-@[simp] theorem sheafH0NatIsoSections_inv_app {X : TopCat.{u}}
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (x : ToType (F.val.obj (op ⊤))) :
-    ConcreteCategory.hom ((sheafH0NatIsoSections (X := X)).inv.app F) x =
-      (sheafH0EquivSections_presheaf F.cond).symm x := rfl
 
 /-- Naturality of the successor connecting morphism packaged at the `Sheaf.H` level:
 if `y` maps to `z` on the quotient side of a morphism of short exact sequences, then their

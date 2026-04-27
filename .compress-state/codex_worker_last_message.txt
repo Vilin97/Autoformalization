@@ -1,16 +1,18 @@
-Completed cycle 13.
+Cycle 14 completed.
 
-Deleted unused `epi_app_top_of_subsingleton_sheafH1` from [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:541) and removed its stale module-doc entry. `sheafH0_surj_of_epi_app_top` was left untouched.
+Changed:
+- Deleted `sheafCohomologyFunctor_additive`
+- Deleted `sheafH0NatIsoSections_hom_app`
+- Deleted `sheafH0NatIsoSections_inv_app`
+- Wrote report: [.compress-state/codex_task_results/cycle_14.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_14.md)
 
-Verification passed:
-- `rg` for `epi_app_top_of_subsingleton_sheafH1(_presheaf)?` now returns no matches.
-- `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean` succeeded.
-- `lake build` succeeded, with only existing warnings in untouched files.
-- Strict `sorry`/`admit`/`axiom` search returned no matches.
+Verification:
+- `rg` for the three deleted names: no matches
+- `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`: passed
+- `lake build`: passed, with unrelated linter warnings in downstream files
 
 Metrics:
-- Normalized LOC: `5260 -> 5245` (`-15`)
-- Raw `main/*.lean` LOC: `6235 -> 6216` (`-19`)
-- `CohomologyAPI.lean`: `728 -> 713` normalized, `925 -> 906` raw
+- Normalized LOC: `5245 -> 5234`, delta `-11`
+- Raw `main/*.lean` `wc -l`: `6216 -> 6202`, delta `-14`
 
-Wrote the required report at [.compress-state/codex_task_results/cycle_13.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_13.md). I did not commit or push.
+I did not commit or push. The workspace still has unrelated pre-existing dirty `.compress-state` files; I only changed [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean) and added the cycle report.
