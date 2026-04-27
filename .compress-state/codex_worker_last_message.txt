@@ -1,13 +1,12 @@
-Cycle 20 is complete.
+Cycle 21 is complete.
 
-Deleted `sheafH_filtered_colimit_surj` from [PresheafFilteredColimitCore.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean) and removed stale doc mentions in that file and [FinitelyGeneratedVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean). Wrote the report at [.compress-state/codex_task_results/cycle_20.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_20.md).
+Deleted `sheafH_succ_map_natural_of_map_eq` from [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:771) and removed its stale module-list entry. Wrote the required report at [cycle_21.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_21.md).
 
 Verification passed:
-- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean`
-- `lake env lean Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean`
-- `lake build`
-- exact `rg` search now finds no `sheafH_filtered_colimit_surj` matches
+- `rg "sheafH_succ_map_natural_of_map_eq" Aristotle/GrothendieckVanishing/main` found no matches
+- `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`
+- `lake build` passed, with unrelated pre-existing linter warnings in other files
 
 Metrics:
-- Normalized LOC: `5115 -> 5027` (`-88`)
-- Raw `main/*.lean` wc: `6034 -> 5939` (`-95`)
+- Normalized LOC: `5027 -> 5014` delta `-13`
+- Raw `main/*.lean` wc: `5939 -> 5920` delta `-19`
