@@ -1,2 +1,3 @@
 
 Cycle 1: cycle 1: bundled sheafH_succ_iso_of_subsingleton_middle cluster onto ShortComplex (Sheaf …); deleted _presheaf wrappers `sheafH_succ_map_presheaf_eq_succ_iso_hom` and `sheafH_exists_preimage_of_subsingleton_middle_presheaf`; updated callers in PresheafFilteredColimitCore.lean and ClosedImmersionCohomology.lean. Δ normalized = -350 (7016→6666); CohomologyAPI raw 1776→1609 (still > 1200).
+Cycle 2: cycle 2: sheaf-reverted successor-map, H¹ cokernel-iso, and H¹-vanishing clusters in CohomologyAPI.lean; deleted _presheaf wrappers, updated cross-file callers (FlasqueVanishing, PresheafFilteredColimit{,Core}, ClosedImmersionCohomology); -501 normalized / -528 raw LOC; CohomologyAPI.lean 1609→1193 (<1200 gate met).

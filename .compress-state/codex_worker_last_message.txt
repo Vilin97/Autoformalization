@@ -1,22 +1,19 @@
-Implemented cycle 1.
+Implemented cycle 2 compression.
 
-Changed:
-- Replaced the successor connecting iso/naturality cluster with bundled `ShortComplex (TopCat.Sheaf ...)` APIs in [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean).
-- Removed the old `_presheaf` successor iso/naturality declarations and the same-cluster unused wrappers:
-  `sheafH_succ_map_presheaf_eq_succ_iso_hom`,
-  `sheafH_exists_preimage_of_subsingleton_middle_presheaf`.
-- Updated direct callers in [PresheafFilteredColimitCore.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean) and [ClosedImmersionCohomology.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean).
-- Wrote the required report at [.compress-state/codex_task_results/cycle_1.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_1.md).
-
-Metrics:
-- Normalized LOC: `7016 -> 6666` (`-350`)
-- Raw `main/*.lean` LOC: `8127 -> 7763` (`-364`)
-- `CohomologyAPI.lean` raw LOC: `1776 -> 1609`, so the `<1200` checklist threshold is not yet met.
+Key changes:
+- Replaced successor-map and H¹ cokernel `_presheaf` APIs with bundled sheaf short-complex APIs in [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean).
+- Updated callers in `PresheafFilteredColimitCore`, `PresheafFilteredColimit`, `ClosedImmersionCohomology`, and `FlasqueVanishing`.
+- Removed duplicate presheaf wrappers and single-use naturality plumbing.
+- Wrote the required report at [.compress-state/codex_task_results/cycle_2.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_2.md).
 
 Verification passed:
-- `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`
-- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean`
-- `lake env lean Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean`
+- `lake env lean` on every modified Lean file
 - `lake build`
+- no actual `sorry` / `admit` / `axiom` declarations found
 
-`lake build` completed successfully with existing linter warnings.
+LOC:
+- Normalized: `6666 -> 6165` (`-501`)
+- Raw `main/*.lean`: `7763 -> 7235` (`-528`)
+- `CohomologyAPI.lean` raw: `1609 -> 1193`, satisfying the `<1200` gate
+
+`lake build` still reports unrelated existing linter warnings in some files, but no errors.

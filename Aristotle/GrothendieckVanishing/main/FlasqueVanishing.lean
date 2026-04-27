@@ -454,7 +454,7 @@ theorem sheafH_subsingleton_H1_of_flasque_presheaf {X : TopCat.{u}}
   let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
   obtain ⟨ip⟩ := EnoughInjectives.presentation Fsh
   let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ip.shortComplex
-  letI : Injective ((⟨S.X₂.val, S.X₂.cond⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
+  letI : Injective S.X₂ := by
     simpa [S] using (inferInstance : Injective S.X₂)
   have hSE :
       (ShortComplex.mk
@@ -475,12 +475,9 @@ theorem sheafH_subsingleton_H1_of_flasque_presheaf {X : TopCat.{u}}
       (f := S.f.val) (g := S.g.val)
       (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
       hSE ⊤
-  simpa [Fsh, S] using sheafH_subsingleton_H1_of_injective_of_epi_app_top_presheaf
-    (F₁ := S.X₁.val) (F₂ := S.X₂.val) (F₃ := S.X₃.val)
-    S.X₁.cond S.X₂.cond S.X₃.cond
-    (f := S.f.val) (g := S.g.val)
-    (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-    hSE hg
+  simpa [Fsh, S] using
+    sheafH_subsingleton_H1_of_injective_of_epi_app_top
+      (by simpa [S] using ip.shortExact_shortComplex) hg
 
 /-- Presheaf-boundary `H¹` vanishing criterion with flasque middle term:
     if `0 → F₁ → F₂ → F₃ → 0` is short exact after bundling the presheaves as sheaves,
@@ -501,11 +498,19 @@ theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top_presheaf {X : TopCat.{u
     [IsFlasqueSheaf ((⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))]
     (hg : Epi (g.app (op ⊤))) :
     Subsingleton (Sheaf.H ((⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) 1) := by
-  simpa using sheafH_subsingleton_H1_via_epi_app_top_presheaf
-    (F₁ := F₁) (F₂ := F₂) (F₃ := F₃)
-    h₁ h₂ h₃ hfg hSE
-    (sheafH_subsingleton_H1_of_flasque_presheaf (F := F₂) h₂)
-    hg
+  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
+    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+    (Sheaf.Hom.mk f)
+    (Sheaf.Hom.mk g)
+    (by
+      apply Sheaf.Hom.ext
+      simpa using hfg)
+  simpa [S] using sheafH_subsingleton_H1_via_epi_app_top
+    (by simpa [S] using hSE)
+    (by simpa [S] using sheafH_subsingleton_H1_of_flasque_presheaf (F := F₂) h₂)
+    (by simpa [S] using hg)
 
 /-- Presheaf-boundary `H¹` vanishing criterion for a pushed-forward short exact sequence:
     if the pushed-forward middle term is flasque and the source sequence has `H¹(F₁)=0`,
@@ -567,9 +572,9 @@ theorem sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map_presheaf {X Y : Top
     (by
       change Epi (g.app (op ((Opens.map i).obj ⊤)))
       rw [h_top]
-      exact epi_app_top_of_subsingleton_sheafH1_presheaf
-        (F₁ := F₁) (F₂ := F₂) (F₃ := F₃)
-        h₁ h₂ h₃ hfg hSE h₁H)
+      exact epi_app_top_of_subsingleton_sheafH1
+        (by simpa [S] using hSE)
+        (by simpa [S] using h₁H))
 
 /-- Presheaf-boundary form of `FlasqueVanishing`. -/
 theorem sheafH_subsingleton_of_flasque_presheaf

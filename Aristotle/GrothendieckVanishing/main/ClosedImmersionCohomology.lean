@@ -70,20 +70,14 @@ noncomputable def PushforwardHIso
       let hH1_src :
           cokernel (S.g.val.app (op ⊤)) ≅ AddCommGrpCat.of (Sheaf.H G' 1) := by
         simpa [S] using
-          sheafH1_cokernel_iso_of_subsingleton_middle_presheaf
-            S.X₁.cond S.X₂.cond S.X₃.cond
-            (f := S.f.val) (g := S.g.val)
-            (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
+          sheafH1_cokernel_iso_of_subsingleton_middle
             (by simpa [S] using ip.shortExact_shortComplex)
             (by simpa [S] using (sheafH_subsingleton_of_injective S.X₂ 0 :
               Subsingleton (Sheaf.H S.X₂ 1)))
       let hH1_tgt :
           cokernel (S.g.val.app (op ⊤)) ≅ AddCommGrpCat.of (Sheaf.H SX.X₁ 1) := by
         simpa [S, SX, Opens.map_top closedIncl] using
-          sheafH1_cokernel_iso_of_subsingleton_middle_presheaf
-            SX.X₁.cond SX.X₂.cond SX.X₃.cond
-            (f := SX.f.val) (g := SX.g.val)
-            (show SX.f.val ≫ SX.g.val = 0 from congrArg Sheaf.Hom.val SX.zero)
+          sheafH1_cokernel_iso_of_subsingleton_middle
             (by simpa [SX] using hSE_X)
             (by simpa [SX] using (inferInstance : Subsingleton (Sheaf.H SX.X₂ 1)))
       exact hH1_src.symm ≪≫ hH1_tgt

@@ -188,43 +188,16 @@ private noncomputable def sheafH_filtered_colimit_h1_stageNatIso
   NatIso.ofComponents
     (fun j => by
       simpa using
-        (sheafH1_cokernel_iso_of_subsingleton_middle_presheaf
-          (h₁ := (Y'.obj j).cond)
-          (h₂ := ((sheafH_filtered_colimit_succ_Inj Y').obj j).cond)
-          (h₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Y').app j)).cond)
-          (f := ((sheafH_filtered_colimit_succ_eta Y').app j).val)
-          (g := (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val)
-          (sheafH_filtered_colimit_succ_eta_val_comp_cokernel_pi (Y' := Y') j)
-          (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y') j)
-          (h_mid j)))
+        (sheafH1_cokernel_iso_of_subsingleton_middle
+          (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y') j) (h_mid j)))
     (fun {j j'} f => by
       ext y
       simpa [sheafCohomologyFunctor_map_apply] using congrArg
         (fun m => AddCommGrpCat.Hom.hom m y)
-        (sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural
-          (h₁₁ := (Y'.obj j).cond)
-          (h₁₂ := ((sheafH_filtered_colimit_succ_Inj Y').obj j).cond)
-          (h₁₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Y').app j)).cond)
-          (h₂₁ := (Y'.obj j').cond)
-          (h₂₂ := ((sheafH_filtered_colimit_succ_Inj Y').obj j').cond)
-          (h₂₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Y').app j')).cond)
-          (f₁ := ((sheafH_filtered_colimit_succ_eta Y').app j).val)
-          (g₁ := (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val)
-          (sheafH_filtered_colimit_succ_eta_val_comp_cokernel_pi (Y' := Y') j)
-          (f₂ := ((sheafH_filtered_colimit_succ_eta Y').app j').val)
-          (g₂ := (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j')).val)
-          (sheafH_filtered_colimit_succ_eta_val_comp_cokernel_pi (Y' := Y') j')
+        (sheafH1_cokernel_iso_of_subsingleton_middle_natural
           (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y') j)
           (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y') j')
-          (τ₁ := (Y'.map f).val)
-          (τ₂ := ((sheafH_filtered_colimit_succ_Inj Y').map f).val)
-          (τ₃ := ((sheafH_filtered_colimit_succ_quotient Y').map f).val)
-          (by
-            simpa using congrArg Sheaf.Hom.val
-              ((sheafH_filtered_colimit_succ_stage_map_hom (Y' := Y') f).comm₁₂))
-          (by
-            simpa using congrArg Sheaf.Hom.val
-              ((sheafH_filtered_colimit_succ_stage_map_hom (Y' := Y') f).comm₂₃))
+          (sheafH_filtered_colimit_succ_stage_map_hom (Y' := Y') f)
           (h_mid j) (h_mid j')))
 
 private theorem sheafH_filtered_colimit_h1_boundary_square
@@ -297,17 +270,8 @@ private noncomputable def sheafH_filtered_colimit_h1_global_cokernel_iso
   change cokernel (sectionsFunctor.map (cokernel.π ι')) ≅
     AddCommGrpCat.of (Sheaf.H c'.pt 1)
   simpa [sectionsFunctor] using
-    (sheafH1_cokernel_iso_of_subsingleton_middle_presheaf
-      (h₁ := c'.pt.cond)
-      (h₂ := (sheafH_filtered_colimit_succ_injCocone Y').pt.cond)
-      (h₃ := qCocone.pt.cond)
-      (f := ι'.val)
-      (g := (cokernel.π ι').val)
-      (by
-        simpa [ι'] using
-          sheafH_filtered_colimit_succ_iota_val_comp_cokernel_pi Y' c' hc')
-      (sheafH_filtered_colimit_succ_shortExact Y' c' hc')
-      h_colim)
+    (sheafH1_cokernel_iso_of_subsingleton_middle
+      (sheafH_filtered_colimit_succ_shortExact Y' c' hc') h_colim)
 
 /-- The degree-`1` filtered-colimit comparison isomorphism on the sheaf diagram attached to
 a presheaf cocone, before rewriting it as `sheafH_filtered_colimit_comparison_presheaf`. -/
@@ -493,14 +457,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_bo
   intro j
   let stageShort := sheafH_filtered_colimit_succ_stage_shortExact (Y' := Ysh) j
   let stageIsoH1 :=
-    sheafH1_cokernel_iso_of_subsingleton_middle_presheaf
-      (h₁ := (Ysh.obj j).cond)
-      (h₂ := ((sheafH_filtered_colimit_succ_Inj Ysh).obj j).cond)
-      (h₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j)).cond)
-      (f := ((sheafH_filtered_colimit_succ_eta Ysh).app j).val)
-      (g := (cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val)
-      (sheafH_filtered_colimit_succ_eta_val_comp_cokernel_pi (Y' := Ysh) j)
-      stageShort (h_mid j)
+    sheafH1_cokernel_iso_of_subsingleton_middle stageShort (h_mid j)
   let stageHom := sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j
   let stageCokMap :
       cokernel ((sheafH_filtered_colimit_h1_gTopNat Ysh).app j) ⟶
@@ -592,30 +549,10 @@ private noncomputable def sheafH_filtered_colimit_comparison_one_iso_presheaf_bo
     simpa [stageShort, stageIsoH1, globalIso, stageCokMap, stageHom, sectionsFunctor,
       sheafH_filtered_colimit_h1_global_cokernel_iso,
       sheafH_filtered_colimit_h1_gTopNat, sheafH_filtered_colimit_succ_shortComplex] using
-      (sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural
-        (h₁₁ := (Ysh.obj j).cond)
-        (h₁₂ := ((sheafH_filtered_colimit_succ_Inj Ysh).obj j).cond)
-        (h₁₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j)).cond)
-        (h₂₁ := csh.pt.cond)
-        (h₂₂ := (sheafH_filtered_colimit_succ_injCocone Ysh).pt.cond)
-        (h₂₃ := qCocone.pt.cond)
-        (f₁ := ((sheafH_filtered_colimit_succ_eta Ysh).app j).val)
-        (g₁ := (cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j)).val)
-        (sheafH_filtered_colimit_succ_eta_val_comp_cokernel_pi (Y' := Ysh) j)
-        (f₂ := ι'.val)
-        (g₂ := (cokernel.π ι').val)
-        (by
-          simpa [ι'] using
-            sheafH_filtered_colimit_succ_iota_val_comp_cokernel_pi Ysh csh hcsh)
+      (sheafH1_cokernel_iso_of_subsingleton_middle_natural
         stageShort
         (sheafH_filtered_colimit_succ_shortExact Ysh csh hcsh)
-        (τ₁ := (csh.ι.app j).val)
-        (τ₂ := ((sheafH_filtered_colimit_succ_injCocone Ysh).ι.app j).val)
-        (τ₃ := (qCocone.ι.app j).val)
-        (by
-          simpa using congrArg Sheaf.Hom.val stageHom.comm₁₂)
-        (by
-          simpa using congrArg Sheaf.Hom.val stageHom.comm₂₃)
+        stageHom
         (h_mid j) h_colim)
   dsimp [comparisonOne]
   rw [HasColimit.isoOfNatIso_ι_inv_assoc, HasColimit.isoOfNatIso_ι_hom_assoc,

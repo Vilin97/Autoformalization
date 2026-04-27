@@ -503,7 +503,6 @@ theorem sheafH_filtered_colimit_surj_presheaf
     let Inj := sheafH_filtered_colimit_succ_Inj Ysh
     let η := sheafH_filtered_colimit_succ_eta Ysh
     let injCocone := sheafH_filtered_colimit_succ_injCocone Ysh
-    let ι' := sheafH_filtered_colimit_succ_iota Ysh csh hcsh
     let S := sheafH_filtered_colimit_succ_shortComplex Ysh csh hcsh
     have hSE : S.ShortExact := sheafH_filtered_colimit_succ_shortExact Ysh csh hcsh
     have hInj : ∀ j, Injective (Inj.obj j) := by
@@ -527,12 +526,8 @@ theorem sheafH_filtered_colimit_surj_presheaf
     have hSE_j : ∀ j, (ShortComplex.mk (η.app j) (cokernel.π (η.app j))
         (cokernel.condition (η.app j))).ShortExact :=
       sheafH_filtered_colimit_succ_stage_shortExact (Y' := Ysh)
-    obtain ⟨y, hy⟩ := sheafH_succ_map_exists_preimage_of_subsingleton_middle_presheaf
-      S.X₁.cond S.X₂.cond S.X₃.cond
-      (f := S.f.val) (g := S.g.val)
-      (show S.f.val ≫ S.g.val = 0 from congrArg Sheaf.Hom.val S.zero)
-      (by simpa using hSE) n
-      (by simpa using hI) x
+    obtain ⟨y, hy⟩ := sheafH_succ_map_exists_preimage_of_subsingleton_middle
+      hSE n (by simpa using hI) x
     obtain ⟨j₀, y_j, hy_j⟩ := by
       simpa using
         (ih
@@ -544,57 +539,14 @@ theorem sheafH_filtered_colimit_surj_presheaf
           (isColimitOfPreserves
             (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hqColim))
     haveI : Mono (η.app j₀) := sheafH_filtered_colimit_succ_eta_mono (Y' := Ysh) j₀
-    have hfg_stage :
-        ((sheafH_filtered_colimit_succ_eta Ysh).app j₀).val ≫
-          (cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).val = 0 :=
-      sheafH_filtered_colimit_succ_eta_val_comp_cokernel_pi (Y' := Ysh) j₀
-    have hfg_colim : ι'.val ≫ (cokernel.π ι').val = 0 :=
-      sheafH_filtered_colimit_succ_iota_val_comp_cokernel_pi Ysh csh hcsh
     let x_j : Sheaf.H (Ysh.obj j₀) (n + 1) :=
-      ConcreteCategory.hom
-        (sheafH_succ_map_presheaf
-          (h₁ := (Ysh.obj j₀).cond)
-          (h₂ := ((sheafH_filtered_colimit_succ_Inj Ysh).obj j₀).cond)
-          (h₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).cond)
-          (f := ((sheafH_filtered_colimit_succ_eta Ysh).app j₀).val)
-          (g := (cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).val)
-          hfg_stage (hSE_j j₀) n) y_j
+      ConcreteCategory.hom (sheafH_succ_map (hSE_j j₀) n) y_j
     refine ⟨j₀, x_j, ?_⟩
     show ConcreteCategory.hom
         ((sheafCohomologyFunctor X (n + 1)).map ((csh.ι.app j₀))) x_j = x
-    rw [show x_j =
-        ConcreteCategory.hom
-          (sheafH_succ_map_presheaf
-            (h₁ := (Ysh.obj j₀).cond)
-            (h₂ := ((sheafH_filtered_colimit_succ_Inj Ysh).obj j₀).cond)
-            (h₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).cond)
-            (f := ((sheafH_filtered_colimit_succ_eta Ysh).app j₀).val)
-            (g := (cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).val)
-            hfg_stage (hSE_j j₀) n) y_j from rfl]
-    exact (sheafH_succ_map_presheaf_natural_of_map_eq
-      (h₁₁ := (Ysh.obj j₀).cond)
-      (h₁₂ := ((sheafH_filtered_colimit_succ_Inj Ysh).obj j₀).cond)
-      (h₁₃ := (cokernel ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).cond)
-      (h₂₁ := csh.pt.cond)
-      (h₂₂ := (sheafH_filtered_colimit_succ_injCocone Ysh).pt.cond)
-      (h₂₃ := qCocone.pt.cond)
-      (f₁ := ((sheafH_filtered_colimit_succ_eta Ysh).app j₀).val)
-      (g₁ := (cokernel.π ((sheafH_filtered_colimit_succ_eta Ysh).app j₀)).val)
-      hfg_stage
-      (f₂ := ι'.val)
-      (g₂ := (cokernel.π ι').val)
-      hfg_colim
-      (hSE_j j₀) hSE
-      (τ₁ := (csh.ι.app j₀).val)
-      (τ₂ := ((sheafH_filtered_colimit_succ_injCocone Ysh).ι.app j₀).val)
-      (τ₃ := (qCocone.ι.app j₀).val)
-      (by
-        simpa using congrArg Sheaf.Hom.val
-          ((sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j₀).comm₁₂))
-      (by
-        simpa using congrArg Sheaf.Hom.val
-          ((sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j₀).comm₂₃))
-      n hy_j).trans hy
+    rw [show x_j = ConcreteCategory.hom (sheafH_succ_map (hSE_j j₀) n) y_j from rfl]
+    exact (sheafH_succ_map_natural_of_map_eq
+      (hSE_j j₀) hSE (sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j₀) n hy_j).trans hy
 
 /-- The sheaf-valued diagram obtained by bundling a presheaf diagram whose stages are sheaves. -/
 def sheafH_filtered_colimit_presheafDiagram

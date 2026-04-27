@@ -1,11 +1,13 @@
 {
   "progress_score": 2,
-  "summary": "Bundled the successor connecting iso cluster onto ShortComplex (Sheaf \u2026), deleted two _presheaf wrappers, and updated cross-file callers; -350 normalized / -364 raw LOC.",
+  "summary": "Sheaf-reverted successor-map, H\u00b9 cokernel iso, and H\u00b9 vanishing clusters in CohomologyAPI.lean, deleted _presheaf wrappers and updated cross-file callers; -501 normalized / -528 raw LOC; CohomologyAPI.lean 1609\u21921193.",
   "principle_violations": [],
   "task_addressed": true,
-  "task_complete": false,
-  "stuck_on": "CohomologyAPI.lean is at 1609 raw lines; COMPLETE_IF requires < 1200, so the 600-LOC checklist target is only partially met (~167 raw lines removed from this file).",
-  "strategy_recommendation": "Continue Phase 1 sheaf-reversion in CohomologyAPI.lean: target the next presheaf/IsSheaf-triple clusters \u2014 `sheafH_succ_map_presheaf` and `sheafH_succ_map_presheaf_natural_of_map_eq`, the H\u00b9 cokernel iso pair `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf(_natural)`, and the dimension-shift / preimage wrappers \u2014 replacing each `(F : Presheaf X) (h : F.IsSheaf)` triple plus reconstructed `f \u226b g = 0` with a single `S : ShortComplex (TopCat.Sheaf \u2026)` argument and updating callers in `PresheafFilteredColimitCore.lean` and `ClosedImmersionCohomology.lean`.",
-  "attempts_entry": "cycle 1: bundled sheafH_succ_iso_of_subsingleton_middle cluster onto ShortComplex (Sheaf \u2026); deleted _presheaf wrappers `sheafH_succ_map_presheaf_eq_succ_iso_hom` and `sheafH_exists_preimage_of_subsingleton_middle_presheaf`; updated callers in PresheafFilteredColimitCore.lean and ClosedImmersionCohomology.lean. \u0394 normalized = -350 (7016\u21926666); CohomologyAPI raw 1776\u21921609 (still > 1200).",
-  "completed_task_lines": []
+  "task_complete": true,
+  "stuck_on": "none",
+  "strategy_recommendation": "Continue Phase 1 sheaf-reversion in CohomologyAPI.lean: target the remaining presheaf-boundary dimension-shift cluster (`sheafH_dimension_shift_of_mono_presheaf`, `sheafH_dimension_shift_presheaf`, `sheafH_dimension_shift_iso_presheaf`) and the `sheafH0EquivSections_presheaf(_natural)` pair, replacing `(F : Presheaf) (h : F.IsSheaf)` triples with bundled `Sheaf` / `ShortComplex (Sheaf \u2026)` arguments and updating callers in `IrreducibleStep.lean` and `FiniteGeneratorVanishing.lean`.",
+  "attempts_entry": "cycle 2: sheaf-reverted successor-map, H\u00b9 cokernel-iso, and H\u00b9-vanishing clusters in CohomologyAPI.lean; deleted _presheaf wrappers, updated cross-file callers (FlasqueVanishing, PresheafFilteredColimit{,Core}, ClosedImmersionCohomology); -501 normalized / -528 raw LOC; CohomologyAPI.lean 1609\u21921193 (<1200 gate met).",
+  "completed_task_lines": [
+    "- [>] In `CohomologyAPI.lean`, rewrite each theorem that takes one or more"
+  ]
 }
