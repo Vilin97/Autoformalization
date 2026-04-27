@@ -17,12 +17,10 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
 * `sheafH_subsingleton_of_isZero_presheaf`: presheaf-boundary zero-sheaf vanishing
 * `stalk_zero_of_ses_g_iso`: stalk vanishing from SES with iso on `g`
 * `stalk_zero_of_shortExact_kernel`: stalk vanishing from SES kernel
-* `stalk_zero_of_g_is_cokernel_of_stalk_epi_presheaf`: presheaf-boundary stalk
+* `stalk_zero_of_g_is_cokernel_of_stalk_epi`: sheaf-level stalk
   vanishing from a cokernel and stalk-epi hypothesis
 * `cokernel_stalk_zero_of_stalk_surj`: actual-cokernel specialization of the same stalk
   vanishing under stalk-surjectivity
-* `stalk_zero_of_shortExact_cokernel_presheaf`: presheaf-boundary short exact
-  specialization of the same cokernel stalk vanishing
 * `sheafH_succ_map`: successor connecting morphism
 * `sheafH_succ_map_natural_of_map_eq`: naturality of the successor connecting
   morphism
@@ -353,50 +351,27 @@ theorem stalk_zero_of_shortExact_kernel
   exact (AddCommGrpCat.mono_iff_injective _).mp hTf_mono
     ((hX₂ _).trans (map_zero _).symm)
 
-/-- Presheaf-boundary stalk vanishing: if `g` is a cokernel of `f` after bundling the
-presheaves as sheaves, and the stalk map of `f` at `x` is epi, then the stalk of `F₃`
-at `x` vanishes. -/
-theorem stalk_zero_of_g_is_cokernel_of_stalk_epi_presheaf
+/-- If `g` is a cokernel of `f` and the stalk map of `f` at `x` is epi, then the stalk
+of `S.X₃` at `x` vanishes. -/
+theorem stalk_zero_of_g_is_cokernel_of_stalk_epi
     {X : TopCat.{u}}
-    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
-    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
-    (hg : let S := (ShortComplex.mk
-        (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-        (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-        (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-        (Sheaf.Hom.mk f)
-        (Sheaf.Hom.mk g)
-        (by
-          apply Sheaf.Hom.ext
-          simpa using hfg)
-      : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)); IsColimit (CokernelCofork.ofπ S.g S.zero))
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hg : IsColimit (CokernelCofork.ofπ S.g S.zero))
     (x : X)
-    (hepi : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f))
-    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F₃) :
+    (hepi : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.f.val))
+    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj S.X₃.val) :
     a = 0 := by
-  let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ShortComplex.mk
-    (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-    (Sheaf.Hom.mk f)
-    (Sheaf.Hom.mk g)
-    (by
-      apply Sheaf.Hom.ext
-      simpa using hfg)
-  have hg' : IsColimit (CokernelCofork.ofπ S.g S.zero) := by
-    simpa [S] using hg
   let T : TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
     TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙ TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
   haveI : ∀ U : Opens X, Decidable (x ∈ U) := fun _ => Classical.dec _
   haveI : T.IsLeftAdjoint :=
     (stalkSkyscraperSheafAdjunction (C := AddCommGrpCat.{u}) (X := X) (p₀ := x)).isLeftAdjoint
   haveI : Epi (T.map S.f) := by
-    simpa [T, S] using hepi
+    simpa [T] using hepi
   have hzero_map : T.map S.f ≫ T.map S.g = 0 := by
     rw [← T.map_comp, S.zero, Functor.map_zero]
   have hcolim : IsColimit (CokernelCofork.ofπ (T.map S.g) hzero_map) := by
-    simpa [T, hzero_map] using CokernelCofork.mapIsColimit _ hg' T
+    simpa [T, hzero_map] using CokernelCofork.mapIsColimit _ hg T
   have hzero : IsZero (T.obj S.X₃) := CokernelCofork.IsColimit.isZero_of_epi hcolim
   haveI := AddCommGrpCat.subsingleton_of_isZero hzero
   change T.obj S.X₃ at a
@@ -404,75 +379,23 @@ theorem stalk_zero_of_g_is_cokernel_of_stalk_epi_presheaf
   exact Subsingleton.elim _ _
 
 /-- Actual-cokernel specialization of
-`stalk_zero_of_g_is_cokernel_of_stalk_epi_presheaf`: if the stalk map of `f` at `x`
+`stalk_zero_of_g_is_cokernel_of_stalk_epi`: if the stalk map of `f` at `x`
 is surjective, then the stalk of `cokernel f` at `x` vanishes. -/
 theorem cokernel_stalk_zero_of_stalk_surj
     {X : TopCat.{u}}
-    {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (hF : F.IsSheaf) (hG : G.IsSheaf)
-    (f : CategoryTheory.NatTrans F G) (x : X)
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
+    (f : F ⟶ G) (x : X)
     (hf : Function.Surjective (ConcreteCategory.hom
-      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f)))
+      ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val)))
     (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj
-      (Limits.cokernel (show (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from Sheaf.Hom.mk f)).val) :
+      (Limits.cokernel f).val) :
     a = 0 := by
-  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
-  have hepi : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f) := by
+  let S := ShortComplex.mk f (Limits.cokernel.π f) (Limits.cokernel.condition f)
+  have hepi : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f.val) := by
     simpa using (AddCommGrpCat.epi_iff_surjective _).mpr hf
-  simpa [fsh] using stalk_zero_of_g_is_cokernel_of_stalk_epi_presheaf
-    (F₁ := F)
-    (F₂ := G)
-    (F₃ := (Limits.cokernel fsh).val)
-    hF
-    hG
-    (Limits.cokernel fsh).cond
-    (f := f)
-    (g := (Limits.cokernel.π fsh).val)
-    (show f ≫ (Limits.cokernel.π fsh).val = 0 by
-      ext U s
-      change ConcreteCategory.hom (((fsh ≫ Limits.cokernel.π fsh).val.app U)) s = 0
-      have happ :
-          (((fsh ≫ Limits.cokernel.π fsh).val).app U) =
-            NatTrans.app
-              (0 : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X).val ⟶
-                (Limits.cokernel fsh).val) U := by
-        exact NatTrans.congr_app
-          (congrArg (fun α => α.val) (Limits.cokernel.condition fsh))
-          U
-      rw [happ]
-      simp)
-    (by simpa [fsh] using (cokernelIsCokernel fsh))
-    x
-    hepi
-    a
-
-/-- Presheaf-boundary short exact sequence version of
-`stalk_zero_of_g_is_cokernel_of_stalk_epi_presheaf`. -/
-theorem stalk_zero_of_shortExact_cokernel_presheaf
-    {X : TopCat.{u}}
-    {F₁ F₂ F₃ : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (h₁ : F₁.IsSheaf) (h₂ : F₂.IsSheaf) (h₃ : F₃.IsSheaf)
-    {f : F₁ ⟶ F₂} {g : F₂ ⟶ F₃} (hfg : f ≫ g = 0)
-    (hS : (ShortComplex.mk
-      (X₁ := (⟨F₁, h₁⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₂ := (⟨F₂, h₂⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (X₃ := (⟨F₃, h₃⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-      (Sheaf.Hom.mk f)
-      (Sheaf.Hom.mk g)
-      (by
-        apply Sheaf.Hom.ext
-        simpa using hfg)).ShortExact)
-    (x : X)
-    (hepi : Epi ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map f))
-    (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F₃) :
-    a = 0 := by
-  exact stalk_zero_of_g_is_cokernel_of_stalk_epi_presheaf
-    (F₁ := F₁) (F₂ := F₂) (F₃ := F₃)
-    h₁ h₂ h₃
-    (f := f) (g := g) hfg
-    (hg := by simpa using hS.gIsCokernel)
+  simpa [S] using stalk_zero_of_g_is_cokernel_of_stalk_epi
+    (S := S)
+    (by simpa [S] using (cokernelIsCokernel f))
     x hepi a
 
 /-! ## H⁰ ≅ Sections -/

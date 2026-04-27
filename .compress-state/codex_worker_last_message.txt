@@ -1,19 +1,12 @@
-Implemented cycle 8.
-
-Changed:
-- `stalk_zero_of_ses_g_iso_presheaf` → `stalk_zero_of_ses_g_iso`
-- `stalk_zero_of_shortExact_kernel_presheaf` → `stalk_zero_of_shortExact_kernel`
-- Removed duplicated `ShortComplex.mk` and sheaf bundling inside both proofs.
-- Updated the four direct callers in `IrreducibleStep.lean` and `GrothendieckVanishing.lean`.
+Done. The cokernel stalk-zero cluster is now sheaf-level in [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:356), `stalk_zero_of_shortExact_cokernel_presheaf` is deleted, and the two callers in [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:469) pass bundled sheaf morphisms directly.
 
 Verification passed:
-- `lake env lean` for `CohomologyAPI.lean`
-- `lake env lean` for `IrreducibleStep.lean`
-- `lake env lean` for `GrothendieckVanishing.lean`
+- `lake env lean` for `CohomologyAPI.lean`, `IrreducibleStep.lean`, and `GrothendieckVanishing.lean`
 - `lake build`
+- post-edit `rg` confirms the deleted/old `_presheaf` declarations are gone
 
-LOC:
-- Normalized: `5779 -> 5708` (`-71`)
-- Raw `main/*.lean`: `6809 -> 6735` (`-74`)
+Metrics:
+- normalized LOC: `5708 -> 5632` (`-76`)
+- raw `main/*.lean`: `6735 -> 6654` (`-81`)
 
-Wrote the required report at `.compress-state/codex_task_results/cycle_8.md`. Existing unrelated compress-loop state files were left untouched.
+Report written at [.compress-state/codex_task_results/cycle_9.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_9.md:1).

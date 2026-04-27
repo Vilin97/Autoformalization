@@ -467,11 +467,7 @@ theorem zeroOutsideInt_cohomology_vanishing
   exact closedComplementVanishing V hV (C := C.val) C.cond m' ih
     (by simpa [gt_iff_lt] using hVcompl_lt_m')
     (fun x hxV a => cokernel_stalk_zero_of_stalk_surj
-      (F := (TopCat.Sheaf.zeroOutsideInt V).val)
-      (G := (TopCat.Sheaf.zeroOutsideInt ⊤).val)
-      (hF := (TopCat.Sheaf.zeroOutsideInt V).cond)
-      (hG := (TopCat.Sheaf.zeroOutsideInt ⊤).cond)
-      (f := (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤)).val)
+      (f := TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))
       (x := x)
       (hf := sheafifyMap_zeroOutside_openHom_stalk_surj Presheaf.constZ le_top x hxV) a)
 
@@ -518,9 +514,9 @@ theorem subsheaf_zeroOutsideInt_vanishing
       exact closedComplementVanishing V' hV'ne (C := C.val) C.cond m ih
         (by simpa [gt_iff_lt] using lt_trans hV'compl_lt_X hm)
         (fun x hxV' b => cokernel_stalk_zero_of_stalk_surj
-          (F := (TopCat.Sheaf.zeroOutsideInt V').val) (G := R)
-          (hF := (TopCat.Sheaf.zeroOutsideInt V').cond) (hG := hRsh)
-          (f := j) (x := x) (hf := (hj_stalk x hxV').2) b)
+          (F := TopCat.Sheaf.zeroOutsideInt V')
+          (G := (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
+          (f := Sheaf.Hom.mk j) (x := x) (hf := (hj_stalk x hxV').2) b)
     exact subsingleton_sheafH_of_shortExact_middle_presheaf
       (hF := (TopCat.Sheaf.zeroOutsideInt V').cond) (hG := hRsh)
       (f := j) m
