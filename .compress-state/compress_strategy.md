@@ -1,1 +1,1 @@
-Continue Phase-2 unused-decl deletion. Next live candidates: `IsFlasqueSheaf.casesOn` from FlasqueVanishing.lean, then later GeneratedSubsheaf/ZeroOutside entries. Verify each via `rg` for external callers before deleting.
+Continue Phase-2 unused-decl deletion in GeneratedSubsheaf.lean: next live targets are `TopCat.Sheaf.familyGeneratedSheaf`, `familyGeneratorMap`, `familyImage_ι_eq`, and `familyImageι` (verify each via `rg` for external refs first, since some `TopCat.Sheaf.family*` names ARE used by ZeroOutsideFinset.lean and FinitelyGeneratedVanishing.lean).
