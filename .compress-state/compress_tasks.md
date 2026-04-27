@@ -89,7 +89,7 @@ become unreachable, cascading the deletion).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_succ_map_presheaf_eq_succ_iso_hom\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
 - [ ] Delete unused declaration `sheafH_succ_map_presheaf_natural_of_map_eq` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_succ_map_presheaf_natural_of_map_eq\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
-- [ ] Delete unused declaration `stalk_zero_of_shortExact_cokernel_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `stalk_zero_of_shortExact_cokernel_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) stalk_zero_of_shortExact_cokernel_presheaf\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
 - [ ] Delete unused declaration `ulift_int_projective` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) ulift_int_projective\b' Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean
@@ -259,4 +259,24 @@ Body-to-signature ratio outliers (≥4x, body ≥ 15 lines):
 - [ ] Golf `sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map_presheaf` in `Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean:514` (body/sig ratio 7.7, body 54L, sig 7L).
 - [ ] Golf `ext_subsingleton_of_isZero_tgt` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:221` (body/sig ratio 7.5, body 15L, sig 2L).
 - [ ] Golf `sheafH_comp_extClass_naturality_presheaf` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:238` (body/sig ratio 7.4, body 59L, sig 8L).
+
+---
+
+## Phase 5: Structural opportunities
+
+Cross-file restructurings the auto-scanner cannot detect, sourced from
+`.compress-state/structural_ideas.md`. Each item below is a single-cycle
+entry point for a larger initiative documented there. Prefer these over
+small-yield Phase-4 golf when both are available.
+
+- [ ] **Idea 1 entry cycle — sheafify `PresheafFilteredColimitCore.lean`.** Replace the four remaining `_presheaf` decls (`sheafH_filtered_colimit_succ_inj_subsingleton_presheaf`, `sheafH_filtered_colimit_surj_presheaf`, `sheafH_filtered_colimit_comparison_presheaf`, `sheafH_filtered_colimit_comparison_succ_compatibility_presheaf`) with sheaf-level analogues using `Sheaf.colimit` / `presheafToSheaf`-preserves-colimits. Update callers in `PresheafFilteredColimit.lean`. Expected -150 to -250 raw LOC; full initiative target -400 to -700. Highest-leverage remaining work — do before any Phase 4 golf in these files.
+      COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafH_filtered_colimit_(succ_inj_subsingleton|surj|comparison|comparison_succ_compatibility)_presheaf\b' Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean
+- [ ] **Idea 2 — collapse `class IsFlasqueSheaf` to a `def`.** The class at `FlasqueVanishing.lean:34` is a one-field wrapper around `IsFlasque F.val`; the auto-generated `casesOn`/`rec`/`recOn` are confirmed unused. Convert to `def IsFlasqueSheaf F := IsFlasque F.val` (or remove entirely and inline `IsFlasque F.val` at use sites). Update ~20 use sites in `FlasqueVanishing` + `IrreducibleStep` + `ConstantSheafFlasque`. Expected -30 to -50 raw LOC.
+      COMPLETE_IF: ! grep -qE '^class IsFlasqueSheaf\b' Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean
+- [ ] **Idea 3 — eliminate `ULiftInt.lean`.** Search Mathlib for an existing `(AddCommGrpCat.of (ULift ℤ) ⟶ G) ≃+ G` equivalence (try `lean_leansearch` for "ULift Int additive equivalence", `lean_loogle` for `ULift ℤ →+ _ ≃+ _`). If found, replace the 5 call sites (CohomologyAPI:541, ZeroOutside:180/201/202/220) and delete the file. If not, inline as a local `let` / fold into `ZeroOutside.lean`. Expected -20 to -28 raw LOC.
+      COMPLETE_IF: ! test -f Aristotle/GrothendieckVanishing/main/ULiftInt.lean
+- [ ] **Idea 4 — merge `ZeroOutsideFinset.lean` into `ZeroOutside.lean`.** Used only by `FinitelyGeneratedVanishing.lean`, same namespace, 77 lines + 3 decls. Move all decls into the bottom of `ZeroOutside.lean`; update imports in `FinitelyGeneratedVanishing.lean` and `GrothendieckVanishingOverview.lean`; delete the file. Expected -10 to -20 raw LOC + one fewer file.
+      COMPLETE_IF: ! test -f Aristotle/GrothendieckVanishing/main/ZeroOutsideFinset.lean
+- [ ] **Idea 6 — submit a Phase-4 ratio outlier to Aristotle for golf.** Pick a self-contained target NOT covered by Idea 1: `finsetGenCocone_isColimit` (FinitelyGeneratedVanishing.lean:65, body/sig 25.5), `zeroOutside` (ZeroOutside.lean:39, body/sig 17.0), or `isFlasque_of_injective` (FlasqueVanishing.lean:430, body/sig 9.0). Use `mcp__aristotle__submit_directory` with the prompt: "Golf the proof of `<name>` in this file. Minimize tactic count. Do not change the statement, signature, or any other declaration. Reply with just the rewritten proof body." Defer broader golf in `PresheafFilteredColimit*` until after Idea 1.
+
 

@@ -70,3 +70,18 @@ EVALUATOR: REWARD replacements that delete custom code in favor of Mathlib.
   enforces this; the worker does not get to override it).
 
 EVALUATOR: A cycle that fails any mechanical gate is a regression.
+
+## Principle 7: Structural opportunities backlog
+
+When the mechanical Phase 1-4 backlog has only small-yield items left, consult
+`.compress-state/structural_ideas.md` for higher-leverage initiatives that the
+auto-scanner cannot detect (cross-file restructurings, file mergers, class →
+def collapses, Mathlib upstreaming). Each idea there lists a single-cycle
+entry point sized to fit one loop iteration.
+
+PLANNER: Read `structural_ideas.md` and prefer its entry-point cycles over
+small-yield Phase-4 golf when both are available.
+
+AUDITOR: When rescanning, do NOT delete `structural_ideas.md`. The scan
+overwrites `compress_tasks.md`, but `structural_ideas.md` is the durable
+source for cross-file structural work.

@@ -1,11 +1,13 @@
 {
   "progress_score": 2,
-  "summary": "Sheaf-reverted the stalk-zero pair (`stalk_zero_of_ses_g_iso{,_presheaf}` and `stalk_zero_of_shortExact_kernel{,_presheaf}`) in CohomologyAPI.lean to take `(S : ShortComplex (Sheaf \u2026))` directly, updated four callers in IrreducibleStep.lean and GrothendieckVanishing.lean; -71 normalized / -74 raw LOC.",
+  "summary": "Sheaf-reverted the cokernel stalk-zero cluster in CohomologyAPI.lean, deleted unused `stalk_zero_of_shortExact_cokernel_presheaf`, and updated two IrreducibleStep callers; -76 normalized / -81 raw LOC.",
   "principle_violations": [],
   "task_addressed": true,
-  "task_complete": false,
-  "stuck_on": "main/*.lean raw wc -l is 6735, still above the 6500 target. Remaining presheaf-boundary clusters: the cokernel stalk-zero cluster at CohomologyAPI.lean:413-530, plus any IsSheaf packaging in ZeroOutside.lean and PresheafFilteredColimit{,Core,General}.lean.",
-  "strategy_recommendation": "Next cycle: tackle the cokernel stalk-zero cluster in CohomologyAPI.lean (around lines 413-530, e.g. `stalk_zero_of_g_is_cokernel_of_stalk_epi_presheaf` and adjacent `_presheaf` wrappers), reverting them to bundled `ShortComplex (Sheaf \u2026)` signatures and updating callers in IrreducibleStep.lean / GrothendieckVanishing.lean. This should yield another ~50-80 LOC and meaningfully advance toward the 6500 raw target.",
-  "attempts_entry": "cycle 8: sheaf-reverted stalk_zero_of_ses_g_iso / stalk_zero_of_shortExact_kernel pair in CohomologyAPI.lean (deleted `_presheaf` names, switched to bundled ShortComplex (Sheaf \u2026)), updated 4 callers; -71 normalized / -74 raw LOC.",
-  "completed_task_lines": []
+  "task_complete": true,
+  "stuck_on": "Raw `main/*.lean` total is 6654 \u2014 still above the 6500 Phase-1 checklist threshold; further sheaf reversion is needed in PresheafFilteredColimit*, ZeroOutside*, and the H0-section API.",
+  "strategy_recommendation": "Next cycle: tackle Idea 1 entry \u2014 sheafify `PresheafFilteredColimitCore.lean` by replacing the four `_presheaf` decls (`sheafH_filtered_colimit_succ_inj_subsingleton_presheaf`, `sheafH_filtered_colimit_surj_presheaf`, `sheafH_filtered_colimit_comparison_presheaf`, `sheafH_filtered_colimit_comparison_succ_compatibility_presheaf`) with sheaf-level analogues using `Sheaf.colimit` / presheafToSheaf-preserves-colimits, then update callers in `PresheafFilteredColimit.lean`. Highest-leverage remaining work, expected -150 to -250 raw LOC and a strong push toward the 6500 raw threshold.",
+  "attempts_entry": "cycle 9: score=2 loc_delta=-76 \u2014 sheaf-reverted cokernel stalk-zero cluster (`stalk_zero_of_g_is_cokernel_of_stalk_epi{,_presheaf}`, `cokernel_stalk_zero_of_stalk_surj`) in CohomologyAPI.lean, deleted unused `stalk_zero_of_shortExact_cokernel_presheaf`, updated two IrreducibleStep callers; -76 normalized / -81 raw LOC.",
+  "completed_task_lines": [
+    "- [>] Delete unused declaration `stalk_zero_of_shortExact_cokernel_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable)."
+  ]
 }

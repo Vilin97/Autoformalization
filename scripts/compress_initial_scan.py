@@ -262,6 +262,27 @@ highest-leverage area in the entire compress loop.
 """
 
 
+def extract_phase5(existing_path: Path) -> str:
+    """Preserve a `## Phase 5: Structural opportunities` section verbatim.
+
+    The auditor periodically rescans and overwrites `compress_tasks.md`. Phase 5
+    is hand-curated (sourced from `structural_ideas.md`) and must survive.
+    """
+    if not existing_path.exists():
+        return ""
+    text = existing_path.read_text()
+    marker = "## Phase 5: Structural opportunities"
+    idx = text.find(marker)
+    if idx == -1:
+        return ""
+    section = text[idx:]
+    # Trim a trailing horizontal rule if a future Phase 6 is appended.
+    next_phase = section.find("\n## Phase 6")
+    if next_phase != -1:
+        section = section[:next_phase]
+    return section.rstrip() + "\n"
+
+
 def write_compress_tasks(
     decls: list[Decl],
     unused_items: list[tuple[str, str]],
@@ -270,6 +291,7 @@ def write_compress_tasks(
 ) -> None:
     long_proofs = long_proof_candidates(decls)
     simple_stmt = simple_statement_candidates(decls)
+    preserved_phase5 = extract_phase5(output_path)
 
     lines: list[str] = []
     lines.append("# Compress Tasks")
@@ -362,6 +384,21 @@ def write_compress_tasks(
             lines.append(f"- [ ] Golf `{d.name}` in `{rel}:{d.start_line}` "
                          f"(body/sig ratio {ratio:.1f}, body {d.body_lines}L, sig {d.signature_lines}L).")
     lines.append("")
+
+    if preserved_phase5:
+        lines.append("---")
+        lines.append("")
+        lines.append(preserved_phase5)
+    else:
+        lines.append("---")
+        lines.append("")
+        lines.append("## Phase 5: Structural opportunities")
+        lines.append("")
+        lines.append("See `.compress-state/structural_ideas.md` for the durable backlog of")
+        lines.append("higher-leverage cross-file restructurings the auto-scanner cannot detect.")
+        lines.append("Pick an entry-point cycle from there when mechanical Phase 1-4 items")
+        lines.append("offer only small yields.")
+        lines.append("")
 
     output_path.write_text("\n".join(lines) + "\n")
 
