@@ -61,10 +61,6 @@ namespace TopCat
 def closedIncl {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) : TopCat.of s ⟶ X :=
   TopCat.ofHom ⟨Subtype.val, hs.isClosedEmbedding_subtypeVal.continuous⟩
 
-@[simp]
-theorem coe_closedIncl {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
-    (closedIncl hs : s → X) = Subtype.val := rfl
-
 lemma set_range_closedIncl {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
     Set.range (closedIncl hs : s → X) = s := by
   ext x
@@ -81,13 +77,6 @@ lemma closedIncl_isClosedEmbedding {X : TopCat.{u}} {s : Set X} (hs : IsClosed s
 lemma closedIncl_isInducing {X : TopCat.{u}} {s : Set X} (hs : IsClosed s) :
     Topology.IsInducing (closedIncl hs) :=
   (closedIncl_isClosedEmbedding hs).isInducing
-
-theorem closedIncl_image_map_eq_inter {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
-    (U : Opens X) :
-    (closedIncl hs : s → X) '' (((Opens.map (closedIncl hs)).obj U : Opens (TopCat.of s)) :
-      Set (TopCat.of s)) = (U : Set X) ∩ s := by
-  change (closedIncl hs : s → X) '' ((closedIncl hs : s → X) ⁻¹' (U : Set X)) = (U : Set X) ∩ s
-  rw [Set.image_preimage_eq_inter_range, set_range_closedIncl hs]
 
 theorem closedIncl_map_eq_bot_of_le_compl {X : TopCat.{u}} {s : Set X} (hs : IsClosed s)
     {U : Opens X} (hU : U ≤ ⟨sᶜ, hs.isOpen_compl⟩) :
