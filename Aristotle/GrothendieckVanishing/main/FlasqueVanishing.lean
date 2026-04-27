@@ -305,14 +305,6 @@ private lemma under_chain_upper_bound {X : TopCat.{u}}
       simpa [ub, cV, cs] using ht_gl ⟨a, ha⟩))
     (by cat_disch))
 
-private lemma structuredArrowsElementsSheafChainsBounded {X : TopCat.{u}}
-    {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
-    (g : F ⟶ G) {U : Opens X} (s : G.val.obj (op U))
-    (c : Set (Under g s))
-    (hchain : IsChain (fun x y => Nonempty (y ⟶ x)) c) :
-    ∃ ub, ∀ a ∈ c, Nonempty (ub ⟶ a) := by
-  exact under_chain_upper_bound g s c hchain
-
 private lemma under_maximal_eq_top {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact)
@@ -353,7 +345,7 @@ theorem epi_app_of_shortExact_of_epi_restrictions_presheaf {X : TopCat.{u}}
     simpa [Ssh] using
       (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} Ssh.g).mpr inferInstance
   obtain ⟨t, hmax⟩ := exists_maximal_of_chains_bounded
-    (structuredArrowsElementsSheafChainsBounded Ssh.g s)
+    (under_chain_upper_bound Ssh.g s)
     (fun ⟨f⟩ ⟨g⟩ => ⟨g ≫ f⟩)
   let V₀ : Opens X := t.right.1.unop
   let t₀ : F₂.obj (op V₀) := t.right.2
