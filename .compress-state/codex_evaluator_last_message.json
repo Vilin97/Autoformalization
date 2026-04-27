@@ -1,13 +1,15 @@
 {
   "progress_score": 2,
-  "summary": "Deleted unused `epi_app_top_of_subsingleton_sheafH1` from CohomologyAPI.lean, -15 normalized LOC.",
+  "summary": "Deleted unused `sheafCohomologyFunctor_additive`, `sheafH0NatIsoSections_hom_app`, `sheafH0NatIsoSections_inv_app` from CohomologyAPI.lean, -11 normalized LOC.",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Continue Phase-2 unused-decl deletion: next item is `sheafCohomologyFunctor_additive` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`. Verify with `rg` it has no remaining call sites, then delete it and any helpers that become unreachable.",
-  "attempts_entry": "cycle 13: deleted unused `epi_app_top_of_subsingleton_sheafH1` from CohomologyAPI.lean (-15 normalized / -19 raw LOC); lake env lean + lake build pass.",
+  "strategy_recommendation": "Continue Phase-2 unused-decl deletion in CohomologyAPI.lean. Next candidate: `sheafCohomologyFunctor_map_succ_of_map_eq_presheaf` (rg already finds no occurrences, so the checklist item may already pass \u2014 verify and flip). After that, deleting `sheafCohomologyFunctor_obj` requires editing call sites in FinitelyGeneratedVanishing.lean:130 and ClosedImmersionCohomology.lean:157, so plan it as a dedicated cycle.",
+  "attempts_entry": "cycle 14: deleted unused `sheafCohomologyFunctor_additive`, `sheafH0NatIsoSections_hom_app`, `sheafH0NatIsoSections_inv_app` from CohomologyAPI.lean, -11 normalized LOC (-14 raw).",
   "completed_task_lines": [
-    "- [>] Delete unused declaration `epi_app_top_of_subsingleton_sheafH1_presheaf` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable)."
+    "- [>] Delete unused declaration `sheafCohomologyFunctor_additive` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).",
+    "- [>] Delete unused declaration `sheafH0NatIsoSections_hom_app` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable).",
+    "- [>] Delete unused declaration `sheafH0NatIsoSections_inv_app` from `CohomologyAPI.lean` (and any helpers it depended on that become unreachable)."
   ]
 }
