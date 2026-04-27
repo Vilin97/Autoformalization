@@ -107,7 +107,7 @@ theorem toPlus_surjective_of_firstPlus
       Plus.sep _ ⟨⊥, hcov⟩ x y fun ⟨_, _, hf⟩ => absurd hf id⟩) _ _
 
 /-- On an irreducible space, the sheafification of the constant presheaf is flasque. -/
-theorem sheafify_constPresheaf_flasque_of_irreducible
+theorem sheafify_const_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X] (A : AddCommGrpCat.{u}) :
     IsFlasqueSheaf (⟨(Opens.grothendieckTopology X).sheafify ((Functor.const (Opens X)ᵒᵖ).obj A),
       (Opens.grothendieckTopology X).sheafify_isSheaf ((Functor.const (Opens X)ᵒᵖ).obj A)⟩ :
@@ -144,7 +144,7 @@ theorem sheafify_constPresheaf_flasque_of_irreducible
     exact epi_of_epi_fac hfac
 
 /-- On an irreducible space, the presheaf-to-sheaf image of the constant presheaf is flasque. -/
-theorem presheafToSheaf_constPresheaf_flasque_of_irreducible
+theorem presheafToSheaf_const_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X] (A : AddCommGrpCat.{u}) :
     IsFlasqueSheaf
       (((presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
@@ -153,7 +153,7 @@ theorem presheafToSheaf_constPresheaf_flasque_of_irreducible
   constructor
   intro U V i
   let e := plusPlusIsoSheafify (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) (P := P)
-  haveI := sheafify_constPresheaf_flasque_of_irreducible (X := X) A
+  haveI := sheafify_const_flasque_of_irreducible (X := X) A
   haveI : Epi (((Opens.grothendieckTopology X).sheafify P).map i.op) := by
     simpa using
       (IsFlasqueSheaf.epi_map
@@ -173,7 +173,7 @@ theorem constantSheaf_flasque_of_irreducible
   let P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} := (Functor.const (Opens X)ᵒᵖ).obj A
   constructor
   intro U V i
-  haveI := presheafToSheaf_constPresheaf_flasque_of_irreducible (X := X) A
+  haveI := presheafToSheaf_const_flasque_of_irreducible (X := X) A
   simpa [CategoryTheory.constantSheaf, P] using
     (IsFlasqueSheaf.epi_map
       (F := ((presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj

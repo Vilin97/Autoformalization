@@ -8,7 +8,7 @@ import Aristotle.GrothendieckVanishing.main.IrreducibleStep
   of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
   The proof assembles (FULLY PROVED — 0 sorry's):
-  - Reduction to irreducible: ReducibleVanishing',
+  - Reduction to irreducible: ReducibleVanishing,
     grothendieck_vanishing_of_irreducible
   - irreducible dim-zero base case here; positive-dimensional irreducible step in
     IrreducibleStep.lean
@@ -20,7 +20,7 @@ open CategoryTheory TopologicalSpace Order Limits Opposite
 
 /-! ## Reduction to irreducible spaces -/
 
-theorem ReducibleVanishing'
+theorem ReducibleVanishing
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
     {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
@@ -141,7 +141,7 @@ theorem grothendieck_vanishing_of_irreducible
   · rw [not_isEmpty_iff] at hEmpty
     by_cases hIrred : IrreducibleSpace X
     · exact ih_irred X n hF le_rfl hn
-    · exact ReducibleVanishing' X n hn (F := F) hF hIrred
+    · exact ReducibleVanishing X n hn (F := F) hF hIrred
         (fun Y [_] [_] {G} hG hle hY => ih_irred Y n (G := G) hG hle hY)
 
 /-! ## Main theorem -/
