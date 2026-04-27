@@ -242,6 +242,38 @@ private lemma chain_isCompatible_of_chain {X : TopCat.{u}}
           j.1.right.2 := CategoryOfElements.map_snd hij'.some.right
       exact congrArg (ConcreteCategory.hom (F.val.map ((cV i).infLERight (cV j)).op)) hsec
 
+private lemma exists_glued_lift_upper_bound {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
+    (g : F ⟶ G) {U : Opens X} (s : G.val.obj (op U))
+    {ι : Type*}
+    (T : ι → StructuredArrow ⟨op U, s⟩
+      (Functor.whiskerRight g.val (CategoryTheory.forget AddCommGrpCat.{u})).mapElements)
+    (hcompat : TopCat.Presheaf.IsCompatible F.val
+      (fun i => (T i).right.1.unop) (fun i => (T i).right.2)) :
+    ∃ y : StructuredArrow ⟨op U, s⟩
+        (Functor.whiskerRight g.val
+          (CategoryTheory.forget AddCommGrpCat.{u})).mapElements,
+      y.right.1.unop = iSup (fun i => (T i).right.1.unop) ∧
+      ∀ i, Nonempty (y ⟶ T i) := by
+  let cV : ι → Opens X := fun i => (T i).right.1.unop
+  let cs : (i : ι) → F.val.obj (op (cV i)) := fun i => (T i).right.2
+  have hcompat' : TopCat.Presheaf.IsCompatible F.val cV cs := by
+    simpa [cV, cs] using hcompat
+  obtain ⟨t_gl, ht_gl, _⟩ := F.existsUnique_gluing cV cs hcompat'
+  have hVsup_le : iSup cV ≤ U := iSup_le fun i => leOfHom (T i).hom.val.unop
+  have hgt : ConcreteCategory.hom (g.val.app (op (iSup cV))) t_gl =
+      ConcreteCategory.hom (G.val.map (homOfLE hVsup_le).op) s := by
+    apply map_glued_eq_of_local_eq g (fun j => le_trans (le_iSup cV j) hVsup_le) ht_gl
+    intro j
+    have hmap := CategoryOfElements.map_snd (T j).hom
+    simpa [cV, cs] using hmap.symm
+  let y := underMk g s t_gl hVsup_le hgt
+  refine ⟨y, rfl, fun i => ?_⟩
+  exact Nonempty.intro (StructuredArrow.homMk
+    (CategoryOfElements.homMk _ _ (homOfLE (le_iSup cV i)).op (by
+      simpa [y, cV, cs] using ht_gl i))
+    (by cat_disch))
+
 /-! ### Structured-arrow Zorn setup for partial lifts -/
 
 /-- Partial lifts of a section `s` along a morphism of sheaves. An object is an
@@ -272,43 +304,17 @@ private lemma under_extend_by_one_open {X : TopCat.{u}}
     simpa [V₀, t₀] using hmap.symm
   obtain ⟨t'', hgt'', hcompat_patch⟩ :=
     exists_patch_of_shortExact hS hX₁_epi hV₀U hWU ht₀ ht'
-  let BU : Bool → Opens X | false => V₀ | true => W
-  let Bsf : (b : Bool) → S.X₂.val.obj (op (BU b)) | false => t₀ | true => t''
-  have hcompat_glue : TopCat.Presheaf.IsCompatible S.X₂.val BU Bsf :=
-    bool_isCompatible_of_false_true_eq S.X₂.val hcompat_patch
-  obtain ⟨t_new, ht_new, _⟩ := S.X₂.existsUnique_gluing BU Bsf hcompat_glue
-  have hBU : ∀ b, BU b ≤ U
-    | false => by simpa [BU] using hV₀U
-    | true => by simpa [BU] using hWU
-  have hBUU : iSup BU ≤ U := iSup_le hBU
-  have hgt_new : ConcreteCategory.hom (S.g.val.app (op (iSup BU))) t_new =
-      ConcreteCategory.hom (S.X₃.val.map (homOfLE hBUU).op) s := by
-    apply map_glued_eq_of_local_eq S.g hBU ht_new
-    intro b
-    cases b <;> simp only [BU, Bsf]
-    · exact ht₀
-    · exact hgt''
-  have hxBU : x ∈ iSup BU := Opens.mem_iSup.mpr ⟨true, by simpa [BU] using hxW⟩
-  let t_new_under : Under S.g s := underMk S.g s t_new hBUU hgt_new
-  refine ⟨t_new_under, ?_, ?_⟩
-  · exact Nonempty.intro (StructuredArrow.homMk
-      (CategoryOfElements.homMk _ _ (homOfLE (le_iSup BU false)).op (by
-        simpa [t_new_under, V₀, t₀, BU, Bsf] using ht_new false))
-      (by cat_disch))
-  · simpa [t_new_under] using hxBU
-
-private lemma under_exists_extension_containing {X : TopCat.{u}}
-    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS : S.ShortExact)
-    (hX₁_epi : ∀ {U V : Opens X} (i : U ⟶ V), Epi (S.X₁.val.map i.op))
-    {U : Opens X} (s : S.X₃.val.obj (op U))
-    (hls : TopCat.Presheaf.IsLocallySurjective S.g.val)
-    (t : Under S.g s)
-    {x : X} (hxU : x ∈ U) (_hxV₀ : x ∉ t.right.1.unop) :
-    ∃ y : Under S.g s, Nonempty (y ⟶ t) ∧ x ∈ y.right.1.unop := by
-  obtain ⟨W, iWU, ⟨t', ht'⟩, hxW⟩ := (hls.imageSieve_mem s) x hxU
-  have hWU : W ≤ U := leOfHom iWU
-  exact under_extend_by_one_open hS hX₁_epi s t W hWU t' ht' hxW
+  let T : Bool → Under S.g s
+    | false => t
+    | true => underMk S.g s t'' hWU hgt''
+  have hcompat_glue : TopCat.Presheaf.IsCompatible S.X₂.val
+      (fun b => (T b).right.1.unop) (fun b => (T b).right.2) := by
+    apply bool_isCompatible_of_false_true_eq S.X₂.val
+    simpa [T, V₀, t₀] using hcompat_patch
+  obtain ⟨y, hy_open, hy⟩ := exists_glued_lift_upper_bound S.g s T hcompat_glue
+  refine ⟨y, hy false, ?_⟩
+  rw [hy_open]
+  exact Opens.mem_iSup.mpr ⟨true, by simpa [T] using hxW⟩
 
 private lemma under_chain_upper_bound {X : TopCat.{u}}
     {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
@@ -316,24 +322,12 @@ private lemma under_chain_upper_bound {X : TopCat.{u}}
     (c : Set (Under g s))
     (hchain : IsChain (fun x y => Nonempty (y ⟶ x)) c) :
     ∃ ub, ∀ a ∈ c, Nonempty (ub ⟶ a) := by
-  let cV : c → Opens X := fun x => x.1.right.1.unop
-  let cs : (x : c) → F.val.obj (op (cV x)) := fun x => x.1.right.2
-  have hcompat : TopCat.Presheaf.IsCompatible F.val cV cs := by
-    simpa [cV, cs] using chain_isCompatible_of_chain (g := g) (s := s) (c := c) hchain
-  obtain ⟨t_gl, ht_gl, _⟩ := F.existsUnique_gluing cV cs hcompat
-  have hVsup_le : iSup cV ≤ U := iSup_le fun j => leOfHom j.1.hom.val.unop
-  have hgt : ConcreteCategory.hom (g.val.app (op (iSup cV))) t_gl =
-      ConcreteCategory.hom (G.val.map (homOfLE hVsup_le).op) s := by
-    apply map_glued_eq_of_local_eq g (fun j => le_trans (le_iSup cV j) hVsup_le) ht_gl
-    intro j
-    have hmap := CategoryOfElements.map_snd j.1.hom
-    simpa using hmap.symm
-  let ub : Under g s := underMk g s t_gl hVsup_le hgt
-  refine ⟨ub, fun a ha => ?_⟩
-  exact Nonempty.intro (StructuredArrow.homMk
-    (CategoryOfElements.homMk _ _ (homOfLE (le_iSup cV ⟨a, ha⟩)).op (by
-      simpa [ub, cV, cs] using ht_gl ⟨a, ha⟩))
-    (by cat_disch))
+  have hcompat : TopCat.Presheaf.IsCompatible F.val
+      (fun x : c => x.1.right.1.unop) (fun x : c => x.1.right.2) :=
+    chain_isCompatible_of_chain (g := g) (s := s) (c := c) hchain
+  obtain ⟨ub, _, hub⟩ :=
+    exists_glued_lift_upper_bound g s (fun x : c => x.1) hcompat
+  exact ⟨ub, fun a ha => hub ⟨a, ha⟩⟩
 
 private lemma under_maximal_eq_top {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
@@ -349,8 +343,9 @@ private lemma under_maximal_eq_top {X : TopCat.{u}}
   by_contra hnot
   have hlt : V₀ < U := lt_of_le_not_ge hV₀U hnot
   obtain ⟨x, hxU, hxV₀⟩ := Set.not_subset.mp hlt.2
+  obtain ⟨W, iWU, ⟨t', ht'⟩, hxW⟩ := (hls.imageSieve_mem s) x hxU
   obtain ⟨y, hyt, hxy⟩ :=
-    under_exists_extension_containing hS hX₁_epi s hls t hxU (by simpa [V₀] using hxV₀)
+    under_extend_by_one_open hS hX₁_epi s t W (leOfHom iWU) t' ht' hxW
   have h_back : Nonempty (t ⟶ y) := hmax y hyt
   exact hxV₀ (leOfHom h_back.some.right.val.unop hxy)
 
