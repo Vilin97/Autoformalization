@@ -210,6 +210,38 @@ private abbrev underMk {X : TopCat.{u}} {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
     (Y := ⟨op V, t⟩)
     (CategoryOfElements.homMk _ _ (homOfLE hVU).op (by simpa using ht.symm))
 
+private lemma chain_isCompatible_of_chain {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
+    {g : F ⟶ G} {U : Opens X} {s : G.val.obj (op U)}
+    {c : Set (StructuredArrow ⟨op U, s⟩
+      (Functor.whiskerRight g.val (CategoryTheory.forget AddCommGrpCat.{u})).mapElements)}
+    (hchain : IsChain (fun x y => Nonempty (y ⟶ x)) c) :
+    TopCat.Presheaf.IsCompatible F.val
+      (fun x : c => x.1.right.1.unop)
+      (fun x : c => x.1.right.2) := by
+  let cV : c → Opens X := fun x => x.1.right.1.unop
+  let cs : (x : c) → F.val.obj (op (cV x)) := fun x => x.1.right.2
+  change TopCat.Presheaf.IsCompatible F.val cV cs
+  intro i j
+  by_cases hij : i = j
+  · subst hij
+    rfl
+  · have htotal := hchain i.property j.property (fun h => hij (Subtype.ext h))
+    rcases htotal with hji | hij'
+    · rw [show (cV i).infLERight (cV j) =
+          (cV i).infLELeft (cV j) ≫ hji.some.right.val.unop from Subsingleton.elim _ _,
+        op_comp, Functor.map_comp, CategoryTheory.comp_apply]
+      have hsec : ConcreteCategory.hom (F.val.map hji.some.right.val) j.1.right.2 =
+          i.1.right.2 := CategoryOfElements.map_snd hji.some.right
+      exact congrArg (ConcreteCategory.hom (F.val.map ((cV i).infLELeft (cV j)).op))
+        hsec.symm
+    · rw [show (cV i).infLELeft (cV j) =
+          (cV i).infLERight (cV j) ≫ hij'.some.right.val.unop from Subsingleton.elim _ _,
+        op_comp, Functor.map_comp, CategoryTheory.comp_apply]
+      have hsec : ConcreteCategory.hom (F.val.map hij'.some.right.val) i.1.right.2 =
+          j.1.right.2 := CategoryOfElements.map_snd hij'.some.right
+      exact congrArg (ConcreteCategory.hom (F.val.map ((cV i).infLERight (cV j)).op)) hsec
+
 /-! ### Structured-arrow Zorn setup for partial lifts -/
 
 /-- Partial lifts of a section `s` along a morphism of sheaves. An object is an
@@ -263,37 +295,6 @@ private lemma under_exists_extension_containing {X : TopCat.{u}}
         simpa [t_new_under, V₀, t₀, BU, Bsf] using ht_new false))
       (by cat_disch))
   · simpa [t_new_under] using hxBU
-
-private lemma chain_isCompatible_of_chain {X : TopCat.{u}}
-    {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
-    {g : F ⟶ G} {U : Opens X} {s : G.val.obj (op U)}
-    {c : Set (Under g s)}
-    (hchain : IsChain (fun x y => Nonempty (y ⟶ x)) c) :
-    TopCat.Presheaf.IsCompatible F.val
-      (fun x : c => x.1.right.1.unop)
-      (fun x : c => x.1.right.2) := by
-  let cV : c → Opens X := fun x => x.1.right.1.unop
-  let cs : (x : c) → F.val.obj (op (cV x)) := fun x => x.1.right.2
-  change TopCat.Presheaf.IsCompatible F.val cV cs
-  intro i j
-  by_cases hij : i = j
-  · subst hij
-    rfl
-  · have htotal := hchain i.property j.property (fun h => hij (Subtype.ext h))
-    rcases htotal with hji | hij'
-    · rw [show (cV i).infLERight (cV j) =
-          (cV i).infLELeft (cV j) ≫ hji.some.right.val.unop from Subsingleton.elim _ _,
-        op_comp, Functor.map_comp, CategoryTheory.comp_apply]
-      have hsec : ConcreteCategory.hom (F.val.map hji.some.right.val) j.1.right.2 =
-          i.1.right.2 := CategoryOfElements.map_snd hji.some.right
-      exact congrArg (ConcreteCategory.hom (F.val.map ((cV i).infLELeft (cV j)).op))
-        hsec.symm
-    · rw [show (cV i).infLELeft (cV j) =
-          (cV i).infLERight (cV j) ≫ hij'.some.right.val.unop from Subsingleton.elim _ _,
-        op_comp, Functor.map_comp, CategoryTheory.comp_apply]
-      have hsec : ConcreteCategory.hom (F.val.map hij'.some.right.val) i.1.right.2 =
-          j.1.right.2 := CategoryOfElements.map_snd hij'.some.right
-      exact congrArg (ConcreteCategory.hom (F.val.map ((cV i).infLERight (cV j)).op)) hsec
 
 private lemma under_chain_upper_bound {X : TopCat.{u}}
     {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
