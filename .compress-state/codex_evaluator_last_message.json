@@ -1,13 +1,11 @@
 {
-  "progress_score": 1,
-  "summary": "Deleted unused wrapper `epiImage_zeroOutsideInt_vanishing` from IrreducibleStep.lean, -20 normalized LOC.",
+  "progress_score": 2,
+  "summary": "Deleted unused public theorem `sheafH_filtered_colimit_surj` from PresheafFilteredColimitCore.lean and stale doc mentions, -88 normalized LOC.",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Continue Phase-2 unused-decl deletion. Re-run `scripts/unused_decls.lean` to find next targets; promising areas remain in CohomologyAPI.lean and FlasqueVanishing.lean as suggested in prior strategy notes. Also consider scanning IrreducibleStep.lean for other locally-unused `Epi`/wrapper variants now that one was removed.",
-  "attempts_entry": "cycle 19: deleted unused `epiImage_zeroOutsideInt_vanishing` wrapper from IrreducibleStep.lean, -20 normalized LOC (5151\u21925131); lake build green.",
-  "completed_task_lines": [
-    "- [>] Delete unused declaration `epiImage_zeroOutsideInt_vanishing` from `IrreducibleStep.lean` (and any helpers it depended on that become unreachable)."
-  ]
+  "strategy_recommendation": "Continue Phase-2 audit-driven unused-decl deletion. Next targets per the audit: `sheafH_succ_map_natural_of_map_eq` and the two `sheafH_filtered_colimit_succ_*_comp_cokernel_pi` lemmas in PresheafFilteredColimitCore.lean. Re-run `scripts/compress_audit.py` and `scripts/unused_decls.lean` to confirm the next-largest live unused public declarations before committing.",
+  "attempts_entry": "cycle 20: deleted unused `sheafH_filtered_colimit_surj` from PresheafFilteredColimitCore.lean (+ stale doc mentions), -88 normalized LOC.",
+  "completed_task_lines": []
 }
