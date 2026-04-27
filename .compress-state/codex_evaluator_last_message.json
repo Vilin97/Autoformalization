@@ -1,17 +1,18 @@
 {
   "progress_score": 2,
-  "summary": "Deleted 5 unused `TopCat.Sheaf.*` wrapper decls (SectionIndex, finsetGeneratorMap, finsetGeneratedSheaf, allSectionMap, allSectionMap_epi) from GeneratedSubsheaf.lean, -31 normalized LOC.",
+  "summary": "Deleted 6 unused `TopCat.Sheaf.family*` wrapper decls (familyImage\u03b9, familyImage_\u03b9_eq, familyGeneratorMap, familyGeneratedSheaf, familyGeneratedSheaf\u03b9, familyGeneratedSheaf_\u03b9_eq) from GeneratedSubsheaf.lean, -34 normalized LOC.",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Continue Phase-2 unused-decl deletion in GeneratedSubsheaf.lean: next live targets are `TopCat.Sheaf.familyGeneratedSheaf`, `familyGeneratorMap`, `familyImage_\u03b9_eq`, and `familyImage\u03b9` (verify each via `rg` for external refs first, since some `TopCat.Sheaf.family*` names ARE used by ZeroOutsideFinset.lean and FinitelyGeneratedVanishing.lean).",
-  "attempts_entry": "cycle 17: deleted 5 unused TopCat.Sheaf.* wrappers (SectionIndex, finsetGeneratorMap, finsetGeneratedSheaf, allSectionMap, allSectionMap_epi) from GeneratedSubsheaf.lean; -31 normalized / -47 raw LOC.",
+  "strategy_recommendation": "Continue Phase-2 unused-decl deletion. Next candidates: scan `TopCat.Presheaf.*` finite/all-section wrappers in GeneratedSubsheaf.lean for unused entries, and re-run `scripts/unused_decls.lean` to find fresh targets across CohomologyAPI.lean and FlasqueVanishing.lean.",
+  "attempts_entry": "cycle 18: deleted 6 unused TopCat.Sheaf.family* wrappers from GeneratedSubsheaf.lean; -34 normalized LOC (-50 raw).",
   "completed_task_lines": [
-    "- [>] Delete unused declaration `TopCat.Sheaf.SectionIndex` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
-    "- [>] Delete unused declaration `TopCat.Sheaf.allSectionMap` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
-    "- [>] Delete unused declaration `TopCat.Sheaf.allSectionMap_epi` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
-    "- [>] Delete unused declaration `TopCat.Sheaf.finsetGeneratedSheaf` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
-    "- [>] Delete unused declaration `TopCat.Sheaf.finsetGeneratorMap` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable)."
+    "- [>] Delete unused declaration `TopCat.Sheaf.familyGeneratedSheaf` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
+    "- [>] Delete unused declaration `TopCat.Sheaf.familyGeneratedSheaf_\u03b9_eq` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
+    "- [>] Delete unused declaration `TopCat.Sheaf.familyGeneratedSheaf\u03b9` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
+    "- [>] Delete unused declaration `TopCat.Sheaf.familyGeneratorMap` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
+    "- [>] Delete unused declaration `TopCat.Sheaf.familyImage_\u03b9_eq` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
+    "- [>] Delete unused declaration `TopCat.Sheaf.familyImage\u03b9` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable)."
   ]
 }
