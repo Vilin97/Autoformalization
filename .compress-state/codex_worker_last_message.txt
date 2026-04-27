@@ -1,14 +1,12 @@
-Implemented the Cycle 3 sheaf reversion.
+Cycle 4 is complete.
 
-Changed [FlasqueVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean) to delete the `sheafShortComplexOfPresheaf` bridge and replace the targeted `_presheaf` declarations with bundled `Sheaf` / `ShortComplex` APIs. Updated direct callers in `PresheafFilteredColimitCore`, `PresheafFilteredColimit`, `IrreducibleStep`, and `GrothendieckVanishing`.
-
-Metrics:
-- Normalized LOC: `6165 -> 6062` (`-103`)
-- Raw `main/*.lean`: `7235 -> 7120` (`-115`)
+Deleted the two unused Flasque `_presheaf` wrappers from [FlasqueVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean:387), with no replacement wrapper and no call-site rewrite needed. Wrote the required report at [cycle_4.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_4.md:1).
 
 Verification passed:
-- `lake env lean` for all five modified Lean files
-- `lake build`
-- `git diff --check`
+`FlasqueVanishing.lean`, `PresheafFilteredColimitCore.lean`, `PresheafFilteredColimit.lean`, `IrreducibleStep.lean`, `GrothendieckVanishing.lean`, and full `lake build`.
 
-I also wrote the required report at [cycle_3.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_3.md). The raw total is still above the later `6500` target, so remaining Phase 1 work is in the other sheaf-reversion clusters.
+Metrics:
+- Normalized LOC: `6062 -> 5971` (`-91`)
+- Raw `main/*.lean` LOC: `7120 -> 7020` (`-100`)
+
+I did not commit or update `.compress-state/compress_tasks.md`.

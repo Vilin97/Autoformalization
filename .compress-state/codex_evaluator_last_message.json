@@ -1,11 +1,11 @@
 {
-  "summary": "Sheaf-reverted FlasqueVanishing.lean cluster: deleted sheafShortComplexOfPresheaf bridge and 5 _presheaf wrappers, replaced with bundled Sheaf/ShortComplex APIs and updated callers; -103 normalized / -115 raw LOC.",
   "progress_score": 2,
+  "summary": "Deleted two unused Flasque _presheaf H1-boundary wrappers cleanly with no remaining references, -91 normalized / -100 raw LOC.",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": false,
-  "stuck_on": "Raw main/*.lean total is 7120, still well above the 6500 COMPLETE_IF gate; remaining sheaf-reversion clusters in PresheafFilteredColimit{,Core,General}.lean and ClosedImmersion*.lean still pending.",
-  "strategy_recommendation": "Next cycle should target one of the two remaining presheaf-boundary `_presheaf` declarations still in FlasqueVanishing.lean (`sheafH_subsingleton_H1_of_flasque_of_epi_app_top_presheaf` at line 393 and `sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map_presheaf` at line 430) \u2014 both still take the `(F\u2081 F\u2082 F\u2083 : Presheaf) (h\u2081 h\u2082 h\u2083 : IsSheaf)` triple plus a hand-built ShortComplex. Convert them to take a bundled `S : ShortComplex (Sheaf \u2026)` and update callers in PresheafFilteredColimit{,Core}.lean. Alternatively, attack PresheafFilteredColimitCore.lean's own multi-arg packaging \u2014 it has the highest raw LOC remaining after CohomologyAPI compression.",
-  "attempts_entry": "cycle 3: score=2 loc_delta=-103 normalized (-115 raw); FlasqueVanishing.lean Sheaf-reversion: deleted sheafShortComplexOfPresheaf bridge + 5 _presheaf wrappers, replaced with bundled Sheaf/ShortComplex APIs, updated callers in PresheafFilteredColimit{,Core}, IrreducibleStep, GrothendieckVanishing.",
+  "stuck_on": "Raw main/*.lean total is 7020, still above the 6500 COMPLETE_IF target; remaining Phase-1 reversion work is in PresheafFilteredColimit{,Core,General}.lean, IrreducibleStep.lean, ClosedImmersion.lean, ClosedImmersionCohomology.lean.",
+  "strategy_recommendation": "Next cycle should target PresheafFilteredColimitCore.lean's multi-arg (Presheaf, IsSheaf) packaging (largest remaining raw LOC after CohomologyAPI compression) \u2014 sheaf-revert its presheaf-boundary wrappers to ShortComplex (Sheaf \u2026) and update callers in PresheafFilteredColimit.lean and IrreducibleStep.lean. Alternatively, attack ClosedImmersionCohomology.lean's _presheaf cluster.",
+  "attempts_entry": "cycle 4: deleted 2 unused Flasque _presheaf H1-boundary wrappers (sheafH_subsingleton_H1_of_flasque_of_epi_app_top{,_map}_presheaf), -91 normalized / -100 raw LOC; raw main now 7020.",
   "completed_task_lines": []
 }
