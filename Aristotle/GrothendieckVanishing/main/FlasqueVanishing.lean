@@ -251,14 +251,17 @@ private abbrev Under {X : TopCat.{u}} {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
   StructuredArrow ⟨op U, s⟩
     (Functor.whiskerRight g.val (CategoryTheory.forget AddCommGrpCat.{u})).mapElements
 
-private lemma under_exists_extension_containing {X : TopCat.{u}}
+private lemma under_extend_by_one_open {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact)
     (hX₁_epi : ∀ {U V : Opens X} (i : U ⟶ V), Epi (S.X₁.val.map i.op))
     {U : Opens X} (s : S.X₃.val.obj (op U))
-    (hls : TopCat.Presheaf.IsLocallySurjective S.g.val)
     (t : Under S.g s)
-    {x : X} (hxU : x ∈ U) (_hxV₀ : x ∉ t.right.1.unop) :
+    (W : Opens X) (hWU : W ≤ U)
+    (t' : S.X₂.val.obj (op W))
+    (ht' : ConcreteCategory.hom (S.g.val.app (op W)) t' =
+      ConcreteCategory.hom (S.X₃.val.map (homOfLE hWU).op) s)
+    {x : X} (hxW : x ∈ W) :
     ∃ y : Under S.g s, Nonempty (y ⟶ t) ∧ x ∈ y.right.1.unop := by
   let V₀ : Opens X := t.right.1.unop
   let t₀ : S.X₂.val.obj (op V₀) := t.right.2
@@ -267,8 +270,6 @@ private lemma under_exists_extension_containing {X : TopCat.{u}}
       ConcreteCategory.hom (S.X₃.val.map (homOfLE hV₀U).op) s := by
     have hmap := CategoryOfElements.map_snd t.hom
     simpa [V₀, t₀] using hmap.symm
-  obtain ⟨W, iWU, ⟨t', ht'⟩, hxW⟩ := (hls.imageSieve_mem s) x hxU
-  have hWU : W ≤ U := leOfHom iWU
   obtain ⟨t'', hgt'', hcompat_patch⟩ :=
     exists_patch_of_shortExact hS hX₁_epi hV₀U hWU ht₀ ht'
   let BU : Bool → Opens X | false => V₀ | true => W
@@ -295,6 +296,19 @@ private lemma under_exists_extension_containing {X : TopCat.{u}}
         simpa [t_new_under, V₀, t₀, BU, Bsf] using ht_new false))
       (by cat_disch))
   · simpa [t_new_under] using hxBU
+
+private lemma under_exists_extension_containing {X : TopCat.{u}}
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact)
+    (hX₁_epi : ∀ {U V : Opens X} (i : U ⟶ V), Epi (S.X₁.val.map i.op))
+    {U : Opens X} (s : S.X₃.val.obj (op U))
+    (hls : TopCat.Presheaf.IsLocallySurjective S.g.val)
+    (t : Under S.g s)
+    {x : X} (hxU : x ∈ U) (_hxV₀ : x ∉ t.right.1.unop) :
+    ∃ y : Under S.g s, Nonempty (y ⟶ t) ∧ x ∈ y.right.1.unop := by
+  obtain ⟨W, iWU, ⟨t', ht'⟩, hxW⟩ := (hls.imageSieve_mem s) x hxU
+  have hWU : W ≤ U := leOfHom iWU
+  exact under_extend_by_one_open hS hX₁_epi s t W hWU t' ht' hxW
 
 private lemma under_chain_upper_bound {X : TopCat.{u}}
     {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
