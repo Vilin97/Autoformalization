@@ -282,7 +282,6 @@ private abbrev Under {X : TopCat.{u}} {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
     (g : F ⟶ G) {U : Opens X} (s : G.val.obj (op U)) :=
   StructuredArrow ⟨op U, s⟩
     (Functor.whiskerRight g.val (CategoryTheory.forget AddCommGrpCat.{u})).mapElements
-
 private lemma under_extend_by_one_open {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact)
@@ -315,19 +314,6 @@ private lemma under_extend_by_one_open {X : TopCat.{u}}
   refine ⟨y, hy false, ?_⟩
   rw [hy_open]
   exact Opens.mem_iSup.mpr ⟨true, by simpa [T] using hxW⟩
-
-private lemma under_chain_upper_bound {X : TopCat.{u}}
-    {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
-    (g : F ⟶ G) {U : Opens X} (s : G.val.obj (op U))
-    (c : Set (Under g s))
-    (hchain : IsChain (fun x y => Nonempty (y ⟶ x)) c) :
-    ∃ ub, ∀ a ∈ c, Nonempty (ub ⟶ a) := by
-  have hcompat : TopCat.Presheaf.IsCompatible F.val
-      (fun x : c => x.1.right.1.unop) (fun x : c => x.1.right.2) :=
-    chain_isCompatible_of_chain (g := g) (s := s) (c := c) hchain
-  obtain ⟨ub, _, hub⟩ :=
-    exists_glued_lift_upper_bound g s (fun x : c => x.1) hcompat
-  exact ⟨ub, fun a ha => hub ⟨a, ha⟩⟩
 
 private lemma under_maximal_eq_top {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
@@ -370,8 +356,14 @@ theorem epi_app_of_shortExact_of_epi_restrictions_presheaf {X : TopCat.{u}}
     simpa [Ssh] using
       (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} Ssh.g).mpr inferInstance
   obtain ⟨t, hmax⟩ := exists_maximal_of_chains_bounded
-    (under_chain_upper_bound Ssh.g s)
-    (fun ⟨f⟩ ⟨g⟩ => ⟨g ≫ f⟩)
+    (fun (c : Set (Under Ssh.g s)) hchain => by
+      have hcompat : TopCat.Presheaf.IsCompatible F₂
+          (fun x : c => x.1.right.1.unop) (fun x : c => x.1.right.2) :=
+        chain_isCompatible_of_chain (g := Ssh.g) (s := s) (c := c) hchain
+      obtain ⟨ub, _, hub⟩ := exists_glued_lift_upper_bound Ssh.g s (fun x : c => x.1) hcompat
+      exact ⟨ub, fun a ha => hub ⟨a, ha⟩⟩)
+    (fun {a b c : Under Ssh.g s} (hab : Nonempty (b ⟶ a)) (hbc : Nonempty (c ⟶ b)) =>
+      ⟨hbc.some ≫ hab.some⟩)
   let V₀ : Opens X := t.right.1.unop
   let t₀ : F₂.obj (op V₀) := t.right.2
   have hV₀U : V₀ ≤ U := leOfHom t.hom.val.unop
