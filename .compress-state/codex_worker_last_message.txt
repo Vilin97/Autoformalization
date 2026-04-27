@@ -1,15 +1,13 @@
-Deleted the unused wrapper `epiImage_zeroOutsideInt_vanishing` from [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:563). Kept `epiImage_zeroOutsideInt_vanishing_of_locallySurjective` intact; it remains defined and called by `IrreduciblePosVanishing`.
+Cycle 20 is complete.
 
-Wrote the required report at [.compress-state/codex_task_results/cycle_19.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_19.md:1).
+Deleted `sheafH_filtered_colimit_surj` from [PresheafFilteredColimitCore.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean) and removed stale doc mentions in that file and [FinitelyGeneratedVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean). Wrote the report at [.compress-state/codex_task_results/cycle_20.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_20.md).
 
 Verification passed:
-- Exact-name `rg` after deletion: no `epiImage_zeroOutsideInt_vanishing` matches.
-- `_of_locallySurjective` search: definition plus call site remain.
-- `lake env lean Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean`
+- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean`
+- `lake env lean Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean`
 - `lake build`
+- exact `rg` search now finds no `sheafH_filtered_colimit_surj` matches
 
 Metrics:
-- Normalized LOC: `5151` → `5131` (`-20`)
-- Raw `main/*.lean` `wc -l`: `6077` → `6056` (`-21`)
-
-I did not commit or push.
+- Normalized LOC: `5115 -> 5027` (`-88`)
+- Raw `main/*.lean` wc: `6034 -> 5939` (`-95`)
