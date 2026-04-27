@@ -1,18 +1,13 @@
 {
-  "progress_score": 2,
-  "summary": "Deleted 6 unused `TopCat.Sheaf.family*` wrapper decls (familyImage\u03b9, familyImage_\u03b9_eq, familyGeneratorMap, familyGeneratedSheaf, familyGeneratedSheaf\u03b9, familyGeneratedSheaf_\u03b9_eq) from GeneratedSubsheaf.lean, -34 normalized LOC.",
+  "progress_score": 1,
+  "summary": "Deleted unused wrapper `epiImage_zeroOutsideInt_vanishing` from IrreducibleStep.lean, -20 normalized LOC.",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Continue Phase-2 unused-decl deletion. Next candidates: scan `TopCat.Presheaf.*` finite/all-section wrappers in GeneratedSubsheaf.lean for unused entries, and re-run `scripts/unused_decls.lean` to find fresh targets across CohomologyAPI.lean and FlasqueVanishing.lean.",
-  "attempts_entry": "cycle 18: deleted 6 unused TopCat.Sheaf.family* wrappers from GeneratedSubsheaf.lean; -34 normalized LOC (-50 raw).",
+  "strategy_recommendation": "Continue Phase-2 unused-decl deletion. Re-run `scripts/unused_decls.lean` to find next targets; promising areas remain in CohomologyAPI.lean and FlasqueVanishing.lean as suggested in prior strategy notes. Also consider scanning IrreducibleStep.lean for other locally-unused `Epi`/wrapper variants now that one was removed.",
+  "attempts_entry": "cycle 19: deleted unused `epiImage_zeroOutsideInt_vanishing` wrapper from IrreducibleStep.lean, -20 normalized LOC (5151\u21925131); lake build green.",
   "completed_task_lines": [
-    "- [>] Delete unused declaration `TopCat.Sheaf.familyGeneratedSheaf` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
-    "- [>] Delete unused declaration `TopCat.Sheaf.familyGeneratedSheaf_\u03b9_eq` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
-    "- [>] Delete unused declaration `TopCat.Sheaf.familyGeneratedSheaf\u03b9` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
-    "- [>] Delete unused declaration `TopCat.Sheaf.familyGeneratorMap` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
-    "- [>] Delete unused declaration `TopCat.Sheaf.familyImage_\u03b9_eq` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).",
-    "- [>] Delete unused declaration `TopCat.Sheaf.familyImage\u03b9` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable)."
+    "- [>] Delete unused declaration `epiImage_zeroOutsideInt_vanishing` from `IrreducibleStep.lean` (and any helpers it depended on that become unreachable)."
   ]
 }

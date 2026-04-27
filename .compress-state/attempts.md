@@ -17,3 +17,4 @@ Cycle 15: cycle 15: deleted unused `sheafCohomologyFunctor_obj` and `sheafH_subs
 Cycle 16: cycle 16: deleted unused `ulift_int_projective` instance from CohomologyAPI.lean, -9 normalized LOC (-13 raw). lake env lean + lake build pass.
 Cycle 17: cycle 17: deleted 5 unused TopCat.Sheaf.* wrappers (SectionIndex, finsetGeneratorMap, finsetGeneratedSheaf, allSectionMap, allSectionMap_epi) from GeneratedSubsheaf.lean; -31 normalized / -47 raw LOC.
 Cycle 18: cycle 18: deleted 6 unused TopCat.Sheaf.family* wrappers from GeneratedSubsheaf.lean; -34 normalized LOC (-50 raw).
+Cycle 19: cycle 19: deleted unused `epiImage_zeroOutsideInt_vanishing` wrapper from IrreducibleStep.lean, -20 normalized LOC (5151→5131); lake build green.
