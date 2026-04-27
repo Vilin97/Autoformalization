@@ -10,18 +10,12 @@ universe u
 
 open CategoryTheory TopologicalSpace Limits Opposite GrothendieckTopology GrothendieckTopology.Plus
 
-/-- The presheaf on `X` with constant value `A`. This is the presheaf input whose
-sheafification is the constant sheaf used in the irreducible flasqueness argument. -/
-abbrev constPresheaf (X : Type u) [TopologicalSpace X]
-    (A : AddCommGrpCat.{u}) : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} :=
-  (Functor.const (Opens X)ᵒᵖ).obj A
-
 theorem toPlus_injective_of_const
     {X : Type u} [TopologicalSpace X] {A : AddCommGrpCat.{u}}
     (U : Opens X) (hU : (U : Set X).Nonempty)
-    (a b : (constPresheaf X A).obj (op U))
-    (h : ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U)) a =
-      ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U)) b) :
+    (a b : ((Functor.const (Opens X)ᵒᵖ).obj A).obj (op U))
+    (h : ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus ((Functor.const (Opens X)ᵒᵖ).obj A)).app (op U)) a =
+      ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus ((Functor.const (Opens X)ᵒᵖ).obj A)).app (op U)) b) :
     a = b := by
   rw [toPlus_eq_mk, toPlus_eq_mk] at h
   rw [eq_mk_iff_exists] at h
@@ -35,7 +29,7 @@ theorem toPlus_surjective_of_const
     {X : Type u} [TopologicalSpace X] {A : AddCommGrpCat.{u}}
     (U : Opens X) (hU : (U : Set X).Nonempty) :
     Function.Surjective
-      (ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U))) := by
+      (ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus ((Functor.const (Opens X)ᵒᵖ).obj A)).app (op U))) := by
   intro y; obtain ⟨S, x, hx⟩ := exists_rep y
   obtain ⟨x₀, hx₀⟩ := hU
   obtain ⟨V₀, f₀, hf₀, hx₀mem⟩ := S.2 x₀ hx₀
@@ -43,39 +37,41 @@ theorem toPlus_surjective_of_const
   have hI₀ : (I₀.Y : Set X).Nonempty := ⟨x₀, hx₀mem⟩
   refine ⟨x I₀, ?_⟩
   rw [hx, show x = Meq.mk S (x I₀) from Meq.ext _ _ fun I => by
-      simpa [constPresheaf] using x.condition (Cover.Relation.mk' (fst := I) (snd := I₀)
+      simpa using x.condition (Cover.Relation.mk' (fst := I) (snd := I₀)
         ⟨I.Y ⊓ I₀.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩),
       toPlus_eq_mk, eq_mk_iff_exists]
   refine ⟨S, homOfLE le_top, 𝟙 S, ?_⟩
   apply Meq.ext; intro I
-  simp [Meq.refine, Meq.mk, constPresheaf]
+  simp [Meq.refine, Meq.mk]
 
 theorem toPlus_naturality_const
     {X : Type u} [TopologicalSpace X] {A : AddCommGrpCat.{u}}
-    {U V : Opens X} (i : U ⟶ V) (a : (constPresheaf X A).obj (op V)) :
-    ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U)) a =
-      ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj (constPresheaf X A)).map i.op)
-        (ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op V)) a) := by
-  have nat := ((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).naturality i.op
-  calc ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U)) a
-      = ConcreteCategory.hom ((constPresheaf X A).map i.op ≫
-          ((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U)) a := by simp
-    _ = ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op V) ≫
-          ((Opens.grothendieckTopology X).plusObj (constPresheaf X A)).map i.op) a := by rw [nat]
+    {U V : Opens X} (i : U ⟶ V) (a : ((Functor.const (Opens X)ᵒᵖ).obj A).obj (op V)) :
+    ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus ((Functor.const (Opens X)ᵒᵖ).obj A)).app (op U)) a =
+      ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj ((Functor.const (Opens X)ᵒᵖ).obj A)).map i.op)
+        (ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus ((Functor.const (Opens X)ᵒᵖ).obj A)).app (op V)) a) := by
+  let P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} := (Functor.const (Opens X)ᵒᵖ).obj A
+  have nat := ((Opens.grothendieckTopology X).toPlus P).naturality i.op
+  calc ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus P).app (op U)) a
+      = ConcreteCategory.hom (P.map i.op ≫
+          ((Opens.grothendieckTopology X).toPlus P).app (op U)) a := by simp [P]
+    _ = ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus P).app (op V) ≫
+          ((Opens.grothendieckTopology X).plusObj P).map i.op) a := by rw [nat]
     _ = _ := ConcreteCategory.comp_apply _ _ _
 
 theorem toPlus_surjective_of_firstPlus
     {X : Type u} [TopologicalSpace X] [IrreducibleSpace X] {A : AddCommGrpCat.{u}}
     (U : Opens X) (hU : (U : Set X).Nonempty) :
     Function.Surjective (ConcreteCategory.hom
-      (((Opens.grothendieckTopology X).toPlus ((Opens.grothendieckTopology X).plusObj (constPresheaf X A))).app (op U))) := by
+      (((Opens.grothendieckTopology X).toPlus ((Opens.grothendieckTopology X).plusObj ((Functor.const (Opens X)ᵒᵖ).obj A))).app (op U))) := by
+  let P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} := (Functor.const (Opens X)ᵒᵖ).obj A
   intro y; obtain ⟨S, x, hx⟩ := exists_rep y
   obtain ⟨x₀, hx₀⟩ := hU
   obtain ⟨V₀, f₀, hf₀, hx₀mem⟩ := S.2 x₀ hx₀
   let I₀ : S.Arrow := ⟨V₀, f₀, hf₀⟩
   have hI₀ : (I₀.Y : Set X).Nonempty := ⟨x₀, hx₀mem⟩
   obtain ⟨a, ha⟩ := toPlus_surjective_of_const I₀.Y hI₀ (x I₀)
-  use ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U)) a
+  use ConcreteCategory.hom (((Opens.grothendieckTopology X).toPlus P).app (op U)) a
   rw [hx, toPlus_eq_mk, eq_mk_iff_exists]
   refine ⟨S, homOfLE le_top, 𝟙 S, ?_⟩
   apply Meq.ext; intro I
@@ -83,18 +79,18 @@ theorem toPlus_surjective_of_firstPlus
   by_cases hI : (I.Y : Set X).Nonempty
   · have hkey :
         x I = ConcreteCategory.hom
-          (((Opens.grothendieckTopology X).plusObj (constPresheaf X A)).map I.f.op)
+          (((Opens.grothendieckTopology X).plusObj P).map I.f.op)
             (ConcreteCategory.hom
-              (((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U)) a) := by
+              (((Opens.grothendieckTopology X).toPlus P).app (op U)) a) := by
         obtain ⟨b, hb⟩ := toPlus_surjective_of_const I.Y hI (x I)
         have hZne : ((I₀.Y ⊓ I.Y : Opens X) : Set X).Nonempty :=
           nonempty_preirreducible_inter I₀.Y.isOpen I.Y.isOpen hI₀ hI
         let R : S.Relation := Cover.Relation.mk' (fst := I₀) (snd := I)
           ⟨I₀.Y ⊓ I.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩
         have hcond := x.condition R
-        change ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj (constPresheaf X A)).map
+        change ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj P).map
             (homOfLE inf_le_left).op) (x I₀) =
-          ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj (constPresheaf X A)).map
+          ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj P).map
             (homOfLE inf_le_right).op) (x I) at hcond
         rw [← ha, ← hb] at hcond
         rw [← toPlus_naturality_const (homOfLE (inf_le_left (a := I₀.Y) (b := I.Y))) a,
@@ -113,9 +109,10 @@ theorem toPlus_surjective_of_firstPlus
 /-- On an irreducible space, the sheafification of the constant presheaf is flasque. -/
 theorem sheafify_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X] (A : AddCommGrpCat.{u}) :
-    IsFlasqueSheaf (⟨(Opens.grothendieckTopology X).sheafify (constPresheaf X A),
-      (Opens.grothendieckTopology X).sheafify_isSheaf (constPresheaf X A)⟩ :
+    IsFlasqueSheaf (⟨(Opens.grothendieckTopology X).sheafify ((Functor.const (Opens X)ᵒᵖ).obj A),
+      (Opens.grothendieckTopology X).sheafify_isSheaf ((Functor.const (Opens X)ᵒᵖ).obj A)⟩ :
       TopCat.Sheaf AddCommGrpCat.{u} X) := by
+  let P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} := (Functor.const (Opens X)ᵒᵖ).obj A
   constructor
   intro U V i
   by_cases hU : (U : Set X) = ∅
@@ -123,23 +120,23 @@ theorem sheafify_constPresheaf_flasque_of_irreducible
     subst this
     rw [AddCommGrpCat.epi_iff_surjective]
     intro y
-    haveI : Subsingleton (ToType (((Opens.grothendieckTopology X).sheafify (constPresheaf X A)).obj (op ⊥))) :=
+    haveI : Subsingleton (ToType (((Opens.grothendieckTopology X).sheafify P).obj (op ⊥))) :=
       AddCommGrpCat.subsingleton_of_isZero
         (TopCat.Sheaf.isTerminalOfEmpty
-          ⟨_, (Opens.grothendieckTopology X).sheafify_isSheaf (constPresheaf X A)⟩).isZero
+          ⟨_, (Opens.grothendieckTopology X).sheafify_isSheaf P⟩).isZero
     exact ⟨0, Subsingleton.elim _ _⟩
   · have hUne : (U : Set X).Nonempty := Set.nonempty_iff_ne_empty.mpr hU
-    have hnat := ((Opens.grothendieckTopology X).toSheafify (constPresheaf X A)).naturality i.op
-    rw [show (constPresheaf X A).map i.op = 𝟙 _ from by ext; simp [constPresheaf],
+    have hnat := ((Opens.grothendieckTopology X).toSheafify P).naturality i.op
+    rw [show P.map i.op = 𝟙 _ from by ext; simp [P],
         Category.id_comp] at hnat
-    have hfac : ((Opens.grothendieckTopology X).toSheafify (constPresheaf X A)).app (op V) ≫
-        ((Opens.grothendieckTopology X).sheafify (constPresheaf X A)).map i.op =
-        ((Opens.grothendieckTopology X).toSheafify (constPresheaf X A)).app (op U) := hnat.symm
-    haveI : Epi (((Opens.grothendieckTopology X).toSheafify (constPresheaf X A)).app (op U)) := by
+    have hfac : ((Opens.grothendieckTopology X).toSheafify P).app (op V) ≫
+        ((Opens.grothendieckTopology X).sheafify P).map i.op =
+        ((Opens.grothendieckTopology X).toSheafify P).app (op U) := hnat.symm
+    haveI : Epi (((Opens.grothendieckTopology X).toSheafify P).app (op U)) := by
       apply ConcreteCategory.epi_of_surjective
-      rw [show ((Opens.grothendieckTopology X).toSheafify (constPresheaf X A)).app (op U) =
-          ((Opens.grothendieckTopology X).toPlus (constPresheaf X A)).app (op U) ≫
-          ((Opens.grothendieckTopology X).toPlus ((Opens.grothendieckTopology X).plusObj (constPresheaf X A))).app (op U) from by
+      rw [show ((Opens.grothendieckTopology X).toSheafify P).app (op U) =
+          ((Opens.grothendieckTopology X).toPlus P).app (op U) ≫
+          ((Opens.grothendieckTopology X).toPlus ((Opens.grothendieckTopology X).plusObj P)).app (op U) from by
         simp only [GrothendieckTopology.toSheafify, (Opens.grothendieckTopology X).plusMap_toPlus, NatTrans.comp_app]]
       intro y; obtain ⟨z, hz⟩ := toPlus_surjective_of_firstPlus (X := X) U hUne y
       obtain ⟨a, ha⟩ := toPlus_surjective_of_const (X := X) U hUne z
@@ -151,34 +148,36 @@ theorem presheafToSheaf_constPresheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X] (A : AddCommGrpCat.{u}) :
     IsFlasqueSheaf
       (((presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-        (constPresheaf X A))) := by
+        ((Functor.const (Opens X)ᵒᵖ).obj A))) := by
+  let P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} := (Functor.const (Opens X)ᵒᵖ).obj A
   constructor
   intro U V i
-  let e := plusPlusIsoSheafify (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) (P := constPresheaf X A)
+  let e := plusPlusIsoSheafify (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) (P := P)
   haveI := sheafify_constPresheaf_flasque_of_irreducible (X := X) A
-  haveI : Epi (((Opens.grothendieckTopology X).sheafify (constPresheaf X A)).map i.op) := by
+  haveI : Epi (((Opens.grothendieckTopology X).sheafify P).map i.op) := by
     simpa using
       (IsFlasqueSheaf.epi_map
-        (F := (⟨(Opens.grothendieckTopology X).sheafify (constPresheaf X A),
-          (Opens.grothendieckTopology X).sheafify_isSheaf (constPresheaf X A)⟩ :
+        (F := (⟨(Opens.grothendieckTopology X).sheafify P,
+          (Opens.grothendieckTopology X).sheafify_isSheaf P⟩ :
           TopCat.Sheaf AddCommGrpCat.{u} X)) i)
   haveI : Epi (e.hom.app (op V) ≫
-      (CategoryTheory.sheafify (Opens.grothendieckTopology X) (constPresheaf X A)).map i.op) := by
+      (CategoryTheory.sheafify (Opens.grothendieckTopology X) P).map i.op) := by
     rw [← e.hom.naturality i.op]; infer_instance
   exact epi_of_epi (e.hom.app (op V))
-    ((CategoryTheory.sheafify (Opens.grothendieckTopology X) (constPresheaf X A)).map i.op)
+    ((CategoryTheory.sheafify (Opens.grothendieckTopology X) P).map i.op)
 
 theorem constantSheaf_flasque_of_irreducible
     (X : TopCat.{u}) [IrreducibleSpace X]
     (A : AddCommGrpCat.{u}) :
     IsFlasqueSheaf (((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj A)) := by
+  let P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} := (Functor.const (Opens X)ᵒᵖ).obj A
   constructor
   intro U V i
   haveI := presheafToSheaf_constPresheaf_flasque_of_irreducible (X := X) A
-  simpa [CategoryTheory.constantSheaf, constPresheaf] using
+  simpa [CategoryTheory.constantSheaf, P] using
     (IsFlasqueSheaf.epi_map
       (F := ((presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-        (constPresheaf X A))) i)
+        P)) i)
 
 /-- `zeroOutsideInt ⊤` is flasque on an irreducible space: it is the sheafification of
     `constZ.zeroOutside ⊤ ≅ constZ` (via `zeroOutside_top_iso`), and the constant sheaf
