@@ -36,7 +36,7 @@ Mechanical signal: `find_repeated_blocks.py` reports 40 occurrences of the
 boilerplate, with ~273 lines of potential savings. Phase 1 is the single
 highest-leverage area in the entire compress loop.
 
-- [>] In `CohomologyAPI.lean`, rewrite each theorem that takes one or more
+- [x] In `CohomologyAPI.lean`, rewrite each theorem that takes one or more
       `(F : Presheaf X) (h : F.IsSheaf)` triples and ends up packaging them
       into `(⟨F, h⟩ : Sheaf …)` inside its body. Replace each triple with a
       single `Sheaf` argument, delete the corresponding `_presheaf` wrapper
