@@ -1,12 +1,27 @@
-Deleted `ulift_int_projective` and its attached heading/docstring from [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:87). Wrote the cycle report at [cycle_16.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_16.md:1).
+Completed cycle 17.
+
+Deleted the unused sheaf-level wrappers from [GeneratedSubsheaf.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean):
+
+- `TopCat.Sheaf.SectionIndex`
+- `TopCat.Sheaf.finsetGeneratorMap`
+- `TopCat.Sheaf.finsetGeneratedSheaf`
+- `TopCat.Sheaf.allSectionMap`
+- `TopCat.Sheaf.allSectionMap_epi`
+
+No external references were found, and the presheaf API plus `familyMap`/`familyImage` were left untouched. The required report was written to [cycle_17.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_17.md).
 
 Verification passed:
-- `rg -n "\bulift_int_projective\b" Aristotle/GrothendieckVanishing/main` found no matches
-- `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`
-- `lake build` passed, with only existing unrelated linter warnings
+
+```bash
+lake env lean Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean
+lake env lean Aristotle/GrothendieckVanishing/main/ZeroOutsideFinset.lean
+lake env lean Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean
+lake build
+```
 
 Metrics:
-- Normalized LOC: `5225` -> `5216` (`-9`)
-- Raw `main/*.lean` wc: `6187` -> `6174` (`-13`)
 
-I did not touch `.compress-state/compress_tasks.md`; the existing controller-state dirty files were left as they were.
+- Normalized LOC: `5216 -> 5185` (`-31`)
+- Raw `main/*.lean` LOC: `6174 -> 6127` (`-47`)
+
+I did not commit or push.

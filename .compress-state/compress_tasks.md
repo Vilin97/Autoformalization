@@ -107,11 +107,11 @@ become unreachable, cascading the deletion).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafShortComplexOfPresheaf_f_val\b' Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean
 - [ ] Delete unused declaration `sheafShortComplexOfPresheaf_g_val` from `FlasqueVanishing.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) sheafShortComplexOfPresheaf_g_val\b' Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean
-- [ ] Delete unused declaration `TopCat.Sheaf.SectionIndex` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopCat.Sheaf.SectionIndex` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Sheaf\.SectionIndex\b' Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean
-- [ ] Delete unused declaration `TopCat.Sheaf.allSectionMap` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopCat.Sheaf.allSectionMap` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Sheaf\.allSectionMap\b' Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean
-- [ ] Delete unused declaration `TopCat.Sheaf.allSectionMap_epi` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopCat.Sheaf.allSectionMap_epi` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Sheaf\.allSectionMap_epi\b' Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean
 - [ ] Delete unused declaration `TopCat.Sheaf.familyGeneratedSheaf` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Sheaf\.familyGeneratedSheaf\b' Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean
@@ -125,9 +125,9 @@ become unreachable, cascading the deletion).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Sheaf\.familyImage_ι_eq\b' Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean
 - [ ] Delete unused declaration `TopCat.Sheaf.familyImageι` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Sheaf\.familyImageι\b' Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean
-- [ ] Delete unused declaration `TopCat.Sheaf.finsetGeneratedSheaf` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopCat.Sheaf.finsetGeneratedSheaf` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Sheaf\.finsetGeneratedSheaf\b' Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean
-- [ ] Delete unused declaration `TopCat.Sheaf.finsetGeneratorMap` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).
+- [x] Delete unused declaration `TopCat.Sheaf.finsetGeneratorMap` from `GeneratedSubsheaf.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) TopCat\.Sheaf\.finsetGeneratorMap\b' Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean
 - [ ] Delete unused declaration `epiImage_zeroOutsideInt_vanishing` from `IrreducibleStep.lean` (and any helpers it depended on that become unreachable).
       COMPLETE_IF: ! grep -qE '^(theorem|lemma|noncomputable def|def|abbrev|instance) epiImage_zeroOutsideInt_vanishing\b' Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean
