@@ -1,11 +1,13 @@
 {
   "progress_score": 2,
-  "summary": "Deleted two unused Flasque _presheaf H1-boundary wrappers cleanly with no remaining references, -91 normalized / -100 raw LOC.",
+  "summary": "Sheaf-reverted `isFlasque_filtered_colimit` and `sheafH_preserves_filtered_colimits` (deleting `_presheaf` wrappers + unused `_hom_epi`), updated all callers, -26 normalized / -31 raw LOC.",
   "principle_violations": [],
   "task_addressed": true,
-  "task_complete": false,
-  "stuck_on": "Raw main/*.lean total is 7020, still above the 6500 COMPLETE_IF target; remaining Phase-1 reversion work is in PresheafFilteredColimit{,Core,General}.lean, IrreducibleStep.lean, ClosedImmersion.lean, ClosedImmersionCohomology.lean.",
-  "strategy_recommendation": "Next cycle should target PresheafFilteredColimitCore.lean's multi-arg (Presheaf, IsSheaf) packaging (largest remaining raw LOC after CohomologyAPI compression) \u2014 sheaf-revert its presheaf-boundary wrappers to ShortComplex (Sheaf \u2026) and update callers in PresheafFilteredColimit.lean and IrreducibleStep.lean. Alternatively, attack ClosedImmersionCohomology.lean's _presheaf cluster.",
-  "attempts_entry": "cycle 4: deleted 2 unused Flasque _presheaf H1-boundary wrappers (sheafH_subsingleton_H1_of_flasque_of_epi_app_top{,_map}_presheaf), -91 normalized / -100 raw LOC; raw main now 7020.",
-  "completed_task_lines": []
+  "task_complete": true,
+  "stuck_on": "Broader Phase-1 raw &lt;6500 target unmet (currently 6989); requires sheaf-reversion in ClosedImmersion*/IrreducibleStep and other multi-arg IsSheaf packagings.",
+  "strategy_recommendation": "Next cycle: continue Phase-1 sheaf-reversion in ClosedImmersionCohomology.lean \u2014 its `_presheaf` cluster is the largest remaining multi-arg `(F : Presheaf) (hF : IsSheaf)` site; bundle to `Sheaf` arguments and update callers in IrreducibleStep.lean. Also consider deleting `sheafH_filtered_colimit_presheafCocone_sheafToPresheaf` (next checklist item) if unreferenced.",
+  "attempts_entry": "cycle 5: score=2 loc_delta=-26 \u2014 bundled isFlasque_filtered_colimit + sheafH_preserves_filtered_colimits to Sheaf args, deleted unused _hom_epi; -26 norm / -31 raw.",
+  "completed_task_lines": [
+    "- [>] Delete unused declaration `sheafH_preserves_filtered_colimits_presheaf_hom_epi` from `PresheafFilteredColimit.lean` (and any helpers it depended on that become unreachable)."
+  ]
 }
