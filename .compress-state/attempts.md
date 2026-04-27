@@ -16,3 +16,4 @@ Cycle 14: cycle 14: deleted unused `sheafCohomologyFunctor_additive`, `sheafH0Na
 Cycle 15: cycle 15: deleted unused `sheafCohomologyFunctor_obj` and `sheafH_subsingleton_of_isEmpty` from CohomologyAPI.lean (kept the _presheaf variant), updated two simp callers to unfold `sheafCohomologyFunctor` directly; -9 normalized LOC, -15 raw.
 Cycle 16: cycle 16: deleted unused `ulift_int_projective` instance from CohomologyAPI.lean, -9 normalized LOC (-13 raw). lake env lean + lake build pass.
 Cycle 17: cycle 17: deleted 5 unused TopCat.Sheaf.* wrappers (SectionIndex, finsetGeneratorMap, finsetGeneratedSheaf, allSectionMap, allSectionMap_epi) from GeneratedSubsheaf.lean; -31 normalized / -47 raw LOC.
+Cycle 18: cycle 18: deleted 6 unused TopCat.Sheaf.family* wrappers from GeneratedSubsheaf.lean; -34 normalized LOC (-50 raw).

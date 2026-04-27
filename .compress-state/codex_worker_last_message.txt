@@ -1,27 +1,16 @@
-Completed cycle 17.
+Completed cycle 18.
 
-Deleted the unused sheaf-level wrappers from [GeneratedSubsheaf.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean):
-
-- `TopCat.Sheaf.SectionIndex`
-- `TopCat.Sheaf.finsetGeneratorMap`
-- `TopCat.Sheaf.finsetGeneratedSheaf`
-- `TopCat.Sheaf.allSectionMap`
-- `TopCat.Sheaf.allSectionMap_epi`
-
-No external references were found, and the presheaf API plus `familyMap`/`familyImage` were left untouched. The required report was written to [cycle_17.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_17.md).
+Deleted the six unused wrappers from [GeneratedSubsheaf.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean), leaving `familyMap` and `familyImage` intact. Wrote the report at [cycle_18.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_18.md).
 
 Verification passed:
+- post-delete `rg` found no target names in `main`
+- `lake env lean GeneratedSubsheaf.lean`
+- `lake env lean FinitelyGeneratedVanishing.lean`
+- `lake env lean ZeroOutsideFinset.lean`
+- `lake build` completed successfully
 
-```bash
-lake env lean Aristotle/GrothendieckVanishing/main/GeneratedSubsheaf.lean
-lake env lean Aristotle/GrothendieckVanishing/main/ZeroOutsideFinset.lean
-lake env lean Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean
-lake build
-```
+LOC:
+- normalized: `5185 -> 5151` (`-34`)
+- raw `main/*.lean`: `6127 -> 6077` (`-50`)
 
-Metrics:
-
-- Normalized LOC: `5216 -> 5185` (`-31`)
-- Raw `main/*.lean` LOC: `6174 -> 6127` (`-47`)
-
-I did not commit or push.
+No commit or push performed.
