@@ -11,8 +11,6 @@ API for topological Krull dimension on irreducible spaces.
   irreducible space with dim ≤ 0, every irreducible closed set is the whole space
 - `opens_eq_bot_or_top_of_irreducibleSpace_dim_zero`: on an irreducible dim-0 space,
   the only opens are ⊥ and ⊤
-- `topologicalKrullDim_eq_bot_iff_isEmpty`: topological Krull dimension is bottom exactly
-  for empty spaces
 - `topologicalKrullDim_nonneg`: non-empty spaces have dim ≥ 0
 - `topologicalKrullDim_subspace_lt_of_lt`: strict ambient upper bounds descend to subspaces
 - `topologicalKrullDim_lt_top_of_lt_nat`: natural-number upper bounds imply finiteness
@@ -69,18 +67,6 @@ theorem opens_eq_bot_or_top_of_irreducibleSpace_dim_zero
 
 /-! ## Dimension helpers -/
 
-/-- The topological Krull dimension is bottom exactly for empty spaces. -/
-@[simp] theorem topologicalKrullDim_eq_bot_iff_isEmpty {X : Type u} [TopologicalSpace X] :
-    topologicalKrullDim X = ⊥ ↔ IsEmpty X := by
-  rw [topologicalKrullDim, Order.krullDim_eq_bot_iff]
-  constructor
-  · intro h
-    exact ⟨fun x => h.false ⟨closure {x}, isIrreducible_singleton.closure, isClosed_closure⟩⟩
-  · intro h
-    exact ⟨fun S => by
-      obtain ⟨x, _⟩ := S.isIrreducible.nonempty
-      exact h.false x⟩
-
 /-- On a non-empty topological space, the topological Krull dimension is ≥ 0. -/
 theorem topologicalKrullDim_nonneg {X : Type u} [TopologicalSpace X]
     [Nonempty X] : topologicalKrullDim X ≥ 0 := by
@@ -119,14 +105,6 @@ variable {X : Type u} [TopologicalSpace X]
 /-- The height of an irreducible closed subset in the inclusion order. -/
 noncomputable def height (S : IrreducibleCloseds X) : ℕ∞ :=
   Order.height S
-
-@[simp] theorem height_eq_order_height (S : IrreducibleCloseds X) :
-    S.height = Order.height S :=
-  rfl
-
-@[gcongr] theorem height_mono : Monotone (height (X := X)) := by
-  intro S T hST
-  simpa [height] using (Order.height_mono hST)
 
 theorem height_add_one_le {S T : IrreducibleCloseds X} (hST : S < T) :
     S.height + 1 ≤ T.height := by
