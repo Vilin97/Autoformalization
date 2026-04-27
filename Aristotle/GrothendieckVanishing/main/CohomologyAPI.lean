@@ -21,8 +21,6 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
 * `cokernel_stalk_zero_of_stalk_surj`: actual-cokernel specialization of the same stalk
   vanishing under stalk-surjectivity
 * `sheafH_succ_map`: successor connecting morphism
-* `sheafH_succ_map_natural_of_map_eq`: naturality of the successor connecting
-  morphism
 * `sheafH_succ_map_exists_preimage_of_subsingleton_middle`: successor-map
   preimage wrapper
 * `sheafH0EquivSections_presheaf`: presheaf-boundary wrapper for `H^0(F) ≃+ F(⊤)`
@@ -772,23 +770,6 @@ noncomputable def sheafH0NatIsoSections {X : TopCat.{u}} :
     simpa [sheafCohomologyFunctor_map_apply] using
       (sheafH0EquivSections_presheaf_natural
         (F := F.val) (G := G.val) F.cond G.cond (f := f.val) (x := x))
-
-/-- Naturality of the successor connecting morphism packaged at the `Sheaf.H` level:
-if `y` maps to `z` on the quotient side of a morphism of short exact sequences, then their
-successor connecting images map to one another. -/
-theorem sheafH_succ_map_natural_of_map_eq {X : TopCat.{u}}
-    {S₁ S₂ : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
-    (hS₁ : S₁.ShortExact) (hS₂ : S₂.ShortExact) (φ : S₁ ⟶ S₂)
-    (n : ℕ)
-    {y : Sheaf.H S₁.X₃ n} {z : Sheaf.H S₂.X₃ n}
-    (hy : ConcreteCategory.hom ((sheafCohomologyFunctor X n).map φ.τ₃) y = z) :
-    ConcreteCategory.hom ((sheafCohomologyFunctor X (n + 1)).map φ.τ₁)
-      (ConcreteCategory.hom (sheafH_succ_map hS₁ n) y) =
-    ConcreteCategory.hom (sheafH_succ_map hS₂ n) z := by
-  have hy' : y.comp (Ext.mk₀ φ.τ₃) (add_zero n) = z := by
-    simpa [sheafCohomologyFunctor_map_apply] using hy
-  rw [sheafH_succ_map_apply, sheafH_succ_map_apply, sheafCohomologyFunctor_map_apply,
-    sheafH_comp_extClass_naturality hS₁ hS₂ φ n y, hy']
 
 /-- Higher-degree connecting additive equivalence for a short exact sequence of sheaves:
 if the middle cohomology groups in degrees `n` and `n + 1` are subsingleton, then the

@@ -1,11 +1,11 @@
 {
   "progress_score": 2,
-  "summary": "Deleted unused public theorem `sheafH_filtered_colimit_surj` from PresheafFilteredColimitCore.lean and stale doc mentions, -88 normalized LOC.",
+  "summary": "Deleted unused public theorem `sheafH_succ_map_natural_of_map_eq` from CohomologyAPI.lean, -13 normalized LOC.",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Continue Phase-2 audit-driven unused-decl deletion. Next targets per the audit: `sheafH_succ_map_natural_of_map_eq` and the two `sheafH_filtered_colimit_succ_*_comp_cokernel_pi` lemmas in PresheafFilteredColimitCore.lean. Re-run `scripts/compress_audit.py` and `scripts/unused_decls.lean` to confirm the next-largest live unused public declarations before committing.",
-  "attempts_entry": "cycle 20: deleted unused `sheafH_filtered_colimit_surj` from PresheafFilteredColimitCore.lean (+ stale doc mentions), -88 normalized LOC.",
+  "strategy_recommendation": "Continue Phase-2 audit-driven unused-decl deletion. Next live targets per audit: `sheafH_filtered_colimit_succ_eta_val_comp_cokernel_pi` and `sheafH_filtered_colimit_succ_iota_val_comp_cokernel_pi` in PresheafFilteredColimitCore.lean. Re-run `scripts/compress_audit.py` first to confirm current largest live unused public decl.",
+  "attempts_entry": "cycle 21: deleted unused `sheafH_succ_map_natural_of_map_eq` from CohomologyAPI.lean; -13 normalized LOC (5027\u21925014); raw -19 (5939\u21925920); lake env lean + lake build pass.",
   "completed_task_lines": []
 }

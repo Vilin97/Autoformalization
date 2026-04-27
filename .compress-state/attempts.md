@@ -19,3 +19,4 @@ Cycle 17: cycle 17: deleted 5 unused TopCat.Sheaf.* wrappers (SectionIndex, fins
 Cycle 18: cycle 18: deleted 6 unused TopCat.Sheaf.family* wrappers from GeneratedSubsheaf.lean; -34 normalized LOC (-50 raw).
 Cycle 19: cycle 19: deleted unused `epiImage_zeroOutsideInt_vanishing` wrapper from IrreducibleStep.lean, -20 normalized LOC (5151→5131); lake build green.
 Cycle 20: cycle 20: deleted unused `sheafH_filtered_colimit_surj` from PresheafFilteredColimitCore.lean (+ stale doc mentions), -88 normalized LOC.
+Cycle 21: cycle 21: deleted unused `sheafH_succ_map_natural_of_map_eq` from CohomologyAPI.lean; -13 normalized LOC (5027→5014); raw -19 (5939→5920); lake env lean + lake build pass.
