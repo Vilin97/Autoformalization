@@ -37,6 +37,7 @@ import normalized_loc  # local module: scripts/normalized_loc.py
 REPO_DIR = Path(__file__).resolve().parent.parent
 STATE_DIR = REPO_DIR / ".compress-state"
 PROMPTS_DIR = REPO_DIR / "scripts" / "prompts"
+SCRIPTS_DIR = REPO_DIR / "scripts"
 SETUP_HOME_SCRIPT = REPO_DIR / "scripts" / "setup_codex_compress_home.sh"
 
 LOCK_FILE = STATE_DIR / "codex_run.lock"
@@ -373,9 +374,27 @@ def run_codex(
     return result.returncode, last
 
 
+def run_audit(cycle: int) -> None:
+    """Refresh `.compress-state/audit.md` with fresh data the planner reads.
+    Non-fatal: the planner still runs even if the audit fails."""
+    write_status(mode="audit", cycle=cycle)
+    try:
+        subprocess.run(
+            ["python3.9", str(SCRIPTS_DIR / "compress_audit.py"), str(cycle)],
+            cwd=REPO_DIR,
+            timeout=900,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        print("Audit timed out; planner will use stale audit.md", file=sys.stderr)
+
+
 def run_planner(cycle: int, history: list[dict]) -> str:
     template = Template((PROMPTS_DIR / "compress_planner.md").read_text())
-    prompt = template.safe_substitute(cycle=cycle, history=format_history(history))
+    audit = read_file_safe(STATE_DIR / "audit.md") or "(audit unavailable)"
+    prompt = template.safe_substitute(
+        cycle=cycle, history=format_history(history), audit=audit[:18000]
+    )
     write_status(mode="planner", cycle=cycle)
     exit_code, _ = run_codex(prompt, timeout=PLANNER_TIMEOUT, model=DEFAULT_MODEL)
     if exit_code != 0:
@@ -954,6 +973,9 @@ def run_cycle(dry_run: bool = False, worker_only: bool = False) -> dict:
     sorry_before = count_sorrys()
     loc_before = normalized_loc.total_normalized_count()
     print(f"  cycle-start: raw {raw_loc} LOC, normalized {loc_before}")
+
+    if not worker_only:
+        run_audit(cycle)
 
     strategy = read_file_safe(STRATEGY_FILE) if worker_only else run_planner(cycle, history)
 
