@@ -1,1 +1,1 @@
-Continue Phase-2 unused-decl deletion in ClosedImmersion.lean: next item is `epi_pushforward_map_closedIncl` (already on the checklist). After that, run `scripts/unused_decls.lean` to refresh the unused list and target the next isolated public decls.
+Continue Phase-2 unused-decl deletion: the next checklist item is `epi_app_top_of_subsingleton_sheafH1_presheaf` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`. Verify it has no remaining references via `rg`, then delete the declaration along with any helpers that become unreachable solely from this deletion.

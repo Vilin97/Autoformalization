@@ -1,18 +1,12 @@
-Done.
+Deleted the unused wrapper `epi_pushforward_map_closedIncl` from [ClosedImmersion.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean:303). Kept `epi_pushforward_map_closedIncl_of_locallySurjective`, which is still used by `closedIncl_pushforward_preservesEpis`.
 
-Deleted the two scoped unused declarations from [ClosedImmersion.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean):
-- `TopCat.coe_closedIncl`
-- `TopCat.closedIncl_image_map_eq_inter`
-
-Wrote the required report: [.compress-state/codex_task_results/cycle_11.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_11.md)
+Wrote the cycle report at [cycle_12.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_12.md:1).
 
 Verification passed:
-- `rg -n "coe_closedIncl|closedIncl_image_map_eq_inter" Aristotle/GrothendieckVanishing/main` returned no matches
-- `lake env lean Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean`
-- `lake build`
+- `rg -n "epi_pushforward_map_closedIncl\b" Aristotle/GrothendieckVanishing/main` found no remaining references.
+- `lake env lean Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean` succeeded.
+- `lake build` succeeded, with unrelated existing linter warnings in untouched files.
 
 Metrics:
-- Normalized LOC: `5295 -> 5286` (`-9`)
-- Raw `main/*.lean` wc: `6275 -> 6264` (`-11`)
-
-`lake build` emitted existing warnings in unrelated files, but completed successfully.
+- Normalized LOC: `5286 -> 5260` (`-26`)
+- Raw `main/*.lean` wc: `6264 -> 6235` (`-29`)

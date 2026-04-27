@@ -1,14 +1,13 @@
 {
   "progress_score": 2,
-  "summary": "Deleted unused `TopCat.coe_closedIncl` and `TopCat.closedIncl_image_map_eq_inter` from `ClosedImmersion.lean`, -9 normalized LOC (-11 raw).",
+  "summary": "Deleted unused public wrapper `epi_pushforward_map_closedIncl` from ClosedImmersion.lean, -26 normalized LOC.",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Continue Phase-2 unused-decl deletion in ClosedImmersion.lean: next item is `epi_pushforward_map_closedIncl` (already on the checklist). After that, run `scripts/unused_decls.lean` to refresh the unused list and target the next isolated public decls.",
-  "attempts_entry": "cycle 11: deleted TopCat.coe_closedIncl and TopCat.closedIncl_image_map_eq_inter from ClosedImmersion.lean; -9 normalized / -11 raw LOC; lake build passed.",
+  "strategy_recommendation": "Continue Phase-2 unused-decl deletion: the next checklist item is `epi_app_top_of_subsingleton_sheafH1_presheaf` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`. Verify it has no remaining references via `rg`, then delete the declaration along with any helpers that become unreachable solely from this deletion.",
+  "attempts_entry": "cycle 12: deleted unused `epi_pushforward_map_closedIncl` wrapper from ClosedImmersion.lean, -26 norm / -29 raw LOC.",
   "completed_task_lines": [
-    "- [>] Delete unused declaration `TopCat.closedIncl_image_map_eq_inter` from `ClosedImmersion.lean` (and any helpers it depended on that become unreachable).",
-    "- [>] Delete unused declaration `TopCat.coe_closedIncl` from `ClosedImmersion.lean` (and any helpers it depended on that become unreachable)."
+    "- [>] Delete unused declaration `epi_pushforward_map_closedIncl` from `ClosedImmersion.lean` (and any helpers it depended on that become unreachable)."
   ]
 }
