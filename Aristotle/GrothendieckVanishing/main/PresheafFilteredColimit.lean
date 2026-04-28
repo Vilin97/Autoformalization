@@ -64,33 +64,22 @@ private noncomputable def sheafH_filtered_colimit_h1_cokernelFunctor :
     map_id := fun j => by
       apply (cancel_epi (cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j))).mp
       rw [cokernel.π_desc]
-      have hq' :
-          (sheafH_filtered_colimit_succ_quotient Y').map (𝟙 j) =
-            𝟙 ((sheafH_filtered_colimit_succ_quotient Y').obj j) := by
+      rw [show (sheafH_filtered_colimit_succ_quotient Y').map (𝟙 j) =
+          𝟙 ((sheafH_filtered_colimit_succ_quotient Y').obj j) by
         simp [sheafH_filtered_colimit_succ_quotient, cokernel.map]
-      have hq :
-          ((sheafH_filtered_colimit_succ_quotient Y').map (𝟙 j)).val.app (op ⊤) =
-            𝟙 (((sheafH_filtered_colimit_succ_quotient Y').obj j).val.obj (op ⊤)) := by
-        rw [hq']
-        rfl
-      rw [hq]
-      exact Category.id_comp
-        (cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j))
+      ]
+      exact Category.id_comp _
     map_comp := fun {j j' j''} f g => by
       apply (cancel_epi (cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j))).mp
       rw [cokernel.π_desc, ← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
-      have hq' :
-          (sheafH_filtered_colimit_succ_quotient Y').map (f ≫ g) =
-            (sheafH_filtered_colimit_succ_quotient Y').map f ≫
-              (sheafH_filtered_colimit_succ_quotient Y').map g := by
+      rw [show (sheafH_filtered_colimit_succ_quotient Y').map (f ≫ g) =
+          (sheafH_filtered_colimit_succ_quotient Y').map f ≫
+            (sheafH_filtered_colimit_succ_quotient Y').map g by
         simp [sheafH_filtered_colimit_succ_quotient, cokernel.map, Functor.map_comp]
-      have hq :
-          ((sheafH_filtered_colimit_succ_quotient Y').map (f ≫ g)).val.app (op ⊤) =
-            ((sheafH_filtered_colimit_succ_quotient Y').map f).val.app (op ⊤) ≫
-              ((sheafH_filtered_colimit_succ_quotient Y').map g).val.app (op ⊤) := by
-        rw [hq']
-        rfl
-      rw [hq]
+      ]
+      change (((sheafH_filtered_colimit_succ_quotient Y').map f).val.app (op ⊤) ≫
+          ((sheafH_filtered_colimit_succ_quotient Y').map g).val.app (op ⊤)) ≫
+        cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j'') = _
       simp [Category.assoc] }
 
 /-- Evaluation at each diagram object identifies the stagewise cokernel functor with the
