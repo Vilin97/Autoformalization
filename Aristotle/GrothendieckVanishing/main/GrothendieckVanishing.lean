@@ -123,7 +123,7 @@ theorem grothendieck_vanishing_of_irreducible
   change Subsingleton (Sheaf.H Fsh n)
   by_cases hEmpty : IsEmpty X
   · letI := hEmpty
-    simpa [Fsh] using sheafH_subsingleton_of_isEmpty_presheaf (F := F) hF n
+    simpa using sheafH_subsingleton_of_isEmpty Fsh n
   · rw [not_isEmpty_iff] at hEmpty
     by_cases hIrred : IrreducibleSpace X
     · exact ih_irred X n hF le_rfl hn
