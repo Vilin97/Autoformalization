@@ -113,7 +113,6 @@ theorem sheafify_const_flasque_of_irreducible
       (Opens.grothendieckTopology X).sheafify_isSheaf ((Functor.const (Opens X)ᵒᵖ).obj A)⟩ :
       TopCat.Sheaf AddCommGrpCat.{u} X) := by
   let P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} := (Functor.const (Opens X)ᵒᵖ).obj A
-  constructor
   intro U V i
   by_cases hU : (U : Set X) = ∅
   · have : U = ⊥ := Opens.ext (by simpa using hU)
@@ -150,16 +149,10 @@ theorem presheafToSheaf_const_flasque_of_irreducible
       (((presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
         ((Functor.const (Opens X)ᵒᵖ).obj A))) := by
   let P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} := (Functor.const (Opens X)ᵒᵖ).obj A
-  constructor
   intro U V i
   let e := plusPlusIsoSheafify (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) (P := P)
-  haveI := sheafify_const_flasque_of_irreducible (X := X) A
   haveI : Epi (((Opens.grothendieckTopology X).sheafify P).map i.op) := by
-    simpa using
-      (IsFlasqueSheaf.epi_map
-        (F := (⟨(Opens.grothendieckTopology X).sheafify P,
-          (Opens.grothendieckTopology X).sheafify_isSheaf P⟩ :
-          TopCat.Sheaf AddCommGrpCat.{u} X)) i)
+    simpa using sheafify_const_flasque_of_irreducible (X := X) A (U := U) (V := V) i
   haveI : Epi (e.hom.app (op V) ≫
       (CategoryTheory.sheafify (Opens.grothendieckTopology X) P).map i.op) := by
     rw [← e.hom.naturality i.op]; infer_instance
@@ -171,25 +164,19 @@ theorem constantSheaf_flasque_of_irreducible
     (A : AddCommGrpCat.{u}) :
     IsFlasqueSheaf (((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj A)) := by
   let P : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} := (Functor.const (Opens X)ᵒᵖ).obj A
-  constructor
   intro U V i
-  haveI := presheafToSheaf_const_flasque_of_irreducible (X := X) A
   simpa [CategoryTheory.constantSheaf, P] using
-    (IsFlasqueSheaf.epi_map
-      (F := ((presheafToSheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).obj
-        P)) i)
+    presheafToSheaf_const_flasque_of_irreducible (X := X) A (U := U) (V := V) i
 
 /-- `zeroOutsideInt ⊤` is flasque on an irreducible space: it is the sheafification of
     `constZ.zeroOutside ⊤ ≅ constZ` (via `zeroOutside_top_iso`), and the constant sheaf
     on an irreducible space is flasque (`constantSheaf_flasque_of_irreducible`). -/
-instance isFlasqueSheaf_zeroOutsideInt_top (X : TopCat.{u}) [IrreducibleSpace X] :
+theorem isFlasqueSheaf_zeroOutsideInt_top (X : TopCat.{u}) [IrreducibleSpace X] :
     IsFlasqueSheaf (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) := by
-  constructor; intro U W i
+  intro U W i
   let J := Opens.grothendieckTopology (T := X)
   let A := AddCommGrpCat.of (ULift.{u} ℤ)
-  letI : IsFlasqueSheaf (((constantSheaf J AddCommGrpCat.{u}).obj A)) :=
-    constantSheaf_flasque_of_irreducible X A
-  have h := IsFlasqueSheaf.epi_map (F := ((constantSheaf J AddCommGrpCat.{u}).obj A)) i
+  have h := constantSheaf_flasque_of_irreducible X A (U := U) (V := W) i
   exact @epi_of_epi_fac _ _ _ _ _ _ _ _ (epi_comp' h (IsIso.epi_of_iso _))
     (((sheafToPresheaf J AddCommGrpCat.{u}).mapIso
       ((presheafToSheaf J AddCommGrpCat.{u}).mapIso

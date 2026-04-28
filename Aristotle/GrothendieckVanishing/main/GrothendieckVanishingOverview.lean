@@ -1,6 +1,5 @@
 import Aristotle.GrothendieckVanishing.main.ClosedImmersion
 import Aristotle.GrothendieckVanishing.main.ZeroOutside
-import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
 import Aristotle.GrothendieckVanishing.main.GrothendieckVanishing
 
 /-!
@@ -17,4 +16,4 @@ this assembled development.
 -/
 
 #check GrothendieckVanishing
-#check FlasqueVanishing
+#check sheafH_subsingleton_of_flasque

@@ -425,10 +425,9 @@ theorem zeroOutsideInt_vanishing
       (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ ⊤))) m)) :
     Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt V) (m + 1)) := by
   have hTop : Subsingleton (Sheaf.H (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) (m + 1)) := by
-    letI : IsFlasqueSheaf (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) := by
-      simpa using isFlasqueSheaf_zeroOutsideInt_top X
     simpa using
-      sheafH_subsingleton_of_flasque X (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X)) m
+      sheafH_subsingleton_of_flasque X (TopCat.Sheaf.zeroOutsideInt (⊤ : Opens X))
+        (fun i => isFlasqueSheaf_zeroOutsideInt_top X i) m
   exact sheafH_dimension_shift_of_mono
     (TopCat.Sheaf.zeroOutsideInt.openHom (le_top : V ≤ (⊤ : Opens X))) m
     hCoker hTop

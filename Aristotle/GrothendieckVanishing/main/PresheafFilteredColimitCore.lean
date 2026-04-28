@@ -66,7 +66,6 @@ theorem isFlasque_filtered_colimit
   haveI : CreatesColimit F
       (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
     createsFilteredColimit F
-  constructor
   intro U V i
   rw [AddCommGrpCat.epi_iff_surjective]
   intro b
@@ -76,7 +75,7 @@ theorem isFlasque_filtered_colimit
       (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) hc)
   obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ hc_U b
   obtain ⟨a₀, ha₀⟩ :=
-    (AddCommGrpCat.epi_iff_surjective _).mp ((hFlasque j₀).epi_map i) b₀
+    (AddCommGrpCat.epi_iff_surjective _).mp ((hFlasque j₀) i) b₀
   refine ⟨ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀, ?_⟩
   rw [show ConcreteCategory.hom (c.pt.val.map i.op)
       (ConcreteCategory.hom ((c.ι.app j₀).val.app (op V)) a₀) =
@@ -178,24 +177,6 @@ noncomputable instance sheafH_filtered_colimit_succ_iota_mono
     (colimit.isColimit (sheafH_filtered_colimit_succ_Inj Y'))
     (sheafH_filtered_colimit_succ_iota Y' c' hc')
     (sheafH_filtered_colimit_succ_iota_fac Y' c' hc')
-
-omit [IsFiltered J'] in
-/-- The injective-replacement inclusion vanishes after the objectwise cokernel projection,
-    after forgetting sheaf morphisms to presheaf morphisms. -/
-theorem sheafH_filtered_colimit_succ_eta_val_comp_cokernel_pi (j : J') :
-    ((sheafH_filtered_colimit_succ_eta Y').app j).val ≫
-      (cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val = 0 := by
-  exact congrArg Sheaf.Hom.val
-    (cokernel.condition ((sheafH_filtered_colimit_succ_eta Y').app j))
-
-/-- The colimit inclusion into the injective-replacement colimit vanishes after its
-    cokernel projection, after forgetting sheaf morphisms to presheaf morphisms. -/
-theorem sheafH_filtered_colimit_succ_iota_val_comp_cokernel_pi
-    (c' : Cocone Y') (hc' : IsColimit c') :
-    (sheafH_filtered_colimit_succ_iota Y' c' hc').val ≫
-      (cokernel.π (sheafH_filtered_colimit_succ_iota Y' c' hc')).val = 0 := by
-  exact congrArg Sheaf.Hom.val
-    (cokernel.condition (sheafH_filtered_colimit_succ_iota Y' c' hc'))
 
 /-- The short exact sequence on colimit objects obtained from the injective replacement. -/
 noncomputable def sheafH_filtered_colimit_succ_shortComplex
@@ -407,18 +388,17 @@ theorem sheafH_filtered_colimit_succ_inj_subsingleton
     Subsingleton (Sheaf.H (sheafH_filtered_colimit_succ_injCocone Y').pt (n + 1)) := by
   let Inj := sheafH_filtered_colimit_succ_Inj Y'
   let injCocone := sheafH_filtered_colimit_succ_injCocone Y'
-  have hFlasque : IsFlasqueSheaf injCocone.pt := by
+  have hFlasque : IsFlasqueSheaf injCocone.pt := fun i => by
     simpa [Inj, injCocone] using
       (isFlasque_filtered_colimit
         (F := Inj)
         (hFlasque := fun j => by
           letI : Injective (Inj.obj j) := hInj j
-          simpa using (isFlasque_of_injective (Inj.obj j)))
+          exact fun {_ _} i => (isFlasque_of_injective (Inj.obj j)) i)
         (c := injCocone)
-        (hc := colimit.isColimit Inj))
-  letI : IsFlasqueSheaf injCocone.pt := hFlasque
+        (hc := colimit.isColimit Inj)) i
   simpa [injCocone] using
-    (sheafH_subsingleton_of_flasque X injCocone.pt n)
+    (sheafH_subsingleton_of_flasque X injCocone.pt hFlasque n)
 
 end SheafHFilteredColimitSucc
 

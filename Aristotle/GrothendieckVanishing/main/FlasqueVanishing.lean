@@ -31,8 +31,8 @@ statement that can be attacked independently.
 
 /-- A sheaf of abelian groups is **flasque** if all restriction maps are epi.
     This is equivalent to surjectivity of restriction on sections. -/
-class IsFlasqueSheaf {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X) : Prop where
-  epi_map : ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op)
+abbrev IsFlasqueSheaf {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X) : Prop :=
+  ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op)
 
 -- For a SES of sheaves, the evaluated sequence at V is exact:
 -- if g_V(x) = 0, then x is in the image of f_V.
@@ -319,28 +319,24 @@ theorem epi_app_of_shortExact_of_epi_restrictions {X : TopCat.{u}}
 theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact)
-    [IsFlasqueSheaf S.X₁]
+    (hX₁ : IsFlasqueSheaf S.X₁)
     (U : Opens X) :
     Epi (S.g.val.app (op U)) := by
   exact epi_app_of_shortExact_of_epi_restrictions hS
-    (fun {_ _} i => by
-      simpa using (IsFlasqueSheaf.epi_map (F := S.X₁) i)) U
+    (fun {_ _} i => hX₁ i) U
 
 /-- Quotients of flasque sheaves are flasque along a short exact sequence. -/
 theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
     (hS : S.ShortExact)
-    [IsFlasqueSheaf S.X₁]
-    [IsFlasqueSheaf S.X₂] :
+    (hX₁ : IsFlasqueSheaf S.X₁)
+    (hX₂ : IsFlasqueSheaf S.X₂) :
     IsFlasqueSheaf S.X₃ := by
-  constructor
   intro U V j
   have hg_U : Epi (S.g.val.app (op U)) :=
     epi_app_of_shortExact_of_epi_restrictions hS
-      (fun {_ _} i => by
-        simpa using (IsFlasqueSheaf.epi_map (F := S.X₁) i)) U
-  have hres₂ : Epi (S.X₂.val.map j.op) := by
-    simpa using (IsFlasqueSheaf.epi_map (F := S.X₂) j)
+      (fun {_ _} i => hX₁ i) U
+  have hres₂ : Epi (S.X₂.val.map j.op) := hX₂ j
   rw [AddCommGrpCat.epi_iff_surjective] at hg_U hres₂ ⊢
   intro z
   obtain ⟨w, hw⟩ := hg_U z
@@ -352,9 +348,9 @@ theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
 
 -- Injective sheaves are flasque.
 -- Uses zeroOutsideInt generator/sHom/openHom API + Injective.factors.
-instance isFlasque_of_injective {X : TopCat.{u}}
+theorem isFlasque_of_injective {X : TopCat.{u}}
     (I : TopCat.Sheaf AddCommGrpCat.{u} X) [Injective I] : IsFlasqueSheaf I := by
-  constructor; intro U V i
+  intro U V i
   rw [AddCommGrpCat.epi_iff_surjective]
   intro s
   obtain ⟨g, hg⟩ := Injective.factors
@@ -372,17 +368,16 @@ instance isFlasque_of_injective {X : TopCat.{u}}
 
 /-- `H¹` vanishes for flasque sheaves. -/
 theorem sheafH_subsingleton_H1_of_flasque {X : TopCat.{u}}
-    (F : TopCat.Sheaf AddCommGrpCat.{u} X) [IsFlasqueSheaf F] :
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) (hF : IsFlasqueSheaf F) :
     Subsingleton (Sheaf.H F 1) := by
   obtain ⟨ip⟩ := EnoughInjectives.presentation F
   let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ip.shortComplex
   letI : Injective S.X₂ := by
     simpa [S] using (inferInstance : Injective S.X₂)
   have hg : Epi (S.g.val.app (op ⊤)) := by
-    letI : IsFlasqueSheaf S.X₁ := by
-      simpa [S] using (inferInstance : IsFlasqueSheaf F)
     simpa [S] using epi_app_of_shortExact_flasque
-      (by simpa [S] using ip.shortExact_shortComplex) ⊤
+      (by simpa [S] using ip.shortExact_shortComplex)
+      (fun i => by simpa [S] using hF i) ⊤
   simpa [S] using
     sheafH_subsingleton_H1_of_injective_of_epi_app_top
       (by simpa [S] using ip.shortExact_shortComplex) hg
@@ -390,33 +385,27 @@ theorem sheafH_subsingleton_H1_of_flasque {X : TopCat.{u}}
 /-- Flasque sheaves have vanishing higher cohomology. -/
 theorem sheafH_subsingleton_of_flasque
     (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    [IsFlasqueSheaf F]
+    (hF : IsFlasqueSheaf F)
     (n : ℕ) :
     Subsingleton (Sheaf.H F (n + 1)) := by
   induction n generalizing F with
   | zero =>
-      exact sheafH_subsingleton_H1_of_flasque F
+      exact sheafH_subsingleton_H1_of_flasque F hF
   | succ n ih =>
       obtain ⟨ip⟩ := EnoughInjectives.presentation F
       let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ip.shortComplex
       letI : Injective S.X₂ := by
         simpa [S] using (inferInstance : Injective S.X₂)
-      letI : IsFlasqueSheaf S.X₁ := by
-        simpa [S] using (inferInstance : IsFlasqueSheaf F)
-      letI : IsFlasqueSheaf S.X₃ := by
+      have hX₁ : IsFlasqueSheaf S.X₁ := fun i => by simpa [S] using hF i
+      have hX₂ : IsFlasqueSheaf S.X₂ := isFlasque_of_injective S.X₂
+      have hX₃ : IsFlasqueSheaf S.X₃ := fun i => by
         simpa [S] using
-          (isFlasque_X₃_of_shortExact (by simpa [S] using ip.shortExact_shortComplex))
+          (isFlasque_X₃_of_shortExact
+            (by simpa [S] using ip.shortExact_shortComplex) hX₁ hX₂) i
       have h₃H : Subsingleton (Sheaf.H S.X₃ (n + 1)) := by
-        simpa using (ih S.X₃)
+        simpa using (ih S.X₃ hX₃)
       simpa [S] using
         (sheafH_dimension_shift_of_injective
           (S := S)
           (by simpa [S] using ip.shortExact_shortComplex)
           (n + 1) h₃H)
-
-/-- **Flasque sheaves have vanishing higher cohomology** (Nugent, PR #35790). -/
-instance FlasqueVanishing (X : TopCat.{u}) (F : TopCat.Sheaf AddCommGrpCat.{u} X)
-    [IsFlasqueSheaf F]
-    (n : ℕ) :
-    Subsingleton (Sheaf.H F (n + 1)) := by
-  exact sheafH_subsingleton_of_flasque X F n
