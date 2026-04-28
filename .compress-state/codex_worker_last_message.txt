@@ -1,11 +1,18 @@
-Done. Golfed [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:111) only in `sheafH_filtered_colimit_h1_cokernelFunctorIso`, using local `alpha`/`ev` lets and direct rewrites through `cokernel.π_desc`.
+Implemented cycle 39.
 
-Verification passed:
+Changed [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean):
+- Golfed `sheafH_filtered_colimit_comparison_one_iso_hom`.
+- Removed local staging aliases `comparisonOne`, `stageShort`, `stageIsoH1`, `stageHom`, and inlined the one-use cokernel proof path.
+- Kept theorem statement and `@[simp]` unchanged.
+
+Wrote the required report at [.compress-state/codex_task_results/cycle_39.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_39.md).
+
+Verification:
 - `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean`
 - `git diff --check`
 
 Metrics:
-- Normalized LOC: `4740` -> `4700` (`-40`)
-- Raw `wc -l main/*.lean`: `5621` -> `5581` (`-40`)
+- Normalized LOC: `4700 -> 4682` (`-18`)
+- Raw `main/*.lean` wc: `5581 -> 5563` (`-18`)
 
-Wrote the required report at [.compress-state/codex_task_results/cycle_38.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_38.md). `lake build` was not run, per the proof-only scope.
+I did not commit or push.
