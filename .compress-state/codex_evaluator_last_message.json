@@ -1,11 +1,11 @@
 {
   "progress_score": 1,
-  "summary": "Golfed `closedIncl_unit_stalk_isIso` in ClosedImmersion.lean using `i`/`pull` aliases, `sheafifyMap`, and a parameterized `toSheafify` instance family, -8 normalized LOC (4260\u21924252).",
+  "summary": "Golfed `finsetGeneratedSheaf_vanishing` insert-branch (inlined `heq`, factored `qIns`/`qS`, dropped redundant `Balanced` instance), -14 normalized LOC (4252\u21924238).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
-  "stuck_on": "Remaining `IsIso` plumbing inside the proof is still required by typeclass search; further compression likely needs a stronger reusable stalk/sheafification lemma.",
-  "strategy_recommendation": "Next cycle should pivot to a different long-proof target. Candidates: `finsetGeneratedSheaf_vanishing` in `Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean` (last touched cycle 64) or the largest body in `CohomologyAPI.lean` (782 raw LOC, untouched recently). Avoid re-mining `closedIncl_unit_stalk_isIso`, `exists_section_generating_stalks`, or `sheafH_filtered_colimit_comparison_one_iso_hom`.",
-  "attempts_entry": "cycle 70: golfed `closedIncl_unit_stalk_isIso` (ClosedImmersion.lean) via aliases + `sheafifyMap` + parameterized `toSheafify` instance, -8 norm LOC (4260\u21924252).",
+  "stuck_on": "Remaining bulk in this proof is the insert-branch `Sigma.desc`/case split itself; further reduction needs a different categorical lemma.",
+  "strategy_recommendation": "Pivot to a fresh long-proof target. Best candidates: the largest body in `CohomologyAPI.lean` (782 raw LOC, untouched recently) or `filtered_colimit_exists_compatible_representatives` in `PresheafFilteredColimitGeneral.lean` (still 55-line body after cycle 67). Avoid re-mining `exists_section_generating_stalks`, `closedIncl_unit_stalk_isIso`, `sheafH_filtered_colimit_comparison_one_iso_hom`, and `finsetGeneratedSheaf_vanishing` \u2014 all show diminishing returns.",
+  "attempts_entry": "cycle 71: golfed `finsetGeneratedSheaf_vanishing` (inlined `heq`, factored `qIns`/`qS`, removed `Balanced` instance), -14 normalized LOC (4252\u21924238).",
   "completed_task_lines": []
 }

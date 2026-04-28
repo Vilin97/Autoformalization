@@ -1,16 +1,11 @@
-Cycle 70 is complete.
+Completed cycle 71.
 
-Changed [ClosedImmersion.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean:366), only inside `closedIncl_unit_stalk_isIso`. The proof now uses local `i`/`pull` aliases, `sheafifyMap`, a collapsed stalk-level naturality step, and one local `toSheafify` instance family.
-
-Report written: [cycle_70.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_70.md)
+Golfed [FinitelyGeneratedVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:144): inlined the single-use `heq`, factored repeated `factorThruImage` expressions into proof-local `qIns`/`qS`, collapsed the non-`σ₀` rewrite chain to one `simpa`, and removed an unnecessary local `Balanced` instance. Wrote the report at [cycle_71.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_71.md).
 
 Verification:
-- `lake env lean Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean`
-- `git diff --check`
-- no `sorry`/`admit`/`axiom` matches in the modified Lean file
+- `lake env lean Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean`
+- `rg` scan found no `sorry`/`admit`/`axiom` in the modified Lean file
+- Normalized LOC: `4252 -> 4238` (`-14`)
+- Raw `main/*.lean` wc: `5154 -> 5140` (`-14`)
 
-Metrics:
-- Normalized LOC: `4260 -> 4252` (`-8`)
-- Raw `main/*.lean` wc: `5162 -> 5154` (`-8`)
-
-I did not run `lake build`, per the proof-body-only scope.
+`lake build` was not run, per the strategy, because this was proof-body-only with no imports, renames, deletions, or generated attributes. I did not commit.
