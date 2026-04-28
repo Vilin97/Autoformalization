@@ -470,23 +470,11 @@ private noncomputable def sheafH_filtered_colimit_comparison_one_iso
       simpa using
         (PreservesCokernel.π_iso_hom
           ((CategoryTheory.evaluation J' AddCommGrpCat.{u}).obj j) α)
-    calc
-      cokernel.π (α.app j) ≫
-          functorCokIso.hom.app j ≫
-            colimit.ι (cokernel α) j ≫ colimCokIso.hom ≫ mapIso.hom =
-        colimit.ι (sheafH_filtered_colimit_succ_quotient Ysh ⋙ sectionsFunctor) j ≫
-          cokernel.π (colim.map α) ≫ mapIso.hom := by
-            rw [← Category.assoc, hfunctorCok, ← colimit.ι_map_assoc,
-              PreservesCokernel.π_iso_hom_assoc]
-      _ = colimit.ι (sheafH_filtered_colimit_succ_quotient Ysh ⋙ sectionsFunctor) j ≫
-          eQ.hom ≫ cokernel.π (sectionsFunctor.map (cokernel.π ι')) := by
-            dsimp [mapIso]
-            rw [cokernel.π_desc]
-      _ = (sectionsFunctor.mapCocone qCocone).ι.app j ≫
-          cokernel.π (sectionsFunctor.map (cokernel.π ι')) := by
-            rw [colimit.comp_coconePointUniqueUpToIso_hom_assoc]
-      _ = cokernel.π (α.app j) ≫ stageCokMap :=
-        (cokernel.π_desc _ _ _).symm
+    rw [← Category.assoc, hfunctorCok, ← colimit.ι_map_assoc,
+      PreservesCokernel.π_iso_hom_assoc]
+    dsimp [mapIso]
+    rw [cokernel.π_desc, colimit.comp_coconePointUniqueUpToIso_hom_assoc]
+    exact (cokernel.π_desc _ _ _).symm
   have hnat :
       stageCokMap ≫ globalIso.hom =
         stageIsoH1.hom ≫ (sheafCohomologyFunctor X 1).map (csh.ι.app j) := by
@@ -501,19 +489,8 @@ private noncomputable def sheafH_filtered_colimit_comparison_one_iso
   dsimp [comparisonOne]
   rw [HasColimit.isoOfNatIso_ι_inv_assoc, HasColimit.isoOfNatIso_ι_hom_assoc,
     colimit_ι_sheafH_filtered_colimit_comparison]
-  simpa [stageIso, stageIsoH1] using
-    calc
-      stageIsoH1.inv ≫
-          functorCokIso.hom.app j ≫
-            colimit.ι (cokernel α) j ≫
-              colimCokIso.hom ≫ mapIso.hom ≫ globalIso.hom =
-        stageIsoH1.inv ≫ stageCokMap ≫ globalIso.hom := by
-          simpa [Category.assoc] using
-            congrArg (fun t => stageIsoH1.inv ≫ t ≫ globalIso.hom) hstage_cok
-      _ = stageIsoH1.inv ≫
-          (stageIsoH1.hom ≫ (sheafCohomologyFunctor X 1).map (csh.ι.app j)) := by
-            rw [hnat]
-      _ = (sheafCohomologyFunctor X 1).map (csh.ι.app j) := by simp
+  simpa [stageIso, stageIsoH1, Category.assoc, hnat] using
+    congrArg (fun t => stageIsoH1.inv ≫ t ≫ globalIso.hom) hstage_cok
 
 /-- The degree-`0` filtered-colimit comparison isomorphism, obtained from global sections. -/
 private noncomputable def sheafH_filtered_colimit_comparison_zero_iso
