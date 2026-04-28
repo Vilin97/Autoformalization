@@ -1,12 +1,12 @@
-Completed cycle 33.
+Done. Golfed [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:145) by removing unused proof-local witnesses and shortening `hi_inj`.
 
-Golfed [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:356): removed inferred local type annotations and shortened `hstage_cok` by eliminating `e_j` plus two `congrArg` wrappers. Added the required report at [cycle_33.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_33.md:1).
+Metrics: normalized LOC `4837 -> 4813` (`-24`); raw `main/*.lean` wc `5712 -> 5694` (`-18`).
 
-Verification:
-- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean` passed, with the existing unused `Category.assoc` simp warning outside the edited proof.
-- Normalized LOC: `4861 -> 4837` (`-24`)
-- Raw `main/*.lean` `wc -l`: `5736 -> 5712` (`-24`)
-- `git diff --check` passed.
-- Checked for leading `sorry` / `admit` / `axiom` forms in `main`.
+Verification passed:
+- `lake env lean Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean`
+- `python3.9 scripts/normalized_loc.py --per-file --raw`
+- `wc -l Aristotle/GrothendieckVanishing/main/*.lean`
+- leading `sorry` / `admit` / `axiom` scan
+- `lean_verify` on `exists_section_generating_stalks`
 
-`lake build` was not run, per the proof-only scope.
+Wrote the cycle report at [.compress-state/codex_task_results/cycle_34.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_34.md).

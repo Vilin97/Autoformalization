@@ -32,3 +32,4 @@ Cycle 30: cycle 30: score=1 loc_delta=-2 — sheaf-reverted `sheafH_subsingleton
 Cycle 31: cycle 31: sheaf-reverted `sheafH_subsingleton_of_isEmpty_presheaf` → `sheafH_subsingleton_of_isEmpty` (bundled sheaf), updated 1 caller in GrothendieckVanishing.lean; -1 normalized LOC (4889→4888); score=1.
 Cycle 32: Cycle 32: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` in `PresheafFilteredColimit.lean` — removed 4 local `_assoc` wrappers, inlined direct calc steps; -27 normalized LOC (4888→4861).
 Cycle 33: cycle 33: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` (dropped local-let type sigs + inlined `e_j`/`congrArg` in `hstage_cok`), -24 normalized LOC (4861→4837).
+Cycle 34: cycle 34: golfed `exists_section_generating_stalks` in IrreducibleStep.lean by deleting unused proof-local witnesses, -24 normalized LOC (4837→4813).
