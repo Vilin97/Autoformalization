@@ -233,7 +233,7 @@ Body-to-signature ratio outliers (≥4x, body ≥ 15 lines):
 - [x] Golf `finsetGenCocone_isColimit` in `Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:65` (body/sig ratio 25.5, body 51L, sig 2L).
 - [>] Golf `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:714` (body/sig ratio 18.5, body 111L, sig 6L).
 - [ ] Golf `zeroOutside` in `Aristotle/GrothendieckVanishing/main/ZeroOutside.lean:39` (body/sig ratio 17.0, body 17L, sig 1L).
-- [ ] Golf `_root_.isZero_zeroOutsideInt_bot` in `Aristotle/GrothendieckVanishing/main/ZeroOutside.lean:366` (body/sig ratio 15.0, body 30L, sig 2L).
+- [x] Golf `_root_.isZero_zeroOutsideInt_bot` in `Aristotle/GrothendieckVanishing/main/ZeroOutside.lean:366` (body/sig ratio 15.0, body 30L, sig 2L).
 - [ ] Golf `sheafH_filtered_colimit_succ_quotientCocone_isColimit` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean:268` (body/sig ratio 14.7, body 44L, sig 3L).
 - [ ] Golf `sHom` in `Aristotle/GrothendieckVanishing/main/ZeroOutside.lean:175` (body/sig ratio 14.5, body 29L, sig 2L).
 - [ ] Golf `sheafH_filtered_colimit_succ_shiftNatIso` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean:359` (body/sig ratio 14.0, body 98L, sig 7L).
