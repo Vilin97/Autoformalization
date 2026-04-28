@@ -576,12 +576,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_zero_iso
   let sectionsFunctor := sheafH_filtered_colimit_h1_sectionsFunctor (X := X)
   let h0Iso :
       Ysh ⋙ sheafCohomologyFunctor X 0 ≅ Ysh ⋙ sectionsFunctor :=
-    NatIso.ofComponents
-      (fun j => (sheafH0EquivSections_presheaf (Ysh.obj j).cond).toAddCommGrpIso)
-      (fun {j j'} f => by
-        ext x
-        simpa [sectionsFunctor, sheafCohomologyFunctor_map_apply] using
-          (sheafH0EquivSections_natural (f := Ysh.map f) (x := x)))
+    Functor.isoWhiskerLeft Ysh (sheafH0NatIsoSections (X := X))
   haveI : CreatesColimit Ysh
       (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
     createsFilteredColimit Ysh
@@ -597,7 +592,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_zero_iso
   exact
     HasColimit.isoOfNatIso h0Iso ≪≫
       (colimit.isColimit (Ysh ⋙ sectionsFunctor)).coconePointUniqueUpToIso hc_sections ≪≫
-      ((sheafH0EquivSections_presheaf csh.pt.cond).toAddCommGrpIso).symm
+      ((sheafH0EquivSections csh.pt).toAddCommGrpIso).symm
 
 @[simp] theorem sheafH_filtered_colimit_comparison_zero_iso_hom
     {X : TopCat.{u}} [NoetherianSpace X]
@@ -610,12 +605,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_zero_iso
   let sectionsFunctor := sheafH_filtered_colimit_h1_sectionsFunctor (X := X)
   let h0Iso :
       Ysh ⋙ sheafCohomologyFunctor X 0 ≅ Ysh ⋙ sectionsFunctor :=
-    NatIso.ofComponents
-      (fun j => (sheafH0EquivSections_presheaf (Ysh.obj j).cond).toAddCommGrpIso)
-      (fun {j j'} f => by
-        ext x
-        simpa [sectionsFunctor, sheafCohomologyFunctor_map_apply] using
-          (sheafH0EquivSections_natural (f := Ysh.map f) (x := x)))
+    Functor.isoWhiskerLeft Ysh (sheafH0NatIsoSections (X := X))
   haveI : CreatesColimit Ysh
       (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
     createsFilteredColimit Ysh
@@ -634,11 +624,11 @@ private noncomputable def sheafH_filtered_colimit_comparison_zero_iso
   rw [HasColimit.isoOfNatIso_ι_hom_assoc, colimit.comp_coconePointUniqueUpToIso_hom_assoc,
     colimit_ι_sheafH_filtered_colimit_comparison]
   ext x
-  change (sheafH0EquivSections_presheaf csh.pt.cond).symm
+  change (sheafH0EquivSections csh.pt).symm
       (ConcreteCategory.hom ((csh.ι.app j).val.app (op ⊤))
-        (sheafH0EquivSections_presheaf (Ysh.obj j).cond x)) =
+        (sheafH0EquivSections (Ysh.obj j) x)) =
     ConcreteCategory.hom ((sheafCohomologyFunctor X 0).map (csh.ι.app j)) x
-  apply (sheafH0EquivSections_presheaf csh.pt.cond).injective
+  apply (sheafH0EquivSections csh.pt).injective
   simpa [sheafCohomologyFunctor_map_apply] using
     (sheafH0EquivSections_natural (f := csh.ι.app j) (x := x)).symm
 
