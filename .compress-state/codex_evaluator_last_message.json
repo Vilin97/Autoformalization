@@ -1,14 +1,14 @@
 {
   "progress_score": 1,
-  "summary": "Golfed `sheafH_filtered_colimit_h1_boundary_square` by deleting three local transport facts (hQj/hInjj/hInjj_assoc) in favor of direct `rw [colimit.\u03b9_map_assoc]; simp [...]`, -15 normalized LOC (4606\u21924591).",
+  "summary": "Golfed `finsetGeneratedSheaf_vanishing` by removing local ShortComplex/ShortExact plumbing, collapsing finsetImageInclGen transport, and inlining single-use witnesses, -25 normalized LOC (4591\u21924566).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
-  "stuck_on": "",
-  "strategy_recommendation": "Pivot to `subsingleton_sheafH_of_closedImmersion_middle_presheaf` in `Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean:126` (body 50, sig 5, ratio 10.0), the next ratio outlier with no recent mining. Alternative: `closedComplementVanishing` in `IrreducibleStep.lean:376` (body 48).",
-  "attempts_entry": "cycle 43: golfed `sheafH_filtered_colimit_h1_boundary_square` by inlining 3 transport facts into a single `rw`+`simp`, -15 normalized LOC (4606\u21924591).",
+  "stuck_on": "Local `Epi g` block (projection/factorization through coproduct summand) still has the bulk of the body's remaining lines.",
+  "strategy_recommendation": "Pivot to `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` in `CohomologyAPI.lean:714` (body 111L, sig 6L, untouched) or `PushforwardHIso` in `ClosedImmersionCohomology.lean:34` (body 85L, sig 7L). Both are higher leverage than further mining `finsetGeneratedSheaf_vanishing`, whose remaining `Epi g` factorization block is structurally hard to compress without new helpers.",
+  "attempts_entry": "cycle 44: -25 norm LOC (4591\u21924566); golfed `finsetGeneratedSheaf_vanishing` by removing ShortComplex/ShortExact plumbing and inlining single-use transports.",
   "completed_task_lines": [
-    "- [>] Golf `sheafH_filtered_colimit_h1_boundary_square` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:230` (signature 5L, body 50L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.",
-    "- [>] Golf `sheafH_filtered_colimit_h1_boundary_square` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:230` (body/sig ratio 10.0, body 50L, sig 5L)."
+    "- [>] Golf `finsetGeneratedSheaf_vanishing` in `Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:162` (signature 12L, body 98L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.",
+    "- [>] Golf `finsetGeneratedSheaf_vanishing` in `Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:162` (body/sig ratio 8.2, body 98L, sig 12L)."
   ]
 }
