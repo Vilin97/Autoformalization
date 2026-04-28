@@ -9,7 +9,7 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
 
 ## Main results
 
-* `subsingleton_sheafH_of_shortExact_middle_presheaf`: presheaf-boundary middle-term wrapper
+* `subsingleton_sheafH_of_shortExact_middle`: middle-term cohomology vanishing
 * `sheafH_subsingleton_of_isEmpty_presheaf`: presheaf-boundary empty-space vanishing
 * `sheaf_isZero_of_zero_stalks`: zero stalks imply zero sheaf
 * `sheafH_subsingleton_of_isZero_presheaf`: presheaf-boundary zero-sheaf vanishing
@@ -667,32 +667,22 @@ theorem sheafCohomologyFunctor_map_apply (X : TopCat.{u}) (n : ℕ)
     x.comp (Ext.mk₀ f) (add_zero n) := rfl
 
 -- If both ends of a short exact sequence have vanishing H^n, so does the middle.
-/-- Presheaf-boundary middle-term cohomology vanishing: if `f : F ⟶ G` is mono between
-sheaf-valued presheaves, and the cohomology of `F` and of the cokernel sheaf of
-`Sheaf.Hom.mk f` are subsingleton in degree `n`, then so is the cohomology of `G`. -/
-theorem subsingleton_sheafH_of_shortExact_middle_presheaf {X : TopCat.{u}}
-    {F G : TopCat.Presheaf AddCommGrpCat.{u} X}
-    (hF : F.IsSheaf) (hG : G.IsSheaf)
+/-- Middle-term cohomology vanishing: if `f : F ⟶ G` is mono and the cohomology of `F`
+and `cokernel f` are subsingleton in degree `n`, then so is the cohomology of `G`. -/
+theorem subsingleton_sheafH_of_shortExact_middle {X : TopCat.{u}}
+    {F G : TopCat.Sheaf AddCommGrpCat.{u} X}
     (f : F ⟶ G) [Mono f] (n : ℕ)
-    (h₁ : Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
-    (h₃ : Subsingleton (Sheaf.H (cokernel (show
-      (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-        (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from
-          Sheaf.Hom.mk f)) n)) :
-    Subsingleton (Sheaf.H ((⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
-  let fsh : (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) ⟶
-      (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
-  haveI : Mono fsh := by
-    exact (Sheaf.Hom.mono_iff_presheaf_mono
-      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) fsh).2 inferInstance
-  let S := ShortComplex.mk fsh (cokernel.π fsh) (cokernel.condition fsh)
+    (h₁ : Subsingleton (Sheaf.H F n))
+    (h₃ : Subsingleton (Sheaf.H (cokernel f) n)) :
+    Subsingleton (Sheaf.H G n) := by
+  let S := ShortComplex.mk f (cokernel.π f) (cokernel.condition f)
   have hS : S.ShortExact := ShortComplex.ShortExact.mk'
-    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel fsh))
+    (ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel f))
     inferInstance inferInstance
   have h₁' : Subsingleton (Sheaf.H S.X₁ n) := by
     simpa [S] using h₁
   have h₃' : Subsingleton (Sheaf.H S.X₃ n) := by
-    simpa [S, fsh] using h₃
+    simpa [S] using h₃
   constructor
   intro a b
   obtain ⟨c, hc⟩ := Ext.covariant_sequence_exact₂ _ hS a

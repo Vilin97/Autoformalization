@@ -1,17 +1,14 @@
-Completed cycle 28.
+Implemented cycle 29.
 
-Changed [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:385): replaced `sheafH0EquivSections_presheaf` with bundled-sheaf `sheafH0EquivSections`, updated naturality and all call sites.
-
-Changed [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:579): updated bundled-sheaf call sites and compressed the two local `h0Iso` blocks via `Functor.isoWhiskerLeft Ysh (sheafH0NatIsoSections ...)`.
+Changed `subsingleton_sheafH_of_shortExact_middle_presheaf` into the bundled-sheaf theorem `subsingleton_sheafH_of_shortExact_middle` in [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:672), then updated the three callers in [ClosedImmersionCohomology.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean:154), [FinitelyGeneratedVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:253), and [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:522). The old `_presheaf` declaration has no remaining references.
 
 Verification passed:
-- `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`
-- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean`
+- `lake env lean` on all four modified Lean files
 - `lake build`
-- `rg "sheafH0EquivSections_presheaf" Aristotle` has no matches
+- `git diff --check`
 
-Metrics:
-- normalized LOC: `4924 -> 4914` (`-10`)
-- raw `main/*.lean` wc: `5802 -> 5792` (`-10`)
+LOC:
+- Normalized: `4914 -> 4891`, delta `-23`
+- Raw `main/*.lean`: `5792 -> 5768`, delta `-24`
 
-Wrote the report at [.compress-state/codex_task_results/cycle_28.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_28.md). Full build passed with existing linter warnings only.
+Wrote the required report at [.compress-state/codex_task_results/cycle_29.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_29.md). No commit made. Build still reports unrelated pre-existing linter warnings in files like `ZeroOutside.lean` and filtered colimit modules.

@@ -138,30 +138,17 @@ theorem subsingleton_sheafH_of_closedImmersion_middle
     simpa [S, closedImmersionSES, closedIncl, FZ] using
       (e.subsingleton_congr).mp h₃'
   haveI : Mono S.f := hSE.mono_f
-  haveI : Mono S.f.val := by
-    exact (Sheaf.Hom.mono_iff_presheaf_mono
-      (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) S.f).1 inferInstance
-  have hCok :
-      Subsingleton
-        (Sheaf.H (cokernel (show S.X₁ ⟶ F from Sheaf.Hom.mk S.f.val)) n) := by
-    let fsh : S.X₁ ⟶ F := Sheaf.Hom.mk S.f.val
-    have hfsh : fsh = S.f := rfl
-    have hfshg : fsh ≫ S.g = 0 := by
-      change S.f ≫ S.g = 0
-      exact S.zero
-    let hSgCok : IsColimit (CokernelCofork.ofπ S.g hfshg) := by
-      simpa [hfsh, hfshg] using hSE.gIsCokernel
+  have hCok : Subsingleton (Sheaf.H (cokernel S.f) n) := by
+    let hSgCok : IsColimit (CokernelCofork.ofπ S.g S.zero) := hSE.gIsCokernel
     let e :=
       (sheafCohomologyFunctor X n).mapIso
-        ((cokernelIsCokernel fsh).coconePointUniqueUpToIso
-          hSgCok)
+        ((cokernelIsCokernel S.f).coconePointUniqueUpToIso hSgCok)
     haveI :
         Subsingleton ↑((sheafCohomologyFunctor X n).obj
-          (CokernelCofork.ofπ S.g hfshg).pt) := by
+          (CokernelCofork.ofπ S.g S.zero).pt) := by
       simpa [sheafCohomologyFunctor] using hPush
     exact ⟨fun a b => by
       apply (ConcreteCategory.bijective_of_isIso e.hom).1
       exact Subsingleton.elim _ _⟩
   simpa using
-    subsingleton_sheafH_of_shortExact_middle_presheaf
-      (F := S.X₁.val) (G := F.val) S.X₁.cond F.cond S.f.val n h₁' hCok
+    subsingleton_sheafH_of_shortExact_middle S.f n h₁' hCok

@@ -492,10 +492,13 @@ theorem subsheaf_zeroOutsideInt_vanishing
           (TopCat.Sheaf.forget AddCommGrpCat.{u} X)
           (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) hR0)))
     haveI : Mono j := hj_mono
+    let jsh : TopCat.Sheaf.zeroOutsideInt V' ⟶
+        (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk j
+    haveI : Mono jsh := by
+      exact (Sheaf.Hom.mono_iff_presheaf_mono
+        (J := Opens.grothendieckTopology X) (D := AddCommGrpCat.{u}) jsh).2 inferInstance
     let C : TopCat.Sheaf AddCommGrpCat.{u} X :=
-      cokernel (show (TopCat.Sheaf.zeroOutsideInt V') ⟶
-          (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from
-            Sheaf.Hom.mk j)
+      cokernel jsh
     have hC : Subsingleton (Sheaf.H C m) := by
       have hV'compl_lt_nat :
           topologicalKrullDim (Set.compl (V' : Set X)) < ↑↑(m : ℕ) :=
@@ -515,10 +518,8 @@ theorem subsheaf_zeroOutsideInt_vanishing
         (fun x hxV' b => cokernel_stalk_zero_of_stalk_surj
           (F := TopCat.Sheaf.zeroOutsideInt V')
           (G := (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))
-          (f := Sheaf.Hom.mk j) (x := x) (hf := (hj_stalk x hxV').2) b)
-    exact subsingleton_sheafH_of_shortExact_middle_presheaf
-      (hF := (TopCat.Sheaf.zeroOutsideInt V').cond) (hG := hRsh)
-      (f := j) m
+          (f := jsh) (x := x) (hf := (hj_stalk x hxV').2) b)
+    exact subsingleton_sheafH_of_shortExact_middle jsh m
       (zeroOutsideInt_cohomology_vanishing V' hV'ne ih m hm)
       (by simpa [C] using hC)
 
