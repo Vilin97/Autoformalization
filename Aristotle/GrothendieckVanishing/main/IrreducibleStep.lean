@@ -144,8 +144,8 @@ theorem exists_section_generating_stalks
           ∃ k : ℤ, a = k • R.germ V' x hx s) := by
   let i_x (x : X) := ConcreteCategory.hom
     ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map i)
-  have hi_inj : ∀ (x : X), Function.Injective (i_x x) := fun x => by
-    exact TopCat.Presheaf.stalkFunctor_map_injective_of_app_injective (f := i)
+  have hi_inj : ∀ (x : X), Function.Injective (i_x x) := fun x =>
+    TopCat.Presheaf.stalkFunctor_map_injective_of_app_injective (f := i)
       (fun U =>
         (ConcreteCategory.mono_iff_injective_of_preservesPullback (i.app (op U))).mp
           ((NatTrans.mono_iff_mono_app i).mp inferInstance (op U))) x
@@ -214,29 +214,11 @@ theorem exists_section_generating_stalks
     exact ⟨_, mk_P x₀' hx₀'V d' hd'_pos hd'_mem hd'_gen⟩
   haveI : DecidablePred P := Classical.decPred P
   set d_nat := Nat.find (p := P) hP
-  obtain ⟨hd_nat_pos, x₀, hx₀V, hd_in_range, hd_divides⟩ := Nat.find_spec (p := P) hP
+  obtain ⟨hd_nat_pos, x₀, hx₀V, hd_in_range, _⟩ := Nat.find_spec (p := P) hP
   have h_minimal : ∀ n, P n → d_nat ≤ n := fun n hn => Nat.find_min' (p := P) hP hn
   set d : ULift.{u} ℤ := ⟨(d_nat : ℤ)⟩ with hd_def
   have hd_pos : d.down > 0 := by simp [hd_def]; exact_mod_cast hd_nat_pos
-  let H := H_at x₀ hx₀V
-  have hH_ne : H ≠ ⊥ := by
-    rw [ne_eq, AddSubgroup.eq_bot_iff_forall]; push_neg
-    exact ⟨d, hd_in_range, by rw [ne_eq, ULift.ext_iff, ULift.zero_down]; omega⟩
-  have hd_gen : ∀ h ∈ H, ∃ k : ℤ, h = ⟨k * d.down⟩ := by
-    intro h hh
-    obtain ⟨k, hk⟩ := hd_divides h.down hh
-    exact ⟨k, by ext; simp only [hd_def]; rw [hk, mul_comm]⟩
   obtain ⟨a₁, ha₁⟩ : d.down • gen_at x₀ hx₀V ∈ Set.range (i_x x₀) := hd_in_range
-  have ha₁_ne : a₁ ≠ 0 := by
-    intro h; rw [h, map_zero] at ha₁
-    exact absurd (zsmul_generator_injective V x₀ hx₀V ((zero_smul _ _).trans ha₁)).symm
-      (by omega)
-  have ha₁_gen : ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x₀).obj R),
-      ∃ k : ℤ, a = k • a₁ := by
-    intro a; obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x₀ hx₀V (i_x x₀ a)
-    obtain ⟨k, hk⟩ := hd_gen ⟨n⟩ ⟨a, hn⟩
-    have hn_eq : n = k * d.down := by simpa [mul_comm] using congrArg ULift.down hk
-    exact ⟨k, hi_inj x₀ (by rw [map_zsmul, hn, hn_eq, mul_smul, ← ha₁])⟩
   obtain ⟨W₀, hx₀W₀, s₀, hs₀⟩ := TopCat.Presheaf.germ_exist R x₀ a₁
   set V₁ := W₀ ⊓ V with hV₁_def
   have hV₁V : V₁ ≤ V := inf_le_right

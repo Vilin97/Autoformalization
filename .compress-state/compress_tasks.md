@@ -187,7 +187,7 @@ candidates: a 60-line proof for a 3-line statement usually has a 10-line core.
 Top 40 declarations by body line count:
 
 - [ ] Golf `sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary_hom` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:398` (signature 9L, body 241L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
-- [ ] Golf `exists_section_generating_stalks` in `Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:133` (signature 12L, body 161L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
+- [>] Golf `exists_section_generating_stalks` in `Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:133` (signature 12L, body 161L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
 - [ ] Golf `sheafH_filtered_colimit_surj_presheaf` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean:550` (signature 13L, body 145L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
 - [ ] Golf `sheafH_filtered_colimit_comparison_isIso_presheaf_succ_succ` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:817` (signature 16L, body 142L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
 - [ ] Golf `sheafH_filtered_colimit_comparison_succ_compatibility_sheaf_aux` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean:862` (signature 25L, body 141L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
@@ -237,7 +237,7 @@ Body-to-signature ratio outliers (≥4x, body ≥ 15 lines):
 - [ ] Golf `sheafH_filtered_colimit_succ_quotientCocone_isColimit` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean:268` (body/sig ratio 14.7, body 44L, sig 3L).
 - [ ] Golf `sHom` in `Aristotle/GrothendieckVanishing/main/ZeroOutside.lean:175` (body/sig ratio 14.5, body 29L, sig 2L).
 - [ ] Golf `sheafH_filtered_colimit_succ_shiftNatIso` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean:359` (body/sig ratio 14.0, body 98L, sig 7L).
-- [ ] Golf `exists_section_generating_stalks` in `Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:133` (body/sig ratio 13.4, body 161L, sig 12L).
+- [>] Golf `exists_section_generating_stalks` in `Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:133` (body/sig ratio 13.4, body 161L, sig 12L).
 - [ ] Golf `PushforwardHIso` in `Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean:34` (body/sig ratio 12.1, body 85L, sig 7L).
 - [ ] Golf `sheafH_filtered_colimit_surj_presheaf` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitCore.lean:550` (body/sig ratio 11.2, body 145L, sig 13L).
 - [ ] Golf `topologicalKrullDim_add_one_eq_iSup_height_add_one` in `Aristotle/GrothendieckVanishing/main/TopologicalKrullDim.lean:183` (body/sig ratio 11.0, body 33L, sig 3L).
