@@ -1,11 +1,11 @@
 {
   "progress_score": 1,
-  "summary": "Reverted `sheafH0EquivSections_presheaf` to bundled-sheaf `sheafH0EquivSections`, updated all callers, and replaced two duplicated NatIso.ofComponents blocks with `Functor.isoWhiskerLeft Ysh sheafH0NatIsoSections`, -10 normalized LOC (4924\u21924914).",
+  "summary": "Sheaf-reverted `subsingleton_sheafH_of_shortExact_middle_presheaf` \u2192 `subsingleton_sheafH_of_shortExact_middle` taking bundled `(f : F \u27f6 G)` directly; updated 3 callers in ClosedImmersionCohomology / FinitelyGeneratedVanishing / IrreducibleStep, -23 normalized LOC (4914\u21924891).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
-  "stuck_on": "Achieved only -10 LOC vs. expected -28; the inner-body simplifications were smaller than estimated.",
-  "strategy_recommendation": "Continue Phase-1 sheaf reversion on the next remaining `_presheaf` decl. The audit lists three left in `CohomologyAPI.lean`: `sheafH_subsingleton_of_isZero_presheaf` (L278), `sheafH_subsingleton_of_isEmpty_presheaf` (L646), and `subsingleton_sheafH_of_shortExact_middle_presheaf` (L673). Pick `subsingleton_sheafH_of_shortExact_middle_presheaf` since it has the broadest fan-out via the `_natural` companion.",
-  "attempts_entry": "Cycle 28: score=1 loc_delta=-10 \u2014 reverted `sheafH0EquivSections_presheaf` \u2192 `sheafH0EquivSections (F : Sheaf \u2026)`, deduped two NatIso.ofComponents blocks via `sheafH0NatIsoSections` whisker.",
+  "stuck_on": "",
+  "strategy_recommendation": "Continue Phase-1 sheaf reversion on the two remaining `_presheaf` decls in `CohomologyAPI.lean`: `sheafH_subsingleton_of_isZero_presheaf` (L278) and `sheafH_subsingleton_of_isEmpty_presheaf` (L646). Pick `sheafH_subsingleton_of_isZero_presheaf` first since `isZero` typically has more call sites and the wrapper packaging savings tend to be larger.",
+  "attempts_entry": "cycle 29: sheaf-reverted `subsingleton_sheafH_of_shortExact_middle_presheaf` \u2192 `subsingleton_sheafH_of_shortExact_middle` taking `(F G : Sheaf \u2026) (f : F \u27f6 G) [Mono f]`; updated 3 callers; -23 normalized LOC (4914\u21924891).",
   "completed_task_lines": []
 }

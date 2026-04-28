@@ -248,11 +248,9 @@ theorem finsetGeneratedSheaf_vanishing
             (show Sheaf.IsLocallySurjective g from
               (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} g).mpr inferInstance)
         simpa [g] using hzero SC.X₃.cond g.val hg_loc
-    haveI : Mono SC.f.val := Functor.map_mono
-      (TopCat.Sheaf.forget AddCommGrpCat.{u} X) SC.f
+    haveI : Mono SC.f := hSE.mono_f
     simpa [SC, h_sub] using
-      (subsingleton_sheafH_of_shortExact_middle_presheaf
-        (hF := SC.X₁.cond) (hG := SC.X₂.cond) (f := SC.f.val) m ih
+      (subsingleton_sheafH_of_shortExact_middle SC.f m ih
         (by simpa [SC, h_sub] using hCoker))
 
 end FinsetGenerated
