@@ -1,11 +1,11 @@
 {
   "progress_score": 2,
-  "summary": "Removed two `@[simps]` attributes in ZeroOutside.lean, eliminating unused public decls `zeroOutside.sHom_app` and `zeroOutsideInt.sHom_val`, -2 normalized LOC (4207\u21924205).",
+  "summary": "Removed two `@[simps]` annotations in ZeroOutside.lean, eliminating 3 unused public decls (`zeroOutside_obj`, `zeroOutside_map`, `zeroOutside_openHom_app`), -2 normalized LOC (4205\u21924203).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Continue Phase 4 unused-decl cleanup: investigate the remaining `@[simps]` on `zeroOutside` (lines 213/228 still reference `zeroOutside_obj`/`zeroOutside_map`) \u2014 see whether those references can be replaced by direct unfolds and the attribute removed. Otherwise, pivot to scanning CohomologyAPI.lean (largest file, 609 normalized LOC) for `(F : Presheaf X) (hF : F.IsSheaf)` triples to collapse to `Sheaf` arguments per Principle 2.",
-  "attempts_entry": "Cycle 77: removed `@[simps]` on `zeroOutside.sHom` and `zeroOutsideInt.sHom` in ZeroOutside.lean, eliminating two unused generated decls; -2 normalized LOC (4207\u21924205); compiles clean.",
+  "strategy_recommendation": "The unused-decl audit row is now empty. Pivot to the largest file: scan `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean` (782 raw / largest in tree) for `(F : Presheaf X) (hF : F.IsSheaf)` triples that should collapse to bundled `Sheaf` arguments per Principle 2 (the canonical illustration is at lines 1734-1776 area \u2014 though file is only 782 lines so search the whole file). Alternatively consult `.compress-state/structural_ideas.md` for higher-leverage cross-file initiatives now that mechanical Phase-4 is exhausted.",
+  "attempts_entry": "cycle 78: removed two `@[simps]` in ZeroOutside.lean, deleted 3 unused public decls (`zeroOutside_obj`/`_map`/`_openHom_app`), -2 normalized LOC (4205\u21924203).",
   "completed_task_lines": []
 }
