@@ -33,3 +33,4 @@ Cycle 31: cycle 31: sheaf-reverted `sheafH_subsingleton_of_isEmpty_presheaf` →
 Cycle 32: Cycle 32: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` in `PresheafFilteredColimit.lean` — removed 4 local `_assoc` wrappers, inlined direct calc steps; -27 normalized LOC (4888→4861).
 Cycle 33: cycle 33: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` (dropped local-let type sigs + inlined `e_j`/`congrArg` in `hstage_cok`), -24 normalized LOC (4861→4837).
 Cycle 34: cycle 34: golfed `exists_section_generating_stalks` in IrreducibleStep.lean by deleting unused proof-local witnesses, -24 normalized LOC (4837→4813).
+Cycle 35: cycle 35: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` (PresheafFilteredColimit.lean) — collapsed two `calc` blocks into direct rewrite chains, -23 normalized LOC (4813→4790).
