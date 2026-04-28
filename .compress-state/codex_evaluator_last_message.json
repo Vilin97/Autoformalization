@@ -1,13 +1,11 @@
 {
-  "progress_score": 1,
-  "summary": "Golfed `_root_.isZero_zeroOutsideInt_bot` in ZeroOutside.lean by reusing `sheaf_isZero_of_zero_stalks` (import swap ClosedImmersion\u2192CohomologyAPI), -20 normalized LOC (4145\u21924125).",
+  "attempts_entry": "cycle 83: extracted `sheafH_filtered_colimit_zero_sections_iso` (two-use private helper) in PresheafFilteredColimit.lean, -10 normalized LOC (4125\u21924115).",
+  "completed_task_lines": [],
   "principle_violations": [],
-  "task_addressed": true,
-  "task_complete": true,
+  "progress_score": 1,
+  "strategy_recommendation": "Phase 4 mechanical golf is yielding ~10 LOC/cycle now. Next planner should re-run `find_repeated_blocks.py` and target the next live repeated block (e.g. the 12 lines \u00d7 2 in `CohomologyAPI.lean` mentioned in the cycle-83 strategy), or revisit `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` (CohomologyAPI.lean:714) for a Sheaf-vs-Presheaf+IsSheaf reduction that aligns with Principle 2.",
   "stuck_on": "",
-  "strategy_recommendation": "Continue Phase 4 body/sig outliers: next-best target is `Golf zeroOutside in ZeroOutside.lean:39` (body/sig 17.0) or `Golf sHom in ZeroOutside.lean:175` (body/sig 14.5). Alternatively, advance the `- [>]` `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` (CohomologyAPI.lean:714, 111L body) which is the largest open WIP item and aligns with Principle 2 (Sheaf vs Presheaf+IsSheaf).",
-  "attempts_entry": "cycle 82: -20 norm LOC (4145\u21924125) \u2014 replaced 22-line manual IsZero.mk block in `_root_.isZero_zeroOutsideInt_bot` with `sheaf_isZero_of_zero_stalks` call (import swap ClosedImmersion\u2192CohomologyAPI in ZeroOutside.lean).",
-  "completed_task_lines": [
-    "- [>] Golf `_root_.isZero_zeroOutsideInt_bot` in `Aristotle/GrothendieckVanishing/main/ZeroOutside.lean:366` (body/sig ratio 15.0, body 30L, sig 2L)."
-  ]
+  "summary": "Extracted two-use private helper `sheafH_filtered_colimit_zero_sections_iso` in PresheafFilteredColimit.lean factoring duplicated degree-0 sections-colimit setup, -10 normalized LOC (4125\u21924115).",
+  "task_addressed": true,
+  "task_complete": true
 }
