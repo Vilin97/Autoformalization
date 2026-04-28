@@ -34,3 +34,4 @@ Cycle 32: Cycle 32: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` in `
 Cycle 33: cycle 33: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` (dropped local-let type sigs + inlined `e_j`/`congrArg` in `hstage_cok`), -24 normalized LOC (4861→4837).
 Cycle 34: cycle 34: golfed `exists_section_generating_stalks` in IrreducibleStep.lean by deleting unused proof-local witnesses, -24 normalized LOC (4837→4813).
 Cycle 35: cycle 35: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` (PresheafFilteredColimit.lean) — collapsed two `calc` blocks into direct rewrite chains, -23 normalized LOC (4813→4790).
+Cycle 36: cycle 36: score=1 loc_delta=-29 — Golfed `sheafH1_cokernel_iso_of_subsingleton_middle` by replacing hand-built `AddMonoidHom.mk'` δ with `(sheafH0EquivSections S.X₃).symm ≫ sheafH_succ_map hS 0` and inlining redundant local witnesses; updated `_hom_π` companion via `sheafH_succ_map_apply`, -29 normalized LOC (4790→4761).

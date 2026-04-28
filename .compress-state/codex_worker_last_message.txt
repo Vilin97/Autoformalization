@@ -1,12 +1,11 @@
-Implemented cycle 35.
+Cycle 36 completed.
 
-Changed [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:451): golfed `sheafH_filtered_colimit_comparison_one_iso_hom` by collapsing the `hstage_cok` middle `calc` and the final `calc`.
+Changed [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:417): replaced the local hand-built `δ` with `sheafH_succ_map hS 0`, then removed the now-redundant `hy'`, `hab'`, `hsub`, and `hq` proof steps. Adjusted the adjacent `hom_π` theorem to simplify through `sheafH_succ_map_apply`.
 
-Report written: [cycle_35.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_35.md).
+Report written to [cycle_36.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_36.md:1).
 
 Verification:
-- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean` passed, with an existing unused simp-arg warning later in the file.
-- Normalized LOC: `4813 -> 4790` (`-23`)
-- Raw `main/*.lean` wc: `5694 -> 5671` (`-23`)
-
-No commit made.
+- `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean` passed
+- Normalized LOC: `4790 -> 4761` (`-29`)
+- Raw `main/*.lean` wc: `5671 -> 5642` (`-29`)
+- No commit or push performed.
