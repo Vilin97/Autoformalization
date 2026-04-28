@@ -204,7 +204,7 @@ Top 40 declarations by body line count:
 - [ ] Golf `sheafH_comp_extClass_naturality_presheaf` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:238` (signature 8L, body 59L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
 - [ ] Golf `sheafH_subsingleton_H1_of_flasque_of_epi_app_top_map_presheaf` in `Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean:514` (signature 7L, body 54L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
 - [ ] Golf `epi_app_of_shortExact_of_epi_restrictions_presheaf` in `Aristotle/GrothendieckVanishing/main/FlasqueVanishing.lean:320` (signature 6L, body 52L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
-- [ ] Golf `finsetGenCocone_isColimit` in `Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:65` (signature 2L, body 51L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
+- [x] Golf `finsetGenCocone_isColimit` in `Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:65` (signature 2L, body 51L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
 - [ ] Golf `subsingleton_sheafH_of_closedImmersion_middle_presheaf` in `Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean:126` (signature 5L, body 50L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
 - [x] Golf `sheafH_filtered_colimit_h1_boundary_square` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:230` (signature 5L, body 50L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
 - [ ] Golf `closedComplementVanishing` in `Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:376` (signature 9L, body 48L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.
@@ -230,7 +230,7 @@ Top 40 declarations by body line count:
 Body-to-signature ratio outliers (≥4x, body ≥ 15 lines):
 
 - [ ] Golf `sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary_hom` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:398` (body/sig ratio 26.8, body 241L, sig 9L).
-- [ ] Golf `finsetGenCocone_isColimit` in `Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:65` (body/sig ratio 25.5, body 51L, sig 2L).
+- [x] Golf `finsetGenCocone_isColimit` in `Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:65` (body/sig ratio 25.5, body 51L, sig 2L).
 - [ ] Golf `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:714` (body/sig ratio 18.5, body 111L, sig 6L).
 - [ ] Golf `zeroOutside` in `Aristotle/GrothendieckVanishing/main/ZeroOutside.lean:39` (body/sig ratio 17.0, body 17L, sig 1L).
 - [ ] Golf `_root_.isZero_zeroOutsideInt_bot` in `Aristotle/GrothendieckVanishing/main/ZeroOutside.lean:366` (body/sig ratio 15.0, body 30L, sig 2L).

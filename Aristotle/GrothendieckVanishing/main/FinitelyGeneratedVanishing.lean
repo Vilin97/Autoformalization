@@ -64,7 +64,6 @@ noncomputable def finsetGenCocone :
     (since `allSectionMap K` factors through it), hence an isomorphism. -/
 noncomputable def finsetGenCocone_isColimit :
     IsColimit (finsetGenCocone hK) := by
-  let Ksh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨K, hK⟩
   -- Show the comparison map colim → K is an iso, then transport IsColimit
   let d := colimit.desc (finsetGenFunctor hK) (finsetGenCocone hK)
   -- desc is mono: natural transformation to const K has all components mono (image.ι),
@@ -72,14 +71,11 @@ noncomputable def finsetGenCocone_isColimit :
   have hd_mono : Mono d := by
     haveI : IsConnected
         (Finset (TopCat.Presheaf.SectionIndex K)) := IsFiltered.isConnected _
-    let α : finsetGenFunctor hK ⟶ (Functor.const _).obj Ksh :=
-      { app := fun S => Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK S)
-        naturality := fun S S' h => by
-          simp [finsetGenFunctor, TopCat.Presheaf.finsetImageInclGen_comp_ι] }
-    haveI : ∀ j, Mono (α.app j) := fun _ => inferInstance
-    haveI := NatTrans.mono_of_mono_app α
-    exact colim.map_mono' α (colimit.isColimit _) (isColimitConstCocone _ _) d
-      (fun j => by simp [d, α, finsetGenCocone, constCocone])
+    haveI : ∀ j, Mono ((finsetGenCocone hK).ι.app j) := fun j =>
+      show Mono (Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK j)) from inferInstance
+    haveI := NatTrans.mono_of_mono_app (finsetGenCocone hK).ι
+    exact colim.map_mono' (finsetGenCocone hK).ι (colimit.isColimit _)
+      (isColimitConstCocone _ _) d (fun j => by simp [d, finsetGenCocone, constCocone])
   -- desc is epi: allSectionMap K factors through desc
   have hd_epi : Epi d := by
     let g : (∐ fun σ : TopCat.Presheaf.SectionIndex K => TopCat.Sheaf.zeroOutsideInt σ.1) ⟶
@@ -90,22 +86,16 @@ noncomputable def finsetGenCocone_isColimit :
           factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK {σ}) ≫
           colimit.ι (finsetGenFunctor hK) {σ}
     have hfac : g ≫ d = TopCat.Presheaf.allSectionMap hK := by
-      dsimp only [g, d]; apply Sigma.hom_ext; intro σ
+      ext σ
+      dsimp only [g, d]
       rw [← Category.assoc, Sigma.ι_desc, Category.assoc, Category.assoc, colimit.ι_desc]
-      change
-        Sigma.ι (fun τ : {τ // τ ∈ ({σ} : Finset _)} => TopCat.Sheaf.zeroOutsideInt τ.1.1)
-            ⟨σ, Finset.mem_singleton_self σ⟩ ≫
-          factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK {σ}) ≫
-          Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK {σ}) =
-        Sigma.ι (fun τ : TopCat.Presheaf.SectionIndex K => TopCat.Sheaf.zeroOutsideInt τ.1) σ ≫
-          TopCat.Presheaf.allSectionMap hK
-      rw [Limits.image.fac]
-      simp [TopCat.Presheaf.allSectionMap, TopCat.Presheaf.finsetGeneratorMap,
-        TopCat.Sheaf.familyMap]
+      simp [finsetGenCocone, TopCat.Presheaf.allSectionMap,
+        TopCat.Presheaf.finsetGeneratorMap, TopCat.Sheaf.familyMap]
     haveI := TopCat.Presheaf.allSectionMap_epi (F := K) hK
     exact epi_of_epi_fac hfac
   -- mono + epi → iso in abelian category
-  haveI := hd_mono; haveI := hd_epi
+  haveI : Mono d := hd_mono
+  haveI : Epi d := hd_epi
   haveI : IsIso ((colimit.isColimit (finsetGenFunctor hK)).desc (finsetGenCocone hK)) :=
     isIso_of_mono_of_epi d
   exact (colimit.isColimit (finsetGenFunctor hK)).ofPointIso
