@@ -1,14 +1,11 @@
-Implemented cycle 64.
+Cycle 65 completed.
 
-Changed [FinitelyGeneratedVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:165):
-- Inlined the single-use `hCoker`.
-- Removed the single-use `proj`/`hfac` locals by passing the projection directly to `epi_of_epi_fac`.
-- Replaced the manual `heq` cancellation/ext proof with `simp [f, TopCat.Presheaf.finsetImageInclGen]`.
+Changed [ClosedImmersionCohomology.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean:34): golfed `PushforwardHIso` only, keeping the signature unchanged. Added the required report at [cycle_65.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_65.md:1).
 
 Verification:
-- `lake env lean Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean` passed.
-- `rg "\b(sorry|admit|axiom)\b"` on the modified Lean file had no matches.
-- Normalized LOC: `4316 -> 4301`, delta `-15`.
-- Raw `main/*.lean` wc: `5218 -> 5203`, delta `-15`.
+- `lake env lean Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean` passed.
+- Normalized LOC: `4301 -> 4291` total, delta `-10`.
+- Raw `main/*.lean` wc: `5203 -> 5193`, delta `-10`.
+- `lake build` not run; this was proof-only with no signature/import/file changes.
 
-Wrote the required report at [cycle_64.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_64.md). No commit or push was performed.
+I did not commit or push. Existing unrelated `.compress-state` dirty files were left untouched.

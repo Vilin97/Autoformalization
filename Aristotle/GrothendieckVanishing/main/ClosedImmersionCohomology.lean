@@ -39,20 +39,16 @@ noncomputable def PushforwardHIso
       AddCommGrpCat.of (Sheaf.H ((TopCat.Sheaf.pushforward AddCommGrpCat.{u}
         (TopCat.closedIncl hZ)).obj G) n) := by
   let closedIncl := TopCat.closedIncl hZ
-  revert G
-  induction n with
+  induction n generalizing G with
   | zero =>
-    intro G'
-    let F' := (TopCat.Sheaf.pushforward AddCommGrpCat.{u} closedIncl).obj G'
-    exact (sheafH0NatIsoSections (X := TopCat.of Z)).app G' ≪≫
-      eqToIso (by
-        change G'.val.obj (op ⊤) = G'.val.obj (op ((Opens.map closedIncl).obj ⊤))
-        rw [Opens.map_top]) ≪≫
-      ((sheafH0NatIsoSections (X := X)).app F').symm
+    exact by
+      simpa [Opens.map_top] using
+        (sheafH0NatIsoSections (X := TopCat.of Z)).app G ≪≫
+          ((sheafH0NatIsoSections (X := X)).app
+            ((TopCat.Sheaf.pushforward AddCommGrpCat.{u} closedIncl).obj G)).symm
   | succ k ih_push =>
-    intro G'
     classical
-    let ip : InjectivePresentation G' := Classical.choice (EnoughInjectives.presentation G')
+    let ip : InjectivePresentation G := Classical.choice (EnoughInjectives.presentation G)
     let S := ip.shortComplex
     let SX := S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} closedIncl)
     have hSE_X : SX.ShortExact :=
@@ -67,26 +63,20 @@ noncomputable def PushforwardHIso
       sheafH_subsingleton_of_flasque X SX.X₂ hFlasqueSX₂ r
     cases k with
     | zero =>
-      exact
-        (show cokernel (S.g.val.app (op ⊤)) ≅ AddCommGrpCat.of (Sheaf.H G' 1) from by
-          simpa [S] using
-            sheafH1_cokernel_iso_of_subsingleton_middle hSE (hSrcSub 0)).symm ≪≫
-        (show cokernel (S.g.val.app (op ⊤)) ≅ AddCommGrpCat.of (Sheaf.H SX.X₁ 1) from by
-          simpa [S, SX, Opens.map_top closedIncl] using
-            sheafH1_cokernel_iso_of_subsingleton_middle hSE_X (hTgtSub 0))
+      exact by
+        simpa [S, SX] using
+          (show cokernel (SX.g.val.app (op ⊤)) ≅ AddCommGrpCat.of (Sheaf.H G 1) from by
+            simpa [S, SX, Opens.map_top closedIncl] using
+              sheafH1_cokernel_iso_of_subsingleton_middle hSE (hSrcSub 0)).symm ≪≫
+          sheafH1_cokernel_iso_of_subsingleton_middle hSE_X (hTgtSub 0)
     | succ m =>
-      exact
-        (show AddCommGrpCat.of (Sheaf.H S.X₃ (m + 1)) ≅
-            AddCommGrpCat.of (Sheaf.H G' (m + 2)) from by
-          simpa [S] using
-            sheafH_succ_iso_of_subsingleton_middle hSE (m + 1) (hSrcSub m)
-              (hSrcSub (m + 1))).symm ≪≫
+      exact by
+        simpa [S, SX] using
+          (sheafH_succ_iso_of_subsingleton_middle hSE (m + 1) (hSrcSub m)
+            (hSrcSub (m + 1))).symm ≪≫
         ih_push S.X₃ ≪≫
-        (show AddCommGrpCat.of (Sheaf.H SX.X₃ (m + 1)) ≅
-            AddCommGrpCat.of (Sheaf.H SX.X₁ (m + 2)) from by
-          simpa [SX] using
-            sheafH_succ_iso_of_subsingleton_middle hSE_X (m + 1) (hTgtSub m)
-              (hTgtSub (m + 1)))
+          sheafH_succ_iso_of_subsingleton_middle hSE_X (m + 1) (hTgtSub m)
+            (hTgtSub (m + 1))
 
 /-- Closed-immersion step: if the kernel term of the closed-immersion
 short exact sequence and the pullback to the closed subset have subsingleton
