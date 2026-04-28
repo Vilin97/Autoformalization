@@ -64,3 +64,4 @@ Cycle 62: cycle 62: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` (Pre
 Cycle 63: cycle 63: golfed `exists_section_generating_stalks` (IrreducibleStep.lean) — namespace shortening, inlined destructures, refine-fold; -12 norm LOC (4328→4316), score 1.
 Cycle 64: cycle 64: score=1 loc_delta=-15 — Golfed `finsetGeneratedSheaf_vanishing` insert branch (FinitelyGeneratedVanishing.lean) by inlining single-use `hCoker`/`proj`/`hfac` and replacing manual `heq` with `simp [f, finsetImageInclGen]`; -15 normalized LOC (4316→4301).
 Cycle 65: cycle 65: golfed `PushforwardHIso` (ClosedImmersionCohomology.lean) — induction generalizing + simpa over manual eqToIso, -10 normalized LOC (4301→4291).
+Cycle 66: cycle 66: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` in PresheafFilteredColimit.lean by inlining `hstage` and cokernel `π` equalities, -7 normalized LOC (4291→4284).

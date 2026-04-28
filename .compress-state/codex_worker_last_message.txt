@@ -1,11 +1,11 @@
-Cycle 65 completed.
+Implemented cycle 66.
 
-Changed [ClosedImmersionCohomology.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean:34): golfed `PushforwardHIso` only, keeping the signature unchanged. Added the required report at [cycle_65.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_65.md:1).
+Golfed `sheafH_filtered_colimit_comparison_one_iso_hom` in [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:317), mainly by inlining the single-use `hstage` and cokernel `π` equality plumbing.
 
 Verification:
-- `lake env lean Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean` passed.
-- Normalized LOC: `4301 -> 4291` total, delta `-10`.
-- Raw `main/*.lean` wc: `5203 -> 5193`, delta `-10`.
-- `lake build` not run; this was proof-only with no signature/import/file changes.
+- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean` passed
+- Normalized LOC: `4291 -> 4284` (`-7`)
+- Raw `main/*.lean` wc: `5193 -> 5186` (`-7`)
+- `lake build` not run; no declarations/files were added, deleted, renamed, or retagged
 
-I did not commit or push. Existing unrelated `.compress-state` dirty files were left untouched.
+Wrote the required report at [cycle_66.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_66.md:1). Existing unrelated `.compress-state` dirt was left untouched.
