@@ -1,16 +1,14 @@
-Cycle 30 is complete.
+Implemented cycle 31.
 
-Changed `sheafH_subsingleton_of_isZero_presheaf` into bundled-sheaf theorem `sheafH_subsingleton_of_isZero`, updated all direct callers, and wrote the report at [.compress-state/codex_task_results/cycle_30.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_30.md).
+Changed [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:643) to replace `sheafH_subsingleton_of_isEmpty_presheaf` with bundled-sheaf theorem `sheafH_subsingleton_of_isEmpty`, and updated the sole call in [GrothendieckVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/GrothendieckVanishing.lean:126). Wrote the required report at [.compress-state/codex_task_results/cycle_31.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_31.md).
 
 Verification passed:
-
-- `lake env lean` for `CohomologyAPI.lean`, `FinitelyGeneratedVanishing.lean`, `IrreducibleStep.lean`, `GrothendieckVanishing.lean`
+- `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`
+- `lake env lean Aristotle/GrothendieckVanishing/main/GrothendieckVanishing.lean`
 - `lake build`
-- old theorem name no longer appears under `Aristotle/`
 
 Metrics:
+- normalized LOC: `4889 -> 4888` (`-1`)
+- raw `main/*.lean` lines: `5765 -> 5763` (`-2`)
 
-- Normalized LOC: `4891 -> 4889` delta `-2`
-- Raw `main/*.lean` wc: `5768 -> 5765` delta `-3`
-
-`lake build` succeeded with only pre-existing linter warnings in unmodified files.
+The full build emitted only existing linter warnings in unrelated files.

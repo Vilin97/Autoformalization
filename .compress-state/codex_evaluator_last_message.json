@@ -1,11 +1,11 @@
 {
   "progress_score": 1,
-  "summary": "Sheaf-reverted `sheafH_subsingleton_of_isZero_presheaf` \u2192 `sheafH_subsingleton_of_isZero` taking bundled `(F : Sheaf \u2026)` directly; updated 4 callers across CohomologyAPI/FinitelyGeneratedVanishing/GrothendieckVanishing/IrreducibleStep, -2 normalized LOC (4891\u21924889).",
+  "summary": "Sheaf-reverted `sheafH_subsingleton_of_isEmpty_presheaf` \u2192 `sheafH_subsingleton_of_isEmpty` taking `(F : Sheaf \u2026)` directly; updated sole caller in GrothendieckVanishing.lean, -1 normalized LOC (4889\u21924888).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
-  "stuck_on": "Savings smaller than projected (-2 vs expected -14) because most callers were already passing bundled sheaves with minimal packaging boilerplate to drop.",
-  "strategy_recommendation": "Next cycle should sheaf-revert the last remaining `_presheaf` decl `sheafH_subsingleton_of_isEmpty_presheaf` at `CohomologyAPI.lean:646` to `sheafH_subsingleton_of_isEmpty` taking `(F : TopCat.Sheaf AddCommGrpCat.{u} X)` directly. After that, all Phase-1 `_presheaf` reversions in `CohomologyAPI.lean` are exhausted and the planner should move to Phase-4 long-proof golf \u2014 the longest remaining body is `filtered_colimit_exists_compatible_representatives` (130 lines, ratio 10.0) in `PresheafFilteredColimitGeneral.lean:204`.",
-  "attempts_entry": "cycle 30: score=1 loc_delta=-2 \u2014 sheaf-reverted `sheafH_subsingleton_of_isZero_presheaf` \u2192 `sheafH_subsingleton_of_isZero`, 4 callers updated; 4891\u21924889 normalized.",
+  "stuck_on": "Nothing \u2014 last `_presheaf` declaration in CohomologyAPI is gone; Phase-1 sheaf-reversions exhausted.",
+  "strategy_recommendation": "Phase-1 `_presheaf` reversions in CohomologyAPI are exhausted. Move to Phase-4 long-proof golf: pick `filtered_colimit_exists_compatible_representatives` (PresheafFilteredColimitGeneral.lean:204, body=130, ratio=10.0) or `sheafH_filtered_colimit_comparison_one_iso_hom` (PresheafFilteredColimit.lean:356, body=207). Alternatively, run the audit/scanner for any remaining `_presheaf` declarations in other files before committing to long-proof golf.",
+  "attempts_entry": "cycle 31: sheaf-reverted `sheafH_subsingleton_of_isEmpty_presheaf` \u2192 `sheafH_subsingleton_of_isEmpty` (bundled sheaf), updated 1 caller in GrothendieckVanishing.lean; -1 normalized LOC (4889\u21924888); score=1.",
   "completed_task_lines": []
 }
