@@ -1,18 +1,14 @@
-Implemented cycle 80.
+Implemented cycle 81.
 
-Golfed `sheafH_filtered_colimit_comparison_isIso_succ_succ` in [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:400):
-- Removed the local `hFlasqueInj` reproof by using existing `sheafH_filtered_colimit_succ_inj_subsingleton`.
-- Replaced the final `hcompat` transport rewrite with direct `IsIso.of_isIso_fac_left`.
-
-Added the required report at [.compress-state/codex_task_results/cycle_80.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_80.md:1).
+Hoisted the repeated degree-`1` filtered-colimit helper context into `section FilteredColimitH1` in [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:23), including `Y'`, `[Zero ...]`, and shared `c'`/`hc'` for the boundary/global cokernel helpers. No declarations were renamed or deleted.
 
 Verification:
-- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean`
-- `lake env lean Aristotle/GrothendieckVanishing/main/GrothendieckVanishing.lean`
-- placeholder scan returned no declaration-level `sorry`/`admit`/`axiom`
+- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean` passed.
+- `lake build` not run, per strategy scope.
 
 Metrics:
-- Normalized LOC: `4182 -> 4162` (`-20`)
-- Raw `main/*.lean` wc: `5087 -> 5067` (`-20`)
+- Normalized LOC: `4162 -> 4145` (`-17`)
+- Raw `main/*.lean` wc: `5067 -> 5054` (`-13`)
+- Target file normalized: `434 -> 417`
 
-No commit or push performed.
+Report written to [cycle_81.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_81.md:1).
