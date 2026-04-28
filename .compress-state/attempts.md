@@ -28,3 +28,4 @@ Cycle 26: Evaluator failed (exit 1): {"type":"result","subtype":"success","is_er
 Cycle 27: cycle 27: sheaf-reverted `sheafH0EquivSections_presheaf_natural` → `sheafH0EquivSections_natural` and updated 8 callers in CohomologyAPI.lean/PresheafFilteredColimit.lean; -22 normalized LOC (4946→4924); raw -20 (5822→5802); lake env lean + lake build pass.
 Cycle 28: Cycle 28: score=1 loc_delta=-10 — reverted `sheafH0EquivSections_presheaf` → `sheafH0EquivSections (F : Sheaf …)`, deduped two NatIso.ofComponents blocks via `sheafH0NatIsoSections` whisker.
 Cycle 29: cycle 29: sheaf-reverted `subsingleton_sheafH_of_shortExact_middle_presheaf` → `subsingleton_sheafH_of_shortExact_middle` taking `(F G : Sheaf …) (f : F ⟶ G) [Mono f]`; updated 3 callers; -23 normalized LOC (4914→4891).
+Cycle 30: cycle 30: score=1 loc_delta=-2 — sheaf-reverted `sheafH_subsingleton_of_isZero_presheaf` → `sheafH_subsingleton_of_isZero`, 4 callers updated; 4891→4889 normalized.

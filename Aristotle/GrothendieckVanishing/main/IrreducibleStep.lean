@@ -409,7 +409,7 @@ theorem closedComplementVanishing
   exact subsingleton_sheafH_of_closedImmersion_middle
     (Z := Y) (hZ := hYcl) Csh n
     (by
-      simpa [S] using sheafH_subsingleton_of_isZero_presheaf S.X₁.cond hSX₁_zero n)
+      simpa [S] using sheafH_subsingleton_of_isZero hSX₁_zero n)
     (by
       simpa [closedIncl, Csh, CY] using
         ih (TopCat.of Y) n (G := CY.val) CY.cond hY_dim_lt hn)
@@ -483,7 +483,7 @@ theorem subsheaf_zeroOutsideInt_vanishing
     (m : ℕ) (hm : m > topologicalKrullDim X) :
     Subsingleton (Sheaf.H (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
   by_cases hR : IsZero (⟨R, hRsh⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)
-  · simpa using sheafH_subsingleton_of_isZero_presheaf hRsh hR m
+  · simpa using sheafH_subsingleton_of_isZero hR m
   · obtain ⟨V', hV'le, hV'ne, j, hj_mono, hj_stalk⟩ :=
       (by
         exact subsheaf_contains_zeroOutsideInt (R := R) hRsh i (by
@@ -548,7 +548,7 @@ theorem epiImage_zeroOutsideInt_vanishing_of_locallySurjective
     have hZero : IsZero ((⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
       (isZero_zeroOutsideInt_bot X).of_epi (show TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X) ⟶
         (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) from Sheaf.Hom.mk f)
-    simpa using sheafH_subsingleton_of_isZero_presheaf hG hZero m
+    simpa using sheafH_subsingleton_of_isZero hZero m
   · let fsh : TopCat.Sheaf.zeroOutsideInt V ⟶
         (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) := Sheaf.Hom.mk f
     have hkernel : Subsingleton (Sheaf.H (kernel fsh) (m + 1)) := by

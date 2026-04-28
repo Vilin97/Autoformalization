@@ -12,7 +12,7 @@ calculations internal so downstream files never need to unfold `Sheaf.H` directl
 * `subsingleton_sheafH_of_shortExact_middle`: middle-term cohomology vanishing
 * `sheafH_subsingleton_of_isEmpty_presheaf`: presheaf-boundary empty-space vanishing
 * `sheaf_isZero_of_zero_stalks`: zero stalks imply zero sheaf
-* `sheafH_subsingleton_of_isZero_presheaf`: presheaf-boundary zero-sheaf vanishing
+* `sheafH_subsingleton_of_isZero`: bundled zero-sheaf vanishing
 * `stalk_zero_of_ses_g_iso`: stalk vanishing from SES with iso on `g`
 * `stalk_zero_of_shortExact_kernel`: stalk vanishing from SES kernel
 * `stalk_zero_of_g_is_cokernel_of_stalk_epi`: sheaf-level stalk
@@ -273,12 +273,10 @@ theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
         fun U => (hZ.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
   simpa [Fsh] using hFsh
 
-/-- If a presheaf is a sheaf and the induced bundled sheaf is zero, then its cohomology is
-    subsingleton in every degree. -/
-theorem sheafH_subsingleton_of_isZero_presheaf {X : TopCat.{u}}
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
-    (hzero : IsZero ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X))) (n : ℕ) :
-    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) :=
+/-- If a bundled sheaf is zero, then its cohomology is subsingleton in every degree. -/
+theorem sheafH_subsingleton_of_isZero {X : TopCat.{u}}
+    {F : TopCat.Sheaf AddCommGrpCat.{u} X} (hzero : IsZero F) (n : ℕ) :
+    Subsingleton (Sheaf.H F n) :=
   ext_subsingleton_of_isZero_tgt hzero n
 
 /-- In a short exact sequence `X₁ → X₂ → X₃`, if the stalk map of `g` at `x` is an
@@ -648,7 +646,7 @@ theorem sheafH_subsingleton_of_isEmpty_presheaf {X : TopCat.{u}} [IsEmpty X]
     Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
   have hzero : IsZero ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) :=
     sheaf_isZero_of_zero_stalks X hF (fun x _ => (IsEmpty.false x).elim)
-  exact sheafH_subsingleton_of_isZero_presheaf hF hzero n
+  exact sheafH_subsingleton_of_isZero hzero n
 
 /-! ## Sheaf Cohomology Functor -/
 

@@ -168,9 +168,8 @@ theorem finsetGeneratedSheaf_vanishing
     exact h S
   intro T; induction T using Finset.induction with
   | empty =>
-    simpa using sheafH_subsingleton_of_isZero_presheaf
-      (F := (TopCat.Presheaf.finsetGeneratedSheaf hK ∅).val)
-      (hF := (TopCat.Presheaf.finsetGeneratedSheaf hK ∅).cond)
+    simpa using sheafH_subsingleton_of_isZero
+      (F := TopCat.Presheaf.finsetGeneratedSheaf hK ∅)
       (hzero := by
         simpa using (show IsZero (TopCat.Presheaf.finsetGeneratedSheaf hK ∅) from by
           apply IsZero.of_iso (isZero_zero _) (imageZero' _)

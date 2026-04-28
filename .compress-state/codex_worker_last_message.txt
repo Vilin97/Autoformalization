@@ -1,14 +1,16 @@
-Implemented cycle 29.
+Cycle 30 is complete.
 
-Changed `subsingleton_sheafH_of_shortExact_middle_presheaf` into the bundled-sheaf theorem `subsingleton_sheafH_of_shortExact_middle` in [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:672), then updated the three callers in [ClosedImmersionCohomology.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean:154), [FinitelyGeneratedVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:253), and [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:522). The old `_presheaf` declaration has no remaining references.
+Changed `sheafH_subsingleton_of_isZero_presheaf` into bundled-sheaf theorem `sheafH_subsingleton_of_isZero`, updated all direct callers, and wrote the report at [.compress-state/codex_task_results/cycle_30.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_30.md).
 
 Verification passed:
-- `lake env lean` on all four modified Lean files
+
+- `lake env lean` for `CohomologyAPI.lean`, `FinitelyGeneratedVanishing.lean`, `IrreducibleStep.lean`, `GrothendieckVanishing.lean`
 - `lake build`
-- `git diff --check`
+- old theorem name no longer appears under `Aristotle/`
 
-LOC:
-- Normalized: `4914 -> 4891`, delta `-23`
-- Raw `main/*.lean`: `5792 -> 5768`, delta `-24`
+Metrics:
 
-Wrote the required report at [.compress-state/codex_task_results/cycle_29.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_29.md). No commit made. Build still reports unrelated pre-existing linter warnings in files like `ZeroOutside.lean` and filtered colimit modules.
+- Normalized LOC: `4891 -> 4889` delta `-2`
+- Raw `main/*.lean` wc: `5768 -> 5765` delta `-3`
+
+`lake build` succeeded with only pre-existing linter warnings in unmodified files.
