@@ -1,12 +1,14 @@
-Cycle 78 complete.
+Cycle 79 completed.
 
-Removed the two targeted `@[simps]` annotations in [ZeroOutside.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ZeroOutside.lean), eliminating generated `zeroOutside_obj`, `zeroOutside_map`, and `zeroOutside_openHom_app`. Updated the local proofs to unfold `zeroOutside` directly. Wrote the required report at [cycle_78.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_78.md).
+Changed [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:221) by adding a narrow `FilteredColimitComparison` section and hoisting the shared `{X}`, `{J'}`, `Ysh`, `csh`, `hcsh` context across the seven comparison iso/isIso declarations. No declarations were renamed or deleted.
 
-Verification passed:
-- `lake env lean Aristotle/GrothendieckVanishing/main/ZeroOutside.lean`
-- `lake build`
-- `rg` found no remaining `zeroOutside_(obj|map|openHom_app)` references
+Verification:
+- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean` passed.
+- `lake build` passed, with existing linter warnings in other files.
 
 Metrics:
-- Normalized LOC: `4205 -> 4203` (`-2`)
-- Raw `main/*.lean` wc: `5107 -> 5105` (`-2`)
+- Normalized LOC: `4203 -> 4182` (`-21`)
+- Raw `main/*.lean` wc: `5105 -> 5087` (`-18`)
+- `PresheafFilteredColimit.lean` raw: `517 -> 499`
+
+Wrote the required report at [.compress-state/codex_task_results/cycle_79.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_79.md). Existing unrelated `.compress-state` worktree changes were left untouched.

@@ -1,11 +1,11 @@
 {
-  "progress_score": 2,
-  "summary": "Removed two `@[simps]` annotations in ZeroOutside.lean, eliminating 3 unused public decls (`zeroOutside_obj`, `zeroOutside_map`, `zeroOutside_openHom_app`), -2 normalized LOC (4205\u21924203).",
+  "progress_score": 1,
+  "summary": "Hoisted repeated `{X}/{J'}/Ysh/csh/hcsh` context across 7 filtered-colimit comparison decls into a `FilteredColimitComparison` section in PresheafFilteredColimit.lean, -21 normalized LOC (4203\u21924182).",
   "principle_violations": [],
   "task_addressed": true,
-  "task_complete": true,
-  "stuck_on": "",
-  "strategy_recommendation": "The unused-decl audit row is now empty. Pivot to the largest file: scan `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean` (782 raw / largest in tree) for `(F : Presheaf X) (hF : F.IsSheaf)` triples that should collapse to bundled `Sheaf` arguments per Principle 2 (the canonical illustration is at lines 1734-1776 area \u2014 though file is only 782 lines so search the whole file). Alternatively consult `.compress-state/structural_ideas.md` for higher-leverage cross-file initiatives now that mechanical Phase-4 is exhausted.",
-  "attempts_entry": "cycle 78: removed two `@[simps]` in ZeroOutside.lean, deleted 3 unused public decls (`zeroOutside_obj`/`_map`/`_openHom_app`), -2 normalized LOC (4205\u21924203).",
+  "task_complete": false,
+  "stuck_on": "3 occurrences of the `{X : TopCat.{u}} [NoetherianSpace X]` binder pattern remain in PresheafFilteredColimit.lean outside the new section (the original count was 14, ~7 were eliminated by this cycle's hoist). A second non-overlapping section hoist is possible if the remaining sites cluster.",
+  "strategy_recommendation": "Look for a second hoist opportunity for the remaining 3 `{X : TopCat.{u}} [NoetherianSpace X] / {J' : Type u} [SmallCategory J'] [IsFiltered J']` binder occurrences in PresheafFilteredColimit.lean (likely in the `_succ_succ`-adjacent `Y`/`hY`/`c`/`hc` Presheaf-level helpers around lines 315/399/649). Alternatively, pivot to the much higher-leverage `CohomologyAPI.lean` 12-line/26-line repeated `(F\u2081 F\u2082 F\u2083 : Presheaf) (h\u2081 h\u2082 h\u2083 : IsSheaf)` blocks, which align with Principle 2 (Sheaf-reversion) and have far larger potential savings (~192\u2013273 lines).",
+  "attempts_entry": "cycle 79: hoisted FilteredColimitComparison section variables across 7 comparison decls in PresheafFilteredColimit.lean \u2014 -21 normalized LOC (4203\u21924182), file compiles, no spirit violations; 3 sibling binder sites remain.",
   "completed_task_lines": []
 }
