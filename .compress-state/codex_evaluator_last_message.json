@@ -1,11 +1,11 @@
 {
   "progress_score": 1,
-  "summary": "Golfed `exists_section_generating_stalks` in IrreducibleStep.lean via `Exists.imp`, classical inference for `Nat.find`, and inlining `hx\u2080V\u2081`/`sW`/`hWV\u2081`, -3 normalized LOC (4227\u21924224).",
+  "summary": "Golfed `ReducibleVanishing` in GrothendieckVanishing.lean by removing `comps`/`hcover`/`hcomp_irred` setup, switching `hker` to term style, and inlining `hx'`, -8 normalized LOC (4224\u21924216).",
   "principle_violations": [],
   "task_addressed": true,
-  "task_complete": false,
-  "stuck_on": "Worker hit only -3 vs the planned -10; final divisibility line and germ_eq block remain dense, with hx\u2080V\u2081/sW now repeated inline 2-3x rather than removed structurally.",
-  "strategy_recommendation": "Pivot away from `exists_section_generating_stalks` \u2014 successive golfs (cycles 68, 69, 73) are now yielding small returns. Next cycle should target `ReducibleVanishing` body in `Aristotle/GrothendieckVanishing/main/GrothendieckVanishing.lean:23` (50 body LOC, ratio 4.5), or pick the largest untouched body in `CohomologyAPI.lean` (782 raw LOC).",
-  "attempts_entry": "cycle 73: golfed `exists_section_generating_stalks` body (Exists.imp, classical Nat.find, inlined hx\u2080V\u2081/sW/hWV\u2081) in IrreducibleStep.lean, -3 normalized LOC (4227\u21924224)",
+  "task_complete": true,
+  "stuck_on": "Local `GZ`/`S` abbreviations remain because they share repeated terms across call sites; further savings need a different proof shape.",
+  "strategy_recommendation": "Pivot to `CohomologyAPI.lean` (782 raw LOC, by far largest file): scan for the longest untouched proof bodies via the audit, or look for `(F : Presheaf X) (hF : F.IsSheaf)` triples that should reduce to a single `Sheaf` argument (Principle 2). Avoid further passes on `ReducibleVanishing` and `exists_section_generating_stalks` \u2014 both have been golfed three+ times now.",
+  "attempts_entry": "cycle 74: golfed `ReducibleVanishing` (collapsed comps/hcover/hcomp_irred, term-style `hker`, inlined `hx'`), -8 normalized LOC (4224\u21924216).",
   "completed_task_lines": []
 }
