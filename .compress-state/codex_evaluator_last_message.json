@@ -1,11 +1,14 @@
 {
-  "progress_score": 1,
-  "summary": "Golfed `sheafH_filtered_colimit_comparison_isIso_succ_succ` by collapsing the quotient IH into a direct `haveI` and inlining the `hrewrite`/`hYshIso` block as a single `rw [...]; simp; infer_instance`, -21 normalized LOC (4761\u21924740).",
+  "progress_score": 2,
+  "summary": "Golfed `sheafH_filtered_colimit_h1_cokernelFunctorIso` body from 72 lines to ~30 by introducing local `alpha`/`ev`/`e_j`/`e_j'` abbreviations, replacing the manual `change`+reassociation block with direct `rw [\u2190 Category.assoc, cokernel.\u03c0_desc, \u2026]` chain, -40 normalized LOC (4740\u21924700).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Next pivot: target `sheafH_filtered_colimit_h1_cokernelFunctorIso` in `PresheafFilteredColimit.lean` (~L101, body=72, ratio=10.3) \u2014 highest-leverage remaining audit candidate after this cycle. Avoid `sheafH_filtered_colimit_comparison_one_iso_hom` (mined cycles 32/33/35) and skip generated `ZeroOutside` projections. Raw LOC at 5621, gap to 5000 target = 621.",
-  "attempts_entry": "cycle 37: golfed sheafH_filtered_colimit_comparison_isIso_succ_succ via direct haveI + inline rw through hcompat, -21 norm LOC (4761\u21924740).",
-  "completed_task_lines": []
+  "strategy_recommendation": "Next pivot: target `sheafH_filtered_colimit_comparison_one_iso` at `PresheafFilteredColimit.lean:278` (body=70, ratio=10.0) \u2014 it's the highest-leverage remaining audit candidate in this file and was not mined in cycles 32/33/35 (those hit `_one_iso_hom`, not `_one_iso`). Avoid re-mining `_one_iso_hom` and skip generated `ZeroOutside` projections. Raw LOC at 5581, gap to 5000 = 581.",
+  "attempts_entry": "cycle 38: golfed `sheafH_filtered_colimit_h1_cokernelFunctorIso` in PresheafFilteredColimit.lean via local `alpha`/`ev`/`e_j` lets and direct `cokernel.\u03c0_desc`/`Category.assoc` rewrites replacing the `change`+reassociation block, -40 normalized LOC (4740\u21924700).",
+  "completed_task_lines": [
+    "- [>] Golf `sheafH_filtered_colimit_h1_cokernelFunctorIso` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:101` (signature 7L, body 72L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.",
+    "- [>] Golf `sheafH_filtered_colimit_h1_cokernelFunctorIso` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:101` (body/sig ratio 10.3, body 72L, sig 7L)."
+  ]
 }
