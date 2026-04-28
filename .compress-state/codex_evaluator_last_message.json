@@ -1,11 +1,11 @@
 {
   "progress_score": 1,
-  "summary": "Golfed `sheafH_filtered_colimit_comparison_isIso_succ_succ` in PresheafFilteredColimit.lean by reusing `sheafH_filtered_colimit_succ_inj_subsingleton` and replacing the manual transport tail with `IsIso.of_isIso_fac_left`, -20 normalized LOC (4182\u21924162).",
+  "summary": "Hoisted degree-1 filtered-colimit helper context into a `FilteredColimitH1` section in PresheafFilteredColimit.lean, -17 normalized LOC (4162\u21924145).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
-  "stuck_on": "",
-  "strategy_recommendation": "No body \u226550-line proofs remain. Pivot to Principle 2 (Sheaf-reversion) on `CohomologyAPI.lean`'s repeated `(F\u2081 F\u2082 F\u2083 : Presheaf) (h\u2081 h\u2082 h\u2083 : IsSheaf)` blocks (largest file at 782 LOC, ~192-273 line potential). Alternatively re-run the audit to check for newly-unreachable decls after the simplifications.",
-  "attempts_entry": "cycle 80: score=1 loc_delta=-20 \u2014 Golfed `sheafH_filtered_colimit_comparison_isIso_succ_succ` by reusing existing inj-subsingleton lemma and `IsIso.of_isIso_fac_left`, -20 normalized LOC (4182\u21924162).",
+  "stuck_on": "Repeated `{J'} [SmallCategory] [IsFiltered]` context still occurs in 4 other declarations (PresheafFilteredColimit.lean:211, 428, 434, 459); the assigned slice (h1 cluster, lines 26-219) is fully hoisted.",
+  "strategy_recommendation": "Pivot to Principle 2 on CohomologyAPI.lean: the 12-line `(F\u2081 F\u2082 F\u2083 : Presheaf) (h\u2081 h\u2082 h\u2083 : IsSheaf)` block \u00d7 6 starting at CohomologyAPI.lean:857 (and the 26-line \u00d7 6 block at line 239) is the largest remaining lever \u2014 replace with a `(S : ShortComplex (Sheaf \u2026))` argument idiom rather than introducing helpers. Expected \u226530 LOC if the cluster reduces fully.",
+  "attempts_entry": "cycle 81: hoisted h1 filtered-colimit context into `section FilteredColimitH1` in PresheafFilteredColimit.lean, -17 norm LOC (4162\u21924145).",
   "completed_task_lines": []
 }
