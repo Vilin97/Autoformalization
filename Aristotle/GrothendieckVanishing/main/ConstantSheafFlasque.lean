@@ -77,30 +77,20 @@ theorem toPlus_surjective_of_firstPlus
   apply Meq.ext; intro I
   simp only [Meq.refine, Meq.mk]
   by_cases hI : (I.Y : Set X).Nonempty
-  · have hkey :
-        x I = ConcreteCategory.hom
-          (((Opens.grothendieckTopology X).plusObj P).map I.f.op)
-            (ConcreteCategory.hom
-              (((Opens.grothendieckTopology X).toPlus P).app (op U)) a) := by
-        obtain ⟨b, hb⟩ := toPlus_surjective_of_const I.Y hI (x I)
-        have hZne : ((I₀.Y ⊓ I.Y : Opens X) : Set X).Nonempty :=
-          nonempty_preirreducible_inter I₀.Y.isOpen I.Y.isOpen hI₀ hI
-        let R : S.Relation := Cover.Relation.mk' (fst := I₀) (snd := I)
-          ⟨I₀.Y ⊓ I.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩
-        have hcond := x.condition R
-        change ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj P).map
-            (homOfLE inf_le_left).op) (x I₀) =
-          ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj P).map
-            (homOfLE inf_le_right).op) (x I) at hcond
-        rw [← ha, ← hb] at hcond
-        rw [← toPlus_naturality_const (homOfLE (inf_le_left (a := I₀.Y) (b := I.Y))) a,
-            ← toPlus_naturality_const (homOfLE (inf_le_right (a := I₀.Y) (b := I.Y))) b] at hcond
-        have hab : a = b := toPlus_injective_of_const _ hZne a b hcond
-        rw [← hb, ← hab]
-        exact toPlus_naturality_const I.f a
-    exact hkey.symm
-  · rw [Set.not_nonempty_iff_eq_empty] at hI
-    have hIbot : I.Y = ⊥ := Opens.ext (by simpa using hI)
+  · symm
+    obtain ⟨b, hb⟩ := toPlus_surjective_of_const I.Y hI (x I)
+    have hcond := x.condition (Cover.Relation.mk' (fst := I₀) (snd := I)
+      ⟨I₀.Y ⊓ I.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩)
+    change ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj P).map
+        (homOfLE inf_le_left).op) (x I₀) =
+      ConcreteCategory.hom (((Opens.grothendieckTopology X).plusObj P).map
+        (homOfLE inf_le_right).op) (x I) at hcond
+    rw [← ha, ← hb, ← toPlus_naturality_const (homOfLE inf_le_left) a,
+      ← toPlus_naturality_const (homOfLE inf_le_right) b] at hcond
+    have hab : a = b := toPlus_injective_of_const (I₀.Y ⊓ I.Y)
+      (nonempty_preirreducible_inter I₀.Y.isOpen I.Y.isOpen hI₀ hI) a b hcond
+    simpa [← hb, ← hab] using toPlus_naturality_const I.f a
+  · have hIbot : I.Y = ⊥ := Opens.ext (by simpa [Set.not_nonempty_iff_eq_empty] using hI)
     have hcov : (⊥ : Sieve (⊥ : Opens X)) ∈ (Opens.grothendieckTopology X) ⊥ :=
       fun _ hp => (Opens.mem_bot.mp hp).elim
     exact @Subsingleton.elim _ (hIbot ▸ ⟨fun x y =>

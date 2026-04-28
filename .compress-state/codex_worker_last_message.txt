@@ -1,16 +1,12 @@
-Implemented cycle 85.
+Done. I golfed `toPlus_surjective_of_firstPlus` in [ConstantSheafFlasque.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ConstantSheafFlasque.lean:62) and wrote the cycle report at [cycle_86.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_86.md).
 
-Updated [GrothendieckVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/GrothendieckVanishing.lean) so the final theorem stack now takes bundled `TopCat.Sheaf` arguments directly in `ReducibleVanishing`, `irreducible_dim_zero_vanishing`, `grothendieck_vanishing_of_irreducible`, and `GrothendieckVanishing`. The only remaining presheaf boundary is the existing `IrreduciblePosVanishing` / `VanishingIH` callback using `G.val` and `G.cond`.
+Metrics:
+- Normalized LOC: `4097 -> 4087` (`-10`)
+- Raw `main/*.lean`: `5008 -> 4998` (`-10`)
+- `ConstantSheafFlasque.lean` raw: `184 -> 174`
 
-Wrote the required report at [cycle_85.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_85.md).
-
-Verification passed:
-- `lake env lean Aristotle/GrothendieckVanishing/main/GrothendieckVanishing.lean`
-- `lake env lean Aristotle/GrothendieckVanishing/main/GrothendieckVanishingOverview.lean`
-- `lake build`
-
-LOC:
-- Normalized: `4104 -> 4097` (`-7`)
-- Raw `main/*.lean`: `5015 -> 5008` (`-7`)
-
-`lake build` completed successfully, with only pre-existing unrelated linter warnings replayed from older files.
+Verification:
+- `lake env lean Aristotle/GrothendieckVanishing/main/ConstantSheafFlasque.lean` passed.
+- `python3.9 scripts/normalized_loc.py --per-file --raw` run before and after.
+- `wc -l Aristotle/GrothendieckVanishing/main/*.lean` run before and after.
+- `lake build` not run; only a local proof body changed.
