@@ -287,42 +287,34 @@ private noncomputable def sheafH_filtered_colimit_comparison_one_iso
       sheafH_filtered_colimit_comparison Ysh 1 csh := by
   letI : Zero (TopCat.Sheaf AddCommGrpCat.{u} X) := Limits.HasZeroObject.zero' _
   let Inj := sheafH_filtered_colimit_succ_Inj Ysh
-  let qCocone := sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh
+  let toPsh := sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}
+  let evTop := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)
   let sectionsFunctor := sheafH_filtered_colimit_h1_sectionsFunctor (X := X)
   let ι' := sheafH_filtered_colimit_succ_iota Ysh csh hcsh
-  have hInj (j) : Injective (Inj.obj j) := by
-    exact inferInstanceAs
-      (Injective (IsGrothendieckAbelian.monoMapFactorizationDataRlp (0 : Ysh.obj j ⟶ 0)).Z)
+  have hInj (j) : Injective (Inj.obj j) := inferInstanceAs
+    (Injective (IsGrothendieckAbelian.monoMapFactorizationDataRlp (0 : Ysh.obj j ⟶ 0)).Z)
   have h_mid (j) : Subsingleton (Sheaf.H (Inj.obj j) 1) := by
     letI : Injective (Inj.obj j) := hInj j
     exact sheafH_subsingleton_of_injective (Inj.obj j) 0
   have h_colim :=
     sheafH_filtered_colimit_succ_inj_subsingleton (X := X) (Y' := Ysh) 0 hInj
   haveI := createsFilteredColimit Inj
-  have hc_psh_inj :=
-    isColimitOfPreserves (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-      (colimit.isColimit Inj)
-  have hc_sections_inj :=
-    isColimitOfPreserves
-      ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)) hc_psh_inj
+  have hc_sections_inj := isColimitOfPreserves evTop <|
+    isColimitOfPreserves toPsh (colimit.isColimit Inj)
   haveI := createsFilteredColimit (sheafH_filtered_colimit_succ_quotient Ysh)
-  have hc_psh_q :=
-    isColimitOfPreserves (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
+  have hc_sections_q := isColimitOfPreserves evTop <|
+    isColimitOfPreserves toPsh
       (sheafH_filtered_colimit_succ_quotientCocone_isColimit Ysh csh hcsh)
-  have hc_sections_q :=
-    isColimitOfPreserves
-      ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)) hc_psh_q
   let eInj :=
     (colimit.isColimit (Inj ⋙ sectionsFunctor)).coconePointUniqueUpToIso hc_sections_inj
   let eQ :=
     (colimit.isColimit (sheafH_filtered_colimit_succ_quotient Ysh ⋙ sectionsFunctor)).coconePointUniqueUpToIso hc_sections_q
   let α := sheafH_filtered_colimit_h1_gTopNat Ysh
-  let stageIso :=
-    sheafH_filtered_colimit_h1_stageNatIso Ysh h_mid
+  let stageIso := sheafH_filtered_colimit_h1_stageNatIso Ysh h_mid
   let mapIso :=
     cokernel.mapIso (f := (colim (J := J') (C := AddCommGrpCat.{u})).map α)
       (sectionsFunctor.map (cokernel.π ι')) eInj eQ (by
-      simpa [α, Inj, qCocone, sectionsFunctor, ι', eInj, eQ] using
+      simpa [α, Inj, sectionsFunctor, ι', eInj, eQ] using
         (sheafH_filtered_colimit_h1_boundary_square (Y' := Ysh) (c' := csh) (hc' := hcsh)
           (hc_sections_inj := hc_sections_inj) (hc_sections_q := hc_sections_q)))
   let globalIso := by
@@ -334,26 +326,24 @@ private noncomputable def sheafH_filtered_colimit_comparison_one_iso
       mapIso ≪≫ globalIso).hom =
     sheafH_filtered_colimit_comparison Ysh 1 csh
   refine colimit.hom_ext (fun j => ?_)
+  let stageHom := sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j
   let stageCokMap :=
     cokernel.map
       (α.app j)
       (sectionsFunctor.map (cokernel.π ι'))
-      (((sheafH_filtered_colimit_succ_injCocone Ysh).ι.app j).val.app (op ⊤))
-      ((qCocone.ι.app j).val.app (op ⊤))
+      (stageHom.τ₂.val.app (op ⊤))
+      (stageHom.τ₃.val.app (op ⊤))
       (by
-        simpa [sectionsFunctor, sheafH_filtered_colimit_h1_gTopNat,
-          sheafH_filtered_colimit_succ_shortComplex] using
-          congrArg (fun β => β.val.app (op ⊤))
-            (sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j).comm₂₃.symm)
+        simpa [sheafH_filtered_colimit_h1_gTopNat, sheafH_filtered_colimit_succ_shortComplex] using
+          congrArg (fun β => β.val.app (op ⊤)) stageHom.comm₂₃.symm)
   have hnat : stageCokMap ≫ globalIso.hom =
       (stageIso.hom.app j) ≫ (sheafCohomologyFunctor X 1).map (csh.ι.app j) := by
-    simpa [stageIso, globalIso, stageCokMap, sectionsFunctor,
-      sheafH_filtered_colimit_h1_global_cokernel_iso,
+    simpa [stageCokMap, sheafH_filtered_colimit_h1_global_cokernel_iso,
       sheafH_filtered_colimit_h1_gTopNat, sheafH_filtered_colimit_succ_shortComplex] using
       (sheafH1_cokernel_iso_of_subsingleton_middle_natural
         (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Ysh) j)
         (sheafH_filtered_colimit_succ_shortExact Ysh csh hcsh)
-        (sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j)
+        stageHom
         (h_mid j) h_colim)
   dsimp
   rw [HasColimit.isoOfNatIso_ι_inv_assoc, HasColimit.isoOfNatIso_ι_hom_assoc,
@@ -372,11 +362,9 @@ private noncomputable def sheafH_filtered_colimit_comparison_one_iso
             (cokernel.π α).app j by
         exact (Iso.comp_inv_eq _).2 (by
           simpa [sheafH_filtered_colimit_h1_cokernelFunctorIso, α] using
-            (PreservesCokernel.π_iso_hom
-              ((CategoryTheory.evaluation J' AddCommGrpCat.{u}).obj j) α).symm),
+            (PreservesCokernel.π_iso_hom ((evaluation J' AddCommGrpCat.{u}).obj j) α).symm),
         ← colimit.ι_map_assoc,
-        PreservesCokernel.π_iso_hom_assoc]
-      rw [cokernel.mapIso_hom, cokernel.π_desc,
+        PreservesCokernel.π_iso_hom_assoc, cokernel.mapIso_hom, cokernel.π_desc,
         colimit.comp_coconePointUniqueUpToIso_hom_assoc]
       exact (cokernel.π_desc _ _ _).symm)
 

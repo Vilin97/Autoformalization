@@ -1,13 +1,11 @@
 {
   "progress_score": 1,
-  "summary": "Golfed `closedIncl_unit_stalk_isIso` via `IsIso.of_isIso_fac_right` (Mathlib triangle), `inferInstanceAs` term-mode, and a reusable proof-local stalkPullback instance, -15 normalized LOC (4478\u21924463).",
+  "summary": "Golfed `sheafH_filtered_colimit_comparison_one_iso_hom` by inlining one-use `hc_psh_*`/`qCocone` locals, factoring `toPsh`/`evTop` two-use aliases, and reusing `stageHom`, -12 normalized LOC (4463\u21924451).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Pivot to `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:1324` (sig 8L, body 67L) \u2014 fresh, large, and the Phase-2 `_presheaf` naturality form is a Sheaf-reversion candidate; otherwise `ReducibleVanishing` in `GrothendieckVanishing.lean:23` (body 73L).",
-  "attempts_entry": "cycle 51: golfed `closedIncl_unit_stalk_isIso` via `IsIso.of_isIso_fac_right` + `inferInstanceAs` + parametric stalkPullback instance, -15 normalized LOC (4478\u21924463).",
-  "completed_task_lines": [
-    "- [>] Golf `closedIncl_unit_stalk_isIso` in `Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean:408` (signature 14L, body 64L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close."
-  ]
+  "strategy_recommendation": "Pivot away from `sheafH_filtered_colimit_comparison_one_iso_hom` (now hit in cycles 47 and 52, body shrunk substantially). Next-cycle planner should target `filtered_colimit_exists_compatible_representatives` in `PresheafFilteredColimitGeneral.lean:204` (body=79, ratio=6.1) \u2014 already golfed in cycle 48 but was the largest remaining body, or `sheafH_filtered_colimit_comparison_succ_compatibility` in `PresheafFilteredColimitCore.lean:428` (body=53). Avoid revisiting `closedIncl_unit_stalk_isIso` (cycle 51).",
+  "attempts_entry": "cycle 52: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` (PresheafFilteredColimit.lean) \u2014 inlined `hc_psh_*` and `qCocone`, factored `toPsh`/`evTop` two-use aliases, reused `stageHom`; -12 normalized LOC (4463\u21924451).",
+  "completed_task_lines": []
 }
