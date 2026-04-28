@@ -1,11 +1,11 @@
 {
   "progress_score": 1,
-  "summary": "Golfed `sheafH_filtered_colimit_comparison_one_iso_hom` by inlining staging aliases (`comparisonOne`, `stageShort`, `stageIsoH1`, `stageHom`) and one-use `hstage_cok`/`hfunctorCok` rewrite blocks; -18 normalized LOC (4700\u21924682).",
+  "summary": "Golfed `sheafH_filtered_colimit_comparison_one_iso` by removing inferable type annotations, converting `hInj`/`h_mid` to binder form, and inlining single-use `hqColim`/`hsq`/`h_colim` simpa wrappers, -21 normalized LOC (4682\u21924661).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Pivot to `sheafH_filtered_colimit_comparison_one_iso` (the def at PresheafFilteredColimit.lean:238, body=70, ratio=10.0) \u2014 it has not been mined since the recent rounds and was explicitly out-of-scope for cycle 39. After that, consider `exists_section_generating_stalks` in IrreducibleStep.lean:133 (body=143). Skip generated ZeroOutside lemmas.",
-  "attempts_entry": "cycle 39: -18 norm LOC (4700\u21924682), inlined staging aliases and one-use rewrite blocks in `sheafH_filtered_colimit_comparison_one_iso_hom`",
+  "strategy_recommendation": "Pivot to `exists_section_generating_stalks` in `Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:133` (body=143, ratio=11.9) \u2014 it is the longest remaining proof and has not been mined recently. Alternatively, re-attack `sheafH_filtered_colimit_comparison_one_iso_hom` in PresheafFilteredColimit.lean:316 (body=115) where the broader cokernel-mapIso assembly may now compose with the cleaned-up sibling iso.",
+  "attempts_entry": "cycle 40: golfed `sheafH_filtered_colimit_comparison_one_iso` (binder forms, inlined `hqColim`/`hsq`, dropped redundant annotations), -21 normalized LOC (4682\u21924661).",
   "completed_task_lines": []
 }
