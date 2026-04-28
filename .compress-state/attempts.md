@@ -71,3 +71,4 @@ Cycle 69: cycle 69: golfed `exists_section_generating_stalks` (consolidated cycl
 Cycle 70: cycle 70: golfed `closedIncl_unit_stalk_isIso` (ClosedImmersion.lean) via aliases + `sheafifyMap` + parameterized `toSheafify` instance, -8 norm LOC (4260→4252).
 Cycle 71: cycle 71: golfed `finsetGeneratedSheaf_vanishing` (inlined `heq`, factored `qIns`/`qS`, removed `Balanced` instance), -14 normalized LOC (4252→4238).
 Cycle 72: cycle 72: golfed `filtered_colimit_exists_compatible_representatives` (PresheafFilteredColimitGeneral.lean) — reindexed reps over `↥t`, folded `h_eq` into `isColimit_eq_iff'`, -11 normalized LOC (4238→4227).
+Cycle 73: cycle 73: golfed `exists_section_generating_stalks` body (Exists.imp, classical Nat.find, inlined hx₀V₁/sW/hWV₁) in IrreducibleStep.lean, -3 normalized LOC (4227→4224)
