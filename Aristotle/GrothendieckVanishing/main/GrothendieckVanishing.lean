@@ -53,7 +53,7 @@ theorem ReducibleVanishing
   intro s; induction s using Finset.induction_on with
   | empty =>
     intro _ G hG hG_stalks
-    exact sheafH_subsingleton_of_isZero_presheaf hG
+    exact sheafH_subsingleton_of_isZero
       (by
         exact sheaf_isZero_of_zero_stalks X hG (fun x a => hG_stalks x (by simp) a)) n
   | @insert Z s' hZ_notin ih =>
