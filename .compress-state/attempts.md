@@ -60,3 +60,4 @@ Cycle 58: cycle 58: golfed sheafH_filtered_colimit_comparison_one_iso_hom in Pre
 Cycle 59: cycle 59: golfed exists_section_generating_stalks (ULift→ℤ in H_at_cyclic, P uses H_at directly, implicit binders, sW alias), -12 normalized LOC (4375→4363).
 Cycle 60: cycle 60: golfed `ReducibleVanishing` to bundled-Sheaf induction target, -13 normalized LOC (4363→4350)
 Cycle 61: Cycle 61: score=1 loc_delta=-12 — collapsed `hqj`/`hqj_assoc`/`hqj_assoc'` in `sheafH_filtered_colimit_comparison_succ_compatibility` (PresheafFilteredColimitCore.lean) into one inline `rw [show … from by …]`, normalized 4350→4338.
+Cycle 62: cycle 62: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` (PresheafFilteredColimit.lean) by inlining `Sh`/`sectionsColimit`/`sectionIso`/`stageIso` and dropping named args; -10 norm LOC (4338→4328).
