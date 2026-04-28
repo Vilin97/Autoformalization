@@ -1,11 +1,11 @@
 {
   "progress_score": 1,
-  "summary": "Golfed `sheafH1_cokernel_iso_of_subsingleton_middle` by replacing hand-built `AddMonoidHom.mk'` \u03b4 with composition through existing `sheafH_succ_map hS 0` and removing redundant local witnesses, -29 normalized LOC (4790\u21924761).",
+  "summary": "Golfed `sheafH_filtered_colimit_comparison_isIso_succ_succ` by collapsing the quotient IH into a direct `haveI` and inlining the `hrewrite`/`hYshIso` block as a single `rw [...]; simp; infer_instance`, -21 normalized LOC (4761\u21924740).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Next pivot: target `sheafH_filtered_colimit_comparison_isIso_succ_succ` in `PresheafFilteredColimit.lean:581` (body=83, ratio=6.9) or `sheafH_filtered_colimit_h1_cokernelFunctorIso` in the same file at L101 (body=72, ratio=10.3). Avoid `sheafH_filtered_colimit_comparison_one_iso_hom` (mined cycles 32/33/35) and skip generated `ZeroOutside` projections. Raw LOC at 5642, gap to 5000 target = 642.",
-  "attempts_entry": "cycle 36: score=1 loc_delta=-29 \u2014 Golfed `sheafH1_cokernel_iso_of_subsingleton_middle` by replacing hand-built `AddMonoidHom.mk'` \u03b4 with `(sheafH0EquivSections S.X\u2083).symm \u226b sheafH_succ_map hS 0` and inlining redundant local witnesses; updated `_hom_\u03c0` companion via `sheafH_succ_map_apply`, -29 normalized LOC (4790\u21924761).",
+  "strategy_recommendation": "Next pivot: target `sheafH_filtered_colimit_h1_cokernelFunctorIso` in `PresheafFilteredColimit.lean` (~L101, body=72, ratio=10.3) \u2014 highest-leverage remaining audit candidate after this cycle. Avoid `sheafH_filtered_colimit_comparison_one_iso_hom` (mined cycles 32/33/35) and skip generated `ZeroOutside` projections. Raw LOC at 5621, gap to 5000 target = 621.",
+  "attempts_entry": "cycle 37: golfed sheafH_filtered_colimit_comparison_isIso_succ_succ via direct haveI + inline rw through hcompat, -21 norm LOC (4761\u21924740).",
   "completed_task_lines": []
 }

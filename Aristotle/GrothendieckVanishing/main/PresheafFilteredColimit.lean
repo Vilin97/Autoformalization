@@ -596,16 +596,12 @@ private theorem sheafH_filtered_colimit_comparison_isIso_succ_succ
   let qCocone := sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh
   have hqColim : IsColimit qCocone :=
     sheafH_filtered_colimit_succ_quotientCocone_isColimit Ysh csh hcsh
-  have h_quot :
+  haveI :
       IsIso
         (sheafH_filtered_colimit_comparison
-          (sheafH_filtered_colimit_succ_quotient Ysh) (m + 1) qCocone) := by
-    exact ih
+          (sheafH_filtered_colimit_succ_quotient Ysh) (m + 1) qCocone) :=
+    ih
       (Ysh := sheafH_filtered_colimit_succ_quotient Ysh) (csh := qCocone) hqColim
-  letI :
-      IsIso
-        (sheafH_filtered_colimit_comparison
-          (sheafH_filtered_colimit_succ_quotient Ysh) (m + 1) qCocone) := h_quot
   have hInj : ∀ j, Injective (Inj.obj j) := by
     intro j
     let fac :=
@@ -649,30 +645,13 @@ private theorem sheafH_filtered_colimit_comparison_isIso_succ_succ
       sheafH_filtered_colimit_comparison_succ_compatibility
         (Ysh := Ysh) (csh := csh) (hcsh := hcsh) (n := m + 1)
         h_mid_n h_mid_succ h_colim_n h_colim_succ
-  have hrewrite :
+  rw [show
       sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh =
-        domainIso.inv ≫
-          sheafH_filtered_colimit_comparison
-            (sheafH_filtered_colimit_succ_quotient Ysh) (m + 1) qCocone ≫
-          codomainIso.hom := by
-    calc
-      sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh
-          = 𝟙 _ ≫ sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh := by simp
-      _ = domainIso.inv ≫ domainIso.hom ≫
-            sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh := by simp
-      _ = domainIso.inv ≫
-            (sheafH_filtered_colimit_comparison
-              (sheafH_filtered_colimit_succ_quotient Ysh) (m + 1) qCocone ≫
-                codomainIso.hom) := by rw [hcompat]
-      _ = domainIso.inv ≫
-            sheafH_filtered_colimit_comparison
-              (sheafH_filtered_colimit_succ_quotient Ysh) (m + 1) qCocone ≫
-            codomainIso.hom := by simp [Category.assoc]
-  have hYshIso :
-      IsIso (sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh) := by
-    rw [hrewrite]
-    infer_instance
-  exact hYshIso
+        domainIso.inv ≫ domainIso.hom ≫
+          sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh by simp,
+    hcompat]
+  simp
+  infer_instance
 
 private theorem sheafH_filtered_colimit_comparison_isIso
     {X : TopCat.{u}} [NoetherianSpace X]
