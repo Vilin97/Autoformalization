@@ -148,12 +148,8 @@ theorem exists_section_generating_stalks
       (ConcreteCategory.mono_iff_injective_of_preservesPullback (i.app (op U))).mp
         ((NatTrans.mono_iff_mono_app i).mp inferInstance (op U))) x
   let gen_at (x : X) (hx : x ∈ V) := (Sheaf.zeroOutsideInt V).presheaf.germ V x hx (Sheaf.zeroOutsideInt.generator V)
-  let H_at (x : X) (hx : x ∈ V) : AddSubgroup ℤ := {
-    carrier := {n | n • gen_at x hx ∈ Set.range (i_x x)}
-    add_mem' := fun ⟨ra, hra⟩ ⟨rb, hrb⟩ =>
-      ⟨ra + rb, by rw [add_smul, map_add, hra, hrb]⟩
-    zero_mem' := ⟨0, by simp⟩
-    neg_mem' := fun ⟨ra, hra⟩ => ⟨-ra, by rw [neg_smul, map_neg, hra]⟩ }
+  let H_at (x : X) (hx : x ∈ V) : AddSubgroup ℤ :=
+    (i_x x).range.comap (AddMonoidHom.mk' (fun n : ℤ => n • gen_at x hx) fun m n => add_smul m n _)
   have cyclic_generator_of_coeff {x : X} {hx : x ∈ V} {d : ℤ} {a}
       (hd : d ≠ 0) (ha : i_x x a = d • gen_at x hx) :
       ∃ e : ℕ, 0 < e ∧ (e : ℤ) ∈ H_at x hx ∧ ∀ h ∈ H_at x hx, (e : ℤ) ∣ h := by
@@ -182,7 +178,7 @@ theorem exists_section_generating_stalks
       (d • ConcreteCategory.hom ((Sheaf.zeroOutsideInt V).val.map (homOfLE hV₁V).op) (Sheaf.zeroOutsideInt.generator V)) (by
       rw [← Presheaf.stalkFunctor_map_germ_apply V₁ x₀ (show x₀ ∈ V₁ from ⟨hx₀W₀, hx₀V⟩) i s₁,
         (Presheaf.germ_res_apply R (homOfLE inf_le_left) x₀ (show x₀ ∈ V₁ from ⟨hx₀W₀, hx₀V⟩) s₀).trans hs₀,
-        ha₁, map_zsmul, Presheaf.germ_res_apply (Sheaf.zeroOutsideInt V).val (homOfLE hV₁V)])
+        ha₁, AddMonoidHom.mk'_apply, map_zsmul, Presheaf.germ_res_apply (Sheaf.zeroOutsideInt V).val (homOfLE hV₁V)])
   have hWV : W ≤ V := le_trans (leOfHom iW1) hV₁V
   refine ⟨W, hWV, fun h => (Opens.mem_bot (x := x₀)).mp (h ▸ hx₀W), ConcreteCategory.hom (R.map (homOfLE (leOfHom iW1 : W ≤ V₁)).op) s₁, fun x hxW => ?_⟩
   have hcoeff_x : i_x x (R.germ W x hxW (ConcreteCategory.hom (R.map (homOfLE (leOfHom iW1 : W ≤ V₁)).op) s₁)) = d • gen_at x (hWV hxW) := by

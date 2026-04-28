@@ -1,15 +1,17 @@
-Cycle 74 is complete.
+Implemented cycle 75.
 
-Golfed `ReducibleVanishing` in [GrothendieckVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/GrothendieckVanishing.lean:23), removing the extra finite-component plumbing and tightening the kernel/closed-immersion proof block.
+Changed [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:151): replaced the manual `H_at` `AddSubgroup` construction with a `range.comap` over `AddMonoidHom.mk'`, and adjusted the existing germ transport rewrite with `AddMonoidHom.mk'_apply`.
 
-Verification passed:
+Wrote the required report at [cycle_75.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_75.md).
 
-`lake env lean Aristotle/GrothendieckVanishing/main/GrothendieckVanishing.lean`
+Verification:
+- `lake env lean Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean`
+- `git diff --check -- Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean .compress-state/codex_task_results/cycle_75.md`
+- `lake build` not run, per scope.
 
 Metrics:
+- Normalized LOC: `4216 -> 4212` (`-4`)
+- Raw `main/*.lean` wc: `5118 -> 5114` (`-4`)
+- `IrreducibleStep.lean`: normalized `405 -> 401`, raw `491 -> 487`
 
-- Normalized LOC: 4224 -> 4216, delta `-8`
-- Raw `main/*.lean` wc: 5126 -> 5118, delta `-8`
-- `GrothendieckVanishing.lean`: 130 -> 122 normalized, 152 -> 144 raw
-
-Wrote the required report at [cycle_74.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_74.md:1). `lake build` was not run because this was proof-body-only with no file/import add, delete, or rename.
+I left the pre-existing unrelated `.compress-state` dirty files alone.
