@@ -1,13 +1,11 @@
 {
   "progress_score": 1,
-  "summary": "Golfed `sheafH_filtered_colimit_h1_cokernelFunctor` map_id/map_comp in PresheafFilteredColimit.lean by inlining the hq'/hq transport facts as `rw [show ... by simp]`, -11 normalized LOC (4115\u21924104).",
+  "summary": "Sheaf-reverted final GrothendieckVanishing interface cluster (ReducibleVanishing, irreducible_dim_zero_vanishing, grothendieck_vanishing_of_irreducible, GrothendieckVanishing) to take bundled `TopCat.Sheaf` directly, -7 normalized LOC (4104\u21924097).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
-  "stuck_on": "",
-  "strategy_recommendation": "Next cycle: target `sheafH_filtered_colimit_succ_quotientCocone_isColimit` in PresheafFilteredColimitCore.lean:268 (body 44L), or revisit `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` (CohomologyAPI.lean:714) for a Sheaf-vs-Presheaf+IsSheaf reduction (Principle 2). Raw-LOC gap to <5000 is now 26.",
-  "attempts_entry": "Cycle 84: golfed `sheafH_filtered_colimit_h1_cokernelFunctor` map_id/map_comp in PresheafFilteredColimit.lean (-11 norm LOC, 4115\u21924104).",
-  "completed_task_lines": [
-    "- [>] Golf `sheafH_filtered_colimit_h1_cokernelFunctor` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:51` (signature 6L, body 44L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close."
-  ]
+  "stuck_on": "Delta was -7 not the projected -20; the `let Fsh := \u27e8F, hF\u27e9 / change` wrappers were short, so removing them recovered less than the strategy estimated. `IrreduciblePosVanishing` and `VanishingIH` remain presheaf-level (out of scope this cycle).",
+  "strategy_recommendation": "Next cycle should target `IrreduciblePosVanishing` in `Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean` and the `VanishingIH` predicate signature so that the presheaf/sheaf boundary at the `GrothendieckVanishing` recursive call (now the only remaining `G.val`/`G.cond` unpack) collapses; alternatively, golf `sheafH_filtered_colimit_succ_quotientCocone_isColimit` (PresheafFilteredColimitCore.lean:268, ~44L body) for a comparable yield. Raw-LOC gap to <5000 is now 8.",
+  "attempts_entry": "cycle 85: score=1 loc_delta=-7 Sheaf-reverted final GrothendieckVanishing interface cluster (ReducibleVanishing/irreducible_dim_zero_vanishing/grothendieck_vanishing_of_irreducible/GrothendieckVanishing) in main/GrothendieckVanishing.lean to take bundled TopCat.Sheaf directly, -7 normalized LOC (4104\u21924097), raw 5015\u21925008.",
+  "completed_task_lines": []
 }

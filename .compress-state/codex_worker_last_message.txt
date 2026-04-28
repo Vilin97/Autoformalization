@@ -1,11 +1,16 @@
-Implemented cycle 83.
+Implemented cycle 85.
 
-Changed [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:318) by adding the private two-use helper `sheafH_filtered_colimit_zero_sections_iso`, then reused it in both `sheafH_filtered_colimit_comparison_zero_iso` and its `_hom` theorem. Wrote the required report at [cycle_83.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_83.md:1).
+Updated [GrothendieckVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/GrothendieckVanishing.lean) so the final theorem stack now takes bundled `TopCat.Sheaf` arguments directly in `ReducibleVanishing`, `irreducible_dim_zero_vanishing`, `grothendieck_vanishing_of_irreducible`, and `GrothendieckVanishing`. The only remaining presheaf boundary is the existing `IrreduciblePosVanishing` / `VanishingIH` callback using `G.val` and `G.cond`.
 
-Verification:
-- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean` passed
-- Normalized LOC: `4125` -> `4115` (`-10`)
-- Raw `main/*.lean` wc: `5034` -> `5026` (`-8`)
-- `lake build` not run, since no public names/imports/project Lean files were added, deleted, or renamed.
+Wrote the required report at [cycle_85.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_85.md).
 
-I did not commit or push.
+Verification passed:
+- `lake env lean Aristotle/GrothendieckVanishing/main/GrothendieckVanishing.lean`
+- `lake env lean Aristotle/GrothendieckVanishing/main/GrothendieckVanishingOverview.lean`
+- `lake build`
+
+LOC:
+- Normalized: `4104 -> 4097` (`-7`)
+- Raw `main/*.lean`: `5015 -> 5008` (`-7`)
+
+`lake build` completed successfully, with only pre-existing unrelated linter warnings replayed from older files.

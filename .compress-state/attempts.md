@@ -83,3 +83,4 @@ Cycle 81: cycle 81: hoisted h1 filtered-colimit context into `section FilteredCo
 Cycle 82: cycle 82: -20 norm LOC (4145→4125) — replaced 22-line manual IsZero.mk block in `_root_.isZero_zeroOutsideInt_bot` with `sheaf_isZero_of_zero_stalks` call (import swap ClosedImmersion→CohomologyAPI in ZeroOutside.lean).
 Cycle 83: cycle 83: extracted `sheafH_filtered_colimit_zero_sections_iso` (two-use private helper) in PresheafFilteredColimit.lean, -10 normalized LOC (4125→4115).
 Cycle 84: Cycle 84: golfed `sheafH_filtered_colimit_h1_cokernelFunctor` map_id/map_comp in PresheafFilteredColimit.lean (-11 norm LOC, 4115→4104).
+Cycle 85: cycle 85: score=1 loc_delta=-7 Sheaf-reverted final GrothendieckVanishing interface cluster (ReducibleVanishing/irreducible_dim_zero_vanishing/grothendieck_vanishing_of_irreducible/GrothendieckVanishing) in main/GrothendieckVanishing.lean to take bundled TopCat.Sheaf directly, -7 normalized LOC (4104→4097), raw 5015→5008.
