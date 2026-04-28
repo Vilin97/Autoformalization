@@ -1,11 +1,13 @@
 {
-  "attempts_entry": "cycle 83: extracted `sheafH_filtered_colimit_zero_sections_iso` (two-use private helper) in PresheafFilteredColimit.lean, -10 normalized LOC (4125\u21924115).",
-  "completed_task_lines": [],
-  "principle_violations": [],
   "progress_score": 1,
-  "strategy_recommendation": "Phase 4 mechanical golf is yielding ~10 LOC/cycle now. Next planner should re-run `find_repeated_blocks.py` and target the next live repeated block (e.g. the 12 lines \u00d7 2 in `CohomologyAPI.lean` mentioned in the cycle-83 strategy), or revisit `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` (CohomologyAPI.lean:714) for a Sheaf-vs-Presheaf+IsSheaf reduction that aligns with Principle 2.",
-  "stuck_on": "",
-  "summary": "Extracted two-use private helper `sheafH_filtered_colimit_zero_sections_iso` in PresheafFilteredColimit.lean factoring duplicated degree-0 sections-colimit setup, -10 normalized LOC (4125\u21924115).",
+  "summary": "Golfed `sheafH_filtered_colimit_h1_cokernelFunctor` map_id/map_comp in PresheafFilteredColimit.lean by inlining the hq'/hq transport facts as `rw [show ... by simp]`, -11 normalized LOC (4115\u21924104).",
+  "principle_violations": [],
   "task_addressed": true,
-  "task_complete": true
+  "task_complete": true,
+  "stuck_on": "",
+  "strategy_recommendation": "Next cycle: target `sheafH_filtered_colimit_succ_quotientCocone_isColimit` in PresheafFilteredColimitCore.lean:268 (body 44L), or revisit `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` (CohomologyAPI.lean:714) for a Sheaf-vs-Presheaf+IsSheaf reduction (Principle 2). Raw-LOC gap to <5000 is now 26.",
+  "attempts_entry": "Cycle 84: golfed `sheafH_filtered_colimit_h1_cokernelFunctor` map_id/map_comp in PresheafFilteredColimit.lean (-11 norm LOC, 4115\u21924104).",
+  "completed_task_lines": [
+    "- [>] Golf `sheafH_filtered_colimit_h1_cokernelFunctor` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:51` (signature 6L, body 44L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close."
+  ]
 }

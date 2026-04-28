@@ -82,3 +82,4 @@ Cycle 80: cycle 80: score=1 loc_delta=-20 — Golfed `sheafH_filtered_colimit_co
 Cycle 81: cycle 81: hoisted h1 filtered-colimit context into `section FilteredColimitH1` in PresheafFilteredColimit.lean, -17 norm LOC (4162→4145).
 Cycle 82: cycle 82: -20 norm LOC (4145→4125) — replaced 22-line manual IsZero.mk block in `_root_.isZero_zeroOutsideInt_bot` with `sheaf_isZero_of_zero_stalks` call (import swap ClosedImmersion→CohomologyAPI in ZeroOutside.lean).
 Cycle 83: cycle 83: extracted `sheafH_filtered_colimit_zero_sections_iso` (two-use private helper) in PresheafFilteredColimit.lean, -10 normalized LOC (4125→4115).
+Cycle 84: Cycle 84: golfed `sheafH_filtered_colimit_h1_cokernelFunctor` map_id/map_comp in PresheafFilteredColimit.lean (-11 norm LOC, 4115→4104).
