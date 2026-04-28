@@ -167,34 +167,31 @@ theorem exists_section_generating_stalks
   have hP : ∃ n, P n := by
     obtain ⟨x₀', hx₀'V, a₀', ha₀'⟩ := exists_nonzero_stalk_in_V V hRsh i hR
     obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x₀' hx₀'V (i_x x₀' a₀')
-    obtain ⟨d', hd'_pos, hd'_mem, hd'_gen⟩ := cyclic_generator_of_coeff (fun hn0 => ha₀' <| hi_inj x₀' <| by simpa [hn0] using hn) hn
-    exact ⟨_, hd'_pos, x₀', hx₀'V, hd'_mem, hd'_gen⟩
-  let d : ℤ := @Nat.find P (Classical.decPred P) hP
-  obtain ⟨hd_nat_pos, x₀, hx₀V, ⟨a₁, ha₁⟩, _⟩ := @Nat.find_spec P (Classical.decPred P) hP
+    exact (cyclic_generator_of_coeff (fun hn0 => ha₀' <| hi_inj x₀' <| by simpa [hn0] using hn) hn).imp fun _ he => ⟨he.1, x₀', hx₀'V, he.2.1, he.2.2⟩
+  classical
+  let d : ℤ := Nat.find hP
+  obtain ⟨hd_nat_pos, x₀, hx₀V, ⟨a₁, ha₁⟩, _⟩ := Nat.find_spec hP
   have hd_pos : 0 < d := Int.ofNat_lt.mpr hd_nat_pos
   obtain ⟨W₀, hx₀W₀, s₀, hs₀⟩ := Presheaf.germ_exist R x₀ a₁
   let V₁ := W₀ ⊓ V
   have hV₁V : V₁ ≤ V := inf_le_right
-  have hx₀V₁ : x₀ ∈ V₁ := ⟨hx₀W₀, hx₀V⟩
   set s₁ := ConcreteCategory.hom (R.map (homOfLE (inf_le_left : V₁ ≤ W₀)).op) s₀
   -- Step 5: Shrink to where germ coefficient is constant via germ_eq
   obtain ⟨W, hx₀W, iW1, _, hW_eq⟩ :=
-    Presheaf.germ_eq (Sheaf.zeroOutsideInt V).val x₀ hx₀V₁ hx₀V₁ (i.app (op V₁) s₁)
+    Presheaf.germ_eq (Sheaf.zeroOutsideInt V).val x₀ (show x₀ ∈ V₁ from ⟨hx₀W₀, hx₀V⟩) (show x₀ ∈ V₁ from ⟨hx₀W₀, hx₀V⟩) (i.app (op V₁) s₁)
       (d • ConcreteCategory.hom ((Sheaf.zeroOutsideInt V).val.map (homOfLE hV₁V).op) (Sheaf.zeroOutsideInt.generator V)) (by
-      rw [← Presheaf.stalkFunctor_map_germ_apply V₁ x₀ hx₀V₁ i s₁,
-        (Presheaf.germ_res_apply R (homOfLE inf_le_left) x₀ hx₀V₁ s₀).trans hs₀,
+      rw [← Presheaf.stalkFunctor_map_germ_apply V₁ x₀ (show x₀ ∈ V₁ from ⟨hx₀W₀, hx₀V⟩) i s₁,
+        (Presheaf.germ_res_apply R (homOfLE inf_le_left) x₀ (show x₀ ∈ V₁ from ⟨hx₀W₀, hx₀V⟩) s₀).trans hs₀,
         ha₁, map_zsmul, Presheaf.germ_res_apply (Sheaf.zeroOutsideInt V).val (homOfLE hV₁V)])
-  have hWV₁ : W ≤ V₁ := leOfHom iW1
-  have hWV : W ≤ V := le_trans hWV₁ hV₁V
-  let sW := ConcreteCategory.hom (R.map (homOfLE hWV₁).op) s₁
-  refine ⟨W, hWV, fun h => (Opens.mem_bot (x := x₀)).mp (h ▸ hx₀W), sW, fun x hxW => ?_⟩
-  have hcoeff_x : i_x x (R.germ W x hxW sW) = d • gen_at x (hWV hxW) := by
-    simpa [i_x, gen_at, sW, map_zsmul, Presheaf.germ_res_apply, Presheaf.stalkFunctor_map_germ_apply] using congrArg ((Sheaf.zeroOutsideInt V).presheaf.germ W x hxW) hW_eq
+  have hWV : W ≤ V := le_trans (leOfHom iW1) hV₁V
+  refine ⟨W, hWV, fun h => (Opens.mem_bot (x := x₀)).mp (h ▸ hx₀W), ConcreteCategory.hom (R.map (homOfLE (leOfHom iW1 : W ≤ V₁)).op) s₁, fun x hxW => ?_⟩
+  have hcoeff_x : i_x x (R.germ W x hxW (ConcreteCategory.hom (R.map (homOfLE (leOfHom iW1 : W ≤ V₁)).op) s₁)) = d • gen_at x (hWV hxW) := by
+    simpa [i_x, gen_at, map_zsmul, Presheaf.germ_res_apply, Presheaf.stalkFunctor_map_germ_apply] using congrArg ((Sheaf.zeroOutsideInt V).presheaf.germ W x hxW) hW_eq
   refine ⟨fun h_zero => ne_of_gt hd_pos (zsmul_generator_injective V x (hWV hxW) (by simpa [h_zero] using hcoeff_x.symm)), fun a => ?_⟩
   obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x (hWV hxW) (i_x x a)
   obtain ⟨d_x, hd_x_pos, hd_x_mem, hd_x_gen⟩ := cyclic_generator_of_coeff (ne_of_gt hd_pos) hcoeff_x
   obtain ⟨k₀, rfl⟩ := hd_x_gen n ⟨a, hn⟩
-  exact ⟨k₀, hi_inj x (by rw [map_zsmul, hn, le_antisymm (Int.le_of_dvd hd_pos (hd_x_gen d ⟨_, hcoeff_x⟩)) <| Int.ofNat_le.mpr (@Nat.find_min' P (Classical.decPred P) hP _ ⟨hd_x_pos, x, hWV hxW, hd_x_mem, hd_x_gen⟩), mul_comm, mul_smul, ← hcoeff_x])⟩
+  exact ⟨k₀, hi_inj x (by rw [map_zsmul, hn, le_antisymm (Int.le_of_dvd hd_pos (hd_x_gen d ⟨_, hcoeff_x⟩)) <| Int.ofNat_le.mpr (Nat.find_min' hP ⟨hd_x_pos, x, hWV hxW, hd_x_mem, hd_x_gen⟩), mul_comm, mul_smul, ← hcoeff_x])⟩
 
 /-- Core construction for Step 4: find V' ≤ V, V' ≠ ⊥, and a section s ∈ R(V') such that
     `sHom s : zeroOutsideInt V' ⟶ R` is a stalk-isomorphism on V'.
