@@ -1,11 +1,11 @@
 {
   "progress_score": 1,
-  "summary": "Golfed `sheafH_filtered_colimit_comparison_one_iso_hom` by collapsing two `calc` blocks (`hstage_cok` middle and final) into direct `rw`/`simpa+congrArg` chains, -23 normalized LOC (4813\u21924790).",
+  "summary": "Golfed `sheafH1_cokernel_iso_of_subsingleton_middle` by replacing hand-built `AddMonoidHom.mk'` \u03b4 with composition through existing `sheafH_succ_map hS 0` and removing redundant local witnesses, -29 normalized LOC (4790\u21924761).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
-  "stuck_on": "none",
-  "strategy_recommendation": "This proof has been mined heavily across cycles 32/33/35 (~74 LOC removed cumulatively) and remaining structure is now tight; pivot to a different target. Best next candidates per audit: `sheafH1_cokernel_iso_of_subsingleton_middle` in `CohomologyAPI.lean:417` (highest ratio among untouched), or `sheafH_filtered_colimit_comparison_isIso_succ_succ` in `PresheafFilteredColimit.lean:604` (body=83).",
-  "attempts_entry": "cycle 35: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` (PresheafFilteredColimit.lean) \u2014 collapsed two `calc` blocks into direct rewrite chains, -23 normalized LOC (4813\u21924790).",
+  "stuck_on": "",
+  "strategy_recommendation": "Next pivot: target `sheafH_filtered_colimit_comparison_isIso_succ_succ` in `PresheafFilteredColimit.lean:581` (body=83, ratio=6.9) or `sheafH_filtered_colimit_h1_cokernelFunctorIso` in the same file at L101 (body=72, ratio=10.3). Avoid `sheafH_filtered_colimit_comparison_one_iso_hom` (mined cycles 32/33/35) and skip generated `ZeroOutside` projections. Raw LOC at 5642, gap to 5000 target = 642.",
+  "attempts_entry": "cycle 36: score=1 loc_delta=-29 \u2014 Golfed `sheafH1_cokernel_iso_of_subsingleton_middle` by replacing hand-built `AddMonoidHom.mk'` \u03b4 with `(sheafH0EquivSections S.X\u2083).symm \u226b sheafH_succ_map hS 0` and inlining redundant local witnesses; updated `_hom_\u03c0` companion via `sheafH_succ_map_apply`, -29 normalized LOC (4790\u21924761).",
   "completed_task_lines": []
 }
