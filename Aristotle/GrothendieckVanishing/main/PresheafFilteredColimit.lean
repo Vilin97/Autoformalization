@@ -314,9 +314,10 @@ private noncomputable def sheafH_filtered_colimit_comparison_one_iso :
         cokernel.π_desc, colimit.comp_coconePointUniqueUpToIso_hom_assoc]
       exact (cokernel.π_desc _ _ _).symm)
 
-/-- The degree-`0` filtered-colimit comparison isomorphism, obtained from global sections. -/
-private noncomputable def sheafH_filtered_colimit_comparison_zero_iso :
-    colimit (Ysh ⋙ sheafCohomologyFunctor X 0) ≅ AddCommGrpCat.of (Sheaf.H csh.pt 0) := by
+/-- The degree-`0` comparison up to identifying `H⁰` with global sections. -/
+private noncomputable def sheafH_filtered_colimit_zero_sections_iso :
+    colimit (Ysh ⋙ sheafCohomologyFunctor X 0) ≅
+      (sheafH_filtered_colimit_h1_sectionsFunctor (X := X)).obj csh.pt := by
   let sectionsFunctor := sheafH_filtered_colimit_h1_sectionsFunctor (X := X)
   let h0Iso :
       Ysh ⋙ sheafCohomologyFunctor X 0 ≅ Ysh ⋙ sectionsFunctor :=
@@ -335,32 +336,23 @@ private noncomputable def sheafH_filtered_colimit_comparison_zero_iso :
         ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)) hc_psh)
   exact
     HasColimit.isoOfNatIso h0Iso ≪≫
-      (colimit.isColimit (Ysh ⋙ sectionsFunctor)).coconePointUniqueUpToIso hc_sections ≪≫
+      (colimit.isColimit (Ysh ⋙ sectionsFunctor)).coconePointUniqueUpToIso hc_sections
+
+/-- The degree-`0` filtered-colimit comparison isomorphism, obtained from global sections. -/
+private noncomputable def sheafH_filtered_colimit_comparison_zero_iso :
+    colimit (Ysh ⋙ sheafCohomologyFunctor X 0) ≅ AddCommGrpCat.of (Sheaf.H csh.pt 0) := by
+  exact
+    sheafH_filtered_colimit_zero_sections_iso (Ysh := Ysh) (csh := csh) (hcsh := hcsh) ≪≫
       ((sheafH0EquivSections csh.pt).toAddCommGrpIso).symm
 
 @[simp] theorem sheafH_filtered_colimit_comparison_zero_iso_hom :
     (sheafH_filtered_colimit_comparison_zero_iso
       (Ysh := Ysh) (csh := csh) (hcsh := hcsh)).hom =
       sheafH_filtered_colimit_comparison Ysh 0 csh := by
-  let sectionsFunctor := sheafH_filtered_colimit_h1_sectionsFunctor (X := X)
-  let h0Iso :
-      Ysh ⋙ sheafCohomologyFunctor X 0 ≅ Ysh ⋙ sectionsFunctor :=
-    Functor.isoWhiskerLeft Ysh (sheafH0NatIsoSections (X := X))
-  haveI : CreatesColimit Ysh
-      (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
-    createsFilteredColimit Ysh
-  have hc_psh :
-      IsColimit ((sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}).mapCocone
-        csh) :=
-    isColimitOfPreserves (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u})
-      hcsh
-  have hc_sections : IsColimit (sectionsFunctor.mapCocone csh) := by
-    simpa [sectionsFunctor] using
-      (isColimitOfPreserves
-        ((CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤)) hc_psh)
   apply colimit.hom_ext
   intro j
-  simp only [sheafH_filtered_colimit_comparison_zero_iso, Iso.trans_hom]
+  simp only [sheafH_filtered_colimit_comparison_zero_iso,
+    sheafH_filtered_colimit_zero_sections_iso, Iso.trans_hom, Category.assoc]
   rw [HasColimit.isoOfNatIso_ι_hom_assoc, colimit.comp_coconePointUniqueUpToIso_hom_assoc,
     colimit_ι_sheafH_filtered_colimit_comparison]
   ext x
