@@ -1,11 +1,11 @@
 {
   "progress_score": 1,
-  "summary": "Sheaf-reverted `sheafH_subsingleton_of_isEmpty_presheaf` \u2192 `sheafH_subsingleton_of_isEmpty` taking `(F : Sheaf \u2026)` directly; updated sole caller in GrothendieckVanishing.lean, -1 normalized LOC (4889\u21924888).",
+  "summary": "Golfed `sheafH_filtered_colimit_comparison_one_iso_hom` by removing redundant local `_assoc` wrappers and inlining calc steps with existing cokernel/colimit lemmas, -27 normalized LOC (4888\u21924861).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
-  "stuck_on": "Nothing \u2014 last `_presheaf` declaration in CohomologyAPI is gone; Phase-1 sheaf-reversions exhausted.",
-  "strategy_recommendation": "Phase-1 `_presheaf` reversions in CohomologyAPI are exhausted. Move to Phase-4 long-proof golf: pick `filtered_colimit_exists_compatible_representatives` (PresheafFilteredColimitGeneral.lean:204, body=130, ratio=10.0) or `sheafH_filtered_colimit_comparison_one_iso_hom` (PresheafFilteredColimit.lean:356, body=207). Alternatively, run the audit/scanner for any remaining `_presheaf` declarations in other files before committing to long-proof golf.",
-  "attempts_entry": "cycle 31: sheaf-reverted `sheafH_subsingleton_of_isEmpty_presheaf` \u2192 `sheafH_subsingleton_of_isEmpty` (bundled sheaf), updated 1 caller in GrothendieckVanishing.lean; -1 normalized LOC (4889\u21924888); score=1.",
+  "stuck_on": "Proof body still has unavoidable categorical associativity transport around `hfunctorCok` and the final naturality step; further golfing would need a different structural approach.",
+  "strategy_recommendation": "Continue Phase-4 long-proof golf. Next highest-leverage targets per audit: `exists_section_generating_stalks` (161 body lines, ratio 13.4) or `filtered_colimit_exists_compatible_representatives` in `PresheafFilteredColimitGeneral.lean:204` (130 body lines). Re-run `scripts/compress_audit.py` first to refresh the long-proof rankings since this proof shrunk.",
+  "attempts_entry": "Cycle 32: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` in `PresheafFilteredColimit.lean` \u2014 removed 4 local `_assoc` wrappers, inlined direct calc steps; -27 normalized LOC (4888\u21924861).",
   "completed_task_lines": []
 }
