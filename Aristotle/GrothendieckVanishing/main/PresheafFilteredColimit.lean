@@ -218,13 +218,17 @@ private noncomputable def sheafH_filtered_colimit_h1_global_cokernel_iso
     (sheafH1_cokernel_iso_of_subsingleton_middle
       (sheafH_filtered_colimit_succ_shortExact Y' c' hc') h_colim)
 
+section FilteredColimitComparison
+
+variable {X : TopCat.{u}} [NoetherianSpace X]
+variable {J' : Type u} [SmallCategory J'] [IsFiltered J']
+variable (Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
+variable (csh : Cocone Ysh) (hcsh : IsColimit csh)
+include hcsh
+
 /-- The degree-`1` filtered-colimit comparison isomorphism, obtained by identifying `H¹`
 with the cokernel of top sections for the injective-replacement short exact sequence. -/
-private noncomputable def sheafH_filtered_colimit_comparison_one_iso
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (csh : Cocone Ysh) (hcsh : IsColimit csh) :
+private noncomputable def sheafH_filtered_colimit_comparison_one_iso :
     colimit (Ysh ⋙ sheafCohomologyFunctor X 1) ≅
       AddCommGrpCat.of (Sheaf.H csh.pt 1) := by
   letI : Zero (TopCat.Sheaf AddCommGrpCat.{u} X) := Limits.HasZeroObject.zero' _
@@ -277,11 +281,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_one_iso
               (hc_sections_inj := hc_sections_inj) (hc_sections_q := hc_sections_q)))) ≪≫
       globalIso
 
-@[simp] theorem sheafH_filtered_colimit_comparison_one_iso_hom
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (csh : Cocone Ysh) (hcsh : IsColimit csh) :
+@[simp] theorem sheafH_filtered_colimit_comparison_one_iso_hom :
     (sheafH_filtered_colimit_comparison_one_iso
       (Ysh := Ysh) (csh := csh) (hcsh := hcsh)).hom =
       sheafH_filtered_colimit_comparison Ysh 1 csh := by
@@ -328,11 +328,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_one_iso
       exact (cokernel.π_desc _ _ _).symm)
 
 /-- The degree-`0` filtered-colimit comparison isomorphism, obtained from global sections. -/
-private noncomputable def sheafH_filtered_colimit_comparison_zero_iso
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (csh : Cocone Ysh) (hcsh : IsColimit csh) :
+private noncomputable def sheafH_filtered_colimit_comparison_zero_iso :
     colimit (Ysh ⋙ sheafCohomologyFunctor X 0) ≅ AddCommGrpCat.of (Sheaf.H csh.pt 0) := by
   let sectionsFunctor := sheafH_filtered_colimit_h1_sectionsFunctor (X := X)
   let h0Iso :
@@ -355,11 +351,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_zero_iso
       (colimit.isColimit (Ysh ⋙ sectionsFunctor)).coconePointUniqueUpToIso hc_sections ≪≫
       ((sheafH0EquivSections csh.pt).toAddCommGrpIso).symm
 
-@[simp] theorem sheafH_filtered_colimit_comparison_zero_iso_hom
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (csh : Cocone Ysh) (hcsh : IsColimit csh) :
+@[simp] theorem sheafH_filtered_colimit_comparison_zero_iso_hom :
     (sheafH_filtered_colimit_comparison_zero_iso
       (Ysh := Ysh) (csh := csh) (hcsh := hcsh)).hom =
       sheafH_filtered_colimit_comparison Ysh 0 csh := by
@@ -393,31 +385,19 @@ private noncomputable def sheafH_filtered_colimit_comparison_zero_iso
   simpa [sheafCohomologyFunctor_map_apply] using
     (sheafH0EquivSections_natural (f := csh.ι.app j) (x := x)).symm
 
-private theorem sheafH_filtered_colimit_comparison_isIso_zero
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (csh : Cocone Ysh) (hcsh : IsColimit csh) :
+private theorem sheafH_filtered_colimit_comparison_isIso_zero :
     IsIso (sheafH_filtered_colimit_comparison Ysh 0 csh) := by
   rw [← sheafH_filtered_colimit_comparison_zero_iso_hom
     (Ysh := Ysh) (csh := csh) (hcsh := hcsh)]
   infer_instance
 
-private theorem sheafH_filtered_colimit_comparison_isIso_one
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (csh : Cocone Ysh) (hcsh : IsColimit csh) :
+private theorem sheafH_filtered_colimit_comparison_isIso_one :
     IsIso (sheafH_filtered_colimit_comparison Ysh 1 csh) := by
   rw [← sheafH_filtered_colimit_comparison_one_iso_hom
     (Ysh := Ysh) (csh := csh) (hcsh := hcsh)]
   infer_instance
 
 private theorem sheafH_filtered_colimit_comparison_isIso_succ_succ
-    {X : TopCat.{u}} [NoetherianSpace X]
-    {J' : Type u} [SmallCategory J'] [IsFiltered J']
-    (Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
-    (csh : Cocone Ysh) (hcsh : IsColimit csh)
     (m : ℕ)
     (ih :
       ∀ {J'' : Type u} [SmallCategory J''] [IsFiltered J'']
@@ -473,6 +453,8 @@ private theorem sheafH_filtered_colimit_comparison_isIso_succ_succ
     hcompat]
   simp
   infer_instance
+
+end FilteredColimitComparison
 
 private theorem sheafH_filtered_colimit_comparison_isIso
     {X : TopCat.{u}} [NoetherianSpace X]
