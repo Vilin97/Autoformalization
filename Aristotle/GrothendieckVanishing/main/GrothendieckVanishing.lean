@@ -23,14 +23,14 @@ open CategoryTheory TopologicalSpace Order Limits Opposite
 theorem ReducibleVanishing
     (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (_ : ¬ IrreducibleSpace X) [Nonempty X]
     (ih_irred : ∀ (Y : TopCat.{u}) [NoetherianSpace Y]
-      [IrreducibleSpace Y] {G : TopCat.Presheaf AddCommGrpCat.{u} Y} (hG : G.IsSheaf),
+      [IrreducibleSpace Y] (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y ≤ topologicalKrullDim X →
       n > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} Y) n)) :
-    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
+      Subsingleton (Sheaf.H G n)) :
+    Subsingleton (Sheaf.H F n) := by
   classical
   have hfin := NoetherianSpace.finite_irreducibleComponents (α := X)
   suffices ∀ (s : Finset (Set X)),
@@ -40,7 +40,7 @@ theorem ReducibleVanishing
         ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj Gsh.val),
         a = 0) →
       Subsingleton (Sheaf.H Gsh n) by
-    exact this hfin.toFinset (by simp) ⟨F, hF⟩ (fun x hx => absurd (by
+    exact this hfin.toFinset (by simp) F (fun x hx => absurd (by
       simpa [Set.Finite.toFinset] using Set.mem_sUnion.mp
         (sUnion_irreducibleComponents (X := (↑X : Type u)) ▸ Set.mem_univ x)) hx)
   intro s; induction s using Finset.induction_on with
@@ -70,75 +70,68 @@ theorem ReducibleVanishing
       (Z := Z) (hZ := hZ_closed) Gsh n hker
       (by
         haveI : IrreducibleSpace (TopCat.of Z) := isIrreducible_iff_irreducibleSpace.mp hZ_comp.1
-        exact ih_irred (TopCat.of Z) (G := GZ.val) GZ.cond
+        exact ih_irred (TopCat.of Z) GZ
           (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z)
           (topologicalKrullDim_subspace_lt_of_lt (X := (↑X : Type u)) Z hn))
 
 private theorem irreducible_dim_zero_vanishing
     {X : TopCat.{u}} [NoetherianSpace X] [IrreducibleSpace X]
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (n : ℕ) (hn : n > topologicalKrullDim X)
     (hdim : topologicalKrullDim X ≤ 0) :
-    Subsingleton (Sheaf.H (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  change Subsingleton (Sheaf.H Fsh n)
-  have hFlasque : IsFlasqueSheaf Fsh := fun {U V} i => by
+    Subsingleton (Sheaf.H F n) := by
+  have hFlasque : IsFlasqueSheaf F := fun {U V} i => by
     rcases opens_eq_bot_or_top_of_irreducibleSpace_dim_zero hdim U with rfl | rfl
-    · exact Fsh.isTerminalOfEmpty.isZero.epi _
+    · exact F.isTerminalOfEmpty.isZero.epi _
     · have hV := le_antisymm le_top (homOfLE le_top ≫ i |>.le); subst hV
-      rw [Subsingleton.elim i (𝟙 ⊤), op_id, F.map_id]; infer_instance
+      rw [Subsingleton.elim i (𝟙 ⊤), op_id, F.val.map_id]; infer_instance
   have hn_ne : n ≠ 0 := fun h => by
     subst h; exact absurd hn (not_lt.mpr topologicalKrullDim_nonneg)
   obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn_ne
-  exact sheafH_subsingleton_of_flasque X Fsh hFlasque m
+  exact sheafH_subsingleton_of_flasque X F hFlasque m
 
 theorem grothendieck_vanishing_of_irreducible
     (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X]
     (n : ℕ) (hn : n > topologicalKrullDim X)
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf)
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X)
     (ih_irred : ∀ (Y : TopCat.{u}) [TopologicalSpace.NoetherianSpace Y]
-      [IrreducibleSpace Y] (m : ℕ) {G : TopCat.Presheaf AddCommGrpCat.{u} Y} (hG : G.IsSheaf),
+      [IrreducibleSpace Y] (m : ℕ) (G : TopCat.Sheaf AddCommGrpCat.{u} Y),
       topologicalKrullDim Y ≤ topologicalKrullDim X →
       m > topologicalKrullDim Y →
-      Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} Y) m)) :
-    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  change Subsingleton (Sheaf.H Fsh n)
+      Subsingleton (Sheaf.H G m)) :
+    Subsingleton (Sheaf.H F n) := by
   by_cases hEmpty : IsEmpty X
   · letI := hEmpty
-    simpa using sheafH_subsingleton_of_isEmpty Fsh n
+    simpa using sheafH_subsingleton_of_isEmpty F n
   · rw [not_isEmpty_iff] at hEmpty
     by_cases hIrred : IrreducibleSpace X
-    · exact ih_irred X n hF le_rfl hn
-    · exact ReducibleVanishing X n hn (F := F) hF hIrred
-        (fun Y [_] [_] {G} hG hle hY => ih_irred Y n (G := G) hG hle hY)
+    · exact ih_irred X n F le_rfl hn
+    · exact ReducibleVanishing X n hn F hIrred
+        (fun Y [_] [_] G hle hY => ih_irred Y n G hle hY)
 
 /-! ## Main theorem -/
 
 /-- **Grothendieck's vanishing theorem** (Hartshorne III, Theorem 2.7). -/
 theorem GrothendieckVanishing (X : TopCat.{u}) [NoetherianSpace X]
     (n : ℕ) (h : n > topologicalKrullDim X)
-    {F : TopCat.Presheaf AddCommGrpCat.{u} X} (hF : F.IsSheaf) :
-    Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  change Subsingleton (Sheaf.H Fsh n)
+    (F : TopCat.Sheaf AddCommGrpCat.{u} X) :
+    Subsingleton (Sheaf.H F n) := by
   have hwf : WellFounded (fun (a b : WithBot ℕ∞) => a < b) := IsWellFounded.wf
   exact hwf.induction (C := fun d =>
     ∀ (X : TopCat.{u}) [NoetherianSpace X]
-      (n : ℕ) (F : TopCat.Presheaf AddCommGrpCat.{u} X) (hF : F.IsSheaf),
+      (n : ℕ) (F : TopCat.Sheaf AddCommGrpCat.{u} X),
       topologicalKrullDim X = d → n > d →
-        Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n))
-    (topologicalKrullDim X) (fun d ih X _ n F hF hd hn => by
-      let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
+        Subsingleton (Sheaf.H F n))
+    (topologicalKrullDim X) (fun d ih X _ n F hd hn => by
       -- Reduce to irreducible X
-      simpa [Fsh] using
-        (grothendieck_vanishing_of_irreducible X n (hd ▸ hn) (F := F) hF
-          (fun Y _ _ m {G} hG hle hY => by
+      exact
+        grothendieck_vanishing_of_irreducible X n (hd ▸ hn) F
+          (fun Y _ _ m G hle hY => by
             by_cases hposY : topologicalKrullDim Y > 0
-            · exact IrreduciblePosVanishing (F := G) hG hposY m hY
+            · exact IrreduciblePosVanishing (F := G.val) G.cond hposY m hY
                 (by
                   intro Z _ m' G' hG' hlt hm'
                   exact ih (topologicalKrullDim Z) (lt_of_lt_of_le hlt (hd ▸ hle))
-                    Z m' G' hG' rfl hm')
-            · exact irreducible_dim_zero_vanishing (F := G) hG m hY (le_of_not_gt hposY))))
-    X n F hF rfl h
+                    Z m' ⟨G', hG'⟩ rfl hm')
+            · exact irreducible_dim_zero_vanishing G m hY (le_of_not_gt hposY)))
+    X n F rfl h
