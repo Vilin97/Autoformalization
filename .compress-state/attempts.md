@@ -46,3 +46,4 @@ Cycle 44: cycle 44: -25 norm LOC (4591→4566); golfed `finsetGeneratedSheaf_van
 Cycle 45: cycle 45: golfed `PushforwardHIso` (inlined one-use isomorphism lets, factored hSE/hSrcSub/hTgtSub shared facts), -20 normalized LOC (4566→4546).
 Cycle 46: cycle 46: golf `finsetGenCocone_isColimit` (FinitelyGeneratedVanishing.lean) — reused cocone.ι, dropped unused `Ksh`, ext/simp the hfac block — -13 norm LOC (4546→4533), score 1
 Cycle 47: cycle 47: score=1 loc_delta=-18 — golfed `sheafH_filtered_colimit_comparison_one_iso_hom` by inlining `hqColim`/`functorCokIso`/`colimCokIso`, using `inferInstanceAs` for injectivity, dropping `IsColimit` type ascriptions, and using `cokernel.mapIso_hom`/`Iso.comp_inv_eq` in the terminal cokernel calc (4533→4515).
+Cycle 48: cycle 48: golfed `filtered_colimit_exists_compatible_representatives` via proof-local `compatAfter` + `Finset.univ` induction + `NatTrans.naturality_apply`, -20 normalized LOC (4515→4495).
