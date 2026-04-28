@@ -1,17 +1,11 @@
-Completed cycle 40.
+Implemented cycle 41.
 
-Golfed [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:238) inside `sheafH_filtered_colimit_comparison_one_iso`: removed redundant local annotations, changed `hInj`/`h_mid` to binder form, inlined `hqColim` and the single-use `hsq`, and simplified `h_colim`.
-
-Wrote the required report at [cycle_40.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_40.md:1).
+Changed [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean) inside `exists_section_generating_stalks`: compressed `H_at_cyclic`, replaced a sign split with `abs_dvd`, shortened `mk_P`, inlined nontrivial subgroup witnesses, and tightened the final divisibility transport.
 
 Verification passed:
-- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean`
-- `git diff --check`
-- `python3.9 scripts/normalized_loc.py --per-file --raw`
-- `wc -l Aristotle/GrothendieckVanishing/main/*.lean`
 
-Metrics:
-- Normalized LOC: `4682 -> 4661` (`-21`)
-- Raw `main/*.lean` wc: `5563 -> 5542` (`-21`)
+- `lake env lean Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean`
+- Normalized LOC: `4661 -> 4637` (`-24`)
+- Raw `main/*.lean` wc: `5542 -> 5527` (`-15`)
 
-No commit or push performed.
+Wrote the cycle report at [.compress-state/codex_task_results/cycle_41.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_41.md). `lake build` was not run because no declarations/imports/files/attributes changed.
