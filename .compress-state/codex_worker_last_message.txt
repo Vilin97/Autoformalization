@@ -1,14 +1,11 @@
-Completed cycle 37.
-
-Changed [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:599): golfed `sheafH_filtered_colimit_comparison_isIso_succ_succ` by turning the quotient IH into a direct `haveI` and replacing the final `hrewrite`/`hYshIso` block with an inline rewrite through `hcompat`.
-
-Wrote the required report at [cycle_37.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_37.md:1).
+Done. Golfed [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:111) only in `sheafH_filtered_colimit_h1_cokernelFunctorIso`, using local `alpha`/`ev` lets and direct rewrites through `cokernel.π_desc`.
 
 Verification passed:
-`lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean`
+- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean`
+- `git diff --check`
 
 Metrics:
-- Normalized LOC: `4761` -> `4740` (`-21`)
-- Raw `main/*.lean` wc: `5642` -> `5621` (`-21`)
+- Normalized LOC: `4740` -> `4700` (`-40`)
+- Raw `wc -l main/*.lean`: `5621` -> `5581` (`-40`)
 
-`lake build` was not run, per the cycle scope. Existing unrelated `.compress-state` dirty files were left untouched.
+Wrote the required report at [.compress-state/codex_task_results/cycle_38.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_38.md). `lake build` was not run, per the proof-only scope.
