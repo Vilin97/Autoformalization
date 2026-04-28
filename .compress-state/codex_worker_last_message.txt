@@ -1,12 +1,14 @@
-Cycle 21 is complete.
+Implemented cycle 27.
 
-Deleted `sheafH_succ_map_natural_of_map_eq` from [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:771) and removed its stale module-list entry. Wrote the required report at [cycle_21.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_21.md).
+Changed [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:399): `sheafH0EquivSections_presheaf_natural` is now `sheafH0EquivSections_natural` and takes bundled sheaves plus a sheaf morphism directly. Updated all eight call sites in `CohomologyAPI.lean` and [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:581), removing the repeated `.cond` / `.val` packaging and local `Sheaf.Hom.mk` bridge proofs.
 
 Verification passed:
-- `rg "sheafH_succ_map_natural_of_map_eq" Aristotle/GrothendieckVanishing/main` found no matches
 - `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`
-- `lake build` passed, with unrelated pre-existing linter warnings in other files
+- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean`
+- `lake build`
 
 Metrics:
-- Normalized LOC: `5027 -> 5014` delta `-13`
-- Raw `main/*.lean` wc: `5939 -> 5920` delta `-19`
+- Normalized LOC: `4946 -> 4924` (`-22`)
+- Raw `main/*.lean` LOC: `5822 -> 5802` (`-20`)
+
+Wrote the report at [cycle_27.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_27.md:1). The workspace already had unrelated dirty files; I left those untouched.

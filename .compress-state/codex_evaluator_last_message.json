@@ -1,11 +1,11 @@
 {
   "progress_score": 2,
-  "summary": "Deleted unused public theorem `sheafH_succ_map_natural_of_map_eq` from CohomologyAPI.lean, -13 normalized LOC.",
+  "summary": "Sheaf-reverted `sheafH0EquivSections_presheaf_natural` \u2192 `sheafH0EquivSections_natural` taking `(F G : Sheaf \u2026) (f : F \u27f6 G)`; updated 8 call sites in `CohomologyAPI.lean`/`PresheafFilteredColimit.lean`; -22 normalized LOC (4946\u21924924).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Continue Phase-2 audit-driven unused-decl deletion. Next live targets per audit: `sheafH_filtered_colimit_succ_eta_val_comp_cokernel_pi` and `sheafH_filtered_colimit_succ_iota_val_comp_cokernel_pi` in PresheafFilteredColimitCore.lean. Re-run `scripts/compress_audit.py` first to confirm current largest live unused public decl.",
-  "attempts_entry": "cycle 21: deleted unused `sheafH_succ_map_natural_of_map_eq` from CohomologyAPI.lean; -13 normalized LOC (5027\u21925014); raw -19 (5939\u21925920); lake env lean + lake build pass.",
+  "strategy_recommendation": "Continue Phase-1 sheaf reversion. Per the audit, four `_presheaf` declarations in `CohomologyAPI.lean` remain: `sheafH_subsingleton_of_isZero_presheaf` (L278), `sheafH0EquivSections_presheaf` (L385), `sheafH_subsingleton_of_isEmpty_presheaf` (L658), and `subsingleton_sheafH_of_shortExact_middle_presheaf` (L685). `sheafH0EquivSections_presheaf` itself is the next high-leverage target since it underlies many call sites; check whether a sheaf-level form lets call sites drop the `.cond` plumbing.",
+  "attempts_entry": "cycle 27: sheaf-reverted `sheafH0EquivSections_presheaf_natural` \u2192 `sheafH0EquivSections_natural` and updated 8 callers in CohomologyAPI.lean/PresheafFilteredColimit.lean; -22 normalized LOC (4946\u21924924); raw -20 (5822\u21925802); lake env lean + lake build pass.",
   "completed_task_lines": []
 }

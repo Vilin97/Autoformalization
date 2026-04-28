@@ -1,6 +1,6 @@
 import Aristotle.GrothendieckVanishing.main.PresheafFilteredColimit
 import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
-import Aristotle.GrothendieckVanishing.main.ZeroOutsideFinset
+import Aristotle.GrothendieckVanishing.main.GeneratedSubsheaf
 
 /-!
   FinitelyGeneratedVanishing.lean — Noetherian finitely generated vanishing reduction

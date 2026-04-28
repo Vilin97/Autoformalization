@@ -99,15 +99,15 @@ private theorem irreducible_dim_zero_vanishing
     Subsingleton (Sheaf.H (⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) n) := by
   let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
   change Subsingleton (Sheaf.H Fsh n)
-  haveI : IsFlasqueSheaf Fsh := ⟨fun {U V} i => by
+  have hFlasque : IsFlasqueSheaf Fsh := fun {U V} i => by
     rcases opens_eq_bot_or_top_of_irreducibleSpace_dim_zero hdim U with rfl | rfl
     · exact Fsh.isTerminalOfEmpty.isZero.epi _
     · have hV := le_antisymm le_top (homOfLE le_top ≫ i |>.le); subst hV
-      rw [Subsingleton.elim i (𝟙 ⊤), op_id, F.map_id]; infer_instance⟩
+      rw [Subsingleton.elim i (𝟙 ⊤), op_id, F.map_id]; infer_instance
   have hn_ne : n ≠ 0 := fun h => by
     subst h; exact absurd hn (not_lt.mpr topologicalKrullDim_nonneg)
   obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn_ne
-  exact sheafH_subsingleton_of_flasque X Fsh m
+  exact sheafH_subsingleton_of_flasque X Fsh hFlasque m
 
 theorem grothendieck_vanishing_of_irreducible
     (X : TopCat.{u}) [TopologicalSpace.NoetherianSpace X]

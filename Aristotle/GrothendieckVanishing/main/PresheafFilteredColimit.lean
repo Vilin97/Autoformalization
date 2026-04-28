@@ -581,9 +581,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_zero_iso
       (fun {j j'} f => by
         ext x
         simpa [sectionsFunctor, sheafCohomologyFunctor_map_apply] using
-          (sheafH0EquivSections_presheaf_natural
-            (hF := (Ysh.obj j).cond) (hG := (Ysh.obj j').cond)
-            (f := (Ysh.map f).val) (x := x)))
+          (sheafH0EquivSections_natural (f := Ysh.map f) (x := x)))
   haveI : CreatesColimit Ysh
       (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
     createsFilteredColimit Ysh
@@ -617,9 +615,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_zero_iso
       (fun {j j'} f => by
         ext x
         simpa [sectionsFunctor, sheafCohomologyFunctor_map_apply] using
-          (sheafH0EquivSections_presheaf_natural
-            (hF := (Ysh.obj j).cond) (hG := (Ysh.obj j').cond)
-            (f := (Ysh.map f).val) (x := x)))
+          (sheafH0EquivSections_natural (f := Ysh.map f) (x := x)))
   haveI : CreatesColimit Ysh
       (sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
     createsFilteredColimit Ysh
@@ -644,8 +640,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_zero_iso
     ConcreteCategory.hom ((sheafCohomologyFunctor X 0).map (csh.ι.app j)) x
   apply (sheafH0EquivSections_presheaf csh.pt.cond).injective
   simpa [sheafCohomologyFunctor_map_apply] using
-    (sheafH0EquivSections_presheaf_natural
-      (hF := (Ysh.obj j).cond) (hG := csh.pt.cond) (f := (csh.ι.app j).val) (x := x)).symm
+    (sheafH0EquivSections_natural (f := csh.ι.app j) (x := x)).symm
 
 private theorem sheafH_filtered_colimit_comparison_isIso_zero
     {X : TopCat.{u}} [NoetherianSpace X]
@@ -711,19 +706,19 @@ private theorem sheafH_filtered_colimit_comparison_isIso_succ_succ
     intro j
     letI : Injective (Inj.obj j) := hInj j
     exact sheafH_subsingleton_of_injective (Inj.obj j) (m + 1)
-  haveI hFlasqueInj : IsFlasqueSheaf injCocone.pt := by
+  have hFlasqueInj : IsFlasqueSheaf injCocone.pt := fun i => by
     simpa using
       (isFlasque_filtered_colimit
         (F := Inj)
         (hFlasque := fun j => by
           letI : Injective (Inj.obj j) := hInj j
-          simpa using (isFlasque_of_injective (Inj.obj j)))
+          exact fun {_ _} i => (isFlasque_of_injective (Inj.obj j)) i)
         (c := injCocone)
-        (hc := colimit.isColimit Inj))
+        (hc := colimit.isColimit Inj)) i
   have h_colim_n : Subsingleton (Sheaf.H injCocone.pt (m + 1)) := by
-    simpa using sheafH_subsingleton_of_flasque X injCocone.pt m
+    simpa using sheafH_subsingleton_of_flasque X injCocone.pt hFlasqueInj m
   have h_colim_succ : Subsingleton (Sheaf.H injCocone.pt (m + 2)) := by
-    simpa using sheafH_subsingleton_of_flasque X injCocone.pt (m + 1)
+    simpa using sheafH_subsingleton_of_flasque X injCocone.pt hFlasqueInj (m + 1)
   let domainIso :=
     sheafH_filtered_colimit_succ_shiftDomainIso Ysh (m + 1) h_mid_n h_mid_succ
   let codomainIso :=

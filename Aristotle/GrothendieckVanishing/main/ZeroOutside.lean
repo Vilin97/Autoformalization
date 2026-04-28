@@ -1,5 +1,4 @@
 import Mathlib
-import Aristotle.GrothendieckVanishing.main.ULiftInt
 import Aristotle.GrothendieckVanishing.main.ClosedImmersion
 
 /-!
@@ -177,8 +176,7 @@ def sHom {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U)) :
   app {W} :=
     if h : (unop W) ≤ U then
       eqToHom (by simp_all) ≫
-        (AddCommGrpCat.uliftZMultiplesAddEquiv (F.obj W)).symm
-          (F.map (homOfLE h).op s)
+        AddCommGrpCat.ofHom (uliftZMultiplesHom (F.obj W) (F.map (homOfLE h).op s))
     else 0
   naturality {W Y} i := by
     by_cases hWU : (unop W) ≤ U
@@ -198,10 +196,6 @@ def sHom {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U)) :
         simp [w, ← comp_apply, eqToHom_trans]
       rw [← hz]
       simp [zeroOutside, hWU, hYU, w, hmap, constZ]
-      rw [AddCommGrpCat.uliftZMultiplesAddEquiv_symm_apply,
-        AddCommGrpCat.uliftZMultiplesAddEquiv_symm_apply]
-      simpa [w, hmap] using
-        (map_zsmul (AddCommGrpCat.Hom.hom (F.map i)) w.down (F.map (homOfLE hWU).op s)).symm
     · apply (zeroOutside_isZero (F := constZ) hWU).eq_of_src
 
 theorem sHom_app_generator {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U)) :
@@ -217,7 +211,6 @@ theorem sHom_app_generator {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U))
       (1 : ULift ℤ) by
       simp [generator, hObjU]]
   simp [sHom, zeroOutside_obj, zeroOutside, constZ]
-  rw [AddCommGrpCat.uliftZMultiplesAddEquiv_symm_apply]
   change (((AddCommGrpCat.Hom.hom (eqToHom hObjU))
       ((AddCommGrpCat.Hom.hom (eqToHom hObjU.symm)) (1 : ULift ℤ))).down : ℤ) • s = s
   rw [congrArg ULift.down h1]

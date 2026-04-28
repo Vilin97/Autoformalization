@@ -57,10 +57,9 @@ noncomputable def PushforwardHIso
     let SX := S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} closedIncl)
     have hSE_X : SX.ShortExact :=
       closedIncl_pushforward_shortExact hZ ip.shortExact_shortComplex
-    haveI : IsFlasqueSheaf SX.X₂ := by
-      constructor; intro U V j
+    have hFlasqueSX₂ : IsFlasqueSheaf SX.X₂ := fun j => by
       change Epi (S.X₂.val.map ((Opens.map closedIncl).op.map j.op))
-      exact IsFlasqueSheaf.epi_map ((Opens.map closedIncl).map j)
+      exact (isFlasque_of_injective S.X₂) ((Opens.map closedIncl).map j)
     cases k with
     | zero =>
       let hH1_src :
@@ -75,7 +74,10 @@ noncomputable def PushforwardHIso
         simpa [S, SX, Opens.map_top closedIncl] using
           sheafH1_cokernel_iso_of_subsingleton_middle
             (by simpa [SX] using hSE_X)
-            (by simpa [SX] using (inferInstance : Subsingleton (Sheaf.H SX.X₂ 1)))
+            (by
+              simpa [SX] using
+                (sheafH_subsingleton_of_flasque X SX.X₂ hFlasqueSX₂ 0 :
+                  Subsingleton (Sheaf.H SX.X₂ 1)))
       exact hH1_src.symm ≪≫ hH1_tgt
     | succ m =>
       let hShift_src :
@@ -99,9 +101,11 @@ noncomputable def PushforwardHIso
             (by simpa [SX] using hSE_X)
             (m + 1)
             (by simpa [SX] using
-              (inferInstance : Subsingleton (Sheaf.H SX.X₂ (m + 1))))
+              (sheafH_subsingleton_of_flasque X SX.X₂ hFlasqueSX₂ m :
+                Subsingleton (Sheaf.H SX.X₂ (m + 1))))
             (by simpa [SX] using
-              (inferInstance : Subsingleton (Sheaf.H SX.X₂ (m + 2))))
+              (sheafH_subsingleton_of_flasque X SX.X₂ hFlasqueSX₂ (m + 1) :
+                Subsingleton (Sheaf.H SX.X₂ (m + 2))))
       exact hShift_src.symm ≪≫ ih_push S.X₃ ≪≫ hShift_tgt
 
 /-- Closed-immersion step: if the kernel term of the closed-immersion
