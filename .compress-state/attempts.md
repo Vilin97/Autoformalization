@@ -76,3 +76,4 @@ Cycle 74: cycle 74: golfed `ReducibleVanishing` (collapsed comps/hcover/hcomp_ir
 Cycle 75: Cycle 75: -4 normalized LOC (4216→4212) by replacing manual `H_at` AddSubgroup construction with `(i_x x).range.comap (AddMonoidHom.mk' …)` in `exists_section_generating_stalks`.
 Cycle 76: cycle 76: golfed `exists_section_generating_stalks` in IrreducibleStep.lean (hi_inj/cyclic-gen/germ-rw/Exists.imp), -5 normalized LOC (4212→4207).
 Cycle 77: Cycle 77: removed `@[simps]` on `zeroOutside.sHom` and `zeroOutsideInt.sHom` in ZeroOutside.lean, eliminating two unused generated decls; -2 normalized LOC (4207→4205); compiles clean.
+Cycle 78: cycle 78: removed two `@[simps]` in ZeroOutside.lean, deleted 3 unused public decls (`zeroOutside_obj`/`_map`/`_openHom_app`), -2 normalized LOC (4205→4203).

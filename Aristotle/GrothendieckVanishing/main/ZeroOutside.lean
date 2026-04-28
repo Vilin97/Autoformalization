@@ -34,7 +34,6 @@ variable {C : Type*} [Category C] [HasZeroObject C] {X : TopCat.{u}}
     (U : Opens X) (F : Presheaf C X)
 
 open Classical in
-@[simps]
 def zeroOutside : Presheaf C X where
   obj W := if (unop W) ≤ U then F.obj W else 0
   map {W Y} i :=
@@ -71,7 +70,6 @@ def zeroOutside_top_iso : zeroOutside (⊤ : Opens X) F ≅ F :=
 variable {V : Opens X} (h : V ≤ U)
 
 open Classical in
-@[simps]
 def zeroOutside_openHom [HasPullbacks C] : zeroOutside V F ⟶ zeroOutside U F where
   app W := if hW : (unop W) ≤ V then
       eqToHom (by rw [zeroOutside_le hW, zeroOutside_le (le_trans hW h)])
@@ -165,7 +163,7 @@ namespace zeroOutside
 variable {X : TopCat.{u}} (U : Opens X)
 
 def generator : (constZ.zeroOutside U).obj (op U) :=
-  (eqToHom (by simp) : AddCommGrpCat.of (ULift ℤ) ⟶ (constZ.zeroOutside U).obj (op U)) 1
+  (eqToHom (by simp [zeroOutside, constZ]) : AddCommGrpCat.of (ULift ℤ) ⟶ (constZ.zeroOutside U).obj (op U)) 1
 
 variable {U}
 
@@ -174,7 +172,7 @@ def sHom {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U)) :
     constZ.zeroOutside U ⟶ F where
   app {W} :=
     if h : (unop W) ≤ U then
-      eqToHom (by simp_all) ≫
+      eqToHom (by simp_all [zeroOutside, constZ]) ≫
         AddCommGrpCat.ofHom (uliftZMultiplesHom (F.obj W) (F.map (homOfLE h).op s))
     else 0
   naturality {W Y} i := by
@@ -192,7 +190,7 @@ def sHom {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U)) :
       let w : ULift ℤ :=
         (AddCommGrpCat.Hom.hom (eqToHom hObjW) z)
       have hz : (AddCommGrpCat.Hom.hom (eqToHom hObjW.symm)) w = z := by
-        simp [w, ← comp_apply, eqToHom_trans]
+        simp [w, ← ConcreteCategory.comp_apply, eqToHom_trans]
       rw [← hz]
       simp [zeroOutside, hWU, hYU, w, hmap, constZ]
     · apply (zeroOutside_isZero (F := constZ) hWU).eq_of_src
@@ -209,7 +207,7 @@ theorem sHom_app_generator {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U))
     (eqToHom hObjU.symm : AddCommGrpCat.of (ULift ℤ) ⟶ (zeroOutside U constZ).obj (op U))
       (1 : ULift ℤ) by
       simp [generator, hObjU]]
-  simp [sHom, zeroOutside_obj, zeroOutside, constZ]
+  simp [sHom, zeroOutside, constZ]
   change (((AddCommGrpCat.Hom.hom (eqToHom hObjU))
       ((AddCommGrpCat.Hom.hom (eqToHom hObjU.symm)) (1 : ULift ℤ))).down : ℤ) • s = s
   rw [congrArg ULift.down h1]
@@ -224,7 +222,7 @@ theorem resGen_eqToHom_eq_one
       (ConcreteCategory.hom ((constZ.zeroOutside V).map (homOfLE hWV).op)
         (generator V)) = (1 : ULift ℤ) := by
   unfold generator
-  simp only [TopCat.Presheaf.zeroOutside_map, dif_pos hWV, dif_pos (le_refl V),
+  simp only [TopCat.Presheaf.zeroOutside, dif_pos hWV, dif_pos (le_refl V),
     ← ConcreteCategory.comp_apply, ← CategoryTheory.comp_apply, eqToHom_trans,
     Functor.const_obj_map, Category.id_comp]
   simp [show hObjW.symm.trans hObjW = rfl from Subsingleton.elim _ _]
