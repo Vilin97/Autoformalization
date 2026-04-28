@@ -1,11 +1,11 @@
-Completed cycle 59.
+Cycle 60 is complete.
 
-Changed [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:160): `H_at_cyclic` now returns an integer generator with divisibility directly, `P` uses `H_at` membership directly, helper arguments infer cleanly, and the final restricted section is named locally as `sW`.
+Changed [GrothendieckVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/GrothendieckVanishing.lean:23) by golfing `ReducibleVanishing`: the local induction target now takes bundled sheaves, redundant packaging was removed, and nearby `simp`/stalk-zero plumbing was tightened.
 
-Verification:
-- `lake env lean Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean` passed
-- Normalized LOC: `4375 -> 4363` (`-12`)
-- Raw `main/*.lean` wc: `5272 -> 5260` (`-12`)
-- `lake build` not run, per scope
+Verification passed:
+- `lake env lean Aristotle/GrothendieckVanishing/main/GrothendieckVanishing.lean`
+- `git diff --check`
+- normalized LOC: `4363 -> 4350` (`-13`)
+- raw `main/*.lean` wc: `5260 -> 5251` (`-9`)
 
-Wrote the report at [.compress-state/codex_task_results/cycle_59.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_59.md).
+Report written to [.compress-state/codex_task_results/cycle_60.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_60.md).

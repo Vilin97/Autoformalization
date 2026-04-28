@@ -32,61 +32,52 @@ theorem ReducibleVanishing
       Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} Y) n)) :
     Subsingleton (Sheaf.H ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) := by
   classical
-  let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  change Subsingleton (Sheaf.H Fsh n)
   have hfin := NoetherianSpace.finite_irreducibleComponents (α := X)
   set comps := hfin.toFinset with comps_def
-  have hcover : ∀ x : X, x ∈ ⋃₀ (comps : Set (Set X)) := by
-    intro x; simp [comps_def, Set.Finite.toFinset]
-    exact Set.mem_sUnion.mp
+  have hcover : ∀ x : X, x ∈ ⋃₀ (comps : Set (Set X)) := fun x => by
+    simpa [comps_def, Set.Finite.toFinset] using Set.mem_sUnion.mp
       (sUnion_irreducibleComponents (X := (↑X : Type u)) ▸ Set.mem_univ x)
-  have hcomp_irred : ∀ Z ∈ comps, Z ∈ irreducibleComponents X := by
-    intro Z hZ; simp [comps_def] at hZ; exact hZ
+  have hcomp_irred : ∀ Z ∈ comps, Z ∈ irreducibleComponents X := by simp [comps_def]
   suffices ∀ (s : Finset (Set X)),
       (∀ Z ∈ s, Z ∈ irreducibleComponents X) →
-      ∀ (G : TopCat.Presheaf AddCommGrpCat.{u} X) (hG : G.IsSheaf),
+      ∀ (Gsh : TopCat.Sheaf AddCommGrpCat.{u} X),
       (∀ x : X, x ∉ ⋃₀ (s : Set (Set X)) →
-        ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj G),
+        ∀ (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj Gsh.val),
         a = 0) →
-      Subsingleton (Sheaf.H ((⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) n) by
-    exact this comps hcomp_irred F hF (fun x hx => absurd (hcover x) hx)
+      Subsingleton (Sheaf.H Gsh n) by
+    exact this comps hcomp_irred ⟨F, hF⟩ (fun x hx => absurd (hcover x) hx)
   intro s; induction s using Finset.induction_on with
   | empty =>
-    intro _ G hG hG_stalks
+    intro _ Gsh hG_stalks
     exact sheafH_subsingleton_of_isZero
-      (by
-        exact sheaf_isZero_of_zero_stalks X hG (fun x a => hG_stalks x (by simp) a)) n
+      (sheaf_isZero_of_zero_stalks X Gsh.cond (fun x a => hG_stalks x (by simp) a)) n
   | @insert Z s' hZ_notin ih =>
-    intro hs_irred G hG hG_stalks
+    intro hs_irred Gsh hG_stalks
     have hZ_comp := hs_irred Z (Finset.mem_insert_self Z s')
     have hZ_closed := isClosed_of_mem_irreducibleComponents Z hZ_comp
-    have hZ_irred := hZ_comp.1
-    let i := TopCat.closedIncl hZ_closed
-    let Gsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨G, hG⟩
-    let GZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} i).obj Gsh)
+    let GZ := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} (TopCat.closedIncl hZ_closed)).obj Gsh)
     let S := closedImmersionSES (Z := Z) (hZ := hZ_closed) Gsh
     have hSE := closedImmersionSES_shortExact (Z := Z) (hZ := hZ_closed) Gsh
     have hker : Subsingleton (Sheaf.H S.X₁ n) := by
-      apply ih (fun Z' hZ' => hs_irred Z' (Finset.mem_insert_of_mem hZ')) S.X₁.val S.X₁.cond
+      apply ih (fun Z' hZ' => hs_irred Z' (Finset.mem_insert_of_mem hZ')) S.X₁
       intro x hx a
       by_cases hxZ : x ∈ Z
       · -- closedIncl_unit_stalk_isIso: iso on stalks at z ∈ Z
         haveI : IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).map S.g.val) := by
-          simpa [S, closedImmersionSES, i, Gsh] using
+          simpa [S] using
             (TopCat.closedIncl_unit_stalk_isIso (C := AddCommGrpCat.{u})
               (hs := hZ_closed) Gsh ⟨x, hxZ⟩)
         exact stalk_zero_of_ses_g_iso S hSE x inferInstance a
       · have hx' : x ∉ ⋃₀ ((insert Z s' : Finset (Set X)) : Set (Set X)) := by
-          simp only [Finset.coe_insert, Set.sUnion_insert, Set.mem_union] at hx ⊢
-          push_neg; exact ⟨hxZ, hx⟩
-        exact stalk_zero_of_shortExact_kernel S hSE x (fun b => hG_stalks x hx' b) a
+          simpa only [Finset.coe_insert, Set.sUnion_insert, Set.mem_union, not_or] using ⟨hxZ, hx⟩
+        exact stalk_zero_of_shortExact_kernel S hSE x (hG_stalks x hx') a
     exact subsingleton_sheafH_of_closedImmersion_middle
       (Z := Z) (hZ := hZ_closed) Gsh n
       (by simpa [S] using hker)
       (by
         haveI : IrreducibleSpace (TopCat.of Z) :=
-          isIrreducible_iff_irreducibleSpace.mp hZ_irred
-        simpa [i, Gsh, GZ] using
+          isIrreducible_iff_irreducibleSpace.mp hZ_comp.1
+        simpa [GZ] using
           ih_irred (TopCat.of Z) (G := GZ.val) GZ.cond
             (topologicalKrullDim_subspace_le (X := (↑X : Type u)) Z)
             (topologicalKrullDim_subspace_lt_of_lt (X := (↑X : Type u)) Z hn))
