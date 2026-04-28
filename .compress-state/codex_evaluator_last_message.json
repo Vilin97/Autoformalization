@@ -1,14 +1,11 @@
 {
   "progress_score": 1,
-  "summary": "Golfed `finsetGenCocone_isColimit` by reusing `(finsetGenCocone hK).\u03b9` instead of rebuilding `\u03b1`, dropping unused `Ksh`, and replacing the explicit `change`/`image.fac` block with `ext`/`simp`, -13 normalized LOC (4546\u21924533).",
+  "summary": "Golfed `sheafH_filtered_colimit_comparison_one_iso_hom` in PresheafFilteredColimit.lean by inlining `hqColim`/`functorCokIso`/`colimCokIso`, dropping redundant `IsColimit` type ascriptions, collapsing the injective witness via `inferInstanceAs`, and using `cokernel.mapIso_hom`/`Iso.comp_inv_eq` in the terminal cokernel calculation, -18 normalized LOC (4533\u21924515).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
-  "stuck_on": "",
-  "strategy_recommendation": "Pivot to `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` in `CohomologyAPI.lean:714` (body 111L, sig 6L, body/sig 18.5) \u2014 the largest untouched proof outlier. Alternative: `subsingleton_sheafH_of_closedImmersion_middle_presheaf` in `ClosedImmersionCohomology.lean:126` (body 50L). Avoid re-mining `finsetGenCocone_isColimit`, `PushforwardHIso`, or already-mined filtered-colimit comparison proofs.",
-  "attempts_entry": "cycle 46: golf `finsetGenCocone_isColimit` (FinitelyGeneratedVanishing.lean) \u2014 reused cocone.\u03b9, dropped unused `Ksh`, ext/simp the hfac block \u2014 -13 norm LOC (4546\u21924533), score 1",
-  "completed_task_lines": [
-    "- [>] Golf `finsetGenCocone_isColimit` in `Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:65` (signature 2L, body 51L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.",
-    "- [>] Golf `finsetGenCocone_isColimit` in `Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:65` (body/sig ratio 25.5, body 51L, sig 2L)."
-  ]
+  "stuck_on": "The remaining `mapIso` local still carries the boundary-square proof; full inlining was not net-shorter because the expression would repeat in the terminal cokernel calculation.",
+  "strategy_recommendation": "Pivot to the next-largest body/sig outliers: `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` in `CohomologyAPI.lean` (body ~111L) or `filtered_colimit_exists_compatible_representatives` in `PresheafFilteredColimitGeneral.lean:204` (body 99L, ratio 7.6). Avoid further passes on `sheafH_filtered_colimit_comparison_one_iso_hom` \u2014 it's been mined in cycles 39, 40, and 47.",
+  "attempts_entry": "cycle 47: score=1 loc_delta=-18 \u2014 golfed `sheafH_filtered_colimit_comparison_one_iso_hom` by inlining `hqColim`/`functorCokIso`/`colimCokIso`, using `inferInstanceAs` for injectivity, dropping `IsColimit` type ascriptions, and using `cokernel.mapIso_hom`/`Iso.comp_inv_eq` in the terminal cokernel calc (4533\u21924515).",
+  "completed_task_lines": []
 }
