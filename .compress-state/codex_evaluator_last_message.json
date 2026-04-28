@@ -1,11 +1,11 @@
 {
-  "progress_score": 2,
-  "summary": "Sheaf-reverted `sheafH0EquivSections_presheaf_natural` \u2192 `sheafH0EquivSections_natural` taking `(F G : Sheaf \u2026) (f : F \u27f6 G)`; updated 8 call sites in `CohomologyAPI.lean`/`PresheafFilteredColimit.lean`; -22 normalized LOC (4946\u21924924).",
+  "progress_score": 1,
+  "summary": "Reverted `sheafH0EquivSections_presheaf` to bundled-sheaf `sheafH0EquivSections`, updated all callers, and replaced two duplicated NatIso.ofComponents blocks with `Functor.isoWhiskerLeft Ysh sheafH0NatIsoSections`, -10 normalized LOC (4924\u21924914).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
-  "stuck_on": "",
-  "strategy_recommendation": "Continue Phase-1 sheaf reversion. Per the audit, four `_presheaf` declarations in `CohomologyAPI.lean` remain: `sheafH_subsingleton_of_isZero_presheaf` (L278), `sheafH0EquivSections_presheaf` (L385), `sheafH_subsingleton_of_isEmpty_presheaf` (L658), and `subsingleton_sheafH_of_shortExact_middle_presheaf` (L685). `sheafH0EquivSections_presheaf` itself is the next high-leverage target since it underlies many call sites; check whether a sheaf-level form lets call sites drop the `.cond` plumbing.",
-  "attempts_entry": "cycle 27: sheaf-reverted `sheafH0EquivSections_presheaf_natural` \u2192 `sheafH0EquivSections_natural` and updated 8 callers in CohomologyAPI.lean/PresheafFilteredColimit.lean; -22 normalized LOC (4946\u21924924); raw -20 (5822\u21925802); lake env lean + lake build pass.",
+  "stuck_on": "Achieved only -10 LOC vs. expected -28; the inner-body simplifications were smaller than estimated.",
+  "strategy_recommendation": "Continue Phase-1 sheaf reversion on the next remaining `_presheaf` decl. The audit lists three left in `CohomologyAPI.lean`: `sheafH_subsingleton_of_isZero_presheaf` (L278), `sheafH_subsingleton_of_isEmpty_presheaf` (L646), and `subsingleton_sheafH_of_shortExact_middle_presheaf` (L673). Pick `subsingleton_sheafH_of_shortExact_middle_presheaf` since it has the broadest fan-out via the `_natural` companion.",
+  "attempts_entry": "Cycle 28: score=1 loc_delta=-10 \u2014 reverted `sheafH0EquivSections_presheaf` \u2192 `sheafH0EquivSections (F : Sheaf \u2026)`, deduped two NatIso.ofComponents blocks via `sheafH0NatIsoSections` whisker.",
   "completed_task_lines": []
 }

@@ -1,14 +1,17 @@
-Implemented cycle 27.
+Completed cycle 28.
 
-Changed [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:399): `sheafH0EquivSections_presheaf_natural` is now `sheafH0EquivSections_natural` and takes bundled sheaves plus a sheaf morphism directly. Updated all eight call sites in `CohomologyAPI.lean` and [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:581), removing the repeated `.cond` / `.val` packaging and local `Sheaf.Hom.mk` bridge proofs.
+Changed [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:385): replaced `sheafH0EquivSections_presheaf` with bundled-sheaf `sheafH0EquivSections`, updated naturality and all call sites.
+
+Changed [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:579): updated bundled-sheaf call sites and compressed the two local `h0Iso` blocks via `Functor.isoWhiskerLeft Ysh (sheafH0NatIsoSections ...)`.
 
 Verification passed:
 - `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`
 - `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean`
 - `lake build`
+- `rg "sheafH0EquivSections_presheaf" Aristotle` has no matches
 
 Metrics:
-- Normalized LOC: `4946 -> 4924` (`-22`)
-- Raw `main/*.lean` LOC: `5822 -> 5802` (`-20`)
+- normalized LOC: `4924 -> 4914` (`-10`)
+- raw `main/*.lean` wc: `5802 -> 5792` (`-10`)
 
-Wrote the report at [cycle_27.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_27.md:1). The workspace already had unrelated dirty files; I left those untouched.
+Wrote the report at [.compress-state/codex_task_results/cycle_28.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_28.md). Full build passed with existing linter warnings only.
