@@ -1,14 +1,14 @@
 {
   "progress_score": 1,
-  "summary": "Golfed `PushforwardHIso` in ClosedImmersionCohomology.lean by inlining one-use let-bindings (`topIso`, `hH1_src`/`hH1_tgt`, `hShift_src`/`hShift_tgt`) and factoring shared subsingleton/short-exact facts (`hSE`, `hSrcSub`, `hTgtSub`) used by both branches, -20 normalized LOC (4566\u21924546).",
+  "summary": "Golfed `finsetGenCocone_isColimit` by reusing `(finsetGenCocone hK).\u03b9` instead of rebuilding `\u03b1`, dropping unused `Ksh`, and replacing the explicit `change`/`image.fac` block with `ext`/`simp`, -13 normalized LOC (4546\u21924533).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Pivot to `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` in `CohomologyAPI.lean:714` (body 111L, sig 6L, untouched and the largest remaining proof) or `sheafH_filtered_colimit_succ_shiftNatIso` in `PresheafFilteredColimitCore.lean:359` (body 98L). Avoid further mining of `PushforwardHIso` and previously-mined filtered-colimit comparison proofs.",
-  "attempts_entry": "cycle 45: golfed `PushforwardHIso` (inlined one-use isomorphism lets, factored hSE/hSrcSub/hTgtSub shared facts), -20 normalized LOC (4566\u21924546).",
+  "strategy_recommendation": "Pivot to `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` in `CohomologyAPI.lean:714` (body 111L, sig 6L, body/sig 18.5) \u2014 the largest untouched proof outlier. Alternative: `subsingleton_sheafH_of_closedImmersion_middle_presheaf` in `ClosedImmersionCohomology.lean:126` (body 50L). Avoid re-mining `finsetGenCocone_isColimit`, `PushforwardHIso`, or already-mined filtered-colimit comparison proofs.",
+  "attempts_entry": "cycle 46: golf `finsetGenCocone_isColimit` (FinitelyGeneratedVanishing.lean) \u2014 reused cocone.\u03b9, dropped unused `Ksh`, ext/simp the hfac block \u2014 -13 norm LOC (4546\u21924533), score 1",
   "completed_task_lines": [
-    "- [>] Golf `PushforwardHIso` in `Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean:34` (signature 7L, body 85L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.",
-    "- [ ] Golf `PushforwardHIso` in `Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean:34` (body/sig ratio 12.1, body 85L, sig 7L)."
+    "- [>] Golf `finsetGenCocone_isColimit` in `Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:65` (signature 2L, body 51L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.",
+    "- [>] Golf `finsetGenCocone_isColimit` in `Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:65` (body/sig ratio 25.5, body 51L, sig 2L)."
   ]
 }
