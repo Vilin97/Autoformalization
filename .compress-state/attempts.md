@@ -39,3 +39,4 @@ Cycle 37: cycle 37: golfed sheafH_filtered_colimit_comparison_isIso_succ_succ vi
 Cycle 38: cycle 38: golfed `sheafH_filtered_colimit_h1_cokernelFunctorIso` in PresheafFilteredColimit.lean via local `alpha`/`ev`/`e_j` lets and direct `cokernel.π_desc`/`Category.assoc` rewrites replacing the `change`+reassociation block, -40 normalized LOC (4740→4700).
 Cycle 39: cycle 39: -18 norm LOC (4700→4682), inlined staging aliases and one-use rewrite blocks in `sheafH_filtered_colimit_comparison_one_iso_hom`
 Cycle 40: cycle 40: golfed `sheafH_filtered_colimit_comparison_one_iso` (binder forms, inlined `hqColim`/`hsq`, dropped redundant annotations), -21 normalized LOC (4682→4661).
+Cycle 41: cycle 41: score=1 loc_delta=-24 — golfed `exists_section_generating_stalks` via `abs_dvd`/`abs_choice` and `AddSubgroup.ne_bot_iff_exists_ne_zero`, inlined nontrivial-subgroup and divisibility-transport witnesses (4661→4637)
