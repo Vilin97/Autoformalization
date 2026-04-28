@@ -1,14 +1,13 @@
-Done. Golfed `finsetGenCocone_isColimit` in [FinitelyGeneratedVanishing.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean:65) and wrote the cycle report at [cycle_46.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_46.md).
+Completed cycle 47.
 
-Verification passed:
+Changed [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean): golfed `sheafH_filtered_colimit_comparison_one_iso_hom`, including inlining `functorCokIso`/`colimCokIso`, removing redundant local colimit/type staging, and shortening the terminal cokernel rewrite with `cokernel.mapIso_hom`.
 
-```bash
-lake env lean Aristotle/GrothendieckVanishing/main/FinitelyGeneratedVanishing.lean
-```
+Verification:
+`lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean` passed.
 
 Metrics:
+normalized LOC `4533 -> 4515` (`-18`)
+raw `main/*.lean` wc `5426 -> 5408` (`-18`)
+target file raw `602 -> 584`
 
-- Normalized LOC: `4546` -> `4533` (`-13`)
-- Raw `main/*.lean` wc: `5436` -> `5426` (`-10`)
-
-I did not run `lake build`, since this was a proof-body-only change with no Lean file add/delete/rename. I also did not edit `.compress-state/compress_tasks.md`.
+Wrote the report at [.compress-state/codex_task_results/cycle_47.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_47.md). Existing unrelated `.compress-state` dirty files were left alone.
