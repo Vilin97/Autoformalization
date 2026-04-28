@@ -1,10 +1,10 @@
-Completed cycle 42.
+Golfed `sheafH_filtered_colimit_h1_boundary_square` in [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:193). The proof now avoids the three local transport facts and uses direct `rw`/`simp` before the existing `cokernel.π_desc` argument.
 
-Golfed `filtered_colimit_exists_compatible_representatives` in [PresheafFilteredColimitGeneral.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitGeneral.lean:204), mainly by replacing explicit naturality rewrites with `convert`/`simp`, collapsing the `hf` transport to one `simpa`, and inlining final single-use witnesses.
+Verification passed:
+- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean`
 
-Verification:
-- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitGeneral.lean` passed, with the existing warning at line 196.
-- Normalized LOC: `4637 -> 4606` (`-31`)
-- Raw `main/*.lean` wc: `5527 -> 5496` (`-31`)
+Metrics:
+- Normalized LOC: `4606 -> 4591` (`-15`)
+- Raw `main/*.lean` wc: `5496 -> 5481` (`-15`)
 
-Wrote the required report at [cycle_42.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_42.md). No commit or push performed.
+Wrote the required report at [.compress-state/codex_task_results/cycle_43.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_43.md). `lake build` was not run, per scope, since this was proof-body-only.

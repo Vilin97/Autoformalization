@@ -193,28 +193,13 @@ private theorem sheafH_filtered_colimit_h1_boundary_square
       eInj.hom ≫ sectionsFunctor.map (cokernel.π ι')
   apply colimit.hom_ext
   intro j
-  have hQj : colimit.ι (sheafH_filtered_colimit_succ_quotient Y' ⋙ sectionsFunctor) j ≫
-      eQ.hom = (sectionsFunctor.mapCocone qCocone).ι.app j := by
-    simp [eQ, qCocone, sectionsFunctor]
-  have hInjj : colimit.ι (sheafH_filtered_colimit_succ_Inj Y' ⋙ sectionsFunctor) j ≫
-      eInj.hom =
-        (sectionsFunctor.mapCocone (sheafH_filtered_colimit_succ_injCocone Y')).ι.app j := by
-    simp [eInj, sectionsFunctor]
-  have hInjj_assoc : colimit.ι (sheafH_filtered_colimit_succ_Inj Y' ⋙ sectionsFunctor) j ≫
-      eInj.hom ≫ sectionsFunctor.map (cokernel.π ι') =
-        (sectionsFunctor.mapCocone (sheafH_filtered_colimit_succ_injCocone Y')).ι.app j ≫
-          sectionsFunctor.map (cokernel.π ι') := by
-    simpa [Category.assoc] using congrArg (fun t => t ≫ sectionsFunctor.map (cokernel.π ι')) hInjj
-  rw [colimit.ι_map_assoc, hQj, hInjj_assoc]
-  change ((cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val.app (op ⊤)) ≫
-      ((qCocone.ι.app j).val.app (op ⊤)) =
-    ((sheafH_filtered_colimit_succ_injCocone Y').ι.app j).val.app (op ⊤) ≫
-      ((cokernel.π ι').val.app (op ⊤))
-  exact (congrArg
+  rw [colimit.ι_map_assoc]
+  simp [eQ, eInj, sectionsFunctor]
+  exact congrArg
     (fun β :
       ((sheafH_filtered_colimit_succ_Inj Y').obj j) ⟶ qCocone.pt =>
         β.val.app (op ⊤))
-    (cokernel.π_desc _ _ _))
+    (cokernel.π_desc _ _ _)
 
 private noncomputable def sheafH_filtered_colimit_h1_global_cokernel_iso
     {X : TopCat.{u}} {J' : Type u} [SmallCategory J'] [IsFiltered J']
