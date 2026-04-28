@@ -378,53 +378,45 @@ theorem closedIncl_unit_stalk_isIso
       ((Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)).unit.app
         F).val) := by
   -- Use the triangle identity + counit iso
-  let adj := Sheaf.pullbackPushforwardAdjunction C (closedIncl hs)
-  let pb := Sheaf.pullback C (closedIncl hs)
+  let i := closedIncl hs
+  let adj := Sheaf.pullbackPushforwardAdjunction C i
+  let pb := Sheaf.pullback C i
   let η := adj.unit.app F
   haveI : IsIso (adj.counit.app (pb.obj F)) :=
     closedIncl_counit_isIso (C := C) (hs := hs) (pb.obj F)
   haveI : IsIso (𝟙 (pb.obj F)) := inferInstance
-  haveI : IsIso (pb.map η) :=
-    IsIso.of_isIso_fac_right (adj.left_triangle_components F)
+  haveI : IsIso (pb.map η) := IsIso.of_isIso_fac_right (adj.left_triangle_components F)
   -- Step 2: val stalk of pb.map(η) is iso
   haveI : IsIso (pb.map η).val :=
     inferInstanceAs (IsIso (sheafToPresheaf _ _ |>.map (pb.map η)))
   let Tz := Presheaf.stalkFunctor C x
+  let K := Opens.grothendieckTopology (TopCat.of s)
+  let pull := Presheaf.pullback C i
   -- Step 3: pullbackIso naturality
-  let pi := Sheaf.pullbackIso C (closedIncl hs)
+  let pi := Sheaf.pullbackIso C i
   let piF := pi.hom.app F
-  let piT := pi.hom.app ((Sheaf.pushforward C (closedIncl hs)).obj (pb.obj F))
+  let piT := pi.hom.app ((pb ⋙ Sheaf.pushforward C i).obj F)
   haveI : IsIso piF.val := inferInstanceAs (IsIso ((sheafToPresheaf _ _).map piF))
   haveI : IsIso piT.val := inferInstanceAs (IsIso ((sheafToPresheaf _ _).map piT))
-  have hnat : (pb.map η).val ≫ piT.val = piF.val ≫
-      (presheafToSheaf _ _ |>.map ((Presheaf.pullback C (closedIncl hs)).map η.val)).val :=
+  have hnat : (pb.map η).val ≫ piT.val = piF.val ≫ sheafifyMap K (pull.map η.val) :=
     congr_arg Sheaf.Hom.val (pi.hom.naturality η)
-  have hnat_stalk := congr_arg Tz.map hnat
-  simp only [Functor.map_comp] at hnat_stalk
+  have hnat_stalk := by simpa only [Functor.map_comp] using congr_arg Tz.map hnat
   -- Step 4: presheafToSheaf.map(pull.map(η.val)).val stalk is iso
-  haveI : IsIso (Tz.map
-      (presheafToSheaf _ _ |>.map ((Presheaf.pullback C (closedIncl hs)).map η.val)).val) :=
+  haveI : IsIso (Tz.map (sheafifyMap K (pull.map η.val))) :=
     IsIso.of_isIso_fac_left hnat_stalk.symm
   -- Step 5: toSheafify naturality → pull.map(η.val) stalk is iso
-  let K := Opens.grothendieckTopology (TopCat.of s)
-  let P₁ := (Presheaf.pullback C (closedIncl hs)).obj F.val
-  let P₂ := (Presheaf.pullback C (closedIncl hs)).obj
-    ((Sheaf.pushforward C (closedIncl hs)).obj (pb.obj F)).val
-  have hts : Tz.map ((Presheaf.pullback C (closedIncl hs)).map η.val) ≫
-      Tz.map (CategoryTheory.toSheafify K P₂) =
-    Tz.map (CategoryTheory.toSheafify K P₁) ≫ Tz.map
-      (presheafToSheaf K C |>.map
-        ((Presheaf.pullback C (closedIncl hs)).map η.val)).val := by
-    simpa only [Functor.map_comp] using congr_arg Tz.map
-      (CategoryTheory.toSheafify_naturality K ((Presheaf.pullback C (closedIncl hs)).map η.val))
-  haveI : IsIso (Tz.map (CategoryTheory.toSheafify K P₁)) := stalkFunctor_map_iso_toSheafify P₁ x
-  haveI : IsIso (Tz.map (CategoryTheory.toSheafify K P₂)) := stalkFunctor_map_iso_toSheafify P₂ x
-  haveI : IsIso (Tz.map ((Presheaf.pullback C (closedIncl hs)).map η.val)) :=
+  let P₁ := pull.obj F.val
+  let P₂ := pull.obj ((pb ⋙ Sheaf.pushforward C i).obj F).val
+  have hts : Tz.map (pull.map η.val) ≫ Tz.map (CategoryTheory.toSheafify K P₂) =
+      Tz.map (CategoryTheory.toSheafify K P₁) ≫ Tz.map (sheafifyMap K (pull.map η.val)) := by
+    simpa only [Functor.map_comp] using congr_arg Tz.map (CategoryTheory.toSheafify_naturality K (pull.map η.val))
+  haveI (P : (TopCat.of s).Presheaf C) : IsIso (Tz.map (toSheafify K P)) := stalkFunctor_map_iso_toSheafify P x
+  haveI : IsIso (Tz.map (pull.map η.val)) :=
     IsIso.of_isIso_fac_right hts
   -- Step 6: stalkPull_nat → η.val stalk is iso
-  haveI (G : Sheaf C X) : IsIso (Presheaf.stalkPullbackHom C (closedIncl hs) G.val x) :=
-    (Presheaf.stalkPullbackIso C (closedIncl hs) G.val x).isIso_hom
-  exact IsIso.of_isIso_fac_right (stalkPullbackHom_naturality (closedIncl hs) η.val x)
+  haveI (G : Sheaf C X) : IsIso (Presheaf.stalkPullbackHom C i G.val x) :=
+    (Presheaf.stalkPullbackIso C i G.val x).isIso_hom
+  exact IsIso.of_isIso_fac_right (stalkPullbackHom_naturality i η.val x)
 
 end TopCat
 

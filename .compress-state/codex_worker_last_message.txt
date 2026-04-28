@@ -1,13 +1,16 @@
-Cycle 69 completed.
+Cycle 70 is complete.
 
-Changed [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:133): golfed `exists_section_generating_stalks` by consolidating the nonzero-subgroup/cyclic-generator pattern into one two-use local helper, tightening `hcoeff_x`, and inlining the final `hd_x_eq` rewrite.
+Changed [ClosedImmersion.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean:366), only inside `closedIncl_unit_stalk_isIso`. The proof now uses local `i`/`pull` aliases, `sheafifyMap`, a collapsed stalk-level naturality step, and one local `toSheafify` instance family.
 
-Metrics:
-- Normalized LOC: `4264 -> 4260` (`-4`)
-- Raw `main/*.lean` wc: `5166 -> 5162` (`-4`)
+Report written: [cycle_70.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_70.md)
 
 Verification:
-- `lake env lean Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean`
-- `rg -n "\bsorry\b|\badmit\b|^\s*axiom\b" Aristotle --glob '*.lean'` only found the existing doc-comment mention.
+- `lake env lean Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean`
+- `git diff --check`
+- no `sorry`/`admit`/`axiom` matches in the modified Lean file
 
-Wrote the required report: [.compress-state/codex_task_results/cycle_69.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_69.md). `lake build` was not run because this was proof-body-only with no declaration/import/signature changes.
+Metrics:
+- Normalized LOC: `4260 -> 4252` (`-8`)
+- Raw `main/*.lean` wc: `5162 -> 5154` (`-8`)
+
+I did not run `lake build`, per the proof-body-only scope.

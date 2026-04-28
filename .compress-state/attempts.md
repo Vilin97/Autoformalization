@@ -68,3 +68,4 @@ Cycle 66: cycle 66: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` in P
 Cycle 67: cycle 67: golfed filtered_colimit_exists_compatible_representatives in PresheafFilteredColimitGeneral.lean (pair-index type swap + choose-fold + change/destructure removal), -10 normalized LOC (4284→4274).
 Cycle 68: cycle 68: golfed `exists_section_generating_stalks` (ULift→ℤ subgroup, removed mk_P, factored 2-use H_ne_of_coeff helper), -10 normalized LOC (4274→4264).
 Cycle 69: cycle 69: golfed `exists_section_generating_stalks` (consolidated cyclic-generator helper, inlined `hd_x_eq`/`hcoeff_x`), -4 normalized LOC (4264→4260).
+Cycle 70: cycle 70: golfed `closedIncl_unit_stalk_isIso` (ClosedImmersion.lean) via aliases + `sheafifyMap` + parameterized `toSheafify` instance, -8 norm LOC (4260→4252).
