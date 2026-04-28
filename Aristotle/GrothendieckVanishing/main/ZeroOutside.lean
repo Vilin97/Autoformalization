@@ -170,7 +170,6 @@ def generator : (constZ.zeroOutside U).obj (op U) :=
 variable {U}
 
 open Classical in
-@[simps]
 def sHom {F : Presheaf AddCommGrpCat.{u} X} (s : F.obj (op U)) :
     constZ.zeroOutside U ⟶ F where
   app {W} :=
@@ -300,7 +299,6 @@ abbrev sHomVal {X : TopCat.{u}} {U : Opens X} {F : Presheaf AddCommGrpCat.{u} X}
     (hF : F.IsSheaf) (s : F.obj (op U)) : (zeroOutsideInt U).val ⟶ F :=
   sheafifyLift _ (Presheaf.zeroOutside.sHom s) hF
 
-@[simps]
 def sHom {X : TopCat.{u}} {U : Opens X} {F : Sheaf AddCommGrpCat.{u} X}
     (s : F.presheaf.obj (op U)) : zeroOutsideInt U ⟶ F where
   val := sHomVal F.cond s

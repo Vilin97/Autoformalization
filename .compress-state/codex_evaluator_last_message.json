@@ -1,11 +1,11 @@
 {
-  "progress_score": 1,
-  "summary": "Golfed `exists_section_generating_stalks` body in IrreducibleStep.lean (tighter `hi_inj`, folded cyclic-generator constructor, shorter germ rewrite, `Exists.imp` for the final conclusion), -5 normalized LOC (4212\u21924207).",
+  "progress_score": 2,
+  "summary": "Removed two `@[simps]` attributes in ZeroOutside.lean, eliminating unused public decls `zeroOutside.sHom_app` and `zeroOutsideInt.sHom_val`, -2 normalized LOC (4207\u21924205).",
   "principle_violations": [],
   "task_addressed": true,
-  "task_complete": false,
-  "stuck_on": "`exists_section_generating_stalks` body still ~50 lines; the WIP checklist entries describe it at 161L (stale) but the proof remains the largest in the file and has been squeezed across cycles 68/69/73/75/76, so further golf yields diminishing returns.",
-  "strategy_recommendation": "Pivot away from `exists_section_generating_stalks` \u2014 it has been golfed in 5 cycles and remaining transport is dense but load-bearing. Target the next-largest file: `CohomologyAPI.lean` (782 raw LOC). Scan for `(F : Presheaf X) (hF : F.IsSheaf)` triples that should reduce to a single `Sheaf` argument (Principle 2), or pick the longest proof body in that file via the audit's Phase-4 list.",
-  "attempts_entry": "cycle 76: golfed `exists_section_generating_stalks` in IrreducibleStep.lean (hi_inj/cyclic-gen/germ-rw/Exists.imp), -5 normalized LOC (4212\u21924207).",
+  "task_complete": true,
+  "stuck_on": "",
+  "strategy_recommendation": "Continue Phase 4 unused-decl cleanup: investigate the remaining `@[simps]` on `zeroOutside` (lines 213/228 still reference `zeroOutside_obj`/`zeroOutside_map`) \u2014 see whether those references can be replaced by direct unfolds and the attribute removed. Otherwise, pivot to scanning CohomologyAPI.lean (largest file, 609 normalized LOC) for `(F : Presheaf X) (hF : F.IsSheaf)` triples to collapse to `Sheaf` arguments per Principle 2.",
+  "attempts_entry": "Cycle 77: removed `@[simps]` on `zeroOutside.sHom` and `zeroOutsideInt.sHom` in ZeroOutside.lean, eliminating two unused generated decls; -2 normalized LOC (4207\u21924205); compiles clean.",
   "completed_task_lines": []
 }

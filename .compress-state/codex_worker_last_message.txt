@@ -1,10 +1,17 @@
-Implemented cycle 76.
+Cycle 77 complete.
 
-Changed [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:143), only inside `exists_section_generating_stalks`, with a `-5` normalized LOC delta. Wrote the required report at [cycle_76.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_76.md).
+Changed [ZeroOutside.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ZeroOutside.lean:170): removed the two targeted `@[simps]` attributes before `TopCat.Presheaf.zeroOutside.sHom` and `TopCat.Sheaf.zeroOutsideInt.sHom`, eliminating the generated unused declarations.
 
-Verification passed:
-- `lake env lean Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean`
-- Normalized LOC: `4212 -> 4207`
-- Raw `main/*.lean` wc: `5114 -> 5109`
+Report written to [cycle_77.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_77.md:1).
 
-`lake build` was not run because no imports or declaration boundaries changed.
+Verification:
+- `rg` found no references to `zeroOutside.sHom_app` or `zeroOutsideInt.sHom_val`
+- `lake env lean Aristotle/GrothendieckVanishing/main/ZeroOutside.lean` passed
+- `lake build` passed
+
+LOC:
+- Normalized: 4207 -> 4205, delta -2
+- Raw script total: 5109 -> 5107, delta -2
+- `wc -l main/*.lean`: 5109 -> 5107, delta -2
+
+Existing unrelated `.compress-state` worktree changes were present before this cycle and left untouched.
