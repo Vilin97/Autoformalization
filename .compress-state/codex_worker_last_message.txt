@@ -1,11 +1,14 @@
-Completed cycle 48.
+Implemented cycle 49.
 
-Changed [PresheafFilteredColimitGeneral.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitGeneral.lean:204): golfed `filtered_colimit_exists_compatible_representatives` by adding a proof-local `compatAfter`, running the finite induction over the finite product subtype, and replacing a manual naturality block with `NatTrans.naturality_apply`.
+Changed [CohomologyAPI.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:417): the mono proof now lifts one representative for `a - b` through `cokernel.π`, removing the separate `a`/`b` representative argument and the longer `Ext.add_comp` rewrite chain. I also tightened one `hδ` rewrite via `sheafH0EquivSections` injectivity.
 
 Verification:
-- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimitGeneral.lean` passes.
-- Existing warning remains at line 196.
-- Normalized LOC: `4515 -> 4495` delta `-20`.
-- Raw `main/*.lean` wc: `5408 -> 5388` delta `-20`.
+- `lake env lean Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean`
+- `python3.9 scripts/normalized_loc.py --per-file --raw`
+- `wc -l Aristotle/GrothendieckVanishing/main/*.lean`
 
-Wrote the report at [cycle_48.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_48.md:1). No commit or push performed.
+Metrics:
+- Normalized LOC: `4495 -> 4487` (`-8`)
+- Raw `main/*.lean` wc: `5388 -> 5380` (`-8`)
+
+Wrote the cycle report at [.compress-state/codex_task_results/cycle_49.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_49.md). I did not run `lake build`, per the proof-body-only scope.

@@ -430,9 +430,9 @@ noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle {X : TopCat.{u}}
         (ConcreteCategory.hom (S.g.val.app (op ⊤)) s)) = 0
     rw [← show y.comp (Ext.mk₀ S.g) (add_zero 0) =
         (sheafH0EquivSections S.X₃).symm
-          (ConcreteCategory.hom (S.g.val.app (op ⊤)) s) from by
-          rw [(sheafH0EquivSections S.X₃).eq_symm_apply]
-          simpa [y] using sheafH0EquivSections_natural (f := S.g) (x := y),
+          (ConcreteCategory.hom (S.g.val.app (op ⊤)) s) from
+          (sheafH0EquivSections S.X₃).injective (by
+            simpa [y] using sheafH0EquivSections_natural (f := S.g) (x := y)),
       sheafH_succ_map_apply,
       Ext.comp_assoc_of_second_deg_zero _ (Ext.mk₀ S.g) hS.extClass rfl,
       hS.comp_extClass, Ext.comp_zero _ _ 1 1 rfl]
@@ -448,29 +448,21 @@ noncomputable def sheafH1_cokernel_iso_of_subsingleton_middle {X : TopCat.{u}}
   have hπH_mono : Mono πH := by
     rw [AddCommGrpCat.mono_iff_injective]
     intro a b hab
-    obtain ⟨sa, hsa⟩ := (AddCommGrpCat.epi_iff_surjective
-      (cokernel.π (S.g.val.app (op ⊤)))).mp inferInstance a
-    obtain ⟨sb, hsb⟩ := (AddCommGrpCat.epi_iff_surjective
-      (cokernel.π (S.g.val.app (op ⊤)))).mp inferInstance b
-    rw [← hsa, ← hsb] at hab ⊢
+    apply sub_eq_zero.mp
+    obtain ⟨s, hs⟩ := (AddCommGrpCat.epi_iff_surjective
+      (cokernel.π (S.g.val.app (op ⊤)))).mp inferInstance (a - b)
+    rw [← hs]
     have hzero :
-        ((((sheafH0EquivSections S.X₃).symm (sa - sb)).comp hS.extClass rfl) :
+        ((((sheafH0EquivSections S.X₃).symm s).comp hS.extClass rfl) :
             Sheaf.H S.X₁ 1) = 0 := by
-      rw [map_sub, sub_eq_add_neg, Ext.add_comp, Ext.neg_comp, ← sub_eq_add_neg, sub_eq_zero]
-      simpa [πH, δ] using hab
+      simpa [πH, δ, ← hs] using (by
+        rw [map_sub, hab, sub_self] : ConcreteCategory.hom πH (a - b) = 0)
     obtain ⟨y, hy⟩ := Ext.covariant_sequence_exact₃ _ hS
-      ((sheafH0EquivSections S.X₃).symm (sa - sb)) rfl hzero
-    have hy_sec :
-        ConcreteCategory.hom (S.g.val.app (op ⊤))
-            (sheafH0EquivSections S.X₂ y) =
-          sa - sb := by
-      exact (sheafH0EquivSections_natural (f := S.g) (x := y)).symm.trans <|
-        by
-          simpa using congrArg (sheafH0EquivSections S.X₃) hy
-    change ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤))) sa =
-      ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤))) sb
-    rw [← sub_eq_zero]
-    simpa [map_sub] using
+      ((sheafH0EquivSections S.X₃).symm s) rfl hzero
+    have hy_sec :=
+      (sheafH0EquivSections_natural (f := S.g) (x := y)).symm.trans <|
+        by simpa using (congrArg (sheafH0EquivSections S.X₃) hy)
+    simpa using
       congrArg (ConcreteCategory.hom (cokernel.π (S.g.val.app (op ⊤)))) hy_sec.symm
   haveI : IsIso πH := isIso_of_mono_of_epi πH
   exact asIso πH
