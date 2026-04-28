@@ -1,11 +1,13 @@
 {
   "progress_score": 1,
-  "summary": "Golfed `exists_section_generating_stalks` in IrreducibleStep.lean: dropped `ha_mem`/`abs_choice` split, inlined `hcoeff_const`, replaced manual int-cast with `Int.le_toNat`, -9 normalized LOC (4487\u21924478).",
+  "summary": "Golfed `closedIncl_unit_stalk_isIso` via `IsIso.of_isIso_fac_right` (Mathlib triangle), `inferInstanceAs` term-mode, and a reusable proof-local stalkPullback instance, -15 normalized LOC (4478\u21924463).",
   "principle_violations": [],
   "task_addressed": true,
-  "task_complete": false,
-  "stuck_on": "Proof body still ~150 lines; further golf possible in `H_at_cyclic` divisibility extraction and the final minimality witness, but the largest one-use plumbing has been removed.",
-  "strategy_recommendation": "Pivot to a fresh long proof: target `sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary_hom` in `PresheafFilteredColimit.lean:398` (body ~241L, ratio ~26.8) \u2014 highest-leverage remaining outlier. Avoid revisiting `exists_section_generating_stalks` and `sheafH_filtered_colimit_comparison_one_iso_hom` in back-to-back cycles.",
-  "attempts_entry": "cycle 50: golfed `exists_section_generating_stalks` (IrreducibleStep.lean) \u2014 inlined `hcoeff_const`, removed `ha_mem`/`abs_choice`, used `Int.le_toNat`, -9 normalized LOC (4487\u21924478).",
-  "completed_task_lines": []
+  "task_complete": true,
+  "stuck_on": "",
+  "strategy_recommendation": "Pivot to `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf_natural` in `Aristotle/GrothendieckVanishing/main/CohomologyAPI.lean:1324` (sig 8L, body 67L) \u2014 fresh, large, and the Phase-2 `_presheaf` naturality form is a Sheaf-reversion candidate; otherwise `ReducibleVanishing` in `GrothendieckVanishing.lean:23` (body 73L).",
+  "attempts_entry": "cycle 51: golfed `closedIncl_unit_stalk_isIso` via `IsIso.of_isIso_fac_right` + `inferInstanceAs` + parametric stalkPullback instance, -15 normalized LOC (4478\u21924463).",
+  "completed_task_lines": [
+    "- [>] Golf `closedIncl_unit_stalk_isIso` in `Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean:408` (signature 14L, body 64L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close."
+  ]
 }

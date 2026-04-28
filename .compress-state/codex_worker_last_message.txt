@@ -1,20 +1,18 @@
-Implemented cycle 50.
+Implemented cycle 51.
 
-Changed [IrreducibleStep.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean:133):
-- Golfed `exists_section_generating_stalks`.
-- Removed the local `ha_mem`/`abs_choice` route in `H_at_cyclic`.
-- Inlined one-use `hcoeff_const` into `hcoeff_x`.
-- Replaced manual integer cast plumbing with `Int.le_toNat`.
-
-Wrote the cycle report at [cycle_50.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_50.md).
+Changed [ClosedImmersion.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean):
+- Golfed `TopCat.closedIncl_unit_stalk_isIso`.
+- Replaced the manual triangle-isomorphism proof with `IsIso.of_isIso_fac_right`.
+- Removed small tactic wrappers via direct lemma terms / `inferInstanceAs`.
+- Collapsed the `toSheafify_naturality` transport.
+- Replaced two repeated stalk-pullback instance blocks with one proof-local parametric instance.
 
 Verification passed:
-- `lake env lean Aristotle/GrothendieckVanishing/main/IrreducibleStep.lean`
-- `python3.9 scripts/normalized_loc.py --per-file --raw`
-- `wc -l Aristotle/GrothendieckVanishing/main/*.lean`
+- `lake env lean Aristotle/GrothendieckVanishing/main/ClosedImmersion.lean`
+- `lake env lean Aristotle/GrothendieckVanishing/main/GrothendieckVanishing.lean`
 
-LOC:
-- Normalized: `4487 -> 4478` (`-9`)
-- Raw `main/*.lean`: `5380 -> 5370` (`-10`)
+Metrics:
+- Normalized LOC: `4478 -> 4463` (`-15`)
+- Raw `main/*.lean` LOC: `5370 -> 5360` (`-10`)
 
-No commit made.
+Wrote the required report at [.compress-state/codex_task_results/cycle_51.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_51.md). Existing unrelated dirty `.compress-state` files were left untouched.

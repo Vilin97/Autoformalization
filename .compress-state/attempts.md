@@ -49,3 +49,4 @@ Cycle 47: cycle 47: score=1 loc_delta=-18 — golfed `sheafH_filtered_colimit_co
 Cycle 48: cycle 48: golfed `filtered_colimit_exists_compatible_representatives` via proof-local `compatAfter` + `Finset.univ` induction + `NatTrans.naturality_apply`, -20 normalized LOC (4515→4495).
 Cycle 49: cycle 49: golfed `sheafH1_cokernel_iso_of_subsingleton_middle` (CohomologyAPI.lean) by collapsing two-representative mono argument into one rep for `a-b` and tightening `hδ` via `sheafH0EquivSections` injectivity, -8 normalized LOC (4495→4487).
 Cycle 50: cycle 50: golfed `exists_section_generating_stalks` (IrreducibleStep.lean) — inlined `hcoeff_const`, removed `ha_mem`/`abs_choice`, used `Int.le_toNat`, -9 normalized LOC (4487→4478).
+Cycle 51: cycle 51: golfed `closedIncl_unit_stalk_isIso` via `IsIso.of_isIso_fac_right` + `inferInstanceAs` + parametric stalkPullback instance, -15 normalized LOC (4478→4463).
