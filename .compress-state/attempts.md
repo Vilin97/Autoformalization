@@ -53,3 +53,4 @@ Cycle 51: cycle 51: golfed `closedIncl_unit_stalk_isIso` via `IsIso.of_isIso_fac
 Cycle 52: cycle 52: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` (PresheafFilteredColimit.lean) — inlined `hc_psh_*` and `qCocone`, factored `toPsh`/`evTop` two-use aliases, reused `stageHom`; -12 normalized LOC (4463→4451).
 Cycle 53: cycle 53: golfed `sheafH_filtered_colimit_comparison_isIso_succ_succ` via inferInstanceAs hInj, inlined hqColim, parameterized h_mid/h_colim locals — -14 normalized LOC (4451→4437).
 Cycle 54: cycle 54: golfed `exists_section_generating_stalks` (IrreducibleStep.lean) by inlining 5 single-use locals and stripping `show … from by` wrappers, -12 normalized LOC (4437→4425).
+Cycle 55: cycle 55: golfed `sheafH_filtered_colimit_comparison_one_iso_hom` (PresheafFilteredColimit.lean) by removing `simpa` wrappers, replacing `change` with `dsimp`, and extracting `hstage`; -12 normalized LOC (4425→4413).
