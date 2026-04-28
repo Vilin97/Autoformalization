@@ -457,36 +457,24 @@ theorem sheafH_filtered_colimit_comparison_succ_compatibility
         h_mid_n h_mid_succ)).hom from rfl]
   rw [HasColimit.isoOfNatIso_ι_hom_assoc]
   rw [colimit_ι_sheafH_filtered_colimit_comparison]
-  have hqj := colimit_ι_sheafH_filtered_colimit_comparison
-    (X := X) (Y' := sheafH_filtered_colimit_succ_quotient Ysh) (n := n)
-    (c' := sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) j
-  have hqj_assoc :
-      (colimit.ι (sheafH_filtered_colimit_succ_quotient Ysh ⋙ sheafCohomologyFunctor X n) j ≫
-          sheafH_filtered_colimit_comparison (sheafH_filtered_colimit_succ_quotient Ysh) n
-            (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh)) ≫
-        (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
-          h_colim_n h_colim_succ).hom =
-      (sheafCohomologyFunctor X n).map
-          ((sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh).ι.app j) ≫
-        (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
-          h_colim_n h_colim_succ).hom := by
-    simpa [Category.assoc] using
-      congrArg
-        (fun t =>
-          t ≫ (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
-            h_colim_n h_colim_succ).hom) hqj
-  have hqj_assoc' :
+  rw [show
       colimit.ι (sheafH_filtered_colimit_succ_quotient Ysh ⋙ sheafCohomologyFunctor X n) j ≫
           sheafH_filtered_colimit_comparison (sheafH_filtered_colimit_succ_quotient Ysh) n
             (sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) ≫
         (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
           h_colim_n h_colim_succ).hom =
       (sheafCohomologyFunctor X n).map
-          ((sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh).ι.app j) ≫
-        (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
-          h_colim_n h_colim_succ).hom := by
-    exact hqj_assoc
-  rw [hqj_assoc']
+        ((sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh).ι.app j) ≫
+      (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
+        h_colim_n h_colim_succ).hom from by
+    simpa only [Category.assoc] using
+      congrArg
+        (fun t =>
+          t ≫ (sheafH_filtered_colimit_succ_shiftCodomainIso Ysh csh hcsh n
+            h_colim_n h_colim_succ).hom)
+        (colimit_ι_sheafH_filtered_colimit_comparison
+          (X := X) (Y' := sheafH_filtered_colimit_succ_quotient Ysh) (n := n)
+          (c' := sheafH_filtered_colimit_succ_quotientCocone Ysh csh hcsh) j)]
   change
     (sheafH_succ_iso_of_subsingleton_middle
         (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Ysh) j) n
