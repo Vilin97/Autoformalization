@@ -1,11 +1,11 @@
 {
   "progress_score": 1,
-  "summary": "Golfed `sheafH1_cokernel_iso_of_subsingleton_middle` mono proof to lift one representative for `a - b` instead of separate `a`/`b` reps, plus tightened `h\u03b4` via `sheafH0EquivSections` injectivity, -8 normalized LOC (4495\u21924487).",
+  "summary": "Golfed `exists_section_generating_stalks` in IrreducibleStep.lean: dropped `ha_mem`/`abs_choice` split, inlined `hcoeff_const`, replaced manual int-cast with `Int.le_toNat`, -9 normalized LOC (4487\u21924478).",
   "principle_violations": [],
   "task_addressed": true,
-  "task_complete": true,
-  "stuck_on": "",
-  "strategy_recommendation": "Pivot to a fresh long proof: target `sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary_hom` in `PresheafFilteredColimit.lean:398` (body 241L, sig 9L, ratio 26.8) \u2014 highest body/sig outlier remaining. Avoid revisiting `sheafH1_cokernel_iso_of_subsingleton_middle` (just mined) and consider the `_presheaf` sibling at line 714 only if upper-leverage targets prove resistant.",
-  "attempts_entry": "cycle 49: golfed `sheafH1_cokernel_iso_of_subsingleton_middle` (CohomologyAPI.lean) by collapsing two-representative mono argument into one rep for `a-b` and tightening `h\u03b4` via `sheafH0EquivSections` injectivity, -8 normalized LOC (4495\u21924487).",
+  "task_complete": false,
+  "stuck_on": "Proof body still ~150 lines; further golf possible in `H_at_cyclic` divisibility extraction and the final minimality witness, but the largest one-use plumbing has been removed.",
+  "strategy_recommendation": "Pivot to a fresh long proof: target `sheafH_filtered_colimit_comparison_one_iso_presheaf_boundary_hom` in `PresheafFilteredColimit.lean:398` (body ~241L, ratio ~26.8) \u2014 highest-leverage remaining outlier. Avoid revisiting `exists_section_generating_stalks` and `sheafH_filtered_colimit_comparison_one_iso_hom` in back-to-back cycles.",
+  "attempts_entry": "cycle 50: golfed `exists_section_generating_stalks` (IrreducibleStep.lean) \u2014 inlined `hcoeff_const`, removed `ha_mem`/`abs_choice`, used `Int.le_toNat`, -9 normalized LOC (4487\u21924478).",
   "completed_task_lines": []
 }

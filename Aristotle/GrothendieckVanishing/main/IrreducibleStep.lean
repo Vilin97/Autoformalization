@@ -168,15 +168,13 @@ theorem exists_section_generating_stalks
         have hy' := AddSubgroup.mem_map_of_mem AddEquiv.ulift.toAddMonoidHom hy
         rw [ha, AddSubgroup.closure_singleton_zero, AddSubgroup.mem_bot] at hy'
         exact AddEquiv.ulift.injective (hy'.trans (map_zero _).symm)
-    have ha_mem : (⟨a⟩ : ULift.{u} ℤ) ∈ H_at x hx := by
-      obtain ⟨⟨b⟩, hbH, rfl⟩ := AddSubgroup.mem_map.mp
-        (ha ▸ AddSubgroup.subset_closure rfl : a ∈ (H_at x hx).map AddEquiv.ulift.toAddMonoidHom)
-      exact hbH
     refine ⟨⟨|a|⟩, ?_, abs_pos.mpr ha_ne, fun h hh => ?_⟩
-    · rcases abs_choice a with h | h
-      · rwa [h]
-      · rw [h]
-        exact (H_at x hx).neg_mem ha_mem
+    · obtain ⟨⟨b⟩, hbH, hb⟩ := AddSubgroup.mem_map.mp (show
+          |a| ∈ (H_at x hx).map AddEquiv.ulift.toAddMonoidHom from by
+        rw [ha, AddSubgroup.mem_closure_singleton]
+        exact ⟨Int.sign a, by simpa only [zsmul_eq_mul] using
+          Int.sign_mul_self_eq_abs a⟩)
+      simpa [show b = |a| by simpa using hb] using hbH
     · have hh' := AddSubgroup.mem_map_of_mem AddEquiv.ulift.toAddMonoidHom hh
       rw [ha, AddSubgroup.mem_closure_singleton] at hh'
       obtain ⟨n, hn⟩ := hh'
@@ -229,28 +227,21 @@ theorem exists_section_generating_stalks
   have hWV₁ : W ≤ V₁ := leOfHom iW1
   have hWV : W ≤ V := le_trans hWV₁ hV₁V
   have hW_ne : W ≠ ⊥ := fun h => (Opens.mem_bot (x := x₀)).mp (h ▸ hx₀W)
-  -- Key: at every x ∈ W, i_x(germ(s₁|_W, x)) = d.down • gen_at x
-  have hcoeff_const : ∀ (x : X) (hxW : x ∈ W),
+  refine ⟨W, hWV, hW_ne, ConcreteCategory.hom (R.map (homOfLE hWV₁).op) s₁,
+    fun x hxW => ?_⟩
+  have hcoeff_x :
       i_x x (R.germ W x hxW
         (ConcreteCategory.hom (R.map (homOfLE hWV₁).op) s₁)) =
       d.down • gen_at x (hWV hxW) := by
-    intro x hxW
     rw [TopCat.Presheaf.germ_res_apply,
       show i_x x (R.germ V₁ x (hWV₁ hxW) s₁) =
         (TopCat.Sheaf.zeroOutsideInt V).presheaf.germ V₁ x (hWV₁ hxW) is₁ from
-        his₁_def ▸ TopCat.Presheaf.stalkFunctor_map_germ_apply V₁ x (hWV₁ hxW) i s₁,
-      ← TopCat.Presheaf.germ_res_apply (TopCat.Sheaf.zeroOutsideInt V).val
-        (homOfLE hWV₁) x hxW is₁,
-      show (TopCat.Sheaf.zeroOutsideInt V).val.map (homOfLE hWV₁).op is₁ =
-        (TopCat.Sheaf.zeroOutsideInt V).val.map (homOfLE hWV₁).op d_gen_res from hW_eq,
-      TopCat.Presheaf.germ_res_apply, hd_gen_res_def, map_zsmul,
-      TopCat.Presheaf.germ_res_apply]
-  refine ⟨W, hWV, hW_ne, ConcreteCategory.hom (R.map (homOfLE hWV₁).op) s₁,
-    fun x hxW => ?_⟩
-  have hcoeff_x := hcoeff_const x hxW
+        his₁_def ▸ TopCat.Presheaf.stalkFunctor_map_germ_apply V₁ x (hWV₁ hxW) i s₁]
+    simpa [hd_gen_res_def, map_zsmul, TopCat.Presheaf.germ_res_apply] using
+      congrArg ((TopCat.Sheaf.zeroOutsideInt V).presheaf.germ W x hxW) hW_eq
   constructor
   · exact fun h_zero => absurd (zsmul_generator_injective V x (hWV hxW)
-      ((zero_smul _ _).trans (by simpa [h_zero] using hcoeff_x))).symm (by omega)
+      ((zero_smul _ _).trans (by simpa [h_zero] using hcoeff_x))).symm (ne_of_gt hd_pos)
   · -- d_nat is minimal, so at every x ∈ W the generator d_x = d.down
     intro a; obtain ⟨n, hn⟩ := stalk_zeroOutsideInt_eq_zsmul_generator V x (hWV hxW) (i_x x a)
     obtain ⟨d_x, hd_x_mem, hd_x_pos, hd_x_gen⟩ := H_at_cyclic x (hWV hxW) <|
@@ -260,9 +251,8 @@ theorem exists_section_generating_stalks
       obtain ⟨k, hk⟩ := hd_x_gen d ⟨_, hcoeff_x⟩
       refine le_antisymm (Int.le_of_dvd hd_pos
         ⟨k, by simpa [mul_comm] using congrArg ULift.down hk⟩) ?_
-      change (d_nat : ℤ) ≤ d_x.down
-      rw [← Int.toNat_of_nonneg (le_of_lt hd_x_pos)]
-      exact_mod_cast h_minimal _ (mk_P x (hWV hxW) d_x hd_x_pos hd_x_mem hd_x_gen)
+      exact (Int.le_toNat (le_of_lt hd_x_pos)).mp <|
+        h_minimal _ (mk_P x (hWV hxW) d_x hd_x_pos hd_x_mem hd_x_gen)
     obtain ⟨k₀, hk₀⟩ := hd_x_gen ⟨n⟩ ⟨a, hn⟩
     exact ⟨k₀, hi_inj x (by rw [map_zsmul, hn, show n = k₀ * d.down from by
       simpa [hd_x_eq] using congrArg ULift.down hk₀, mul_smul, ← hcoeff_x])⟩
