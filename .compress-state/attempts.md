@@ -78,3 +78,4 @@ Cycle 76: cycle 76: golfed `exists_section_generating_stalks` in IrreducibleStep
 Cycle 77: Cycle 77: removed `@[simps]` on `zeroOutside.sHom` and `zeroOutsideInt.sHom` in ZeroOutside.lean, eliminating two unused generated decls; -2 normalized LOC (4207→4205); compiles clean.
 Cycle 78: cycle 78: removed two `@[simps]` in ZeroOutside.lean, deleted 3 unused public decls (`zeroOutside_obj`/`_map`/`_openHom_app`), -2 normalized LOC (4205→4203).
 Cycle 79: cycle 79: hoisted FilteredColimitComparison section variables across 7 comparison decls in PresheafFilteredColimit.lean — -21 normalized LOC (4203→4182), file compiles, no spirit violations; 3 sibling binder sites remain.
+Cycle 80: cycle 80: score=1 loc_delta=-20 — Golfed `sheafH_filtered_colimit_comparison_isIso_succ_succ` by reusing existing inj-subsingleton lemma and `IsIso.of_isIso_fac_left`, -20 normalized LOC (4182→4162).

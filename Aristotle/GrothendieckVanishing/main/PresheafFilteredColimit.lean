@@ -421,38 +421,18 @@ private theorem sheafH_filtered_colimit_comparison_isIso_succ_succ
   have h_mid (r) (j) : Subsingleton (Sheaf.H (Inj.obj j) (r + 1)) := by
     letI : Injective (Inj.obj j) := hInj j
     exact sheafH_subsingleton_of_injective (Inj.obj j) r
-  have hFlasqueInj : IsFlasqueSheaf injCocone.pt := fun i => by
-    simpa using
-      (isFlasque_filtered_colimit
-        (F := Inj)
-        (hFlasque := fun j => by
-          letI : Injective (Inj.obj j) := hInj j
-          exact fun {_ _} i => (isFlasque_of_injective (Inj.obj j)) i)
-        (c := injCocone)
-        (hc := colimit.isColimit Inj)) i
   have h_colim (r) : Subsingleton (Sheaf.H injCocone.pt (r + 1)) := by
-    simpa using sheafH_subsingleton_of_flasque X injCocone.pt hFlasqueInj r
+    simpa [injCocone] using sheafH_filtered_colimit_succ_inj_subsingleton (Y' := Ysh) r hInj
   let domainIso :=
     sheafH_filtered_colimit_succ_shiftDomainIso Ysh (m + 1) (h_mid m) (h_mid (m + 1))
   let codomainIso :=
     sheafH_filtered_colimit_succ_shiftCodomainIso
       Ysh csh hcsh (m + 1) (h_colim m) (h_colim (m + 1))
-  have hcompat :
-      domainIso.hom ≫ sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh =
-        sheafH_filtered_colimit_comparison
-            (sheafH_filtered_colimit_succ_quotient Ysh) (m + 1) qCocone ≫
-          codomainIso.hom := by
+  exact IsIso.of_isIso_fac_left (by
     simpa [domainIso, codomainIso, qCocone] using
       sheafH_filtered_colimit_comparison_succ_compatibility
         (Ysh := Ysh) (csh := csh) (hcsh := hcsh) (n := m + 1)
-        (h_mid m) (h_mid (m + 1)) (h_colim m) (h_colim (m + 1))
-  rw [show
-      sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh =
-        domainIso.inv ≫ domainIso.hom ≫
-          sheafH_filtered_colimit_comparison Ysh (m + 1 + 1) csh by simp,
-    hcompat]
-  simp
-  infer_instance
+        (h_mid m) (h_mid (m + 1)) (h_colim m) (h_colim (m + 1)))
 
 end FilteredColimitComparison
 
