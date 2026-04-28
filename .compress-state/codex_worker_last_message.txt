@@ -1,14 +1,14 @@
-Implemented cycle 81.
+Cycle 82 complete.
 
-Hoisted the repeated degree-`1` filtered-colimit helper context into `section FilteredColimitH1` in [PresheafFilteredColimit.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:23), including `Y'`, `[Zero ...]`, and shared `c'`/`hc'` for the boundary/global cokernel helpers. No declarations were renamed or deleted.
-
-Verification:
-- `lake env lean Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean` passed.
-- `lake build` not run, per strategy scope.
+Golfed [ZeroOutside.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ZeroOutside.lean:1) by importing `CohomologyAPI` and replacing the duplicated `IsZero.mk` proof in `_root_.isZero_zeroOutsideInt_bot` with `sheaf_isZero_of_zero_stalks X F.cond hstalk`.
 
 Metrics:
-- Normalized LOC: `4162 -> 4145` (`-17`)
-- Raw `main/*.lean` wc: `5067 -> 5054` (`-13`)
-- Target file normalized: `434 -> 417`
+- Normalized LOC: `4145 -> 4125` (`-20`)
+- Raw `main/*.lean` wc: `5054 -> 5034` (`-20`)
+- `ZeroOutside.lean`: `448 -> 428` raw lines
 
-Report written to [cycle_81.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_81.md:1).
+Verification passed:
+- `lake env lean Aristotle/GrothendieckVanishing/main/ZeroOutside.lean`
+- `lake build`
+
+Wrote the required report at [.compress-state/codex_task_results/cycle_82.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_82.md). Build emitted only existing linter warnings.

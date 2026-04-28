@@ -1,11 +1,13 @@
 {
   "progress_score": 1,
-  "summary": "Hoisted degree-1 filtered-colimit helper context into a `FilteredColimitH1` section in PresheafFilteredColimit.lean, -17 normalized LOC (4162\u21924145).",
+  "summary": "Golfed `_root_.isZero_zeroOutsideInt_bot` in ZeroOutside.lean by reusing `sheaf_isZero_of_zero_stalks` (import swap ClosedImmersion\u2192CohomologyAPI), -20 normalized LOC (4145\u21924125).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
-  "stuck_on": "Repeated `{J'} [SmallCategory] [IsFiltered]` context still occurs in 4 other declarations (PresheafFilteredColimit.lean:211, 428, 434, 459); the assigned slice (h1 cluster, lines 26-219) is fully hoisted.",
-  "strategy_recommendation": "Pivot to Principle 2 on CohomologyAPI.lean: the 12-line `(F\u2081 F\u2082 F\u2083 : Presheaf) (h\u2081 h\u2082 h\u2083 : IsSheaf)` block \u00d7 6 starting at CohomologyAPI.lean:857 (and the 26-line \u00d7 6 block at line 239) is the largest remaining lever \u2014 replace with a `(S : ShortComplex (Sheaf \u2026))` argument idiom rather than introducing helpers. Expected \u226530 LOC if the cluster reduces fully.",
-  "attempts_entry": "cycle 81: hoisted h1 filtered-colimit context into `section FilteredColimitH1` in PresheafFilteredColimit.lean, -17 norm LOC (4162\u21924145).",
-  "completed_task_lines": []
+  "stuck_on": "",
+  "strategy_recommendation": "Continue Phase 4 body/sig outliers: next-best target is `Golf zeroOutside in ZeroOutside.lean:39` (body/sig 17.0) or `Golf sHom in ZeroOutside.lean:175` (body/sig 14.5). Alternatively, advance the `- [>]` `sheafH1_cokernel_iso_of_subsingleton_middle_presheaf` (CohomologyAPI.lean:714, 111L body) which is the largest open WIP item and aligns with Principle 2 (Sheaf vs Presheaf+IsSheaf).",
+  "attempts_entry": "cycle 82: -20 norm LOC (4145\u21924125) \u2014 replaced 22-line manual IsZero.mk block in `_root_.isZero_zeroOutsideInt_bot` with `sheaf_isZero_of_zero_stalks` call (import swap ClosedImmersion\u2192CohomologyAPI in ZeroOutside.lean).",
+  "completed_task_lines": [
+    "- [>] Golf `_root_.isZero_zeroOutsideInt_bot` in `Aristotle/GrothendieckVanishing/main/ZeroOutside.lean:366` (body/sig ratio 15.0, body 30L, sig 2L)."
+  ]
 }

@@ -80,3 +80,4 @@ Cycle 78: cycle 78: removed two `@[simps]` in ZeroOutside.lean, deleted 3 unused
 Cycle 79: cycle 79: hoisted FilteredColimitComparison section variables across 7 comparison decls in PresheafFilteredColimit.lean — -21 normalized LOC (4203→4182), file compiles, no spirit violations; 3 sibling binder sites remain.
 Cycle 80: cycle 80: score=1 loc_delta=-20 — Golfed `sheafH_filtered_colimit_comparison_isIso_succ_succ` by reusing existing inj-subsingleton lemma and `IsIso.of_isIso_fac_left`, -20 normalized LOC (4182→4162).
 Cycle 81: cycle 81: hoisted h1 filtered-colimit context into `section FilteredColimitH1` in PresheafFilteredColimit.lean, -17 norm LOC (4162→4145).
+Cycle 82: cycle 82: -20 norm LOC (4145→4125) — replaced 22-line manual IsZero.mk block in `_root_.isZero_zeroOutsideInt_bot` with `sheaf_isZero_of_zero_stalks` call (import swap ClosedImmersion→CohomologyAPI in ZeroOutside.lean).

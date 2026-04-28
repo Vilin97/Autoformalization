@@ -1,5 +1,5 @@
 import Mathlib
-import Aristotle.GrothendieckVanishing.main.ClosedImmersion
+import Aristotle.GrothendieckVanishing.main.CohomologyAPI
 
 /-!
   ZeroOutside.lean — Extension-by-zero presheaf and sheaf machinery
@@ -356,31 +356,11 @@ theorem _root_.isZero_zeroOutsideInt_bot (X : TopCat.{u}) :
     IsZero (TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X)) := by
   let F := TopCat.Sheaf.zeroOutsideInt (⊥ : Opens X)
   change IsZero F
-  have hF : TopCat.Presheaf.IsSheaf F.val := F.cond
   have hstalk :
       ∀ (x : X) (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F.val), a = 0 := by
     intro x a
     exact stalk_zeroOutsideInt_zero_outside ⊥ x (Opens.mem_bot.not.mpr (fun h => h.elim)) a
-  have hF_val_zero : IsZero F.val := Functor.isZero F.val (fun ⟨U⟩ =>
-    @AddCommGrpCat.isZero_of_subsingleton _
-      ⟨fun s t => by
-        apply hF.section_ext
-        intro x hx
-        obtain ⟨W, hxW, iU, iV, hEq⟩ := TopCat.Presheaf.germ_eq F.val x hx hx s t
-          ((hstalk x _).trans (hstalk x _).symm)
-        rw [Subsingleton.elim iU iV] at hEq
-        have hWU : W ≤ U := leOfHom iV
-        rw [Subsingleton.elim iV (homOfLE hWU)] at hEq
-        exact ⟨W, hWU, hxW, hEq⟩⟩)
-  exact IsZero.mk
-    (fun (G : TopCat.Sheaf AddCommGrpCat.{u} X) => ⟨{
-      default := (show F ⟶ G from Sheaf.Hom.mk (0 : F.val ⟶ G.val)),
-      uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
-      fun U => (hF_val_zero.obj U).eq_zero_of_src (f.val.app U))) }⟩)
-    (fun (G : TopCat.Sheaf AddCommGrpCat.{u} X) => ⟨{
-      default := (show G ⟶ F from Sheaf.Hom.mk (0 : G.val ⟶ F.val)),
-      uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
-      fun U => (hF_val_zero.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
+  exact sheaf_isZero_of_zero_stalks X F.cond hstalk
 
 /-- At a point inside the support open, every stalk element of `zeroOutsideInt V` is an integer
     multiple of the germ of the distinguished generator over `V`. -/
