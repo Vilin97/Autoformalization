@@ -43,3 +43,4 @@ Cycle 41: cycle 41: score=1 loc_delta=-24 — golfed `exists_section_generating_
 Cycle 42: cycle 42: golfed `filtered_colimit_exists_compatible_representatives` in PresheafFilteredColimitGeneral.lean via `convert`/`simpa` naturality, inlined `hx''_compat`/`hx''` into existential; -31 normalized LOC (4637→4606).
 Cycle 43: cycle 43: golfed `sheafH_filtered_colimit_h1_boundary_square` by inlining 3 transport facts into a single `rw`+`simp`, -15 normalized LOC (4606→4591).
 Cycle 44: cycle 44: -25 norm LOC (4591→4566); golfed `finsetGeneratedSheaf_vanishing` by removing ShortComplex/ShortExact plumbing and inlining single-use transports.
+Cycle 45: cycle 45: golfed `PushforwardHIso` (inlined one-use isomorphism lets, factored hSE/hSrcSub/hTgtSub shared facts), -20 normalized LOC (4566→4546).
