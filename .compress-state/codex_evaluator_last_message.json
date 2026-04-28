@@ -1,14 +1,11 @@
 {
-  "progress_score": 2,
-  "summary": "Golfed `sheafH_filtered_colimit_h1_cokernelFunctorIso` body from 72 lines to ~30 by introducing local `alpha`/`ev`/`e_j`/`e_j'` abbreviations, replacing the manual `change`+reassociation block with direct `rw [\u2190 Category.assoc, cokernel.\u03c0_desc, \u2026]` chain, -40 normalized LOC (4740\u21924700).",
+  "progress_score": 1,
+  "summary": "Golfed `sheafH_filtered_colimit_comparison_one_iso_hom` by inlining staging aliases (`comparisonOne`, `stageShort`, `stageIsoH1`, `stageHom`) and one-use `hstage_cok`/`hfunctorCok` rewrite blocks; -18 normalized LOC (4700\u21924682).",
   "principle_violations": [],
   "task_addressed": true,
   "task_complete": true,
   "stuck_on": "",
-  "strategy_recommendation": "Next pivot: target `sheafH_filtered_colimit_comparison_one_iso` at `PresheafFilteredColimit.lean:278` (body=70, ratio=10.0) \u2014 it's the highest-leverage remaining audit candidate in this file and was not mined in cycles 32/33/35 (those hit `_one_iso_hom`, not `_one_iso`). Avoid re-mining `_one_iso_hom` and skip generated `ZeroOutside` projections. Raw LOC at 5581, gap to 5000 = 581.",
-  "attempts_entry": "cycle 38: golfed `sheafH_filtered_colimit_h1_cokernelFunctorIso` in PresheafFilteredColimit.lean via local `alpha`/`ev`/`e_j` lets and direct `cokernel.\u03c0_desc`/`Category.assoc` rewrites replacing the `change`+reassociation block, -40 normalized LOC (4740\u21924700).",
-  "completed_task_lines": [
-    "- [>] Golf `sheafH_filtered_colimit_h1_cokernelFunctorIso` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:101` (signature 7L, body 72L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.",
-    "- [>] Golf `sheafH_filtered_colimit_h1_cokernelFunctorIso` in `Aristotle/GrothendieckVanishing/main/PresheafFilteredColimit.lean:101` (body/sig ratio 10.3, body 72L, sig 7L)."
-  ]
+  "strategy_recommendation": "Pivot to `sheafH_filtered_colimit_comparison_one_iso` (the def at PresheafFilteredColimit.lean:238, body=70, ratio=10.0) \u2014 it has not been mined since the recent rounds and was explicitly out-of-scope for cycle 39. After that, consider `exists_section_generating_stalks` in IrreducibleStep.lean:133 (body=143). Skip generated ZeroOutside lemmas.",
+  "attempts_entry": "cycle 39: -18 norm LOC (4700\u21924682), inlined staging aliases and one-use rewrite blocks in `sheafH_filtered_colimit_comparison_one_iso_hom`",
+  "completed_task_lines": []
 }
