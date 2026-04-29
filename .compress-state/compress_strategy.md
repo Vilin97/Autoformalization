@@ -1,0 +1,1 @@
+Raw LOC is now 4998, under the <5000 target. Next cycle should pivot to body-to-signature outliers like `sheafH_filtered_colimit_succ_quotientCocone_isColimit` in PresheafFilteredColimitCore.lean:268 (body 44L), or `stalk_zero_of_shortExact_kernel_presheaf` in CohomologyAPI.lean:504 (body 43L). Avoid further golfing in PresheafFilteredColimit.lean which has been heavily mined.

@@ -164,7 +164,7 @@ Instead it isolates two closed-immersion statements:
 
 - `PushforwardHVanishing`:
   if `G` on a closed subset `Z` has `H^n(G) = 0`, then `H^n(i_* G) = 0` on `X`.
-- `ClosedImmersionSES`:
+- `closedImmersionSES`:
   for a closed subset `Z ⊆ X` and sheaf `F` on `X`, there is a short exact sequence
   `0 → K → F → i_* i^* F → 0`.
 

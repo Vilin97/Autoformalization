@@ -1,0 +1,12 @@
+Done. I golfed `toPlus_surjective_of_firstPlus` in [ConstantSheafFlasque.lean](/mmfs1/gscratch/amath/vilin/Clawristotle/Aristotle/GrothendieckVanishing/main/ConstantSheafFlasque.lean:62) and wrote the cycle report at [cycle_86.md](/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_task_results/cycle_86.md).
+
+Metrics:
+- Normalized LOC: `4097 -> 4087` (`-10`)
+- Raw `main/*.lean`: `5008 -> 4998` (`-10`)
+- `ConstantSheafFlasque.lean` raw: `184 -> 174`
+
+Verification:
+- `lake env lean Aristotle/GrothendieckVanishing/main/ConstantSheafFlasque.lean` passed.
+- `python3.9 scripts/normalized_loc.py --per-file --raw` run before and after.
+- `wc -l Aristotle/GrothendieckVanishing/main/*.lean` run before and after.
+- `lake build` not run; only a local proof body changed.

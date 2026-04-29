@@ -1,4 +1,4 @@
-import Aristotle.GrothendieckVanishing.main.main
+import Aristotle.GrothendieckVanishing.main.GrothendieckVanishingOverview
 
 /-!
 # Blueprint validator
@@ -33,9 +33,9 @@ def blueprintDecls : Array Name := #[
   `PushforwardHVanishing,
   `TopCat.closedIncl_counit_isIso,
   `epi_unit_of_closedImmersion,
-  `ClosedImmersionSES,
+  `closedImmersionSES,
   `opens_eq_bot_or_top_of_irreducibleSpace_dim_zero,
-  `topologicalKrullDim_nonneg_of_irreducible,
+  `topologicalKrullDim_nonneg,
   `topologicalKrullDim_lt_of_isIrreducible_of_isClosed,
   `TopCat.Presheaf.zeroOutside,
   `TopCat.Sheaf.zeroOutsideInt,
