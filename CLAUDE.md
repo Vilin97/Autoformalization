@@ -17,7 +17,7 @@ Formalization of Grothendieck's Vanishing Theorem (Hartshorne III, Theorem 2.7) 
 lake build
 
 # Verify a single modified file (IMPORTANT: lake build may use stale .olean cache)
-lake env lean Aristotle/GrothendieckVanishing/main/SetupCore.lean
+lake env lean Aristotle/GrothendieckVanishing/main/ClosedImmersionCohomology.lean
 
 # Rebuild from scratch (rarely needed; slow)
 lake clean && lake build
@@ -33,25 +33,21 @@ GitHub Actions runs `leanprover/lean-action@v1` on every push/PR (`.github/workf
 
 ## Code Structure
 
-Entry point: `Aristotle.lean` → imports `Aristotle.Basic` + `Aristotle.GrothendieckVanishing.main.main`
+Entry point: `Aristotle.lean` → imports
+`Aristotle.GrothendieckVanishing.main.GrothendieckVanishingOverview`
 
 All theorem files live in `Aristotle/GrothendieckVanishing/main/`. The proof proceeds by well-founded induction on Krull dimension:
 
 ```
-GrothendieckVanishing.lean    ← Main theorem (assembles all cases)
-├── DimZeroVanishing.lean     ← Irreducible dim=0: constant sheaf is flasque
-│   └── ConstantSheafFlasque.lean
+GrothendieckVanishing.lean    ← Main theorem (assembles all cases, incl. dim=0, reducible→irreducible)
 ├── IrreducibleStep.lean      ← Irreducible dim≥1 (uses IrreduciblePosVanishing)
 │   └── FiniteGeneratorReduction.lean ← Colimit step, filtered diagram, f.g. vanishing
-├── ClosedOpenDecomposition.lean ← Reduction to irreducible spaces
-│   └── ReducibleVanishing.lean  ← Reducible case via Finset.induction
 └── (shared infrastructure)
-    ├── SetupCore.lean         ← Core: category instances, ClosedImmersionSES
+    ├── ClosedImmersionCohomology.lean ← Closed immersion cohomology, closedImmersionSES
     ├── FlasqueVanishing.lean  ← Flasque sheaf theory and cohomological vanishing
-    ├── Setup.lean             ← Wrapper theorems (IrreduciblePosVanishing, ReducibleVanishing)
     ├── ClosedImmersion.lean   ← Closed immersion counit/stalk
     ├── ZeroOutside.lean       ← Extension-by-zero sheaf machinery
-    └── Auxiliary.lean         ← Topology/dimension helpers
+    └── TopologicalKrullDim.lean ← Topological Krull dimension API
 ```
 
 ## Lean Options (from lakefile.toml)
@@ -74,4 +70,4 @@ Never increase `maxHeartbeats` above 200000 (the default). If a proof exceeds th
 
 **FULLY PROVED — 0 sorry's, 0 axioms, 0 admits.**
 
-The last sorry (Gabriel's theorem: filtered colimits of injectives are injective) was eliminated by observing that we only need `H^n(colim I_j) = 0`, not full injectivity. Since injective sheaves are flasque (`isFlasque_of_injective`), filtered colimits of flasque sheaves are flasque (`isFlasque_filtered_colimit` in `FiniteGeneratorReduction.lean`), and flasque sheaves have vanishing higher cohomology (`FlasqueVanishing`), the result follows without Gabriel's theorem.
+The last sorry (that filtered colimits of injectives are injective) was eliminated by observing that we only need `H^n(colim I_j) = 0`, not full injectivity. Since injective sheaves are flasque (`isFlasque_of_injective`), filtered colimits of flasque sheaves are flasque (`isFlasque_filtered_colimit` in `FiniteGeneratorReduction.lean`), and flasque sheaves have vanishing higher cohomology (`FlasqueVanishing`), the result follows without this fact.

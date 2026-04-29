@@ -1,0 +1,14 @@
+{
+  "progress_score": 1,
+  "summary": "Golfed `toPlus_surjective_of_firstPlus` in ConstantSheafFlasque.lean by inlining the one-use `hkey`/`R`/`hZne` wrappers and combining the rewrite chain; -10 normalized LOC (4097\u21924087), and crosses the raw <5000 target (5008\u21924998).",
+  "principle_violations": [],
+  "task_addressed": true,
+  "task_complete": true,
+  "stuck_on": "",
+  "strategy_recommendation": "Raw LOC is now 4998, under the <5000 target. Next cycle should pivot to body-to-signature outliers like `sheafH_filtered_colimit_succ_quotientCocone_isColimit` in PresheafFilteredColimitCore.lean:268 (body 44L), or `stalk_zero_of_shortExact_kernel_presheaf` in CohomologyAPI.lean:504 (body 43L). Avoid further golfing in PresheafFilteredColimit.lean which has been heavily mined.",
+  "attempts_entry": "cycle 86: golfed `toPlus_surjective_of_firstPlus` in ConstantSheafFlasque.lean (inlined `hkey`/`R`/`hZne`, combined rewrites), -10 normalized LOC (4097\u21924087), raw 5008\u21924998.",
+  "completed_task_lines": [
+    "- [>] Golf `toPlus_surjective_of_firstPlus` in `Aristotle/GrothendieckVanishing/main/ConstantSheafFlasque.lean:62` (signature 5L, body 43L). Look for redundant `simp` chains, manual `rfl`s after `simp`, unfolded `apply` sequences that `exact?`/`aesop` could close.",
+    "- [>] Golf `toPlus_surjective_of_firstPlus` in `Aristotle/GrothendieckVanishing/main/ConstantSheafFlasque.lean:62` (body/sig ratio 8.6, body 43L, sig 5L)."
+  ]
+}
