@@ -85,7 +85,7 @@ theorem closedIncl_map_eq_bot_of_le_compl {X : TopCat.{u}} {s : Set X} (hs : IsC
   change (closedIncl hs : s → X) ⁻¹' (U : Set X) = (⊥ : Opens (TopCat.of s))
   have hdisj : Disjoint (U : Set X) (Set.range (closedIncl hs : s → X)) := by
     rw [set_range_closedIncl hs]
-    exact Set.disjoint_left.mpr fun x hxU hxS => hU hxU hxS
+    exact Set.disjoint_left.mpr fun x hxU hxS ↦ hU hxU hxS
   simpa using (Set.preimage_eq_empty hdisj)
 
 instance closedIncl_stalkPushforward_isIso {X : TopCat.{u}} {s : Set X} {hs : IsClosed s}
@@ -355,7 +355,7 @@ lemma stalkPullbackHom_naturality
     ((Presheaf.pushforwardPullbackAdjunction C f).unit.app F).app (Opposite.op U) ≫
       ((Presheaf.pullback C f).map α).app
         (Opposite.op ((TopologicalSpace.Opens.map f).obj U)) := by
-    have h := congr_arg (fun β => NatTrans.app β (Opposite.op U))
+    have h := congr_arg (fun β ↦ NatTrans.app β (Opposite.op U))
       ((Presheaf.pushforwardPullbackAdjunction C f).unit.naturality α)
     simpa only [Functor.id_obj, Functor.id_map, Functor.comp_obj, Functor.comp_map] using h
   rw [← CategoryTheory.Category.assoc, key, CategoryTheory.Category.assoc]
@@ -445,7 +445,7 @@ theorem epi_unit_of_closedImmersion
       ((TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} ((TopCat.closedIncl hZ) ⟨x, hxZ⟩)).map
         ((TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{u}
           (TopCat.closedIncl hZ)).unit.app F).val)).2
-  · exact fun b => ⟨0, by
+  · exact fun b ↦ ⟨0, by
       rw [pushforward_closedIncl_stalk_eq_zero
         (hs := hZ)
         (G := ((TopCat.Sheaf.pullback AddCommGrpCat.{u} closedIncl).obj F).val)
