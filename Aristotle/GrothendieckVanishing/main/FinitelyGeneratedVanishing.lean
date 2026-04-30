@@ -3,19 +3,29 @@ import Aristotle.GrothendieckVanishing.main.ClosedImmersionCohomology
 import Aristotle.GrothendieckVanishing.main.GeneratedSubsheaf
 
 /-!
-  FinitelyGeneratedVanishing.lean — Noetherian finitely generated vanishing reduction
+# Finitely generated vanishing reduction
 
-  Key results:
-  - finsetGenFunctor / finsetGenCocone / finsetGenCocone_isColimit: K is the filtered
-    colimit of its finitely generated subsheaves (PROVED)
-  - cohomology_vanishing_of_finitelyGenerated_vanishing: H^m = 0 for all f.g. subsheaves
-    implies H^m(K) = 0 (PROVED via sheafH_preserves_filtered_colimits)
-  - finsetGeneratedSheaf_vanishing: vanishing for finitely generated sheaves by
-    Finset.induction (PROVED)
-  - directLimit_cohomology_vanishing: from epi-image vanishing to all sheaves (PROVED)
+On a Noetherian space, every sheaf is the filtered colimit of its finitely generated
+subsheaves, and sheaf cohomology commutes with filtered colimits. Combining the two
+reduces vanishing of `Hⁿ` for arbitrary sheaves to vanishing for finitely generated ones.
+This file packages that reduction; together with the Noetherian-shrinking step, it
+underlies the irreducible positive-dimensional case of Grothendieck vanishing.
 
-  Note: isFlasque_filtered_colimit and sheafH_preserves_filtered_colimits live in
-  the PresheafFilteredColimit modules.
+## Main definitions
+
+* `finsetGenFunctor` — the filtered diagram of finitely generated subsheaves.
+* `finsetGenCocone`, `finsetGenCocone_isColimit` — exhibits `K` as the colimit.
+
+## Main results
+
+* `cohomology_vanishing_of_finitelyGenerated_vanishing` — vanishing for f.g. subsheaves
+  propagates to the whole sheaf via the filtered-colimit comparison.
+* `finsetGeneratedSheaf_vanishing` — `Finset.induction` reducing vanishing for finitely
+  generated subsheaves to vanishing for the epi-images of `zeroOutsideInt V`.
+* `directLimit_cohomology_vanishing` — composes both above into the headline reduction.
+
+The `isFlasque_filtered_colimit` and `sheafH_preserves_filtered_colimits` building blocks
+live in the `PresheafFilteredColimit` modules.
 -/
 
 universe u
@@ -55,8 +65,8 @@ noncomputable def finsetGenFunctor :
 noncomputable def finsetGenCocone :
     Cocone (finsetGenFunctor hK) :=
   Cocone.mk (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)
-    { app := fun S => Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK S)
-      naturality := fun S S' h => by
+    { app := fun S ↦ Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK S)
+      naturality := fun S S' h ↦ by
         simp [finsetGenFunctor, TopCat.Presheaf.finsetImageInclGen_comp_ι] }
 
 /-- The cocone is a colimit: `K` is the filtered colimit of its finitely generated subsheaves.
@@ -71,17 +81,17 @@ noncomputable def finsetGenCocone_isColimit :
   have hd_mono : Mono d := by
     haveI : IsConnected
         (Finset (TopCat.Presheaf.SectionIndex K)) := IsFiltered.isConnected _
-    haveI : ∀ j, Mono ((finsetGenCocone hK).ι.app j) := fun j =>
+    haveI : ∀ j, Mono ((finsetGenCocone hK).ι.app j) := fun j ↦
       show Mono (Limits.image.ι (TopCat.Presheaf.finsetGeneratorMap hK j)) from inferInstance
     haveI := NatTrans.mono_of_mono_app (finsetGenCocone hK).ι
     exact colim.map_mono' (finsetGenCocone hK).ι (colimit.isColimit _)
-      (isColimitConstCocone _ _) d (fun j => by simp [d, finsetGenCocone, constCocone])
+      (isColimitConstCocone _ _) d (fun j ↦ by simp [d, finsetGenCocone, constCocone])
   -- desc is epi: allSectionMap K factors through desc
   have hd_epi : Epi d := by
-    let g : (∐ fun σ : TopCat.Presheaf.SectionIndex K => TopCat.Sheaf.zeroOutsideInt σ.1) ⟶
+    let g : (∐ fun σ : TopCat.Presheaf.SectionIndex K ↦ TopCat.Sheaf.zeroOutsideInt σ.1) ⟶
         colimit (finsetGenFunctor hK) :=
-      Sigma.desc fun σ =>
-        Sigma.ι (fun τ : {τ // τ ∈ ({σ} : Finset _)} =>
+      Sigma.desc fun σ ↦
+        Sigma.ι (fun τ : {τ // τ ∈ ({σ} : Finset _)} ↦
             TopCat.Sheaf.zeroOutsideInt τ.1.1) ⟨σ, Finset.mem_singleton_self σ⟩ ≫
           factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK {σ}) ≫
           colimit.ι (finsetGenFunctor hK) {σ}
@@ -110,7 +120,7 @@ theorem cohomology_vanishing_of_finitelyGenerated_vanishing
     {K : TopCat.Presheaf AddCommGrpCat.{u} X} (hK : K.IsSheaf) (m : ℕ)
     (hfg : ∀ (S : Finset
         (TopCat.Presheaf.SectionIndex K))
-      [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1],
+      [HasCoproduct fun σ : {σ // σ ∈ S} ↦ TopCat.Sheaf.zeroOutsideInt σ.1.1],
       Subsingleton (Sheaf.H (TopCat.Presheaf.finsetGeneratedSheaf hK S) m)) :
     Subsingleton (Sheaf.H (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
   have hZeroDiagram : IsZero (finsetGenFunctor hK ⋙ sheafCohomologyFunctor X m) := by
@@ -151,7 +161,7 @@ theorem finsetGeneratedSheaf_vanishing
       Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m))
     (S : Finset
       (TopCat.Presheaf.SectionIndex K))
-    [HasCoproduct fun σ : {σ // σ ∈ S} => TopCat.Sheaf.zeroOutsideInt σ.1.1] :
+    [HasCoproduct fun σ : {σ // σ ∈ S} ↦ TopCat.Sheaf.zeroOutsideInt σ.1.1] :
     Subsingleton (Sheaf.H (TopCat.Presheaf.finsetGeneratedSheaf hK S) m) := by
   suffices h : ∀ (T : Finset (TopCat.Presheaf.SectionIndex K)),
       Subsingleton (Sheaf.H (TopCat.Presheaf.finsetGeneratedSheaf hK T) m) from h S
@@ -167,11 +177,11 @@ theorem finsetGeneratedSheaf_vanishing
     let qIns := factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK (insert σ₀ S'))
     let qS := factorThruImage (TopCat.Presheaf.finsetGeneratorMap hK S')
     let g : TopCat.Sheaf.zeroOutsideInt σ₀.1 ⟶ cokernel f :=
-      Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} => TopCat.Sheaf.zeroOutsideInt σ.1.1)
+      Sigma.ι (fun σ : {σ // σ ∈ insert σ₀ S'} ↦ TopCat.Sheaf.zeroOutsideInt σ.1.1)
         ⟨σ₀, Finset.mem_insert_self σ₀ S'⟩ ≫ qIns ≫ cokernel.π f
     haveI : Epi g := by
       refine epi_of_epi_fac
-        (f := Sigma.desc fun σ => if h : σ.1 = σ₀ then eqToHom (by rw [h]) else 0)
+        (f := Sigma.desc fun σ ↦ if h : σ.1 = σ₀ then eqToHom (by rw [h]) else 0)
         (h := qIns ≫ cokernel.π f) ?_
       ext ⟨σ, hσ⟩
       by_cases h : σ = σ₀
@@ -179,8 +189,8 @@ theorem finsetGeneratedSheaf_vanishing
         simp [g]
       · simpa [g, TopCat.Presheaf.finsetCoproductInclGen, Category.assoc, h,
           cokernel.condition] using
-          (congrArg (fun e => Sigma.ι
-            (fun τ : {τ // τ ∈ S'} => TopCat.Sheaf.zeroOutsideInt τ.1.1)
+          (congrArg (fun e ↦ Sigma.ι
+            (fun τ : {τ // τ ∈ S'} ↦ TopCat.Sheaf.zeroOutsideInt τ.1.1)
             ⟨σ, Finset.mem_of_mem_insert_of_ne hσ h⟩ ≫ e ≫ cokernel.π f)
             (show TopCat.Presheaf.finsetCoproductInclGen h_sub ≫ qIns = qS ≫ f by
               simp [qIns, qS, f, TopCat.Presheaf.finsetImageInclGen])).symm
@@ -203,4 +213,4 @@ theorem directLimit_cohomology_vanishing
       Subsingleton (Sheaf.H (⟨G, hG⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m)) :
     Subsingleton (Sheaf.H (⟨K, hK⟩ : TopCat.Sheaf AddCommGrpCat.{u} X) m) := by
   exact cohomology_vanishing_of_finitelyGenerated_vanishing hK m
-    (fun S _ => finsetGeneratedSheaf_vanishing hK m hzero S)
+    (fun S _ ↦ finsetGeneratedSheaf_vanishing hK m hzero S)
