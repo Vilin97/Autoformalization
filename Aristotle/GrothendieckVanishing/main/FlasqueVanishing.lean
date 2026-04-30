@@ -2,20 +2,27 @@ import Aristotle.GrothendieckVanishing.main.CohomologyAPI
 import Aristotle.GrothendieckVanishing.main.ZeroOutside
 
 /-!
-# FlasqueVanishing — Flasque sheaf theory and cohomological vanishing
+# Flasque sheaf theory and cohomological vanishing
 
-This file collects the flasque-sheaf API used by the Grothendieck vanishing proof.
+A sheaf of abelian groups is **flasque** when every restriction map is epi. Such sheaves
+have vanishing higher cohomology, which is one of the key inputs to Grothendieck vanishing.
 
-Main declarations:
-* `IsFlasqueSheaf`
-* `epi_app_of_shortExact_flasque`
-* `isFlasque_X₃_of_shortExact`
-* `isFlasque_of_injective`
-* `sheafH_subsingleton_H1_of_flasque`
-* `sheafH_subsingleton_of_flasque`
-* `FlasqueVanishing`
+## Main definitions
 
-Generic `Sheaf.H` and `Ext` APIs live in `CohomologyAPI.lean`.
+* `IsFlasqueSheaf` — the flasque predicate.
+
+## Main results
+
+* `epi_app_of_shortExact_flasque`, `isFlasque_X₃_of_shortExact` — flasqueness propagates
+  through short exact sequences.
+* `isFlasque_of_injective` — every injective sheaf is flasque.
+* `sheafH_subsingleton_H1_of_flasque`, `sheafH_subsingleton_of_flasque` — flasque sheaves
+  have vanishing `Hⁿ` for `n ≥ 1`.
+
+The four sub-lemmas inside the `epi_app_of_shortExact_of_epi_restrictions` block are
+adapted from Brian Nugent's Mathlib PR #35790.
+
+Generic `Sheaf.H` and `Ext` API lives in `CohomologyAPI.lean`.
 -/
 
 universe u
@@ -34,8 +41,8 @@ statement that can be attacked independently.
 abbrev IsFlasqueSheaf {X : TopCat.{u}} (F : TopCat.Sheaf AddCommGrpCat.{u} X) : Prop :=
   ∀ {U V : Opens X} (i : U ⟶ V), Epi (F.val.map i.op)
 
--- For a SES of sheaves, the evaluated sequence at V is exact:
--- if g_V(x) = 0, then x is in the image of f_V.
+/-- For a short exact sequence of sheaves, the sequence of sections at any open `V` is
+exact: if `g_V x = 0`, then `x` lies in the image of `f_V`. -/
 lemma sections_exact_of_shortExact {X : TopCat.{u}}
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
     (V : Opens X) (x : S.X₂.val.obj (op V))
@@ -113,18 +120,19 @@ private lemma exists_patch_of_shortExact {X : TopCat.{u}}
     (hX₁_epi (homOfLE inf_le_right : V ⊓ W ⟶ W)) a
   have hfg_app : S.f.val.app (op W) ≫ S.g.val.app (op W) = 0 := by
     have hfg : S.f.val ≫ S.g.val = 0 := congrArg Sheaf.Hom.val S.zero
-    simpa using congrArg (fun α => α.app (op W)) hfg
+    simpa using congrArg (fun α ↦ α.app (op W)) hfg
   let tW' := tW + S.f.val.app (op W) ahat
+  have hgf_zero : S.g.val.app (op W) (S.f.val.app (op W) ahat) = 0 := by
+    show (S.f.val.app (op W) ≫ S.g.val.app (op W)) ahat = 0
+    rw [hfg_app]; simp
+  have hf_naturality :
+      S.X₂.val.map (homOfLE inf_le_right).op (S.f.val.app (op W) ahat) =
+        S.f.val.app (op (V ⊓ W)) (S.X₁.val.map (homOfLE inf_le_right).op ahat) :=
+    (S.f.val.naturality_apply (homOfLE inf_le_right).op ahat).symm
   refine ⟨tW', ?_, ?_⟩
-  · simp only [tW', map_add, show S.g.val.app (op W) (S.f.val.app (op W) ahat) = 0 from by
-      show (S.f.val.app (op W) ≫ S.g.val.app (op W)) ahat = 0
-      rw [hfg_app]
-      simp,
-      add_zero, htW]
+  · simp only [tW', map_add, hgf_zero, add_zero, htW]
   · simp only [tW', map_add]
-    rw [show S.X₂.val.map (homOfLE inf_le_right).op (S.f.val.app (op W) ahat) =
-      S.f.val.app (op (V ⊓ W)) (S.X₁.val.map (homOfLE inf_le_right).op ahat) from
-      (S.f.val.naturality_apply (homOfLE inf_le_right).op ahat).symm, hahat, ha]
+    rw [hf_naturality, hahat, ha]
     abel
 
 private lemma bool_isCompatible_of_false_true_eq {X : TopCat.{u}}
@@ -167,18 +175,18 @@ private lemma chain_isCompatible_of_chain {X : TopCat.{u}}
     {g : F ⟶ G} {U : Opens X} {s : G.val.obj (op U)}
     {c : Set (StructuredArrow ⟨op U, s⟩
       (Functor.whiskerRight g.val (CategoryTheory.forget AddCommGrpCat.{u})).mapElements)}
-    (hchain : IsChain (fun x y => Nonempty (y ⟶ x)) c) :
+    (hchain : IsChain (fun x y ↦ Nonempty (y ⟶ x)) c) :
     TopCat.Presheaf.IsCompatible F.val
-      (fun x : c => x.1.right.1.unop)
-      (fun x : c => x.1.right.2) := by
-  let cV : c → Opens X := fun x => x.1.right.1.unop
-  let cs : (x : c) → F.val.obj (op (cV x)) := fun x => x.1.right.2
+      (fun x : c ↦ x.1.right.1.unop)
+      (fun x : c ↦ x.1.right.2) := by
+  let cV : c → Opens X := fun x ↦ x.1.right.1.unop
+  let cs : (x : c) → F.val.obj (op (cV x)) := fun x ↦ x.1.right.2
   change TopCat.Presheaf.IsCompatible F.val cV cs
   intro i j
   by_cases hij : i = j
   · subst hij
     rfl
-  · have htotal := hchain i.property j.property (fun h => hij (Subtype.ext h))
+  · have htotal := hchain i.property j.property (fun h ↦ hij (Subtype.ext h))
     rcases htotal with hji | hij'
     · rw [show (cV i).infLERight (cV j) =
           (cV i).infLELeft (cV j) ≫ hji.some.right.val.unop from Subsingleton.elim _ _,
@@ -201,26 +209,26 @@ private lemma exists_glued_lift_upper_bound {X : TopCat.{u}}
     (T : ι → StructuredArrow ⟨op U, s⟩
       (Functor.whiskerRight g.val (CategoryTheory.forget AddCommGrpCat.{u})).mapElements)
     (hcompat : TopCat.Presheaf.IsCompatible F.val
-      (fun i => (T i).right.1.unop) (fun i => (T i).right.2)) :
+      (fun i ↦ (T i).right.1.unop) (fun i ↦ (T i).right.2)) :
     ∃ y : StructuredArrow ⟨op U, s⟩
         (Functor.whiskerRight g.val
           (CategoryTheory.forget AddCommGrpCat.{u})).mapElements,
-      y.right.1.unop = iSup (fun i => (T i).right.1.unop) ∧
+      y.right.1.unop = iSup (fun i ↦ (T i).right.1.unop) ∧
       ∀ i, Nonempty (y ⟶ T i) := by
-  let cV : ι → Opens X := fun i => (T i).right.1.unop
-  let cs : (i : ι) → F.val.obj (op (cV i)) := fun i => (T i).right.2
+  let cV : ι → Opens X := fun i ↦ (T i).right.1.unop
+  let cs : (i : ι) → F.val.obj (op (cV i)) := fun i ↦ (T i).right.2
   have hcompat' : TopCat.Presheaf.IsCompatible F.val cV cs := by
     simpa [cV, cs] using hcompat
   obtain ⟨t_gl, ht_gl, _⟩ := F.existsUnique_gluing cV cs hcompat'
-  have hVsup_le : iSup cV ≤ U := iSup_le fun i => leOfHom (T i).hom.val.unop
+  have hVsup_le : iSup cV ≤ U := iSup_le fun i ↦ leOfHom (T i).hom.val.unop
   have hgt : ConcreteCategory.hom (g.val.app (op (iSup cV))) t_gl =
       ConcreteCategory.hom (G.val.map (homOfLE hVsup_le).op) s := by
-    apply map_glued_eq_of_local_eq g (fun j => le_trans (le_iSup cV j) hVsup_le) ht_gl
+    apply map_glued_eq_of_local_eq g (fun j ↦ le_trans (le_iSup cV j) hVsup_le) ht_gl
     intro j
     have hmap := CategoryOfElements.map_snd (T j).hom
     simpa [cV, cs] using hmap.symm
   let y := underMk g s t_gl hVsup_le hgt
-  refine ⟨y, rfl, fun i => ?_⟩
+  refine ⟨y, rfl, fun i ↦ ?_⟩
   exact Nonempty.intro (StructuredArrow.homMk
     (CategoryOfElements.homMk _ _ (homOfLE (le_iSup cV i)).op (by
       simpa [y, cV, cs] using ht_gl i))
@@ -259,7 +267,7 @@ private lemma under_extend_by_one_open {X : TopCat.{u}}
     | false => t
     | true => underMk S.g s t'' hWU hgt''
   have hcompat_glue : TopCat.Presheaf.IsCompatible S.X₂.val
-      (fun b => (T b).right.1.unop) (fun b => (T b).right.2) := by
+      (fun b ↦ (T b).right.1.unop) (fun b ↦ (T b).right.2) := by
     apply bool_isCompatible_of_false_true_eq S.X₂.val
     simpa [T, V₀, t₀] using hcompat_patch
   obtain ⟨y, hy_open, hy⟩ := exists_glued_lift_upper_bound S.g s T hcompat_glue
@@ -282,13 +290,13 @@ theorem epi_app_of_shortExact_of_epi_restrictions {X : TopCat.{u}}
   have hls : TopCat.Presheaf.IsLocallySurjective S.g.val := by
     simpa using (Sheaf.isLocallySurjective_iff_epi' AddCommGrpCat.{u} S.g).mpr inferInstance
   obtain ⟨t, hmax⟩ := exists_maximal_of_chains_bounded
-    (fun (c : Set (Under S.g s)) hchain => by
+    (fun (c : Set (Under S.g s)) hchain ↦ by
       have hcompat : TopCat.Presheaf.IsCompatible S.X₂.val
-          (fun x : c => x.1.right.1.unop) (fun x : c => x.1.right.2) :=
+          (fun x : c ↦ x.1.right.1.unop) (fun x : c ↦ x.1.right.2) :=
         chain_isCompatible_of_chain (g := S.g) (s := s) (c := c) hchain
-      obtain ⟨ub, _, hub⟩ := exists_glued_lift_upper_bound S.g s (fun x : c => x.1) hcompat
-      exact ⟨ub, fun a ha => hub ⟨a, ha⟩⟩)
-    (fun {a b c : Under S.g s} (hab : Nonempty (b ⟶ a)) (hbc : Nonempty (c ⟶ b)) =>
+      obtain ⟨ub, _, hub⟩ := exists_glued_lift_upper_bound S.g s (fun x : c ↦ x.1) hcompat
+      exact ⟨ub, fun a ha ↦ hub ⟨a, ha⟩⟩)
+    (fun {a b c : Under S.g s} (hab : Nonempty (b ⟶ a)) (hbc : Nonempty (c ⟶ b)) ↦
       ⟨hbc.some ≫ hab.some⟩)
   let V₀ : Opens X := t.right.1.unop
   let t₀ : S.X₂.val.obj (op V₀) := t.right.2
@@ -323,7 +331,7 @@ theorem epi_app_of_shortExact_flasque {X : TopCat.{u}}
     (U : Opens X) :
     Epi (S.g.val.app (op U)) := by
   exact epi_app_of_shortExact_of_epi_restrictions hS
-    (fun {_ _} i => hX₁ i) U
+    (fun {_ _} i ↦ hX₁ i) U
 
 /-- Quotients of flasque sheaves are flasque along a short exact sequence. -/
 theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
@@ -335,7 +343,7 @@ theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
   intro U V j
   have hg_U : Epi (S.g.val.app (op U)) :=
     epi_app_of_shortExact_of_epi_restrictions hS
-      (fun {_ _} i => hX₁ i) U
+      (fun {_ _} i ↦ hX₁ i) U
   have hres₂ : Epi (S.X₂.val.map j.op) := hX₂ j
   rw [AddCommGrpCat.epi_iff_surjective] at hg_U hres₂ ⊢
   intro z
@@ -346,8 +354,7 @@ theorem isFlasque_X₃_of_shortExact {X : TopCat.{u}}
     simp only [AddCommGrpCat.hom_comp] at this
     exact this.symm.trans (by simp [hx, hw])⟩
 
--- Injective sheaves are flasque.
--- Uses zeroOutsideInt generator/sHom/openHom API + Injective.factors.
+/-- Injective sheaves are flasque. -/
 theorem isFlasque_of_injective {X : TopCat.{u}}
     (I : TopCat.Sheaf AddCommGrpCat.{u} X) [Injective I] : IsFlasqueSheaf I := by
   intro U V i
@@ -356,13 +363,14 @@ theorem isFlasque_of_injective {X : TopCat.{u}}
   obtain ⟨g, hg⟩ := Injective.factors
     (TopCat.Sheaf.zeroOutsideInt.sHom s) (TopCat.Sheaf.zeroOutsideInt.openHom (leOfHom i))
   refine ⟨g.val.app (op V) (TopCat.Sheaf.zeroOutsideInt.generator V), ?_⟩
-  rw [show I.val.map i.op = I.val.map (homOfLE (leOfHom i)).op from
-    congr_arg I.val.map (congr_arg Quiver.Hom.op (Subsingleton.elim _ _)),
-    ← g.val.naturality_apply (homOfLE (leOfHom i)).op,
+  have hi_eq : I.val.map i.op = I.val.map (homOfLE (leOfHom i)).op :=
+    congr_arg I.val.map (congr_arg Quiver.Hom.op (Subsingleton.elim _ _))
+  rw [hi_eq, ← g.val.naturality_apply (homOfLE (leOfHom i)).op,
     ← TopCat.Sheaf.zeroOutsideInt.openHom_val_app_generator]
   change ((TopCat.Sheaf.zeroOutsideInt.openHom (leOfHom i) ≫ g).val.app (op U))
     (TopCat.Sheaf.zeroOutsideInt.generator U) = s
-  rw [hg]; exact TopCat.Sheaf.zeroOutsideInt.sHom_app_generator s
+  rw [hg]
+  exact TopCat.Sheaf.zeroOutsideInt.sHom_app_generator s
 
 /-! ## Cohomological vanishing for flasque sheaves -/
 
@@ -377,7 +385,7 @@ theorem sheafH_subsingleton_H1_of_flasque {X : TopCat.{u}}
   have hg : Epi (S.g.val.app (op ⊤)) := by
     simpa [S] using epi_app_of_shortExact_flasque
       (by simpa [S] using ip.shortExact_shortComplex)
-      (fun i => by simpa [S] using hF i) ⊤
+      (fun i ↦ by simpa [S] using hF i) ⊤
   simpa [S] using
     sheafH_subsingleton_H1_of_injective_of_epi_app_top
       (by simpa [S] using ip.shortExact_shortComplex) hg
@@ -396,9 +404,9 @@ theorem sheafH_subsingleton_of_flasque
       let S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X) := ip.shortComplex
       letI : Injective S.X₂ := by
         simpa [S] using (inferInstance : Injective S.X₂)
-      have hX₁ : IsFlasqueSheaf S.X₁ := fun i => by simpa [S] using hF i
+      have hX₁ : IsFlasqueSheaf S.X₁ := fun i ↦ by simpa [S] using hF i
       have hX₂ : IsFlasqueSheaf S.X₂ := isFlasque_of_injective S.X₂
-      have hX₃ : IsFlasqueSheaf S.X₃ := fun i => by
+      have hX₃ : IsFlasqueSheaf S.X₃ := fun i ↦ by
         simpa [S] using
           (isFlasque_X₃_of_shortExact
             (by simpa [S] using ip.shortExact_shortComplex) hX₁ hX₂) i

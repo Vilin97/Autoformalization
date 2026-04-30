@@ -1,11 +1,11 @@
 import Aristotle.GrothendieckVanishing.main.CohomologyAPI
 
 /-!
-  # General filtered-colimit infrastructure for presheaves
+# General filtered-colimit infrastructure for presheaves
 
-  This file contains presheaf-level filtered-colimit helpers that do not use
-  Noetherian hypotheses: finite-cover separation, eventual vanishing, compatible
-  representative extraction, and finite-subcover gluing in cocone points.
+Presheaf-level filtered-colimit helpers that do not require Noetherian hypotheses:
+finite-cover separation, eventual vanishing, compatible representative extraction, and
+finite-subcover gluing in cocone points.
 -/
 
 universe u
@@ -75,7 +75,7 @@ theorem sheaf_section_zero_of_zero_on_cover
     (b : ToType (F.obj (op V)))
     (hzero : ∀ k ∈ t, ConcreteCategory.hom (F.map (homOfLE (hW k)).op) b = 0) :
     b = 0 :=
-  hF.section_ext (s := b) (t := 0) fun x hx => by
+  hF.section_ext (s := b) (t := 0) fun x hx ↦ by
     obtain ⟨k, hk⟩ := Opens.mem_iSup.mp (hcov hx)
     obtain ⟨hkt, hxk⟩ := Opens.mem_iSup.mp hk
     exact ⟨W k, hW k, hxk, (hzero k hkt).trans (map_zero _).symm⟩
@@ -95,9 +95,9 @@ theorem filtered_colimit_kills_all_restrictions
         (ConcreteCategory.hom ((Y'.map g₀).app (op V)) b₀) = 0 := by
   classical
   induction t using Finset.induction with
-  | empty => exact ⟨j₀, 𝟙 j₀, fun _ hk => absurd hk (by simp)⟩
+  | empty => exact ⟨j₀, 𝟙 j₀, fun _ hk ↦ absurd hk (by simp)⟩
   | @insert k₀ t₀ hk₀ ih =>
-    obtain ⟨j_cur, g_cur, hg_cur⟩ := ih (fun k hk => h_ev k (Finset.mem_insert_of_mem hk))
+    obtain ⟨j_cur, g_cur, hg_cur⟩ := ih (fun k hk ↦ h_ev k (Finset.mem_insert_of_mem hk))
     obtain ⟨jk₀, fk₀, hfk₀⟩ := h_ev k₀ (Finset.mem_insert_self k₀ t₀)
     let h_eq := IsFiltered.coeqHom (g_cur ≫ IsFiltered.leftToMax j_cur jk₀)
         (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
@@ -105,7 +105,7 @@ theorem filtered_colimit_kills_all_restrictions
         fk₀ ≫ IsFiltered.rightToMax j_cur jk₀ ≫ h_eq := by
       simpa only [Category.assoc] using IsFiltered.coeq_condition
         (g_cur ≫ IsFiltered.leftToMax j_cur jk₀) (fk₀ ≫ IsFiltered.rightToMax j_cur jk₀)
-    refine ⟨_, g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq, fun k hk => ?_⟩
+    refine ⟨_, g_cur ≫ IsFiltered.leftToMax j_cur jk₀ ≫ h_eq, fun k hk ↦ ?_⟩
     rw [Finset.mem_insert] at hk; rcases hk with rfl | hk
     · rw [heq]; exact transition_preserves_zero Y' fk₀
         (IsFiltered.rightToMax j_cur jk₀ ≫ h_eq) (homOfLE (hW k)) b₀ hfk₀
@@ -177,7 +177,7 @@ theorem colimit_section_zero_of_zero_on_cover
     (ha : ∀ k ∈ t, c.pt.map (homOfLE (hW k)).op a = 0) :
     a = 0 := by
   let ev V := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op V)
-  have hcV : ∀ V, IsColimit ((ev V).mapCocone c) := fun V => isColimitOfPreserves (ev V) hc
+  have hcV : ∀ V, IsColimit ((ev V).mapCocone c) := fun V ↦ isColimitOfPreserves (ev V) hc
   obtain ⟨j₀, b₀, hb₀⟩ := Concrete.isColimit_exists_rep _ (hcV V) a
   -- For each k ∈ t: ι(b₀|_{W_k}) = a|_{W_k} = 0, so eventually zero
   have h_ev_zero : ∀ k ∈ t, ∃ (jk : J') (fk : j₀ ⟶ jk),
@@ -193,8 +193,7 @@ theorem colimit_section_zero_of_zero_on_cover
   have hnat : (c.ι.app j₀).app (op V) =
       (Y'.map g₀).app (op V) ≫
       (c.ι.app j₁).app (op V) := by
-    simpa [Functor.const_obj_map] using
-      (congrArg (fun α => NatTrans.app α (op V)) (c.ι.naturality g₀)).symm
+    simp [Functor.const_obj_map]
   rw [hnat]
   rw [ConcreteCategory.comp_apply,
     sheaf_section_zero_of_zero_on_cover (hY j₁) hW hcov _ hg₀, map_zero]
@@ -212,12 +211,12 @@ theorem filtered_colimit_exists_compatible_representatives
     {t : Finset ι} :
     ∃ (j₁ : J')
       (x'' : ∀ k : ↥t, ToType ((P.obj j₁).obj (op (U k.1)))),
-      Presheaf.IsCompatible (P.obj j₁) (fun k : ↥t => U k.1) x'' ∧
+      Presheaf.IsCompatible (P.obj j₁) (fun k : ↥t ↦ U k.1) x'' ∧
       (∀ k : ↥t, ConcreteCategory.hom ((c.ι.app j₁).app (op (U k.1))) (x'' k) = sf k.1) := by
   classical
   let ev V := (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op V)
-  have hcV : ∀ V, IsColimit ((ev V).mapCocone c) := fun V => isColimitOfPreserves (ev V) hc
-  choose j_all x_all hx_all using fun k : ↥t => Concrete.isColimit_exists_rep _ (hcV (U k.1)) (sf k.1)
+  have hcV : ∀ V, IsColimit ((ev V).mapCocone c) := fun V ↦ isColimitOfPreserves (ev V) hc
+  choose j_all x_all hx_all using fun k : ↥t ↦ Concrete.isColimit_exists_rep _ (hcV (U k.1)) (sf k.1)
   obtain ⟨j₀, hj₀⟩ := IsFiltered.sup_objs_exists (Finset.univ.image j_all)
   let g₀ (k : ↥t) := (hj₀ (Finset.mem_image_of_mem j_all (Finset.mem_univ k))).some
   let x' (k : ↥t) := ConcreteCategory.hom ((P.map (g₀ k)).app (op (U k.1))) (x_all k)
@@ -233,7 +232,7 @@ theorem filtered_colimit_exists_compatible_representatives
       (ConcreteCategory.hom ((P.map g).app (op (U p.2.1))) (x' p.2))
   obtain ⟨j₁, g₁, hg₁⟩ : ∃ (j₁ : J') (g₁ : j₀ ⟶ j₁),
       ∀ p : ↥t × ↥t, compatAfter j₁ g₁ p := by
-    choose j_pair f_pair hf_pair using fun p : ↥t × ↥t => show ∃ j' f, compatAfter j' f p from by
+    choose j_pair f_pair hf_pair using fun p : ↥t × ↥t ↦ show ∃ j' f, compatAfter j' f p from by
       rcases p with ⟨k, l⟩
       simpa [compatAfter, ev] using ((Types.FilteredColimit.isColimit_eq_iff'
         (isColimitOfPreserves (CategoryTheory.forget AddCommGrpCat) (hcV (U k.1 ⊓ U l.1))))
@@ -246,13 +245,13 @@ theorem filtered_colimit_exists_compatible_representatives
               hx' k, hx' l]
           exact hcompat k.1 l.1
     obtain ⟨j₁, T, hT⟩ := IsFiltered.sup_exists ({j₀} ∪ Finset.univ.image j_pair) <|
-      Finset.univ.image fun p : ↥t × ↥t => ⟨j₀, j_pair p, by simp, by simp, f_pair p⟩
-    refine ⟨j₁, T (by simp), fun p => ?_⟩
+      Finset.univ.image fun p : ↥t × ↥t ↦ ⟨j₀, j_pair p, by simp, by simp, f_pair p⟩
+    refine ⟨j₁, T (by simp), fun p ↦ ?_⟩
     rw [← hT (by simp) (by simp) (Finset.mem_image_of_mem _ (Finset.mem_univ p))]
     exact transition_preserves_compat P (f_pair p) (T (by simp)) _ _ (hf_pair p)
-  exact ⟨j₁, fun k => ConcreteCategory.hom ((P.map g₁).app (op (U k.1))) (x' k), fun k l => by
+  exact ⟨j₁, fun k ↦ ConcreteCategory.hom ((P.map g₁).app (op (U k.1))) (x' k), fun k l ↦ by
     simpa [compatAfter] using hg₁ (k, l),
-    fun k => by
+    fun k ↦ by
     change ConcreteCategory.hom ((P.map g₁).app (op (U k.1)) ≫ (c.ι.app j₁).app (op (U k.1))) (x' k) = sf k.1
     simpa [Functor.const_obj_map] using hx' k⟩
 
@@ -269,12 +268,12 @@ theorem colimit_exists_gluing_of_compatible_finite_subcover
     {t : Finset ι} (hsup_le : iSup U ≤ ⨆ k ∈ t, U k)
     (j₁ : J')
     (x'' : ∀ k : ↥t, ToType ((P.obj j₁).obj (op (U k.1))))
-    (hx''_compat : Presheaf.IsCompatible (P.obj j₁) (fun k : ↥t => U k.1) x'')
+    (hx''_compat : Presheaf.IsCompatible (P.obj j₁) (fun k : ↥t ↦ U k.1) x'')
     (hx'' : ∀ k : ↥t,
       ConcreteCategory.hom ((c.ι.app j₁).app (op (U k.1))) (x'' k) = sf k.1) :
     ∃ s : ToType (c.pt.obj (op (iSup U))),
       ∀ k, k ∈ t → c.pt.map (Opens.leSupr U k).op s = sf k := by
-  let W : ↥t → Opens X := fun k => U k.1
+  let W : ↥t → Opens X := fun k ↦ U k.1
   have hcov_W : iSup W = iSup U := by
     apply le_antisymm
     · refine iSup_le ?_
@@ -333,7 +332,7 @@ theorem colimit_restrict_eq_of_eq_on_finite_subcover
   apply sub_eq_zero.mp
   refine colimit_section_zero_of_zero_on_cover
     P hP hc
-    (fun k => inf_le_left (a := U i) (b := U k))
+    (fun k ↦ inf_le_left (a := U i) (b := U k))
     (t := t)
     ?_
     (c.pt.map (Opens.leSupr U i).op s - sf i)
@@ -376,7 +375,7 @@ theorem colimit_existsUnique_gluing_of_compatible_finite_subcover
     apply sub_eq_zero.mp
     exact colimit_section_zero_of_zero_on_cover
       P hP hc
-      (fun k => le_iSup U k) hsup_le (s' - s) (fun k hk => by
+      (fun k ↦ le_iSup U k) hsup_le (s' - s) (fun k hk ↦ by
         show c.pt.map (Opens.leSupr U k).op (s' - s) = 0
         rw [map_sub, sub_eq_zero]
         exact (hs' k).trans (hs_k k hk).symm)
