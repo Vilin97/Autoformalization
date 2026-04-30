@@ -3,7 +3,20 @@ import Aristotle.GrothendieckVanishing.main.TopologicalKrullDim
 import Aristotle.GrothendieckVanishing.main.ZeroOutside
 
 /-!
-  ConstantSheafFlasque.lean — The constant sheaf on an irreducible space is flasque
+# Flasqueness of the constant sheaf on an irreducible space
+
+On an irreducible topological space, the constant sheaf with values in any object of
+`AddCommGrpCat` is flasque. The proof descends from the explicit `+`-construction:
+the presheaf-level surjectivity lemmas `toPlus_surjective_of_const` and
+`toPlus_surjective_of_firstPlus` combine via a section-by-section gluing argument that
+relies crucially on `nonempty_preirreducible_inter` for irreducible spaces.
+
+## Main results
+
+* `sheafify_const_flasque_of_irreducible`
+* `presheafToSheaf_const_flasque_of_irreducible`
+* `constantSheaf_flasque_of_irreducible`
+* `isFlasqueSheaf_zeroOutsideInt_top`
 -/
 
 universe u
@@ -36,10 +49,10 @@ theorem toPlus_surjective_of_const
   let I₀ : S.Arrow := ⟨V₀, f₀, hf₀⟩
   have hI₀ : (I₀.Y : Set X).Nonempty := ⟨x₀, hx₀mem⟩
   refine ⟨x I₀, ?_⟩
-  rw [hx, show x = Meq.mk S (x I₀) from Meq.ext _ _ fun I => by
-      simpa using x.condition (Cover.Relation.mk' (fst := I) (snd := I₀)
-        ⟨I.Y ⊓ I₀.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩),
-      toPlus_eq_mk, eq_mk_iff_exists]
+  have hxmk : x = Meq.mk S (x I₀) := Meq.ext _ _ fun I ↦ by
+    simpa using x.condition (Cover.Relation.mk' (fst := I) (snd := I₀)
+      ⟨I.Y ⊓ I₀.Y, homOfLE inf_le_left, homOfLE inf_le_right, Subsingleton.elim _ _⟩)
+  rw [hx, hxmk, toPlus_eq_mk, eq_mk_iff_exists]
   refine ⟨S, homOfLE le_top, 𝟙 S, ?_⟩
   apply Meq.ext; intro I
   simp [Meq.refine, Meq.mk]
@@ -92,9 +105,9 @@ theorem toPlus_surjective_of_firstPlus
     simpa [← hb, ← hab] using toPlus_naturality_const I.f a
   · have hIbot : I.Y = ⊥ := Opens.ext (by simpa [Set.not_nonempty_iff_eq_empty] using hI)
     have hcov : (⊥ : Sieve (⊥ : Opens X)) ∈ (Opens.grothendieckTopology X) ⊥ :=
-      fun _ hp => (Opens.mem_bot.mp hp).elim
-    exact @Subsingleton.elim _ (hIbot ▸ ⟨fun x y =>
-      Plus.sep _ ⟨⊥, hcov⟩ x y fun ⟨_, _, hf⟩ => absurd hf id⟩) _ _
+      fun _ hp ↦ (Opens.mem_bot.mp hp).elim
+    exact @Subsingleton.elim _ (hIbot ▸ ⟨fun x y ↦
+      Plus.sep _ ⟨⊥, hcov⟩ x y fun ⟨_, _, hf⟩ ↦ absurd hf id⟩) _ _
 
 /-- On an irreducible space, the sheafification of the constant presheaf is flasque. -/
 theorem sheafify_const_flasque_of_irreducible
@@ -115,19 +128,23 @@ theorem sheafify_const_flasque_of_irreducible
           ⟨_, (Opens.grothendieckTopology X).sheafify_isSheaf P⟩).isZero
     exact ⟨0, Subsingleton.elim _ _⟩
   · have hUne : (U : Set X).Nonempty := Set.nonempty_iff_ne_empty.mpr hU
+    have hPmap : P.map i.op = 𝟙 _ := by ext; simp [P]
     have hnat := ((Opens.grothendieckTopology X).toSheafify P).naturality i.op
-    rw [show P.map i.op = 𝟙 _ from by ext; simp [P],
-        Category.id_comp] at hnat
+    rw [hPmap, Category.id_comp] at hnat
     have hfac : ((Opens.grothendieckTopology X).toSheafify P).app (op V) ≫
         ((Opens.grothendieckTopology X).sheafify P).map i.op =
         ((Opens.grothendieckTopology X).toSheafify P).app (op U) := hnat.symm
+    have hToSheafify : ((Opens.grothendieckTopology X).toSheafify P).app (op U) =
+        ((Opens.grothendieckTopology X).toPlus P).app (op U) ≫
+          ((Opens.grothendieckTopology X).toPlus
+            ((Opens.grothendieckTopology X).plusObj P)).app (op U) := by
+      simp only [GrothendieckTopology.toSheafify,
+        (Opens.grothendieckTopology X).plusMap_toPlus, NatTrans.comp_app]
     haveI : Epi (((Opens.grothendieckTopology X).toSheafify P).app (op U)) := by
       apply ConcreteCategory.epi_of_surjective
-      rw [show ((Opens.grothendieckTopology X).toSheafify P).app (op U) =
-          ((Opens.grothendieckTopology X).toPlus P).app (op U) ≫
-          ((Opens.grothendieckTopology X).toPlus ((Opens.grothendieckTopology X).plusObj P)).app (op U) from by
-        simp only [GrothendieckTopology.toSheafify, (Opens.grothendieckTopology X).plusMap_toPlus, NatTrans.comp_app]]
-      intro y; obtain ⟨z, hz⟩ := toPlus_surjective_of_firstPlus (X := X) U hUne y
+      rw [hToSheafify]
+      intro y
+      obtain ⟨z, hz⟩ := toPlus_surjective_of_firstPlus (X := X) U hUne y
       obtain ⟨a, ha⟩ := toPlus_surjective_of_const (X := X) U hUne z
       exact ⟨a, by rw [ConcreteCategory.comp_apply, ha]; exact hz⟩
     exact epi_of_epi_fac hfac

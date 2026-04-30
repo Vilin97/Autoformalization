@@ -56,7 +56,7 @@ theorem opens_eq_bot_or_top_of_irreducibleSpace_dim_zero
     (hdim : topologicalKrullDim X ≤ 0) (U : Opens X) :
     U = ⊥ ∨ U = ⊤ := by
   by_cases hne : (U : Set X).Nonempty
-  · right; ext x; refine ⟨fun _ => trivial, fun _ => by_contra fun hx => ?_⟩
+  · right; ext x; refine ⟨fun _ ↦ trivial, fun _ ↦ by_contra fun hx ↦ ?_⟩
     have hclosure : closure ({x} : Set X) = Set.univ :=
       TopologicalSpace.IrreducibleCloseds.eq_univ_of_topologicalKrullDim_nonpos
         (X := X) ⟨closure {x}, isIrreducible_singleton.closure, isClosed_closure⟩ hdim
@@ -135,9 +135,9 @@ theorem height_add_one_le_topologicalKrullDim_of_isClosed_of_ne_univ
   have h_height_le : S.height ≤ (f S).height :=
     height_le_height_map_of_isInducing Topology.IsInducing.subtypeVal S
   have h_lt_top : f S < T := by
-    refine lt_of_le_of_ne (Set.subset_univ _) fun h_eq => hne ?_
+    refine lt_of_le_of_ne (Set.subset_univ _) fun h_eq ↦ hne ?_
     have h_sub : (f S : Set X) ⊆ Y :=
-      closure_minimal (fun _ ⟨⟨_, hy⟩, _, rfl⟩ => hy) hY
+      closure_minimal (fun _ ⟨⟨_, hy⟩, _, rfl⟩ ↦ hy) hY
     have h_eq' : (f S : Set X) = Set.univ := by
       simpa [T] using congrArg IrreducibleCloseds.carrier h_eq
     rwa [h_eq', Set.univ_subset_iff] at h_sub
@@ -170,25 +170,25 @@ theorem topologicalKrullDim_add_one_eq_iSup_height_add_one (X : Type u) [Topolog
       letI := h
       rw [topologicalKrullDim_eq_iSup_height]
       have bdd :
-          BddAbove (Set.range (fun S : IrreducibleCloseds X => IrreducibleCloseds.height S)) :=
+          BddAbove (Set.range (fun S : IrreducibleCloseds X ↦ IrreducibleCloseds.height S)) :=
         OrderTop.bddAbove _
-      rw [show (⨆ S : IrreducibleCloseds X, (S.height : WithBot ℕ∞)) =
-          ↑(⨆ S : IrreducibleCloseds X, IrreducibleCloseds.height S) from
+      have hcoe_iSup :
+          (⨆ S : IrreducibleCloseds X, (S.height : WithBot ℕ∞)) =
+            ↑(⨆ S : IrreducibleCloseds X, IrreducibleCloseds.height S) :=
         (WithBot.coe_iSup
-          (f := fun S : IrreducibleCloseds X => IrreducibleCloseds.height S) bdd).symm]
-      rw [show (↑(⨆ S : IrreducibleCloseds X, IrreducibleCloseds.height S) : WithBot ℕ∞) + 1 =
-          ↑((⨆ S : IrreducibleCloseds X, IrreducibleCloseds.height S) + 1) from
-        by push_cast; ring]
-      rw [ENat.iSup_add,
+          (f := fun S : IrreducibleCloseds X ↦ IrreducibleCloseds.height S) bdd).symm
+      have hcoe_add :
+          (↑(⨆ S : IrreducibleCloseds X, IrreducibleCloseds.height S) : WithBot ℕ∞) + 1 =
+            ↑((⨆ S : IrreducibleCloseds X, IrreducibleCloseds.height S) + 1) := by
+        push_cast; ring
+      have hsucc_coe : ∀ S : IrreducibleCloseds X,
+          (↑(S.height + 1 : ℕ∞) : WithBot ℕ∞) = (↑S.height : WithBot ℕ∞) + 1 := by
+        intro S; push_cast; ring
+      rw [hcoe_iSup, hcoe_add, ENat.iSup_add,
         WithBot.coe_iSup
-          (f := fun S : IrreducibleCloseds X => IrreducibleCloseds.height S + 1)
+          (f := fun S : IrreducibleCloseds X ↦ IrreducibleCloseds.height S + 1)
           (OrderTop.bddAbove _)]
-      simp_rw [show ∀ S : IrreducibleCloseds X,
-          (↑(S.height + 1 : ℕ∞) : WithBot ℕ∞) = (↑S.height : WithBot ℕ∞) + 1 from
-        by
-          intro S
-          push_cast
-          ring]
+      simp_rw [hsucc_coe]
 
 end TopologicalSpace
 
@@ -199,7 +199,7 @@ theorem topologicalKrullDim_add_one_le_of_isIrreducible_of_isClosed {X : Type u}
     (hne : Y ≠ Set.univ) :
     topologicalKrullDim Y + 1 ≤ topologicalKrullDim X := by
   rw [topologicalKrullDim_add_one_eq_iSup_height_add_one]
-  exact iSup_le (fun s =>
+  exact iSup_le (fun s ↦
     IrreducibleCloseds.height_add_one_le_topologicalKrullDim_of_isClosed_of_ne_univ hY hne s)
 
 /-- If `topologicalKrullDim Y + 1 ≤ topologicalKrullDim X` and `Y` has finite dimension, then
@@ -231,8 +231,8 @@ private theorem topologicalKrullDim_lt_of_add_one_le_of_lt_top {X Y : Type u}
       exact lt_of_lt_of_le hy_lt' h'
 
 /-- On an irreducible space, a proper closed subset with finite Krull dimension has
-    strictly smaller Krull dimension. The finiteness hypothesis excludes the case where
-    both Y and X have infinite dimension. Proved by Aristotle (72e670ee). -/
+strictly smaller Krull dimension. The finiteness hypothesis excludes the case where both
+`Y` and `X` have infinite dimension. -/
 theorem topologicalKrullDim_lt_of_isIrreducible_of_isClosed {X : Type u} [TopologicalSpace X]
     [IrreducibleSpace X] {Y : Set X} (hY : IsClosed Y) (hne : Y ≠ Set.univ)
     (hfin : topologicalKrullDim Y < ⊤) :
@@ -252,12 +252,12 @@ theorem topologicalKrullDim_pos_iff_exists_irreducibleCloseds_ne_univ {X : Type 
     simp only [topologicalKrullDim, gt_iff_lt] at hpos
     obtain ⟨A, B, hAB⟩ := Order.krullDim_pos_iff.mp hpos
     by_cases hB : (B : Set X) = Set.univ
-    · refine ⟨A, fun hA => hAB.ne ?_⟩
+    · refine ⟨A, fun hA ↦ hAB.ne ?_⟩
       exact IrreducibleCloseds.ext (hA.trans hB.symm)
     · exact ⟨B, hB⟩
   · rintro ⟨Z, hZ_ne_univ⟩
     have hZ_lt : Z < T := by
-      refine lt_of_le_of_ne (Set.subset_univ _) fun hZT => hZ_ne_univ ?_
+      refine lt_of_le_of_ne (Set.subset_univ _) fun hZT ↦ hZ_ne_univ ?_
       simpa [T] using congrArg IrreducibleCloseds.carrier hZT
     simpa [topologicalKrullDim, gt_iff_lt] using (Order.krullDim_pos_iff.mpr ⟨Z, T, hZ_lt⟩)
 

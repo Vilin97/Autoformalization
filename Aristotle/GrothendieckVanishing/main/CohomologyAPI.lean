@@ -63,7 +63,7 @@ instance : HasSeparator AddCommGrpCat.{u} where
       ULift.forall]
     intro x
     specialize h (AddCommGrpCat.ofHom
-      (AddMonoidHom.mk' (fun y => y • x) fun y z => by simp only [add_smul])) 1
+      (AddMonoidHom.mk' (fun y ↦ y • x) fun y z ↦ by simp only [add_smul])) 1
     aesop
 
 instance : IsGrothendieckAbelian.{u} AddCommGrpCat.{u} where
@@ -188,8 +188,8 @@ private lemma extClass_naturality {S₁ S₂ : ShortComplex C'} (hS₁ : S₁.Sh
     Proof: `𝟙 Y = 0` because `Y` is zero, so `x = x ∘ mk₀(𝟙 Y) = x ∘ mk₀(0) = x ∘ 0 = 0`. -/
 private theorem ext_subsingleton_of_isZero_tgt {X Y : C'} (hY : IsZero Y) (n : ℕ) :
     Subsingleton (Ext X Y n) :=
-  ⟨fun a b => by
-    have eq : ∀ x : Ext X Y n, x = 0 := fun x => by
+  ⟨fun a b ↦ by
+    have eq : ∀ x : Ext X Y n, x = 0 := fun x ↦ by
       have h := Ext.comp_mk₀_id x
       rw [show (𝟙 Y : Y ⟶ Y) = 0 from hY.eq_of_src _ _, Ext.mk₀_zero] at h
       exact h.symm.trans (Ext.comp_zero x Y 0 n (add_zero n))
@@ -210,7 +210,7 @@ private theorem sheafH_comp_extClass_naturality {X : TopCat.{u}}
   have hcomp :
       y.comp (hS₁.extClass.comp (Ext.mk₀ φ.τ₁) (add_zero 1)) rfl =
         y.comp ((Ext.mk₀ φ.τ₃).comp hS₂.extClass (zero_add 1)) rfl := by
-    exact congrArg (fun t => y.comp t rfl) (extClass_naturality hS₁ hS₂ φ).symm
+    exact congrArg (fun t ↦ y.comp t rfl) (extClass_naturality hS₁ hS₂ φ).symm
   simpa [Ext.comp_assoc_of_third_deg_zero, Ext.comp_assoc_of_second_deg_zero] using hcomp
 
 /-- Successor connecting morphism attached to a short exact sequence of sheaves. -/
@@ -221,7 +221,7 @@ noncomputable def sheafH_succ_map {X : TopCat.{u}}
     AddCommGrpCat.of (Sheaf.H S.X₃ n) ⟶ AddCommGrpCat.of (Sheaf.H S.X₁ (n + 1)) := by
   exact AddCommGrpCat.ofHom <|
     AddMonoidHom.mk'
-      (fun y => y.comp hS.extClass rfl)
+      (fun y ↦ y.comp hS.extClass rfl)
       (by
         intro a b
         change (a + b).comp hS.extClass rfl = a.comp hS.extClass rfl + b.comp hS.extClass rfl
@@ -254,9 +254,9 @@ theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
       (a : (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x).obj F), a = 0) :
     IsZero ((⟨F, hF⟩ : TopCat.Sheaf AddCommGrpCat.{u} X)) := by
   let Fsh : TopCat.Sheaf AddCommGrpCat.{u} X := ⟨F, hF⟩
-  have hZ : IsZero F := Functor.isZero F (fun ⟨U⟩ =>
+  have hZ : IsZero F := Functor.isZero F (fun ⟨U⟩ ↦
     @AddCommGrpCat.isZero_of_subsingleton _
-      ⟨fun s t => by
+      ⟨fun s t ↦ by
         apply hF.section_ext
         intro x hx
         obtain ⟨W, hxW, iU, iV, hEq⟩ := F.germ_eq x hx hx s t
@@ -267,10 +267,10 @@ theorem sheaf_isZero_of_zero_stalks (X : TopCat.{u})
         exact ⟨W, hWU, hxW, hEq⟩⟩)
   have hFsh : IsZero Fsh := by
     exact IsZero.mk
-      (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
-        fun U => (hZ.obj U).eq_zero_of_src (f.val.app U))) }⟩)
-      (fun G => ⟨{ default := 0, uniq := fun f => Sheaf.Hom.ext (NatTrans.ext (funext
-        fun U => (hZ.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
+      (fun G ↦ ⟨{ default := 0, uniq := fun f ↦ Sheaf.Hom.ext (NatTrans.ext (funext
+        fun U ↦ (hZ.obj U).eq_zero_of_src (f.val.app U))) }⟩)
+      (fun G ↦ ⟨{ default := 0, uniq := fun f ↦ Sheaf.Hom.ext (NatTrans.ext (funext
+        fun U ↦ (hZ.obj U).eq_zero_of_tgt (f.val.app U))) }⟩)
   simpa [Fsh] using hFsh
 
 /-- If a bundled sheaf is zero, then its cohomology is subsingleton in every degree. -/
@@ -342,7 +342,7 @@ theorem stalk_zero_of_g_is_cokernel_of_stalk_epi
     a = 0 := by
   let T : TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} :=
     TopCat.Sheaf.forget AddCommGrpCat.{u} X ⋙ TopCat.Presheaf.stalkFunctor AddCommGrpCat.{u} x
-  haveI : ∀ U : Opens X, Decidable (x ∈ U) := fun _ => Classical.dec _
+  haveI : ∀ U : Opens X, Decidable (x ∈ U) := fun _ ↦ Classical.dec _
   haveI : T.IsLeftAdjoint :=
     (stalkSkyscraperSheafAdjunction (C := AddCommGrpCat.{u}) (X := X) (p₀ := x)).isLeftAdjoint
   haveI : Epi (T.map S.f) := by
@@ -607,7 +607,7 @@ theorem sheafH_subsingleton_of_isEmpty {X : TopCat.{u}} [IsEmpty X]
     (F : TopCat.Sheaf AddCommGrpCat.{u} X) (n : ℕ) :
     Subsingleton (Sheaf.H F n) :=
   sheafH_subsingleton_of_isZero
-    (sheaf_isZero_of_zero_stalks X F.cond (fun x _ => (IsEmpty.false x).elim)) n
+    (sheaf_isZero_of_zero_stalks X F.cond (fun x _ ↦ (IsEmpty.false x).elim)) n
 
 /-! ## Sheaf Cohomology Functor -/
 
@@ -661,7 +661,7 @@ theorem sheafH1_cokernel_iso_of_subsingleton_middle_natural {X : TopCat.{u}}
         (φ.τ₂.val.app (op ⊤)) (φ.τ₃.val.app (op ⊤))
         (by
           simpa using congrArg
-            (fun α : S₁.X₂ ⟶ S₂.X₃ => α.val.app (op ⊤)) φ.comm₂₃.symm) ≫
+            (fun α : S₁.X₂ ⟶ S₂.X₃ ↦ α.val.app (op ⊤)) φ.comm₂₃.symm) ≫
       (sheafH1_cokernel_iso_of_subsingleton_middle hS₂ h₂₂H).hom =
     (sheafH1_cokernel_iso_of_subsingleton_middle hS₁ h₁₂H).hom ≫
       (sheafCohomologyFunctor X 1).map φ.τ₁ := by
@@ -702,8 +702,8 @@ noncomputable def sheafH0NatIsoSections {X : TopCat.{u}} :
     sheafCohomologyFunctor X 0 ≅
       sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u} ⋙
         (CategoryTheory.evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (op ⊤) :=
-  NatIso.ofComponents (fun F => (sheafH0EquivSections F).toAddCommGrpIso)
-    fun {F G} f => by
+  NatIso.ofComponents (fun F ↦ (sheafH0EquivSections F).toAddCommGrpIso)
+    fun {F G} f ↦ by
     ext x
     simpa [sheafCohomologyFunctor_map_apply] using
       (sheafH0EquivSections_natural (f := f) (x := x))
@@ -767,7 +767,7 @@ theorem sheafH_succ_iso_of_subsingleton_middle_natural {X : TopCat.{u}}
   have hcomp :
       y.comp (hS₁.extClass.comp (Ext.mk₀ φ.τ₁) (add_zero 1)) rfl =
         y.comp ((Ext.mk₀ φ.τ₃).comp hS₂.extClass (zero_add 1)) rfl := by
-    exact congrArg (fun t => y.comp t rfl) (extClass_naturality hS₁ hS₂ φ).symm
+    exact congrArg (fun t ↦ y.comp t rfl) (extClass_naturality hS₁ hS₂ φ).symm
   rw [AddCommGrpCat.hom_comp, AddCommGrpCat.hom_comp]
   change
       (ConcreteCategory.hom ((sheafCohomologyFunctor X (n + 1)).map φ.τ₁)

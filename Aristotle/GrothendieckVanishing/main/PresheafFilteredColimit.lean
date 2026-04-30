@@ -1,12 +1,11 @@
 import Aristotle.GrothendieckVanishing.main.PresheafFilteredColimitCore
 
 /-!
-  # Degree-one and higher filtered-colimit comparisons
+# Degree-one and higher filtered-colimit comparisons
 
-  This file contains the degree-`1` and higher comparison arguments showing that
-  sheaf cohomology commutes with filtered colimits on Noetherian spaces, building
-  on the presheaf-boundary and successor-stage infrastructure in
-  `PresheafFilteredColimitCore`.
+The degree-`1` and higher comparison arguments showing that sheaf cohomology commutes
+with filtered colimits on Noetherian spaces, building on the presheaf-boundary and
+successor-stage infrastructure in `PresheafFilteredColimitCore`.
 -/
 
 universe u
@@ -31,9 +30,9 @@ degree-`1` filtered-colimit comparison. -/
 private noncomputable def sheafH_filtered_colimit_h1_gTopNat :
     (sheafH_filtered_colimit_succ_Inj Y' ⋙ sheafH_filtered_colimit_h1_sectionsFunctor) ⟶
       (sheafH_filtered_colimit_succ_quotient Y' ⋙ sheafH_filtered_colimit_h1_sectionsFunctor) :=
-  { app := fun j =>
+  { app := fun j ↦
       ((cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j)).val.app (op ⊤))
-    naturality := fun j j' f => by
+    naturality := fun j j' f ↦ by
       have hπ :
           cokernel.π ((sheafH_filtered_colimit_succ_eta Y').app j) ≫
               (sheafH_filtered_colimit_succ_quotient Y').map f =
@@ -51,8 +50,8 @@ private noncomputable def sheafH_filtered_colimit_h1_gTopNat :
 filtered-colimit boundary construction. -/
 private noncomputable def sheafH_filtered_colimit_h1_cokernelFunctor :
     J' ⥤ AddCommGrpCat.{u} :=
-  { obj := fun j => cokernel ((sheafH_filtered_colimit_h1_gTopNat Y').app j)
-    map := fun {j j'} f =>
+  { obj := fun j ↦ cokernel ((sheafH_filtered_colimit_h1_gTopNat Y').app j)
+    map := fun {j j'} f ↦
       cokernel.map
         ((sheafH_filtered_colimit_h1_gTopNat Y').app j)
         ((sheafH_filtered_colimit_h1_gTopNat Y').app j')
@@ -61,7 +60,7 @@ private noncomputable def sheafH_filtered_colimit_h1_cokernelFunctor :
         (by
           simpa [sheafH_filtered_colimit_h1_sectionsFunctor] using
             ((sheafH_filtered_colimit_h1_gTopNat Y').naturality f).symm)
-    map_id := fun j => by
+    map_id := fun j ↦ by
       apply (cancel_epi (cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j))).mp
       rw [cokernel.π_desc]
       rw [show (sheafH_filtered_colimit_succ_quotient Y').map (𝟙 j) =
@@ -69,7 +68,7 @@ private noncomputable def sheafH_filtered_colimit_h1_cokernelFunctor :
         simp [sheafH_filtered_colimit_succ_quotient, cokernel.map]
       ]
       exact Category.id_comp _
-    map_comp := fun {j j' j''} f g => by
+    map_comp := fun {j j' j''} f g ↦ by
       apply (cancel_epi (cokernel.π ((sheafH_filtered_colimit_h1_gTopNat Y').app j))).mp
       rw [cokernel.π_desc, ← Category.assoc, cokernel.π_desc, Category.assoc, cokernel.π_desc]
       rw [show (sheafH_filtered_colimit_succ_quotient Y').map (f ≫ g) =
@@ -88,11 +87,11 @@ private noncomputable def sheafH_filtered_colimit_h1_cokernelFunctorIso :
     sheafH_filtered_colimit_h1_cokernelFunctor Y' ≅
       cokernel (sheafH_filtered_colimit_h1_gTopNat Y') :=
   NatIso.ofComponents
-    (fun j =>
+    (fun j ↦
       (PreservesCokernel.iso
         ((CategoryTheory.evaluation J' AddCommGrpCat.{u}).obj j)
         (sheafH_filtered_colimit_h1_gTopNat Y')).symm)
-    (fun {j j'} f => by
+    (fun {j j'} f ↦ by
       let alpha := sheafH_filtered_colimit_h1_gTopNat Y'
       let ev := CategoryTheory.evaluation J' AddCommGrpCat.{u}
       let e_j := PreservesCokernel.iso (ev.obj j) alpha
@@ -124,14 +123,14 @@ private noncomputable def sheafH_filtered_colimit_h1_stageNatIso
     sheafH_filtered_colimit_h1_cokernelFunctor Y' ≅
       Y' ⋙ sheafCohomologyFunctor X 1 :=
   NatIso.ofComponents
-    (fun j => by
+    (fun j ↦ by
       simpa using
         (sheafH1_cokernel_iso_of_subsingleton_middle
           (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y') j) (h_mid j)))
-    (fun {j j'} f => by
+    (fun {j j'} f ↦ by
       ext y
       simpa [sheafCohomologyFunctor_map_apply] using congrArg
-        (fun m => AddCommGrpCat.Hom.hom m y)
+        (fun m ↦ AddCommGrpCat.Hom.hom m y)
         (sheafH1_cokernel_iso_of_subsingleton_middle_natural
           (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y') j)
           (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Y') j')
@@ -284,7 +283,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_one_iso :
       (sheafH_filtered_colimit_h1_boundary_square Ysh csh hcsh hc_sections_inj hc_sections_q)
   let globalIso := sheafH_filtered_colimit_h1_global_cokernel_iso Ysh csh hcsh h_colim
   dsimp [sheafH_filtered_colimit_comparison_one_iso]
-  refine colimit.hom_ext (fun j => ?_)
+  refine colimit.hom_ext (fun j ↦ ?_)
   let stageHom := sheafH_filtered_colimit_succ_stage_hom Ysh csh hcsh j
   let appTop {F G : TopCat.Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G) := f.val.app (op ⊤)
   let stageCokMap :=
@@ -294,7 +293,7 @@ private noncomputable def sheafH_filtered_colimit_comparison_one_iso :
     sheafH1_cokernel_iso_of_subsingleton_middle_natural (sheafH_filtered_colimit_succ_stage_shortExact (Y' := Ysh) j) (sheafH_filtered_colimit_succ_shortExact Ysh csh hcsh) stageHom (h_mid j) h_colim
   rw [HasColimit.isoOfNatIso_ι_inv_assoc, HasColimit.isoOfNatIso_ι_hom_assoc, colimit_ι_sheafH_filtered_colimit_comparison]
   let cokIso := sheafH_filtered_colimit_h1_cokernelFunctorIso Ysh
-  simpa [Category.assoc, hnat, sheafH_filtered_colimit_h1_stageNatIso] using congrArg (fun t => (sheafH_filtered_colimit_h1_stageNatIso Ysh h_mid).inv.app j ≫ t ≫ globalIso.hom)
+  simpa [Category.assoc, hnat, sheafH_filtered_colimit_h1_stageNatIso] using congrArg (fun t ↦ (sheafH_filtered_colimit_h1_stageNatIso Ysh h_mid).inv.app j ≫ t ≫ globalIso.hom)
     (show cokIso.hom.app j ≫ colimit.ι (cokernel α) j ≫ (PreservesCokernel.iso (colim (C := AddCommGrpCat.{u})) α).hom ≫ mapIso.hom = stageCokMap from by
       apply (cancel_epi (cokernel.π (α.app j))).mp
       rw [← Category.assoc, show cokernel.π (α.app j) ≫ cokIso.hom.app j = (cokernel.π α).app j from (Iso.comp_inv_eq _).2 <| by
@@ -411,7 +410,7 @@ private theorem sheafH_filtered_colimit_comparison_isIso
     (csh : Cocone Ysh) (hcsh : IsColimit csh)
     (n : ℕ) :
     IsIso (sheafH_filtered_colimit_comparison Ysh n csh) := by
-  let P : ℕ → Prop := fun n =>
+  let P : ℕ → Prop := fun n ↦
     ∀ {J' : Type u} [SmallCategory J'] [IsFiltered J']
       (Ysh : J' ⥤ TopCat.Sheaf AddCommGrpCat.{u} X)
       (csh : Cocone Ysh) (hcsh : IsColimit csh),

@@ -3,34 +3,32 @@ import Aristotle.GrothendieckVanishing.main.CohomologyAPI
 import Aristotle.GrothendieckVanishing.main.FlasqueVanishing
 
 /-!
-  ClosedImmersionCohomology.lean — Closed immersion cohomology infrastructure
+# Closed-immersion cohomology
 
-  Provides:
-  1. `PushforwardHIso` (pushforward preserves cohomology by isomorphism)
-  2. `subsingleton_sheafH_of_closedImmersion_middle`
+Cohomological consequences of closed inclusions used in the Grothendieck vanishing proof.
 
-  Depends on `ClosedImmersion.lean` for the closed-inclusion pushforward exactness and
-  adjunction-unit/SES API,
-  on `CohomologyAPI.lean` for LES-facing `Sheaf.H` wrappers, and on
-  `FlasqueVanishing.lean` for `FlasqueVanishing`, `IsFlasqueSheaf`, and
-  `isFlasque_of_injective`.
+## Main results
+
+* `PushforwardHIso` — pushforward along a closed inclusion preserves sheaf cohomology, as
+  an isomorphism in every degree.
+* `subsingleton_sheafH_of_closedImmersion_middle` — vanishing of `Hⁿ` of the middle term in
+  the closed-immersion short exact sequence, given vanishing for the kernel and the pullback.
+
+The closed-inclusion stalk, exactness, and adjunction-unit short exact sequence API live
+in `ClosedImmersion.lean`. LES-facing `Sheaf.H` wrappers come from `CohomologyAPI.lean`,
+and the flasque infrastructure from `FlasqueVanishing.lean`.
 -/
-
-set_option linter.unusedSimpArgs false
 
 universe u
 
 open CategoryTheory TopologicalSpace Abelian Limits Opposite
 
-/-! ## Closed-immersion cohomology consequences
+/-! ## Closed-immersion cohomology consequences -/
 
-This file starts at the cohomological layer. The closed-immersion stalk, exactness, and
-adjunction-unit short exact sequence API now lives in `ClosedImmersion.lean`.
--/
-
--- Pushforward along closed immersion preserves sheaf cohomology.
--- Proof by induction: n=0 via sections, n=1 via the cokernel model of H¹,
--- n≥2 via source/target dimension-shift isomorphisms and the induction hypothesis on X₃.
+/-- Pushforward along a closed inclusion preserves sheaf cohomology in every degree, as an
+isomorphism. The proof is by induction: in degree zero via sections, in degree one via the
+cokernel model of `H¹`, and in higher degrees via dimension-shift isomorphisms on both
+sides combined with the induction hypothesis on the next term of an injective resolution. -/
 noncomputable def PushforwardHIso
     {X : TopCat.{u}} (Z : Set X) (hZ : IsClosed Z)
     (G : TopCat.Sheaf AddCommGrpCat.{u} (TopCat.of Z))
@@ -53,7 +51,7 @@ noncomputable def PushforwardHIso
     let SX := S.map (TopCat.Sheaf.pushforward AddCommGrpCat.{u} closedIncl)
     have hSE_X : SX.ShortExact :=
       closedIncl_pushforward_shortExact hZ ip.shortExact_shortComplex
-    have hFlasqueSX₂ : IsFlasqueSheaf SX.X₂ := fun j => by
+    have hFlasqueSX₂ : IsFlasqueSheaf SX.X₂ := fun j ↦ by
       change Epi (S.X₂.val.map ((Opens.map closedIncl).op.map j.op))
       exact (isFlasque_of_injective S.X₂) ((Opens.map closedIncl).map j)
     have hSE : S.ShortExact := by simpa [S] using ip.shortExact_shortComplex
@@ -117,7 +115,7 @@ theorem subsingleton_sheafH_of_closedImmersion_middle
         Subsingleton ↑((sheafCohomologyFunctor X n).obj
           (CokernelCofork.ofπ S.g S.zero).pt) := by
       simpa [sheafCohomologyFunctor] using hPush
-    exact ⟨fun a b => by
+    exact ⟨fun a b ↦ by
       apply (ConcreteCategory.bijective_of_isIso e.hom).1
       exact Subsingleton.elim _ _⟩
   simpa using
