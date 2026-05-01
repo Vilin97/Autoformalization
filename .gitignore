@@ -49,3 +49,4 @@ aristotle-out/
 WorkflowState.md
 .prover-state/
 .refactor-state/
+.compress-state/
