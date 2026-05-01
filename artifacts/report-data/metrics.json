@@ -1,0 +1,95 @@
+{
+  "generated_at": "2026-05-01T17:55:20.784078Z",
+  "headline": {
+    "lean_files": 15,
+    "raw_loc_at_head": 5061,
+    "sorry_count_at_head": 0,
+    "git_commits_since_2026_03_27": 904,
+    "active_days": 27,
+    "elapsed_days": 35
+  },
+  "claude": {
+    "turns_total": 31529,
+    "turns_by_machine": {
+      "laptop": 18919,
+      "hyak": 12610
+    },
+    "sessions_laptop": 29,
+    "sessions_hyak": 241,
+    "models": {
+      "claude-opus-4-7": 7021,
+      "<synthetic>": 71,
+      "claude-opus-4-6": 24431,
+      "claude-haiku-4-5-20251001": 6
+    },
+    "tokens": {
+      "input": 187883,
+      "cache_creation_input": 93076869,
+      "cache_read_input": 6759040923,
+      "output": 13865519
+    },
+    "date_range": [
+      "2026-03-31T11:08:43.484Z",
+      "2026-05-01T17:52:27.410Z"
+    ]
+  },
+  "codex": {
+    "gv_sessions_laptop": 1,
+    "gv_sessions_hyak": 4,
+    "gv_token_rows_total": 288,
+    "session_total_tokens_summed": {
+      "input": 26254087,
+      "cached_input": 25142016,
+      "output": 129139,
+      "reasoning_output": 46248,
+      "total": 26383226
+    },
+    "note": "Sums of per-session cumulative totals across persisted GV sessions only. EXCLUDES compress (86 cycles) and refactor (478 cycles) loop runs which used `codex exec --ephemeral` and are not persisted."
+  },
+  "compress_loop": {
+    "cycles": 86,
+    "first_cycle_ts": "2026-04-27T15:24:37.110481+00:00",
+    "last_cycle_ts": "2026-04-28T22:53:23.981690+00:00",
+    "loc_first": 7016,
+    "loc_last": 4087
+  },
+  "refactor_loop": {
+    "cycles": 478,
+    "first_cycle_ts": "2026-04-19T18:12:26.737879+00:00",
+    "last_cycle_ts": "2026-04-27T13:59:52.653457+00:00"
+  },
+  "aristotle": {
+    "total_jobs_in_account": 1350,
+    "date_range": [
+      "2025-12-06",
+      "2026-04-29"
+    ],
+    "status_counts": {
+      "COMPLETE": 718,
+      "COMPLETE_WITH_ERRORS": 491,
+      "CANCELED": 118,
+      "OUT_OF_BUDGET": 2,
+      "FAILED": 11,
+      "NOT_STARTED": 10
+    },
+    "proving_phase_jobs_2026_03_27_to_04_04": 94,
+    "clearly_gv_by_filename": 31,
+    "by_day_top": {
+      "2026-04-22": 147,
+      "2026-04-21": 108,
+      "2026-04-25": 85,
+      "2026-04-26": 85,
+      "2026-04-23": 81,
+      "2026-04-20": 67,
+      "2026-04-17": 63,
+      "2026-04-28": 61,
+      "2026-03-02": 57,
+      "2026-04-18": 55,
+      "2026-03-06": 45,
+      "2026-03-18": 45,
+      "2026-04-19": 43,
+      "2026-04-27": 40,
+      "2026-04-29": 35
+    }
+  }
+}
