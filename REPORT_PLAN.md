@@ -44,12 +44,24 @@ and what new analyses GV needs that VML didn't.
 > loops and Hyak sessions entirely.
 >
 > **Note on this draft.** The original draft of this plan was produced
-> on the laptop, which is git-only (no Claude/Codex jsonl, no
-> `aristotle-in/`, `aristotle-out/`, `.compress-state/`, `.refactor-state/`
-> — all gitignored). Several factual claims in the original draft —
-> notably that `aristotle-jobs.json` being `[]` implies GV never used
-> Aristotle — were artifacts of that blind spot. This revision was made
-> on Hyak with full data access; corrections are flagged inline below.
+> on the laptop, which is git-only (no Claude/Codex jsonl,
+> `.compress-state/`, `.refactor-state/` — all gitignored). The Hyak
+> revision flagged that the laptop draft was missing local-filesystem
+> data sources. A subsequent laptop-side check on 2026-04-30 then
+> established a separate fact: `aristotle-in/`, `aristotle-out/`, and
+> `aristotle-jobs.json` are empty on **both** machines. The actual
+> Aristotle per-job record lives on Harmonic's API and is queryable
+> from any machine with `ARISTOTLE_API_KEY` (already exported in
+> `~/.zshrc`). API enumeration on 2026-04-30 returned **1100 jobs**
+> across the account in the window 2026-03-09 → 2026-04-29, mixing GV
+> with at least one other project (augmented B-series). The
+> proving-phase Mar 27 – Apr 4 daily counts sum to **exactly 94** —
+> matching PR #15's proving-phase total — strong evidence that
+> date-windowing alone separates the GV proving phase cleanly. The
+> remaining attribution work is the Apr 27 `aristotle-loop` day (40
+> jobs total, mixed) and the ambiguous `cycle_*`-named jobs; see §2.3
+> / §6 for the filtering rules and the drop-if-messy fallback the
+> user pre-approved.
 
 ---
 
@@ -65,12 +77,16 @@ Sections cover the multi-tool / multi-phase nature of GV:
    - **Token Usage** (Claude + Codex separately and combined).
    - **Loop modes**: `/babysit`, `autonomous_loop`, `aristotle-loop`,
      `codex_compress_loop`, `codex_refactor_loop`, mathlib-style refactor.
-   - **Aristotle Integration** — ~94 submissions in the proving phase
-     (per PR #15: 22 proved / 66 with sorry / 5 canceled / 1 failed),
-     plus the Apr 27 `aristotle-loop` infra burst. The empty
-     `aristotle-jobs.json` in git is misleading: per-job state lives in
-     gitignored `aristotle-in/` and `aristotle-out/` and is only on the
-     machine where prove/submit-aristotle commands ran.
+   - **Aristotle Integration** *(conditional — see §2.3 filter rules)*.
+     ~94 submissions in the proving phase per PR #15 (22 proved / 66
+     with sorry / 5 canceled / 1 failed), plus the Apr 27
+     `aristotle-loop` infra burst. Per-job records live on Harmonic's
+     API (queryable with `ARISTOTLE_API_KEY`), not in any local
+     filesystem dir — `aristotle-in/`, `aristotle-out/`, and
+     `aristotle-jobs.json` are empty on both machines. The account
+     holds 1100 jobs across multiple projects in the GV window;
+     including this section in the report depends on whether GV jobs
+     separate cleanly from the others.
    - **Lines of Code Over Time** (raw and normalized).
    - **Compress / Refactor Cycle Effectiveness** (NEW, GV-specific —
      86 compress cycles, 478 refactor cycles in `.refactor-state/codex_history.jsonl`).
@@ -105,7 +121,7 @@ For each metric: what it is, the data source, how to extract it, and any pitfall
 | Tool calls | count `tool_use` blocks in Claude jsonl + Codex equivalents | |
 | Tokens consumed | Claude jsonl `usage` field; Codex sqlite `logs_2.sqlite` (~30 MB; need to inspect schema) | NEW: Codex token accounting is under-explored, may need digging. |
 | Estimated API cost | per-model pricing × tokens, separately for Claude/Codex | |
-| Aristotle submissions | PR #15 description + `aristotle-out/` (gitignored, on the machine that ran the prover) + commit messages tagged `submit to Aristotle` | **~94 submissions in the proving phase** per PR #15 (22 proved / 66 with sorry / 5 canceled / 1 failed). Plus the Apr 27 `aristotle-loop` burst (~7 commits). Empty git-tracked `aristotle-jobs.json` is NOT evidence of zero usage. |
+| Aristotle submissions | Harmonic API: `aristotlelib.Project.list_projects()` with `ARISTOTLE_API_KEY` (already in `~/.zshrc`). Cross-reference: PR #15 totals + commit messages tagged `submit to Aristotle` / `aristotle-loop:`. | API returns **1100 jobs across the account** (2026-03-09 → 2026-04-29) covering GV and at least one other project. GV-only requires filtering — see §2.3. The proving-phase total **94 = sum of daily counts Mar 27 – Apr 4**, matching PR #15 exactly (date-windowing is enough for that phase). `aristotle-in/`, `aristotle-out/`, and `aristotle-jobs.json` are empty on both machines and should not be treated as a usage signal in either direction. |
 
 ### 2.2 Per-figure metrics (graphs)
 
@@ -121,8 +137,8 @@ Each one becomes a `.png` in `artifacts/` plus narrative.
 | **Git churn** | Daily +/- and net delta. | `git log --numstat`. |
 | **Sorry count over time** | Sawtooth pattern with phase annotations. | Walk commits, count sorries (already in `sorry_history_gv.py`). |
 | **Tool usage breakdown** | Per-category bar + daily stacked. | Classify tool_use blocks; need to extend categories for Codex tools (e.g. `apply_patch`, codex shell). |
-| **Aristotle outcomes** | Stacked bar by date (proved/disproved/sorry/failed). | `aristotle-out/` on the machine that ran the prover (gitignored, NOT on Hyak — confirm laptop has it). Fall back to PR #15 totals if dir is gone. **Keep.** |
-| **Aristotle turnaround** | Histogram by outcome. | Same. **Keep if `aristotle-out/` survives; else drop.** |
+| **Aristotle outcomes** | Stacked bar by date over GV-only jobs (`COMPLETE` / `COMPLETE_WITH_ERRORS` / `CANCELED` / `OUT_OF_BUDGET` / `FAILED`). | Harmonic API + GV filter (§2.3). **Conditional: keep iff GV jobs separate cleanly from the other-project jobs in the same account (≥90% confident attribution); otherwise drop the figure and mention Aristotle qualitatively in the narrative.** |
+| **Aristotle turnaround** | Histogram of `last_updated_at − created_at` by outcome, GV-only. | Same source, same conditional. |
 | **Compress cycle effectiveness** *(NEW)* | Per-cycle LOC delta (raw and normalized), success/skip rate, stuck-on reasons. | `.compress-state/codex_history.jsonl` (86 cycles). |
 | **Refactor cycle effectiveness** *(NEW)* | Per-cycle metrics (similar). | `.refactor-state/` and `wip/grothendieck-vanishing` commit messages tagged "refactor:". |
 | **Phase / loop-mode timeline** *(NEW)* | Gantt-style: which loop mode was active each day; commit-rate by loop mode. | Classify commit messages + state-dir timestamps. |
@@ -159,12 +175,39 @@ Each one becomes a `.png` in `artifacts/` plus narrative.
 - **Laptop vs Hyak split.** Sessions per machine, tokens per machine,
   commit attribution per machine. The compress and refactor loops
   primarily ran on Hyak (state dirs are checked out here); the proving
-  phase ran primarily on the laptop (where `aristotle-in/aristotle-out/`
-  live).
+  phase ran primarily on the laptop. Aristotle is machine-independent
+  (API-backed, same view from any host).
 - **Raw-LOC vs normalized-LOC convergence.** GV's compress loop optimized
   normalized LOC; raw LOC tracks differently. A two-line plot tells this story.
 - **Activity gaps.** Apr 8 – Apr 15 is a real lull (no commits), as is
   Apr 23. Worth flagging and confirming there isn't a missing data source.
+- **Aristotle GV-vs-other-project filtering.** The Harmonic API returns
+  all 1100 jobs across the account; only a fraction are GV. Apply rules
+  in this order, then decide whether to keep the Aristotle figures:
+  1. **Definite GV by `file_name` substring**: `clawristotle` (17),
+     `aristotle-loop` (17), `flasque` (7), `irreducible` (5),
+     `grothendieck` (1), and any `closed_immersion`, `constant_sheaf`,
+     `zero_outside`. ~46+ jobs.
+  2. **Definite non-GV by `file_name`**: `bseries` (7), `closed_form`
+     (1), and prompts about "cycle 587 replicate-subtree", augmented
+     B-series, etc. ~8+ jobs.
+  3. **GV by date window**: Mar 27 – Apr 4 (proving phase) covers
+     **94 jobs** — equal to PR #15's reported total, so this date
+     window is GV with very high confidence. Apr 27 contains the
+     `aristotle-loop` burst mixed with other-project work; intersect
+     with rule 1 to extract the GV subset.
+  4. **Ambiguous**: `cycle_*`-named jobs (49) outside the proving date
+     window. Disambiguate via prompt text (look for GV vocabulary:
+     `flasque`, `irreducible`, `Krull`, `cohomology`, `Hartshorne`,
+     `closed immersion`) or cross-reference with
+     `wip/grothendieck-vanishing` commit messages tagged
+     `submit to Aristotle`.
+  5. **Decision rule**: if the GV-attributed set covers ≥90% of
+     proving-phase + aristotle-loop activity with high confidence,
+     include the Aristotle figures and section in the report;
+     otherwise drop the Aristotle subsection and mention it
+     qualitatively in the narrative. User pre-approved this fallback
+     on 2026-04-30.
 
 ---
 
@@ -180,8 +223,8 @@ Each one becomes a `.png` in `artifacts/` plus narrative.
 | Codex sessions | `~/.codex/sessions/2026/{03,04}/*.jsonl` | 30 files. |
 | Codex history (slash-command-style) | `~/.codex/history.jsonl` | One-line entries. |
 | Codex logs sqlite | `~/.codex/logs_2.sqlite` (51 MB) | Internal logs; schema has `logs(ts, level, target, feedback_log_body, …)`. Need to confirm whether token usage is recorded here or only in session jsonl. |
-| Aristotle jobs (real data) | `aristotle-in/`, `aristotle-out/` (gitignored) | **The 94 GV submissions per PR #15 should live here.** Confirm directory survives on the laptop and capture before any cleanup. |
-| Aristotle jobs (git-tracked) | `aristotle-jobs.json` | Currently `[]` and 3 bytes — IGNORE this file as a usage signal. The empty value reflects that per-job state was never checked in. |
+| Aristotle jobs (canonical) | Harmonic API via `aristotlelib`; key in `~/.zshrc` as `ARISTOTLE_API_KEY` | The actual data source. 1100 jobs visible across the account 2026-03-09 → 2026-04-29. **Same data is reachable from any machine** — no laptop-vs-Hyak distinction needed for Aristotle. |
+| Aristotle local dirs (empty) | `aristotle-in/`, `aristotle-out/`, `aristotle-jobs.json` | EMPTY on both machines (verified 2026-04-30). Per-job state was never written to disk during this work; do not chase these paths. |
 | Git history | `git log` on `wip/grothendieck-vanishing` and `grothendieck-vanishing` | ~1130 commits. Same on both machines (git is shared). |
 
 ### 3.2 Hyak (`vilin@hyak-*`, `/mmfs1/gscratch/amath/vilin/Clawristotle`)
@@ -238,13 +281,51 @@ rsync -avz $LAPTOP:'~/.claude/projects/-Users-vasil-Github-aristotle/'    "$DEST
 rsync -avz $LAPTOP:'~/.codex/sessions/'      "$DEST/codex-sessions/"
 rsync -avz $LAPTOP:'~/.codex/history.jsonl'  "$DEST/codex-history.jsonl"
 rsync -avz $LAPTOP:'~/.codex/logs_2.sqlite'  "$DEST/codex-logs.sqlite"
-# CRITICAL: capture aristotle-in/out before any cleanup — these are
-# the only record of the 94-job proving-phase activity.
-rsync -avz $LAPTOP:'~/Github/Clawristotle/aristotle-in/'  "$DEST/aristotle-in/"
-rsync -avz $LAPTOP:'~/Github/Clawristotle/aristotle-out/' "$DEST/aristotle-out/"
+# Note: aristotle-in/ and aristotle-out/ are NOT in this list — they are
+# empty on both machines. Aristotle data comes from the Harmonic API
+# (see §3.5 below) and is not part of cross-machine scraping.
 ```
 
-### 3.4 Token / cost accounting
+### 3.4 Aristotle API (machine-independent)
+
+Aristotle per-job state is on Harmonic's servers, queryable from any
+host with `ARISTOTLE_API_KEY` set in the environment. Snapshot once
+into the analysis directory rather than re-querying mid-run:
+
+```python
+# scripts/report/aristotle_dump.py
+import asyncio, json
+from aristotlelib import Project
+
+async def main():
+    out, key = [], None
+    while True:
+        page, key = await (Project.list_projects(limit=100, pagination_key=key)
+                           if key else Project.list_projects(limit=100))
+        out.extend(page)
+        if not key:
+            break
+    rows = [{
+        "id": p.project_id,
+        "status": str(p.status.value) if p.status else None,
+        "created": p.created_at.isoformat() if p.created_at else None,
+        "updated": p.last_updated_at.isoformat() if p.last_updated_at else None,
+        "pct": p.percent_complete,
+        "file": p.file_name,
+        "desc": p.description,
+        "prompt": p.input_prompt,
+    } for p in out]
+    with open("artifacts/aristotle_projects.json", "w") as f:
+        json.dump(rows, f, indent=2)
+
+asyncio.run(main())
+```
+
+Apply the §2.3 GV filter to that snapshot before generating any
+Aristotle figure. Keep the unfiltered snapshot too — useful as a
+sanity check and because the filter rules may need iteration.
+
+### 3.5 Token / cost accounting
 
 - **Claude Code**: each assistant message in jsonl carries a `message.usage` block
   with `input_tokens`, `cache_creation_input_tokens`, `cache_read_input_tokens`,
@@ -328,11 +409,14 @@ user's 2026-04-30 corrections and pulled out; what remains:)
    `.codex/sessions/` and whether Hyak ran Claude Code, Codex, or both.
    Plan currently assumes Codex on Hyak (all the late-April loops),
    Claude on both.
-2. **Aristotle data location.** Confirm whether the laptop still has
-   `aristotle-in/aristotle-out/` from the proving phase. If it was
-   cleaned up, the report falls back to the PR #15 totals (94 / 22
-   proved / 66 with sorry / 5 canceled / 1 failed) without per-job
-   timestamps.
+2. **Aristotle reporting scope.** Resolved: API enumeration shows
+   1100 jobs in the account across multiple projects, ~46 clearly GV
+   by file-name, ~49 ambiguous (`cycle_*`). Plan: do the §2.3 filter
+   pass; if GV separates cleanly (≥90% confident), keep an Aristotle
+   subsection; if not, drop it and mention Aristotle qualitatively.
+   User pre-approved this fallback. Open sub-question: how to handle
+   Apr 27, where `aristotle-loop` runs and other-project runs are
+   intermixed in the same day.
 3. **Phase narrative.** Are the four phases in §2.3 the right cut, or
    should the proving phase be sub-divided by mathematical milestone
    (closed-immersion, flasque, filtered-colimit)?
@@ -350,7 +434,7 @@ Each step is independent enough to push as one commit; later steps depend on
 earlier ones only for the final report assembly.
 
 1. **Inventory.** Walk laptop Claude project dirs (both names) + Hyak Claude project dir + all Codex sessions on both machines + state dirs; produce a `data_manifest.json` listing every input file with size, date range, machine, tool. (Sanity-check that we're not missing data before building anything.)
-2. **Cross-machine scrape.** Run the appropriate direction from §3.3, including capturing `aristotle-in/aristotle-out/` from the laptop before any cleanup.
+2. **Cross-machine scrape.** Run the appropriate direction from §3.3. Aristotle is API-backed and machine-independent; snapshot it once via §3.4 and apply the §2.3 GV filter to that snapshot. Decide at this stage whether the Aristotle subsection survives.
 3. **Headline metrics.** Build `metrics.json` from all sources. Verify against ground truth (`git rev-list --count`, file counts, etc.).
 4. **Re-point + re-run existing `_gv` graphs** (LOC, sorry, churn, dep-graph, session, token, tool-use) for the full GV window (Mar 27 → HEAD), with merged Claude session sources.
 5. **New graphs**: cycle effectiveness, loop-mode timeline, tool/machine split heatmap, raw-vs-normalized LOC.
@@ -365,12 +449,17 @@ earlier ones only for the final report assembly.
 - **Codex schema unknown.** If Codex jsonl doesn't expose token usage, we'll need to estimate, which weakens cost claims.
 - **Cross-machine SSH.** If Hyak↔laptop scraping needs interactive 2FA, it has to be a one-shot manual run rather than scripted from inside the report build.
 - **Project rename gap.** Some laptop sessions may straddle the `aristotle → Clawristotle` rename and split awkwardly. Need a sanity check that no session is double-counted nor lost across `-Github-aristotle/` and `-Github-Clawristotle/`.
-- **Aristotle data may already be gone.** If `aristotle-in/aristotle-out/` was deleted from the laptop, we lose per-job timestamps and have to fall back to PR #15 totals.
+- **Aristotle GV separation may be ambiguous.** ~49 `cycle_*`-named jobs share filename patterns with the augmented B-series project's "cycle 587 replicate-subtree" runs. If prompt-text disambiguation isn't decisive enough — i.e. fewer than ~90% of GV-window Aristotle calls can be attributed with confidence — the Aristotle subsection gets dropped per the §2.3 fallback. (User pre-approved this; impact on the report is small.)
 - **Pricing drift over 5 weeks.** Claude pricing changed during the GV window; using flat pricing may over/under-state cost (less severe than originally feared with a hypothetical 4-month window).
 - **Refactor commit volume (~453).** High cardinality; plots may need to bin by day rather than per-commit.
 
 ---
 
 *Draft prepared 2026-04-30 by the laptop agent; revised 2026-04-30 on
-Hyak after user feedback (timeline, Aristotle, authorship). Awaiting
-further feedback before implementation begins.*
+Hyak after user feedback (timeline, Aristotle, authorship); revised
+again 2026-05-01 on the laptop after Aristotle API enumeration
+(`ARISTOTLE_API_KEY` confirmed working from any host; 1100 jobs across
+multiple projects; GV/non-GV separation strategy added; aristotle-in/
+and aristotle-out/ confirmed empty on both machines and removed from
+the cross-machine scrape). Awaiting further feedback before
+implementation begins.*
