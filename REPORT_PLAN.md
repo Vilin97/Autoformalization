@@ -6,15 +6,14 @@ repo (`TECHNICAL_REPORT.md`, `REFACTOR_REPORT.md`, `AUDIT_VERDICT.md`,
 not be used as input — the new GV report is being written from scratch
 against primary sources only.
 
-The GV project differs from the prior VML formalization in three ways
-that shape the analysis:
+The GV project has three features that shape the analysis:
 
 1. **Timeline is ~5 weeks elapsed (2026-03-27 → 2026-04-30)**, bimodal:
    ~9 days of initial proving (Mar 27 – Apr 4, ending sorry-free) and
    ~14 days of refactor / compression (Apr 17 – Apr 30). The repo
    `Clawristotle` itself was initialized 2026-01-07, but everything before
    Mar 27 is unrelated work (Lean experiments, Cayley-graph play,
-   Auslander–Buchsbaum, the VML formalization that finished ~Mar 10). The
+   Auslander–Buchsbaum). The
    `grothendieck-vanishing` branch first appears on 2026-04-01 (PR #2,
    `wip/grothendieck-vanishing → grothendieck-vanishing`) — that's when
    the wip→protected-branch PR workflow was set up; coding had been
@@ -22,26 +21,25 @@ that shape the analysis:
 2. **Three AI tools** were used: Claude Code (interactive + `/babysit` /
    autonomous loops), Codex CLI (compress and refactor loops, late April),
    and the Aristotle external prover (~94 submissions in early April per
-   PR #15, plus an `aristotle-loop` infra burst on Apr 27). The Codex
-   loops are the new piece relative to the prior VML formalization.
+   PR #15, plus an `aristotle-loop` infra burst on Apr 27).
 3. **Two machines**: local laptop (`~/Github/Clawristotle`, was
    `~/Github/aristotle` before the rename) and Hyak (UW HPC cluster,
    `/mmfs1/gscratch/amath/vilin/Clawristotle`). Logs live in different
    filesystems and the project rename split the Claude session dirs.
 
-The plan below lists every statistic to collect, where it lives, how to collect it,
-and what new analyses GV needs that VML didn't.
+The plan below lists every statistic to collect, where it lives, and
+how to collect it.
 
 > **Note on existing scripts.** `scripts/*_gv.py` and `artifacts/*_gv.png`
-> were written for GV (cutoff `2026-03-27` is GV's first commit, not
-> VML's), but on the laptop under the pre-rename project name —
+> were written for GV (cutoff `2026-03-27` is GV's first commit), but on
+> the laptop under the pre-rename project name —
 > `SESSION_DIR = ~/.claude/projects/-Users-vasil-Github-aristotle/` and
 > repo path `~/Github/aristotle`. They need re-pointing at (a) the
 > post-rename laptop project dir `…-Github-Clawristotle/`, (b) the Hyak
 > project dir `/mmfs1/home/vilin/.claude/projects/-mmfs1-gscratch-amath-vilin-Clawristotle/`,
-> and (c) the current repo path. They are not VML scripts — but they only
-> see part of the GV picture (laptop, pre-rename) and miss the Codex
-> loops and Hyak sessions entirely.
+> and (c) the current repo path. They only see part of the GV picture
+> (laptop, pre-rename) and miss the Codex loops and Hyak sessions
+> entirely.
 >
 > **Note on this draft.** The original draft of this plan was produced
 > on the laptop, which is git-only (no Claude/Codex jsonl,
@@ -102,7 +100,7 @@ Sections cover the multi-tool / multi-phase nature of GV:
 
 For each metric: what it is, the data source, how to extract it, and any pitfalls.
 
-### 2.1 Headline metrics table (mirrors VML)
+### 2.1 Headline metrics table
 
 | Metric | Source | Notes |
 |---|---|---|
@@ -129,11 +127,11 @@ Each one becomes a `.png` in `artifacts/` plus narrative.
 
 | Figure | What it shows | Data source |
 |---|---|---|
-| **Dependency graph** | All theorems/lemmas in `Aristotle/GrothendieckVanishing/` with proof edges. | Lean script `scripts/dep_graph_gv.lean` (already exists for VML — needs path & module changes). |
+| **Dependency graph** | All theorems/lemmas in `Aristotle/GrothendieckVanishing/` with proof edges. | Lean script `scripts/dep_graph_gv.lean` (already exists — needs path & module changes). |
 | **Session activity heatmap** | Hourly activity, hour-of-day distribution, **per machine and per tool**. | Claude jsonl timestamps + Codex jsonl timestamps. NEW: stack Claude vs Codex. |
 | **Token usage (cumulative + per-turn)** | Cumulative input/output tokens; per-turn context size; autocompact markers; cost breakdown (cache reads / cache creation / output / fresh input). | Claude jsonl `usage`; Codex sqlite or jsonl. NEW: split by tool. |
 | **LOC history (raw + normalized)** | LOC over commits, annotated by phase. | `git log` walk + `wc -l` + `normalized_loc.py`. NEW: two lines (raw, normalized). |
-| **LOC by file group** | Stacked area: `main/` vs `Landau/` vs other (if any). | Group by directory at each commit. |
+| **LOC by file group** | Stacked area by directory under `Aristotle/GrothendieckVanishing/` (e.g. `main/` vs other). | Group by directory at each commit. |
 | **Git churn** | Daily +/- and net delta. | `git log --numstat`. |
 | **Sorry count over time** | Sawtooth pattern with phase annotations. | Walk commits, count sorries (already in `sorry_history_gv.py`). |
 | **Tool usage breakdown** | Per-category bar + daily stacked. | Classify tool_use blocks; need to extend categories for Codex tools (e.g. `apply_patch`, codex shell). |
@@ -170,8 +168,7 @@ Each one becomes a `.png` in `artifacts/` plus narrative.
   report time/tokens/LOC per mode.
 - **Tool-vs-tool comparison.** Claude Code vs Codex CLI: tokens consumed,
   cycles run, LOC delta produced, error rate, $/LOC. Codex is doing the
-  bulk of the late-April refactor; this comparison is the headline story
-  the VML report did not have.
+  bulk of the late-April refactor; this comparison is the headline story.
 - **Laptop vs Hyak split.** Sessions per machine, tokens per machine,
   commit attribution per machine. The compress and refactor loops
   primarily ran on Hyak (state dirs are checked out here); the proving
@@ -329,7 +326,7 @@ sanity check and because the filter rules may need iteration.
 
 - **Claude Code**: each assistant message in jsonl carries a `message.usage` block
   with `input_tokens`, `cache_creation_input_tokens`, `cache_read_input_tokens`,
-  `output_tokens`, plus the `model` name. Same as VML.
+  `output_tokens`, plus the `model` name.
 - **Codex**: this is the tricky one. Need to inspect a Codex session jsonl to
   see whether token usage is recorded per turn. If not, fall back to:
   - Codex sqlite `logs_2.sqlite` (check `feedback_log_body` for usage records).
@@ -345,9 +342,8 @@ sanity check and because the filter rules may need iteration.
 ### 4.1 Re-point the existing `_gv` scripts
 
 The `scripts/*_gv.py` family was written for GV during the proving phase
-on the laptop, with the pre-rename project name baked in. They are not
-VML scripts — but they only see the laptop / pre-rename slice. Each one
-needs:
+on the laptop, with the pre-rename project name baked in. They only see
+the laptop / pre-rename slice. Each one needs:
 
 - Repo path: parameterize (laptop `~/Github/Clawristotle`, Hyak
   `/mmfs1/gscratch/amath/vilin/Clawristotle`).
