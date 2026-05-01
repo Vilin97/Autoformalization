@@ -17,7 +17,7 @@ A fully verified formalization of research-level mathematics in Lean 4, achieved
 
 > **Theorem.** For a Noetherian topological space X of dimension n and any sheaf F of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
-[Technical Report](TECHNICAL_REPORT.md) | [LOC History](artifacts/loc_history_gv.png) | [Sorry History](artifacts/sorry_history_gv.png)
+[Technical Report](TECHNICAL_REPORT_GV.md) | [Brian's Review](review.md) | [LOC History](artifacts/loc_history_gv.png) | [Sorry History](artifacts/sorry_history_gv.png)
 
 ## The Team
 
