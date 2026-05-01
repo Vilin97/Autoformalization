@@ -1464,11 +1464,11 @@ human review delta is real but partial.**
 
 Per `README.md` lines 37–43 and updates from PR #15 description.
 
-- **[Vasily Ilin](https://github.com/Vilin97) (Human, primary).**
+- **[Vasily Ilin](https://github.com/Vilin97) (Human).**
   Architect, reviewer, infrastructure, owns the repo. Drove all loops,
   set the user-facing direction, wrote and edited prompts. The user
   voice in the human-prompt corpus is his.
-- **[Brian Nugent](https://github.com/brian-nugent) (Human, reviewer).**
+- **[Brian Nugent](https://github.com/brian-nugent) (Human).**
   Wrote the initial theorem statement, supplied the Hartshorne III.2.7
   proof reference and the flasque-vanishing architecture, did review-1
   (Apr 8–15, this report's `review.md`) and review-2 (in progress).
