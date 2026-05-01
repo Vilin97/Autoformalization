@@ -1,3 +1,18 @@
+# Human prompts (2026-03-31 -> 2026-05-01)
+#
+# Chronological list of user-submitted prompts to Claude Code on the GV project,
+# extracted from ~/.claude/projects/-Users-vasil-Github-{aristotle,Clawristotle}/
+# and the Hyak equivalent.
+#
+# **Mar 27-30 prompts are missing.** Claude Code's `cleanupPeriodDays` default
+# is 30; with today being 2026-05-01, sessions older than 2026-04-01 have been
+# auto-deleted. The earliest preserved Claude session starts at the 30-day
+# boundary on 2026-03-31 21:46 PDT. See artifacts/proving_phase_commits_gv.txt
+# for the commit-message record of the missing days (175 commits Mar 27-31).
+#
+# Format: [Mon DD HH:MM] prompt   (Pacific time, multiline prompts collapsed,
+# tag-wrapped system messages and slash-command outputs filtered)
+
 [Mar 31 21:46] switch to the grothendieck-vanishing branch, pull.
 
 [Mar 31 21:46] I am very concerned about the status of the project, because the CI is failing. are you seeing the CI errors?
