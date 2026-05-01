@@ -46,6 +46,7 @@ logs/*.lock
 *codex-local
 aristotle-in/
 aristotle-out/
+state.md
 WorkflowState.md
 .prover-state/
 .refactor-state/
