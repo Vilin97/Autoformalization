@@ -115,6 +115,20 @@ hardest-looking sublemma was avoided. We return to this in §4.4.
 The proof is conventional in mathematical content; what makes this project
 worth reporting is *how* it was assembled, not what was proved.
 
+![Lean dependency graph](artifacts/dep_graph_gv.png)
+
+**Figure: Lean import graph for `Aristotle/GrothendieckVanishing/main/`.** All
+15 files at HEAD, with arrows pointing from importers to imports. The graph
+reads bottom-up in dependency order: `TopologicalKrullDim.lean` and the
+extension-by-zero / closed-immersion infrastructure feed into the
+`FlasqueVanishing` and `ClosedImmersionCohomology` blocks; those plus
+`PresheafFilteredColimit` and `FiniteGeneratorReduction` feed into
+`IrreducibleStep` (the dim≥1 irreducible case); finally
+`GrothendieckVanishing.lean` assembles the dim-0, irreducible-positive, and
+reducible cases by well-founded induction on Krull dimension. The narrow
+neck at `IrreducibleStep` reflects the four-pillar architecture — every
+non-trivial cohomology fact funnels through it.
+
 ---
 
 ## 2. The Setup — minimal-agent toolkit
@@ -194,8 +208,7 @@ in §9.
 ## 3. Timeline
 
 The project is bimodal in commit density and active in 27 of 35 elapsed
-days (figures: `artifacts/git_churn_gv.png`, `artifacts/phase_timeline_gv.png`,
-`artifacts/session_activity_gv.png`).
+days.
 
 | # | Phase | Dates | Driver | Headline outcome |
 |---|---|---|---|---|
@@ -205,6 +218,20 @@ days (figures: `artifacts/git_churn_gv.png`, `artifacts/phase_timeline_gv.png`,
 | 4 | **Codex compress** | Apr 27 – Apr 28 | Same architecture, LOC-decrease gate | 86 cycles, 7,016 → 4,087 normalized LOC |
 | 5 | **Mathlib polish + report** | Apr 29 – May 1 | Claude (interactive + agents) | PR #27 docstrings/lint, this report |
 | 6 | **Review 2** | May 1 + | Brian (in progress) | "C" — pending |
+
+![Phase timeline](artifacts/phase_timeline_gv.png)
+
+**Figure: Commits per day across the project, classified by commit-message
+tag.** 904 commits over 35 elapsed days, of which 27 had at least one
+commit. The bimodality is visible: a 9-day proving spike (Mar 27 – Apr 4)
+dominated by `feat:` and `prove:` commits closes the sorries; an
+8-day no-commit lull (Apr 8–15) is Brian's review-1 reading window; then
+the response phase (Apr 17 – May 1) is a wall of `refactor:` and
+`compress:` commits driven by the two Codex loops. The single largest
+commit-day is **Apr 23 (137 commits)** — almost all of which are
+checklist-exhaustion no-ops on the refactor loop (see §6.1). The
+final docstring/mathlib-style PR #27 is the small `style:` cluster on
+Apr 29 – May 1.
 
 ### 3.1 The two-review backbone
 
@@ -245,6 +272,23 @@ recoverable from the 175 commits in those days
 setting `cleanupPeriodDays` to a year or more — a setting we have now bumped
 to 365 on this machine.
 
+![Claude Code session activity](artifacts/session_activity_gv.png)
+
+**Figure: Claude Code activity across the laptop and Hyak, by day and
+hour-of-day.** Top: assistant turns per UTC day, split by machine
+(laptop = blue, Hyak = orange). The laptop dominates the proving phase
+(Mar 27 – Apr 4); Hyak takes over from Apr 19 onward as the home of the
+Codex compress and refactor loops with their Claude evaluator calls.
+Bottom: hour-of-day heatmap. Of **31,529 total assistant turns across
+270 sessions** (29 laptop sessions + 241 Hyak sessions), the proving phase
+contributed roughly a third — the rest is automated loop traffic. The
+sparse band Apr 5–16 corresponds to the first review-1 lull (no GV work
+in flight); the dense Apr 19 – Apr 28 stretch is the two Codex loops
+running near-continuously on Hyak. The Mar 27–31 portion of the laptop
+data was reconstructed from `~/.claude/history.jsonl` plus commit
+timestamps after the default 30-day session-jsonl cleanup deleted the
+originals.
+
 ---
 
 ## 4. Phase 1: Proving (Mar 27 – Apr 4)
@@ -253,11 +297,41 @@ to 365 on this machine.
 04 17:18). The sorry curve climbs from 4 → 35 (Mar 27–28 decomposition
 burst), drops to 2 by Mar 30 23:08, regresses to 24 on Apr 01 12:35 when
 heartbeat overrides were stripped, then walks 24 → 16 → 2 → 1 → 0 over
-the next 76 hours. See `artifacts/sorry_history_gv.png`.
+the next 76 hours.
 
 This phase is documented in detail in `artifacts/findings/proving_phase.md`.
 The summary follows; the four sub-sections below pull out the most
 report-worthy threads.
+
+![Sorry count over time](artifacts/sorry_history_gv.png)
+
+**Figure: `sorry`-count in `Aristotle/GrothendieckVanishing/main/` across
+all 904 commits, with the proving phase highlighted.** Classic sawtooth.
+Key events: (1) **Mar 27 — start at 4 sorry's** in the inherited skeleton.
+(2) **Mar 28 — peak 35** as the four pillars are stated and decomposed
+into named sub-lemmas (the "decomposition burst"). (3) **Mar 28–30** —
+foundational-layer Aristotle wins drop the count quickly (constant-sheaf
+flasqueness, dim inequality, closed-immersion stalk facts; see §4.3).
+(4) **Apr 01 12:35 — regression 3 → 24** when `set_option maxHeartbeats`
+overrides were stripped wholesale to satisfy the user's "default heartbeats
+only" demand (§4.2 Act III). (5) **Apr 01 13:53 — 16 → 2** in a six-hour
+cleanup. (6) **Apr 04 17:18 — final 0** when the last sorry closed by
+reframing the filtered-colimit-of-injectives goal through flasque (§4.4).
+The post-Apr-4 portion of the curve is flat at 0 across the 549 review-
+response commits.
+
+![Daily git churn](artifacts/git_churn_gv.png)
+
+**Figure: Lines added (green) / deleted (red) / net (line) per UTC day.**
+The plot has two distinct shapes. **Mar 27 – Apr 4 (proving):** mostly
+net-positive, with two structural-decomposition spikes (Mar 30 and Apr 01)
+showing simultaneously large adds and deletes — the signature of
+splitting a long monolithic proof into named sub-lemmas. **Apr 17 – May 1
+(response):** dominated by deletions from the compress loop. Apr 27 alone
+is `+1,300 / −2,400 net −1,100`, the day phase-1 sheaf-reversion deleted
+the unbundled `_presheaf` wrappers (cycles 1–10 of the compress loop).
+The 8-day flat band Apr 8–15 is the review-1 reading window. Project
+totals: ~+18.5K added / −13.5K deleted / +5K net at HEAD.
 
 ### 4.1 Pillars in dependency order
 
@@ -332,6 +406,26 @@ above 200000."*
 exactly, and is recoverable from the Harmonic API by date filtering alone:
 the daily counts Mar 27 – Apr 4 sum to exactly 94.
 
+![Aristotle outcomes](artifacts/aristotle_outcomes_gv.png)
+
+**Figure: Outcomes of the 94 Aristotle submissions during the proving
+phase (Mar 27 – Apr 4), filtered from the 1,350-job account dump by date
+window.** Only **22 (23%) returned `COMPLETE`** — a clean proof. **66
+(70%) returned `COMPLETE_WITH_ERRORS`** — partial work that still leaves
+sorry's. 5 were canceled by the user (typically when a different
+architectural route obsoleted the submission, e.g. the three flasque-
+implies-injective successor jobs after the Mar 28 counterexample), 1
+hard-failed. The stacked daily breakdown shows the mass on Mar 27–28
+(the foundational-layer days, when 6 of the 22 COMPLETEs landed in
+sorry-elimination commits) and a thinning tail Apr 2–4 where 12 jobs
+covering filtered-colimit and Gabriel-theorem machinery returned
+**uniformly with errors or were canceled**. None of those Apr
+submissions corresponds to a commit that closed a sorry — the
+filtered-colimit and Gabriel sorries were closed by Claude directly.
+The 23% clean-COMPLETE rate is much lower than the VML project's 50%;
+the conceptual gap between Hartshorne III.2.7's harder steps and
+Aristotle's tactic library is one explanation.
+
 Of the 22 COMPLETE jobs, **only 6 map cleanly to integration commits that
 cut the sorry count**:
 
@@ -370,6 +464,23 @@ flasque/injective direction, closed-immersion stalk facts). It was
 purge, presheaf-colimit-is-sheaf, the final flasque-via-colimit insight —
 were all closed by Claude after Aristotle timed out or returned errors.
 **Aristotle was a tactic, not a strategy.**
+
+![Aristotle turnaround](artifacts/aristotle_turnaround_gv.png)
+
+**Figure: Aristotle turnaround times for the 94 GV proving-phase
+submissions, colored by outcome.** Left: histogram of `created_at →
+last_updated_at` deltas. The COMPLETE bucket (green) clusters in the
+short bins; `COMPLETE_WITH_ERRORS` (orange) dominates the long tail.
+Right: median turnaround by outcome. Note the unusually long medians
+across all categories — several days for any non-CANCELED outcome.
+Two caveats temper this: (1) `last_updated_at` is suspected to be a
+dashboard-refresh artefact, not compute completion (see Appendix B
+question 3); (2) the user often left jobs running overnight or across
+weekends without polling. The qualitative pattern is robust: COMPLETE
+is fastest, COMPLETE_WITH_ERRORS slowest, and the long tails reflect
+Aristotle exhausting its time budget on hard goals before returning a
+partial proof. The Apr 2–4 wave of jobs covering filtered-colimit and
+Gabriel-theorem machinery sits in the long-tail bins.
 
 ### 4.4 Reframing: how the last sorry actually closed
 
@@ -627,7 +738,25 @@ lines).
 no-op. The rate did not slow sustainedly; what slowed was the average
 value per cycle.
 
-(Detail: `artifacts/findings/refactor_loop.md`, `artifacts/cycle_effectiveness_gv.png`.)
+![Cycle effectiveness](artifacts/cycle_effectiveness_gv.png)
+
+**Figure: Per-cycle effectiveness of the two Codex loops.** Top:
+refactor-loop `progress_score` distribution across 478 cycles. The
+schema is `[-2, +2]` but only `{0, 1, 2}` ever fired — **220 zeros (46%
+no-progress)**, 154 ones (32% modest), 104 twos (22% strong). The
+negative half of the schema was never exercised. Middle: refactor-loop
+`task_complete: true` rate by cycle index, with the two pathological
+runs visible — cycles 268–331 (64 consecutive checklist-exhaustion
+no-ops) and cycles 463–498 (36 consecutive default-fallback strategy
+returns). Bottom: compress-loop per-cycle LOC delta across 86 cycles.
+All deltas are negative by construction (the gate rejects equal-LOC
+commits); range is **[−501, −1], mean −33.9, median −14**. The top 5
+single-cycle wins (cycles 1, 2, 3, 7, 10) account for **49% of total
+LOC reduction** — phase-1 sheaf-reversion. Cycles 26–86 average
+−12/cycle (long-proof golf), with the floor visible as the mass of
+small-magnitude bars at the right of the strip.
+
+(Detail: `artifacts/findings/refactor_loop.md`.)
 
 ### 6.2 The Codex compress loop (Apr 27–28, 86 cycles)
 
@@ -718,8 +847,26 @@ not a near-miss — the loop's stop condition is exactly raw < 5,000, so
 it simply self-terminated as designed. The interesting fact is the
 *trajectory*, not the landing.
 
-(Detail: `artifacts/findings/compress_loop.md`, `artifacts/loc_history_gv.png`,
-`artifacts/cycle_effectiveness_gv.png`.)
+![LOC history](artifacts/loc_history_gv.png)
+
+**Figure: Lean lines of code in `Aristotle/GrothendieckVanishing/main/`
+across the project.** Two curves: raw LOC across all 904 commits (top
+panel) and normalized LOC across the 86 compress cycles (bottom panel).
+**Phase 1 (Mar 27 – Apr 4):** the proving phase grows the codebase from
+~1,000 to ~7,000 raw LOC as the four pillars are stated and proved; the
+end-of-phase plateau is the messy state-A. **Phase 2 (Apr 5–16):** flat,
+including the 8-day review-1 reading window. **Phase 3 (Apr 17–27):**
+the refactor loop hovers around 6,500–7,000 raw LOC — its job is
+restructuring and renaming, not shrinking, so net LOC moves little. Real
+extracts (cycles 410, 422–445, 500) are visible as small downward
+steps. **Phase 4 (Apr 27–28):** the compress loop's signature is the
+sharp ~30% drop from 7,016 → 4,087 normalized LOC over 86 cycles. The
+trajectory is frontloaded (cycles 1–10 drop from 7,016 to 5,295 — the
+sheaf-reversion phase, mean −172/cycle) and then linear-decay (cycles
+11–86 each shave single-to-low-double-digit LOC, mean ~−16). The 5,000
+raw target is crossed on the very last cycle (4,998).
+
+(Detail: `artifacts/findings/compress_loop.md`.)
 
 ### 6.3 Mathlib-style PR #27 (Apr 29 – May 1)
 
@@ -1095,30 +1242,41 @@ cycles to remove 2,929 normalized LOC. Per-LOC costs of the loops are
 much lower than per-sorry costs of the proving phase, but absolute
 spend is still concentrated in proving.
 
-### 9.3 Figures
+![Token usage](artifacts/token_usage_gv.png)
 
-All in `artifacts/`:
+**Figure: Cumulative Claude Code token consumption across the project.**
+Top: cumulative output tokens (red, ~13.9 M) and cache-read tokens
+(blue, ~6.76 B). The cache-read curve is two orders of magnitude larger
+than output — the read-heavy structure of formal-verification work, where
+each Claude turn loads thousands of lines of Lean and Mathlib context to
+emit a few dozen lines of tactic. The fresh-input total (188 K) is
+negligible against cache reads, meaning **prompt caching saved roughly
+$30K** at Opus pricing. Bottom: per-day cumulative output tokens, with
+the proving phase (Mar 27 – Apr 4) and the response phase (Apr 19+)
+visible as the two main slopes. The Apr 27 inflection is the start of
+the compress loop with its high-frequency Claude evaluator calls. The
+Codex token total (~26.4 M from 5 persisted sessions) is omitted from
+the figure because the 564 ephemeral cycles' tokens were never written
+to local disk and remain unrecoverable from the filesystem.
 
-- `aristotle_outcomes_gv.png` — outcomes by date (GV-filtered to 145
-  jobs from 1,350-job account total).
-- `aristotle_turnaround_gv.png` — turnaround histogram by outcome.
-- `cycle_effectiveness_gv.png` — per-cycle compress LOC delta +
-  refactor score histogram.
-- `git_churn_gv.png` — daily insertions / deletions / net + commits
-  per day.
-- `loc_breakdown_gv.png` — per-file LOC at HEAD.
-- `loc_history_gv.png` — raw LOC across 904 commits + normalized LOC
-  over the 86 compress cycles.
-- `phase_timeline_gv.png` — commits per day classified by tag.
-- `session_activity_gv.png` — daily turns by tool / machine + hour-of-day.
-- `sorry_history_gv.png` — sawtooth peaking at 35 (Mar 28) → 0 by Apr 4.
-- `token_usage_gv.png` — cumulative Claude tokens (incl. 6.7 B cache
-  reads) + Codex sum.
-- `tool_use_gv.png` — top 20 tools (Bash 7,816 / Read 3,118 / Edit
-  2,454 / lean-lsp 2,256 / …) + daily category breakdown.
-- `dep_graph_gv.png` — Lean dependency graph (pre-existing from Apr 28).
+![Tool usage](artifacts/tool_use_gv.png)
 
-### 9.4 Source data
+**Figure: Claude Code tool invocations across the project.** Left:
+top-20 tools by total call count. The core editing loop dominates —
+**Bash (7,816), Read (3,118), Edit (2,454), Grep, Write** — followed by
+the `lean-lsp-mcp` family (2,256 combined: `lean_diagnostic_messages`,
+`lean_goal`, `lean_multi_attempt`, `lean_local_search`,
+`lean_leansearch`, `lean_loogle`, `lean_state_search`, `lean_run_code`,
+`lean_hammer_premise`). Aristotle MCP submissions show as a smaller
+band. Right: daily breakdown by tool category. The proving phase
+(Mar 27 – Apr 4) shows the highest lean-lsp density per day (the agent
+uses LSP feedback intensively while writing tactics); the response phase
+(Apr 19+) is dominated by Bash and Edit (file-level refactoring,
+`rg`-based usage searches, file moves). Lean LSP calls drop sharply
+after Apr 4 because the Codex worker on Hyak is the one editing Lean
+files in the loops, not Claude.
+
+### 9.3 Source data
 
 In `artifacts/report-data/`:
 
@@ -1151,6 +1309,24 @@ arguments, a separate `CohomologyAPI.lean` providing wrapper API for
 `Sheaf.H` (with some Ext leaks remaining), and the two LC5 lemmas
 (`sheafH_preserves_filtered_colimits`, `PushforwardHVanishing`) still
 in implication form.
+
+![LOC breakdown by file](artifacts/loc_breakdown_gv.png)
+
+**Figure: Raw LOC per file at HEAD (2026-05-01), all 15 files in
+`Aristotle/GrothendieckVanishing/main/`, sorted by size.** The largest
+file is `CohomologyAPI.lean` (~870 LOC) — the wrapper API for `Sheaf.H`
+that LC4 asked for. Next come the four-pillar workhorses
+`PresheafFilteredColimit.lean`, `FlasqueVanishing.lean`,
+`IrreducibleStep.lean`, `ClosedImmersionCohomology.lean`,
+`FiniteGeneratorReduction.lean` — each in the 300–600 LOC band.
+`GrothendieckVanishing.lean` itself (the assembly file) is small
+(~150 LOC), as expected for a final-assembly file. The indescriptive
+file names that LC1 flagged — `SetupCore.lean`, `Auxiliary.lean`,
+`ClosedOpenDecomposition.lean` — are all still present, occupying the
+mid-bracket; the renames the review asked for did not happen.
+`PresheafFilteredColimit.lean` was *not* split as LC1 suggested; it
+remains the second-largest file. Total 5,061 raw / 4,087 normalized
+LOC across 15 files.
 
 This is "B". Review-2 evaluates B against A.
 
@@ -1335,8 +1511,8 @@ the following:
 | Full Aristotle dump | `artifacts/report-data/raw/aristotle/projects.json` | Used throughout §4.3 and §6 |
 | Per-commit LOC + sorry | `artifacts/report-data/extracted/per_commit_loc_sorry.jsonl` | Used in §4 and §6.2 |
 | Cycle history | `artifacts/report-data/extracted/cycle_history_*.jsonl` | Used in §6.1 and §6.2 |
-| Tool-use log | `artifacts/report-data/extracted/tool_use.jsonl` | Used in §9.3 |
-| Figures | `artifacts/*_gv.png` | Referenced throughout §9.3 |
+| Tool-use log | `artifacts/report-data/extracted/tool_use.jsonl` | Used in §9.2 |
+| Figures | `artifacts/*_gv.png` | Embedded throughout §1, §3, §4, §6, §9, §10 |
 
 ## Appendix B. Open questions carried forward
 
