@@ -1,6 +1,0 @@
-[projects."/mmfs1/gscratch/amath/vilin/Clawristotle"]
-trust_level = "trusted"
-
-[mcp_servers.lean-lsp]
-command = "/usr/bin/bash"
-args = ["-lc", "cd /mmfs1/gscratch/amath/vilin/Clawristotle && export PATH=/tmp/lake-bin:/tmp/lean4-toolchain/bin:$PATH && export LEAN_PROJECT_PATH=/mmfs1/gscratch/amath/vilin/Clawristotle && exec /mmfs1/gscratch/amath/vilin/Clawristotle/.uv-tools/lean-lsp-mcp/bin/lean-lsp-mcp --lean-project-path /mmfs1/gscratch/amath/vilin/Clawristotle"]
