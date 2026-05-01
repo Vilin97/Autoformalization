@@ -50,3 +50,4 @@ state.md
 WorkflowState.md
 .prover-state/
 .refactor-state/
+.compress-state/
