@@ -1,0 +1,125 @@
+{
+  "generated_at": "2026-05-01T17:55:20.742369Z",
+  "sources": [
+    {
+      "type": "claude",
+      "machine": "laptop",
+      "project": "Clawristotle",
+      "path": "~/.claude/projects/-Users-vasil-Github-Clawristotle/"
+    },
+    {
+      "type": "claude",
+      "machine": "laptop",
+      "project": "aristotle (pre-rename)",
+      "path": "~/.claude/projects/-Users-vasil-Github-aristotle/"
+    },
+    {
+      "type": "claude",
+      "machine": "hyak",
+      "project": "Clawristotle",
+      "path": "/mmfs1/home/vilin/.claude/projects/-mmfs1-gscratch-amath-vilin-Clawristotle/"
+    },
+    {
+      "type": "codex",
+      "machine": "laptop",
+      "cwd_filter": "/Users/vasil/Github/{Clawristotle,aristotle}",
+      "path": "~/.codex/sessions/"
+    },
+    {
+      "type": "codex",
+      "machine": "hyak",
+      "cwd_filter": "/mmfs1/gscratch/amath/vilin/Clawristotle",
+      "path": "/mmfs1/home/vilin/.codex/sessions/"
+    },
+    {
+      "type": "compress_state",
+      "machine": "hyak",
+      "path": "/mmfs1/gscratch/amath/vilin/Clawristotle/.compress-state/codex_history.jsonl"
+    },
+    {
+      "type": "refactor_state",
+      "machine": "hyak",
+      "path": "/mmfs1/gscratch/amath/vilin/Clawristotle/.refactor-state/codex_history.jsonl"
+    },
+    {
+      "type": "git",
+      "machine": "both",
+      "path": "git log wip/grothendieck-vanishing since 2026-03-27"
+    },
+    {
+      "type": "aristotle_api",
+      "machine": "any",
+      "path": "https://aristotle.harmonic.fun (via aristotlelib + ARISTOTLE_API_KEY)"
+    }
+  ],
+  "extracted": {
+    "claude_turns_laptop.jsonl": {
+      "rows": 18919,
+      "size_bytes": 5176783,
+      "date_range": [
+        "2026-04-01T04:46:14.811Z",
+        "2026-05-01T17:52:27.410Z"
+      ],
+      "sessions": 29
+    },
+    "claude_turns_hyak.jsonl": {
+      "rows": 12610,
+      "size_bytes": 3462636,
+      "date_range": [
+        "2026-03-31T11:08:43.484Z",
+        "2026-05-01T00:44:21.247Z"
+      ],
+      "sessions": 241
+    },
+    "codex_turns_laptop.jsonl": {
+      "rows": 1,
+      "size_bytes": 396,
+      "date_range": [
+        "2026-04-07T03:43:43.166Z",
+        "2026-04-07T03:43:43.166Z"
+      ],
+      "sessions": 1
+    },
+    "codex_turns_hyak.jsonl": {
+      "rows": 287,
+      "size_bytes": 121563,
+      "date_range": [
+        "2026-04-19T17:33:09.581Z",
+        "2026-04-22T14:57:01.333Z"
+      ],
+      "sessions": 4
+    },
+    "cycle_history_compress.jsonl": {
+      "rows": 86,
+      "size_bytes": 137877,
+      "date_range": [
+        null,
+        null
+      ]
+    },
+    "cycle_history_refactor.jsonl": {
+      "rows": 478,
+      "size_bytes": 865203,
+      "date_range": [
+        null,
+        null
+      ]
+    },
+    "commits.jsonl": {
+      "rows": 904,
+      "size_bytes": 308501,
+      "date_range": [
+        "2026-03-27T11:54:32-07:00",
+        "2026-05-01T10:36:13-07:00"
+      ]
+    },
+    "aristotle_projects.json": {
+      "rows": 1350,
+      "size_bytes": 998205,
+      "date_range": [
+        "2025-12-06T03:59:50.873945",
+        "2026-04-29T22:31:45.473715"
+      ]
+    }
+  }
+}
