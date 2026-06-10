@@ -1,0 +1,416 @@
+% Blueprint for: Grothendieck's Vanishing Theorem (Hartshorne III, Theorem 2.7)
+
+\chapter{Introduction}
+
+This blueprint describes the formalization of Grothendieck's vanishing theorem
+in Lean~4 with Mathlib. The main result states:
+
+\medskip
+\noindent\textbf{Theorem} (Hartshorne III, Theorem 2.7).
+\emph{Let $X$ be a Noetherian topological space of Krull dimension $n$.
+Then for any sheaf $\FF$ of abelian groups on $X$ and any $i > n$,
+the sheaf cohomology $H^i(X, \FF) = 0$.}
+\medskip
+
+The proof proceeds by well-founded induction on the Krull dimension, with the
+key steps being: (1) flasque sheaves have vanishing higher cohomology,
+(2) on irreducible spaces of dimension~0 every sheaf is flasque,
+(3) reduction from arbitrary spaces to irreducible spaces via
+Mayer--Vietoris on irreducible components, and (4) the irreducible
+positive-dimension case via extension-by-zero sheaves, filtered colimits,
+and dimension shifting.
+
+The formalization is fully proved with 0 sorry's, 0 axioms, and 0 admits.
+
+
+\chapter{Categorical Infrastructure}\label{ch:infrastructure}
+
+\begin{definition}[Flasque sheaf]\label{def:isFlasqueSheaf}
+  \lean{IsFlasqueSheaf}
+  \leanok
+  A sheaf $\FF$ of abelian groups on $X$ is \emph{flasque} if for every
+  inclusion of opens $U \hookrightarrow V$, the restriction map
+  $\FF(V) \to \FF(U)$ is surjective (equivalently, epi in the category).
+\end{definition}
+
+\begin{lemma}[Injective sheaves are flasque]\label{lem:isFlasque_of_injective}
+  \lean{isFlasque_of_injective}
+  \leanok
+  \uses{def:isFlasqueSheaf}
+  Every injective sheaf of abelian groups is flasque.
+\end{lemma}
+
+\begin{lemma}[Flasque quotients]\label{lem:isFlasque_X3_of_shortExact}
+  \lean{isFlasque_X₃_of_shortExact}
+  \leanok
+  \uses{def:isFlasqueSheaf}
+  Given a short exact sequence $0 \to \FF_1 \to \FF_2 \to \FF_3 \to 0$
+  with $\FF_1$ and $\FF_2$ flasque, $\FF_3$ is also flasque.
+\end{lemma}
+
+
+\chapter{Flasque Vanishing}\label{ch:flasque}
+
+\begin{lemma}[Sections at $H^0$]\label{lem:sheafH0EquivSections}
+  \lean{sheafH0EquivSections}
+  \leanok
+  $H^0(\FF) \cong \FF(\top)$ as abelian groups.
+\end{lemma}
+
+\begin{lemma}[Surjectivity in $\Ext^0$]\label{lem:ext_zero_map_surjective}
+  \lean{ext_zero_map_surjective}
+  \leanok
+  \uses{def:isFlasqueSheaf}
+  Given a short exact sequence $0 \to \FF_1 \to \FF_2 \to \FF_3 \to 0$
+  with $\FF_1$ flasque, the induced map
+  $\Ext^0(Z, \FF_2) \to \Ext^0(Z, \FF_3)$ is surjective.
+\end{lemma}
+
+\begin{lemma}[Dimension shifting (injective presentation)]\label{lem:sheafH_dimension_shift}
+  \lean{sheafH_dimension_shift}
+  \leanok
+  Given an injective presentation $0 \to \FF \to \II \to Q \to 0$,
+  if $H^n(Q) = 0$ then $H^{n+1}(\FF) = 0$.
+  Uses the covariant Ext long exact sequence.
+\end{lemma}
+
+\begin{theorem}[Flasque vanishing]\label{thm:FlasqueVanishing}
+  \lean{FlasqueVanishing}
+  \leanok
+  \uses{def:isFlasqueSheaf, lem:ext_zero_map_surjective, lem:isFlasque_X3_of_shortExact, lem:isFlasque_of_injective, lem:sheafH_dimension_shift}
+  If $\FF$ is a flasque sheaf of abelian groups on $X$, then $H^n(\FF) = 0$
+  for all $n \ge 1$.
+
+  \emph{Proof.} By induction on $n$. The base case $H^1 = 0$ uses surjectivity
+  in $\Ext^0$ (from flasqueness). The inductive step embeds $\FF$ into an
+  injective $\II$, forms $0 \to \FF \to \II \to Q \to 0$; since $\FF$ and $\II$
+  are both flasque, $Q$ is flasque, so $H^{n+1}(Q) = 0$ by induction,
+  giving $H^{n+2}(\FF) = 0$ by dimension shifting.
+\end{theorem}
+
+
+\chapter{Dimension Shifting and Closed Immersions}\label{ch:dimshift}
+
+\begin{lemma}[Ext dimension shift]\label{lem:ext_dimension_shift}
+  \lean{ext_dimension_shift}
+  \leanok
+  Given a short exact sequence $0 \to X_1 \to X_2 \to X_3 \to 0$,
+  if $\Ext^n(Z, X_3) = 0$ and $\Ext^{n+1}(Z, X_2) = 0$,
+  then $\Ext^{n+1}(Z, X_1) = 0$.
+\end{lemma}
+
+\begin{lemma}[Ext dimension shift (reverse)]\label{lem:ext_dimension_shift_X3}
+  \lean{ext_dimension_shift_X₃}
+  \leanok
+  Given a short exact sequence $0 \to X_1 \to X_2 \to X_3 \to 0$,
+  if $\Ext^n(Z, X_2) = 0$ and $\Ext^{n+1}(Z, X_1) = 0$,
+  then $\Ext^n(Z, X_3) = 0$.
+\end{lemma}
+
+\begin{lemma}[Pushforward preserves short exact sequences]\label{lem:closedIncl_pushforward_shortExact}
+  \lean{closedIncl_pushforward_shortExact}
+  \leanok
+  Pushforward along a closed immersion preserves short exact sequences.
+\end{lemma}
+
+\begin{theorem}[Pushforward preserves cohomological vanishing]\label{thm:PushforwardHVanishing}
+  \lean{PushforwardHVanishing}
+  \leanok
+  \uses{def:isFlasqueSheaf, lem:closedIncl_pushforward_shortExact, lem:isFlasque_of_injective, lem:sheafH0EquivSections, thm:FlasqueVanishing}
+  If $Z \subseteq X$ is a closed subset and $H^n(\GG) = 0$ for all sheaves $\GG$
+  on $Z$, then $H^n(i_* \GG) = 0$ for $i : Z \hookrightarrow X$ the closed immersion.
+  The proof uses functorial injective presentations: embed $\GG \hookrightarrow \II$
+  (injective on $Z$), push forward to get $0 \to i_*\GG \to i_*\II \to i_*Q \to 0$
+  on $X$, where $i_*\II$ is flasque (pushforward preserves flasqueness), then
+  apply dimension shifting.
+\end{theorem}
+
+\begin{lemma}[Closed immersion counit is iso]\label{lem:closedIncl_counit_isIso}
+  \lean{TopCat.closedIncl_counit_isIso}
+  \leanok
+  For a closed immersion $i : Z \hookrightarrow X$, the counit
+  $i^* i_* \GG \to \GG$ of the pushforward-pullback adjunction is an isomorphism
+  on stalks.
+\end{lemma}
+
+\begin{lemma}[Closed immersion unit is epi]\label{lem:epi_unit_of_closedImmersion}
+  \lean{epi_unit_of_closedImmersion}
+  \leanok
+  \uses{lem:closedIncl_counit_isIso}
+  For a closed immersion $i : Z \hookrightarrow X$ and any sheaf $\FF$ on $X$,
+  the unit $\eta : \FF \to i_*(i^*\FF)$ is an epimorphism.
+\end{lemma}
+
+\begin{theorem}[Closed immersion short exact sequence]\label{thm:closedImmersionSES}
+  \lean{closedImmersionSES}
+  \leanok
+  \uses{lem:epi_unit_of_closedImmersion}
+  For a closed subset $Z \subseteq X$ and a sheaf $\FF$ on $X$, the unit
+  $\eta : \FF \to i_*(i^*\FF)$ gives rise to a short exact sequence
+  \[
+    0 \to K \to \FF \xrightarrow{\eta} i_*(i^*\FF) \to 0,
+  \]
+  where $K = \ker(\eta)$ is a sheaf supported on $X \setminus Z$.
+\end{theorem}
+
+\chapter{Topology and Dimension Helpers}\label{ch:auxiliary}
+
+\begin{lemma}[Only two opens in dimension 0]\label{lem:opens_eq_bot_or_top}
+  \lean{opens_eq_bot_or_top_of_irreducibleSpace_dim_zero}
+  \leanok
+  On an irreducible space of Krull dimension $\le 0$, the only open sets
+  are $\emptyset$ and $X$.
+\end{lemma}
+
+\begin{lemma}[Dimension is nonneg for irreducible]\label{lem:dim_nonneg_irreducible}
+  \lean{topologicalKrullDim_nonneg}
+  \leanok
+  On a nonempty irreducible space, $\KrullDim(X) \ge 0$.
+\end{lemma}
+
+\begin{lemma}[Strict dimension decrease]\label{lem:dim_lt_of_closed}
+  \lean{topologicalKrullDim_lt_of_isIrreducible_of_isClosed}
+  \leanok
+  If $X$ is irreducible and $Z \subsetneq X$ is a proper closed irreducible subset,
+  then $\KrullDim(Z) < \KrullDim(X)$.
+\end{lemma}
+
+
+\chapter{Extension by Zero}\label{ch:zeroOutside}
+
+\begin{definition}[Extension by zero (presheaf)]\label{def:zeroOutside}
+  \lean{TopCat.Presheaf.zeroOutside}
+  \leanok
+  Given a presheaf $\FF$ on $X$ and an open $U \subseteq X$, the
+  \emph{extension by zero} $\FF_U$ is the presheaf with
+  $\FF_U(W) = \FF(W)$ if $W \subseteq U$ and $\FF_U(W) = 0$ otherwise.
+\end{definition}
+
+\begin{definition}[Extension by zero (sheaf)]\label{def:zeroOutsideInt}
+  \lean{TopCat.Sheaf.zeroOutsideInt}
+  \leanok
+  \uses{def:zeroOutside}
+  The sheafification of the extension-by-zero presheaf $\Z_U$, where
+  $\Z$ is the constant presheaf with value $\Z$.
+  This is the sheaf $j_! \Z_U$ (extension by zero of the constant sheaf
+  on $U$).
+\end{definition}
+
+\begin{definition}[Section homomorphism]\label{def:sHom}
+  \lean{TopCat.Sheaf.zeroOutsideInt.sHom}
+  \leanok
+  \uses{def:zeroOutside, def:zeroOutsideInt}
+  Given a section $s \in \FF(U)$, the \emph{section homomorphism}
+  $\Z_U \to \FF$ is the unique sheaf map sending the generator of $\Z_U(U)$ to $s$.
+\end{definition}
+
+\begin{lemma}[Stalks are $\Z$-multiples of generator]\label{lem:stalk_zsmul_generator}
+  \lean{stalk_zeroOutsideInt_eq_zsmul_generator}
+  \leanok
+  \uses{def:zeroOutside, def:zeroOutsideInt}
+  Every element of a stalk of $\Z_U$ is a $\Z$-multiple of the generator.
+  This uses the fact that every subgroup of $\Z$ is cyclic.
+\end{lemma}
+
+\begin{lemma}[$\Z$-multiple coefficient is injective]\label{lem:zsmul_generator_injective}
+  \lean{zsmul_generator_injective}
+  \leanok
+  \uses{def:zeroOutside, def:zeroOutsideInt}
+  If $n \cdot g = m \cdot g$ for the generator $g$ of a stalk of $\Z_U$
+  at a point in $U$, then $n = m$.
+\end{lemma}
+
+
+\chapter{Constant Sheaf and Dimension Zero}\label{ch:dimzero}
+
+\begin{theorem}[Constant sheaf is flasque on irreducible spaces]\label{thm:constantSheaf_flasque}
+  \lean{constantSheaf_flasque_of_irreducible}
+  \leanok
+  On an irreducible topological space, the constant sheaf $\Z_X$ is flasque.
+\end{theorem}
+
+\begin{lemma}[Every sheaf is flasque in dimension 0]\label{lem:sheaf_restriction_epi_dim_zero}
+  \lean{sheaf_restriction_epi_of_irreducible_dim_zero}
+  \leanok
+  \uses{lem:opens_eq_bot_or_top}
+  On an irreducible space of dimension $\le 0$, every sheaf is flasque.
+  The only open sets are $\emptyset$ and $X$, so the only nontrivial
+  restriction is $\FF(X) \to \FF(\emptyset)$, which is surjective
+  because $\FF(\emptyset)$ is terminal.
+\end{lemma}
+
+\begin{theorem}[Vanishing for irreducible dimension 0]\label{thm:grothendieck_vanishing_dim_zero}
+  \lean{grothendieck_vanishing_dim_zero}
+  \leanok
+  \uses{lem:sheaf_restriction_epi_dim_zero, thm:FlasqueVanishing}
+  On an irreducible Noetherian space of Krull dimension $\le 0$,
+  $H^n(\FF) = 0$ for all $n \ge 1$ and all sheaves $\FF$.
+  This is Hartshorne III.2.7, Step~2.
+\end{theorem}
+
+
+\chapter{Filtered Colimits}\label{ch:colimits}
+
+\begin{theorem}[sheafToPresheaf creates filtered colimits]\label{thm:createsFilteredColimit}
+  \lean{createsFilteredColimit}
+  \leanok
+  On a Noetherian space, the forgetful functor from sheaves to presheaves
+  creates filtered colimits. Internally uses that presheaf-level filtered
+  colimits of sheaves are already sheaves on Noetherian spaces.
+\end{theorem}
+
+\begin{theorem}[Cohomology commutes with filtered colimits]\label{thm:sheafH_preserves_filtered_colimits}
+  \lean{sheafH_preserves_filtered_colimits}
+  \leanok
+  \uses{def:isFlasqueSheaf, lem:ext_dimension_shift, lem:ext_dimension_shift_X3, lem:isFlasque_of_injective, lem:sheafH0EquivSections, thm:FlasqueVanishing, thm:createsFilteredColimit}
+  On a Noetherian space, if $H^n(F_j) = 0$ for all pieces of a filtered
+  diagram, then $H^n(\colim F_j) = 0$.
+
+  This replaces Gabriel's theorem (filtered colimits of injectives are injective)
+  with a weaker but sufficient statement: since injective sheaves are flasque
+  and filtered colimits of flasque sheaves are flasque on Noetherian spaces,
+  the colimit of injectives has vanishing cohomology.
+\end{theorem}
+
+\begin{theorem}[Finitely generated vanishing implies vanishing]\label{thm:cohomology_vanishing_fg}
+  \lean{cohomology_vanishing_of_finitelyGenerated_vanishing}
+  \leanok
+  \uses{def:sHom, def:zeroOutside, def:zeroOutsideInt, thm:sheafH_preserves_filtered_colimits}
+  On a Noetherian space, if $H^m = 0$ for all finitely generated subsheaves
+  of $K$, then $H^m(K) = 0$. This is Hartshorne 2.9.
+\end{theorem}
+
+
+\chapter{Extension-by-Zero Vanishing}\label{ch:zeroOutsideVanishing}
+
+\begin{theorem}[$\Z_V$ vanishing via constant sheaf]\label{thm:zeroOutsideInt_vanishing}
+  \lean{zeroOutsideInt_vanishing}
+  \leanok
+  \uses{def:isFlasqueSheaf, def:zeroOutside, def:zeroOutsideInt, thm:FlasqueVanishing, thm:constantSheaf_flasque}
+  On an irreducible Noetherian space with $\KrullDim \ge 1$ and $n > \KrullDim(X)$:
+  given $H^m(\coker(j)) = 0$ for the cokernel of $\Z_V \to \Z_X$,
+  we have $H^{m+1}(\Z_V) = 0$. Uses the short exact sequence
+  $0 \to \Z_V \to \Z_X \to \coker \to 0$, where $\Z_X$ is flasque (hence has
+  vanishing cohomology), and dimension shifting.
+\end{theorem}
+
+\begin{theorem}[$\Z_V$ complete cohomology vanishing]\label{thm:zeroOutsideInt_cohomology_vanishing}
+  \lean{zeroOutsideInt_cohomology_vanishing}
+  \leanok
+  \uses{def:zeroOutside, def:zeroOutsideInt, lem:closedIncl_counit_isIso, lem:dim_lt_of_closed, lem:epi_unit_of_closedImmersion, thm:PushforwardHVanishing, thm:zeroOutsideInt_vanishing}
+  Full vanishing: $H^n(\Z_V) = 0$ for all $n > \KrullDim(X)$ on an
+  irreducible Noetherian space, using induction with the cokernel
+  vanishing and the $\Z_V$ vanishing step.
+\end{theorem}
+
+
+\chapter{Finitely Generated Sheaf Vanishing}\label{ch:fingen}
+
+\begin{theorem}[Finitely generated sheaf vanishing]\label{thm:finsetGeneratedSheaf_vanishing}
+  \lean{finsetGeneratedSheaf_vanishing}
+  \leanok
+  \uses{def:sHom, def:zeroOutsideInt}
+  On an irreducible Noetherian space, every finitely generated subsheaf $K_S$
+  (image of $\bigoplus_{i \in S} \Z_{U_i} \to K$) has $H^n(K_S) = 0$ for
+  $n > \KrullDim(X)$.
+
+  \emph{Proof.} By induction on $|S|$. The base case $S = \emptyset$ gives the
+  zero sheaf. For the step $S' \cup \{\sigma_0\}$, form
+  $0 \to K_{S'} \to K_{S' \cup \{\sigma_0\}} \to C \to 0$
+  where $C$ is a quotient of $\Z_{U_{\sigma_0}}$, hence has vanishing cohomology.
+  By the inductive hypothesis, $H^n(K_{S'}) = 0$, and dimension shifting gives
+  $H^n(K_{S' \cup \{\sigma_0\}}) = 0$.
+\end{theorem}
+
+\begin{theorem}[Direct limit cohomology vanishing]\label{thm:directLimit_cohomology_vanishing}
+  \lean{directLimit_cohomology_vanishing}
+  \leanok
+  \uses{def:zeroOutsideInt, thm:cohomology_vanishing_fg, thm:finsetGeneratedSheaf_vanishing}
+  Vanishing extends from finitely generated subsheaves (epi-images)
+  to arbitrary sheaves via filtered colimits.
+\end{theorem}
+
+
+\chapter{Irreducible Positive-Dimension Case}\label{ch:irredpos}
+
+\begin{lemma}[Proper closed subset of smaller dimension]\label{lem:exists_closed_subset}
+  \lean{exists_closed_subset_lt_dim_of_irreducible_pos}
+  \leanok
+  \uses{lem:dim_lt_of_closed}
+  On an irreducible space with $\KrullDim(X) > 0$ and $n > \KrullDim(X)$,
+  there exists a proper closed subset $Z \subsetneq X$ with $\KrullDim(Z) < \KrullDim(X)$
+  and $n > \KrullDim(Z)$.
+\end{lemma}
+
+\begin{lemma}[Good section existence]\label{lem:exists_good_section}
+  \lean{exists_good_section}
+  \leanok
+  \uses{def:sHom, def:zeroOutside, def:zeroOutsideInt, lem:stalk_zsmul_generator, lem:zsmul_generator_injective}
+  Given a sheaf map $\Z_V \to \FF$, there exists a good section: an open
+  $V' \subseteq V$ with $V'$ nonempty and a section $s$ such that the section
+  homomorphism $\Z_{V'} \to \FF$ generates all stalks at points of $V'$.
+  Internally uses a Noetherian descent argument (shrinking lemma).
+\end{lemma}
+
+\begin{theorem}[Irreducible positive-dimension vanishing]\label{thm:IrreduciblePosVanishing}
+  \lean{IrreduciblePosVanishing}
+  \leanok
+  \uses{def:sHom, def:zeroOutside, def:zeroOutsideInt, lem:closedIncl_counit_isIso, lem:dim_lt_of_closed, lem:epi_unit_of_closedImmersion, lem:exists_closed_subset, lem:exists_good_section, thm:closedImmersionSES, thm:PushforwardHVanishing, thm:directLimit_cohomology_vanishing, thm:zeroOutsideInt_cohomology_vanishing}
+  On an irreducible Noetherian space with $\KrullDim(X) > 0$ and
+  $n > \KrullDim(X)$, we have $H^n(\FF) = 0$ for all sheaves $\FF$.
+
+  \emph{Proof.} Choose a proper closed $Z$ with $\KrullDim(Z) < \KrullDim(X)$.
+  The closed immersion SES gives $0 \to K \to \FF \to i_*(i^*\FF) \to 0$.
+  By the induction hypothesis (lower dimension), $H^n(i_*(i^*\FF)) = 0$.
+  For the kernel $K$ (supported on $X \setminus Z$), use
+  filtered colimit vanishing to reduce to finitely generated subsheaves,
+  then Finset.induction to reduce to extension-by-zero sheaves.
+  Conclude by dimension shifting.
+\end{theorem}
+
+
+\chapter{Reducible Case}\label{ch:reducible}
+
+\begin{theorem}[Reducible vanishing]\label{thm:ReducibleVanishing}
+  \lean{ReducibleVanishing'}
+  \leanok
+  \uses{lem:closedIncl_counit_isIso, lem:epi_unit_of_closedImmersion, thm:PushforwardHVanishing}
+  On a Noetherian space that is not irreducible, $H^n(\FF) = 0$ for $n > \KrullDim(X)$,
+  assuming vanishing on all irreducible closed subsets.
+
+  \emph{Proof.} By Finset.induction on the (finite) set of irreducible components.
+  At each step, pick one irreducible component $Z_i$, form the closed immersion
+  SES, and use the induction hypothesis on the pushforward term (where vanishing
+  for the irreducible $Z_i$ is given) and on the kernel (which has zero stalks at
+  points of $Z_i$, so is ``one component smaller'').
+\end{theorem}
+
+
+\chapter{Main Theorem}\label{ch:main}
+
+\begin{lemma}[Reduction to irreducible spaces]\label{lem:grothendieck_vanishing_of_irreducible}
+  \lean{grothendieck_vanishing_of_irreducible}
+  \leanok
+  \uses{thm:ReducibleVanishing}
+  For a Noetherian space $X$: if the result holds for all irreducible spaces
+  of dimension $\le \KrullDim(X)$, then it holds for $X$.
+  Splits into three cases: $X$ empty (trivial), $X$ irreducible (apply
+  dim~0 or positive-dimension vanishing), $X$ reducible (apply ReducibleVanishing).
+\end{lemma}
+
+\begin{theorem}[Grothendieck's vanishing theorem]\label{thm:GrothendieckVanishing}
+  \lean{GrothendieckVanishing}
+  \leanok
+  \uses{lem:dim_nonneg_irreducible, lem:grothendieck_vanishing_of_irreducible, thm:IrreduciblePosVanishing, thm:grothendieck_vanishing_dim_zero}
+  Let $X$ be a Noetherian topological space with $\KrullDim(X) = n$.
+  Then for any sheaf $\FF$ of abelian groups on $X$ and any $i > n$,
+  \[
+    H^i(X, \FF) = 0.
+  \]
+
+  \emph{Proof.} By well-founded induction on Krull dimension.
+  At each step, reduce to irreducible spaces
+  (via \texttt{grothendieck\_vanishing\_of\_irreducible}), then handle
+  dimension~0 and positive dimension separately. The induction hypothesis
+  supplies vanishing for all spaces of strictly smaller dimension.
+\end{theorem}

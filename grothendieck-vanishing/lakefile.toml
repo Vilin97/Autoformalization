@@ -1,0 +1,21 @@
+name = "aristotle"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["Aristotle"]
+
+[leanOptions]
+pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+relaxedAutoImplicit = false
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.28.0"
+
+[[require]]
+name = "doc-gen4"
+scope = "leanprover"
+rev = "v4.28.0"
+
+[[lean_lib]]
+name = "Aristotle"

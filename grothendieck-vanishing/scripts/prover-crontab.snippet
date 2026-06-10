@@ -1,0 +1,7 @@
+# Autonomous loop — runs one cycle every 10 minutes
+# Each invocation is a fresh Claude session (no context accumulation)
+# The script handles locking, so overlapping cron invocations are safe.
+*/10 * * * * cd /home/vilin/aristotle && /home/vilin/miniconda3/bin/python scripts/autonomous_loop.py --budget 5.0 >> logs/autonomous_loop.log 2>&1
+
+# Alternative: continuous loop in tmux (instead of cron)
+# tmux new-session -d -s prover 'cd /home/vilin/aristotle && python scripts/autonomous_loop.py --loop --interval 600 --budget 5.0'
