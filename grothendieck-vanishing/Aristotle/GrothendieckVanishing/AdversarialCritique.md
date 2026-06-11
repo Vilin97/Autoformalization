@@ -8,7 +8,7 @@
 ## 0. CI Status
 
 - **Build CI**: Last commit on `wip/grothendieck-vanishing` — PASSED.
-- **Blueprint**: Live at https://vilin97.github.io/Clawristotle/blueprint/
+- **Blueprint**: Live at https://vilin97.github.io/Clawristotle/grothendieck-vanishing/blueprint/
 
 ## 1. Sorry's
 

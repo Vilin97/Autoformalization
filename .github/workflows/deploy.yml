@@ -221,6 +221,35 @@ jobs:
           redirect blueprint/dep_graph_document.html ../landau/blueprint/dep_graph_document.html
           redirect docs/index.html ../landau/docs/
 
+          # Catch-all for deep pre-monorepo URLs (/Clawristotle/blueprint/*, /Clawristotle/docs/*)
+          cat > _site/404.html <<'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta name="robots" content="noindex">
+            <title>Page not found</title>
+            <script>
+              var m = location.pathname.match(/^(\/Clawristotle\/)(blueprint|docs)(\/.*)?$/);
+              if (m) location.replace(m[1] + "landau/" + m[2] + (m[3] || "/") + location.search + location.hash);
+            </script>
+            <style>
+              body { font-family: sans-serif; margin: 40px; line-height: 1.6; max-width: 800px; }
+              a { color: #0366d6; text-decoration: none; }
+              a:hover { text-decoration: underline; }
+            </style>
+          </head>
+          <body>
+            <h1>Page not found</h1>
+            <p>This site was reorganized when the repository became a two-project monorepo:</p>
+            <ul>
+              <li>Landau: <a href="/Clawristotle/landau/blueprint/">blueprint</a> &middot; <a href="/Clawristotle/landau/docs/">docs</a></li>
+              <li>Grothendieck vanishing: <a href="/Clawristotle/grothendieck-vanishing/blueprint/">blueprint</a> &middot; <a href="/Clawristotle/grothendieck-vanishing/docs/">docs</a></li>
+              <li><a href="/Clawristotle/">Site index</a></li>
+            </ul>
+          </body>
+          </html>
+          EOF
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
