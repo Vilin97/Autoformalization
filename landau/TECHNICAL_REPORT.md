@@ -1,6 +1,6 @@
 # Formal Verification of the Vlasov-Maxwell-Landau Steady-State Theorem
 
-[![Lean Action CI](https://github.com/Vilin97/aristotle/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/Vilin97/aristotle/actions/workflows/lean_action_ci.yml) [![Documentation](https://img.shields.io/badge/docs-blueprint-blue)](https://vilin97.github.io/aristotle/blueprint/) [![Dependency Graph](https://img.shields.io/badge/docs-dep_graph-blue)](https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html)
+[![Lean Action CI](https://github.com/Vilin97/Clawristotle/actions/workflows/landau-ci.yml/badge.svg)](https://github.com/Vilin97/Clawristotle/actions/workflows/landau-ci.yml) [![Documentation](https://img.shields.io/badge/docs-blueprint-blue)](https://vilin97.github.io/Clawristotle/landau/blueprint/) [![Dependency Graph](https://img.shields.io/badge/docs-dep_graph-blue)](https://vilin97.github.io/Clawristotle/landau/blueprint/dep_graph_document.html)
 
 A complete formalization of the characterization of smooth steady-state solutions to the **Vlasov-Maxwell-Landau (VML) system** with Coulomb collisions on the 3-torus.
 
@@ -31,11 +31,11 @@ A complete formalization of the characterization of smooth steady-state solution
 | Estimated API cost | ~$6,300 |
 | Aristotle ATP submissions | 220 (111 proved, 28 disproved) |
 
-[Documentation](https://vilin97.github.io/aristotle/blueprint/) | [Dependency graph](https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html)
+[Documentation](https://vilin97.github.io/Clawristotle/landau/blueprint/) | [Dependency graph](https://vilin97.github.io/Clawristotle/landau/blueprint/dep_graph_document.html)
 
 ![Dependency graph](artifacts/dep_graph.png)
 
-**Proof dependency graph.** All nodes are green (fully proved). The graph flows from primitive definitions (`normSq`, `eucNorm`, `landauMatrix`) at the top through intermediate results (`H_theorem`, `D_zero_implies_maxwellian`, the field and conservation lemmas) down to `theorem42` and its concrete Coulomb instantiation `coulomb_concrete` at the bottom. The interactive version is available [here](https://vilin97.github.io/aristotle/blueprint/dep_graph_document.html).
+**Proof dependency graph.** All nodes are green (fully proved). The graph flows from primitive definitions (`normSq`, `eucNorm`, `landauMatrix`) at the top through intermediate results (`H_theorem`, `D_zero_implies_maxwellian`, the field and conservation lemmas) down to `theorem42` and its concrete Coulomb instantiation `coulomb_concrete` at the bottom. The interactive version is available [here](https://vilin97.github.io/Clawristotle/landau/blueprint/dep_graph_document.html).
 
 ## The Mathematics
 

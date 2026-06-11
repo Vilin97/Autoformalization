@@ -1,10 +1,8 @@
-# Clawristotle: Semi-Autonomous Mathematical Research
+# Global Steady State of the Vlasov–Maxwell–Landau System
 
-<p align="center">
-  <img src="artifacts/clawristotle.png" alt="Clawristotle" width="400">
-</p>
+> Part of [Clawristotle](../README.md), alongside [Grothendieck's vanishing theorem](../grothendieck-vanishing/).
 
-[![Lean Action CI](https://github.com/Vilin97/Clawristotle/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/Vilin97/Clawristotle/actions/workflows/lean_action_ci.yml) [![Documentation](https://img.shields.io/badge/docs-blueprint-blue)](https://vilin97.github.io/Clawristotle/blueprint/) [![Dependency Graph](https://img.shields.io/badge/docs-dep_graph-blue)](https://vilin97.github.io/Clawristotle/blueprint/dep_graph_document.html) [![arXiv](https://img.shields.io/badge/arXiv-2603.15929-b31b1b)](https://arxiv.org/abs/2603.15929) [![Paper](https://img.shields.io/badge/HF-Paper-yellow)](https://huggingface.co/papers/2603.15929) [![Logs](https://img.shields.io/badge/HF-Agent_Logs-yellow)](https://huggingface.co/datasets/Vilin97/Clawristotle-Logs)
+[![Landau CI](https://github.com/Vilin97/Clawristotle/actions/workflows/landau-ci.yml/badge.svg)](https://github.com/Vilin97/Clawristotle/actions/workflows/landau-ci.yml) [![Documentation](https://img.shields.io/badge/docs-blueprint-blue)](https://vilin97.github.io/Clawristotle/landau/blueprint/) [![Dependency Graph](https://img.shields.io/badge/docs-dep_graph-blue)](https://vilin97.github.io/Clawristotle/landau/blueprint/dep_graph_document.html) [![arXiv](https://img.shields.io/badge/arXiv-2603.15929-b31b1b)](https://arxiv.org/abs/2603.15929) [![Paper](https://img.shields.io/badge/HF-Paper-yellow)](https://huggingface.co/papers/2603.15929) [![Logs](https://img.shields.io/badge/HF-Agent_Logs-yellow)](https://huggingface.co/datasets/Vilin97/Clawristotle-Logs)
 
 > This README focuses on the autonomous agent system. For the detailed mathematical and technical report, see [TECHNICAL_REPORT.md](TECHNICAL_REPORT.md).
 
@@ -92,4 +90,4 @@ This is a rigidity result fundamental to plasma physics, formalized here in full
 
 ## 📄 License
 
-This work is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+Released under the [Apache License 2.0](../LICENSE).

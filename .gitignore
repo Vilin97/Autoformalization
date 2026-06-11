@@ -1,0 +1,26 @@
+.DS_Store
+*.log
+.env
+
+# Claude Code sandbox artifacts
+HEAD
+objects
+refs
+hooks
+config
+.bash_profile
+.bashrc
+.profile
+.zprofile
+.zshrc
+.gitconfig
+.gitmodules
+.claude/agents
+.claude/skills
+.claude/settings.json
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.idea
+.mcp.json
+.ripgreprc
+.vscode

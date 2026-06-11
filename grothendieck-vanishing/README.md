@@ -1,12 +1,12 @@
-# Clawristotle: Semi-Autonomous Mathematical Research
+# Grothendieck's Vanishing Theorem
 
-[![Lean Action CI](https://github.com/Vilin97/Clawristotle/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/Vilin97/Clawristotle/actions/workflows/lean_action_ci.yml) [![Logs](https://img.shields.io/badge/HF-Agent_Logs-yellow)](https://huggingface.co/datasets/Vilin97/Clawristotle-Logs)
+> Part of [Clawristotle](../README.md), alongside [the Vlasov–Maxwell–Landau steady-state theorem](../landau/).
 
-A fully verified formalization of research-level mathematics in Lean 4, achieved by a centaur team of AI agents and a human mathematician.
+[![Grothendieck Vanishing CI](https://github.com/Vilin97/Clawristotle/actions/workflows/grothendieck-vanishing-ci.yml/badge.svg)](https://github.com/Vilin97/Clawristotle/actions/workflows/grothendieck-vanishing-ci.yml) [![Documentation](https://img.shields.io/badge/docs-blueprint-blue)](https://vilin97.github.io/Clawristotle/grothendieck-vanishing/blueprint/) [![Logs](https://img.shields.io/badge/HF-Agent_Logs-yellow)](https://huggingface.co/datasets/Vilin97/Clawristotle-Logs)
 
-## Grothendieck's Vanishing Theorem
+A fully verified formalization of Grothendieck's vanishing theorem in Lean 4, achieved by a centaur team of AI agents and human mathematicians.
 
-**Branch:** [`grothendieck-vanishing`](https://github.com/Vilin97/Clawristotle/tree/grothendieck-vanishing)
+> **Theorem.** For a Noetherian topological space X of dimension n and any sheaf F of abelian groups on X, H^i(X, F) = 0 for all i > n.
 
 | Metric | Value |
 |--------|-------|
@@ -18,8 +18,6 @@ A fully verified formalization of research-level mathematics in Lean 4, achieved
 | | — 14 days review-driven refactor + compress (Apr 17 – May 1) |
 | Estimated API Cost | ~$15,000 |
 
-> **Theorem.** For a Noetherian topological space X of dimension n and any sheaf F of abelian groups on X, H^i(X, F) = 0 for all i > n.
-
 [Technical Report](TECHNICAL_REPORT_GV.md) | [Brian's Review](review.md) | [LOC History](artifacts/loc_history_gv.png) | [Sorry History](artifacts/sorry_history_gv.png)
 
 ## The Team
@@ -30,6 +28,10 @@ A fully verified formalization of research-level mathematics in Lean 4, achieved
 - [Codex CLI](https://openai.com/codex) (Agent): Worker for the compress (86 cycles) and refactor (478 cycles) loops
 - [Aristotle](https://aristotle.harmonic.fun/) (ATP): Lemma specialist (94 proving-phase submissions + Apr 27 infra burst)
 
+## History
+
+Developed March–May 2026 on the [`grothendieck-vanishing`](https://github.com/Vilin97/Clawristotle/tree/grothendieck-vanishing) branch and merged into `main` as this directory, with full history preserved.
+
 ## License
 
-[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+Released under the [Apache License 2.0](../LICENSE).

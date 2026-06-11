@@ -1,10 +1,12 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this project.
 
 ## Project
 
 Formalization of Grothendieck's Vanishing Theorem (Hartshorne III, Theorem 2.7) in Lean 4 with Mathlib. The main theorem states: for a Noetherian topological space X of dimension n and any sheaf F of abelian groups on X, H^i(X, F) = 0 for all i > n.
+
+The project is the `grothendieck-vanishing/` directory of the Clawristotle monorepo (alongside the Landau project in `landau/`); it is a self-contained Lake package, and all commands below are run from this directory.
 
 - **Lean**: 4.28.0 (`lean-toolchain`)
 - **Mathlib**: v4.28.0 (via `lakefile.toml`)
@@ -25,11 +27,11 @@ lake clean && lake build
 
 **Critical**: `lake build` uses cached `.olean` files and may not recompile modified files. Always verify modified files with `lake env lean <file>` before committing.
 
-## CI & Branch Protection
+## CI & Deployment
 
-GitHub Actions runs `leanprover/lean-action@v1` on every push/PR (`.github/workflows/lean_action_ci.yml`). Documentation is deployed via `doc-gen4` to GitHub Pages.
+GitHub Actions (workflows at the repository root) runs `leanprover/lean-action@v1` on every push/PR that touches this directory (`.github/workflows/grothendieck-vanishing-ci.yml`). The blueprint and `doc-gen4` documentation are deployed to GitHub Pages by `.github/workflows/deploy.yml`.
 
-**The `grothendieck-vanishing` branch is protected.** Direct pushes are blocked. Agents work on the persistent `wip/grothendieck-vanishing` branch and push there freely. A single PR (`wip/grothendieck-vanishing` → `grothendieck-vanishing`) stays open with auto-merge enabled and merges automatically once the `build` CI check passes. See `/commit` for the full workflow.
+Historical note: the project was developed on the protected `grothendieck-vanishing` branch (with agents pushing to `wip/grothendieck-vanishing` and auto-merging via PR); it was merged into `main` in June 2026, and development now happens on `main` like any other change.
 
 ## Code Structure
 
