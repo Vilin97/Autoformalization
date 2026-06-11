@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - main
-      - landau
+    paths:
+      - 'landau/**'
+      - 'grothendieck-vanishing/**'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 permissions:
@@ -12,50 +15,48 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: pages-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  build_docs:
+  build_docs_landau:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project
         uses: actions/checkout@v5
 
-      - name: Install elan
-        run: |
-          set -o pipefail
-          curl -sSfL https://github.com/leanprover/elan/releases/download/v3.1.1/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
-          ./elan-init -y --default-toolchain none
-          echo "$HOME/.elan/bin" >> $GITHUB_PATH
-
-      - name: Build documentation
-        run: |
-          mkdir -p docbuild
-          cat << EOF > docbuild/lakefile.toml
-          name = "docbuild"
-          reservoir = false
-          version = "0.1.0"
-          packagesDir = "../.lake/packages"
-
-          [[require]]
-          name = "aristotle"
-          path = "../"
-
-          [[require]]
-          scope = "leanprover"
-          name = "doc-gen4"
-          rev = "$(< lean-toolchain cut -f 2 -d: )"
-          EOF
-          cd docbuild
-          git remote set-url origin https://github.com/Vilin97/aristotle.git || true
-          MATHLIB_NO_CACHE_ON_UPDATE=1 lake update aristotle
-          lake build Aristotle:docs
+      - name: Build project and documentation
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: landau
+          build-args: 'Aristotle:docs'
 
       - name: Upload documentation artifact
         uses: actions/upload-artifact@v4
         with:
-          name: docs
-          path: docbuild/.lake/build/doc
+          name: docs-landau
+          path: landau/.lake/build/doc
 
-  build_blueprint:
+  build_docs_gv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v5
+
+      - name: Build project and documentation
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: grothendieck-vanishing
+          build-args: 'Aristotle:docs'
+
+      - name: Upload documentation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-gv
+          path: grothendieck-vanishing/.lake/build/doc
+
+  build_blueprint_landau:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project
@@ -77,65 +78,148 @@ jobs:
             pip install --upgrade pip requests wheel
             CFLAGS="-I/usr/include/graphviz" LDFLAGS="-L/usr/lib/graphviz" pip install pygraphviz
             pip install leanblueprint
+            cd landau
             leanblueprint web
 
       - name: Upload blueprint artifact
         uses: actions/upload-artifact@v4
         with:
-          name: blueprint
-          path: blueprint/web
+          name: blueprint-landau
+          path: landau/blueprint/web
+
+  build_blueprint_gv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Build blueprint
+        uses: xu-cheng/texlive-action@v2
+        with:
+          docker_image: ghcr.io/xu-cheng/texlive-full:20231201
+          run: |
+            export PIP_BREAK_SYSTEM_PACKAGES=1
+            apk update
+            apk add --update py3-pip git pkgconfig graphviz graphviz-dev gcc musl-dev
+            git config --global --add safe.directory $GITHUB_WORKSPACE
+            python3 -m venv env
+            source env/bin/activate
+            pip install --upgrade pip requests wheel
+            CFLAGS="-I/usr/include/graphviz" LDFLAGS="-L/usr/lib/graphviz" pip install pygraphviz
+            pip install leanblueprint
+            cd grothendieck-vanishing
+            leanblueprint web
+
+      - name: Upload blueprint artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: blueprint-gv
+          path: grothendieck-vanishing/blueprint/web
 
   deploy:
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/landau'
-    needs: [build_docs, build_blueprint]
+    # Deploy as long as both blueprints built; docs builds are heavy and
+    # allowed to fail (their links are dropped from the landing page).
+    if: >-
+      always() &&
+      github.ref == 'refs/heads/main' &&
+      needs.build_blueprint_landau.result == 'success' &&
+      needs.build_blueprint_gv.result == 'success'
+    needs: [build_docs_landau, build_docs_gv, build_blueprint_landau, build_blueprint_gv]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout project
-        uses: actions/checkout@v5
+      - name: Download Landau documentation artifact
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: docs-landau
+          path: _site/landau/docs
 
-      - name: Download documentation artifact
+      - name: Download Grothendieck vanishing documentation artifact
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: docs-gv
+          path: _site/grothendieck-vanishing/docs
+
+      - name: Download Landau blueprint artifact
         uses: actions/download-artifact@v4
         with:
-          name: docs
-          path: _site/docs
+          name: blueprint-landau
+          path: _site/landau/blueprint
 
-      - name: Download blueprint artifact
+      - name: Download Grothendieck vanishing blueprint artifact
         uses: actions/download-artifact@v4
         with:
-          name: blueprint
-          path: _site/blueprint
+          name: blueprint-gv
+          path: _site/grothendieck-vanishing/blueprint
 
       - name: Prepare site
         run: |
-          if [ -f home_page/index.md ]; then
-            # Simple conversion of index.md to index.html if possible, or just use a redirect
-            # For now, let's just create a basic index.html that links to both
-            cat > _site/index.html <<EOF
+          docs_link() {
+            if [ -d "_site/$1/docs" ] && [ "$(ls -A _site/$1/docs 2>/dev/null)" ]; then
+              echo "<li><a href=\"$1/docs/\">Lean Documentation</a> &mdash; API documentation (doc-gen4)</li>"
+            else
+              echo "<li><em>Lean Documentation</em> &mdash; not built in this deployment</li>"
+            fi
+          }
+          LANDAU_DOCS_LINK=$(docs_link landau)
+          GV_DOCS_LINK=$(docs_link grothendieck-vanishing)
+
+          cat > _site/index.html <<EOF
           <!DOCTYPE html>
           <html>
           <head>
-            <title>Aristotle Project</title>
+            <title>Clawristotle</title>
             <style>
-              body { font-family: sans-serif; margin: 40px; line-height: 1.6; }
+              body { font-family: sans-serif; margin: 40px; line-height: 1.6; max-width: 800px; }
               a { color: #0366d6; text-decoration: none; }
               a:hover { text-decoration: underline; }
             </style>
           </head>
           <body>
-            <h1>Global Steady State of the Vlasov-Maxwell-Landau System</h1>
-            <p>This project formalizes the main result (Theorem 42) of Guo & Strain, characterizing the global steady state of the Vlasov-Maxwell-Landau system on a flat 3-torus.</p>
+            <h1>Clawristotle: Semi-Autonomous Mathematical Research</h1>
+            <p>Fully verified formalizations of research-level mathematics in Lean 4, produced by
+            centaur teams of AI agents and human mathematicians. See the
+            <a href="https://github.com/Vilin97/Clawristotle">GitHub repository</a> for details.</p>
+
+            <h2>Global Steady State of the Vlasov&ndash;Maxwell&ndash;Landau System</h2>
+            <p>The main result (Theorem 42) of Guo &amp; Strain: every positive smooth steady state of
+            the Vlasov&ndash;Maxwell&ndash;Landau system on the flat 3-torus is a global Maxwellian.</p>
             <ul>
-              <li><a href="blueprint/">Blueprint</a> -- dependency graph and formalization status</li>
-              <li><a href="docs/">Lean Documentation</a> -- API documentation</li>
-              <li><a href="https://github.com/Vilin97/aristotle">GitHub repository</a></li>
+              <li><a href="landau/blueprint/">Blueprint</a> &mdash; dependency graph and formalization status</li>
+              ${LANDAU_DOCS_LINK}
+            </ul>
+
+            <h2>Grothendieck's Vanishing Theorem</h2>
+            <p>Hartshorne III, Theorem 2.7: for a Noetherian topological space X of dimension n and any
+            sheaf F of abelian groups on X, H<sup>i</sup>(X, F) = 0 for all i &gt; n.</p>
+            <ul>
+              <li><a href="grothendieck-vanishing/blueprint/">Blueprint</a> &mdash; dependency graph and formalization status</li>
+              ${GV_DOCS_LINK}
             </ul>
           </body>
           </html>
           EOF
-          fi
+
+          # Redirects for pre-monorepo URLs (linked from the arXiv paper and old badges)
+          redirect() {
+            mkdir -p "_site/$(dirname "$1")"
+            cat > "_site/$1" <<HTML
+          <!DOCTYPE html>
+          <html>
+          <head><meta http-equiv="refresh" content="0; url=$2"></head>
+          <body><a href="$2">Moved here</a></body>
+          </html>
+          HTML
+          }
+          redirect blueprint/index.html ../landau/blueprint/
+          redirect blueprint/dep_graph_document.html ../landau/blueprint/dep_graph_document.html
+          redirect docs/index.html ../landau/docs/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

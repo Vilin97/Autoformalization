@@ -1,8 +1,14 @@
-name: Lean Action CI
+name: Landau CI
 
 on:
   push:
+    paths:
+      - 'landau/**'
+      - '.github/workflows/landau-ci.yml'
   pull_request:
+    paths:
+      - 'landau/**'
+      - '.github/workflows/landau-ci.yml'
   workflow_dispatch:
 
 # Cancel in-progress runs on the same branch (saves CI minutes on rapid pushes)
@@ -20,3 +26,5 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: landau

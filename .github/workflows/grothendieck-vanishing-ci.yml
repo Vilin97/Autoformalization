@@ -1,0 +1,30 @@
+name: Grothendieck Vanishing CI
+
+on:
+  push:
+    paths:
+      - 'grothendieck-vanishing/**'
+      - '.github/workflows/grothendieck-vanishing-ci.yml'
+  pull_request:
+    paths:
+      - 'grothendieck-vanishing/**'
+      - '.github/workflows/grothendieck-vanishing-ci.yml'
+  workflow_dispatch:
+
+# Cancel in-progress runs on the same branch (saves CI minutes on rapid pushes)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: grothendieck-vanishing
