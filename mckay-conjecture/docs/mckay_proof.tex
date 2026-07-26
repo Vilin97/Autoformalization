@@ -1,0 +1,681 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\definecolor{linkblue}{HTML}{174A7E}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=linkblue,
+  citecolor=linkblue,
+  urlcolor=linkblue,
+  pdftitle={A Detailed Proof of the McKay Equality},
+  pdfauthor={Clawristotle contributors}
+}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\Irr}{\operatorname{Irr}}
+\newcommand{\Aut}{\operatorname{Aut}}
+\newcommand{\Inn}{\operatorname{Inn}}
+\newcommand{\Out}{\operatorname{Out}}
+\newcommand{\Norm}{\operatorname{N}}
+\newcommand{\Cent}{\operatorname{C}}
+\newcommand{\Syl}{\operatorname{Syl}}
+\newcommand{\Z}{\operatorname{Z}}
+\newcommand{\Ind}{\operatorname{Ind}}
+\newcommand{\Res}{\operatorname{Res}}
+\newcommand{\IMK}{\mathrm{iMK}}
+\newcommand{\Ad}{\mathrm{A}(d)}
+\newcommand{\Bd}{\mathrm{B}(d)}
+\newcommand{\Ainf}{\mathrm{A}(\infty)}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\G}{\mathbf{G}}
+\newcommand{\M}{\mathbf{M}}
+\newcommand{\Sbf}{\mathbf{S}}
+
+\title{\textbf{A Detailed Natural-Language Proof of the McKay Equality}\\
+\large A proof certificate through the inductive McKay condition}
+\author{Clawristotle contributors}
+\date{July 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+For a finite group \(X\), a prime \(\ell\), and a Sylow
+\(\ell\)-subgroup \(S\), the McKay equality says that \(X\) and
+\(\Norm_X(S)\) have the same number of irreducible complex characters
+whose degrees are not divisible by \(\ell\).  The first complete proof is
+not a short argument: it combines the Isaacs--Malle--Navarro reduction,
+the classification of finite simple groups, a family-by-family verification
+of the inductive McKay condition, and the final type-\(D\) analysis of
+Cabanes and Sp{\"a}th.
+
+This document gives a detailed proof at the correct level of granularity:
+every major imported theorem is stated, every family in the classification
+is accounted for, the final type-\(D\) trichotomy is expanded, and the last
+induction from an intermediate local subgroup to the Sylow normalizer is
+proved explicitly.  It is a proof by fully identified literature results,
+not a claim to reproduce the several hundred pages of character theory and
+the classification on which those results depend.
+\end{abstract}
+
+{\small\tableofcontents}
+\clearpage
+
+\section{Statement and conventions}
+
+Let \(X\) be a finite group.  An ordinary complex character of \(X\) is
+the trace of a finite-dimensional complex representation.  Write
+\(\Irr(X)\) for the set of characters afforded by irreducible
+representations, with isomorphic representations counted once.  The
+degree of \(\chi\in\Irr(X)\) is
+\[
+  \chi(1)=\dim_{\mathbb C} V_\chi\in\mathbb Z_{>0}.
+\]
+For a prime \(\ell\), define
+\[
+  \Irr_{\ell'}(X)
+  :=\{\chi\in\Irr(X)\mid \ell\nmid \chi(1)\}.
+\]
+
+\begin{theorem}[McKay equality]\label{thm:mckay}
+Let \(X\) be a finite group, let \(\ell\) be prime, and let
+\(S\in\Syl_\ell(X)\).  Then
+\[
+  \bigl|\Irr_{\ell'}(X)\bigr|
+  =
+  \bigl|\Irr_{\ell'}(\Norm_X(S))\bigr|.
+\]
+\end{theorem}
+
+The theorem does not depend on the chosen Sylow subgroup: any two Sylow
+\(\ell\)-subgroups are conjugate, conjugation identifies their
+normalizers, and a group isomorphism transports irreducible characters
+without changing their degrees.
+
+\section{The stronger inductive condition}
+
+\subsection{Character triples}
+
+A \emph{character triple} is a triple \((A,X,\chi)\) in which
+\(X\trianglelefteq A\) and \(\chi\in\Irr(X)\) is invariant under \(A\).
+Given a second triple \((H,M,\chi')\) with
+\[
+  \Cent_A(X)\leq H\leq A,\qquad A=XH,\qquad H\cap X=M,
+\]
+the relation
+\[
+  (A,X,\chi)\geq_c(H,M,\chi')
+\]
+of centrally isomorphic character triples records substantially more than
+an equality of cardinalities.  Definition 2.6 of
+\cite{CabanesSpath2026} requires associated projective representations
+of \(A\) and \(H\) whose factor sets agree on \(H\times H\), and whose
+scalar matrices agree on \(\Cent_A(X)\).  The relation supplies character
+correspondences over the normal subgroups and has three structural
+properties used below:
+
+\begin{enumerate}[label=(\roman*)]
+  \item it is transitive;
+  \item it can be restricted to suitable subgroups of the outer action;
+  \item its two sides can be transported through the ``Butterfly''
+        construction when they induce the same automorphisms.
+\end{enumerate}
+
+The precise relation and these closure properties are developed in
+Navarro--Sp{\"a}th's language and in Rossi's reformulation
+\cite{Rossi2023,Navarro2018}.  They are the mechanism that makes a
+classification-based argument inductive rather than merely a list of
+numerical coincidences.
+
+\subsection{\texorpdfstring{Definition of \(\IMK\)}{Definition of iMK}}
+
+Fix \(S\in\Syl_\ell(X)\) and put
+\(\Gamma=\Aut(X)_S\).  The condition \(\IMK(X,\ell)\) asserts that there
+are:
+
+\begin{enumerate}
+  \item a \(\Gamma\)-stable subgroup
+  \[
+    \Norm_X(S)\leq N\leq X,
+  \]
+  with \(N\neq X\) whenever \(\Norm_X(S)\neq X\); and
+  \item a \(\Gamma\)-equivariant bijection
+  \[
+    \Omega:\Irr_{\ell'}(X)\longrightarrow\Irr_{\ell'}(N)
+  \]
+  such that, for every \(\chi\) with \(\Omega(\chi)=\chi'\),
+  \[
+    (X\rtimes\Gamma_\chi,X,\chi)
+      \geq_c
+    (N\rtimes\Gamma_\chi,N,\chi').
+  \]
+\end{enumerate}
+
+For universal covers of nonabelian finite simple groups, this is
+equivalent to the inductive McKay condition of
+Isaacs--Malle--Navarro \cite{IsaacsMalleNavarro2007}; see the comparison
+in \cite[Section 2.B]{CabanesSpath2026}.
+
+\begin{theorem}[Reduction theorem]\label{thm:reduction}
+Fix a prime \(\ell\).  If the universal covering group of every
+nonabelian finite simple group satisfies \(\IMK\) at \(\ell\), then every
+finite group satisfies \(\IMK\) at \(\ell\).
+\end{theorem}
+
+The original reduction is due to Isaacs--Malle--Navarro
+\cite{IsaacsMalleNavarro2007}.  The exact centrally-isomorphic-triple
+form used here is Rossi's Theorem B \cite{Rossi2023}, recalled as
+Theorem 2.10 in \cite{CabanesSpath2026}.
+
+\subsection{Inside the reduction theorem}
+
+For completeness, here is the logical mechanism hidden inside
+\cref{thm:reduction}.  A clean equality-level version is Sp{\"a}th's
+Theorem 3.15 \cite{Spath2018}; Rossi's stronger proof follows the same
+minimal-counterexample spine while retaining the central-isomorphism
+data.
+
+One first proves a relative form over each character of the center.
+Assume that this form fails and choose a counterexample \(A\) minimizing
+\(|A/\Z(A)|\).  The reduction proceeds as follows.
+
+\begin{enumerate}
+  \item Local character correspondences and the Glauberman
+  correspondence show that both the largest normal \(\ell\)-subgroup
+  and the largest normal \(\ell'\)-subgroup of \(A\) lie in \(\Z(A)\).
+  Otherwise one passes to a proper quotient or normalizer and contradicts
+  minimality.
+  \item The generalized Fitting subgroup
+  \(F^*(A)=F(A)E(A)\) now has no noncentral solvable part.  A noncentral
+  minimal normal section therefore comes from the layer \(E(A)\).  There
+  is a normal subgroup \(L\) with
+  \[
+    L/\Z(A)\cong T^m
+  \]
+  for a nonabelian finite simple group \(T\) whose order is divisible by
+  \(\ell\).
+  \item The assumed \(\IMK\) correspondence for the universal cover of
+  \(T\) is extended to the \(m\) components, including their permutation
+  action, and then descended through the relevant central quotient.
+  This produces a proper local subgroup of \(L\), containing the needed
+  Sylow normalizer, and a character correspondence compatible with the
+  action of \(A\).
+  \item Clifford theory lifts that correspondence from \(L\) to \(A\).
+  The resulting intermediate subgroup is proper, so minimality applies
+  again and replaces it by the actual Sylow normalizer.
+  \item Restriction and Butterfly transport align the automorphism
+  actions on the two stages; transitivity of central isomorphism composes
+  their character-triple witnesses.  This contradicts the choice of
+  \(A\).
+\end{enumerate}
+
+Thus a hypothetical counterexample would contain a simple section whose
+universal cover violates \(\IMK\).  The hypothesis of
+\cref{thm:reduction} excludes every such section, proving the result.
+
+\subsection{\texorpdfstring{Why \(\IMK\) gives the actual Sylow normalizer}
+  {Why iMK gives the actual Sylow normalizer}}
+
+\begin{proposition}\label{prop:imk-to-mckay}
+If every finite group satisfies \(\IMK\) at \(\ell\), then
+\cref{thm:mckay} holds at \(\ell\).
+\end{proposition}
+
+\begin{proof}
+We prove a stronger statement by induction on
+\[
+  m(X,S):=[X:\Norm_X(S)].
+\]
+If \(m(X,S)=1\), then \(S\trianglelefteq X\) and
+\(\Norm_X(S)=X\), so the identity map is the required bijection.
+
+Assume \(m(X,S)>1\).  The condition \(\IMK(X,\ell)\) supplies a subgroup
+\[
+  \Norm_X(S)\leq N<X
+\]
+and a bijection
+\[
+  \Omega_X:\Irr_{\ell'}(X)\xrightarrow{\sim}\Irr_{\ell'}(N).
+\]
+The subgroup \(S\) is also a Sylow \(\ell\)-subgroup of \(N\): its order
+already contains the full \(\ell\)-part of \(|X|\), hence of \(|N|\).
+Moreover
+\[
+  \Norm_N(S)=N\cap\Norm_X(S)=\Norm_X(S),
+\]
+because \(\Norm_X(S)\leq N\).  Since \(N<X\),
+\[
+  [N:\Norm_N(S)]<[X:\Norm_X(S)].
+\]
+The induction hypothesis applied to \(N\) therefore gives a bijection
+\[
+  \Omega_N:\Irr_{\ell'}(N)
+    \xrightarrow{\sim}
+  \Irr_{\ell'}(\Norm_N(S))
+  =
+  \Irr_{\ell'}(\Norm_X(S)).
+\]
+The composite \(\Omega_N\circ\Omega_X\) proves the desired equality.
+
+For the stronger equivariant statement, one restricts the second outer
+action to the image of \(\Gamma\), applies the Butterfly property, and
+uses transitivity of \(\geq_c\).  This is the final induction in the proof
+of Theorem B of \cite{CabanesSpath2026}.
+\end{proof}
+
+\section{Verification on universal covers}
+
+By \cref{thm:reduction,prop:imk-to-mckay}, it remains to verify
+\(\IMK\) for the universal covering groups of the nonabelian finite
+simple groups.  The classification divides these into alternating
+groups, sporadic groups, and groups of Lie type.  The proof is cumulative:
+the 2026 paper closes the only family left by the preceding results.
+
+\begin{longtable}{p{0.24\textwidth}p{0.50\textwidth}p{0.18\textwidth}}
+\toprule
+Family or prime & Result supplying \(\IMK\) & Source \\
+\midrule
+\endfirsthead
+\toprule
+Family or prime & Result supplying \(\IMK\) & Source \\
+\midrule
+\endhead
+Alternating and sporadic groups
+  & Inductive McKay for simple groups not of Lie type
+  & \cite{Malle2008} \\
+Groups of Lie type in defining characteristic
+  & Inductive McKay in defining characteristic
+  & \cite{Spath2012} \\
+\(\ell=2\), all families
+  & Equivariant character correspondence for odd-degree characters
+  & \cite{MalleSpath2016} \\
+\(\ell=3\), all families
+  & Type-\(D\) extension results, together with the earlier families
+  & \cite{Spath2025II} \\
+Types \(A\) and \({}^{2}A\)
+  & Equivariant character correspondences
+  & \cite{CabanesSpath2017A} \\
+Type \(C\)
+  & Verification of the inductive condition
+  & \cite{CabanesSpath2017C} \\
+Types \(B,E_6,{}^{2}E_6,E_7\)
+  & Descent equalities and local extension conditions
+  & \cite{CabanesSpath2019} \\
+Exceptional types \({}^{3}D_4,E_8,F_4,{}^{2}F_4,G_2\)
+  & Equivariance and extendibility in connected-center groups
+  & \cite{CabanesSpath2013} \\
+Suzuki and Ree types \({}^{2}B_2,{}^{2}G_2\)
+  & Cases contained in the original reduction analysis
+  & \cite{IsaacsMalleNavarro2007} \\
+Type \(D_l\) and \({}^{2}D_l\), remaining non-defining primes
+  & Final local conditions \(\Ad\) and \(\Bd\)
+  & \cite{CabanesSpath2026} \\
+\bottomrule
+\end{longtable}
+
+This inventory is formalized as Theorem 2.11 of
+\cite{CabanesSpath2026}: before its new type-\(D\) argument, only
+\(D_l\) and \({}^{2}D_l\) at primes \(\ell\geq5\) different from the
+defining characteristic remain.
+
+\section{The local criterion for groups of Lie type}
+
+\subsection{Finite reductive setup}
+
+Let \(\G\) be a simple simply connected linear algebraic group over
+\(\overline{\mathbb F}_p\), let \(F:\G\to\G\) be a Frobenius
+endomorphism defining an \(\mathbb F_q\)-structure, and set
+\[
+  G=\G^F.
+\]
+A regular embedding \(\G\leq\widetilde{\G}\) with connected center
+produces
+\[
+  G\trianglelefteq\widetilde G=\widetilde{\G}^{\,F}.
+\]
+Field and graph automorphisms form a group \(E\), and
+\(\widetilde G\rtimes E\) induces the relevant outer automorphisms of
+\(G\).
+
+For an odd prime \(\ell\nmid q\), let
+\[
+  d=d_\ell(q)
+\]
+be the multiplicative order of \(q\) modulo \(\ell\).  A Sylow
+\(d\)-torus \(\Sbf\) of \((\G,F)\) is the finite-reductive analogue of
+a Sylow subgroup.  Generic Sylow theory
+\cite{BroueMalle1992,MalleTesterman2011} relates
+\(\Norm_G(\Sbf)\) to a Sylow \(\ell\)-subgroup of \(G\).  Set
+\[
+\begin{aligned}
+  N&=\Norm_G(\Sbf),\\
+  \widehat N&=\Norm_{G\rtimes E}(\Sbf),\\
+  \widetilde N&=\Norm_{\widetilde G}(\Sbf),\\
+  \widetilde C&=\Cent_{\widetilde G}(\Sbf).
+\end{aligned}
+\]
+
+\subsection{The three extension conditions}
+
+The global condition \(\Ainf\) says that there is an \(E\)-stable
+\(\widetilde G\)-transversal in \(\Irr(G)\) whose members extend to
+their stabilizers in \(G\rtimes E\).  Sp{\"a}th's Theorem A
+\cite{Spath2025II}, together with the earlier type-\(A\), type-\(C\), and
+type-\(B/E\) results, establishes \(\Ainf\) in all types;
+\cite{Spath2023I,Spath2025II} supplies the final type-\(D\) part.
+
+The local condition \(\Ad\) says that there is a
+\(\widehat N\)-stable \(\widetilde N\)-transversal in \(\Irr(N)\)
+whose members extend to the appropriate stabilizers.  The local
+condition \(\Bd\) says:
+
+\begin{enumerate}
+  \item maximal extendibility holds for
+  \(N\trianglelefteq\widetilde N\) and
+  \(\widetilde C\trianglelefteq\widetilde N\); and
+  \item there is an extension map for
+  \(\widetilde C\trianglelefteq\widetilde N\) equivariant under both
+  the linear-character twists of \(\widetilde G/G\) and the outer
+  normalizer action.
+\end{enumerate}
+
+The local criterion, Theorem 2.21 of \cite{CabanesSpath2026} (imported
+from \cite{CabanesSpath2019}), states:
+
+\begin{proposition}[Local criterion]\label{prop:local-criterion}
+Assume \(\ell\nmid 6q\), \(G/\Z(G)\) is simple, \(G\) is its universal
+cover, and \(\Ad\) and \(\Bd\) hold for
+\(d=d_\ell(q)\).  Then \(G\) satisfies \(\IMK\) at \(\ell\), with
+local subgroup \(\Norm_{\G}(\Sbf)^F\).
+\end{proposition}
+
+The proof combines \(\Ainf\), the local extension data, and a common
+parametrization of global and local characters obtained through
+generic Harish--Chandra theory and Jordan decomposition
+\cite{Malle2007,BroueMalleMichel1993}.  The resulting bijection is
+outer-equivariant and its paired characters define centrally
+isomorphic character triples.
+
+\section{\texorpdfstring{The final type-\(D\) verification}
+  {The final type-D verification}}
+
+\subsection{Arithmetic organization}
+
+Take
+\[
+  G=D_{l,\mathrm{sc}}^\varepsilon(q),
+  \qquad l\geq4,\quad \varepsilon\in\{1,-1\}.
+\]
+The polynomial order of \((\G,F)\) is
+\[
+ P_{(\G,F)}(X)
+ =
+ X^{l^2-l}
+ (X^2-1)(X^4-1)\cdots(X^{2l-2}-1)(X^l-\varepsilon).
+\]
+Let \(a_{(\G,F)}(m)\) be the multiplicity of a primitive \(m\)-th root
+of unity as a root of this polynomial.
+
+An integer \(d\geq3\) is \emph{doubly regular} for \((\G,F)\) when
+\[
+  d\mid 2l
+  \quad\text{and}\quad
+  \frac{2l}{d}
+  \begin{cases}
+    \text{is even},&\varepsilon=1,\\
+    \text{is odd},&\varepsilon=-1.
+  \end{cases}
+\]
+This is stronger than ordinary regularity: it controls the centralizer
+of a Sylow \(\ell\)-subgroup both in the type-\(D_l\) group and in the
+ambient type-\(B_l\) overgroup.
+
+\subsection{Doubly regular case}
+
+Theorem 4.1 of \cite{CabanesSpath2026} proves that if \(d\) is doubly
+regular, then \(\Ad\) and \(\Bd\) hold.  Its construction uses:
+
+\begin{enumerate}
+  \item explicit Tits-group representatives in the torus normalizer;
+  \item relative Weyl groups
+  \(\Norm_{\G}(\Sbf,\xi)^F/\Cent_{\G}(\Sbf)^F\);
+  \item compatible extension maps for characters of the torus
+  centralizer; and
+  \item control of field, graph, and diagonal automorphisms.
+\end{enumerate}
+
+Consequently \cref{prop:local-criterion} gives \(\IMK\) for every odd
+prime \(\ell\nmid q\) with \(d_\ell(q)=d\).  Since \(d\geq3\), such a
+prime is at least \(5\).  The same theorem separately settles rank
+\(l=4\).
+
+\subsection{The trichotomy}
+
+For \(l\geq5\) and \(d\geq3\), Lemma 5.8 of
+\cite{CabanesSpath2026} proves that at least one of the following three
+alternatives holds:
+
+\begin{enumerate}[label=(\alph*)]
+  \item \(d\) is doubly regular;
+  \item \(a_{(\G,F)}(d)\leq1\), and
+  \(a_{(\G,F)}(dm)=0\) for every odd \(m\geq3\); or
+  \item there are \(l_1,l_2>0\), signs
+  \(\varepsilon_1,\varepsilon_2\), and \(j\in\{1,2\}\) such that
+  \[
+    l_1+l_2=l,\qquad
+    \varepsilon_1\varepsilon_2=\varepsilon,
+  \]
+  the \(j\)-th type-\(D\) factor has rank \(l_j\geq4\), \(d\) is
+  doubly regular for that factor, and its \(d\)-multiplicity equals
+  \(a_{(\G,F)}(d)\).
+\end{enumerate}
+
+Case (a) is already done.  For case (b), the needed cyclotomic step is
+the following: for odd \(\ell\),
+\[
+  \ell\mid\Phi_m(q)
+  \quad\Longleftrightarrow\quad
+  m=d\ell^a\text{ for some }a\geq0
+\]
+\cite[Lemma 5.2(a)]{Malle2007}.  Alternative (b), applied with
+\(m=\ell^a\), gives
+\(a_{(\G,F)}(d\ell^a)=0\) for \(a\geq1\).  Thus the entire
+\(\ell\)-part of \(|G|\) lies in a Sylow \(d\)-torus of rank at most one,
+so the Sylow \(\ell\)-subgroup is cyclic.  The inductive Alperin--McKay
+theorem for cyclic-defect blocks \cite{KoshitaniSpath2016} implies the
+required \(\IMK\) condition.
+
+\subsection{\texorpdfstring{The subgroup \(\M\) in the non-doubly-regular case}
+  {The subgroup M in the non-doubly-regular case}}
+
+In case (c), Cabanes and Sp{\"a}th pass to a twisted Frobenius
+\[
+  F'=\nu F_q
+\]
+and construct a generally disconnected maximal-rank algebraic subgroup
+\(\M\leq\G\), stable under \(F'\), such that
+\[
+  (\M^\circ)_{\mathrm{der}}
+  \text{ has type }
+  D_{l_1}\times D_{l_2},
+  \qquad
+  |\M/\M^\circ|=2.
+\]
+At fixed points,
+\[
+  M_0=G_1.G_2\trianglelefteq
+  M^\circ=(\M^\circ)^{F'}
+\]
+is a central product.  Only the distinguished factor \(G_j\) is
+guaranteed to have rank \(l_j\geq4\); the other can have low rank and
+need not be quasisimple.  The distinguished factor contains a Sylow
+\(d\)-torus with the same \(d\)-multiplicity as \(G\), and \(d\) is
+doubly regular there.  Thus its already proved correspondence can be
+transported into \(M=\M^{F'}\).
+
+The technical core is Clifford theory across
+\[
+  M_0=G_1.G_2
+   \trianglelefteq M^\circ
+   \trianglelefteq M,
+\]
+where
+\[
+  [M:M_0]=2\gcd(2,q-1);
+\]
+the quotient therefore has order \(4\) for odd \(q\), but order \(2\)
+for even \(q\).  Characters are partitioned according to their
+stabilizers and extension behavior.  Theorem 5.20 of
+\cite{CabanesSpath2026} constructs an \(E(M)\)-stable
+\(\widetilde M\)-transversal in \(\Irr(M)\), and its chosen characters
+extend to the required stabilizers.  In the exceptional case
+\(2\mid f\), \(\varepsilon=1\), and \(\varepsilon_1=-1\), the theorem
+also controls the central element \(h_0\): when \(h_0\in\ker(\chi)\), it
+chooses an extension with \(vF_q\) in its kernel.
+
+Proposition 6.3 transports the needed character correspondences using
+central isomorphisms of character triples.  Theorem 6.4 proves
+extendibility for the chosen transversal with respect to
+\(N\trianglelefteq\widehat N\), and Corollary 6.5 proves maximal
+extendibility for \(N\trianglelefteq\widetilde N\).  Propositions 6.7
+and 6.8 construct the required equivariant extension maps.  Theorem 6.9
+assembles these results for the normalizer of a Sylow \(d\)-torus in
+\(G\), proving:
+
+\begin{enumerate}
+  \item a \(\widehat N\)-stable \(\widetilde N\)-transversal of
+  \(\Irr(N)\), whose members extend to their stabilizers in
+  \(\widehat N\);
+  \item maximal extendibility for \(N\trianglelefteq\widetilde N\);
+  \item on a chosen \(\widehat N\)-stable
+  \(\widetilde C\)-transversal in \(\Irr(C)\), a
+  \(\widehat N\)-equivariant extension map for
+  \(C\trianglelefteq N\); and
+  \item a
+  \(\operatorname{Lin}(\widetilde N/N)\rtimes\widehat N\)-equivariant
+  extension map for
+  \(\widetilde C\trianglelefteq\widetilde N\), which also gives maximal
+  extendibility for that inclusion.
+\end{enumerate}
+
+The first item is \(\Ad\).  The second and fourth items give \(\Bd\);
+the third is the auxiliary extension map used in their construction.
+Therefore \cref{prop:local-criterion} applies in every
+non-doubly-regular case with \(a_{(\G,F)}(d)\geq2\).
+
+\begin{proposition}[Final type-\(D\) case]\label{prop:type-d}
+Let \(q\) be a prime power and let \(\ell\nmid 2q\) be prime.  Then
+\(\IMK\) holds for \(D_{l,\mathrm{sc}}^\varepsilon(q)\), for every
+\(l\geq4\) and \(\varepsilon\in\{1,-1\}\).
+\end{proposition}
+
+\begin{proof}
+For \(l=4\), use the rank-four clause of the doubly regular theorem.
+For \(l\geq5\), put \(d=d_\ell(q)\).  The cases \(d=1,2\) were already
+proved in the odd-degree/local-extension work
+\cite{MalleSpath2016}.  Thus assume \(d\geq3\) and apply the trichotomy.
+The doubly regular case follows from Theorem 4.1; the multiplicity-at-most
+one case has cyclic Sylow subgroup and follows from
+\cite{KoshitaniSpath2016}; the remaining case follows from Theorem 6.9
+and the local criterion.  These cases are exhaustive.
+\end{proof}
+
+This is Theorem 6.12 of \cite{CabanesSpath2026}.  Lemma 6.10 chooses the
+ranks, signs, and subgroup \(M\), and proves the Sylow-\(d\)-torus and
+normalizer containments in the twisted setup.  Lemma 6.11 constructs the
+conjugation/isomorphism transport back to the original \(F\)-fixed group.
+
+\section{Assembly of the full theorem}
+
+\begin{proof}[Proof of \cref{thm:mckay}]
+Fix a prime \(\ell\).  By the classification of finite simple groups,
+every nonabelian finite simple group is alternating, sporadic, or of Lie
+type.  The results in the table of Section 3 verify \(\IMK\) for the
+universal covers of all families except the remaining type-\(D\) cases.
+Those cases are supplied by \cref{prop:type-d}.  Hence the universal
+cover of every nonabelian finite simple group satisfies \(\IMK\) at
+\(\ell\).
+
+Apply the reduction theorem, \cref{thm:reduction}.  Every finite group
+now satisfies \(\IMK\) at \(\ell\).  Apply
+\cref{prop:imk-to-mckay} to obtain a bijection between
+\(\Irr_{\ell'}(X)\) and
+\(\Irr_{\ell'}(\Norm_X(S))\) for every finite \(X\) and
+\(S\in\Syl_\ell(X)\).  Taking cardinalities proves the equality.
+\end{proof}
+
+\section{Was a simpler proof available?}
+
+We searched the post-2024 literature and the cited character-correspondence
+literature for a proof that avoids the inductive condition or the
+classification.  No such proof of the theorem for \emph{all} finite
+groups was found.  The Annals authors themselves organize the result as
+the last step of a classification-based program
+\cite{CabanesSpath2026}.
+
+There are important simpler proofs in restricted settings:
+
+\begin{itemize}
+  \item the Okuyama--Wajima argument proves the blockwise height-zero
+  counting equality, hence McKay's equality, for \(p\)-solvable groups
+  \cite{OkuyamaWajima1980};
+  \item a modern equivariant version still assumes a \(p\)-solvable
+  quotient \cite{MaltempoVallejo2026};
+  \item the prime \(2\) admits a much more focused Harish--Chandra
+  analysis \cite{MalleSpath2016}; and
+  \item cyclic Sylow/defect cases follow from the cyclic-defect theory
+  \cite{KoshitaniSpath2016}.
+\end{itemize}
+
+None of these covers the non-\(p\)-solvable type-\(D\) families that
+constituted the final obstruction.  Treating a special-case proof as a
+general proof would therefore leave a genuine logical gap.  The proof
+above is the complete route documented by the cited primary literature:
+it compresses the classification work behind named theorems, but does
+not disguise or omit it.
+
+\section{Dependency summary}
+
+The logical spine of the argument is:
+\[
+\begin{gathered}
+\text{ordinary character theory and character triples}\\
+\Downarrow\\
+\text{family-specific equivariant bijections and extension maps}\\
+\Downarrow\\
+\IMK\text{ for every universal cover (CFSG case split)}\\
+\Downarrow\quad\text{\cite{IsaacsMalleNavarro2007,Rossi2023}}\\
+\IMK\text{ for every finite group}\\
+\Downarrow\quad\text{induction on }[X:\Norm_X(S)]\\
+|\Irr_{\ell'}(X)|
+=
+|\Irr_{\ell'}(\Norm_X(S))|.
+\end{gathered}
+\]
+
+\begingroup
+\footnotesize
+\bibliographystyle{alpha}
+\bibliography{references}
+\endgroup
+
+\end{document}

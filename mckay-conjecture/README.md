@@ -21,6 +21,11 @@ tip of mathlib's `master` branch when the project was created on 2026-07-25.
   complex characters and the `p'`-degree condition.
 - `McKayConjecture/Statement.lean` defines the Sylow normalizer and the
   proposition `McKayConjecture.Statement`.
+- `docs/mckay_proof.tex` gives a detailed natural-language proof certificate,
+  including the exact reduction and final type-`D` theorem chain.
+- `docs/formalization_blueprint.tex` audits existing Lean coverage and divides
+  the complete formalization into named modules and compilation gates.
+- `docs/references.bib` records the primary mathematical and Lean sources.
 
 ## Build
 
@@ -29,5 +34,17 @@ lake exe cache get
 lake build
 ```
 
-The first milestone contains only the audited proposition; it does not assume
-the conjecture as an axiom or hide an unfinished proof behind `sorry`.
+To build the documents:
+
+```bash
+cd docs
+latexmk -pdf -interaction=nonstopmode -halt-on-error \
+  -outdir=../output/pdf mckay_proof.tex
+latexmk -pdf -interaction=nonstopmode -halt-on-error \
+  -outdir=../output/pdf formalization_blueprint.tex
+```
+
+The statement milestone contains only the audited proposition; it does not
+assume the conjecture as an axiom or hide an unfinished proof behind `sorry`.
+The blueprint keeps the same trust boundary: an assumed reduction theorem or
+CFSG family result is explicitly not counted as a complete formal proof.
