@@ -1,0 +1,16 @@
+name = "mckay-conjecture"
+version = "0.1.0"
+defaultTargets = ["McKayConjecture"]
+
+[leanOptions]
+pp.unicode.fun = true
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "9cebae57f419f984d008f357605b2621a1d9f13b"
+
+[[lean_lib]]
+name = "McKayConjecture"

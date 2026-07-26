@@ -1,0 +1,10 @@
+/.lake/
+*.olean
+*.ilean
+*.log
+*.aux
+*.fdb_latexmk
+*.fls
+*.out
+*.pdf
+*.synctex.gz

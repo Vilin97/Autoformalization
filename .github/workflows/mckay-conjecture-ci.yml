@@ -1,0 +1,29 @@
+name: McKay Conjecture CI
+
+on:
+  push:
+    paths:
+      - 'mckay-conjecture/**'
+      - '.github/workflows/mckay-conjecture-ci.yml'
+  pull_request:
+    paths:
+      - 'mckay-conjecture/**'
+      - '.github/workflows/mckay-conjecture-ci.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: mckay-conjecture
