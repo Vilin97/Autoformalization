@@ -21,49 +21,11 @@ noncomputable section
 namespace McKayConjecture
 namespace InductiveMcKay
 
-open GroupTheory
-
 private abbrev row18OrdinaryCertificate :=
   alternatingSixAmbientRow18OrdinaryCharacterRowCertificate
 
 private abbrev row19OrdinaryCertificate :=
   alternatingSixAmbientRow19OrdinaryCharacterRowCertificate
-
-local instance row18Row19SeparationRow18CoordinateNonempty :
-    Nonempty (Fin AlternatingSixAmbientOrdinaryRow.row18.dimension) :=
-  ⟨⟨0, by simp [AlternatingSixAmbientOrdinaryRow.dimension]⟩⟩
-
-local instance row18Row19SeparationRow19CoordinateNonempty :
-    Nonempty (Fin AlternatingSixAmbientOrdinaryRow.row19.dimension) :=
-  ⟨⟨0, by simp [AlternatingSixAmbientOrdinaryRow.dimension]⟩⟩
-
-theorem alternatingSixAmbientRow18OrdinaryCharacter_generatorAB :
-    (row18OrdinaryCertificate.characterRowCertificate.representation.character)
-        alternatingSixAmbientCanonicalGeneratorAB =
-      (alternatingSixFiveAmbient_row18_matrixA *
-        alternatingSixFiveAmbient_row18_matrixB).trace := by
-  change
-    (FDRep.of
-      alternatingSixAmbientRow18MatrixCertificate.universalCoverRepresentation).character
-      alternatingSixAmbientCanonicalGeneratorAB =
-      _
-  exact
-    alternatingSixAmbientRow18MatrixCertificate
-      |>.universalCoverRepresentation_character_generatorAB
-
-theorem alternatingSixAmbientRow19OrdinaryCharacter_generatorAB :
-    (row19OrdinaryCertificate.characterRowCertificate.representation.character)
-        alternatingSixAmbientCanonicalGeneratorAB =
-      (alternatingSixFiveAmbient_row19_matrixA *
-        alternatingSixFiveAmbient_row19_matrixB).trace := by
-  change
-    (FDRep.of
-      alternatingSixAmbientRow19MatrixCertificate.universalCoverRepresentation).character
-      alternatingSixAmbientCanonicalGeneratorAB =
-      _
-  exact
-    alternatingSixAmbientRow19MatrixCertificate
-      |>.universalCoverRepresentation_character_generatorAB
 
 /-- The normalized ordinary characters at rows 18 and 19 are distinct. -/
 theorem
@@ -71,12 +33,13 @@ theorem
     row18OrdinaryCertificate.characterRowCertificate.irreducibleCharacter ≠
       row19OrdinaryCertificate.characterRowCertificate.irreducibleCharacter := by
   apply
-    CharacterRowCertificate.irreducibleCharacter_ne_of_character_apply_ne
-      row18OrdinaryCertificate.characterRowCertificate
-      row19OrdinaryCertificate.characterRowCertificate
-      alternatingSixAmbientCanonicalGeneratorAB
-  rw [alternatingSixAmbientRow18OrdinaryCharacter_generatorAB,
-    alternatingSixAmbientRow19OrdinaryCharacter_generatorAB]
+    row18OrdinaryCertificate.irreducibleCharacter_ne_of_matrixAB_trace_ne
+      row19OrdinaryCertificate
+  change
+    (alternatingSixFiveAmbient_row18_matrixA *
+          alternatingSixFiveAmbient_row18_matrixB).trace ≠
+      (alternatingSixFiveAmbient_row19_matrixA *
+          alternatingSixFiveAmbient_row19_matrixB).trace
   exact
     alternatingSixAmbientRow18_matrixAB_trace_ne_row19_matrixAB_trace
 

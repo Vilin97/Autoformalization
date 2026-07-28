@@ -3,6 +3,7 @@ Copyright (c) 2026 Clawristotle contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Clawristotle contributors
 -/
+import McKayConjecture.Character.CharacterRowSeparation
 import McKayConjecture.Character.FiniteCharacterTableCertificate
 import McKayConjecture.Character.SimpleCharacterRowCertificate
 import McKayConjecture.InductiveMcKay.AlternatingSixAmbientOrdinaryRows
@@ -152,6 +153,58 @@ theorem scalarPattern_eq_of_irreducibleCharacter_eq
     mul_left_cancel₀
       (Nat.cast_ne_zero.mpr row'.dimension_pos.ne')
       hcentral
+
+/-- Different traces of the second presentation generator separate two
+normalized ordinary rows. -/
+theorem irreducibleCharacter_ne_of_matrixB_trace_ne
+    {row' : AlternatingSixAmbientOrdinaryRow}
+    (D : AlternatingSixAmbientOrdinaryCharacterRowCertificate row')
+    (htrace : C.matrixRow.matrixB.trace ≠ D.matrixRow.matrixB.trace) :
+    C.characterRowCertificate.irreducibleCharacter ≠
+      D.characterRowCertificate.irreducibleCharacter := by
+  letI : Nonempty (Fin row.dimension) :=
+    Fin.pos_iff_nonempty.mp row.dimension_pos
+  letI : Nonempty (Fin row'.dimension) :=
+    Fin.pos_iff_nonempty.mp row'.dimension_pos
+  apply
+    CharacterRowCertificate.irreducibleCharacter_ne_of_character_apply_ne
+      C.characterRowCertificate D.characterRowCertificate
+      alternatingSixAmbientCanonicalGeneratorB
+  change
+    (FDRep.of C.matrixRow.universalCoverRepresentation).character
+        alternatingSixAmbientCanonicalGeneratorB ≠
+      (FDRep.of D.matrixRow.universalCoverRepresentation).character
+        alternatingSixAmbientCanonicalGeneratorB
+  rw [C.matrixRow.universalCoverRepresentation_character_generatorB,
+    D.matrixRow.universalCoverRepresentation_character_generatorB]
+  exact htrace
+
+/-- Different traces of the product of the two presentation generators
+separate two normalized ordinary rows. -/
+theorem irreducibleCharacter_ne_of_matrixAB_trace_ne
+    {row' : AlternatingSixAmbientOrdinaryRow}
+    (D : AlternatingSixAmbientOrdinaryCharacterRowCertificate row')
+    (htrace :
+      (C.matrixRow.matrixA * C.matrixRow.matrixB).trace ≠
+        (D.matrixRow.matrixA * D.matrixRow.matrixB).trace) :
+    C.characterRowCertificate.irreducibleCharacter ≠
+      D.characterRowCertificate.irreducibleCharacter := by
+  letI : Nonempty (Fin row.dimension) :=
+    Fin.pos_iff_nonempty.mp row.dimension_pos
+  letI : Nonempty (Fin row'.dimension) :=
+    Fin.pos_iff_nonempty.mp row'.dimension_pos
+  apply
+    CharacterRowCertificate.irreducibleCharacter_ne_of_character_apply_ne
+      C.characterRowCertificate D.characterRowCertificate
+      alternatingSixAmbientCanonicalGeneratorAB
+  change
+    (FDRep.of C.matrixRow.universalCoverRepresentation).character
+        alternatingSixAmbientCanonicalGeneratorAB ≠
+      (FDRep.of D.matrixRow.universalCoverRepresentation).character
+        alternatingSixAmbientCanonicalGeneratorAB
+  rw [C.matrixRow.universalCoverRepresentation_character_generatorAB,
+    D.matrixRow.universalCoverRepresentation_character_generatorAB]
+  exact htrace
 
 end AlternatingSixAmbientOrdinaryCharacterRowCertificate
 
