@@ -103,9 +103,10 @@ natural number and the predicate ``\(p'\)-degree'' is literally
 \(\neg\,p\mid\chi(1)\).
 
 The project is pinned to mathlib commit
-\texttt{9cebae57f419f984d008f357605b2621a1d9f13b} and Lean
+\texttt{c7e4bc625eceee28a62a2c852148eb4c14cef1d8} and Lean
 \texttt{v4.33.0-rc1}.  That commit was the tip of mathlib's
-\texttt{master} branch when this package was created on 2026-07-25.
+\texttt{master} branch when the dependency pin was refreshed on
+2026-07-27.
 Pinning the dependency is part of reproducibility: ``latest mathlib'' is
 a moving target and cannot be a stable build input.
 
@@ -332,22 +333,266 @@ simple groups.
 
 The modular-algebra layer developed in this project now includes Brauer
 trace ideals and quotients, bases for permutation-module and
-permutation-algebra Brauer quotients, tensor-product compatibility,
-finite-field central-simple splitting, and the honest linear lift of a
-\(p\)-group action on a full endomorphism algebra.  These results turn
-an abstract finite-field Dade algebra into a pointed endopermutation
-module.  Importantly, the defining condition for a Dade algebra only
-says that its Brauer quotient is nonzero; it does not force that
-quotient to be one-dimensional.  The formal development records the
-exact equivalence between one-dimensionality, Brauer primitivity, and
-a subsingleton set of fixed basis indices, and supplies the
-counterexample \(M_2(k)\) with trivial group action, whose Brauer
-quotient has dimension four.  Thus a cap or multiplicity-one
-(equivalently, Brauer-primitivity) hypothesis is indispensable.  These
-results do not replace the remaining deep input: the Puig--Turull
-normalizer-extension theorem and its dependence on Dade's
-classification of capped endopermutation modules still require a
-kernel-checked formal proof.
+permutation-algebra Brauer quotients, and functoriality under
+equivariant algebra equivalences, opposites, and tensor products.  Over
+a finite field it proves central-simple splitting, the Azumaya
+property, and closure of Dade algebras under tensor products.  It also
+proves that Brauer primitivity is preserved by opposites and that a
+tensor product is Brauer-primitive exactly when both factors are.
+For a trivial action of a finite \(p\)-group all proper relative traces
+vanish, and the resulting Brauer quotient is explicitly equivalent to
+the original algebra.
+
+These results turn an abstract finite-field Dade algebra into a pointed
+endopermutation module and construct the Brauer-normalizer extension
+whenever the canonical endomorphism comparison is an isomorphism.  A
+Brauer-primitive pointed endopermutation module with a one-dimensional
+cap satisfies that comparison by a dimension argument.  The project
+also proves the transitive core of Ladisch's Lemma~11.4(a): a
+transitive permutation module for a finite \(p\)-group in
+characteristic \(p\) is indecomposable, equivalently every equivariant
+idempotent is zero or one.  It now decomposes every finite permutation
+module canonically as the internal direct sum of its orbit modules,
+proves that each orbit factor has a local endomorphism ring, and develops
+the finite-length Krull--Schmidt exchange needed for off-diagonal maps
+between isomorphic orbit factors.  Consequently every equivariant split
+retract of a finite permutation module for a finite \(p\)-group again
+has a finite permutation basis; equivalently, the range of an arbitrary
+equivariant idempotent is a permutation module.  No orbit-block
+preservation hypothesis remains.
+
+This direct-summand result does not by itself prove the numerical
+Glauberman endpoint.  The invariant subspace of a permutation module has
+dimension equal to the number of permutation-basis orbits, and
+prime-to-\(p\) total dimension does not force that orbit count to be
+prime to \(p\).  For example, in characteristic two the permutation
+module on one fixed point and one free \(C_2\)-orbit has total dimension
+three but invariant dimension two.  The exact remaining permutation
+input is therefore a prime-to-\(p\) orbit count.  A useful stronger
+sufficient condition is indecomposability of the reduced canonical
+Glauberman module: exchange then makes it a single transitive orbit, and
+prime-to-\(p\) total rank forces that orbit to be a singleton.
+
+There is no remaining Puig--Turull issue in the stronger special case
+where the reduced module itself has a finite permutation basis.  The
+endomorphism Brauer comparison then supplies the full normalizer
+extension for every faithful action, and Brauer primitivity forces the
+ordinary module Brauer quotient to be a line.  The intrinsic
+\texttt{FinitePermutationBasis} interface is now transported to the
+typeclass-based permutation-module API, with a theorem identifying the
+reconstructed representation with the original one.  The unresolved
+case is therefore genuinely the non-permutation capped
+endopermutation case, where only the endomorphism algebra has a
+permutation basis.
+
+Importantly, the defining condition for a Dade algebra only says that
+its Brauer quotient is nonzero; it does not force that quotient to be
+one-dimensional.  The formal development records the exact
+equivalence between one-dimensionality, Brauer primitivity, and a
+subsingleton set of fixed basis indices, and supplies the counterexample
+\(M_2(k)\) with trivial group action, whose Brauer quotient has
+dimension four.  Thus a cap or multiplicity-one hypothesis is
+indispensable.  It also proves a useful rank consequence that is often
+left implicit in paper proofs: a Brauer-primitive Dade algebra has
+dimension prime to \(p\), and when the algebra is
+\(\operatorname{End}_k(V)\), the module dimension
+\(\dim_k V\) is prime to \(p\).
+
+For the actual Glauberman--Nagao endpoint the remaining
+input is more precise than an abstract scalar comparison.  The scalar
+coefficient boundary is now constructive: determinant normalization
+places the complex factor in finite roots of unity, a Chinese-remainder
+projection maps its prime-to-\(q\) part to an explicit Galois field, and
+the discarded factor represents a \(q\)-primary \(H^2\)-class.  If a
+Brauer-normalizer lift has exactly this reduced factor, its scalar
+cochain splits the retained class; the prime-to-\(q\) selected-summand
+multiplicity then kills the remaining \(q\)-primary class and proves
+the full Proposition~4.5 obstruction agreement.  The development now
+packages these exact inputs in
+\texttt{ProductAmbientGlaubermanHasReducedDadeFactor}: the
+prime-to-\(q\) multiplicity, a Brauer-primitive Dade algebra over the
+explicit reduced field, its interior normalizer lift and extension, and
+pointwise equality of factors.  Witnesses for the canonical
+correspondence imply the global DGN obstruction hypothesis by
+Glauberman uniqueness, and
+\texttt{statement\_of\_reducedDadeFactor\_universalCover} connects that
+operator-level boundary directly to the public McKay equality.
+
+Consequently the remaining cross-characteristic input is operator-level:
+construct a rank-preserving normalizer-stable integral model, identify
+the resulting pointed endopermutation module and primitive Dade algebra,
+and obtain its Brauer-normalizer extension.  The first reduction stage
+is now checked: the orbit span of a complex basis is a finite full
+cyclotomic-order lattice, every determinant-normalized operator
+preserves it, reduction at a chosen maximal ideal above \(q\) produces
+an actual projective representation over a finite residue field, and
+its factor is pointwise the residue of the finite complex factor.
+Given an honest finite-group action on that residue module and
+pointwise normalization by the reduced projective operators, the
+development constructs the corresponding projective interior-normalizer
+lift and proves its factor formula exactly.  A reusable residue-Dade
+package now combines that action, Brauer primitivity, the
+extension of the fixed-unit Brauer character to the unit normalizer;
+faithfulness and primitivity make the remaining conjugation clause
+automatic and hence recover the full Brauer-normalizer extension.  Its
+canonical Glauberman specialization discharges the obstruction-class
+comparison without repeating the large dependent endomorphism-action
+types.
+
+The rank boundary is also explicit.  General quotient/base-change
+equivalences and finite-free, finite-flat, and finite-projective
+rank-preservation theorems show that a projective integral lattice of
+the expected rank reduces to a vector space of the same dimension.
+For the actual orbit lattice the development proves torsion-freeness,
+linear independence of the embedded complex basis over the coefficient
+ring, and hence the lower bound
+\[
+  \dim_{\mathbb C}V
+  \leq \operatorname{rank}_{R}L.
+\]
+It obtains equality from either an integral basis of the same index or
+projectivity together with the missing upper bound.  The latter premise
+is genuine: the orbit span of an arbitrary complex basis may contain
+matrix coefficients outside the fraction field selected by that basis,
+so fullness alone does not rule out a larger rank.  A genuine integral
+model or a better-adapted coefficient ring remains necessary.
+
+The scalar coefficient boundary is now unconditional.  Cyclotomic
+reduction at any chosen maximal ideal kills exactly the \(q\)-primary
+kernel of the CRT projection: prime-to-\(q\) primitive roots retain their
+exact order, while \(q\)-power roots reduce to one by Frobenius
+injectivity.  The resulting character on the range of root reduction
+therefore lifts the complex prime-to-\(q\) projection.  Since the full
+unit group of a finite field is cyclic, finite-abelian duality extends
+that range character to a homomorphism
+\[
+  k^\times\longrightarrow\mathbb C^\times .
+\]
+The checked chain is split across
+\texttt{FiniteRootResidueKernel},
+\texttt{FiniteRootResidueComplexCharacter}, and
+\texttt{ProjectiveCompatibleNormalizerSplitting}.  The retained-factor
+argument now uses only this multiplicative character, so the
+residue-Dade package no longer requires a ring embedding into an
+independently chosen finite field.
+
+The stronger prescribed ring embedding can genuinely fail and is not
+silently assumed.  It exists exactly when a
+\texttt{CompatibleReductionTransport} exists.  For \(q=2\) and \(n=7\),
+primitive seventh roots split into two Frobenius orbits, and independent
+choices may select different orbits; increasing the target degree does
+not repair that mismatch.  This no longer obstructs the proof because
+additive or field compatibility is irrelevant to the scalar cohomology
+calculation.
+
+The obvious candidate for the canonical honest residue action is now
+settled exactly, including its limitation.  The homomorphism from the
+internal Sylow direct factor through the right inertia group to the
+right outer quotient is identically one, because its image already
+lies in the normal copy killed by the quotient.  More generally, every
+homomorphism from a finite \(q\)-group to that \(q'\)-outer quotient is
+trivial.  Along this trivial map the constant-one scalar correction
+constructs an honest action, is conjugation-stable, and is normalized
+by every ambient projective operator.  Its action is faithful if and
+only if the acting \(q\)-group is trivial.  Thus scalar normalization is
+not the missing input, and no nontrivial faithful Dade interior action
+can be obtained by restricting the right outer-quotient action.
+
+Passing back to the full right inertia group does not evade this
+obstruction.  The corrected selected-summand projective operators are
+already the identity on the embedded Sylow factor before quotient
+descent.  Determinant normalization and residue reduction preserve
+that identity, and honesty forces every scalar correction to be a
+character into the finite residue-field unit group.  A character from
+a finite \(q\)-group to this \(q'\)-group is trivial.  Thus every
+pre-quotient scalar normalization is again trivial, and can be faithful
+only for a trivial acting group.  The required modular action must be
+independent interior data rather than a scalar correction of either
+canonical restriction.
+
+After the rank and coefficient points, the remaining modular input is
+therefore a nontrivial faithful honest residue action supplied by
+external or pre-quotient modular data, identification of its
+endomorphism algebra as a Brauer-primitive Dade algebra, and extension
+of the fixed-unit Brauer character to the full unit normalizer.  This
+last extension problem now has a sharp elementary sufficient
+criterion.  For a faithful primitive interior action, fixed-algebra
+units are exactly the kernel of the normalizer action on \(P\), and
+the fixed-unit Brauer character is invariant under the full
+normalizer.  Transfer extends it whenever the fixed-unit quotient is
+a \(p\)-group, since the unit group of the finite coefficient field
+has \(p'\)-order.  Equivalently, this quotient is the subgroup of
+\(\operatorname{Aut}(P)\) induced by normalizer conjugation.
+
+That quotient condition is genuine, not a hidden consequence of
+primitivity.  In characteristic three, the faithful two-dimensional
+Jordan module for \(C_3\) has primitive Dade endomorphism algebra,
+while a diagonal normalizer induces inversion and hence a
+\(C_2\)-subgroup of \(\operatorname{Aut}(C_3)\).  Thus the transfer
+criterion cannot by itself finish the general case.  The remaining
+Puig--Turull input must either control the induced automorphism
+subgroup in the canonical construction or extend the invariant
+character beyond the \(p\)-group case.  Ordinary cappedness only gives
+nonvanishing of the Brauer quotient and does not construct the needed
+faithful action; Dade's classification of capped endopermutation
+modules is still needed in kernel-checked form
+\cite{Ladisch2009,Puig1986}.
+
+The formalization now reaches the natural starting point of Puig's
+extended Brauer construction.  A faithful interior action of a
+\(p\)-group on a central algebra in characteristic \(p\) induces a
+faithful conjugation action: a trivially acting implementing unit is
+central, hence scalar, and characteristic \(p\) has no nontrivial
+\(p\)-power roots of unity.  For every
+\(\varphi\in\operatorname{Aut}(P)\), the development defines the
+twisted fixed submodule
+\[
+  A^\varphi=\{a\in A\mid aI(g)=I(\varphi(g))a\},
+\]
+identifies it with the invariants of the twisted representation
+\(g\cdot a=I(\varphi(g))aI(g)^{-1}\), and takes its ordinary relative
+trace quotient.  Products satisfy
+\(A^\varphi A^\psi\subseteq A^{\varphi\psi}\).  Both left and right
+trace-product formulas are proved, including transport of the subgroup
+by \(\psi^{-1}\) on the right, so multiplication descends to bilinear
+maps between all twisted Brauer components.  For every unit normalizing
+the interior copy of \(P\), its Brauer class lies in the component
+indexed by the induced automorphism.  These homogeneous classes multiply
+as the normalizing units do, and the class represented by the inverse
+unit is proved to be a two-sided homogeneous inverse.  Thus each
+normalizing unit now determines a certified unit in the corresponding
+fiber of the automorphism-graded Brauer object.  What remains is the
+genuinely deep step stated by Ladisch's Lemma~11.7: for abelian \(P\),
+split or transport this graded family into the identity Brauer component
+coherently, thereby extracting a homomorphism from the full unit
+normalizer which extends the ordinary Brauer map
+\cite{Ladisch2009,Puig1986}.
+
+The first new CFSG-side case, \(A_6\), now has a complete
+kernel-checked Schur-multiplier calculation.  An executable rewrite
+certificate verifies all 188 derived rules and all \(360\times4\)
+state transitions for the four-relator ATLAS presentation of \(A_6\).
+Lifting those rewrites with four central weights produces a perfect
+central cover in which every element has one of \(360\times6\)
+representatives.  Corrected lifts into every central extension prove
+that this cover is universal.  Two finite permutation representations,
+on the coordinate models of \(\mathbb F_9^2\) and
+\(\mathbb F_4^3\), detect respectively the order-two and order-three
+parts of the first central generator.  Since the rewrite lattice
+already gives exponent six, that generator has exact order six.
+Consequently the projection kernel and center have order six and the
+presented group has order \(2160\).  Uniqueness of universal central
+extensions transports the result to the canonical Hopf-formula cover.
+The \(p=5\) group-theoretic local structure is also complete.  A Sylow
+five-subgroup of the universal cover is cyclic of order five and meets
+the central kernel trivially.  Its normalizer has order \(60\), its
+centralizer is cyclic of order \(30\), and the conjugation image has
+order two; quotienting by the central kernel recovers the corresponding
+\(A_6\) local subgroup.  The \(p=5\) verification is reduced to one
+explicit finite projective-character table certificate.  Consequently
+the remaining \(A_6\) obligations are the actual \(p=5\) projective
+table and the local character computations at \(2\) and \(3\), not a
+Schur-multiplier or Sylow-five normalizer premise.
 
 \subsection{Odd Order}
 
@@ -407,6 +652,10 @@ Projective representations and factor sets &
 \(H^2\), cocycles & absent & absent & no &
 TNLean: concrete scaffold; pool: crossed products &
 generalize and connect to characters \\
+Dade algebras and endopermutation modules &
+absent & absent & absent & no & absent &
+project layer substantial; formalize classification and stable
+cross-characteristic lattice reduction \\
 Central isomorphism and Butterfly &
 absent & absent & absent & no & absent &
 entire new layer \\
@@ -498,7 +747,7 @@ APIs.
 The version boundary is strict.  Odd Order and lean-pool use Lean
 4.32.0-rc1 with mathlib \texttt{360da6f\ldots}; Qiuzhen, TauCeti, and
 TNLean use Lean 4.32.0 with mathlib \texttt{81a5d25\ldots}.  This package
-uses Lean 4.33.0-rc1 and mathlib \texttt{9cebae5\ldots}.  These packages
+uses Lean 4.33.0-rc1 and mathlib \texttt{c7e4bc6\ldots}.  These packages
 cannot be placed unchanged in one Lake graph.  Selected files must be
 ported to the current pin and reviewed there.
 

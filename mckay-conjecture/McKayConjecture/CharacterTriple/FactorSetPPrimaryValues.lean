@@ -26,7 +26,11 @@ namespace McKayConjecture
 namespace CharacterTriple
 namespace FactorSet
 
-variable {G A B : Type}
+universe u v w
+
+section Map
+
+variable {G : Type u} {A : Type v} {B : Type w}
 variable [Group G] [CommGroup A] [CommGroup B]
 
 /-- Map the coefficients of a factor set along a commutative-group
@@ -43,6 +47,11 @@ theorem map_apply
     (x y : G) :
     α.map f x y = f (α x y) :=
   rfl
+
+end Map
+
+variable {G A B : Type}
+variable [Group G] [CommGroup A] [CommGroup B]
 
 /-- A uniform exponent for all factor-set values gives the same
 annihilator for the represented `H²` class. -/

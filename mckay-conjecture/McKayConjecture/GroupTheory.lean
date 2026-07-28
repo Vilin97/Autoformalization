@@ -3,6 +3,16 @@ Copyright (c) 2026 Clawristotle contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Clawristotle contributors
 -/
+import McKayConjecture.GroupTheory.AlternatingSix
+import McKayConjecture.GroupTheory.AlternatingSixGeneration
+import McKayConjecture.GroupTheory.AlternatingSixHopfKernel
+import McKayConjecture.GroupTheory.AlternatingSixPresentation
+import McKayConjecture.GroupTheory.AlternatingSixHopfKernelProof
+import McKayConjecture.GroupTheory.AlternatingSixSylowFiveNormalizer
+import McKayConjecture.GroupTheory.AlternatingSixSylowStructure
+import McKayConjecture.GroupTheory.AlternatingSixUniversalCoverFiveLocalStructure
+import McKayConjecture.GroupTheory.AlternatingSixUniversalCoverKernel
+import McKayConjecture.GroupTheory.CentralExtensionSylowNormalizerAction
 import McKayConjecture.GroupTheory.Component
 import McKayConjecture.GroupTheory.ComponentCenter
 import McKayConjecture.GroupTheory.ComponentCommutation
@@ -28,6 +38,7 @@ import McKayConjecture.GroupTheory.CoprimeActionFixedPointProduct
 import McKayConjecture.GroupTheory.CoprimeActionFixedDual
 import McKayConjecture.GroupTheory.CoprimeCommutingFactors
 import McKayConjecture.GroupTheory.CoprimeFixedPointNormalizer
+import McKayConjecture.GroupTheory.CyclicComplexCharacterExtension
 import McKayConjecture.GroupTheory.EquivariantOrbitEquiv
 import McKayConjecture.GroupTheory.Fitting
 import McKayConjecture.GroupTheory.FittingPrimeDecomposition
@@ -37,6 +48,7 @@ import McKayConjecture.GroupTheory.FrattiniArgument
 import McKayConjecture.GroupTheory.FrattiniIntermediate
 import McKayConjecture.GroupTheory.FreePresentationCentralExtension
 import McKayConjecture.GroupTheory.FreePresentationCoverPerfect
+import McKayConjecture.GroupTheory.FreePresentationHopfKernel
 import McKayConjecture.GroupTheory.FreePresentationUniversalCentralExtension
 import McKayConjecture.GroupTheory.GeneralizedFitting
 import McKayConjecture.GroupTheory.GeneralizedFittingAction
@@ -81,6 +93,7 @@ import McKayConjecture.GroupTheory.PGroupQuotientIndex
 import McKayConjecture.GroupTheory.PGroupMaximalCyclicQuotient
 import McKayConjecture.GroupTheory.PGroupInvariantSum
 import McKayConjecture.GroupTheory.PGroupPPrimeHom
+import McKayConjecture.GroupTheory.PPrimaryKernelCardinality
 import McKayConjecture.GroupTheory.PPrimeKernelSylowNormalizer
 import McKayConjecture.GroupTheory.PPrimeCore
 import McKayConjecture.GroupTheory.PPrimeCoreSylowIntersection
@@ -105,6 +118,7 @@ import McKayConjecture.GroupTheory.UniversalCentralExtensionAutomorphism
 import McKayConjecture.GroupTheory.UniversalCentralExtensionSourceEquiv
 import McKayConjecture.GroupTheory.UniversalCentralExtensionTargetEquiv
 import McKayConjecture.GroupTheory.UniversalCoverDominatesPerfectCover
+import McKayConjecture.GroupTheory.UniversalCoverPerfectCoverKernel
 import McKayConjecture.GroupTheory.QuaternionGroupHom
 import McKayConjecture.GroupTheory.SpecialLinearTwoFiveSylowThreeNormalizer
 import McKayConjecture.GroupTheory.SpecialLinearTwoFiveSylowFiveNormalizer

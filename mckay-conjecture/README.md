@@ -12,8 +12,9 @@ divisible by `p`. The conjecture asserts
 ```
 
 The package is pinned to mathlib commit
-`9cebae57f419f984d008f357605b2621a1d9f13b` (Lean `v4.33.0-rc1`), which was the
-tip of mathlib's `master` branch when the project was created on 2026-07-25.
+`3b6f23172a994dc739dfcc974199fe05c44f691d` (Lean `v4.33.0-rc1`), which was the
+tip of mathlib's `master` branch when the dependency pin was refreshed on
+2026-07-28.
 
 ## Layout
 
