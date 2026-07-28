@@ -3,6 +3,11 @@ Copyright (c) 2026 Clawristotle contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Clawristotle contributors
 -/
+import McKayConjecture.Character.AlternatingSixFiveNormalizerSemidirectCharacterTable
+import McKayConjecture.Character.AlternatingSixThreeNormalizerDegreeFourIrreducible
+import McKayConjecture.Character.AlternatingSixThreeNormalizerDegreeThreeExtensions
+import McKayConjecture.Character.AlternatingSixThreeNormalizerOrdinaryCharacterCount
+import McKayConjecture.Character.AlternatingSixTwoNormalizerModelCharacterTable
 import McKayConjecture.Character.Automorphism
 import McKayConjecture.Character.AutomorphismInertia
 import McKayConjecture.Character.AutomorphismInertiaPPrime
@@ -79,6 +84,7 @@ import McKayConjecture.Character.FiniteOrderTraceIntegrality
 import McKayConjecture.Character.FiniteRootFamilyKronecker
 import McKayConjecture.Character.FiniteProductCorrespondence
 import McKayConjecture.Character.FiniteProductAutomorphism
+import McKayConjecture.Character.FiniteCharacterTableCertificate
 import McKayConjecture.Character.Gallagher
 import McKayConjecture.Character.GallagherBaseChange
 import McKayConjecture.Character.GallagherCovariantBaseChange
@@ -220,6 +226,8 @@ import McKayConjecture.Character.TwistedInteriorBrauerMultiplication
 import McKayConjecture.Character.BrauerQuotientAlgebraLinearComparison
 import McKayConjecture.Character.TwistedInteriorBrauerIdentity
 import McKayConjecture.Character.TwistedInteriorBrauerNormalizerUnits
+import McKayConjecture.Character.TwistedInteriorBrauerGradedNormalizerExtension
+import McKayConjecture.Character.TwistedInteriorBrauerSubgroupCollapse
 import McKayConjecture.Character.PrimitiveFixedUnitBrauerCharacter
 import McKayConjecture.Character.InvariantCharacterTransferExtension
 import McKayConjecture.Character.PrimitiveFixedUnitTransferExtension
