@@ -150,9 +150,7 @@ private theorem row06_reducedY11
       hY01,
       hY02,
       hY03,
-      hY13,
       hY21,
-      hY23,
       hY31] at commutesA01
   have commutesA03 :=
     congrFun (congrFun commutesA
@@ -168,9 +166,7 @@ private theorem row06_reducedY11
       hY02,
       hY03,
       hY13,
-      hY21,
-      hY23,
-      hY31] at commutesA03
+      hY23] at commutesA03
 
   linear_combination
     ((-((4 / 3) : ℂ) - ((8 / 3) : ℂ) * ζ ^ 3 + (4 : ℂ) * ζ ^ 5 - ((8 / 3) : ℂ) * ζ ^ 7 + ((4 / 3) : ℂ) * ζ ^ 10 + ((4 / 3) : ℂ) * ζ ^ 15 + ((8 / 3) : ℂ) * ζ ^ 19 - ((4 / 3) : ℂ) * ζ ^ 20 + ((8 / 3) : ℂ) * ζ ^ 23 - (4 : ℂ) * ζ ^ 25 + ((4 / 3) : ℂ) * ζ ^ 30 - ((8 / 3) : ℂ) * ζ ^ 31)) * commutesA01
@@ -234,8 +230,6 @@ private theorem row06_reducedY22
       hY02,
       hY03,
       hY12,
-      hY13,
-      hY23,
       hY32] at commutesA02
   have commutesA03 :=
     congrFun (congrFun commutesA
@@ -250,10 +244,8 @@ private theorem row06_reducedY22
       hY01,
       hY02,
       hY03,
-      hY12,
       hY13,
-      hY23,
-      hY32] at commutesA03
+      hY23] at commutesA03
 
   linear_combination
     ((-((8 / 3) : ℂ) * ζ ^ 3 - ((4 / 3) : ℂ) * ζ ^ 5 - ((8 / 3) : ℂ) * ζ ^ 7 + ((8 / 3) : ℂ) * ζ ^ 10 + ((4 / 3) : ℂ) * ζ ^ 15 + ((8 / 3) : ℂ) * ζ ^ 19 + ((8 / 3) : ℂ) * ζ ^ 23 - ((4 / 3) : ℂ) * ζ ^ 25 - ((4 / 3) : ℂ) * ζ ^ 30 - ((8 / 3) : ℂ) * ζ ^ 31)) * commutesA02

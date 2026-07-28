@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Clawristotle contributors
 -/
 import McKayConjecture.Character.AlternatingSixFiveNormalizerSemidirectCharacterTable
+import McKayConjecture.Character.AlternatingSixThreeActualNormalizerCharacterTable
 import McKayConjecture.Character.AlternatingSixThreeNormalizerDegreeFourIrreducible
 import McKayConjecture.Character.AlternatingSixThreeNormalizerDegreeThreeExtensions
 import McKayConjecture.Character.AlternatingSixThreeNormalizerOrdinaryCharacterCount

@@ -3,7 +3,7 @@ Copyright (c) 2026 Clawristotle contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Clawristotle contributors
 -/
-import McKayConjecture.InductiveMcKay.AlternatingSixAmbientMatrixRepresentation
+import McKayConjecture.InductiveMcKay.AlternatingSixAmbientScalarPattern
 
 /-!
 # Ordinary character-row indices for the sixfold cover of `A₆`
@@ -111,6 +111,23 @@ def dimension : AlternatingSixAmbientOrdinaryRow → ℕ
   | .row30 | .row31 => 15
   | .atlasTwelvePowerOne | .atlasTwelvePowerTwo
   | .atlasTwelvePowerSeven | .atlasTwelvePowerEleven => 12
+
+/-- Central-scalar pattern of an ordinary matrix row. -/
+def scalarPattern :
+    AlternatingSixAmbientOrdinaryRow →
+      AlternatingSixAmbientScalarPattern
+  | .row01 | .row08 | .row09 | .row16 | .row17
+  | .row20 | .row23 => .trivial
+  | .row02 | .row03 | .row10 | .row21 | .row30 =>
+      .orderThreePositive
+  | .row04 | .row05 | .row11 | .row22 | .row31 =>
+      .orderThreeNegative
+  | .row06 | .row07 | .row18 | .row19 | .row24
+  | .row25 => .orderTwo
+  | .row12 | .row13 | .atlasTwelvePowerOne
+  | .atlasTwelvePowerSeven => .orderSixPositive
+  | .row14 | .row15 | .atlasTwelvePowerTwo
+  | .atlasTwelvePowerEleven => .orderSixNegative
 
 end AlternatingSixAmbientOrdinaryRow
 

@@ -220,19 +220,8 @@ private theorem row14_reducedY11
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
-      hY14,
-      hY15,
-      hY20,
-      hY25,
-      hY30,
       hY31,
-      hY35,
-      hY40,
       hY41,
-      hY45,
-      hY50,
       hY51] at commutesA01
   have commutesA05 :=
     congrFun (congrFun commutesA
@@ -249,20 +238,10 @@ private theorem row14_reducedY11
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
-      hY14,
       hY15,
-      hY20,
       hY25,
-      hY30,
-      hY31,
       hY35,
-      hY40,
-      hY41,
-      hY45,
-      hY50,
-      hY51] at commutesA05
+      hY45] at commutesA05
   have commutesA10 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -273,25 +252,14 @@ private theorem row14_reducedY11
       alternatingSixAmbientRow14TransformedGeneratorA,
       alternatingSixCyclotomicValue] at commutesA10
   simp only [
-      hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
       hY20,
-      hY25,
       hY30,
-      hY31,
-      hY35,
       hY40,
-      hY41,
-      hY45,
-      hY50,
-      hY51] at commutesA10
+      hY50] at commutesA10
   have commutesA11 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -303,23 +271,12 @@ private theorem row14_reducedY11
       alternatingSixCyclotomicValue] at commutesA11
   simp only [
       hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
-      hY20,
-      hY25,
-      hY30,
       hY31,
-      hY35,
-      hY40,
       hY41,
-      hY45,
-      hY50,
       hY51] at commutesA11
 
   linear_combination
@@ -425,16 +382,8 @@ private theorem row14_reducedY12
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
-      hY14,
-      hY15,
-      hY20,
-      hY30,
       hY31,
-      hY40,
       hY41,
-      hY50,
       hY51] at commutesA01
   have commutesA10 :=
     congrFun (congrFun commutesA
@@ -446,22 +395,14 @@ private theorem row14_reducedY12
       alternatingSixAmbientRow14TransformedGeneratorA,
       alternatingSixCyclotomicValue] at commutesA10
   simp only [
-      hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
       hY20,
       hY30,
-      hY31,
       hY40,
-      hY41,
-      hY50,
-      hY51] at commutesA10
+      hY50] at commutesA10
   have commutesA11 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -473,20 +414,12 @@ private theorem row14_reducedY12
       alternatingSixCyclotomicValue] at commutesA11
   simp only [
       hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
-      hY20,
-      hY30,
       hY31,
-      hY40,
       hY41,
-      hY50,
       hY51] at commutesA11
 
   linear_combination
@@ -590,16 +523,8 @@ private theorem row14_reducedY21
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
-      hY14,
-      hY15,
-      hY20,
-      hY30,
       hY31,
-      hY40,
       hY41,
-      hY50,
       hY51] at commutesA01
   have commutesA10 :=
     congrFun (congrFun commutesA
@@ -611,22 +536,14 @@ private theorem row14_reducedY21
       alternatingSixAmbientRow14TransformedGeneratorA,
       alternatingSixCyclotomicValue] at commutesA10
   simp only [
-      hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
       hY20,
       hY30,
-      hY31,
       hY40,
-      hY41,
-      hY50,
-      hY51] at commutesA10
+      hY50] at commutesA10
   have commutesA11 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -638,20 +555,12 @@ private theorem row14_reducedY21
       alternatingSixCyclotomicValue] at commutesA11
   simp only [
       hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
-      hY20,
-      hY30,
       hY31,
-      hY40,
       hY41,
-      hY50,
       hY51] at commutesA11
 
   linear_combination
@@ -779,23 +688,9 @@ private theorem row14_reducedY22
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
-      hY14,
-      hY15,
-      hY20,
-      hY25,
-      hY30,
       hY31,
-      hY32,
-      hY35,
-      hY40,
       hY41,
-      hY42,
-      hY45,
-      hY50,
-      hY51,
-      hY52] at commutesA01
+      hY51] at commutesA01
   have commutesA02 :=
     congrFun (congrFun commutesA
       (0 : Fin 6))
@@ -811,22 +706,8 @@ private theorem row14_reducedY22
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
-      hY14,
-      hY15,
-      hY20,
-      hY25,
-      hY30,
-      hY31,
       hY32,
-      hY35,
-      hY40,
-      hY41,
       hY42,
-      hY45,
-      hY50,
-      hY51,
       hY52] at commutesA02
   have commutesA05 :=
     congrFun (congrFun commutesA
@@ -843,23 +724,10 @@ private theorem row14_reducedY22
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
-      hY14,
       hY15,
-      hY20,
       hY25,
-      hY30,
-      hY31,
-      hY32,
       hY35,
-      hY40,
-      hY41,
-      hY42,
-      hY45,
-      hY50,
-      hY51,
-      hY52] at commutesA05
+      hY45] at commutesA05
   have commutesA10 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -870,28 +738,14 @@ private theorem row14_reducedY22
       alternatingSixAmbientRow14TransformedGeneratorA,
       alternatingSixCyclotomicValue] at commutesA10
   simp only [
-      hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
       hY20,
-      hY25,
       hY30,
-      hY31,
-      hY32,
-      hY35,
       hY40,
-      hY41,
-      hY42,
-      hY45,
-      hY50,
-      hY51,
-      hY52] at commutesA10
+      hY50] at commutesA10
   have commutesA11 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -903,27 +757,13 @@ private theorem row14_reducedY22
       alternatingSixCyclotomicValue] at commutesA11
   simp only [
       hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
-      hY20,
-      hY25,
-      hY30,
       hY31,
-      hY32,
-      hY35,
-      hY40,
       hY41,
-      hY42,
-      hY45,
-      hY50,
-      hY51,
-      hY52] at commutesA11
+      hY51] at commutesA11
 
   linear_combination
     ((((56 / 5) : ℂ) + ((48 / 5) : ℂ) * ζ ^ 3 + ((28 / 5) : ℂ) * ζ ^ 5 + ((48 / 5) : ℂ) * ζ ^ 7 + (8 : ℂ) * ζ ^ 10 - ((44 / 5) : ℂ) * ζ ^ 15 - ((48 / 5) : ℂ) * ζ ^ 19 - (12 : ℂ) * ζ ^ 20 - ((48 / 5) : ℂ) * ζ ^ 23 - ((52 / 5) : ℂ) * ζ ^ 25 - ((68 / 5) : ℂ) * ζ ^ 30 + ((48 / 5) : ℂ) * ζ ^ 31)) * commutesA01
@@ -1050,22 +890,9 @@ private theorem row14_reducedY33
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
-      hY14,
-      hY15,
-      hY20,
-      hY23,
-      hY25,
-      hY30,
       hY31,
-      hY35,
-      hY40,
       hY41,
-      hY45,
-      hY50,
-      hY51,
-      hY53] at commutesA01
+      hY51] at commutesA01
   have commutesA03 :=
     congrFun (congrFun commutesA
       (0 : Fin 6))
@@ -1081,21 +908,8 @@ private theorem row14_reducedY33
       hY03,
       hY04,
       hY05,
-      hY10,
       hY13,
-      hY14,
-      hY15,
-      hY20,
       hY23,
-      hY25,
-      hY30,
-      hY31,
-      hY35,
-      hY40,
-      hY41,
-      hY45,
-      hY50,
-      hY51,
       hY53] at commutesA03
   have commutesA05 :=
     congrFun (congrFun commutesA
@@ -1112,22 +926,10 @@ private theorem row14_reducedY33
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
-      hY14,
       hY15,
-      hY20,
-      hY23,
       hY25,
-      hY30,
-      hY31,
       hY35,
-      hY40,
-      hY41,
-      hY45,
-      hY50,
-      hY51,
-      hY53] at commutesA05
+      hY45] at commutesA05
   have commutesA10 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -1138,27 +940,14 @@ private theorem row14_reducedY33
       alternatingSixAmbientRow14TransformedGeneratorA,
       alternatingSixCyclotomicValue] at commutesA10
   simp only [
-      hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
       hY20,
-      hY23,
-      hY25,
       hY30,
-      hY31,
-      hY35,
       hY40,
-      hY41,
-      hY45,
-      hY50,
-      hY51,
-      hY53] at commutesA10
+      hY50] at commutesA10
   have commutesA11 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -1170,26 +959,13 @@ private theorem row14_reducedY33
       alternatingSixCyclotomicValue] at commutesA11
   simp only [
       hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
-      hY20,
-      hY23,
-      hY25,
-      hY30,
       hY31,
-      hY35,
-      hY40,
       hY41,
-      hY45,
-      hY50,
-      hY51,
-      hY53] at commutesA11
+      hY51] at commutesA11
   have commutesA13 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -1200,26 +976,12 @@ private theorem row14_reducedY33
       alternatingSixAmbientRow14TransformedGeneratorA,
       alternatingSixCyclotomicValue] at commutesA13
   simp only [
-      hY01,
-      hY02,
       hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
-      hY20,
       hY23,
-      hY25,
-      hY30,
-      hY31,
-      hY35,
-      hY40,
-      hY41,
-      hY45,
-      hY50,
-      hY51,
       hY53] at commutesA13
 
   linear_combination
@@ -1337,19 +1099,9 @@ private theorem row14_reducedY34
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
-      hY14,
-      hY15,
-      hY20,
-      hY24,
-      hY30,
       hY31,
-      hY40,
       hY41,
-      hY50,
-      hY51,
-      hY54] at commutesA01
+      hY51] at commutesA01
   have commutesA04 :=
     congrFun (congrFun commutesA
       (0 : Fin 6))
@@ -1365,18 +1117,8 @@ private theorem row14_reducedY34
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
       hY14,
-      hY15,
-      hY20,
       hY24,
-      hY30,
-      hY31,
-      hY40,
-      hY41,
-      hY50,
-      hY51,
       hY54] at commutesA04
   have commutesA10 :=
     congrFun (congrFun commutesA
@@ -1388,24 +1130,14 @@ private theorem row14_reducedY34
       alternatingSixAmbientRow14TransformedGeneratorA,
       alternatingSixCyclotomicValue] at commutesA10
   simp only [
-      hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
       hY20,
-      hY24,
       hY30,
-      hY31,
       hY40,
-      hY41,
-      hY50,
-      hY51,
-      hY54] at commutesA10
+      hY50] at commutesA10
   have commutesA11 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -1417,23 +1149,13 @@ private theorem row14_reducedY34
       alternatingSixCyclotomicValue] at commutesA11
   simp only [
       hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
-      hY20,
-      hY24,
-      hY30,
       hY31,
-      hY40,
       hY41,
-      hY50,
-      hY51,
-      hY54] at commutesA11
+      hY51] at commutesA11
   have commutesA14 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -1444,23 +1166,12 @@ private theorem row14_reducedY34
       alternatingSixAmbientRow14TransformedGeneratorA,
       alternatingSixCyclotomicValue] at commutesA14
   simp only [
-      hY01,
-      hY02,
-      hY03,
       hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
-      hY20,
       hY24,
-      hY30,
-      hY31,
-      hY40,
-      hY41,
-      hY50,
-      hY51,
       hY54] at commutesA14
 
   linear_combination
@@ -1576,19 +1287,9 @@ private theorem row14_reducedY43
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
-      hY14,
-      hY15,
-      hY20,
-      hY23,
-      hY30,
       hY31,
-      hY40,
       hY41,
-      hY50,
-      hY51,
-      hY53] at commutesA01
+      hY51] at commutesA01
   have commutesA03 :=
     congrFun (congrFun commutesA
       (0 : Fin 6))
@@ -1604,18 +1305,8 @@ private theorem row14_reducedY43
       hY03,
       hY04,
       hY05,
-      hY10,
       hY13,
-      hY14,
-      hY15,
-      hY20,
       hY23,
-      hY30,
-      hY31,
-      hY40,
-      hY41,
-      hY50,
-      hY51,
       hY53] at commutesA03
   have commutesA10 :=
     congrFun (congrFun commutesA
@@ -1627,24 +1318,14 @@ private theorem row14_reducedY43
       alternatingSixAmbientRow14TransformedGeneratorA,
       alternatingSixCyclotomicValue] at commutesA10
   simp only [
-      hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
       hY20,
-      hY23,
       hY30,
-      hY31,
       hY40,
-      hY41,
-      hY50,
-      hY51,
-      hY53] at commutesA10
+      hY50] at commutesA10
   have commutesA11 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -1656,23 +1337,13 @@ private theorem row14_reducedY43
       alternatingSixCyclotomicValue] at commutesA11
   simp only [
       hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
-      hY20,
-      hY23,
-      hY30,
       hY31,
-      hY40,
       hY41,
-      hY50,
-      hY51,
-      hY53] at commutesA11
+      hY51] at commutesA11
   have commutesA13 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -1683,23 +1354,12 @@ private theorem row14_reducedY43
       alternatingSixAmbientRow14TransformedGeneratorA,
       alternatingSixCyclotomicValue] at commutesA13
   simp only [
-      hY01,
-      hY02,
       hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
-      hY20,
       hY23,
-      hY30,
-      hY31,
-      hY40,
-      hY41,
-      hY50,
-      hY51,
       hY53] at commutesA13
 
   linear_combination
@@ -1827,22 +1487,9 @@ private theorem row14_reducedY44
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
-      hY14,
-      hY15,
-      hY20,
-      hY24,
-      hY25,
-      hY30,
       hY31,
-      hY35,
-      hY40,
       hY41,
-      hY45,
-      hY50,
-      hY51,
-      hY54] at commutesA01
+      hY51] at commutesA01
   have commutesA04 :=
     congrFun (congrFun commutesA
       (0 : Fin 6))
@@ -1858,21 +1505,8 @@ private theorem row14_reducedY44
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
       hY14,
-      hY15,
-      hY20,
       hY24,
-      hY25,
-      hY30,
-      hY31,
-      hY35,
-      hY40,
-      hY41,
-      hY45,
-      hY50,
-      hY51,
       hY54] at commutesA04
   have commutesA05 :=
     congrFun (congrFun commutesA
@@ -1889,22 +1523,10 @@ private theorem row14_reducedY44
       hY03,
       hY04,
       hY05,
-      hY10,
-      hY13,
-      hY14,
       hY15,
-      hY20,
-      hY24,
       hY25,
-      hY30,
-      hY31,
       hY35,
-      hY40,
-      hY41,
-      hY45,
-      hY50,
-      hY51,
-      hY54] at commutesA05
+      hY45] at commutesA05
   have commutesA10 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -1915,27 +1537,14 @@ private theorem row14_reducedY44
       alternatingSixAmbientRow14TransformedGeneratorA,
       alternatingSixCyclotomicValue] at commutesA10
   simp only [
-      hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
       hY20,
-      hY24,
-      hY25,
       hY30,
-      hY31,
-      hY35,
       hY40,
-      hY41,
-      hY45,
-      hY50,
-      hY51,
-      hY54] at commutesA10
+      hY50] at commutesA10
   have commutesA11 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -1947,26 +1556,13 @@ private theorem row14_reducedY44
       alternatingSixCyclotomicValue] at commutesA11
   simp only [
       hY01,
-      hY02,
-      hY03,
-      hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
-      hY20,
-      hY24,
-      hY25,
-      hY30,
       hY31,
-      hY35,
-      hY40,
       hY41,
-      hY45,
-      hY50,
-      hY51,
-      hY54] at commutesA11
+      hY51] at commutesA11
   have commutesA14 :=
     congrFun (congrFun commutesA
       (1 : Fin 6))
@@ -1977,26 +1573,12 @@ private theorem row14_reducedY44
       alternatingSixAmbientRow14TransformedGeneratorA,
       alternatingSixCyclotomicValue] at commutesA14
   simp only [
-      hY01,
-      hY02,
-      hY03,
       hY04,
-      hY05,
       hY10,
       hY13,
       hY14,
       hY15,
-      hY20,
       hY24,
-      hY25,
-      hY30,
-      hY31,
-      hY35,
-      hY40,
-      hY41,
-      hY45,
-      hY50,
-      hY51,
       hY54] at commutesA14
 
   linear_combination
