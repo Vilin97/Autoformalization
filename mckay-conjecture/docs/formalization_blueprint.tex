@@ -231,7 +231,7 @@ bijection implies equal cardinalities.
 The declarations should mirror the following named results from
 Cabanes--Sp{\"a}th \cite{CabanesSpath2026}.
 
-\begin{longtable}{p{0.15\textwidth}p{0.75\textwidth}}
+\begin{longtable}{p{0.22\textwidth}p{0.68\textwidth}}
 \toprule
 Paper result & Lean-facing obligation \\
 \midrule
@@ -261,7 +261,7 @@ Theorem 5.20 &
 Stable transversals and character extensions for the subgroup \(M\). \\
 Proposition 6.3 &
 Transport of the relevant correspondences by central isomorphisms. \\
-Theorem 6.4 and Corollary 6.5 &
+Thm.\ 6.4; Cor.\ 6.5 &
 Stable transversals and maximal extendibility for the local normalizer. \\
 Propositions 6.7--6.8 &
 Equivariant extension maps, including compatibility with linear twists. \\
@@ -294,6 +294,20 @@ Mathlib \cite{Mathlib} provides a strong general algebraic base:
   character inner product, orthonormality, and Maschke semisimplicity;
   \item abstract induced and coinduced representations;
   \item group extensions and group cohomology;
+  \item the Skolem--Noether theorem for full endomorphism algebras,
+  exposed as
+  \texttt{AlgEquiv.}\linebreak
+  \texttt{eq\_linearEquivConjAlgEquiv}, together with uniqueness
+  of conjugating linear equivalences up to scalar in
+  \path{LinearEquiv.conjAlgEquiv_ext_iff'};
+  \item Wedderburn--Artin for finite-dimensional simple algebras and
+  Wedderburn's little theorem for finite division rings; the project
+  combines them with centrality to prove that every finite-dimensional
+  central simple algebra over a finite field is a full endomorphism
+  algebra;
+  \item Schur--Zassenhaus, used in the project to split a projective
+  factor set of a finite \(p\)-group over a finite field of
+  characteristic \(p\), since the scalar-unit group has \(p'\)-order;
   \item perfect and simple groups; and
   \item root pairings, root data, Weyl groups, and Coxeter groups.
 \end{itemize}
@@ -315,6 +329,25 @@ ordinary irreducible characters needed here, Clifford theory, projective
 character triples, central isomorphisms, \(\IMK\), finite reductive
 groups, Deligne--Lusztig theory, or a formal classification of finite
 simple groups.
+
+The modular-algebra layer developed in this project now includes Brauer
+trace ideals and quotients, bases for permutation-module and
+permutation-algebra Brauer quotients, tensor-product compatibility,
+finite-field central-simple splitting, and the honest linear lift of a
+\(p\)-group action on a full endomorphism algebra.  These results turn
+an abstract finite-field Dade algebra into a pointed endopermutation
+module.  Importantly, the defining condition for a Dade algebra only
+says that its Brauer quotient is nonzero; it does not force that
+quotient to be one-dimensional.  The formal development records the
+exact equivalence between one-dimensionality, Brauer primitivity, and
+a subsingleton set of fixed basis indices, and supplies the
+counterexample \(M_2(k)\) with trivial group action, whose Brauer
+quotient has dimension four.  Thus a cap or multiplicity-one
+(equivalently, Brauer-primitivity) hypothesis is indispensable.  These
+results do not replace the remaining deep input: the Puig--Turull
+normalizer-extension theorem and its dependence on Dade's
+classification of capped endopermutation modules still require a
+kernel-checked formal proof.
 
 \subsection{Odd Order}
 
