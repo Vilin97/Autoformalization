@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Clawristotle contributors
 -/
 import McKayConjecture.Character.AlternatingSixFiveNormalizerSemidirectCharacterTable
+import McKayConjecture.Character.AlternatingSixFiveNormalizerCentralCharacter
 import McKayConjecture.Character.AlternatingSixThreeActualNormalizerCharacterTable
 import McKayConjecture.Character.AlternatingSixThreeNormalizerDegreeFourIrreducible
 import McKayConjecture.Character.AlternatingSixThreeNormalizerDegreeThreeExtensions
@@ -86,6 +87,7 @@ import McKayConjecture.Character.FiniteRootFamilyKronecker
 import McKayConjecture.Character.FiniteProductCorrespondence
 import McKayConjecture.Character.FiniteProductAutomorphism
 import McKayConjecture.Character.FiniteCharacterTableCertificate
+import McKayConjecture.Character.FiniteFiberSum
 import McKayConjecture.Character.Gallagher
 import McKayConjecture.Character.GallagherBaseChange
 import McKayConjecture.Character.GallagherCovariantBaseChange

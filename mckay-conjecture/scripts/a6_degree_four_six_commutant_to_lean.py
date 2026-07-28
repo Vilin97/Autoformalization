@@ -222,6 +222,7 @@ class DiagonalData:
     matrix_b: list[list[Polynomial]]
     eigenbasis: list[list[Polynomial]]
     eigenbasis_inverse: list[list[Polynomial]]
+    inverse_times_a: list[list[Polynomial]]
     transformed_a: list[list[Polynomial]]
     labels: list[int]
     eigenvalue_exponents: list[int]
@@ -266,15 +267,18 @@ def compute_diagonal_data(metadata: RowMetadata) -> DiagonalData:
     inverse_elements = DEGREE_THREE.matrix_inverse(
         eigenbasis_elements
     )
+    inverse_times_a_elements = matrix_multiply(
+        inverse_elements, element_matrix(matrix_a)
+    )
     transformed_elements = matrix_multiply(
-        matrix_multiply(inverse_elements, element_matrix(matrix_a)),
-        eigenbasis_elements,
+        inverse_times_a_elements, eigenbasis_elements
     )
     return DiagonalData(
         matrix_a,
         matrix_b,
         polynomial_matrix(eigenbasis_elements),
         polynomial_matrix(inverse_elements),
+        polynomial_matrix(inverse_times_a_elements),
         polynomial_matrix(transformed_elements),
         labels,
         exponents,
@@ -529,30 +533,26 @@ theorem alternatingSixAmbientRow{row}GeneratorB_mul_eigenbasis :
     return "".join(chunks)
 
 
-def render_transformed_a_proof(
+def render_inverse_times_a_proof(
     metadata: RowMetadata, data: DiagonalData
 ) -> str:
     row = metadata.row
     dimension = metadata.dimension
     left = BASE.matrix_multiply_raw(
-        BASE.matrix_multiply_raw(
-            data.eigenbasis_inverse, data.matrix_a
-        ),
-        data.eigenbasis,
+        data.eigenbasis_inverse, data.matrix_a
     )
     quotients = quotient_matrix(
-        raw_matrix_subtract(left, data.transformed_a)
+        raw_matrix_subtract(left, data.inverse_times_a)
     )
     chunks: list[str] = []
     for row_index in range(dimension):
         for column_index in range(dimension):
             chunks.append(
-                f"""private theorem row{row}_transformedGeneratorA_{row_index}_{column_index} :
+                f"""private theorem row{row}_inverseTimesGeneratorA_{row_index}_{column_index} :
     (alternatingSixAmbientRow{row}EigenbasisInverse *
-        alternatingSixFiveAmbient_row{row}_matrixA *
-        alternatingSixAmbientRow{row}Eigenbasis)
+        alternatingSixFiveAmbient_row{row}_matrixA)
         {row_index} {column_index} =
-      alternatingSixAmbientRow{row}TransformedGeneratorA
+      alternatingSixAmbientRow{row}InverseTimesGeneratorA
         {row_index} {column_index} := by
   simp_rw [Matrix.mul_apply]
 """
@@ -565,25 +565,23 @@ def render_transformed_a_proof(
                         f"alternatingSixAmbientRow{row}Eigenbasis",
                         f"alternatingSixAmbientRow{row}EigenbasisInverse",
                         f"alternatingSixFiveAmbient_row{row}_matrixA",
-                        f"alternatingSixAmbientRow{row}TransformedGeneratorA",
+                        f"alternatingSixAmbientRow{row}InverseTimesGeneratorA",
                         "alternatingSixCyclotomicValue",
                         "Fin.sum_univ_succ",
                     ],
                 )
-            )
+    )
     exact_cells = "\n".join(
-        f"  · exact row{row}_transformedGeneratorA_{row_index}_{column_index}"
+        f"  · exact row{row}_inverseTimesGeneratorA_{row_index}_{column_index}"
         for row_index in range(dimension)
         for column_index in range(dimension)
     )
     chunks.append(
-        f"""/-- Exact conjugation formula for the row {row} first
-generator. -/
-theorem alternatingSixAmbientRow{row}TransformedGeneratorA_eq :
+        f"""/-- Exact first stage of the row {row} generator conjugation. -/
+theorem alternatingSixAmbientRow{row}InverseTimesGeneratorA_eq :
     alternatingSixAmbientRow{row}EigenbasisInverse *
-        alternatingSixFiveAmbient_row{row}_matrixA *
-        alternatingSixAmbientRow{row}Eigenbasis =
-      alternatingSixAmbientRow{row}TransformedGeneratorA := by
+        alternatingSixFiveAmbient_row{row}_matrixA =
+      alternatingSixAmbientRow{row}InverseTimesGeneratorA := by
   ext i j
   fin_cases i <;> fin_cases j
 {exact_cells}
@@ -593,37 +591,156 @@ theorem alternatingSixAmbientRow{row}TransformedGeneratorA_eq :
     return "".join(chunks)
 
 
-def render_data_module(
+def render_transformed_a_row_proof(
+    metadata: RowMetadata,
+    data: DiagonalData,
+    output_row: int,
+) -> str:
+    """Render the scalar products checking one transformed-matrix row."""
+
+    row = metadata.row
+    dimension = metadata.dimension
+    chunks: list[str] = []
+    for column_index in range(dimension):
+        reduced_terms: list[Polynomial] = []
+        term_names: list[str] = []
+        for middle_index in range(dimension):
+            sum_index = (
+                "0"
+                if middle_index == 0
+                else (
+                    "(Fin.succ 0)"
+                    + ".succ" * (middle_index - 1)
+                )
+            )
+            raw_term = (
+                data.inverse_times_a[output_row][middle_index]
+                * data.eigenbasis[middle_index][column_index]
+            )
+            reduced_term = CyclotomicElement(raw_term).polynomial
+            reduced_terms.append(reduced_term)
+            term_name = (
+                f"row{row}_transformedGeneratorA_term_"
+                f"{output_row}_{column_index}_{middle_index}"
+            )
+            term_names.append(term_name)
+            term_quotient = quotient_of_zero(raw_term - reduced_term)
+            chunks.append(
+                f"""private theorem {term_name} :
+    alternatingSixAmbientRow{row}InverseTimesGeneratorA
+          {output_row} {sum_index} *
+        alternatingSixAmbientRow{row}Eigenbasis
+          {sum_index} {column_index} =
+      {lean_complex(reduced_term)} := by
+  simp [
+      alternatingSixAmbientRow{row}InverseTimesGeneratorA,
+      alternatingSixAmbientRow{row}Eigenbasis,
+      alternatingSixCyclotomicValue]
+  try close_cyclotomic_row{row} {lean_complex(term_quotient)}
+
+"""
+            )
+        reduced_sum = sum(reduced_terms, zero_polynomial())
+        sum_quotient = quotient_of_zero(
+            reduced_sum
+            - data.transformed_a[output_row][column_index]
+        )
+        term_rewrites = ",\n      ".join(term_names)
+        chunks.append(
+            f"""private theorem row{row}_transformedGeneratorA_{output_row}_{column_index} :
+    (alternatingSixAmbientRow{row}InverseTimesGeneratorA *
+        alternatingSixAmbientRow{row}Eigenbasis)
+        {output_row} {column_index} =
+      alternatingSixAmbientRow{row}TransformedGeneratorA
+        {output_row} {column_index} := by
+  rw [Matrix.mul_apply]
+  simp only [Fin.sum_univ_succ]
+  rw [
+      {term_rewrites}]
+  simp [
+      alternatingSixAmbientRow{row}TransformedGeneratorA,
+      alternatingSixCyclotomicValue]
+  try close_cyclotomic_row{row} {lean_complex(sum_quotient)}
+
+"""
+        )
+    exact_cells = "\n".join(
+        f"  · exact row{row}_transformedGeneratorA_"
+        f"{output_row}_{column_index}"
+        for column_index in range(dimension)
+    )
+    chunks.append(
+        f"""/-- The checked transformed-generator equality on output row
+{output_row} of ambient row {row}. -/
+theorem alternatingSixAmbientRow{row}TransformedGeneratorA_fromIntermediate_row{output_row}
+    (j : Fin {dimension}) :
+    (alternatingSixAmbientRow{row}InverseTimesGeneratorA *
+        alternatingSixAmbientRow{row}Eigenbasis)
+        {output_row} j =
+      alternatingSixAmbientRow{row}TransformedGeneratorA
+        {output_row} j := by
+  fin_cases j
+{exact_cells}
+
+"""
+    )
+    return "".join(chunks)
+
+
+def render_transformed_a_assembly_proof(
+    metadata: RowMetadata,
+) -> str:
+    """Assemble the checked output rows and recover the conjugation."""
+
+    row = metadata.row
+    dimension = metadata.dimension
+    exact_rows = "\n".join(
+        f"  · exact "
+        f"alternatingSixAmbientRow{row}"
+        f"TransformedGeneratorA_fromIntermediate_row{output_row} j"
+        for output_row in range(dimension)
+    )
+    return f"""/-- Exact second stage of the row {row} generator
+conjugation. -/
+theorem alternatingSixAmbientRow{row}TransformedGeneratorA_fromIntermediate_eq :
+    alternatingSixAmbientRow{row}InverseTimesGeneratorA *
+        alternatingSixAmbientRow{row}Eigenbasis =
+      alternatingSixAmbientRow{row}TransformedGeneratorA := by
+  ext i j
+  fin_cases i
+{exact_rows}
+
+/-- Exact conjugation formula for the row {row} first generator. -/
+theorem alternatingSixAmbientRow{row}TransformedGeneratorA_eq :
+    alternatingSixAmbientRow{row}EigenbasisInverse *
+        alternatingSixFiveAmbient_row{row}_matrixA *
+        alternatingSixAmbientRow{row}Eigenbasis =
+      alternatingSixAmbientRow{row}TransformedGeneratorA := by
+  rw [alternatingSixAmbientRow{row}InverseTimesGeneratorA_eq]
+  exact
+    alternatingSixAmbientRow{row}TransformedGeneratorA_fromIntermediate_eq
+
+"""
+
+
+def render_transformed_a_proof(
+    metadata: RowMetadata, data: DiagonalData
+) -> str:
+    chunks = [
+        render_transformed_a_row_proof(metadata, data, output_row)
+        for output_row in range(metadata.dimension)
+    ]
+    chunks.append(render_transformed_a_assembly_proof(metadata))
+    return "".join(chunks)
+
+
+def render_data_definitions(
     metadata: RowMetadata, data: DiagonalData
 ) -> str:
     row = metadata.row
     dimension = metadata.dimension
     label_entries = ", ".join(str(label) for label in data.labels)
-    return f"""/-
-Copyright (c) 2026 Clawristotle contributors. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Clawristotle contributors
--/
-import Mathlib.Tactic.FinCases
-import Mathlib.Tactic.LinearCombination
-import McKayConjecture.InductiveMcKay.AlternatingSixDegreeFourSixEigenvalues
-import McKayConjecture.InductiveMcKay.AlternatingSixFiveAmbientMatrixDataDegreeFourSix
-
-/-!
-# Checked diagonal data for ambient row {row}
-
-This generated module records an exact eigenbasis for the second generator
-and the first generator in that basis.
--/
-
-noncomputable section
-
-namespace McKayConjecture
-namespace InductiveMcKay
-
-local notation "ζ" => alternatingSixComplexCyclotomicRoot
-
-/-- Eigenvalue block labels for row {row}. -/
+    return f"""/-- Eigenvalue block labels for row {row}. -/
 def alternatingSixAmbientRow{row}EigenvalueLabel :
     Fin {dimension} → Fin 4 :=
   ![{label_entries}]
@@ -651,15 +768,176 @@ def alternatingSixAmbientRow{row}EigenbasisInverse :
     Matrix (Fin {dimension}) (Fin {dimension}) ℂ :=
   {lean_matrix(data.eigenbasis_inverse)}
 
+/-- Intermediate product used to check the row {row} first-generator
+conjugation without expanding a double matrix sum. -/
+def alternatingSixAmbientRow{row}InverseTimesGeneratorA :
+    Matrix (Fin {dimension}) (Fin {dimension}) ℂ :=
+  {lean_matrix(data.inverse_times_a)}
+
 /-- The row {row} first generator in the checked diagonal basis. -/
 def alternatingSixAmbientRow{row}TransformedGeneratorA :
     Matrix (Fin {dimension}) (Fin {dimension}) ℂ :=
   {lean_matrix(data.transformed_a)}
 
+"""
+
+
+def render_data_module(
+    metadata: RowMetadata,
+    data: DiagonalData,
+    matrix_data_module: str = (
+        "AlternatingSixFiveAmbientMatrixDataDegreeFourSix"
+    ),
+) -> str:
+    row = metadata.row
+    return f"""/-
+Copyright (c) 2026 Clawristotle contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Clawristotle contributors
+-/
+import Mathlib.Tactic.FinCases
+import Mathlib.Tactic.LinearCombination
+import McKayConjecture.InductiveMcKay.AlternatingSixDegreeFourSixEigenvalues
+import McKayConjecture.InductiveMcKay.{matrix_data_module}
+
+/-!
+# Checked diagonal data for ambient row {row}
+
+This generated module records an exact eigenbasis for the second generator
+and the first generator in that basis.
+-/
+
+noncomputable section
+
+namespace McKayConjecture
+namespace InductiveMcKay
+
+local notation "ζ" => alternatingSixComplexCyclotomicRoot
+
+{render_data_definitions(metadata, data)}
 {close_macro(row)}
 {render_inverse_proof(metadata, data)}
 {render_diagonalization_proof(metadata, data)}
+{render_inverse_times_a_proof(metadata, data)}
 {render_transformed_a_proof(metadata, data)}
+end InductiveMcKay
+end McKayConjecture
+"""
+
+
+def render_data_core_module(
+    metadata: RowMetadata,
+    data: DiagonalData,
+    matrix_data_module: str,
+) -> str:
+    """Render definitions and the checks that precede transformed rows."""
+
+    row = metadata.row
+    return f"""/-
+Copyright (c) 2026 Clawristotle contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Clawristotle contributors
+-/
+import Mathlib.Tactic.FinCases
+import Mathlib.Tactic.LinearCombination
+import McKayConjecture.InductiveMcKay.AlternatingSixDegreeFourSixEigenvalues
+import McKayConjecture.InductiveMcKay.{matrix_data_module}
+
+/-!
+# Checked diagonal-data core for ambient row {row}
+
+This generated module records the diagonal data, checks the eigenbasis and
+second-generator diagonalization, and checks the intermediate product
+`P⁻¹ * A`.  The remaining product is checked one output row per module.
+-/
+
+noncomputable section
+
+namespace McKayConjecture
+namespace InductiveMcKay
+
+local notation "ζ" => alternatingSixComplexCyclotomicRoot
+
+{render_data_definitions(metadata, data)}
+{close_macro(row)}
+{render_inverse_proof(metadata, data)}
+{render_diagonalization_proof(metadata, data)}
+{render_inverse_times_a_proof(metadata, data)}
+end InductiveMcKay
+end McKayConjecture
+"""
+
+
+def render_transformed_data_row_module(
+    metadata: RowMetadata,
+    data: DiagonalData,
+    output_row: int,
+) -> str:
+    """Render one chained transformed-generator output-row check."""
+
+    row = metadata.row
+    dependency = (
+        f"AlternatingSixAmbientRow{row}DiagonalDataCore"
+        if output_row == 0
+        else (
+            f"AlternatingSixAmbientRow{row}"
+            f"TransformedDataRow{output_row - 1}"
+        )
+    )
+    return f"""/-
+Copyright (c) 2026 Clawristotle contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Clawristotle contributors
+-/
+import McKayConjecture.InductiveMcKay.{dependency}
+
+/-!
+# Transformed-generator data for ambient row {row}, output row {output_row}
+
+This generated module checks the scalar products in output row {output_row}.
+It imports the preceding output-row module to serialize clean builds.
+-/
+
+noncomputable section
+
+namespace McKayConjecture
+namespace InductiveMcKay
+
+local notation "ζ" => alternatingSixComplexCyclotomicRoot
+
+{render_transformed_a_row_proof(metadata, data, output_row)}
+end InductiveMcKay
+end McKayConjecture
+"""
+
+
+def render_partitioned_data_wrapper_module(
+    metadata: RowMetadata,
+) -> str:
+    """Render the stable diagonal-data API atop the final row module."""
+
+    row = metadata.row
+    final_output_row = metadata.dimension - 1
+    return f"""/-
+Copyright (c) 2026 Clawristotle contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Clawristotle contributors
+-/
+import McKayConjecture.InductiveMcKay.AlternatingSixAmbientRow{row}TransformedDataRow{final_output_row}
+
+/-!
+# Checked diagonal data for ambient row {row}
+
+This wrapper assembles the independently checked transformed-generator rows
+and preserves the public diagonal-data import path.
+-/
+
+noncomputable section
+
+namespace McKayConjecture
+namespace InductiveMcKay
+
+{render_transformed_a_assembly_proof(metadata)}
 end InductiveMcKay
 end McKayConjecture
 """
@@ -814,7 +1092,6 @@ def render_equation_hypotheses(
             }
         )
     chunks: list[str] = []
-    off_block_source = ",\n      ".join(off_block_names)
     for index in support:
         output_row, output_column = divmod(
             index, metadata.dimension
@@ -833,11 +1110,22 @@ def render_equation_hypotheses(
 """
         )
         if off_block_names:
-            chunks.append(
-                f"""  simp only [
+            equation_off_block_names = [
+                off_block_name(row, column)
+                for row, column in relevant_off_blocks(
+                    metadata, data, [index]
+                )
+                if off_block_name(row, column) in off_block_names
+            ]
+            if equation_off_block_names:
+                off_block_source = ",\n      ".join(
+                    equation_off_block_names
+                )
+                chunks.append(
+                    f"""  simp only [
       {off_block_source}] at {name}
 """
-            )
+                )
     return "".join(chunks), support
 
 
@@ -1026,6 +1314,120 @@ def reduced_relation_goal(
     return pair, name, goal
 
 
+def render_sequential_diagonal_relation(
+    metadata: RowMetadata,
+    data: DiagonalData,
+    diagonal: int,
+    equation_pair: tuple[int, int],
+    dependencies: list[tuple[int, int]],
+) -> str:
+    """Render a sequential diagonal-coordinate certificate.
+
+    Some fully reduced one-shot certificates have enormous coefficients that
+    exhaust Lean's default elaboration budget.  After earlier coordinates have
+    been reduced, a single commutator entry instead gives a nonzero scalar
+    times the remaining diagonal difference.
+    """
+    equation_index = (
+        equation_pair[0] * metadata.dimension + equation_pair[1]
+    )
+    allowed_pairs = [
+        (row, column)
+        for row in range(metadata.dimension)
+        for column in range(metadata.dimension)
+        if data.labels[row] == data.labels[column]
+    ]
+    equation = restricted_commutator_rows(
+        data.transformed_a, allowed_pairs
+    )[equation_index]
+    coefficient = equation[
+        allowed_pairs.index((diagonal, diagonal))
+    ]
+    coefficient_inverse = coefficient.inverse()
+    inverse_quotient = quotient_of_zero(
+        coefficient.polynomial * coefficient_inverse.polynomial
+        - CyclotomicElement(1).polynomial
+    )
+    off_blocks = relevant_off_blocks(
+        metadata, data, [equation_index]
+    )
+    off_names = [
+        off_block_name(row, column)
+        for row, column in off_blocks
+    ]
+    off_proofs = "".join(
+        f"""  have {off_block_name(row, column)} :
+      Y {row} {column} = 0 :=
+    alternatingSixAmbientRow{metadata.row}_off_block
+      Y commutesDiagonal {row} {column} (by decide)
+"""
+        for row, column in off_blocks
+    )
+    equation_hypotheses, _ = render_equation_hypotheses(
+        metadata,
+        data,
+        ReductionData(allowed_pairs, [], [], []),
+        off_names,
+        [equation_index],
+    )
+    dependency_proofs: list[str] = []
+    dependency_names: list[str] = []
+    free = metadata.dimension - 1
+    for row, column in dependencies:
+        name = f"reducedY{row}{column}"
+        dependency_names.append(name)
+        if row == column:
+            goal = f"Y {row} {column} = Y {free} {free}"
+        else:
+            goal = f"Y {row} {column} = 0"
+        dependency_proofs.append(
+            f"""  have {name} : {goal} :=
+    row{metadata.row}_{name} Y commutesA commutesDiagonal
+"""
+        )
+    dependency_source = "".join(dependency_proofs)
+    rewrite_source = ", ".join(dependency_names)
+    equation_name_source = equation_name(
+        metadata.dimension, equation_index
+    )
+    return f"""private theorem row{metadata.row}_y{diagonal}{diagonal}Coefficient_ne_zero :
+    {lean_complex(coefficient.polynomial)} ≠ 0 := by
+  intro h
+  have hunit :
+      {lean_complex(coefficient.polynomial)} *
+          {lean_complex(coefficient_inverse.polynomial)} = 1 := by
+    close_cyclotomic_row{metadata.row}
+      {lean_complex(inverse_quotient)}
+  rw [h, zero_mul] at hunit
+  exact zero_ne_one hunit
+
+private theorem row{metadata.row}_reducedY{diagonal}{diagonal}
+    (Y : Matrix (Fin {metadata.dimension})
+      (Fin {metadata.dimension}) ℂ)
+    (commutesA :
+      Y * alternatingSixAmbientRow{metadata.row}TransformedGeneratorA =
+        alternatingSixAmbientRow{metadata.row}TransformedGeneratorA * Y)
+    (commutesDiagonal :
+      Y * alternatingSixAmbientRow{metadata.row}GeneratorBDiagonal =
+        alternatingSixAmbientRow{metadata.row}GeneratorBDiagonal * Y) :
+    Y {diagonal} {diagonal} = Y {free} {free} := by
+{off_proofs}
+{equation_hypotheses}
+{dependency_source}
+  rw [{rewrite_source}] at {equation_name_source}
+  have hscaled :
+      {lean_complex(coefficient.polynomial)} *
+          (Y {diagonal} {diagonal} - Y {free} {free}) = 0 := by
+    linear_combination {equation_name_source}
+  rcases mul_eq_zero.mp hscaled with hcoefficient | hdifference
+  · exact
+      (row{metadata.row}_y{diagonal}{diagonal}Coefficient_ne_zero
+        hcoefficient).elim
+  · exact sub_eq_zero.mp hdifference
+
+"""
+
+
 def render_reduced_relation_helpers(
     metadata: RowMetadata,
     data: DiagonalData,
@@ -1034,11 +1436,59 @@ def render_reduced_relation_helpers(
     chunks: list[str] = []
     applications: list[str] = []
     names: list[str] = []
-    for reduction_row in range(len(reduction.pivots)):
+    reduction_rows = list(range(len(reduction.pivots)))
+    if metadata.row in {"13", "15"}:
+        y44_row = next(
+            reduction_row
+            for reduction_row, pivot in enumerate(reduction.pivots)
+            if reduction.allowed_pairs[pivot] == (4, 4)
+        )
+        y45_row = next(
+            reduction_row
+            for reduction_row, pivot in enumerate(reduction.pivots)
+            if reduction.allowed_pairs[pivot] == (4, 5)
+        )
+        reduction_rows.remove(y45_row)
+        reduction_rows.insert(reduction_rows.index(y44_row), y45_row)
+    for reduction_row in reduction_rows:
         pair, name, goal = reduced_relation_goal(
             metadata, reduction, reduction_row
         )
         names.append(name)
+        sequential_specifications = {
+            ("13", (4, 4)): (
+                (4, 0),
+                [(0, 0), (1, 0), (4, 5)],
+            ),
+            ("15", (3, 3)): (
+                (3, 2),
+                [(2, 2)],
+            ),
+            ("15", (4, 4)): (
+                (4, 0),
+                [(0, 0), (1, 0), (4, 5)],
+            ),
+        }
+        specification = sequential_specifications.get(
+            (metadata.row, pair)
+        )
+        if specification is not None:
+            equation_pair, dependencies = specification
+            chunks.append(
+                render_sequential_diagonal_relation(
+                    metadata,
+                    data,
+                    pair[0],
+                    equation_pair,
+                    dependencies,
+                )
+            )
+            applications.append(
+                f"""  have {name} : {goal} :=
+    row{metadata.row}_{name} Y commutesA commutesDiagonal
+"""
+            )
+            continue
         support = [
             index
             for index, coefficient in enumerate(
@@ -1224,6 +1674,14 @@ end McKayConjecture
 """
 
 
+def write_if_changed(path: Path, source: str) -> bool:
+    """Write generated source only when its contents actually change."""
+    if path.exists() and path.read_text(encoding="utf-8") == source:
+        return False
+    path.write_text(source, encoding="utf-8")
+    return True
+
+
 def main() -> None:
     for metadata in ROWS:
         data = compute_diagonal_data(metadata)
@@ -1235,16 +1693,21 @@ def main() -> None:
             OUTPUT_DIRECTORY
             / f"AlternatingSixAmbientRow{metadata.row}DiagonalCommutant.lean"
         )
-        data_path.write_text(
+        data_changed = write_if_changed(
+            data_path,
             render_data_module(metadata, data),
-            encoding="utf-8",
         )
-        commutant_path.write_text(
+        commutant_changed = write_if_changed(
+            commutant_path,
             render_commutant_module(metadata, data),
-            encoding="utf-8",
+        )
+        action = (
+            "wrote"
+            if data_changed or commutant_changed
+            else "unchanged"
         )
         print(
-            f"wrote {data_path.relative_to(ROOT)} and "
+            f"{action} {data_path.relative_to(ROOT)} and "
             f"{commutant_path.relative_to(ROOT)}"
         )
 

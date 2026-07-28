@@ -6,6 +6,7 @@ Authors: Clawristotle contributors
 import McKayConjecture.Character.FiniteCharacterTableCertificate
 import McKayConjecture.Character.SimpleCharacterRowCertificate
 import McKayConjecture.InductiveMcKay.AlternatingSixAmbientOrdinaryRows
+import McKayConjecture.InductiveMcKay.AlternatingSixAmbientTwoGeneratorCharacterRow
 
 /-!
 # Kernel-checked ordinary character-table interface for the sixfold `A₆` cover
@@ -31,6 +32,13 @@ structure AlternatingSixAmbientOrdinaryCharacterRowCertificate
     (row : AlternatingSixAmbientOrdinaryRow) where
   /-- Exact matrices and all presentation relations. -/
   matrixRow : AlternatingSixAmbientOrdinaryMatrixRowCertificate row
+  /-- The four central relator scalars agree with the advertised scalar
+  pattern of this named ordinary row. -/
+  relatorScalar_eq_scalarPattern :
+    ∀ i : Fin 4,
+      matrixRow.relatorScalar i =
+        alternatingSixComplexCyclotomicRoot ^
+          row.scalarPattern.exponent i
   /-- The unnormalized self-pairing over all 2160 canonical-cover elements. -/
   characterSelfPairing :
     characterSelfPairingSum
@@ -46,9 +54,16 @@ variable (C : AlternatingSixAmbientOrdinaryCharacterRowCertificate row)
 already known to be simple. -/
 def ofSimple
     (matrixRow : AlternatingSixAmbientOrdinaryMatrixRowCertificate row)
+    (relatorScalar_eq_scalarPattern :
+      ∀ i : Fin 4,
+        matrixRow.relatorScalar i =
+          alternatingSixComplexCyclotomicRoot ^
+            row.scalarPattern.exponent i)
     [Simple (FDRep.of matrixRow.universalCoverRepresentation)] :
     AlternatingSixAmbientOrdinaryCharacterRowCertificate row where
   matrixRow := matrixRow
+  relatorScalar_eq_scalarPattern :=
+    relatorScalar_eq_scalarPattern
   characterSelfPairing := by
     letI : Fintype AlternatingSixUniversalCover := Fintype.ofFinite _
     change
@@ -72,6 +87,27 @@ theorem representation_finrank :
     Module.finrank ℂ C.characterRowCertificate.representation =
       row.dimension := by
   change Module.finrank ℂ (Fin row.dimension → ℂ) = row.dimension
+  simp
+
+/-- The irreducible character attached to a named row has the advertised
+value at the canonical central generator. -/
+theorem irreducibleCharacter_values_centralGenerator :
+    C.characterRowCertificate.irreducibleCharacter.values
+        alternatingSixAmbientCanonicalCentralGenerator =
+      (row.dimension : ℂ) *
+        alternatingSixComplexCyclotomicRoot ^
+          row.scalarPattern.exponent 0 := by
+  letI : Nonempty (Fin row.dimension) :=
+    Fin.pos_iff_nonempty.mp row.dimension_pos
+  rw [C.characterRowCertificate.irreducibleCharacter_values_apply]
+  change
+    (FDRep.of C.matrixRow.universalCoverRepresentation).character
+        alternatingSixAmbientCanonicalCentralGenerator =
+      _
+  rw [
+    C.matrixRow.universalCoverRepresentation_character_centralGenerator_eq,
+    C.relatorScalar_eq_scalarPattern
+  ]
   simp
 
 end AlternatingSixAmbientOrdinaryCharacterRowCertificate
@@ -115,6 +151,17 @@ def pPrimeIrreducibleCharacterEquiv
     (T.toFiniteCharacterTableCertificate.PPrimeRow p) ≃
       PPrimeIrreducibleCharacter AlternatingSixUniversalCover p :=
   T.toFiniteCharacterTableCertificate.pPrimeIrreducibleCharacterEquiv p
+
+/-- Every character enumerated by the completed table has the central value
+advertised by its named row. -/
+theorem character_values_centralGenerator
+    (row : AlternatingSixAmbientOrdinaryRow) :
+    (T.toFiniteCharacterTableCertificate.character row).values
+        alternatingSixAmbientCanonicalCentralGenerator =
+      (row.dimension : ℂ) *
+        alternatingSixComplexCyclotomicRoot ^
+          row.scalarPattern.exponent 0 :=
+  (T.row row).irreducibleCharacter_values_centralGenerator
 
 end AlternatingSixAmbientOrdinaryCharacterTableCertificate
 end InductiveMcKay

@@ -288,6 +288,15 @@ def vector(values: list[int]) -> str:
     return "![" + ", ".join(str(value) for value in values) + "]"
 
 
+def wrapped_vector(values: list[int], width: int = 16) -> str:
+    """Format a small Lean vector without relying on long-line exemptions."""
+    rows = [
+        ", ".join(str(value) for value in values[start : start + width])
+        for start in range(0, len(values), width)
+    ]
+    return "![\n    " + ",\n    ".join(rows) + "\n  ]"
+
+
 def emit_data_types():
     chunks = [
         module_header(
@@ -524,6 +533,156 @@ def alternatingSixSchurOrbitPenultimate
     chunks.append(NAMESPACE_CLOSE)
     (
         GROUP_THEORY / "AlternatingSixSchurCoverConjugacyData.lean"
+    ).write_text("".join(chunks))
+
+
+def emit_class_count_blocks(class_index: dict[Coordinate, int]):
+    """Emit bounded class-fiber counts and their global assembly.
+
+    A direct `decide` over all 2160 coordinates exceeds Lean's default
+    recursion depth.  Each generated theorem below enumerates only one
+    `10 × 6` block.  The global theorem then adds 36 checked histograms.
+    """
+    base_chunks = [
+        module_header(
+            "AlternatingSixSchurCoverConjugacyData",
+            "Blocks for counting classes in the sixfold cover of `A₆`",
+            "The 360 normal-word states are split as `36 × 10`.  "
+            "Consequently a class\nfiber can be counted in 36 independent "
+            "blocks of only sixty coordinates.\nThis keeps all finite "
+            "checks within Lean's default recursion limits.",
+        ),
+        """/-- Reassemble a normal-word state from a ten-state block and an offset. -/
+def alternatingSixSchurClassCountBlockCoordinate
+    (block : Fin 36) (coordinate : Fin 10 × Fin 6) :
+    AlternatingSixSchurCoordinates :=
+  { state :=
+      (finProdFinEquiv : Fin 36 × Fin 10 ≃ Fin 360)
+        (block, coordinate.1)
+    central := (ZMod.finEquiv 6) coordinate.2 }
+
+/-- The part of a checked class-label fiber lying over one ten-state block. -/
+abbrev AlternatingSixSchurClassCountBlockFiber
+    (block : Fin 36) (i : Fin 31) :=
+  {coordinate : Fin 10 × Fin 6 //
+    alternatingSixSchurClassIndex
+        (alternatingSixSchurClassCountBlockCoordinate block coordinate) = i}
+
+""",
+        NAMESPACE_CLOSE,
+    ]
+    (
+        GROUP_THEORY / "AlternatingSixSchurCoverClassCountBlock.lean"
+    ).write_text("".join(base_chunks))
+
+    block_count = STATE_COUNT // BLOCK_SIZE
+    histograms: list[list[int]] = []
+    for block in range(block_count):
+        start = block * BLOCK_SIZE
+        end = start + BLOCK_SIZE
+        histogram = [
+            sum(
+                class_index[(state, central)] == index
+                for state in range(start, end)
+                for central in range(CENTRAL_ORDER)
+            )
+            for index in range(EXPECTED_CLASS_COUNT)
+        ]
+        if sum(histogram) != BLOCK_SIZE * CENTRAL_ORDER:
+            raise RuntimeError("class-count block has the wrong size")
+        histograms.append(histogram)
+        chunks = [
+            module_header(
+                "AlternatingSixSchurCoverClassCountBlock",
+                f"Class counts in states {start}–{end - 1} "
+                "of the sixfold cover of `A₆`",
+                "This generated certificate counts the checked class labels "
+                "in one block of\nten normal-word states and six central "
+                "coordinates.",
+            ),
+            f"/-- The class-label histogram in normal-word states "
+            f"{start}–{end - 1}. -/\n",
+            f"def alternatingSixSchurClassCountBlock{block:02d} :\n",
+            "    Fin 31 → Nat :=\n  ",
+            wrapped_vector(histogram),
+            "\n\n",
+            f"/-- Kernel-checked cardinality of every label fiber in states "
+            f"{start}–{end - 1}. -/\n",
+            "theorem alternatingSixSchurClassCountBlockFiber_card_"
+            f"{block:02d} (i : Fin 31) :\n",
+            "    Fintype.card "
+            f"(AlternatingSixSchurClassCountBlockFiber {block} i) =\n",
+            f"      alternatingSixSchurClassCountBlock{block:02d} i := by\n",
+            "  fin_cases i <;> decide\n\n",
+            NAMESPACE_CLOSE,
+        ]
+        (
+            GROUP_THEORY
+            / f"AlternatingSixSchurCoverClassCountBlock{block:02d}.lean"
+        ).write_text("".join(chunks))
+
+    imports = "\n".join(
+        "import McKayConjecture.GroupTheory."
+        f"AlternatingSixSchurCoverClassCountBlock{block:02d}"
+        for block in range(block_count)
+    )
+    chunks = [
+        COPYRIGHT,
+        imports,
+        """
+
+/-!
+# Checked class counts in the sixfold cover of `A₆`
+
+The blockwise histograms are assembled into a count of every checked
+class-label fiber.  All computational proofs enumerate at most sixty group
+coordinates or thirty-six small natural numbers.
+-/
+""",
+        NAMESPACE_OPEN,
+        """/-- The checked class-label histogram of a ten-state block. -/
+def alternatingSixSchurClassCountBlock
+    (block : Fin 36) : Fin 31 → Nat :=
+  match block.val with
+""",
+    ]
+    for block in range(block_count - 1):
+        chunks.append(
+            f"  | {block} => alternatingSixSchurClassCountBlock{block:02d}\n"
+        )
+    chunks.extend(
+        [
+            "  | _ => alternatingSixSchurClassCountBlock35\n\n",
+            """/-- Every block fiber has the corresponding checked histogram entry. -/
+theorem alternatingSixSchurClassCountBlockFiber_card
+    (block : Fin 36) (i : Fin 31) :
+    Fintype.card
+        (AlternatingSixSchurClassCountBlockFiber block i) =
+      alternatingSixSchurClassCountBlock block i := by
+  fin_cases block
+""",
+        ]
+    )
+    for block in range(block_count):
+        chunks.append(
+            f"  · exact alternatingSixSchurClassCountBlockFiber_card_"
+            f"{block:02d} i\n"
+        )
+    chunks.extend(
+        [
+            "\n",
+            """/-- The 36 checked block histograms add to the advertised class size. -/
+theorem alternatingSixSchurClassCountBlock_sum (i : Fin 31) :
+    ∑ block : Fin 36, alternatingSixSchurClassCountBlock block i =
+      alternatingSixSchurClassSize i := by
+  fin_cases i <;> decide
+
+""",
+            NAMESPACE_CLOSE,
+        ]
+    )
+    (
+        GROUP_THEORY / "AlternatingSixSchurCoverClassCounts.lean"
     ).write_text("".join(chunks))
 
 
@@ -782,11 +941,12 @@ def main():
         orbit_penultimate,
     )
     emit_data_umbrella(representatives, class_sizes)
+    emit_class_count_blocks(class_index)
     emit_check_blocks()
     emit_check_umbrella()
     print(
         f"generated {EXPECTED_CLASS_COUNT} classes in "
-        f"{2 * (STATE_COUNT // BLOCK_SIZE) + 2} Lean files"
+        f"{3 * (STATE_COUNT // BLOCK_SIZE) + 4} Lean files"
     )
 
 

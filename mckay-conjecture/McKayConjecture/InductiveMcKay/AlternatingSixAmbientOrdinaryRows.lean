@@ -112,6 +112,11 @@ def dimension : AlternatingSixAmbientOrdinaryRow → ℕ
   | .atlasTwelvePowerOne | .atlasTwelvePowerTwo
   | .atlasTwelvePowerSeven | .atlasTwelvePowerEleven => 12
 
+/-- Every ordinary matrix row has positive dimension. -/
+theorem dimension_pos (row : AlternatingSixAmbientOrdinaryRow) :
+    0 < row.dimension := by
+  cases row <;> decide
+
 /-- Central-scalar pattern of an ordinary matrix row. -/
 def scalarPattern :
     AlternatingSixAmbientOrdinaryRow →

@@ -228,6 +228,15 @@ def alternatingSixSchurPresentedConjugacyClassesEquiv :
       ConjClasses AlternatingSixSchurPresentedGroup :=
   conjugacyClassesEquivOfMulEquiv mulEquivPresentedGroup
 
+/-- The computable Schur-cover coordinates are multiplicatively equivalent
+to the canonical universal cover. -/
+def alternatingSixSchurCoordinatesEquivUniversalCover :
+    AlternatingSixSchurCoordinates ≃*
+      AlternatingSixUniversalCover :=
+  mulEquivPresentedGroup.trans
+    (alternatingSixSchurUniversalCentralExtension.sourceEquiv
+      alternatingSixUniversalCentralExtension)
+
 /-- The presented sixfold cover has exactly 31 conjugacy classes. -/
 theorem natCard_conjClasses_alternatingSixSchurPresentedGroup :
     Nat.card
