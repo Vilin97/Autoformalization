@@ -58,6 +58,21 @@ theorem scalar_pow_one
     (ζ ^ pattern.exponent i) ^ 120 = 1 := by
   rw [← pow_mul, Nat.mul_comm, pow_mul, root_pow_one, one_pow]
 
+/-- The scalar at the first central relator distinguishes all six patterns. -/
+theorem firstScalar_injective :
+    Function.Injective (fun pattern :
+      AlternatingSixAmbientScalarPattern ↦
+        ζ ^ pattern.exponent 0) := by
+  intro pattern pattern' heq
+  have hexponent :
+      pattern.exponent 0 = pattern'.exponent 0 :=
+    alternatingSixComplexCyclotomicRoot_isPrimitive.pow_inj
+      (by cases pattern <;> norm_num [exponent])
+      (by cases pattern' <;> norm_num [exponent])
+      heq
+  cases pattern <;> cases pattern' <;>
+    simp_all [exponent]
+
 /-- The first relation-module row for every scalar pattern. -/
 theorem lattice_one
     (pattern : AlternatingSixAmbientScalarPattern) :

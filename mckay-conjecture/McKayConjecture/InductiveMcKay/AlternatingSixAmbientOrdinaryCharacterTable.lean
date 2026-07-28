@@ -110,6 +110,49 @@ theorem irreducibleCharacter_values_centralGenerator :
   ]
   simp
 
+/-- Equal packaged characters have equal matrix dimensions. -/
+theorem dimension_eq_of_irreducibleCharacter_eq
+    {row' : AlternatingSixAmbientOrdinaryRow}
+    (D : AlternatingSixAmbientOrdinaryCharacterRowCertificate row')
+    (h :
+      C.characterRowCertificate.irreducibleCharacter =
+        D.characterRowCertificate.irreducibleCharacter) :
+    row.dimension = row'.dimension := by
+  calc
+    row.dimension =
+        C.characterRowCertificate.irreducibleCharacter.degree := by
+      rw [C.characterRowCertificate.irreducibleCharacter_degree,
+        C.representation_finrank]
+    _ = D.characterRowCertificate.irreducibleCharacter.degree :=
+      congrArg IrreducibleCharacter.degree h
+    _ = row'.dimension := by
+      rw [D.characterRowCertificate.irreducibleCharacter_degree,
+        D.representation_finrank]
+
+/-- Equal packaged characters have the same advertised central-scalar
+pattern. -/
+theorem scalarPattern_eq_of_irreducibleCharacter_eq
+    {row' : AlternatingSixAmbientOrdinaryRow}
+    (D : AlternatingSixAmbientOrdinaryCharacterRowCertificate row')
+    (h :
+      C.characterRowCertificate.irreducibleCharacter =
+        D.characterRowCertificate.irreducibleCharacter) :
+    row.scalarPattern = row'.scalarPattern := by
+  have hdimension := C.dimension_eq_of_irreducibleCharacter_eq D h
+  have hcentral :=
+    congrArg
+      (fun χ : IrreducibleCharacter AlternatingSixUniversalCover ↦
+        χ.values alternatingSixAmbientCanonicalCentralGenerator)
+      h
+  rw [C.irreducibleCharacter_values_centralGenerator,
+    D.irreducibleCharacter_values_centralGenerator,
+    hdimension] at hcentral
+  apply AlternatingSixAmbientScalarPattern.firstScalar_injective
+  exact
+    mul_left_cancel₀
+      (Nat.cast_ne_zero.mpr row'.dimension_pos.ne')
+      hcentral
+
 end AlternatingSixAmbientOrdinaryCharacterRowCertificate
 
 /-- A complete kernel-checked ordinary character table for the canonical

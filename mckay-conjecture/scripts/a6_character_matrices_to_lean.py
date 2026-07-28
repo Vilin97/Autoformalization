@@ -524,11 +524,24 @@ def lean_rational(value: Fraction) -> str:
 
 def polynomial_to_lean(polynomial: Polynomial, root_name: str = "ζ") -> str:
     del root_name
-    terms = ", ".join(
+    rendered_terms = [
         f"({lean_rational(coefficient)}, {degree})"
         for degree, coefficient in polynomial.coefficients
+    ]
+    source = (
+        "alternatingSixCyclotomicValue ["
+        + ", ".join(rendered_terms)
+        + "]"
     )
-    return f"alternatingSixCyclotomicValue [{terms}]"
+    if len(source) <= 68:
+        return source
+    return (
+        "alternatingSixCyclotomicValue\n"
+        "          [\n"
+        "            "
+        + ",\n            ".join(rendered_terms)
+        + "\n          ]"
+    )
 
 
 def polynomial_expression_to_lean(
@@ -556,7 +569,16 @@ def polynomial_expression_to_lean(
     source = f"-{first_term}" if first_sign < 0 else first_term
     for sign, term in rendered_terms[1:]:
         source += f" {'-' if sign < 0 else '+'} {term}"
-    return f"({source})"
+    if len(source) <= 68:
+        return f"({source})"
+    lines = [
+        "(",
+        f"        {'-' if first_sign < 0 else ''}{first_term}",
+    ]
+    for sign, term in rendered_terms[1:]:
+        lines.append(f"          {'-' if sign < 0 else '+'} {term}")
+    lines.append("      )")
+    return "\n".join(lines)
 
 
 def matrix_to_lean_with(
@@ -941,34 +963,52 @@ def render_stage_proof(
                     f"{row_index:02d}_{column_index:02d}"
                 )
                 quotient = stage.quotient[row_index][column_index]
-                closing_tactic = (
-                    " <;>\n  ring"
-                    if not quotient.coefficients
-                    else ""
-                )
+                if quotient.coefficients:
+                    chunks.append(
+                        "-- Cyclotomic reduction uses a generated "
+                        "fallback with the opposite sign.\n"
+                        "set_option linter.flexible false in\n"
+                        "set_option linter.unusedTactic false in\n"
+                        "set_option linter.unreachableTactic false in\n"
+                    )
+                else:
+                    chunks.append(
+                        "-- `simp` may close before the zero-goal-safe "
+                        "`all_goals ring` fallback runs.\n"
+                        "set_option linter.unusedTactic false in\n"
+                        "set_option linter.unreachableTactic false in\n"
+                    )
                 chunks.append(
-                    "set_option linter.flexible false in\n"
                     f"private theorem {entry_lemma} :\n"
-                    f"    ({stage.left_name} * {stage.right_name})\n"
+                    f"    ({stage.left_name}\n"
+                    f"        * {stage.right_name})\n"
                     f"          ({row_index} : Fin {dimension}) "
                     f"({column_index} : Fin {dimension}) =\n"
-                    f"      {stage.target_name} "
+                    f"      {stage.target_name}\n"
+                    "        "
                     f"({row_index} : Fin {dimension}) "
                     f"({column_index} : Fin {dimension}) := by\n"
                     f"  rw [Matrix.mul_apply]\n"
-                    "  simp ["
-                    f"{stage.left_name}, {stage.right_name}, "
-                    f"{stage.target_name}, "
-                    "alternatingSixCyclotomicValue"
-                    f"{finite_sum_simp}]{closing_tactic}\n"
+                    "  simp [\n"
+                    f"    {stage.left_name},\n"
+                    f"    {stage.right_name},\n"
+                    f"    {stage.target_name},\n"
+                    "    alternatingSixCyclotomicValue"
+                    f"{finite_sum_simp}\n"
+                    "  ]"
                 )
-                chunks.append(
-                    render_stage_entry_tactic(quotient, indent="  ")
-                )
+                if not quotient.coefficients:
+                    chunks.append("\n  all_goals ring\n")
+                else:
+                    chunks.append("\n")
+                    chunks.append(
+                        render_stage_entry_tactic(quotient, indent="  ")
+                    )
                 chunks.append("\n")
         chunks.append(
             f"private theorem {stage.name}_mul :\n"
-            f"    {stage.left_name} * {stage.right_name} =\n"
+            f"    {stage.left_name} *\n"
+            f"        {stage.right_name} =\n"
             f"      {stage.target_name} := by\n"
             f"  ext i j\n"
             f"  fin_cases i <;> fin_cases j\n"
@@ -984,7 +1024,6 @@ def render_stage_proof(
     for row_index in range(dimension):
         row_lemma = f"{stage.name}_row{row_index:02d}"
         chunks.append(
-            "set_option linter.flexible false in\n"
             f"private theorem {row_lemma}\n"
             f"    (j : Fin {dimension}) :\n"
             f"    ({stage.left_name} * {stage.right_name})\n"

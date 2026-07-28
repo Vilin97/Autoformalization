@@ -158,7 +158,8 @@ theorem alternatingSixAmbientDegreeSixPairedGeneratorValues_ne :
     alternatingSixCyclotomicValue]
   ring
 
-/-- The two degree-six rows with trivial central scalar are distinct. -/
+/-- The two degree-six rows with positive order-six central scalar are
+distinct. -/
 theorem alternatingSixAmbientRow12_character_ne_row13_character :
     alternatingSixAmbientRow12CharacterRowCertificate.irreducibleCharacter ≠
       alternatingSixAmbientRow13CharacterRowCertificate.irreducibleCharacter := by
@@ -171,7 +172,8 @@ theorem alternatingSixAmbientRow12_character_ne_row13_character :
     alternatingSixAmbientRow13_character_generatorB]
   exact alternatingSixAmbientDegreeSixPairedGeneratorValues_ne
 
-/-- The two degree-six rows with negative central scalar are distinct. -/
+/-- The two degree-six rows with negative order-six central scalar are
+distinct. -/
 theorem alternatingSixAmbientRow14_character_ne_row15_character :
     alternatingSixAmbientRow14CharacterRowCertificate.irreducibleCharacter ≠
       alternatingSixAmbientRow15CharacterRowCertificate.irreducibleCharacter := by

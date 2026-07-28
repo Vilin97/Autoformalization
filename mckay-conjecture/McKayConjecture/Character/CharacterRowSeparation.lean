@@ -21,6 +21,17 @@ namespace CharacterRowCertificate
 
 variable {G : Type} [Group G] [Finite G]
 
+/-- Two certified rows built from the same representation afford the same
+irreducible character.  This lets a table-wide normalized certificate reuse
+separation theorems proved for an earlier certificate package. -/
+theorem irreducibleCharacter_eq_of_representation_eq
+    (C D : CharacterRowCertificate G)
+    (h : C.representation = D.representation) :
+    C.irreducibleCharacter = D.irreducibleCharacter := by
+  apply IrreducibleCharacter.ext
+  rw [C.irreducibleCharacter_values,
+    D.irreducibleCharacter_values, h]
+
 /-- Equal certified irreducible characters have equal representation
 dimensions. -/
 theorem finrank_eq_of_irreducibleCharacter_eq
