@@ -12,9 +12,9 @@ divisible by `p`. The conjecture asserts
 ```
 
 The package is pinned to mathlib commit
-`3b6f23172a994dc739dfcc974199fe05c44f691d` (Lean `v4.33.0-rc1`), which was the
+`12ab8e82f8447fa639dabe9ffeda74436b72be31` (Lean `v4.33.0-rc1`), which was the
 tip of mathlib's `master` branch when the dependency pin was refreshed on
-2026-07-28.
+2026-07-29.
 
 ## Layout
 
@@ -45,7 +45,17 @@ latexmk -pdf -interaction=nonstopmode -halt-on-error \
   -outdir=../output/pdf formalization_blueprint.tex
 ```
 
-The statement milestone contains only the audited proposition; it does not
-assume the conjecture as an axiom or hide an unfinished proof behind `sorry`.
-The blueprint keeps the same trust boundary: an assumed reduction theorem or
-CFSG family result is explicitly not counted as a complete formal proof.
+The package now contains the ordinary-character infrastructure, numerical
+normalizer induction, a conditional central-scalar Rossi reduction, and
+substantial finite computations including the complete ordinary table of the
+canonical sixfold cover of `A₆`. It does not yet export an unconditional proof
+of the general theorem. The optimized proof-facing boundary keeps the ordinary
+fixed-character count
+`CentralScalarCentralIntersectionOrdinaryInertiaFibreCardinalityHypothesis`
+separate from the automatic prime-to-`q` degree theorem
+`CentralScalarCentralIntersectionInertiaFibrePPrimeDegreeHypothesis`. Their
+checked composition supplies
+`CentralScalarCentralIntersectionInertiaFibreCardinalityHypothesis` and the
+existing conditional final reduction. The remaining per-parameter count,
+automatic-degree proof, and CFSG family inputs stay explicit rather than being
+hidden behind axioms or unfinished proofs.

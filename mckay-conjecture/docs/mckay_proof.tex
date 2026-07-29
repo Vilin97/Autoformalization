@@ -126,7 +126,7 @@ the relation
   (A,X,\chi)\geq_c(H,M,\chi')
 \]
 of centrally isomorphic character triples records substantially more than
-an equality of cardinalities.  Definition 2.6 of
+an equality of cardinalities.  Definition 2.5 of
 \cite{CabanesSpath2026} requires associated projective representations
 of \(A\) and \(H\) whose factor sets agree on \(H\times H\), and whose
 scalar matrices agree on \(\Cent_A(X)\).  The relation supplies character
@@ -399,11 +399,13 @@ condition \(\Bd\) says:
 \end{enumerate}
 
 The local criterion, Theorem 2.21 of \cite{CabanesSpath2026} (imported
-from \cite{CabanesSpath2019}), states:
+from \cite{CabanesSpath2019}), uses the previously established
+\(\Ainf\) theorem through Theorem 2.18.  In dependency-explicit form it
+states:
 
 \begin{proposition}[Local criterion]\label{prop:local-criterion}
 Assume \(\ell\nmid 6q\), \(G/\Z(G)\) is simple, \(G\) is its universal
-cover, and \(\Ad\) and \(\Bd\) hold for
+cover, \(\Ainf\) has been established, and \(\Ad\) and \(\Bd\) hold for
 \(d=d_\ell(q)\).  Then \(G\) satisfies \(\IMK\) at \(\ell\), with
 local subgroup \(\Norm_{\G}(\Sbf)^F\).
 \end{proposition}
@@ -652,6 +654,34 @@ general proof would therefore leave a genuine logical gap.  The proof
 above is the complete route documented by the cited primary literature:
 it compresses the classification work behind named theorems, but does
 not disguise or omit it.
+
+There is nevertheless a shorter route for one important part of a
+\emph{numerical} formalization.  In the proof of
+\cite[Theorem 2.4]{MaltempoVallejo2026}, Equation (2.1) compares, one
+Gallagher linear parameter at a time, the numbers of automorphism-fixed
+characters above a canonical extension and above the corresponding
+Glauberman extension.  Applied to the normal \(p'\)-kernel in Rossi's
+central-intersection branch, this gives the ordinary-character count
+underlying each matched Clifford inertia fibre.  The common quotient
+parameter in the paper must be transported in Lean through the canonical
+source--target quotient equivalence; it is not a definitionally identical
+term on the two sides.  Likewise, the ambient normal \(p'\)-kernel must be
+identified with its internal copy in the subgroup used by the existing
+Theorem~4.4 API before asserting a literal character equality.  The automatic
+\(p'\)-degree theorem \cite[Theorem~5.12]{Navarro2018} used in the proof
+of Theorem~2.4 must then be applied explicitly before passing to the
+project's \(p'\)-degree fibre types.
+After adjoining the ambient center,
+arbitrary equivalences between those finite fibres automatically preserve
+the central scalar needed by the numerical reduction.  Thus equal finite
+cardinalities can be converted to equivalences without formalizing the
+Dade-algebra/projective-obstruction construction.
+
+This shortcut does not replace the classification or the quasisimple
+verification: the Maltempo--Vallejo argument still requires the relevant
+quotient to be \(p\)-solvable.  The efficient formal route is therefore
+hybrid: retain the CFSG/\(\IMK\) layer reduction, but use the
+Okuyama--Wajima counting argument for the solvable normal-subgroup seam.
 
 \section{Dependency summary}
 
