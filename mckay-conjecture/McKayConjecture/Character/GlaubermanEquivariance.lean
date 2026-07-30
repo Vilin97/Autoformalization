@@ -156,5 +156,23 @@ theorem characterEquiv_conjByNormalizer
     K P g θ (d.characterEquiv θ)]
   exact d.multiplicity_isPPrime θ
 
+/-- Inverse form of normalizer-equivariance.  This is convenient when
+the fixed-point character is obtained first, as in the full-fixed
+Okuyama--Wajima branch. -/
+theorem characterEquiv_symm_conjByNormalizer
+    (d : GlaubermanCorrespondence K P p)
+    (g : Subgroup.normalizer (P : Set G))
+    (φ :
+      PPrimeIrreducibleCharacter
+        (coprimeFixedPoints K P) p) :
+    d.characterEquiv.symm
+        (fixedPointCharacterConjByNormalizer K P g φ) =
+      invariantCharacterConjByNormalizer
+        K P g (d.characterEquiv.symm φ) := by
+  apply d.characterEquiv.injective
+  rw [d.characterEquiv.apply_symm_apply,
+    characterEquiv_conjByNormalizer]
+  simp
+
 end GlaubermanCorrespondence
 end McKayConjecture

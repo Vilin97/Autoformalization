@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Clawristotle contributors
 -/
 import McKayConjecture.Character.GlaubermanActionStrong
+import McKayConjecture.Character.GlaubermanActionStrongUniqueness
 import McKayConjecture.Character.OverAlongTransport
 
 /-!
@@ -237,5 +238,83 @@ def StrongActionGlaubermanCorrespondence.transport
           congrArg Subtype.val
             (eTarget.apply_symm_apply
               (d.characterEquiv (eSource θ))).symm
+
+/-! ## Equivariance under compatible automorphisms -/
+
+/-- A strong action Glauberman correspondence commutes with every
+compatible pair of automorphisms of the acting and acted-on groups.
+
+This is a consequence of transport plus uniqueness: transporting the
+correspondence around an automorphism produces another strong
+correspondence on the same action, so the two character equivalences
+must agree. -/
+theorem StrongActionGlaubermanCorrespondence.characterEquiv_equivariant
+    (eP : P ≃* P)
+    (eA : A ≃* A)
+    (hsmul : ∀ q : P, ∀ b : A,
+      eA (q • b) = eP q • eA b)
+    (d : StrongActionGlaubermanCorrespondence P A p)
+    (θ : ActionInvariantPPrimeIrreducibleCharacter P A p) :
+    d.characterEquiv
+        (actionInvariantPPrimeIrreducibleCharacterEquivOfEquivariant
+          (p := p) P P A A eP eA hsmul θ) =
+      IrreducibleCharacter.pPrimeComapEquiv p
+        (actionFixedPointsEquivOfEquivariant
+          P P A A eP eA hsmul)
+        (d.characterEquiv θ) := by
+  let eSource :=
+    actionInvariantPPrimeIrreducibleCharacterEquivOfEquivariant
+      (p := p) P P A A eP eA hsmul
+  let eFixed :=
+    actionFixedPointsEquivOfEquivariant
+      P P A A eP eA hsmul
+  let eTarget :=
+    IrreducibleCharacter.pPrimeComapEquiv p eFixed
+  let transported :=
+    d.transport P P A A eP eA hsmul
+  have htransport :
+      transported.characterEquiv θ =
+        d.characterEquiv θ :=
+    congrArg
+      (fun e :
+          ActionInvariantPPrimeIrreducibleCharacter P A p ≃
+            PPrimeIrreducibleCharacter
+              (FixedPoints.subgroup P A) p ↦
+        e θ)
+      (StrongActionGlaubermanCorrespondence.characterEquiv_eq
+        P A transported d)
+  have htransported :
+      transported.characterEquiv θ =
+        eTarget.symm (d.characterEquiv (eSource θ)) :=
+    rfl
+  rw [htransported] at htransport
+  have hmap := congrArg eTarget htransport
+  simpa only [eTarget, eSource, eFixed,
+    Equiv.apply_symm_apply] using hmap
+
+/-- Inverse form of compatible-automorphism equivariance.  It is the
+form used when a fixed-point character is selected first and its source
+correspondent is recovered by the inverse equivalence. -/
+theorem
+    StrongActionGlaubermanCorrespondence.characterEquiv_symm_equivariant
+    (eP : P ≃* P)
+    (eA : A ≃* A)
+    (hsmul : ∀ q : P, ∀ b : A,
+      eA (q • b) = eP q • eA b)
+    (d : StrongActionGlaubermanCorrespondence P A p)
+    (φ :
+      PPrimeIrreducibleCharacter
+        (FixedPoints.subgroup P A) p) :
+    d.characterEquiv.symm
+        (IrreducibleCharacter.pPrimeComapEquiv p
+          (actionFixedPointsEquivOfEquivariant
+            P P A A eP eA hsmul) φ) =
+      actionInvariantPPrimeIrreducibleCharacterEquivOfEquivariant
+        (p := p) P P A A eP eA hsmul
+        (d.characterEquiv.symm φ) := by
+  apply d.characterEquiv.injective
+  rw [d.characterEquiv.apply_symm_apply,
+    StrongActionGlaubermanCorrespondence.characterEquiv_equivariant,
+    d.characterEquiv.apply_symm_apply]
 
 end McKayConjecture
