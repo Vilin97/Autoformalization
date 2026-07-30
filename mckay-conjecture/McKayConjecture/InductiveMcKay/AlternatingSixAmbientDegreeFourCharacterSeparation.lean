@@ -47,7 +47,8 @@ private theorem alternatingSixDegreeFourComplexRoot_pow_forty :
 
 /-! ### Exact separator traces -/
 
-private def alternatingSixAmbientRow06MatrixAB :
+/-- Reduced row-06 matrix for the word `ab`. -/
+def alternatingSixAmbientRow06MatrixAB :
     Matrix (Fin 4) (Fin 4) ℂ :=
   ![
       ![-ω, 0, 1, -ω],
@@ -56,7 +57,8 @@ private def alternatingSixAmbientRow06MatrixAB :
       ![1, -1 + ω, -1 + ω, 2 - ω]
     ]
 
-private def alternatingSixAmbientRow06MatrixABB :
+/-- Reduced row-06 matrix for the word `ab²`. -/
+def alternatingSixAmbientRow06MatrixABB :
     Matrix (Fin 4) (Fin 4) ℂ :=
   ![
       ![ω, -1, -1 + ω, 1],
@@ -65,7 +67,8 @@ private def alternatingSixAmbientRow06MatrixABB :
       ![0, 0, -ω, ω]
     ]
 
-private def alternatingSixAmbientRow06MatrixABBB :
+/-- Reduced row-06 matrix for the word `ab³`. -/
+def alternatingSixAmbientRow06MatrixABBB :
     Matrix (Fin 4) (Fin 4) ℂ :=
   ![
       ![0, 0, -ω, -1 + ω],
@@ -83,7 +86,10 @@ private def alternatingSixAmbientRow06SeparatorPrefix :
       ![-1, 0, 0, 0]
     ]
 
-private theorem alternatingSixAmbientRow06_matrixAB :
+/- The public reductions below are reused by the second outer separator. -/
+
+/-- The row-06 generator product is its reduced `ab` matrix. -/
+theorem alternatingSixAmbientRow06_matrixAB :
     alternatingSixFiveAmbient_row06_matrixA *
         alternatingSixFiveAmbient_row06_matrixB =
       alternatingSixAmbientRow06MatrixAB := by
@@ -143,7 +149,8 @@ private theorem alternatingSixAmbientRow06_matrixAB_mul_matrixABB :
     rw [alternatingSixDegreeFourComplexRoot_pow_forty]
     ring
 
-private theorem alternatingSixAmbientRow06_matrixABB :
+/-- The row-06 word `ab²` is its reduced matrix. -/
+theorem alternatingSixAmbientRow06_matrixABB :
     (alternatingSixFiveAmbient_row06_matrixA *
           alternatingSixFiveAmbient_row06_matrixB) *
         alternatingSixFiveAmbient_row06_matrixB =
@@ -151,7 +158,8 @@ private theorem alternatingSixAmbientRow06_matrixABB :
   rw [alternatingSixAmbientRow06_matrixAB,
     alternatingSixAmbientRow06_matrixAB_mul_matrixB]
 
-private theorem alternatingSixAmbientRow06_matrixABBB :
+/-- The row-06 word `ab³` is its reduced matrix. -/
+theorem alternatingSixAmbientRow06_matrixABBB :
     ((alternatingSixFiveAmbient_row06_matrixA *
             alternatingSixFiveAmbient_row06_matrixB) *
           alternatingSixFiveAmbient_row06_matrixB) *
@@ -210,7 +218,10 @@ theorem alternatingSixAmbientRow06_separator_trace :
     alternatingSixAmbientRow06_matrixAB_mul_matrixABB]
   exact alternatingSixAmbientRow06_separator_prefix_mul_abbb_trace
 
-private def alternatingSixAmbientRow07MatrixAB :
+/- The following reduced matrices are also reused by the outer action. -/
+
+/-- Reduced row-07 matrix for the word `ab`. -/
+def alternatingSixAmbientRow07MatrixAB :
     Matrix (Fin 4) (Fin 4) ℂ :=
   ![
       ![(-1 / 3 : ℂ) + (-1 / 3 : ℂ) * ω,
@@ -225,7 +236,8 @@ private def alternatingSixAmbientRow07MatrixAB :
         (1 / 3 : ℂ) + (1 / 3 : ℂ) * ω]
     ]
 
-private def alternatingSixAmbientRow07MatrixABB :
+/-- Reduced row-07 matrix for the word `ab²`. -/
+def alternatingSixAmbientRow07MatrixABB :
     Matrix (Fin 4) (Fin 4) ℂ :=
   ![
       ![ω, 0, 1, 0],
@@ -243,7 +255,8 @@ private def alternatingSixAmbientRow07MatrixABB :
         (2 / 3 : ℂ) + (2 / 3 : ℂ) * ω]
     ]
 
-private def alternatingSixAmbientRow07MatrixABBB :
+/-- Reduced row-07 matrix for the word `ab³`. -/
+def alternatingSixAmbientRow07MatrixABBB :
     Matrix (Fin 4) (Fin 4) ℂ :=
   ![
       ![(2 / 3 : ℂ) + (-4 / 3 : ℂ) * ω,
@@ -279,7 +292,8 @@ private def alternatingSixAmbientRow07SeparatorPrefix :
         (1 / 3 : ℂ) + (1 / 3 : ℂ) * ω]
     ]
 
-private theorem alternatingSixAmbientRow07_matrixAB :
+/-- The row-07 generator product is its reduced `ab` matrix. -/
+theorem alternatingSixAmbientRow07_matrixAB :
     alternatingSixFiveAmbient_row07_matrixA *
         alternatingSixFiveAmbient_row07_matrixB =
       alternatingSixAmbientRow07MatrixAB := by
@@ -339,7 +353,8 @@ private theorem alternatingSixAmbientRow07_matrixAB_mul_matrixABB :
     rw [alternatingSixDegreeFourComplexRoot_pow_forty]
     ring
 
-private theorem alternatingSixAmbientRow07_matrixABB :
+/-- The row-07 word `ab²` is its reduced matrix. -/
+theorem alternatingSixAmbientRow07_matrixABB :
     (alternatingSixFiveAmbient_row07_matrixA *
           alternatingSixFiveAmbient_row07_matrixB) *
         alternatingSixFiveAmbient_row07_matrixB =
@@ -347,7 +362,8 @@ private theorem alternatingSixAmbientRow07_matrixABB :
   rw [alternatingSixAmbientRow07_matrixAB,
     alternatingSixAmbientRow07_matrixAB_mul_matrixB]
 
-private theorem alternatingSixAmbientRow07_matrixABBB :
+/-- The row-07 word `ab³` is its reduced matrix. -/
+theorem alternatingSixAmbientRow07_matrixABBB :
     ((alternatingSixFiveAmbient_row07_matrixA *
             alternatingSixFiveAmbient_row07_matrixB) *
           alternatingSixFiveAmbient_row07_matrixB) *

@@ -108,7 +108,8 @@ private theorem alternatingSixComplexCyclotomicRoot_pow_forty :
   linear_combination
     alternatingSixComplexCyclotomicRoot_orderSixRelation
 
-private def alternatingSixAmbientRow09MatrixAB :
+/-- Reduced row-09 matrix for the word `ab`. -/
+def alternatingSixAmbientRow09MatrixAB :
     Matrix (Fin 5) (Fin 5) ℂ :=
   ![
       ![alternatingSixCyclotomicValue [(-1, 0), (1, 20)],
@@ -138,7 +139,8 @@ private def alternatingSixAmbientRow09MatrixAB :
         alternatingSixCyclotomicValue [(1, 0), (-1, 20)]]
     ]
 
-private theorem alternatingSixAmbientRow09_matrixAB :
+/-- The row-09 generator product is its reduced `ab` matrix. -/
+theorem alternatingSixAmbientRow09_matrixAB :
     alternatingSixFiveAmbient_row09_matrixA *
       alternatingSixFiveAmbient_row09_matrixB =
       alternatingSixAmbientRow09MatrixAB := by
@@ -164,7 +166,8 @@ private theorem alternatingSixAmbientRow09_matrixAB :
           alternatingSixComplexCyclotomicRoot_orderSixRelation
     | ring
 
-private def alternatingSixAmbientRow09MatrixABB :
+/-- Reduced row-09 matrix for the word `ab²`. -/
+def alternatingSixAmbientRow09MatrixABB :
     Matrix (Fin 5) (Fin 5) ℂ :=
   ![
       ![-1, -ω, -1 + ω, 1, 1 - ω],
@@ -174,7 +177,8 @@ private def alternatingSixAmbientRow09MatrixABB :
       ![2, ω, 1 - ω, -1, -1]
     ]
 
-private def alternatingSixAmbientRow09MatrixABBB :
+/-- Reduced row-09 matrix for the word `ab³`. -/
+def alternatingSixAmbientRow09MatrixABBB :
     Matrix (Fin 5) (Fin 5) ℂ :=
   ![
       ![0, 1 + ω, -1 + ω, 0, -1 + 2 * ω],
@@ -239,7 +243,8 @@ private theorem alternatingSixAmbientRow09_matrixAB_mul_matrixABB :
     rw [alternatingSixComplexCyclotomicRoot_pow_forty]
     ring
 
-private theorem alternatingSixAmbientRow09_matrixABB :
+/-- The row-09 word `ab²` is its reduced matrix. -/
+theorem alternatingSixAmbientRow09_matrixABB :
     (alternatingSixFiveAmbient_row09_matrixA *
           alternatingSixFiveAmbient_row09_matrixB) *
         alternatingSixFiveAmbient_row09_matrixB =
@@ -247,7 +252,8 @@ private theorem alternatingSixAmbientRow09_matrixABB :
   rw [alternatingSixAmbientRow09_matrixAB,
     alternatingSixAmbientRow09_matrixAB_mul_matrixB]
 
-private theorem alternatingSixAmbientRow09_matrixABBB :
+/-- The row-09 word `ab³` is its reduced matrix. -/
+theorem alternatingSixAmbientRow09_matrixABBB :
     ((alternatingSixFiveAmbient_row09_matrixA *
             alternatingSixFiveAmbient_row09_matrixB) *
           alternatingSixFiveAmbient_row09_matrixB) *
