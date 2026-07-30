@@ -30,7 +30,7 @@ macro "close_degree_eight_absquared_cyclotomic" q:term : tactic =>
     | linear_combination
         (-($q)) * alternatingSixComplexCyclotomicRoot_relation)
 
-theorem alternatingSixAmbientRow16_matrixABSquared_trace :
+theorem alternatingSixAmbientOuterRow16_matrixABSquared_trace :
     (alternatingSixFiveAmbient_row16_matrixA *
           alternatingSixFiveAmbient_row16_matrixB *
           alternatingSixFiveAmbient_row16_matrixB).trace =
@@ -113,7 +113,7 @@ theorem alternatingSixAmbientRow16_character_generatorABSquared :
   rw [alternatingSixAmbientRow16CharacterRowCertificate_representation,
     alternatingSixAmbientRow16MatrixCertificate
       |>.universalCoverRepresentation_character_generatorABSquared]
-  exact alternatingSixAmbientRow16_matrixABSquared_trace
+  exact alternatingSixAmbientOuterRow16_matrixABSquared_trace
 
 theorem alternatingSixAmbientRow17_character_generatorABSquared :
     alternatingSixAmbientRow17CharacterRowCertificate.representation.character

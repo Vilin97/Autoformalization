@@ -5,6 +5,8 @@ Authors: Clawristotle contributors
 -/
 import McKayConjecture.InductiveMcKay.AlternatingSixTwoAlphaOneStabilizer
 import McKayConjecture.InductiveMcKay.AlternatingSixTwoAlphaTwoStabilizer
+import McKayConjecture.GroupTheory.AlternatingSixSchurOuterClassActionAlphaOne
+import McKayConjecture.GroupTheory.AlternatingSixSchurOuterClassActionAlphaTwo
 
 /-!
 # Conjugacy-class actions of the two audited `6.A₆` automorphisms
@@ -158,7 +160,6 @@ theorem alternatingSixAlphaTwoConjugacyClassPermutation_apply
   alternatingSixSchurClassIndexPermutation_apply
     alternatingSixSchurAlphaTwoAutomorphism i
 
-set_option maxRecDepth 2000 in
 /-- The displayed first vector is computed from the underlying coordinate
 endomorphism on every certified class representative. -/
 theorem alternatingSixAlphaOneEndomorphism_classIndex_eq_vector
@@ -167,7 +168,10 @@ theorem alternatingSixAlphaOneEndomorphism_classIndex_eq_vector
         (alternatingSixSchurAlphaOneEndomorphism
           (alternatingSixSchurClassRepresentative i)) =
       alternatingSixAlphaOneConjugacyClassVector i := by
-  fin_cases i <;> rfl
+  calc
+    _ = alternatingSixSchurAlphaOneClassIndexAction i :=
+      alternatingSixSchurAlphaOneAutomorphism_classIndex_representative i
+    _ = alternatingSixAlphaOneConjugacyClassVector i := rfl
 
 /-- The semantic first conjugacy-class permutation is exactly its displayed
 finite vector. -/
@@ -183,7 +187,6 @@ theorem alternatingSixAlphaOneConjugacyClassPermutation_eq_vector
       alternatingSixAlphaOneConjugacyClassVector i
   exact alternatingSixAlphaOneEndomorphism_classIndex_eq_vector i
 
-set_option maxRecDepth 2000 in
 /-- The displayed second vector is computed from the underlying coordinate
 endomorphism on every certified class representative. -/
 theorem alternatingSixAlphaTwoEndomorphism_classIndex_eq_vector
@@ -192,7 +195,10 @@ theorem alternatingSixAlphaTwoEndomorphism_classIndex_eq_vector
         (alternatingSixSchurAlphaTwoEndomorphism
           (alternatingSixSchurClassRepresentative i)) =
       alternatingSixAlphaTwoConjugacyClassVector i := by
-  fin_cases i <;> rfl
+  calc
+    _ = alternatingSixSchurAlphaTwoClassIndexAction i :=
+      alternatingSixSchurAlphaTwoAutomorphism_classIndex_representative i
+    _ = alternatingSixAlphaTwoConjugacyClassVector i := rfl
 
 /-- The semantic second conjugacy-class permutation is exactly its displayed
 finite vector. -/

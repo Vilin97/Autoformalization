@@ -60,14 +60,42 @@ private theorem alphaOne_explicitQuaternionReflectionCoordinate :
       explicitQuaternionReflectionCoordinate := by
   decide
 
-set_option maxRecDepth 2048 in
 private theorem alphaTwo_explicitQuaternionRotationCoordinate :
     alternatingSixSchurAlphaTwoEndomorphism
         explicitQuaternionRotationCoordinate =
       alternatingSixSchurAuditedCoordinate 219 1 := by
+  simp only [
+    explicitQuaternionRotationCoordinate,
+    map_mul,
+    map_inv,
+    map_zpow,
+    alternatingSixSchurAlphaTwoEndomorphism_generator
+  ]
+  have hAB :
+      alternatingSixSchurAlphaTwoGeneratorCoordinates 0 *
+          alternatingSixSchurAlphaTwoGeneratorCoordinates 1 =
+        alternatingSixSchurAuditedCoordinate 284 2 := by
+    decide
+  rw [hAB]
+  have hABA :
+      alternatingSixSchurAuditedCoordinate 284 2 *
+          alternatingSixSchurAlphaTwoGeneratorCoordinates 0 =
+        alternatingSixSchurAuditedCoordinate 298 0 := by
+    decide
+  rw [hABA]
+  have hABABInv :
+      alternatingSixSchurAuditedCoordinate 298 0 *
+          (alternatingSixSchurAlphaTwoGeneratorCoordinates 1)⁻¹ =
+        alternatingSixSchurAuditedCoordinate 219 3 := by
+    decide
+  rw [hABABInv]
+  have hKPow :
+      alternatingSixSchurAlphaTwoGeneratorCoordinates 2 ^ (2 : ℤ) =
+        alternatingSixSchurAuditedCoordinate 0 4 := by
+    decide
+  rw [hKPow]
   decide
 
-set_option maxRecDepth 2048 in
 private theorem alphaTwo_explicitQuaternionReflectionCoordinate :
     alternatingSixSchurAlphaTwoEndomorphism
         explicitQuaternionReflectionCoordinate =
