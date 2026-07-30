@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Clawristotle contributors
 -/
 import McKayConjecture.InductiveMcKay.FinalReduction
+import
+  McKayConjecture.InductiveMcKay.NormalSubgroupCentralIntersectionAutomaticDegree
 import McKayConjecture.InductiveMcKay.NormalSubgroupCentralIntersectionOrdinaryCardinalityReduction
 import McKayConjecture.Proof.SmallModel
 
@@ -87,7 +89,7 @@ theorem statement_of_inertiaFibreCardinality_universalCover
     (centralScalarNumericalInductiveMcKay_of_inertiaFibreCardinality_universalCover
       counts covers).statement H Q
 
-/-- The ordinary fixed-character count, its automatic-degree theorem, and
+/-- The ordinary inertia-fibre count, its relative-degree theorem, and
 the quasisimple condition imply the central-scalar numerical
 inductive-McKay condition. -/
 theorem
@@ -107,8 +109,8 @@ theorem
       counts degrees)
     covers
 
-/-- Public McKay equality from the ordinary fixed-character count, its
-automatic-degree theorem, and the quasisimple condition. -/
+/-- Public McKay equality from the ordinary inertia-fibre count, its
+relative-degree theorem, and the quasisimple condition. -/
 theorem statement_of_ordinaryInertiaFibreCardinality_quasisimple
     {p : ℕ} [Fact p.Prime]
     (counts :
@@ -127,7 +129,7 @@ theorem statement_of_ordinaryInertiaFibreCardinality_quasisimple
       counts degrees)
     covers G P
 
-/-- Universal-cover form of the final ordinary fixed-character counting
+/-- Universal-cover form of the final ordinary inertia-fibre counting
 reduction. -/
 theorem
     centralScalarNumericalInductiveMcKay_of_ordinaryInertiaFibreCardinality_universalCover
@@ -145,7 +147,7 @@ theorem
     counts degrees covers.toQuasisimple
 
 /-- Public McKay equality in the universal-cover formulation of the
-ordinary fixed-character counting reduction. -/
+ordinary inertia-fibre counting reduction. -/
 theorem statement_of_ordinaryInertiaFibreCardinality_universalCover
     {p : ℕ} [Fact p.Prime]
     (counts :
@@ -162,6 +164,72 @@ theorem statement_of_ordinaryInertiaFibreCardinality_universalCover
   statement_of_inertiaFibreCardinality_universalCover
     (centralScalarCentralIntersectionInertiaFibreCardinalityHypothesis_of_ordinary
       counts degrees)
+    covers G P
+
+/-! ### Ordinary-count endpoints with automatic relative degrees -/
+
+/-- The ordinary inertia-fibre count and the quasisimple condition suffice:
+Navarro relative-degree divisibility supplies the prime-to-degree premise
+automatically. -/
+theorem
+    centralScalarNumericalInductiveMcKay_of_ordinaryCount_quasisimple
+    {p : ℕ} [Fact p.Prime]
+    (counts :
+      CentralScalarCentralIntersectionOrdinaryInertiaFibreCardinalityHypothesis
+        p)
+    (covers :
+      QuasisimpleInductiveMcKayHypothesis.{0} p) :
+    CentralScalarNumericalInductiveMcKay.{0} p :=
+  centralScalarNumericalInductiveMcKay_of_inertiaFibreCardinality_quasisimple
+    (centralScalarCentralIntersectionCardinality_of_ordinary counts)
+    covers
+
+/-- Public McKay equality from the ordinary inertia-fibre count and the
+quasisimple condition, with relative degrees discharged internally. -/
+theorem
+    statement_of_ordinaryCount_quasisimple
+    {p : ℕ} [Fact p.Prime]
+    (counts :
+      CentralScalarCentralIntersectionOrdinaryInertiaFibreCardinalityHypothesis
+        p)
+    (covers :
+      QuasisimpleInductiveMcKayHypothesis.{0} p)
+    (G : Type u) [Group G] [Finite G]
+    (P : Sylow p G) :
+    Statement G p P :=
+  statement_of_inertiaFibreCardinality_quasisimple
+    (centralScalarCentralIntersectionCardinality_of_ordinary counts)
+    covers G P
+
+/-- Universal-cover form of the ordinary-count reduction with relative
+degrees discharged internally. -/
+theorem
+    centralScalarNumericalInductiveMcKay_of_ordinaryCount_universalCover
+    {p : ℕ} [Fact p.Prime]
+    (counts :
+      CentralScalarCentralIntersectionOrdinaryInertiaFibreCardinalityHypothesis
+        p)
+    (covers :
+      UniversalCoverInductiveMcKayHypothesis.{0} p) :
+    CentralScalarNumericalInductiveMcKay.{0} p :=
+  centralScalarNumericalInductiveMcKay_of_ordinaryCount_quasisimple
+    counts covers.toQuasisimple
+
+/-- Public McKay equality in the universal-cover formulation, requiring
+only the ordinary inertia-fibre count. -/
+theorem
+    statement_of_ordinaryCount_universalCover
+    {p : ℕ} [Fact p.Prime]
+    (counts :
+      CentralScalarCentralIntersectionOrdinaryInertiaFibreCardinalityHypothesis
+        p)
+    (covers :
+      UniversalCoverInductiveMcKayHypothesis.{0} p)
+    (G : Type u) [Group G] [Finite G]
+    (P : Sylow p G) :
+    Statement G p P :=
+  statement_of_inertiaFibreCardinality_universalCover
+    (centralScalarCentralIntersectionCardinality_of_ordinary counts)
     covers G P
 
 end InductiveMcKay

@@ -9,13 +9,13 @@ import McKayConjecture.InductiveMcKay.NormalSubgroupCentralIntersectionCardinali
 /-!
 # Ordinary inertia-fibre counts and the prime-to-degree bridge
 
-The fixed-character counting theorem used in the optimized
-normal-subgroup reduction counts ordinary irreducible characters.  The
+The counting theorem used in the optimized normal-subgroup reduction
+counts ordinary irreducible characters in matched inertia fibres.  The
 prime-to-`q` Clifford reduction used downstream counts a subtype selected
 by degree.  This file keeps the two mathematical inputs separate:
 
 * equality of the matched ordinary inertia-fibre cardinalities;
-* the automatic prime-to-`q` degree theorem on each ordinary fibre.
+* the prime-to-`q` relative-degree consequence on each ordinary fibre.
 
 Their conjunction gives exactly the prime-to-`q` cardinality hypothesis
 consumed by the existing numerical reduction.
@@ -32,7 +32,7 @@ open ComplementReduction
 open Proposition45
 
 /-- The ordinary matched-inertia cardinality equality supplied by the
-fixed-character counting theorem. -/
+ordinary Gallagher--Okuyama--Wajima count. -/
 def CentralScalarCentralIntersectionOrdinaryInertiaFibreCardinalityHypothesis
     (q : ℕ) [Fact q.Prime] : Prop :=
   ∀ (X : Type) [Group X] [Finite X]
@@ -65,8 +65,10 @@ def CentralScalarCentralIntersectionOrdinaryInertiaFibreCardinalityHypothesis
                   (complementCharacterEquivOfGlauberman
                     S C hcentral g) theta).1)
 
-/-- The automatic-degree input: every ordinary character in each matched
-inertia fibre has prime-to-`q` degree. -/
+/-- The relative-degree input: every ordinary character in each matched
+inertia fibre has prime-to-`q` degree.  Navarro's relative-degree theorem
+is intended to discharge this predicate after the relevant inertia
+quotients are shown to have prime-to-`q` order. -/
 def CentralScalarCentralIntersectionInertiaFibrePPrimeDegreeHypothesis
     (q : ℕ) [Fact q.Prime] : Prop :=
   ∀ (X : Type) [Group X] [Finite X]
@@ -101,7 +103,7 @@ def CentralScalarCentralIntersectionInertiaFibrePPrimeDegreeHypothesis
                     S C hcentral g) theta).1,
               χ.1.IsPPrimeDegree q)
 
-/-- Ordinary matched-fibre counts and automatic prime-to-`q` degree give
+/-- Ordinary matched-fibre counts and pointwise prime-to-`q` degree give
 the prime-to-`q` matched-fibre counts required by the numerical
 normal-subgroup reduction. -/
 theorem

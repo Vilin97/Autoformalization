@@ -640,8 +640,6 @@ There are important simpler proofs in restricted settings:
   \item the Okuyama--Wajima argument proves the blockwise height-zero
   counting equality, hence McKay's equality, for \(p\)-solvable groups
   \cite{OkuyamaWajima1980};
-  \item a modern equivariant version still assumes a \(p\)-solvable
-  quotient \cite{MaltempoVallejo2026};
   \item the prime \(2\) admits a much more focused Harish--Chandra
   analysis \cite{MalleSpath2016}; and
   \item cyclic Sylow/defect cases follow from the cyclic-defect theory
@@ -656,32 +654,102 @@ it compresses the classification work behind named theorems, but does
 not disguise or omit it.
 
 There is nevertheless a shorter route for one important part of a
-\emph{numerical} formalization.  In the proof of
-\cite[Theorem 2.4]{MaltempoVallejo2026}, Equation (2.1) compares, one
-Gallagher linear parameter at a time, the numbers of automorphism-fixed
-characters above a canonical extension and above the corresponding
-Glauberman extension.  Applied to the normal \(p'\)-kernel in Rossi's
-central-intersection branch, this gives the ordinary-character count
-underlying each matched Clifford inertia fibre.  The common quotient
-parameter in the paper must be transported in Lean through the canonical
-source--target quotient equivalence; it is not a definitionally identical
-term on the two sides.  Likewise, the ambient normal \(p'\)-kernel must be
-identified with its internal copy in the subgroup used by the existing
-Theorem~4.4 API before asserting a literal character equality.  The automatic
-\(p'\)-degree theorem \cite[Theorem~5.12]{Navarro2018} used in the proof
-of Theorem~2.4 must then be applied explicitly before passing to the
-project's \(p'\)-degree fibre types.
-After adjoining the ambient center,
-arbitrary equivalences between those finite fibres automatically preserve
-the central scalar needed by the numerical reduction.  Thus equal finite
-cardinalities can be converted to equivalences without formalizing the
+\emph{numerical} formalization.  Using Gallagher's original
+commutator-sum method in the explicit form described by Murray, together
+with the classical ordinary statement and Okuyama--Wajima comparison
+\cite{Gallagher1971,Murray2023,Navarro2018,OkuyamaWajima1980}, good-class counting can
+be applied inside each actual character inertia group.  This direct route
+uses Clifford multiplicities, Schur orthogonality, and finite Fourier
+orthogonality, and avoids constructing a strong character-triple
+isomorphism solely for the counting step.  For
+\(\theta\in\Irr_{p'}(CS)\), let \(r\) be its canonical invariant
+\(p'\)-kernel constituent.  The two groups
+\(\Delta=I_X(r)\) and \(\Gamma_\theta=I_X(\theta)\) must not be
+conflated: \(\theta\) need not be \(\Delta\)-invariant, and the
+per-character count is applied in \(\Gamma_\theta\).  There the relevant
+action is self-conjugation, so no external fixed-character theorem is
+needed.  Normal-product
+restriction and a Schur--Zassenhaus complement first compare the fibres
+above the two canonical base extensions.  The source and target Gallagher
+linear parameters can then be removed by two independent twist
+equivalences.  Only existence of each ambient linear extension is needed;
+the two parameters need not be identified with one another.
+
+The Okuyama--Wajima input is used in its printed normal-product scope.
+The extension comparison for arbitrary intermediate subgroups is derived
+prime-locally: Navarro's Sylow-preimage criterion handles localization and
+reassembly, while the original theorem is applied only on the
+prime-away local groups where its Sylow, normalizer, intersection, and
+abelian-quotient hypotheses hold.  The projective multiplicity
+calculation has a second important bookkeeping boundary.  Its retained
+prime-to-\(p\) factor is defined on the acting group, whereas the character
+extension obstruction lives on the common outer quotient.  Equality of the
+two quotient \(H^2\)-classes does construct the required literal factor
+matching by a cochain gauge, but vanishing after inflation does not by
+itself imply quotient vanishing.  This residue route would therefore
+require a separate descent theorem, and no unconditional injectivity of
+inflation is assumed.
+
+The printed proof does not establish that stronger residue statement.
+It proves extension equivalence directly by induction on the ambient group
+order.  After choosing a \(p\)-complement \(M\) in the Sylow normalizer, a
+Gorenstein subgroup theorem
+\cite[Chapter~3, Theorem~2.2]{Gorenstein1968} supplies
+\(L\leq U\trianglelefteq M\) with \(M/U\) cyclic and
+\(C_{P/P'}(U)\neq1\).  If the fixed subgroup is all of \(P/P'\), apply
+Isaacs Theorem~13.29
+\cite[Theorem~13.29]{Isaacs1976} to the action-invariant part of the
+source lying-over fibre.  It identifies that subfibre with the complete
+fixed-point target fibre.  A target extension and the abelian quotient
+give the target fibre cardinality equal to the subgroup index.  The
+invariant source subfibre injects into the complete source fibre, while
+Clifford theory bounds the latter above by the same index.  Equality
+follows, and the sum-of-squared-restriction-multiplicities identity forces
+every source constituent to be an extension.  This avoids any need to
+strengthen Theorem~13.28 from existence of one invariant constituent to
+invariance of the whole source fibre.  Cyclic extension and
+prime-power-index ascent then give the conclusion.  Otherwise one forms the
+proper nontrivial subgroup \(Q/P'=C_{P/P'}(U)\), uses Glauberman
+transitivity, and applies induction to \(N_G(Q)/Q\) and to \(QMK\), with
+the same prime-power-index ascent between them.  This direct induction is
+the source-faithful route implemented in the formalization; the residue
+construction remains an optional sufficient-condition adapter.
+
+This correction matters because the tempting equivariant theorem is not a
+valid dependency.  Maltempo--Vallejo Theorem~1.3
+\cite{MaltempoVallejo2026} is false as printed: take
+\(A=S_3\), \(G=A_3\), \(N=1\), and \(\theta=1\).  Every element of \(A_3\)
+is \(\theta\)-good, but only the trivial irreducible character of \(A_3\)
+is \(S_3\)-fixed.  The published proof incorrectly asserts that every
+restriction from \(S_3\) lies in the span of individually fixed
+irreducibles; the degree-two character restricts as
+\(\omega+\omega^2\).  Consequently its Theorem~1.3, Corollary~1.4, and
+the downstream equivariant counting statements are not used here.
+
+The ordinary count is followed by the now-formalized relative-degree
+theorem \cite[Theorem~5.12]{Navarro2018} before passing to the project's
+\(p'\)-degree fibre types.  Applied inside \(I_G(\theta)\), that theorem
+states that \(\chi(1)/\theta(1)\) divides
+\(|I_G(\theta):N|\); the relevant \(p'\)-order input is therefore the
+inertia quotient, not the distinct ambient induction index
+\(|G:I_G(\theta)|\).  The formalization also identifies the ambient normal
+\(p'\)-kernel with its internal copy in the existing Theorem~4.4 API, and
+uses equivariance plus injectivity to identify the target inertia group
+with the normalizer of the induced Sylow subgroup inside the source
+inertia group by a canonical equivalence between the corresponding
+subtype groups.
+After adjoining the ambient center, arbitrary equivalences between the
+resulting finite fibres automatically preserve the central scalar needed
+by the numerical reduction.  Thus equal finite cardinalities can be
+converted to equivalences without formalizing the
 Dade-algebra/projective-obstruction construction.
 
 This shortcut does not replace the classification or the quasisimple
-verification: the Maltempo--Vallejo argument still requires the relevant
-quotient to be \(p\)-solvable.  The efficient formal route is therefore
-hybrid: retain the CFSG/\(\IMK\) layer reduction, but use the
-Okuyama--Wajima counting argument for the solvable normal-subgroup seam.
+verification.  The efficient formal route is hybrid: retain the
+CFSG/\(\IMK\) layer reduction, but use the valid ordinary
+Gallagher--Okuyama--Wajima argument for the solvable normal-subgroup seam.
+That counting seam is now closed; the remaining mathematical
+formalization is the quasisimple/CFSG verification.
 
 \section{Dependency summary}
 
