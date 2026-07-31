@@ -238,9 +238,11 @@ are defined semantically from the completed table, and inner correction is
 proved not to change them. Their genuine actions on the 31 certified
 conjugacy classes are also computed as explicit checked vectors, and the
 contragredient inverse-column formula for every transported table row is
-proved.
-Identifying the induced character-row permutations with the audited
-CTblLib vectors remains. On the local
+proved.  A compatibility theorem now identifies the transported ambient
+row-action API with these completed named-row permutations for every prime,
+including the Sylow-corrected representatives.  Identifying the remaining
+local character-row permutations with the audited CTblLib vectors remains.
+On the local
 side, the genuine stabilizer actions are now transported through the proved
 actual-normalizer row enumerations at `p = 2, 3, 5`, without asserting any
 finite-vector identification. At all three primes, ordering-safe
@@ -309,7 +311,11 @@ for the second generator with its rotation/reflection shear, and transport
 valid corrections back to the project's fixed Sylow subgroup.  Identifying
 those transported actions with the existing noncomputable Sylow equivalence
 and evaluating the six character seeds is the remaining local semantic
-calculation.
+calculation.  The invariant-safe ambient order and this corrected local
+order are now packaged as one proposed row identification.  Both ambient
+generator bridges hold unconditionally, and its complete four-generator
+bridge package is proved equivalent to exactly those six local seed
+equations.
 The engineered `p = 5` position identification is likewise formally
 impossible: its first audited ambient generator would change degree four to
 six, and its second would change degree three to four.  Its invariant-safe
@@ -329,10 +335,13 @@ equivalence and its induced local identification are now recorded and
 recover the proved central-block candidate.  Prime-independent semantic
 transport plus the completed `p = 3` actions settles all non-Atlas rows
 currently determined by the value API.  In particular, alpha-two now
-interchanges `row06` and `row07`.  Each full ambient bridge is therefore
-exactly equivalent to the same ten residual positions `8..13,16..19`.
-These are now the precise finite ambient calculations, rather than an
-unresolved ordering search.
+interchanges `row06` and `row07`.  The completed named-row actions now
+settle the same ten residual positions `8..13,16..19`, so both full ambient
+generator bridges hold for the corrected order.  Its complete
+four-generator bridge package is therefore equivalent to only the two
+genuine local generator bridges.  Establishing those local actions—and
+independently justifying that the proposed display order is CTblLib's
+semantic row identification—remains open.
 Independently, evaluation on the two standard presentation generators
 injects `Aut(A₆)` into an executable-counted relation-pair type of cardinal
 `1440`. Four conjugacy-class-separated outer representatives times the
