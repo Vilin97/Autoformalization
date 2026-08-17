@@ -1,4 +1,6 @@
 /.lake/
+/output/
+/tmp/
 *.olean
 *.ilean
 *.log
