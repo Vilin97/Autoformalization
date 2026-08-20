@@ -365,8 +365,18 @@ that map pointwise with the explicit equatorial lift labelled `a`; in particular
 are equal.  The proof uses the exact projected equator range, one explicit point on the smooth
 side cylinder, and the correct label shift.  This identifies the embedded neck carriers without
 claiming that the surrounding flower/star is homeomorphic to the entire strict-complement cover.
-Transporting the full star separation and capping data from the closed core to that whole smooth
-cover remains a separate ambient comparison.
+
+The ambient comparison is now explicit at the level of the whole power cover.  The radial base
+homeomorphism does not preserve the right-normal character: in the left tube its multiplicative
+change is genuinely complex.  Its normalized ratio nevertheless lies in the principal slit
+plane, so the principal logarithm produces a continuous `m`th-root gauge.  Multiplying the power
+coordinate by this gauge gives a deck-equivariant homeomorphism from the full complement power
+pullback to the literal pullback over the strict radius-`1/8` exterior.  This is then identified
+with exactly the inverse-image open subset of the compact coordinate-exterior pullback.  The
+gauge is one on the coordinate equator, so every explicit equatorial lift is fixed.  No
+surjectivity onto the whole compact pullback is asserted.  Restricting the closed-core star
+separation to this exact open subset, with witnesses genuinely away from the radius-`1/8`
+boundary, remains the next comparison step.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
