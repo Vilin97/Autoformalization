@@ -436,12 +436,11 @@ any one of its points.  Consequently the component space of the actual lifted-eq
 is equivalent to `Fin 2`, and its `Nat.card` is exactly `2`.  This conclusion concerns the strict
 full-cover complement; it does not identify either side with an entire compact star piece.
 
-Composing this partition with the conditional ambient-extension layer gives an exact equivalence
-from the connected components of the time-one lifted-sphere complement to the same `Fin 2`-indexed
-dependent sum.  In particular, such an ambient extension forces the time-one complement to have
-nontrivial component space and not to be preconnected.  This is a preservation theorem under an
-explicit ambient-extension witness; it neither constructs that witness nor turns either summand
-of the dependent sum into a singleton.
+Composing this calculation with the conditional ambient-extension layer gives an exact equivalence
+from the connected components of the time-one lifted-sphere complement to `Fin 2`, and hence exact
+`Nat.card` equal to `2`.  In particular, such an ambient extension forces the time-one complement
+to be non-preconnected with precisely the same component count.  This is a preservation theorem
+under an explicit ambient-extension witness; it does not yet construct that witness.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove

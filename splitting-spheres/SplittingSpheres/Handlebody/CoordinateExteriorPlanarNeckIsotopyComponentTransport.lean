@@ -5,20 +5,17 @@ Released under Apache 2.0 license as described in the file LICENSE.
 module
 
 public import SplittingSpheres.Geometry.UnlinkSphereIsotopyPowerComplementTransport
-public import SplittingSpheres.Handlebody.CoordinateExteriorPlanarNeckFullCoverComponents
+public import SplittingSpheres.Handlebody.CoordinateExteriorPlanarNeckFullCoverExactComponents
 
 /-!
 # Conditional component transport along a lifted sphere isotopy
 
 The explicit coordinate equator in the full unlink power cover has a rigorously computed
-component partition: its complement has two displayed clopen sides, and its component space is
-the dependent sum of the component spaces of those sides.  An ambient extension of a lifted
-sphere isotopy carries this entire partition to the time-one lifted sphere.
+component partition: its complement has exactly two path-connected clopen sides.  An ambient
+extension of a lifted sphere isotopy carries this entire partition to the time-one lifted sphere.
 
 This file composes those two results.  It remains conditional on
-`StandardUnlinkPowerIsotopyLiftAmbientExtension`; no ambient isotopy is constructed here.  It also
-does not strengthen the displayed partition to exactly two components, since preconnectedness of
-the two strict-core sides is not yet known.
+`StandardUnlinkPowerIsotopyLiftAmbientExtension`; no ambient isotopy is constructed here.
 -/
 
 @[expose] public section
@@ -44,9 +41,7 @@ private theorem range_equatorUnlinkPowerLiftContinuousMap
   constructor <;> rintro ⟨x, rfl⟩ <;> exact ⟨x, rfl⟩
 
 /-- The components of the time-one lifted-sphere complement, conditionally transported back to
-the exact two-side component partition of the initial coordinate equator.
-
-Each `Fin 2` fiber may still contain more than one component. -/
+the two-side component partition of the initial coordinate equator. -/
 noncomputable def finalConnectedComponentsEquivRestrictedSides
     (E : StandardUnlinkPowerIsotopyLiftAmbientExtension m a H havoid) :
     ConnectedComponents
@@ -75,6 +70,44 @@ theorem finalConnectedComponentsEquivRestrictedSides_image
         m a (E.connectedComponentsHomeomorph.symm
           (E.connectedComponentsHomeomorph c)) = _
   rw [E.connectedComponentsHomeomorph.symm_apply_apply]
+
+/-- The time-one lifted-sphere complement has exactly the two component labels of the initial
+coordinate equator whenever the lifted isotopy admits the stated ambient extension. -/
+noncomputable def finalConnectedComponentsEquivFinTwo
+    (E : StandardUnlinkPowerIsotopyLiftAmbientExtension m a H havoid) :
+    ConnectedComponents
+        ↥(range
+          (standardUnlinkPowerIsotopyLiftFinalContinuousMap m a H havoid))ᶜ ≃
+      Fin 2 :=
+  E.connectedComponentsHomeomorph.symm.toEquiv.trans
+    (coordinateUnlinkExteriorPlanarFullCoverEquatorConnectedComponentsEquivFinTwo
+      m a)
+
+/-- On a transported initial component, the exact final `Fin 2` label is the original one. -/
+@[simp]
+theorem finalConnectedComponentsEquivFinTwo_image
+    (E : StandardUnlinkPowerIsotopyLiftAmbientExtension m a H havoid)
+    (c : ConnectedComponents
+      ↥(range (equatorUnlinkPowerLiftContinuousMap m a))ᶜ) :
+    E.finalConnectedComponentsEquivFinTwo
+        (E.connectedComponentsHomeomorph c) =
+      coordinateUnlinkExteriorPlanarFullCoverEquatorConnectedComponentsEquivFinTwo
+        m a c := by
+  change
+    coordinateUnlinkExteriorPlanarFullCoverEquatorConnectedComponentsEquivFinTwo
+        m a (E.connectedComponentsHomeomorph.symm
+          (E.connectedComponentsHomeomorph c)) = _
+  rw [E.connectedComponentsHomeomorph.symm_apply_apply]
+
+/-- Conditional ambient extension preserves the exact count of two complement components. -/
+theorem natCard_connectedComponents_finalComplement
+    (E : StandardUnlinkPowerIsotopyLiftAmbientExtension m a H havoid) :
+    Nat.card
+      (ConnectedComponents
+        ↥(range
+          (standardUnlinkPowerIsotopyLiftFinalContinuousMap m a H havoid))ᶜ) = 2 := by
+  rw [Nat.card_congr E.finalConnectedComponentsEquivFinTwo]
+  exact Nat.card_fin 2
 
 /-- The time-one lifted-sphere complement has at least two connected components whenever the
 lifted isotopy admits the stated ambient extension. -/
