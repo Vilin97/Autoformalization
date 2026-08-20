@@ -187,6 +187,20 @@ by `m`th roots of unity.  The outer lifted boundary and both inner base circles 
 This coordinate normal form is intended to support a direct cut-and-straighten proof; the three
 inequalities alone are not treated as a surface-classification theorem.
 
+The outer polynomial region
+
+```text
+{z | norm (z^m + 1/2) <= sphereHandleRadius}
+```
+
+has now been straightened by an explicit positive direction-dependent radial homeomorphism to a
+closed disk, with its equality locus identified with the corresponding circle.  On the inner
+boundary, the right preimage is one connected circle, while the left preimage is the disjoint
+union of exactly `m` circles indexed by `ZMod m`; their displayed parametrizations and deck action
+are exact.  Filling the right circle by its literal power-preimage disk has also been recognized as
+an actual topological pushout.  These are point-set ingredients for the pending boundary-labelled
+planar classification, not a substitute for it.
+
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
 
