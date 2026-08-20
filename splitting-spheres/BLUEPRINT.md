@@ -424,8 +424,11 @@ off-seam status is independent of its ball coordinate.  Consequently the whole s
 left side is path connected.  The parallel right-column calculation shows that every point
 represented by the right star coprojection and lying in the strict remainder reaches the right
 carrier, including retained-sector endpoint fibers with the symbolic upper-label offset.  This
-does not yet cover the nonselected left leaves contained in the full remainder; those must be
-routed through their unremoved attaching spheres into the right carrier.
+is extended across every nonselected left leaf: its literal label differs from the selected one,
+left-column access reaches the corresponding open-annulus carrier, and a positive-time path runs
+to its unremoved attaching sphere before crossing into the right column.  Pushout coverage then
+shows that every point of the strict remainder reaches the right carrier.  Hence both the selected
+strict left side and the entire strict remainder are path connected and preconnected.
 At the level of connected components, every component meeting one displayed side remains in that
 side, and points on opposite sides have distinct relative components.  More precisely, the
 component space of the lifted-equator complement is equivalent to the dependent sum, indexed by
