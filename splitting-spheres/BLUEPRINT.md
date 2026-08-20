@@ -226,6 +226,20 @@ so there are exactly `m + 1` of them.  This is still deliberately weaker than ca
 transported images a standard unlink of cap cores: the present point-set pushout calculation does
 not prove that the transported disks are locally flat, unknotted, or mutually unlinked.
 
+The first explicit cutting data is also formalized.  The vertical diameter of the polynomial
+outer disk avoids both inner disks and admits a continuous selected `m`th-root lift.  Its
+`ZMod m` deck translates are jointly injective, have pairwise-disjoint full images (including
+their endpoints), meet the outer boundary exactly at their two endpoints, and lie strictly inside
+it otherwise.  Separately, the partial `S2`-spin of the literal annulus `S1 x [0,1]` is identified
+with `S1 x B3` by an explicit radial-shell homeomorphism.  The flower itself is now recognized
+exactly as the pushout of its closed left and right polynomial half-spaces along the entire
+`ZMod m`-indexed arc family: the common boundary is proved to be precisely the range of those
+arcs, and the two closed halves cover the flower.  A reusable direction-dependent radial-annulus
+homeomorphism supplies the point-set normal form needed next.  What remains at this stage is to
+identify the closed halves with one right annulus and the `ZMod m` family of left annuli, including
+their outer-boundary sectors; neither the arc pushout nor the abstract radial-annulus calculation
+alone implies that global labelled normalization.
+
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
 
@@ -444,6 +458,8 @@ statement.
 - the completely capped explicit cyclic example is homeomorphic to `S4`;
 - the original cyclic partial spin is the literal complement of `m + 1` pairwise-disjoint,
   strictly described off-boundary cap subsets in that `S4`;
+- the `m` explicit lifted cut arcs are pairwise disjoint and deck-equivariant, and the partial spin
+  of each standard annulus is a one-handle;
 - the partial-spin calculation identifying the cyclic example with the required interior
   connected sum, with all inner boundary components labelled.
 
