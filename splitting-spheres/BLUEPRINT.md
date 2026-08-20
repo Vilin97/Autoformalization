@@ -327,9 +327,13 @@ smooth neck cylinder in the actual strict coordinate-unlink complement.  For eve
 label, the explicit root supplies a continuous direct lift to the power pullback.  The atlas
 pulled back from the complement makes its covering projection a local diffeomorphism, and a
 local-inverse argument proves that each such lift is jointly smooth.  This is a smooth statement
-about the genuine complement and its cover, not about the flower or star pushouts.  Smooth
-embedding status for these cylinders, compatibility with rounded endpoint caps, and a smooth
-atlas and gluing theorem for the complete star remain separate obligations.
+about the genuine complement and its cover, not about the flower or star pushouts.  A direct
+chart-normal-form calculation proves that the closed interval is smoothly embedded as the normal
+diameter, including at both boundary points.  Taking its product with `S2`, passing through the
+polar diffeomorphism, and reflecting through the locally diffeomorphic covering projection proves
+that both the base cylinder and every fixed-label lifted cylinder are genuine bundled smooth
+embeddings.  Compatibility with rounded endpoint caps, and a smooth atlas and gluing theorem for
+the complete star, remain separate obligations.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
