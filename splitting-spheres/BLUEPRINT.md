@@ -417,10 +417,15 @@ are preconnected.
 The normalized open annuli are now located inside those domains as explicit continuous carriers
 `S1 x (0,1) x S2`.  The left carrier lies in the strict selected leaf and the right carrier lies in
 the strict remainder for every selected label.  Each carrier is path connected, and arbitrary
-pairs of its points are joined inside the corresponding strict side.  This gives an honest common
-target for the remaining access paths, but it does not show that every point of either whole side
-can reach that target; the missing access statement is precisely the connectivity of the displayed
-one-handle complements after their product-four-ball cap carriers are removed.
+pairs of its points are joined inside the corresponding strict side.  Exact left-column access now
+shows that every point of a selected strict left leaf reaches its carrier: bottom points descend
+through positive annulus time, while top points move across a complete three-ball fiber whose
+off-seam status is independent of its ball coordinate.  Consequently the whole selected strict
+left side is path connected.  The parallel right-column calculation shows that every point
+represented by the right star coprojection and lying in the strict remainder reaches the right
+carrier, including retained-sector endpoint fibers with the symbolic upper-label offset.  This
+does not yet cover the nonselected left leaves contained in the full remainder; those must be
+routed through their unremoved attaching spheres into the right carrier.
 At the level of connected components, every component meeting one displayed side remains in that
 side, and points on opposite sides have distinct relative components.  More precisely, the
 component space of the lifted-equator complement is equivalent to the dependent sum, indexed by
