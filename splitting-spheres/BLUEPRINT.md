@@ -381,6 +381,13 @@ defined open, disjoint sides.  Points at normalized annular time `1/2` give witn
 sides with both tube distances strictly greater than `1/8`, so the actual full-cover equator
 complement is not preconnected.  This proves separation in the genuine complement cover, but not
 that either displayed side is connected or that there are exactly two connected components.
+The full-cover-to-star map is in fact an open embedding whose range is exactly the nested image of
+the strict coordinate exterior under the inverse neck transport and the flower-to-star
+homeomorphism.  Restriction gives honest homeomorphisms from the two displayed full-cover sides
+onto the intersections of this strict core with the corresponding star sides at label
+`a + smoothNeckShift`; it does not identify them with the whole compact leaf or remainder.  The
+explicit deck transformation labelled `b` sends equator `a`, its range, and its complement to the
+corresponding objects at `b + a`.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
