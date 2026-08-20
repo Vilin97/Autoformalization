@@ -1,0 +1,17 @@
+name = "splitting-spheres"
+version = "0.1.0"
+defaultTargets = ["SplittingSpheres"]
+
+[leanOptions]
+pp.unicode.fun = true
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+weak.linter.style.header = false
+
+[[require]]
+name = "TauCeti"
+git = "https://github.com/TauCetiProject/TauCeti.git"
+rev = "675a2d2c1de7656ed751bc9b856fe902fb056c15"
+
+[[lean_lib]]
+name = "SplittingSpheres"
