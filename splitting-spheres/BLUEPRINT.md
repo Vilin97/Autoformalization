@@ -468,6 +468,22 @@ product map near the two half-space boundary points; this removes the endpoint o
 later trace-normal-form argument.  Endpoint flattening is still only a source reparametrization,
 not an ambient extension.
 
+The same formula now gives a globally smooth map from real time into the unit interval.  Hence the
+flattened isotopy has a smooth extension over `ℝ × Sphere 3`, literally equal to its initial slice
+before time `1/4` and to its final slice after time `3/4`.  For any jointly smooth real-time family
+into a normed space, its ordinary time Fréchet derivative evaluated on `1` is jointly smooth; this
+velocity is exactly zero wherever the family is locally constant in time.  This supplies the
+globally smooth prescribed velocity used by a later spacetime construction, but does not yet
+extend that velocity away from the trace.
+
+The analytic local-normal-form prerequisite has also been isolated.  The Banach inverse function
+theorem is packaged at arbitrary nonzero differentiability order by restricting to the open locus
+where the derivative remains invertible and bootstrapping the inverse there.  Adding a complementary
+linear variable to a map whose derivative is a split inclusion then gives the exact immersion
+normal form required by Mathlib.  This closes the all-orders inverse-chart step; applying it
+pointwise to the time-preserving trace and globalizing the resulting local velocity extensions are
+separate geometric steps.
+
 The global ODE end of that extension is now formalized independently.  A bounded globally
 Lipschitz autonomous field on a complete real normed space has a jointly continuous selected flow
 on a buffered time interval; ODE uniqueness proves the reverse-time inverse and bundles the unit
@@ -478,6 +494,14 @@ hence an ambient isotopy of `E`.  What remains is to construct such a field agre
 velocity of the flattened trace, with support compactly contained in the stereographic image, and
 then restrict and conjugate its flow.  No vector-field extension or support-invariance theorem is
 claimed by the flow constructor itself.
+
+ODE uniqueness now also proves that every spatial point at which the field vanishes for all
+buffered times is fixed by the selected flow, including the ends of the closed time interval.
+Consequently, when a compactly supported field vanishes outside an open set, the ambient flow fixes
+that complement pointwise and restricts to an honest ambient isotopy of the open subtype; the
+inverse restriction comes from the inverse total homeomorphism, not from forward invariance alone.
+Thus flow localization and open-chart restriction are complete.  The residual input is precisely
+the smooth, compactly supported extension of the prescribed trace velocity.
 
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
