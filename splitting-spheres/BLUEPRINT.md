@@ -449,6 +449,13 @@ labelled lifted isotopy.  Thus the remaining geometric input is precisely an amb
 `StandardUnlinkComplement` extending the normalized downstairs sphere isotopy; no separate
 cover-label or monodromy hypothesis remains.
 
+The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
+pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
+composition with the covering projection, where it becomes the projection itself.  This gives
+literal roots-of-unity- and `ZMod m`-indexed homomorphisms into the smooth diffeomorphism group,
+with the same multiplication and projection laws as the earlier homeomorphisms.  It does not
+classify all deck transformations or put a smooth structure on the compact flower/star model.
+
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
 

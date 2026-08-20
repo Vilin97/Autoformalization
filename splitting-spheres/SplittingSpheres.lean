@@ -81,6 +81,7 @@ public import SplittingSpheres.Geometry.UnlinkImmersion
 public import SplittingSpheres.Geometry.UnlinkMeridianCharacter
 public import SplittingSpheres.Geometry.UnlinkMeridianDeckIndex
 public import SplittingSpheres.Geometry.UnlinkPowerDeck
+public import SplittingSpheres.Geometry.UnlinkPowerSmoothDeck
 public import SplittingSpheres.Geometry.UnlinkPowerFactor
 public import SplittingSpheres.Geometry.UnlinkPowerFactorZMod
 public import SplittingSpheres.Geometry.UnlinkPowerProper
