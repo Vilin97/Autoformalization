@@ -10,6 +10,9 @@ non-isotopic in the unlink complement. Two independent adversarial reviews check
 smooth category, parameterization invariance, non-vacuity, and the relevant Mathlib APIs before
 the statement was frozen.
 
+[`BLUEPRINT.md`](BLUEPRINT.md) gives the audited proof, replaces every diagrammatic step by named
+handle/capping/cover lemmas, and records the exact reusable APIs and missing infrastructure.
+
 The proof formalization is in progress. The statement checkpoint contains no project-local
 `sorry`, axioms, or proof placeholders.
 
