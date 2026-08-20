@@ -1,6 +1,7 @@
 module
 
 public import SplittingSpheres.BudneyGabai.DeltaIndependence
+public import SplittingSpheres.BudneyGabai.DeltaDetection
 public import SplittingSpheres.Foundations.CoveringHomeomorphTransport
 public import SplittingSpheres.Foundations.CyclicCharacter
 public import SplittingSpheres.Foundations.CyclicFactorFiber

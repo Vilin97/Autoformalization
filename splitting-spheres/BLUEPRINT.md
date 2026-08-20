@@ -741,6 +741,12 @@ pairwise-difference corollaries are exposed.  This closes only the combinatorial
 item 13: no theorem yet identifies these formal sums with `W3` values, proves `W3` invariant, or
 maps the resulting independence into the geometric mapping-class quotient.
 
+The conditional interface `BudneyGabaiDeltaDetectionData` now packages exactly the missing
+algebraic handoff: a group family and a homomorphism whose values are the formal delta normal
+forms.  Any actual instance immediately makes the family injective and every pairwise quotient
+nontrivial.  No instance is constructed here; producing one still requires the realization,
+invariance, ball-vanishing, and quotient-identification results in items 1--12 and 14 above.
+
 The aligned-compactification constraints suppressed in `BG:1190-1194` must be made explicit.  A
 purely combinatorial chord calculation is not sufficient until a realization and invariance
 theorem connects it to the smooth embedding/diffeomorphism spaces.
