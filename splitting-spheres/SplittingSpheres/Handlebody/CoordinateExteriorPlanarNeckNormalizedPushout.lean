@@ -107,6 +107,30 @@ theorem coordinateUnlinkExteriorPlanarNormalizedLeftSeam_fst
     (coordinateUnlinkExteriorPlanarNormalizedLeftSeam m x).1 = x.1 := by
   rw [coordinateUnlinkExteriorPlanarNormalizedLeftSeam_apply]
 
+/-- Every normalized left seam lies on the outer (`t = 1`) boundary of its labelled
+annulus. -/
+@[simp]
+theorem coordinateUnlinkExteriorPlanarNormalizedLeftSeam_time
+    (m : ℕ) [NeZero m]
+    (x : ZMod m × CoordinateUnlinkExteriorPlanarNeckInterval) :
+    (coordinateUnlinkExteriorPlanarNormalizedLeftSeam m x).2.2 = 1 := by
+  rw [coordinateUnlinkExteriorPlanarNormalizedLeftSeam_apply]
+  let w := coordinateUnlinkExteriorPlanarNeckBaseArcToBaseLeftHalf x.2
+  have hw : w ∈ coordinateUnlinkExteriorPlanarBaseLeftHalfOuterEndpointSet := by
+    left
+    exact coordinateUnlinkExteriorPlanarNeckBaseArc_re x.2
+  have hwRange : w ∈ range (fun u : Sphere 1 ↦
+      coordinateUnlinkExteriorPlanarBaseLeftHalfAnnulusHomeomorph (u, 1)) := by
+    rw [range_coordinateUnlinkExteriorPlanarBaseLeftHalfAnnulusHomeomorph_one]
+    exact hw
+  obtain ⟨u, hu⟩ := hwRange
+  have hinv : (u, 1) =
+      coordinateUnlinkExteriorPlanarBaseLeftHalfAnnulusHomeomorph.symm w := by
+    rw [← hu]
+    exact coordinateUnlinkExteriorPlanarBaseLeftHalfAnnulusHomeomorph.symm_apply_apply _ |>.symm
+  change (coordinateUnlinkExteriorPlanarBaseLeftHalfAnnulusHomeomorph.symm w).2 = 1
+  simpa using congrArg Prod.snd hinv.symm
+
 /-- The normalized right seam map, defined as the exact inverse conjugate of the original one. -/
 def coordinateUnlinkExteriorPlanarNormalizedRightSeam
     (m : ℕ) [NeZero m] :
@@ -124,8 +148,35 @@ theorem coordinateUnlinkExteriorPlanarNormalizedRightSeam_apply
     (x : ZMod m × CoordinateUnlinkExteriorPlanarNeckInterval) :
     coordinateUnlinkExteriorPlanarNormalizedRightSeam m x =
       (coordinateUnlinkExteriorPlanarNormalizedRightHalfHomeomorph m).symm
-        (coordinateUnlinkExteriorPlanarNeckArcToRightHalf m x) :=
+      (coordinateUnlinkExteriorPlanarNeckArcToRightHalf m x) :=
   rfl
+
+/-- Every normalized right seam lies on the outer (`t = 1`) boundary of the right annulus. -/
+@[simp]
+theorem coordinateUnlinkExteriorPlanarNormalizedRightSeam_time
+    (m : ℕ) [NeZero m]
+    (x : ZMod m × CoordinateUnlinkExteriorPlanarNeckInterval) :
+    (coordinateUnlinkExteriorPlanarNormalizedRightSeam m x).2 = 1 := by
+  let w := coordinateUnlinkExteriorPlanarNeckArcToRightHalf m x
+  have hw : w ∈ coordinateUnlinkExteriorPlanarFlowerRightHalfOuterEndpointSet m := by
+    left
+    change ((coordinateUnlinkExteriorPlanarNeckArcTranslate m x.1 x.2).1.1 ^ m).re =
+      -1 / 2
+    rw [coordinateUnlinkExteriorPlanarNeckArcTranslate_pow,
+      coordinateUnlinkExteriorPlanarNeckBaseArc_re]
+  have hwRange : w ∈ range (fun u : Sphere 1 ↦
+      coordinateUnlinkExteriorPlanarFlowerRightHalfAnnulusHomeomorph m (u, 1)) := by
+    rw [range_coordinateUnlinkExteriorPlanarFlowerRightHalfAnnulusHomeomorph_one]
+    exact hw
+  obtain ⟨u, hu⟩ := hwRange
+  have hinv : (u, 1) =
+      (coordinateUnlinkExteriorPlanarFlowerRightHalfAnnulusHomeomorph m).symm w := by
+    rw [← hu]
+    exact (coordinateUnlinkExteriorPlanarFlowerRightHalfAnnulusHomeomorph m).symm_apply_apply _
+      |>.symm
+  rw [coordinateUnlinkExteriorPlanarNormalizedRightSeam_apply]
+  change ((coordinateUnlinkExteriorPlanarFlowerRightHalfAnnulusHomeomorph m).symm w).2 = 1
+  simpa using congrArg Prod.snd hinv.symm
 
 theorem coordinateUnlinkExteriorPlanarNormalizedLeftSeam_conjugacy
     (m : ℕ) [NeZero m]

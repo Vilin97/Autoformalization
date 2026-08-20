@@ -244,10 +244,31 @@ so the sheet labels and the cut-pushout labels agree.  A compact-Hausdorff produ
 identifies the product of an injective topological pushout with the pushout of the product span.
 Conjugating the two closed-half legs now identifies the flower itself with the pushout of the
 literal `ZMod m` family of left annuli and one right annulus, and the product theorem gives the
-same exact pushout after crossing every piece and seam with `S2`.  What remains at this stage is
-to normalize the outer-boundary sectors and lift that product cut through the one-handle part of
-the full partial-spin attachment; the annulus calculations alone do not imply the global spun
-decomposition.
+same exact pushout after crossing every piece and seam with `S2`.  The retained outer circle is
+also normalized.  The closed left polynomial semicircle lifts to `m` explicitly labelled,
+pairwise-disjoint closed sectors, with exact lower and upper lifted-neck endpoints.  The closed
+right polynomial semicircle is lifted by covering-path lifting and then translated by the deck
+action.  Its selected lift ends on a uniquely determined sheet offset `c : ZMod m`; every
+labelled right sector therefore runs from `a` to `a + c`.  Addition by `c` is a permutation, and
+that is sufficient to prove pairwise disjointness and exact coverage.  No claim that `c = 1`, and
+hence no unproved cyclic-orientation convention, is used.  Transporting these sectors back to
+the retained parameter circle gives literal interval homeomorphisms and the same endpoint laws.
+
+Independently of the interval labelling, the two closed parameter carriers are proved to cover
+the retained `S1` and to meet exactly in the complete `ZMod m x S0` family of neck endpoints.
+Their pushout is homeomorphic to that circle.  The compact-Hausdorff product theorem then gives
+the corresponding exact pushout after crossing with `B3`, so the retained one-handle is split at
+the endpoint 3-balls.  Reversing the annulus coordinate also identifies the partial spin attached
+at its `t = 1` boundary with `S1 x B3`, with an exact formula on the remaining `t = 0` boundary.
+For each fixed left label, its retained sector and its lifted seam are now recognized as the two
+closed arcs of the literal `t = 1` annulus circle; crossing this recognition with `B3` gives an
+exact `S1 x B3`.  On the right, all `m` retained sectors and all `m` seams are recognized as the
+same circle, with their upper endpoints attached using `a -> a + c`; its `B3` product is again an
+exact one-handle.  A general theorem interchanging row-first and column-first pushouts of a
+commuting `3 x 3` grid is also formalized, with exact laws on all four terminal pieces and no
+separation hypotheses.  The next step is to instantiate that grid simultaneously with the
+annular and retained-circle cuts, producing the uncapped leaf pieces and central piece.  The
+separate boundary recognitions do not by themselves imply that global regrouping.
 
 The corresponding closed necks are nevertheless already explicit.  The boundary of the product
 four-ball `D1 x B3` is recognized as the pushout of `D1 x S2` and `S0 x B3` and is homeomorphic to
@@ -257,9 +278,9 @@ partial spin.  Exact cross-face recovery proves that the whole labelled family h
 disjoint images.  This construction is not yet a smooth embedding theorem, and pairwise
 disjointness alone does not prove that these spheres separate the required capped components.
 
-Both planar annulus homeomorphisms include exact inner- and outer-endpoint range theorems.  These
-range equalities are the input for the still-missing labelled decomposition of the retained outer
-circle into the one-handle sectors between the neck endpoints.
+Both planar annulus homeomorphisms include exact inner- and outer-endpoint range theorems.  The
+outer endpoint equalities are now matched to the labelled retained-circle sectors just described;
+what remains is their simultaneous partial-spin attachment and reassociation across every neck.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
