@@ -240,6 +240,21 @@ identify the closed halves with one right annulus and the `ZMod m` family of lef
 their outer-boundary sectors; neither the arc pushout nor the abstract radial-annulus calculation
 alone implies that global labelled normalization.
 
+The corresponding closed necks are nevertheless already explicit.  The boundary of the product
+four-ball `D1 x B3` is recognized as the pushout of `D1 x S2` and `S0 x B3` and is homeomorphic to
+the literal `Sphere 3`.  Sending its side face to a lifted arc times `S2` and its two end balls into
+the one-handle face gives, for every `ZMod m` label, a topologically embedded `S3` in the flower
+partial spin.  Exact cross-face recovery proves that the whole labelled family has pairwise
+disjoint images.  This construction is not yet a smooth embedding theorem, and pairwise
+disjointness alone does not prove that these spheres separate the required capped components.
+
+The two closed planar halves now also have explicit polar normal forms.  A direction-dependent
+radial calculation identifies the downstairs left half with a closed annulus, while a second
+calculation using the positive real `m`th root identifies the actual right flower half with a
+closed annulus.  Both homeomorphisms include exact inner- and outer-endpoint range theorems.  The
+left statement is deliberately downstairs: the remaining normalization must still trivialize its
+full preimage as `ZMod m` copies and verify that the lifted seam arcs agree with the chosen sheets.
+
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
 
