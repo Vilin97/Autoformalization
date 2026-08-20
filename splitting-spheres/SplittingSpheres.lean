@@ -41,6 +41,7 @@ public import SplittingSpheres.Handlebody.CyclicGraphBasis
 public import SplittingSpheres.Handlebody.CyclicGraphDeckBasis
 public import SplittingSpheres.Handlebody.CyclicGraphPieces
 public import SplittingSpheres.Handlebody.CapPiece
+public import SplittingSpheres.Handlebody.BoundaryAttachment
 public import SplittingSpheres.Handlebody.OneHandlePiece
 public import SplittingSpheres.Proof.AbstractFamily
 public import SplittingSpheres.Statement
