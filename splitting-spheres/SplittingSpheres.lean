@@ -27,6 +27,7 @@ public import SplittingSpheres.Foundations.SmoothRadialCompression
 public import SplittingSpheres.Foundations.TopologicalCyclicCover
 public import SplittingSpheres.Foundations.TopologicalCyclicFactor
 public import SplittingSpheres.Foundations.TopologicalPushout
+public import SplittingSpheres.Foundations.TopologicalPushoutHomeomorph
 public import SplittingSpheres.Geometry.ClosedBall
 public import SplittingSpheres.Geometry.EquatorImmersion
 public import SplittingSpheres.Geometry.ExteriorCompression
@@ -43,5 +44,7 @@ public import SplittingSpheres.Handlebody.CyclicGraphPieces
 public import SplittingSpheres.Handlebody.CapPiece
 public import SplittingSpheres.Handlebody.BoundaryAttachment
 public import SplittingSpheres.Handlebody.OneHandlePiece
+public import SplittingSpheres.Handlebody.ProductBoundaryAttachment
+public import SplittingSpheres.Handlebody.ProductFiveBall
 public import SplittingSpheres.Proof.AbstractFamily
 public import SplittingSpheres.Statement
