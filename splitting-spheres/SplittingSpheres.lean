@@ -28,6 +28,8 @@ public import SplittingSpheres.Foundations.TopologicalCyclicCover
 public import SplittingSpheres.Foundations.TopologicalCyclicFactor
 public import SplittingSpheres.Geometry.ClosedBall
 public import SplittingSpheres.Geometry.EquatorImmersion
+public import SplittingSpheres.Geometry.ExteriorCompression
+public import SplittingSpheres.Geometry.ExteriorIsotopyTransport
 public import SplittingSpheres.Geometry.IsotopyTrace
 public import SplittingSpheres.Geometry.SpherePolarProduct
 public import SplittingSpheres.Geometry.StandardUnlink

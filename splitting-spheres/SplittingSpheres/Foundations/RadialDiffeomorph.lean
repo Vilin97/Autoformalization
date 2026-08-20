@@ -321,6 +321,13 @@ theorem norm_centeredAnnularRadialCompression_sub_center (center : E) (d a b c :
       annularScalarCompression d a b c hda hab hbc ‖x - center‖ :=
   norm_centeredRadialDiffeomorph_sub_center _ center _ _ hd hd _ _ x
 
+theorem centeredAnnularRadialCompression_eq_self_of_norm_le (center : E) (d a b c : ℝ)
+    (hd : 0 < d) (hda : d < a) (hab : a < b) (hbc : b < c) {x : E}
+    (hx : ‖x - center‖ ≤ d) :
+    centeredAnnularRadialCompression center d a b c hd hda hab hbc x = x :=
+  centeredRadialDiffeomorph_eq_self_of_radius_eq _ center _ _ hd hd _ _
+    (annularScalarCompression_eq_self_of_le_left d a b c hda hab hbc hx)
+
 theorem centeredAnnularRadialCompression_mem_ball_iff (center : E) (d a b c : ℝ)
     (hd : 0 < d) (hda : d < a) (hab : a < b) (hbc : b < c) (x : E) :
     centeredAnnularRadialCompression center d a b c hd hda hab hbc x ∈ ball center b ↔
