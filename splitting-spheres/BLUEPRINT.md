@@ -398,8 +398,9 @@ now restricted to precisely this open subset.  The equatorial lift labelled `a` 
 the old star neck labelled `a + smoothNeckShift`; its complement is the union of two explicitly
 defined open, disjoint sides.  Points at normalized annular time `1/2` give witnesses on both
 sides with both tube distances strictly greater than `1/8`, so the actual full-cover equator
-complement is not preconnected.  This proves separation in the genuine complement cover, but not
-that either displayed side is connected or that there are exactly two connected components.
+complement is not preconnected.  This first proves separation in the genuine complement cover;
+the strict-core path calculation below subsequently proves that its two displayed sides are
+exactly its two connected components.
 The full-cover-to-star map is in fact an open embedding whose range is exactly the nested image of
 the strict coordinate exterior under the inverse neck transport and the flower-to-star
 homeomorphism.  Restriction gives honest homeomorphisms from the two displayed full-cover sides
@@ -412,8 +413,7 @@ On the planar face, membership in this strict core is now computed exactly by th
 positive annulus time: time zero is the deleted tube boundary and every positive-time point is
 retained.  The entire one-handle face is retained, and the same formulas are transported through
 the flower-to-star homeomorphism.  These statements identify the domains in which connecting
-paths must run; they do not yet construct the paths or prove that the resulting side intersections
-are preconnected.
+paths must run and provide the exact membership tests used by the path constructions below.
 The normalized open annuli are now located inside those domains as explicit continuous carriers
 `S1 x (0,1) x S2`.  The left carrier lies in the strict selected leaf and the right carrier lies in
 the strict remainder for every selected label.  Each carrier is path connected, and arbitrary
@@ -430,15 +430,11 @@ to its unremoved attaching sphere before crossing into the right column.  Pushou
 shows that every point of the strict remainder reaches the right carrier.  Hence both the selected
 strict left side and the entire strict remainder are path connected and preconnected.
 At the level of connected components, every component meeting one displayed side remains in that
-side, and points on opposite sides have distinct relative components.  More precisely, the
-component space of the lifted-equator complement is equivalent to the dependent sum, indexed by
-`Fin 2`, of the component spaces of the two restricted sides.  This proves that the component
-space is nontrivial, but it is not an exact cardinality-two theorem: either dependent-sum fiber
-may still contain several components.  Exact equality of a side with the relative component of
-any one of its points is proved conditionally on that side being preconnected.  Establishing those
-two preconnectedness hypotheses requires explicit paths inside the strict-core intersections;
-path connectedness of the surrounding compact one-handle pieces alone does not survive deletion
-of the embedded cap interiors.
+side, and points on opposite sides have distinct relative components.  The path constructions make
+both restricted sides path connected, so each side is unconditionally the relative component of
+any one of its points.  Consequently the component space of the actual lifted-equator complement
+is equivalent to `Fin 2`, and its `Nat.card` is exactly `2`.  This conclusion concerns the strict
+full-cover complement; it does not identify either side with an entire compact star piece.
 
 Composing this partition with the conditional ambient-extension layer gives an exact equivalence
 from the connected components of the time-one lifted-sphere complement to the same `Fin 2`-indexed
