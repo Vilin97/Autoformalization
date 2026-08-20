@@ -64,6 +64,7 @@ public import SplittingSpheres.Geometry.UnlinkComplementExteriorHomeomorph
 public import SplittingSpheres.Geometry.UnlinkCyclicCover
 public import SplittingSpheres.Geometry.UnlinkDeckGraphIndex
 public import SplittingSpheres.Geometry.UnlinkDeckZMod
+public import SplittingSpheres.Geometry.UnlinkEquatorPowerLift
 public import SplittingSpheres.Geometry.UnlinkExteriorCollar
 public import SplittingSpheres.Geometry.UnlinkExteriorPowerCover
 public import SplittingSpheres.Geometry.UnlinkExteriorPowerDeck

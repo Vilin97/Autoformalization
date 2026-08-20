@@ -335,6 +335,21 @@ that both the base cylinder and every fixed-label lifted cylinder are genuine bu
 embeddings.  Compatibility with rounded endpoint caps, and a smooth atlas and gluing theorem for
 the complete star, remain separate obligations.
 
+There is also a global endpoint-free realization of the same prospective necks.  On the standard
+equatorial splitting sphere the right-normal character is exactly
+
+```text
+-1/2 + i x4.
+```
+
+Its negative lies in the complex slit plane everywhere, so the same rotated-log construction
+gives a smooth root on the entire `S3`.  Every `ZMod m` translate is now bundled as a smooth
+embedding into the actual power pullback, its projection is the standard equator, and the whole
+labelled family is jointly injective; in particular, distinct lifted equators have disjoint
+ranges.  Relating these global smooth ranges to the earlier point-set cut-and-cap neck family,
+and then transporting the star separation and capping data across that equality, remains an
+explicit comparison theorem rather than an implicit identification.
+
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
 
