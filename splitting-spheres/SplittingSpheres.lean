@@ -64,6 +64,7 @@ public import SplittingSpheres.Geometry.IsotopyTrace
 public import SplittingSpheres.Geometry.SpherePolarProduct
 public import SplittingSpheres.Geometry.StandardUnlink
 public import SplittingSpheres.Geometry.UnlinkComplement
+public import SplittingSpheres.Geometry.UnlinkComplementStereographic
 public import SplittingSpheres.Geometry.UnlinkComplementExteriorHomeomorph
 public import SplittingSpheres.Geometry.UnlinkComplementExteriorPowerHomeomorph
 public import SplittingSpheres.Geometry.UnlinkCyclicCover

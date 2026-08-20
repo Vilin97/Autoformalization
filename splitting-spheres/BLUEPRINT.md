@@ -449,6 +449,15 @@ labelled lifted isotopy.  Thus the remaining geometric input is precisely an amb
 `StandardUnlinkComplement` extending the normalized downstairs sphere isotopy; no separate
 cover-label or monodromy hypothesis remains.
 
+This downstairs problem can be placed in a single Euclidean chart.  A fixed point of component
+zero of the standard unlink is used as a stereographic pole, so every point of
+`StandardUnlinkComplement` lies in that chart.  Restriction gives a genuine smooth diffeomorphism
+from the whole complement onto an explicitly displayed open subset of Euclidean four-space, with
+exact forward, inverse, and range laws.  Therefore the remaining ambient-extension input may be
+formulated entirely as a smooth isotopy-extension theorem for a compact source moving inside an
+open subset of `EuclideanSpace ℝ (Fin 4)`.  The image is not asserted to be all of Euclidean
+four-space, and the one-chart reduction does not itself construct the ambient isotopy.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
