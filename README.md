@@ -21,6 +21,10 @@ This repository hosts two completed formalization projects. Each is a self-conta
 | **Paper** | [arXiv:2603.15929](https://arxiv.org/abs/2603.15929) · [HF paper](https://huggingface.co/papers/2603.15929) | [Technical report](grothendieck-vanishing/TECHNICAL_REPORT_GV.md) |
 | **Read more** | [README](landau/README.md) · [Technical report](landau/TECHNICAL_REPORT.md) · [Blueprint](https://vilin97.github.io/Clawristotle/landau/blueprint/) | [README](grothendieck-vanishing/README.md) · [Brian's review](grothendieck-vanishing/review.md) · [Blueprint](https://vilin97.github.io/Clawristotle/grothendieck-vanishing/blueprint/) |
 
+An additional project, [`mckay-conjecture/`](mckay-conjecture/), is in active
+development. Its first milestone is a compiled, adversarially audited Lean
+statement of the McKay conjecture for ordinary irreducible complex characters.
+
 ## How it works
 
 The human steers — choosing the theorem, fixing the definitions, auditing the final statement — while AI agents handle the implementation: writing the Lean code, searching for proofs, dispatching hard lemmas to the [Aristotle](https://aristotle.harmonic.fun/) cloud prover, and reviewing their own output in autonomous critique–plan–prove–simplify loops. Each project's README describes its agent stack and how the method evolved between the two projects.
