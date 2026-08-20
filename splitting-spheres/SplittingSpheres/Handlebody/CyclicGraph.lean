@@ -8,12 +8,13 @@ public import Mathlib.Data.ZMod.Basic
 public import Mathlib.SetTheory.Cardinal.Finite
 
 /-!
-# The cyclic graph cover underlying the handlebody cover
+# The cyclic graph encoding of the cover character
 
-The two-generator handlebody retracts onto a rose with a left and a right loop. Its degree-`m`
-cyclic cover has vertices `ZMod m`; the left edge is a loop at every vertex and the right edge
-moves a vertex by `+1`. This file isolates that finite graph calculation from the later smooth
-thickening construction.
+The two generators of the relevant fundamental group are encoded by a rose with a left and a
+right loop. Its degree-`m` cyclic cover has vertices `ZMod m`; the left edge is a loop at every
+vertex and the right edge moves a vertex by `+1`. This file isolates that finite graph
+calculation from the later ribbon-surface and partial-spin constructions. It does not assert that
+the compact four-dimensional exterior deformation retracts onto this graph.
 
 A `RoseCover` records the two edge permutations. Thus the local covering condition is built into
 the data: at every vertex and for each label there is one outgoing and one incoming edge. We prove
@@ -100,7 +101,7 @@ def ReachableFromBase (C : RoseCover) (v : C.Vertex) : Prop :=
 def IsConnected (C : RoseCover) : Prop := ∀ v, C.ReachableFromBase v
 
 /-- The Euler cycle-rank expression for a finite connected graph. Its later topological
-interpretation is supplied by the graph-thickening development. -/
+interpretation is supplied by the ribbon-surface development. -/
 def cycleRank (C : RoseCover) : ℕ := Nat.card C.Edge - Nat.card C.Vertex + 1
 
 end RoseCover
@@ -150,8 +151,8 @@ theorem edge_card : Nat.card (cyclicRoseCover m).Edge = 2 * m := by
   rw [Nat.card_prod, Nat.card_zmod, Nat.card_fin]
   omega
 
-/-- The connected cyclic graph has cycle rank `m+1`, hence its four-dimensional thickening has
-`m+1` one-handles once the thickening theorem is available. -/
+/-- The connected cyclic graph has cycle rank `m+1`.  Relating this number to the summands of
+the four-dimensional partial spin requires a separate ribbon-surface and handle theorem. -/
 theorem cycleRank_eq : (cyclicRoseCover m).cycleRank = m + 1 := by
   rw [RoseCover.cycleRank, edge_card, vertex_card]
   omega

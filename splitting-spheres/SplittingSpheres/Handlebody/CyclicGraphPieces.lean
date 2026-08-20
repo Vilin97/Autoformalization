@@ -14,7 +14,7 @@ makes that decomposition, its deck action, and its compatibility with divisibili
 literal at the finite labelled-graph level.
 
 These are combinatorial statements only.  Their interpretation as one-handle pieces and neck
-spheres in a smooth four-dimensional thickening remains a separate geometric theorem.
+spheres in the partial `S²`-spin of a planar ribbon surface remains a separate geometric theorem.
 -/
 
 @[expose] public section

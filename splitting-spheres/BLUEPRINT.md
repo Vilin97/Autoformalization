@@ -160,15 +160,30 @@ L |-> 0,
 R |-> 1.
 ```
 
-Its total space `X m` is the 4-dimensional 1-handlebody with graph consisting of an `m`-cycle
-covering the `R` loop and one lifted `L` loop at every cycle vertex.  Hence
+The cover of the planar twice-punctured-disk factor is the ribbon surface `P m` whose spine is
+the graph consisting of an `m`-cycle covering the `R` loop and one lifted `L` loop at every cycle
+vertex.  The cyclic order of the four darts at each vertex is essential: the labelled graph alone
+does not determine a planar thickening.  With the inherited planar order, its boundary cycles are
+`m` left circles, one right circle, and one outer circle.
+
+The total four-manifold is the partial `S2`-spin
+
+```text
+X m = (S1 x B3) union_(S1 x S2) ((P m) x S2).
+```
+
+An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
+argument, must prove
 
 ```text
 X m diffeomorphic to #(m+1) (S1 x B3).
 ```
 
 There are `m` lifted copies of `L`, one connected lifted `R` piece, and `m` lifted neck spheres.
-This replaces the analogy in `2D_pic.jpeg` (`P:125-132`) by an explicit graph-cover theorem.
+This replaces the analogy in `2D_pic.jpeg` (`P:125-132`) by an explicit ribbon-surface cover
+theorem followed by a partial-spin theorem.  In particular, `X m` is not asserted to be a regular
+neighborhood of, or to deformation retract onto, the graph: its boundary and third homology rule
+that out.  Here `#` is the paper's ordinary/interior connected sum, not boundary connected sum.
 
 First prove that `beta k` is homotopic to the identity rel boundary (equivalently for this use,
 that its induced fundamental-group automorphism preserves the kernel of the cyclic character).
@@ -269,15 +284,19 @@ The Lean development must not inherit the following implicit steps.
    collar fixation is required.
 6. The cap regions asserted at `P:107,116,152` need handle-identification proofs.
 7. `cap(beta k) ~ delta k` is contained only in a drawing.
-8. Ball containment of each lifted framed barbell at `P:134-140` is contained only in a drawing.
-9. The lifted factorization and final cap at `P:143-152` are schematic.
-10. `P:156` silently uses full linear independence, factorization of the `i*j` cover through
+8. The cyclic-order/ribbon data needed to pass from the labelled cover graph to the planar cover
+   is implicit in the drawings; the labelled graph by itself is insufficient.
+9. The partial `S2`-spin identification with the interior connected sum, including all labelled
+   boundary components, is not supplied by graph homotopy type.
+10. Ball containment of each lifted framed barbell at `P:134-140` is contained only in a drawing.
+11. The lifted factorization and final cap at `P:143-152` are schematic.
+12. `P:156` silently uses full linear independence, factorization of the `i*j` cover through
     both smaller covers, preservation of the cyclic-cover subgroup, compatible based lifts, and a
     corrected composition order.
-11. A range-endpoint embedding isotopy must be converted to the submanifold isotopy accepted by
+13. A range-endpoint embedding isotopy must be converted to the submanifold isotopy accepted by
     relative isotopy extension.  Equal ranges of compact smooth embeddings induce a smooth source
     reparametrization.
-12. Support control must keep every ambient extension away from the fixed link.
+14. Support control must keep every ambient extension away from the fixed link.
 
 ## Lean module architecture
 
@@ -353,18 +372,25 @@ statement.
 
 ### Layer C: handlebodies and diagrams
 
-`SplittingSpheres/Handlebody/GraphThickening.lean`
+`SplittingSpheres/Handlebody/RibbonSurface.lean`
 
-- a finite graph/half-edge DSL with cyclic covers;
-- a smooth 4-dimensional 0/1-handle thickening;
-- deformation retraction onto the graph and the induced fundamental group;
-- thickening functoriality for graph covers;
-- a regular neighborhood of a finite embedded tree is `B4`.
+- a finite graph/dart DSL with a cyclic order at every vertex;
+- the boundary permutation and its `m + 2` explicit orbits in the cyclic cover;
+- a boundary-labelled planar thickening of the ribbon graph;
+- identification of that surface with the explicit planar power pullback;
+- ribbon-thickening functoriality for graph covers.
+
+`SplittingSpheres/Handlebody/PartialSphereSpin.lean`
+
+- the topological pushout `(S1 x B3) union_(S1 x S2) (P x S2)`;
+- functoriality under outer-boundary-relative homeomorphisms;
+- the partial-spin calculation identifying the cyclic example with the required interior
+  connected sum, with all inner boundary components labelled.
 
 `SplittingSpheres/Handlebody/Genus.lean`
 
-- the one-loop thickening is `S1 x B3`;
-- the two-loop thickening is `(S1 x B3) # (S1 x B3)`;
+- the one-hole partial spin is `S1 x B3`;
+- the two-hole partial spin is `(S1 x B3) # (S1 x B3)`;
 - capping a selected loop and the `L # S4` cancellation;
 - the degree-`m` unwinding cover has `m+1` one-handles;
 - explicit lifted pieces and neck spheres.
