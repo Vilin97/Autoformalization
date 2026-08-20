@@ -235,10 +235,16 @@ with `S1 x B3` by an explicit radial-shell homeomorphism.  The flower itself is 
 exactly as the pushout of its closed left and right polynomial half-spaces along the entire
 `ZMod m`-indexed arc family: the common boundary is proved to be precisely the range of those
 arcs, and the two closed halves cover the flower.  A reusable direction-dependent radial-annulus
-homeomorphism supplies the point-set normal form needed next.  What remains at this stage is to
-identify the closed halves with one right annulus and the `ZMod m` family of left annuli, including
-their outer-boundary sectors; neither the arc pushout nor the abstract radial-annulus calculation
-alone implies that global labelled normalization.
+homeomorphism supplies the point-set normal form needed next.  The actual right flower half is a
+closed annulus.  Downstairs, the left polynomial half is another closed annulus and lies strictly
+inside the selected root disk; multiplying that chosen root by the standard `ZMod m` roots of
+unity gives a genuine homeomorphism from `ZMod m` copies of the downstairs annulus to the actual
+left flower half.  Its seam formula is literally the previously constructed labelled neck arc,
+so the sheet labels and the cut-pushout labels agree.  A compact-Hausdorff product theorem also
+identifies the product of an injective topological pushout with the pushout of the product span.
+What remains at this stage is to normalize the outer-boundary sectors and lift the planar cut
+through the whole partial-spin attachment; the annulus calculations alone do not imply that
+global spun decomposition.
 
 The corresponding closed necks are nevertheless already explicit.  The boundary of the product
 four-ball `D1 x B3` is recognized as the pushout of `D1 x S2` and `S0 x B3` and is homeomorphic to
@@ -248,12 +254,9 @@ partial spin.  Exact cross-face recovery proves that the whole labelled family h
 disjoint images.  This construction is not yet a smooth embedding theorem, and pairwise
 disjointness alone does not prove that these spheres separate the required capped components.
 
-The two closed planar halves now also have explicit polar normal forms.  A direction-dependent
-radial calculation identifies the downstairs left half with a closed annulus, while a second
-calculation using the positive real `m`th root identifies the actual right flower half with a
-closed annulus.  Both homeomorphisms include exact inner- and outer-endpoint range theorems.  The
-left statement is deliberately downstairs: the remaining normalization must still trivialize its
-full preimage as `ZMod m` copies and verify that the lifted seam arcs agree with the chosen sheets.
+Both planar annulus homeomorphisms include exact inner- and outer-endpoint range theorems.  These
+range equalities are the input for the still-missing labelled decomposition of the retained outer
+circle into the one-handle sectors between the neck endpoints.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
