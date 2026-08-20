@@ -308,6 +308,29 @@ the full point-set cut-and-cap model needed for the cover calculation.  A conven
 interior-connected-sum theorem still requires individual rounded-ball charts, corner smoothing,
 and smooth gluing; none is inferred from these topological homeomorphisms.
 
+The first smooth structure crossing this point-set calculation is now explicit.  On the root
+disk `ball (-1) 1`, the rotated logarithm formula
+
+```text
+exp ((log (-z) + pi * I) / m)
+```
+
+is a nonzero smooth `m`th root.  Restricting it to the vertical neck segment gives a smooth arc
+from the closed-interval half-space model.  Its ratio with the earlier, arbitrarily selected
+continuous root is a continuous map from a connected interval to the finite discrete group of
+`m`th roots of unity, and hence is one constant element.  Thus a single fixed translation of the
+`ZMod m` labels identifies the entire explicit smooth arc family with the previously proved
+topological cut-arc family; no normalization of the selected root is assumed.
+
+Crossing the explicit segment with `S2` and using the smooth aligned cap face gives a jointly
+smooth neck cylinder in the actual strict coordinate-unlink complement.  For every fixed deck
+label, the explicit root supplies a continuous direct lift to the power pullback.  The atlas
+pulled back from the complement makes its covering projection a local diffeomorphism, and a
+local-inverse argument proves that each such lift is jointly smooth.  This is a smooth statement
+about the genuine complement and its cover, not about the flower or star pushouts.  Smooth
+embedding status for these cylinders, compatibility with rounded endpoint caps, and a smooth
+atlas and gluing theorem for the complete star remain separate obligations.
+
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
 
