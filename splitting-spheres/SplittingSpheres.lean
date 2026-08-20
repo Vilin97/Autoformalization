@@ -7,6 +7,7 @@ public import SplittingSpheres.Foundations.CoordinateBallSupport
 public import SplittingSpheres.Foundations.CoordinateBallExample
 public import SplittingSpheres.Foundations.MappingClassFunctor
 public import SplittingSpheres.Foundations.Orientation
+public import SplittingSpheres.Foundations.OpenDiffeomorphExtension
 public import SplittingSpheres.Foundations.RelativeDiffeomorph
 public import SplittingSpheres.Foundations.RelativeDiffeotopy
 public import SplittingSpheres.Foundations.Separation
