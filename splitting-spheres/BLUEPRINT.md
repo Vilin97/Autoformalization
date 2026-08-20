@@ -197,9 +197,21 @@ has now been straightened by an explicit positive direction-dependent radial hom
 closed disk, with its equality locus identified with the corresponding circle.  On the inner
 boundary, the right preimage is one connected circle, while the left preimage is the disjoint
 union of exactly `m` circles indexed by `ZMod m`; their displayed parametrizations and deck action
-are exact.  Filling the right circle by its literal power-preimage disk has also been recognized as
-an actual topological pushout.  These are point-set ingredients for the pending boundary-labelled
-planar classification, not a substitute for it.
+are exact.  Filling the right circle by its literal power-preimage disk is an actual topological
+pushout.  The remaining left power-preimage disks are pairwise disjoint, their union is exactly
+the full left missing locus, and their labelled simultaneous pushout with the right-filled flower
+is the whole polynomial outer disk.  Thus the required boundary-labelled planar
+disk-with-`m + 2`-holes calculation is now proved directly in coordinates, without invoking
+compact-surface classification.
+
+The corresponding point-set partial-spin associativity is also formalized.  Spinning after a
+planar filling is homeomorphic to attaching the filling disk times `S2` after spinning.  Applied
+first to the right disk and then simultaneously to all `m` labelled left disks, it gives a literal
+two-stage cap-attachment space.  A boundary-corrected radial parameterization identifies the
+completely filled planar factor with the standard disk while preserving the retained outer
+circle exactly, and hence proves that the completely capped partial spin is homeomorphic to
+`S4`.  This is a topological capping calculation; it does not yet provide a smooth gluing theorem
+or the interior-connected-sum decomposition of the unfilled partial spin.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
@@ -405,14 +417,18 @@ statement.
 
 - a finite graph/dart DSL with a cyclic order at every vertex;
 - the boundary permutation and its `m + 2` explicit orbits in the cyclic cover;
-- a boundary-labelled planar thickening of the ribbon graph;
-- identification of that surface with the explicit planar power pullback;
+- the explicit power-coordinate replacement for a boundary-labelled planar thickening;
+- exact right and labelled-left filling disks and their simultaneous pushout identification with
+  the outer disk;
 - ribbon-thickening functoriality for graph covers.
 
 `SplittingSpheres/Handlebody/PartialSphereSpin.lean`
 
 - the topological pushout `(S1 x B3) union_(S1 x S2) (P x S2)`;
 - functoriality under outer-boundary-relative homeomorphisms;
+- associativity of planar filling with attachment of `disk x S2`, including simultaneous labelled
+  fillings;
+- the completely capped explicit cyclic example is homeomorphic to `S4`;
 - the partial-spin calculation identifying the cyclic example with the required interior
   connected sum, with all inner boundary components labelled.
 
