@@ -242,9 +242,12 @@ unity gives a genuine homeomorphism from `ZMod m` copies of the downstairs annul
 left flower half.  Its seam formula is literally the previously constructed labelled neck arc,
 so the sheet labels and the cut-pushout labels agree.  A compact-Hausdorff product theorem also
 identifies the product of an injective topological pushout with the pushout of the product span.
-What remains at this stage is to normalize the outer-boundary sectors and lift the planar cut
-through the whole partial-spin attachment; the annulus calculations alone do not imply that
-global spun decomposition.
+Conjugating the two closed-half legs now identifies the flower itself with the pushout of the
+literal `ZMod m` family of left annuli and one right annulus, and the product theorem gives the
+same exact pushout after crossing every piece and seam with `S2`.  What remains at this stage is
+to normalize the outer-boundary sectors and lift that product cut through the one-handle part of
+the full partial-spin attachment; the annulus calculations alone do not imply the global spun
+decomposition.
 
 The corresponding closed necks are nevertheless already explicit.  The boundary of the product
 four-ball `D1 x B3` is recognized as the pushout of `D1 x S2` and `S0 x B3` and is homeomorphic to
