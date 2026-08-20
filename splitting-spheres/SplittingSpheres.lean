@@ -34,6 +34,7 @@ public import SplittingSpheres.Foundations.SmoothRadialCompression
 public import SplittingSpheres.Foundations.TopologicalCyclicCover
 public import SplittingSpheres.Foundations.TopologicalCyclicFactor
 public import SplittingSpheres.Foundations.TopologicalCoverPullback
+public import SplittingSpheres.Foundations.TopologicalCoverPullbackBaseHomeomorph
 public import SplittingSpheres.Foundations.TopologicalPushout
 public import SplittingSpheres.Foundations.TopologicalPushoutExtension
 public import SplittingSpheres.Foundations.TopologicalPushoutHomeomorph
@@ -48,9 +49,18 @@ public import SplittingSpheres.Geometry.StandardUnlink
 public import SplittingSpheres.Geometry.UnlinkComplement
 public import SplittingSpheres.Geometry.UnlinkComplementExteriorHomeomorph
 public import SplittingSpheres.Geometry.UnlinkCyclicCover
+public import SplittingSpheres.Geometry.UnlinkDeckGraphIndex
+public import SplittingSpheres.Geometry.UnlinkDeckZMod
 public import SplittingSpheres.Geometry.UnlinkExteriorCollar
+public import SplittingSpheres.Geometry.UnlinkExteriorPowerCover
+public import SplittingSpheres.Geometry.UnlinkExteriorPowerDeck
+public import SplittingSpheres.Geometry.UnlinkExteriorPowerFactor
 public import SplittingSpheres.Geometry.UnlinkImmersion
+public import SplittingSpheres.Geometry.UnlinkMeridianCharacter
+public import SplittingSpheres.Geometry.UnlinkMeridianDeckIndex
 public import SplittingSpheres.Geometry.UnlinkPowerDeck
+public import SplittingSpheres.Geometry.UnlinkPowerFactor
+public import SplittingSpheres.Geometry.UnlinkPowerFactorZMod
 public import SplittingSpheres.Geometry.UnlinkTubes
 public import SplittingSpheres.Handlebody.AlignedSphereHandleDecomposition
 public import SplittingSpheres.Handlebody.CyclicGraph
@@ -63,6 +73,9 @@ public import SplittingSpheres.Handlebody.CappedOneHandleExtension
 public import SplittingSpheres.Handlebody.CoreSupportedMappingClass
 public import SplittingSpheres.Handlebody.CoreSupportedMappingClassMod
 public import SplittingSpheres.Handlebody.CoreExtensionBallSupport
+public import SplittingSpheres.Handlebody.CoordinateExteriorPowerCover
+public import SplittingSpheres.Handlebody.CoordinateExteriorPowerDeck
+public import SplittingSpheres.Handlebody.CoordinateExteriorPowerFactor
 public import SplittingSpheres.Handlebody.CoordinateUnlinkExteriorDecomposition
 public import SplittingSpheres.Handlebody.DirectCappedOneHandleExtension
 public import SplittingSpheres.Handlebody.CoreExtensionDiffeomorph
