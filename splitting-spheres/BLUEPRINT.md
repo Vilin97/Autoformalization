@@ -398,6 +398,13 @@ onto the intersections of this strict core with the corresponding star sides at 
 `a + smoothNeckShift`; it does not identify them with the whole compact leaf or remainder.  The
 explicit deck transformation labelled `b` sends equator `a`, its range, and its complement to the
 corresponding objects at `b + a`.
+On the planar face, membership in this strict core is now computed exactly by the two inequalities
+`1/8 < norm (z^m)` and `1/8 < norm (z^m+1)`.  On either normalized annulus these reduce exactly to
+positive annulus time: time zero is the deleted tube boundary and every positive-time point is
+retained.  The entire one-handle face is retained, and the same formulas are transported through
+the flower-to-star homeomorphism.  These statements identify the domains in which connecting
+paths must run; they do not yet construct the paths or prove that the resulting side intersections
+are preconnected.
 At the level of connected components, every component meeting one displayed side remains in that
 side, and points on opposite sides have distinct relative components.  More precisely, the
 component space of the lifted-equator complement is equivalent to the dependent sum, indexed by
