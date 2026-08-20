@@ -353,9 +353,15 @@ Its negative lies in the complex slit plane everywhere, so the same rotated-log 
 gives a smooth root on the entire `S3`.  Every `ZMod m` translate is now bundled as a smooth
 embedding into the actual power pullback, its projection is the standard equator, and the whole
 labelled family is jointly injective; in particular, distinct lifted equators have disjoint
-ranges.  Relating these global smooth ranges to the earlier point-set cut-and-cap neck family,
-and then transporting the star separation and capping data across that equality, remains an
-explicit comparison theorem rather than an implicit identification.
+ranges.  The global and point-set necks are now compared exactly.  Transport the old selected
+neck labelled `a + smoothNeckShift` through the flower homeomorphism and the closed-exterior
+inclusion.  After a proved source homeomorphism of `Sphere 3`, covering-space uniqueness identifies
+that map pointwise with the explicit equatorial lift labelled `a`; in particular, their ranges
+are equal.  The proof uses the exact projected equator range, one explicit point on the smooth
+side cylinder, and the correct label shift.  This identifies the embedded neck carriers without
+claiming that the surrounding flower/star is homeomorphic to the entire strict-complement cover.
+Transporting the full star separation and capping data from the closed core to that whole smooth
+cover remains a separate ambient comparison.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
