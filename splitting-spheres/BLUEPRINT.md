@@ -304,9 +304,16 @@ closed embeddings, and each uncapped column is homeomorphic to the literal compl
 corresponding strict cap-interior image.  Consequently the original flower partial spin is
 homeomorphic to the explicit star pushout of `m` punctured labelled one-handles and one central
 one-handle punctured by all `m` caps, over the common `ZMod m x Sphere 3` boundary family.  This is
-the full point-set cut-and-cap model needed for the cover calculation.  A conventional smooth
-interior-connected-sum theorem still requires individual rounded-ball charts, corner smoothing,
-and smooth gluing; none is inferred from these topological homeomorphisms.
+the full point-set cut-and-cap model needed for the cover calculation.  Both attaching maps in
+this literal star are now proved to be closed embeddings.  Removing the image of the whole
+labelled neck family therefore leaves two disjoint open sides covering its complement; opposite
+side witnesses lie in distinct relative connected components.  The same statements are
+transported back to the original flower partial spin using the exact identification of its old
+neck-family carrier with the star seam.  This is simultaneous-family separation, not yet the
+label-by-label theorem that removing one selected neck sphere separates one leaf from the rest.
+A conventional smooth interior-connected-sum theorem still requires individual rounded-ball
+charts, corner smoothing, and smooth gluing; none is inferred from these topological
+homeomorphisms.
 
 The first smooth structure crossing this point-set calculation is now explicit.  On the root
 disk `ball (-1) 1`, the rotated logarithm formula
