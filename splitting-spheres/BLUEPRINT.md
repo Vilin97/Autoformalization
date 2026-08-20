@@ -276,20 +276,30 @@ right piece along the labelled neck family, with exact formulas on all four term
 This is a genuine global regrouping, but it still makes no claim that either uncapped column is
 a one-handle or that the regrouping is a connected sum.
 
-The corresponding closed necks are nevertheless already explicit.  The boundary of the product
-four-ball `D1 x B3` is recognized as the pushout of `D1 x S2` and `S0 x B3` and is homeomorphic to
-the literal `Sphere 3`.  Sending its side face to a lifted arc times `S2` and its two end balls into
-the one-handle face gives, for every `ZMod m` label, a topologically embedded `S3` in the flower
-partial spin.  Exact cross-face recovery proves that the whole labelled family has pairwise
-disjoint images.  This construction is not yet a smooth embedding theorem, and pairwise
-disjointness alone does not prove that these spheres separate the required capped components.
+The corresponding closed necks are now explicit on both sides of that regrouping.  The boundary
+of the product four-ball `D1 x B3` is recognized as the pushout of `D1 x S2` and `S0 x B3` and is
+homeomorphic to the literal `Sphere 3`.  Sending its side face to a lifted arc times `S2` and its
+two end balls into the one-handle face gives, for every `ZMod m` label, a topologically embedded
+`S3` in the flower partial spin.  Exact cross-face recovery proves that the whole labelled family
+has pairwise-disjoint images.  The complete center column of the regrouping is independently
+identified with `ZMod m x Sphere 3`, with exact laws on both faces.  Those laws prove that its two
+attaching maps reproduce the previously constructed neck-sphere family, and hence that both are
+closed embeddings.  This remains a topological embedding theorem: it supplies neither a smooth
+embedding nor a separation theorem by itself.
 
 Both planar annulus homeomorphisms include exact inner- and outer-endpoint range theorems.  The
 outer endpoint equalities are matched to the labelled retained-circle sectors and used in the
 simultaneous partial-spin attachment and reassociation just described.  What remains at this
-layer is to attach an explicit product four-ball to every exposed neck boundary, prove that each
-capped leaf and the simultaneously capped central piece is `S1 x B3`, and package the uncapped
-column-first pushout as a literal star-shaped interior connected-sum model.
+layer is no longer the local capping calculation.  Two further commuting `3 x 3` grids attach the
+literal interval-product four-ball to a fixed normalized leaf, and attach all `m` labelled copies
+simultaneously to the normalized central node.  Row-by-row recognition reduces both capped pieces
+to the partial spin of the standard annulus and proves that each is homeomorphic to `S1 x B3`.
+The fixed cap is exactly `D1 x B3`, while the simultaneous cap column is exactly
+`ZMod m x (D1 x B3)`, with formulas on every side and end face.  The next bounded step is to package
+the fixed-leaf calculations into one simultaneous labelled family, identify the uncapped pieces
+as complements of the strict cap interiors, and express the original column-first pushout as a
+literal star-shaped interior-connected-sum model.  No smooth gluing or connected-sum theorem is
+inferred from the present point-set homeomorphisms.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
