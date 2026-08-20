@@ -366,6 +366,16 @@ are equal.  The proof uses the exact projected equator range, one explicit point
 side cylinder, and the correct label shift.  This identifies the embedded neck carriers without
 claiming that the surrounding flower/star is homeomorphic to the entire strict-complement cover.
 
+Every hypothetical smooth unlink-avoiding isotopy starting at the standard splitting sphere can
+now be lifted through the same power cover.  First a source diffeomorphism normalizes its
+time-zero parametrization pointwise to `equatorSphereMap`; covering homotopy lifting then starts
+each sheet at the explicit equator labelled `a`.  With the atlas pulled back through the covering
+projection, the resulting family is jointly smooth and every fixed-time slice is a genuine smooth
+embedding.  Deck label `b` carries the entire lift at `a` to the lift at `b + a`, so the labelled
+source family remains jointly injective and distinct labelled ranges remain disjoint at every
+time.  This is not an ambient isotopy of the cover and, by itself, supplies no homeomorphism of
+the slice complements or preservation of their connected components.
+
 The ambient comparison is now explicit at the level of the whole power cover.  The radial base
 homeomorphism does not preserve the right-normal character: in the left tube its multiplicative
 change is genuinely complex.  Its normalized ratio nevertheless lies in the principal slit
