@@ -621,6 +621,22 @@ theorem partialSphereSpinSimultaneousInnerBoundaryInclusion_apply
       partialSphereSpinInr outer (inner x.1, x.2) :=
   rfl
 
+/-- Injectivity of an inner attaching map is preserved after taking its product with `S²` and
+including it in the partial sphere spin. -/
+theorem injective_partialSphereSpinSimultaneousInnerBoundaryInclusion
+    (outer : C(Sphere 1, P)) (inner : C(A, P))
+    (hinner : Function.Injective inner) :
+    Function.Injective
+      (partialSphereSpinSimultaneousInnerBoundaryInclusion outer inner) := by
+  intro x y hxy
+  have hprod : (inner x.1, x.2) = (inner y.1, y.2) :=
+    topologicalPushoutInr_injective oneHandleBoundaryInclusion
+      (partialSphereSpinBoundaryInclusion outer)
+      oneHandleBoundaryInclusion_injective hxy
+  exact Prod.ext
+    (hinner (congrArg (fun z : P × Sphere 2 ↦ z.1) hprod))
+    (congrArg (fun z : P × Sphere 2 ↦ z.2) hprod)
+
 /-- The product of the arbitrary filling-boundary map with `id : S² → S²`. -/
 def partialSphereSpinSimultaneousFillBoundaryInclusion
     (fillBoundary : C(A, D)) : C(A × Sphere 2, D × Sphere 2) where
@@ -634,6 +650,17 @@ theorem partialSphereSpinSimultaneousFillBoundaryInclusion_apply
     partialSphereSpinSimultaneousFillBoundaryInclusion fillBoundary x =
       (fillBoundary x.1, x.2) :=
   rfl
+
+/-- Injectivity of a filling-boundary map is preserved after taking its product with `S²`. -/
+theorem injective_partialSphereSpinSimultaneousFillBoundaryInclusion
+    (fillBoundary : C(A, D)) (hfill : Function.Injective fillBoundary) :
+    Function.Injective
+      (partialSphereSpinSimultaneousFillBoundaryInclusion fillBoundary) := by
+  intro x y hxy
+  have hprod : (fillBoundary x.1, x.2) = (fillBoundary y.1, y.2) := hxy
+  exact Prod.ext
+    (hfill (congrArg (fun z : D × Sphere 2 ↦ z.1) hprod))
+    (congrArg (fun z : D × Sphere 2 ↦ z.2) hprod)
 
 /-- First spin `P`, then attach `D × S²` simultaneously along `A × S²`. -/
 abbrev PartialSphereSpinSimultaneousCappedSecond

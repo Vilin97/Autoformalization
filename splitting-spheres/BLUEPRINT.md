@@ -213,6 +213,19 @@ circle exactly, and hence proves that the completely capped partial spin is home
 `S4`.  This is a topological capping calculation; it does not yet provide a smooth gluing theorem
 or the interior-connected-sum decomposition of the unfilled partial spin.
 
+The original unfilled partial spin is now also identified exactly with the complement, inside
+that completely capped `S4`, of the off-attaching-boundary pieces of the filling caps.  Those
+pieces have concrete strict disk-coordinate descriptions, are pairwise disjoint, and are indexed
+by
+
+```text
+ZMod m + PUnit,
+```
+
+so there are exactly `m + 1` of them.  This is still deliberately weaker than calling their
+transported images a standard unlink of cap cores: the present point-set pushout calculation does
+not prove that the transported disks are locally flat, unknotted, or mutually unlinked.
+
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
 
@@ -429,6 +442,8 @@ statement.
 - associativity of planar filling with attachment of `disk x S2`, including simultaneous labelled
   fillings;
 - the completely capped explicit cyclic example is homeomorphic to `S4`;
+- the original cyclic partial spin is the literal complement of `m + 1` pairwise-disjoint,
+  strictly described off-boundary cap subsets in that `S4`;
 - the partial-spin calculation identifying the cyclic example with the required interior
   connected sum, with all inner boundary components labelled.
 
