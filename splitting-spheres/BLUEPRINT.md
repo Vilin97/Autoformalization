@@ -266,9 +266,15 @@ exact `S1 x B3`.  On the right, all `m` retained sectors and all `m` seams are r
 same circle, with their upper endpoints attached using `a -> a + c`; its `B3` product is again an
 exact one-handle.  A general theorem interchanging row-first and column-first pushouts of a
 commuting `3 x 3` grid is also formalized, with exact laws on all four terminal pieces and no
-separation hypotheses.  The next step is to instantiate that grid simultaneously with the
-annular and retained-circle cuts, producing the uncapped leaf pieces and central piece.  The
-separate boundary recognitions do not by themselves imply that global regrouping.
+separation hypotheses.  That theorem is now instantiated by the nine literal endpoint, seam,
+outer-sector, annulus, and ball products.  The upper right endpoint retains the symbolic
+translation `a -> a + c`.  Three exact horizontal-row homeomorphisms identify the row-first
+pushout with the retained `S1 x B3`, the normalized flower times `S2`, and hence the original
+flower partial spin.  Composing with grid interchange gives a homeomorphism from that original
+partial spin to the column-first pushout of the complete labelled leaf family and the central
+right piece along the labelled neck family, with exact formulas on all four terminal pieces.
+This is a genuine global regrouping, but it still makes no claim that either uncapped column is
+a one-handle or that the regrouping is a connected sum.
 
 The corresponding closed necks are nevertheless already explicit.  The boundary of the product
 four-ball `D1 x B3` is recognized as the pushout of `D1 x S2` and `S0 x B3` and is homeomorphic to
@@ -279,8 +285,11 @@ disjoint images.  This construction is not yet a smooth embedding theorem, and p
 disjointness alone does not prove that these spheres separate the required capped components.
 
 Both planar annulus homeomorphisms include exact inner- and outer-endpoint range theorems.  The
-outer endpoint equalities are now matched to the labelled retained-circle sectors just described;
-what remains is their simultaneous partial-spin attachment and reassociation across every neck.
+outer endpoint equalities are matched to the labelled retained-circle sectors and used in the
+simultaneous partial-spin attachment and reassociation just described.  What remains at this
+layer is to attach an explicit product four-ball to every exposed neck boundary, prove that each
+capped leaf and the simultaneously capped central piece is `S1 x B3`, and package the uncapped
+column-first pushout as a literal star-shaped interior connected-sum model.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
