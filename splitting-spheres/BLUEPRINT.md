@@ -388,6 +388,16 @@ onto the intersections of this strict core with the corresponding star sides at 
 `a + smoothNeckShift`; it does not identify them with the whole compact leaf or remainder.  The
 explicit deck transformation labelled `b` sends equator `a`, its range, and its complement to the
 corresponding objects at `b + a`.
+At the level of connected components, every component meeting one displayed side remains in that
+side, and points on opposite sides have distinct relative components.  More precisely, the
+component space of the lifted-equator complement is equivalent to the dependent sum, indexed by
+`Fin 2`, of the component spaces of the two restricted sides.  This proves that the component
+space is nontrivial, but it is not an exact cardinality-two theorem: either dependent-sum fiber
+may still contain several components.  Exact equality of a side with the relative component of
+any one of its points is proved conditionally on that side being preconnected.  Establishing those
+two preconnectedness hypotheses requires explicit paths inside the strict-core intersections;
+path connectedness of the surrounding compact one-handle pieces alone does not survive deletion
+of the embedded cap interiors.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
