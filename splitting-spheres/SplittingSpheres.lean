@@ -9,6 +9,7 @@ public import SplittingSpheres.Foundations.MappingClassFunctor
 public import SplittingSpheres.Foundations.Orientation
 public import SplittingSpheres.Foundations.OpenDiffeomorphExtension
 public import SplittingSpheres.Foundations.RadialDiffeomorph
+public import SplittingSpheres.Foundations.RelationMappingClass
 public import SplittingSpheres.Foundations.RelativeDiffeomorph
 public import SplittingSpheres.Foundations.RelativeDiffeotopy
 public import SplittingSpheres.Foundations.Separation
@@ -46,6 +47,7 @@ public import SplittingSpheres.Handlebody.CyclicGraphPieces
 public import SplittingSpheres.Handlebody.CapPiece
 public import SplittingSpheres.Handlebody.BoundaryAttachment
 public import SplittingSpheres.Handlebody.CappedOneHandleExtension
+public import SplittingSpheres.Handlebody.CoreSupportedMappingClass
 public import SplittingSpheres.Handlebody.DirectCappedOneHandleExtension
 public import SplittingSpheres.Handlebody.CoreExtensionDiffeomorph
 public import SplittingSpheres.Handlebody.OneHandleCoreSupport
@@ -56,5 +58,6 @@ public import SplittingSpheres.Handlebody.SphereHandleDecomposition
 public import SplittingSpheres.Handlebody.SphereHandleInterior
 public import SplittingSpheres.Handlebody.SphereHandleSmoothness
 public import SplittingSpheres.Handlebody.SmoothCoreExtension
+public import SplittingSpheres.Handlebody.SmoothCoreDiffeotopyExtension
 public import SplittingSpheres.Proof.AbstractFamily
 public import SplittingSpheres.Statement
