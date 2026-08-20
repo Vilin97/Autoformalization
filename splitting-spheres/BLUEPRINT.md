@@ -441,6 +441,13 @@ from the connected components of the time-one lifted-sphere complement to `Fin 2
 `Nat.card` equal to `2`.  In particular, such an ambient extension forces the time-one complement
 to be non-preconnected with precisely the same component count.  This is a preservation theorem
 under an explicit ambient-extension witness; it does not yet construct that witness.
+The covering-space part of this witness is now discharged generically: every downstairs ambient
+isotopy lifts canonically through an arbitrary covering map by lifting it and its pointwise inverse,
+with covering uniqueness proving the two inverse laws.  For the unlink power cover, full-time
+agreement downstairs with the normalized equator isotopy gives full-time agreement with every
+labelled lifted isotopy.  Thus the remaining geometric input is precisely an ambient isotopy of
+`StandardUnlinkComplement` extending the normalized downstairs sphere isotopy; no separate
+cover-label or monodromy hypothesis remains.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
