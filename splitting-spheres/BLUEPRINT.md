@@ -172,6 +172,21 @@ The total four-manifold is the partial `S2`-spin
 X m = (S1 x B3) union_(S1 x S2) ((P m) x S2).
 ```
 
+The implemented point-set reduction identifies `P m` with the explicit nonzero-complex
+``flower''
+
+```text
+{z != 0 |
+  norm (z^m + 1/2) <= sphereHandleRadius,
+  1/8 <= norm (z^m),
+  1/8 <= norm (z^m + 1)}.
+```
+
+The homeomorphism remembers exactly the power coordinate and is equivariant for multiplication
+by `m`th roots of unity.  The outer lifted boundary and both inner base circles are also explicit.
+This coordinate normal form is intended to support a direct cut-and-straighten proof; the three
+inequalities alone are not treated as a surface-classification theorem.
+
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
 
