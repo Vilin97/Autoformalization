@@ -14,6 +14,7 @@ public import SplittingSpheres.Foundations.SmoothCover
 public import SplittingSpheres.Foundations.SmoothCoverLift
 public import SplittingSpheres.Foundations.SmoothCoverIsotopyLift
 public import SplittingSpheres.Foundations.SmoothCoverDiffeotopyLift
+public import SplittingSpheres.Foundations.SmoothCoverFactorLift
 public import SplittingSpheres.Foundations.SmoothCoverLiftGroup
 public import SplittingSpheres.Foundations.SmoothCoverMappingClassLift
 public import SplittingSpheres.Foundations.SmoothEmbedding
@@ -22,13 +23,16 @@ public import SplittingSpheres.Foundations.SmoothIsotopy
 public import SplittingSpheres.Foundations.SmoothIsotopyConcat
 public import SplittingSpheres.Foundations.TopologicalCyclicCover
 public import SplittingSpheres.Foundations.TopologicalCyclicFactor
+public import SplittingSpheres.Geometry.ClosedBall
 public import SplittingSpheres.Geometry.EquatorImmersion
 public import SplittingSpheres.Geometry.IsotopyTrace
+public import SplittingSpheres.Geometry.SpherePolarProduct
 public import SplittingSpheres.Geometry.StandardUnlink
 public import SplittingSpheres.Geometry.UnlinkImmersion
 public import SplittingSpheres.Geometry.UnlinkTubes
 public import SplittingSpheres.Handlebody.CyclicGraph
 public import SplittingSpheres.Handlebody.CyclicGraphBasis
+public import SplittingSpheres.Handlebody.CyclicGraphDeckBasis
 public import SplittingSpheres.Handlebody.CyclicGraphPieces
 public import SplittingSpheres.Proof.AbstractFamily
 public import SplittingSpheres.Statement
