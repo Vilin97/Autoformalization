@@ -30,6 +30,7 @@ public import SplittingSpheres.Foundations.TopologicalPushout
 public import SplittingSpheres.Foundations.TopologicalPushoutExtension
 public import SplittingSpheres.Foundations.TopologicalPushoutHomeomorph
 public import SplittingSpheres.Geometry.ClosedBall
+public import SplittingSpheres.Geometry.ClosedBallMaps
 public import SplittingSpheres.Geometry.EquatorImmersion
 public import SplittingSpheres.Geometry.ExteriorCompression
 public import SplittingSpheres.Geometry.ExteriorIsotopyTransport
@@ -46,10 +47,14 @@ public import SplittingSpheres.Handlebody.CapPiece
 public import SplittingSpheres.Handlebody.BoundaryAttachment
 public import SplittingSpheres.Handlebody.CappedOneHandleExtension
 public import SplittingSpheres.Handlebody.DirectCappedOneHandleExtension
+public import SplittingSpheres.Handlebody.CoreExtensionDiffeomorph
+public import SplittingSpheres.Handlebody.OneHandleCoreSupport
 public import SplittingSpheres.Handlebody.OneHandlePiece
 public import SplittingSpheres.Handlebody.ProductBoundaryAttachment
 public import SplittingSpheres.Handlebody.ProductFiveBall
 public import SplittingSpheres.Handlebody.SphereHandleDecomposition
+public import SplittingSpheres.Handlebody.SphereHandleInterior
 public import SplittingSpheres.Handlebody.SphereHandleSmoothness
+public import SplittingSpheres.Handlebody.SmoothCoreExtension
 public import SplittingSpheres.Proof.AbstractFamily
 public import SplittingSpheres.Statement
