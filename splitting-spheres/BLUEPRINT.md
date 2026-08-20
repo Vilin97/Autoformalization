@@ -376,6 +376,15 @@ source family remains jointly injective and distinct labelled ranges remain disj
 time.  This is not an ambient isotopy of the cover and, by itself, supplies no homeomorphism of
 the slice complements or preservation of their connected components.
 
+The exact extra input needed for such preservation is now isolated as a separate conditional
+structure.  It consists of an actual continuous ambient isotopy of the power-cover total space
+whose final homeomorphism agrees, on one initial labelled equator, with the time-one lifted
+sphere.  Under precisely that hypothesis, the final ambient homeomorphism restricts to a
+homeomorphism of the two sphere complements, carries ambient relative connected components
+exactly, and induces a homeomorphism of their `ConnectedComponents` spaces.  No theorem currently
+constructs this ambient isotopy from the smooth family above; that missing constructor is the
+support-controlled isotopy-extension step, not a consequence of covering homotopy lifting.
+
 The ambient comparison is now explicit at the level of the whole power cover.  The radial base
 homeomorphism does not preserve the right-normal character: in the left tube its multiplicative
 change is genuinely complex.  Its normalized ratio nevertheless lies in the principal slit
