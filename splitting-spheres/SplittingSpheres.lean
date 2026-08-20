@@ -24,6 +24,7 @@ public import SplittingSpheres.Foundations.SmoothCoverDiffeotopyLift
 public import SplittingSpheres.Foundations.SmoothCoverFactorLift
 public import SplittingSpheres.Foundations.SmoothCoverLiftGroup
 public import SplittingSpheres.Foundations.SmoothCoverMappingClassLift
+public import SplittingSpheres.Foundations.SmoothCoverPullbackAtlas
 public import SplittingSpheres.Foundations.SmoothEmbedding
 public import SplittingSpheres.Foundations.SmoothEmbeddingRange
 public import SplittingSpheres.Foundations.SmoothIsotopy
@@ -42,6 +43,8 @@ public import SplittingSpheres.Geometry.ExteriorIsotopyTransport
 public import SplittingSpheres.Geometry.IsotopyTrace
 public import SplittingSpheres.Geometry.SpherePolarProduct
 public import SplittingSpheres.Geometry.StandardUnlink
+public import SplittingSpheres.Geometry.UnlinkComplement
+public import SplittingSpheres.Geometry.UnlinkExteriorCollar
 public import SplittingSpheres.Geometry.UnlinkImmersion
 public import SplittingSpheres.Geometry.UnlinkTubes
 public import SplittingSpheres.Handlebody.AlignedSphereHandleDecomposition
