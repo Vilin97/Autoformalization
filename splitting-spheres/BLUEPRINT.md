@@ -425,6 +425,13 @@ two preconnectedness hypotheses requires explicit paths inside the strict-core i
 path connectedness of the surrounding compact one-handle pieces alone does not survive deletion
 of the embedded cap interiors.
 
+Composing this partition with the conditional ambient-extension layer gives an exact equivalence
+from the connected components of the time-one lifted-sphere complement to the same `Fin 2`-indexed
+dependent sum.  In particular, such an ambient extension forces the time-one complement to have
+nontrivial component space and not to be preconnected.  This is a preservation theorem under an
+explicit ambient-extension witness; it neither constructs that witness nor turns either summand
+of the dependent sum into a singleton.
+
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
 
