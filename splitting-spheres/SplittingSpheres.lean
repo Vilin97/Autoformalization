@@ -5,7 +5,9 @@ public import SplittingSpheres.Foundations.CyclicFactorFiber
 public import SplittingSpheres.Foundations.CyclicFiber
 public import SplittingSpheres.Foundations.CoordinateBallSupport
 public import SplittingSpheres.Foundations.CoordinateBallExample
+public import SplittingSpheres.Foundations.CoordinateBallOpenTransport
 public import SplittingSpheres.Foundations.MappingClassFunctor
+public import SplittingSpheres.Foundations.ModelCoordinateBall
 public import SplittingSpheres.Foundations.Orientation
 public import SplittingSpheres.Foundations.OpenDiffeomorphExtension
 public import SplittingSpheres.Foundations.RadialDiffeomorph
@@ -48,9 +50,11 @@ public import SplittingSpheres.Handlebody.CapPiece
 public import SplittingSpheres.Handlebody.BoundaryAttachment
 public import SplittingSpheres.Handlebody.CappedOneHandleExtension
 public import SplittingSpheres.Handlebody.CoreSupportedMappingClass
+public import SplittingSpheres.Handlebody.CoreExtensionBallSupport
 public import SplittingSpheres.Handlebody.DirectCappedOneHandleExtension
 public import SplittingSpheres.Handlebody.CoreExtensionDiffeomorph
 public import SplittingSpheres.Handlebody.OneHandleCoreSupport
+public import SplittingSpheres.Handlebody.OneHandleInteriorDiffeomorph
 public import SplittingSpheres.Handlebody.OneHandlePiece
 public import SplittingSpheres.Handlebody.ProductBoundaryAttachment
 public import SplittingSpheres.Handlebody.ProductFiveBall
