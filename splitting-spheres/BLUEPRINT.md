@@ -374,9 +374,13 @@ coordinate by this gauge gives a deck-equivariant homeomorphism from the full co
 pullback to the literal pullback over the strict radius-`1/8` exterior.  This is then identified
 with exactly the inverse-image open subset of the compact coordinate-exterior pullback.  The
 gauge is one on the coordinate equator, so every explicit equatorial lift is fixed.  No
-surjectivity onto the whole compact pullback is asserted.  Restricting the closed-core star
-separation to this exact open subset, with witnesses genuinely away from the radius-`1/8`
-boundary, remains the next comparison step.
+surjectivity onto the whole compact pullback is asserted.  The closed-core star separation is
+now restricted to precisely this open subset.  The equatorial lift labelled `a` corresponds to
+the old star neck labelled `a + smoothNeckShift`; its complement is the union of two explicitly
+defined open, disjoint sides.  Points at normalized annular time `1/2` give witnesses on both
+sides with both tube distances strictly greater than `1/8`, so the actual full-cover equator
+complement is not preconnected.  This proves separation in the genuine complement cover, but not
+that either displayed side is connected or that there are exactly two connected components.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
