@@ -6,6 +6,7 @@ public import SplittingSpheres.Foundations.CyclicFiber
 public import SplittingSpheres.Foundations.CoordinateBallSupport
 public import SplittingSpheres.Foundations.CoordinateBallExample
 public import SplittingSpheres.Foundations.CoordinateBallOpenTransport
+public import SplittingSpheres.Foundations.LocalHomeomorphChartedSpace
 public import SplittingSpheres.Foundations.MappingClassFunctor
 public import SplittingSpheres.Foundations.ModelCoordinateBall
 public import SplittingSpheres.Foundations.Orientation
@@ -43,6 +44,7 @@ public import SplittingSpheres.Geometry.SpherePolarProduct
 public import SplittingSpheres.Geometry.StandardUnlink
 public import SplittingSpheres.Geometry.UnlinkImmersion
 public import SplittingSpheres.Geometry.UnlinkTubes
+public import SplittingSpheres.Handlebody.AlignedSphereHandleDecomposition
 public import SplittingSpheres.Handlebody.CyclicGraph
 public import SplittingSpheres.Handlebody.CyclicGraphBasis
 public import SplittingSpheres.Handlebody.CyclicGraphDeckBasis
@@ -53,6 +55,7 @@ public import SplittingSpheres.Handlebody.CappedOneHandleExtension
 public import SplittingSpheres.Handlebody.CoreSupportedMappingClass
 public import SplittingSpheres.Handlebody.CoreSupportedMappingClassMod
 public import SplittingSpheres.Handlebody.CoreExtensionBallSupport
+public import SplittingSpheres.Handlebody.CoordinateUnlinkExteriorDecomposition
 public import SplittingSpheres.Handlebody.DirectCappedOneHandleExtension
 public import SplittingSpheres.Handlebody.CoreExtensionDiffeomorph
 public import SplittingSpheres.Handlebody.OneHandleCoreSupport
