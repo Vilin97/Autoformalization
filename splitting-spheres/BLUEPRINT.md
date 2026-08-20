@@ -414,6 +414,13 @@ retained.  The entire one-handle face is retained, and the same formulas are tra
 the flower-to-star homeomorphism.  These statements identify the domains in which connecting
 paths must run; they do not yet construct the paths or prove that the resulting side intersections
 are preconnected.
+The normalized open annuli are now located inside those domains as explicit continuous carriers
+`S1 x (0,1) x S2`.  The left carrier lies in the strict selected leaf and the right carrier lies in
+the strict remainder for every selected label.  Each carrier is path connected, and arbitrary
+pairs of its points are joined inside the corresponding strict side.  This gives an honest common
+target for the remaining access paths, but it does not show that every point of either whole side
+can reach that target; the missing access statement is precisely the connectivity of the displayed
+one-handle complements after their product-four-ball cap carriers are removed.
 At the level of connected components, every component meeting one displayed side remains in that
 side, and points on opposite sides have distinct relative components.  More precisely, the
 component space of the lifted-equator complement is equivalent to the dependent sum, indexed by
