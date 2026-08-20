@@ -733,6 +733,14 @@ The minimum sound dependency closure is:
 14. the mapping-class theorem `deltaIndependentModBall`, in particular
     `i != j -> class (delta i * (delta j)^-1) != 1`.
 
+The explicit eight-term formal sum in item 12 is now represented in the free abelian group on
+ordered integer pairs.  Its coefficient at the pivot `(k-1,k-2)` is `-(k-1)`, every earlier
+formal delta vanishes at that pivot, and a maximal-support argument proves that the family indexed
+by `k = 4,5,...` is `Z`-linearly independent.  Nonzero, injective, pairwise-distinct, and
+pairwise-difference corollaries are exposed.  This closes only the combinatorial calculation in
+item 13: no theorem yet identifies these formal sums with `W3` values, proves `W3` invariant, or
+maps the resulting independence into the geometric mapping-class quotient.
+
 The aligned-compactification constraints suppressed in `BG:1190-1194` must be made explicit.  A
 purely combinatorial chord calculation is not sufficient until a realization and invariance
 theorem connects it to the smooth embedding/diffeomorphism spaces.
