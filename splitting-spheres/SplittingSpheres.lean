@@ -1,6 +1,7 @@
 module
 
 public import SplittingSpheres.Foundations.CyclicCharacter
+public import SplittingSpheres.Foundations.CyclicFactorFiber
 public import SplittingSpheres.Foundations.CyclicFiber
 public import SplittingSpheres.Foundations.MappingClassFunctor
 public import SplittingSpheres.Foundations.RelativeDiffeomorph
@@ -9,11 +10,15 @@ public import SplittingSpheres.Foundations.Separation
 public import SplittingSpheres.Foundations.SmoothCover
 public import SplittingSpheres.Foundations.SmoothCoverLift
 public import SplittingSpheres.Foundations.SmoothEmbedding
+public import SplittingSpheres.Foundations.SmoothEmbeddingRange
 public import SplittingSpheres.Foundations.SmoothIsotopy
+public import SplittingSpheres.Foundations.SmoothIsotopyConcat
 public import SplittingSpheres.Foundations.TopologicalCyclicCover
 public import SplittingSpheres.Foundations.TopologicalCyclicFactor
 public import SplittingSpheres.Geometry.EquatorImmersion
 public import SplittingSpheres.Geometry.StandardUnlink
+public import SplittingSpheres.Geometry.UnlinkImmersion
 public import SplittingSpheres.Handlebody.CyclicGraph
+public import SplittingSpheres.Handlebody.CyclicGraphBasis
 public import SplittingSpheres.Proof.AbstractFamily
 public import SplittingSpheres.Statement
