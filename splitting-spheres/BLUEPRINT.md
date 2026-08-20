@@ -295,11 +295,18 @@ literal interval-product four-ball to a fixed normalized leaf, and attach all `m
 simultaneously to the normalized central node.  Row-by-row recognition reduces both capped pieces
 to the partial spin of the standard annulus and proves that each is homeomorphic to `S1 x B3`.
 The fixed cap is exactly `D1 x B3`, while the simultaneous cap column is exactly
-`ZMod m x (D1 x B3)`, with formulas on every side and end face.  The next bounded step is to package
-the fixed-leaf calculations into one simultaneous labelled family, identify the uncapped pieces
-as complements of the strict cap interiors, and express the original column-first pushout as a
-literal star-shaped interior-connected-sum model.  No smooth gluing or connected-sum theorem is
-inferred from the present point-set homeomorphisms.
+`ZMod m x (D1 x B3)`, with formulas on every side and end face.  The fixed-leaf calculation is now
+also packaged into one simultaneous labelled family, whose uncapped and boundary columns agree
+exactly with the original grid.  On both sides the cap attaching map conjugates to
+`id x (Sphere 3 -> ProductFourBall)`.  The complements of those boundary ranges are proved to be
+the strict `ModelWithCorners.interior` subsets, the cap maps into the displayed one-handles are
+closed embeddings, and each uncapped column is homeomorphic to the literal complement of the
+corresponding strict cap-interior image.  Consequently the original flower partial spin is
+homeomorphic to the explicit star pushout of `m` punctured labelled one-handles and one central
+one-handle punctured by all `m` caps, over the common `ZMod m x Sphere 3` boundary family.  This is
+the full point-set cut-and-cap model needed for the cover calculation.  A conventional smooth
+interior-connected-sum theorem still requires individual rounded-ball charts, corner smoothing,
+and smooth gluing; none is inferred from these topological homeomorphisms.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
