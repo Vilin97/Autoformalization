@@ -458,6 +458,27 @@ formulated entirely as a smooth isotopy-extension theorem for a compact source m
 open subset of `EuclideanSpace ℝ (Fin 4)`.  The image is not asserted to be all of Euclidean
 four-space, and the one-chart reduction does not itself construct the ambient isotopy.
 
+The time-boundary part of the extension problem can be normalized without changing either
+endpoint.  The smooth time change
+`Real.smoothTransition (2 * t - 1 / 2)` is exactly zero on the first quarter of the unit interval
+and exactly one on the last quarter.  Precomposing a frozen sphere isotopy with this map preserves
+all embedded slices, endpoint ranges, and unlink avoidance, while making the family literally
+constant on relative neighborhoods of both boundary faces.  Thus its level-preserving trace is a
+product map near the two half-space boundary points; this removes the endpoint obstruction from a
+later trace-normal-form argument.  Endpoint flattening is still only a source reparametrization,
+not an ambient extension.
+
+The global ODE end of that extension is now formalized independently.  A bounded globally
+Lipschitz autonomous field on a complete real normed space has a jointly continuous selected flow
+on a buffered time interval; ODE uniqueness proves the reverse-time inverse and bundles the unit
+time restriction as a genuine `TauCeti.AmbientIsotopy`.  Applying this to the autonomous lift
+`(τ, x) ↦ (1, V (τ, x))` integrates a time-dependent field.  In particular, a jointly `C^1`,
+compactly supported `V : ℝ × E → E` supplies all global boundedness and Lipschitz estimates and
+hence an ambient isotopy of `E`.  What remains is to construct such a field agreeing with the
+velocity of the flattened trace, with support compactly contained in the stereographic image, and
+then restrict and conjugate its flow.  No vector-field extension or support-invariance theorem is
+claimed by the flow constructor itself.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives

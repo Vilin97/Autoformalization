@@ -2,6 +2,7 @@ module
 
 public import SplittingSpheres.BudneyGabai.DeltaIndependence
 public import SplittingSpheres.BudneyGabai.DeltaDetection
+public import SplittingSpheres.Foundations.CompactlySupportedTimeDependentFlow
 public import SplittingSpheres.Foundations.CoveringHomeomorphTransport
 public import SplittingSpheres.Foundations.CyclicCharacter
 public import SplittingSpheres.Foundations.CyclicFactorFiber
@@ -35,6 +36,7 @@ public import SplittingSpheres.Foundations.SmoothEmbedding
 public import SplittingSpheres.Foundations.SmoothEmbeddingRange
 public import SplittingSpheres.Foundations.SmoothIsotopy
 public import SplittingSpheres.Foundations.SmoothIsotopyConcat
+public import SplittingSpheres.Foundations.SmoothIsotopyEndpointFlattening
 public import SplittingSpheres.Foundations.SmoothLocalDiffeomorphLift
 public import SplittingSpheres.Foundations.SmoothRadialCompression
 public import SplittingSpheres.Foundations.TopologicalCyclicCover
