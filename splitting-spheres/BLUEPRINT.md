@@ -309,8 +309,13 @@ this literal star are now proved to be closed embeddings.  Removing the image of
 labelled neck family therefore leaves two disjoint open sides covering its complement; opposite
 side witnesses lie in distinct relative connected components.  The same statements are
 transported back to the original flower partial spin using the exact identification of its old
-neck-family carrier with the star seam.  This is simultaneous-family separation, not yet the
-label-by-label theorem that removing one selected neck sphere separates one leaf from the rest.
+neck-family carrier with the star seam.  The literal first-coordinate map on the left star now
+specializes the pushout separation argument to every label `a : ZMod m`: the selected labelled
+`Sphere 3` separates its own punctured leaf from the rest, both displayed sides have explicit
+points, and its complement is not preconnected.  The proof also gives a clopen selected-leaf
+subset and places points from opposite sides in distinct relative connected components.  It does
+not prove that either side is connected, so it does not yet identify the complement as having
+exactly two connected components.
 A conventional smooth interior-connected-sum theorem still requires individual rounded-ball
 charts, corner smoothing, and smooth gluing; none is inferred from these topological
 homeomorphisms.
