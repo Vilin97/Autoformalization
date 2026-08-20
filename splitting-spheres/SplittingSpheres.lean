@@ -8,6 +8,7 @@ public import SplittingSpheres.Foundations.CoordinateBallExample
 public import SplittingSpheres.Foundations.MappingClassFunctor
 public import SplittingSpheres.Foundations.Orientation
 public import SplittingSpheres.Foundations.OpenDiffeomorphExtension
+public import SplittingSpheres.Foundations.RadialDiffeomorph
 public import SplittingSpheres.Foundations.RelativeDiffeomorph
 public import SplittingSpheres.Foundations.RelativeDiffeotopy
 public import SplittingSpheres.Foundations.Separation
@@ -22,6 +23,7 @@ public import SplittingSpheres.Foundations.SmoothEmbedding
 public import SplittingSpheres.Foundations.SmoothEmbeddingRange
 public import SplittingSpheres.Foundations.SmoothIsotopy
 public import SplittingSpheres.Foundations.SmoothIsotopyConcat
+public import SplittingSpheres.Foundations.SmoothRadialCompression
 public import SplittingSpheres.Foundations.TopologicalCyclicCover
 public import SplittingSpheres.Foundations.TopologicalCyclicFactor
 public import SplittingSpheres.Geometry.ClosedBall
