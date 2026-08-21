@@ -801,6 +801,15 @@ boundaries are exactly the subtype preimages of the old radial boundary union th
 seam.  No cap, pushout, or identification with a compact handlebody piece is asserted at this
 stage.
 
+The full labelled seam has now been identified in the original smooth power cover without using
+the normalized annular formulas.  The union of all equatorial lifts is exactly the inverse image
+of the literal coordinate equator under the covering projection.  Its image under the canonical
+strict coordinate-exterior map is exactly the entire transported neck family, so the global seam
+pulled back from the neck star is that same coordinate-equator inverse image.  The two global
+off-seam sets remain disjoint and cover its complement.  This does not yet identify the named
+left and right star sides with the negative and positive coordinate caps: that orientation is a
+separate point-set comparison, and no smoothness of the old normalized planar annuli is inferred.
+
 The signed seam source used to glue those halves is itself now given a direct common-model atlas.
 The open interval is presented by the strict interior of the native half-space chart, then crossed
 with `Sphere 3`, recharted to `coordinateUnlinkExteriorModel`, and pulled back componentwise over
