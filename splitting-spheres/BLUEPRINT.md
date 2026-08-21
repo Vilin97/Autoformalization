@@ -328,6 +328,18 @@ with corners and the projection a smooth local diffeomorphism.  Its model bounda
 projection preimage of the one-handle boundary.  This restricted calculation alone does not put a
 smooth structure on the punctured cap or flower pushout.
 
+The topological trivialization of this restricted pullback is now smooth as well.  The
+positive-degree power map on the project's literal unit circle is proved to be a local
+diffeomorphism by conjugating with an explicit linear-isometry sphere diffeomorphism and using
+translated Lie-exponential charts on the complex circle.  Its product with the identity on the
+closed three-ball makes the displayed one-handle base power map a local diffeomorphism, including
+at boundary points.  Smoothness of the selected-root trivialization and its inverse is then
+reflected through the pulled-back covering projection.  This gives a genuine diffeomorphism from
+`S1 x B3` to the restricted power pullback without differentiating the selected residual-root
+branch or transporting an atlas.  It does not identify either direct smooth capping with that
+one-handle target; the collar-compatible rounded body/cap decomposition remains a separate
+geometric obligation.
+
 The literal global radius-`1/8` coordinate exterior now has its own independently constructed
 smooth four-manifold-with-boundary atlas.  Its strict region uses the ambient `S4` charts; its two
 radial faces use the actual polar collars `S2 x S1 x [1/8,1/4)`, all four classes of chart overlap
