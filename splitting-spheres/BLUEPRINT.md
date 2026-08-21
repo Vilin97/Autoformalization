@@ -336,9 +336,9 @@ closed three-ball makes the displayed one-handle base power map a local diffeomo
 at boundary points.  Smoothness of the selected-root trivialization and its inverse is then
 reflected through the pulled-back covering projection.  This gives a genuine diffeomorphism from
 `S1 x B3` to the restricted power pullback without differentiating the selected residual-root
-branch or transporting an atlas.  It does not identify either direct smooth capping with that
-one-handle target; the collar-compatible rounded body/cap decomposition remains a separate
-geometric obligation.
+branch or transporting an atlas.  This calculation by itself did not identify either direct
+smooth capping with that one-handle target; that required the later collar-compatible rounded
+body/cap constructions described below.
 
 The central one-handle face in the compact planar exterior is smooth for these same direct
 atlases.  Its literal map is first lifted to the strict compact-cover interior; smoothness is
@@ -347,8 +347,9 @@ composed with the smooth circle power map.  Conjugating by the smooth restricted
 trivialization identifies this face exactly with the canonical inclusion of the restricted
 pullback into the compact power pullback.  The selected residual root is again used only in the
 underlying continuous lift and is never differentiated.  This does not extend the face across the
-planar annular shell: constructing the collar-compatible rounded four-ball family and proving its
-body-complement range are still required for the three-generator smooth-capping recognition.
+planar annular shell by itself.  The later rounded-cap power trivialization and direct right-tube
+construction supply that missing extension without declaring the old normalized annular formulas
+smooth.
 
 The literal global radius-`1/8` coordinate exterior now has its own independently constructed
 smooth four-manifold-with-boundary atlas.  Its strict region uses the ambient `S4` charts; its two
@@ -873,8 +874,8 @@ the cap.  The exact seam preimages, boundary detection, and one-sided openness m
 open embedding.  The strict negative and positive local-diffeomorphism results then discharge all
 mixed transitions in the concrete three-family pushout atlas.  Thus the left and right capped
 pushouts are honest smooth four-manifolds in direct generated atlases.  No atlas is transported
-from the old product caps, and this step does not yet identify either smooth capped pushout with
-the earlier point-set one-handle calculation or compute its remaining model boundary.
+from the old product caps.  This gluing step alone does not identify either smooth capped pushout
+with a one-handle or compute its remaining model boundary.
 
 The old product-cap diagrams and the direct smooth cappings are now compared piece by piece.  The
 old attaching spheres are reparametrized by the smooth neck equator, the old uncapped bodies are
@@ -883,7 +884,8 @@ genuine Euclidean four-balls.  Exact commutative attaching squares induce homeom
 pushouts, including the reversed coprojection order on the old right capping.  Composing with the
 earlier point-set recognition identifies the new left smooth capping with
 `ZMod m x OneHandlePiece` and the right smooth capping with `OneHandlePiece`.  These are only
-homeomorphisms: no diffeomorphism, atlas transport, or model-boundary conclusion is inferred.
+homeomorphisms obtained from the old diagram: no smoothness, atlas transport, or model-boundary
+conclusion is inferred from those particular maps.
 
 The exact last formal step for a smooth recognition has been isolated from that geometry.  A
 homeomorphism out of either direct capping upgrades to a genuine diffeomorphism once its
@@ -893,8 +895,46 @@ are precisely the generators of the direct pushout atlas and cover its underlyin
 right specialization targets the natural atlas on `OneHandlePiece`; the left specialization uses
 the explicit discrete-product atlas on `ZMod m x OneHandlePiece`.  This criterion does not make
 the old comparison smooth: its cap leg still passes through a product-with-corners model and a
-merely topological radial source reparametrization.  A collar-compatible rounded target
-decomposition must supply the three local-diffeomorphism hypotheses.
+merely topological radial source reparametrization.
+
+The three local-diffeomorphism hypotheses have now been discharged by new direct comparisons.
+First, the complement of the open radius-`1/8` tube around the right unlink component is equipped
+with two direct common-model atlases.  One uses a collar pulled back from the natural
+`OneHandlePiece`; the other uses the literal standard unlink exterior collar.  An explicit affine
+ray map gives a diffeomorphism from the strict exterior to the one-handle interior.  At the radial
+face, an explicit punctured-normal-plane diffeomorphism and its sphere lift give the missing smooth
+transition from the literal standard collar to the natural one-handle collar.  The resulting
+closed right-tube diffeomorphism lifts through the nonzero-degree power covering and composes with
+the smooth selected-root trivialization to identify the standard-atlas power pullback with
+`OneHandlePiece`.  No atlas is transported through the underlying homeomorphism.
+
+For the right capping, the cut body and the rounded four-ball family map directly into that
+right-tube power pullback.  The attaching equality, exact cross-image intersection, and cover
+package these maps as a homeomorphism.  Its composites with the cut off-seam chart, cap off-seam
+chart, and signed seam chart are local diffeomorphisms for the literal standard-collar atlas.  The
+three-generator criterion therefore upgrades this same homeomorphism to a diffeomorphism, and the
+standard right-tube recognition gives
+
+```text
+RightSmoothCapping m diffeomorphic to OneHandlePiece.
+```
+
+The left capping is handled without reusing the old product-cap comparison.  The compact left cut
+corestricts into the rounded-cap power pullback; the inverse smooth trivialization extracts its
+locally constant `ZMod m` label.  Reflection of the fourth sphere coordinate interchanges unlink
+tubes zero and one, fixes the equator, and carries the component-zero standard exterior collar to
+the component-one collar through an explicit common-model parameter diffeomorphism.  The reflected
+cut body and the rounded negative-hemisphere cap give an exact homeomorphism to the labelled direct
+right-tube family.  Its cut, cap, and signed-seam composites are again local diffeomorphisms,
+including at time zero on the explicit `|t| < 1/8` neighborhood.  Componentwise composition with
+the standard right-tube recognition proves
+
+```text
+LeftSmoothCapping m diffeomorphic to ZMod m x OneHandlePiece.
+```
+
+Both conclusions use the generated capping atlases and the explicit discrete-product target atlas.
+They do not assert that the earlier radial/product-corner homeomorphisms are smooth.
 
 The generic pushout-boundary theorem also applies to both direct smooth cappings.  In their exact
 generated atlases, each model boundary is the union of the cut coprojection image of the compact
