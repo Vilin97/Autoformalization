@@ -972,10 +972,29 @@ CoordinateUnlinkExteriorPlanarCompactCutPushout m
 ```
 
 Thus the smooth cancellation/regluing step itself is complete without transporting an atlas.
-The remaining connected-sum step is to corestrict the already proved left and right capping
-diffeomorphisms to the complements of their actual labelled cap interiors, and to identify the
-resulting simultaneous `m`-sphere gluing with the ordinary interior connected sum of the `m`
-labelled one-handles and the single central one-handle.
+The actual rounded-cap deletion is now point-set exact as well.  The complement of the labelled
+four-ball attaching range is proved to be the direct model interior.  Transporting the full closed
+cap maps through the proved capping diffeomorphisms gives closed embeddings of `m` labelled
+four-balls in `ZMod m x OneHandlePiece` and of the same `m` labelled balls in the central
+`OneHandlePiece`; their strict interiors are open, exhaust the displayed cap-interior sets, and
+are pairwise disjoint by label.  The two compact cuts are homeomorphic to the literal complements
+of those open ball images, with exact range and boundary-attaching laws.  Gluing these complements
+along their actual labelled `S3` boundary maps defines
+
+```text
+CoordinateUnlinkExteriorPlanarNeckDirectMultiInteriorConnectedSum m,
+```
+
+an `m`-edge simultaneous interior connected sum.  An explicit pushout congruence, followed by the
+direct compact-cut regluing comparison, gives a homeomorphism from
+`CoordinateUnlinkExteriorEighthPowerPullback m` to this target, with exact formulas on both cut
+pieces.  This new result is deliberately point-set only: it neither transports a target atlas nor
+identifies the rounded caps with the older product-corner cap model.
+
+The remaining smooth connected-sum step is to equip these literal complements and their pushout
+with direct common-model collar atlases, upgrade the displayed homeomorphism to a diffeomorphism,
+and then identify the simultaneous `m`-sphere gluing with the ordinary iterated interior connected
+sum of the `m` labelled one-handles and the single central one-handle.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
