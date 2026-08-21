@@ -340,6 +340,16 @@ branch or transporting an atlas.  It does not identify either direct smooth capp
 one-handle target; the collar-compatible rounded body/cap decomposition remains a separate
 geometric obligation.
 
+The central one-handle face in the compact planar exterior is smooth for these same direct
+atlases.  Its literal map is first lifted to the strict compact-cover interior; smoothness is
+detected after the actual compact-cover projection, where it is the aligned one-handle sphere map
+composed with the smooth circle power map.  Conjugating by the smooth restricted-pullback
+trivialization identifies this face exactly with the canonical inclusion of the restricted
+pullback into the compact power pullback.  The selected residual root is again used only in the
+underlying continuous lift and is never differentiated.  This does not extend the face across the
+planar annular shell: constructing the collar-compatible rounded four-ball family and proving its
+body-complement range are still required for the three-generator smooth-capping recognition.
+
 The literal global radius-`1/8` coordinate exterior now has its own independently constructed
 smooth four-manifold-with-boundary atlas.  Its strict region uses the ambient `S4` charts; its two
 radial faces use the actual polar collars `S2 x S1 x [1/8,1/4)`, all four classes of chart overlap
