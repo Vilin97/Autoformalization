@@ -537,6 +537,14 @@ it restricts there and conjugates to a genuine `C∞` self-diffeomorphism of
 isotopy and satisfy the exact endpoint-flattened equator law.  This result deliberately asserts no
 joint smoothness in the time parameter; it is a family of smooth spatial slices.
 
+Those slices lift smoothly through every nonzero-degree cyclic cover as well.  The underlying
+equivalence is exactly the time-slice homeomorphism of the canonical lifted ambient isotopy.
+Forward smoothness follows by reflecting its projection square through the smooth cover; applying
+the downstairs inverse first gives the inverse projection square and hence inverse smoothness by
+the same argument.  Thus the lifted continuous ambient isotopy agrees pointwise with genuine
+cover diffeomorphisms and retains the exact labelled endpoint-flat sphere law, without a
+connectivity or chosen-basepoint hypothesis.  Joint smoothness in time is again not asserted.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
