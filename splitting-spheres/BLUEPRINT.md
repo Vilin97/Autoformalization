@@ -616,6 +616,11 @@ connectivity or chosen-basepoint hypothesis.  Reflecting the full evaluation map
 smooth covering projection also proves joint `C∞` dependence of the lifted forward family.  As
 downstairs, no joint smoothness theorem for the inverse-evaluation family is claimed.
 
+A jointly smooth family of self-diffeomorphisms of a compact Hausdorff manifold, starting at the
+identity, now packages directly as a `TauCeti.AmbientIsotopy`.  The time-space map is a continuous
+bijection by slice-wise bijectivity, so compact-to-Hausdorff recognition supplies its inverse
+continuity.  This deliberately needs no joint smoothness theorem for the inverse-evaluation family.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
