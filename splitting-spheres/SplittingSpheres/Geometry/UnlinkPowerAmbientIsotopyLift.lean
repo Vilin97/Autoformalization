@@ -164,6 +164,36 @@ theorem proj_liftAmbientIsotopy (hp : IsCoveringMap p)
       Φ.toContinuousMap (te.1, p te.2) :=
   proj_ambientIsotopyLift hp Φ te
 
+/-- If the downstairs isotopy fixes the projection of a point at every time, its canonical lift
+fixes that point at every time. -/
+theorem liftAmbientIsotopy_fixed_of_fixed (hp : IsCoveringMap p)
+    (Φ : TauCeti.AmbientIsotopy X) (e : E)
+    (hfixed : ∀ t : I, Φ.toContinuousMap (t, p e) = p e) (t : I) :
+    (liftAmbientIsotopy hp Φ).toContinuousMap (t, e) = e := by
+  change ambientIsotopyLift hp Φ (t, e) = e
+  calc
+    ambientIsotopyLift hp Φ (t, e) =
+        ambientIsotopyLift hp Φ (0, e) := by
+      apply hp.const_of_comp
+        ((ambientIsotopyLift hp Φ).continuous.comp
+          (continuous_id.prodMk continuous_const))
+      intro s s'
+      simp only [Function.comp_apply, id_eq]
+      rw [proj_ambientIsotopyLift hp Φ (s, e),
+        proj_ambientIsotopyLift hp Φ (s', e)]
+      exact (hfixed s).trans (hfixed s').symm
+    _ = e := ambientIsotopyLift_zero hp Φ e
+
+/-- A uniform fixed-outside-set law downstairs pulls back exactly to the canonical lifted
+ambient isotopy. -/
+theorem liftAmbientIsotopy_fixed_of_proj_not_mem (hp : IsCoveringMap p)
+    (Φ : TauCeti.AmbientIsotopy X) (K : Set X)
+    (hfixed : ∀ (t : I) (x : X), x ∉ K → Φ.toContinuousMap (t, x) = x)
+    (t : I) (e : E) (he : p e ∉ K) :
+    (liftAmbientIsotopy hp Φ).toContinuousMap (t, e) = e := by
+  exact liftAmbientIsotopy_fixed_of_fixed hp Φ e
+    (fun s ↦ hfixed s (p e) he) t
+
 end IsCoveringMap
 
 /-! ## The standard unlink power cover -/
