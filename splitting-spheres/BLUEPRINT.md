@@ -693,6 +693,13 @@ family the same four-dimensional model and an honest manifold structure.  This s
 common source model required by the forthcoming cut-side atlas; it still asserts no atlas on a
 cut carrier or on a glued cap.
 
+The recharted collar is now compared smoothly with its natural radial atlas.  The explicit
+carrier homeomorphism is a genuine diffeomorphism, and the identity on the underlying four-ball
+collar domain is a diffeomorphism from the recharted atlas to the natural one.  Consequently its
+model boundary is still exactly the zero normal face; for the labelled family it is precisely
+the inverse image of that face under the discrete-sheet projection.  This is an intrinsic atlas
+comparison and boundary calculation, not a transported smooth structure on a cut carrier.
+
 The remaining compatibility calculation for the intrinsic cut-side atlas is now automatic under
 the exact geometric overlap hypothesis.  The collar map need only be a local diffeomorphism on
 the preimage of the native off-boundary region; a one-sided collar is correctly not required to
