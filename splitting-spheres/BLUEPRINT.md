@@ -755,6 +755,21 @@ boundaries are exactly the subtype preimages of the old radial boundary union th
 seam.  No cap, pushout, or identification with a compact handlebody piece is asserted at this
 stage.
 
+The signed seam source used to glue those halves is itself now given a direct common-model atlas.
+The open interval is presented by the strict interior of the native half-space chart, then crossed
+with `Sphere 3`, recharted to `coordinateUnlinkExteriorModel`, and pulled back componentwise over
+the discrete label family.  Its model boundary is empty and its signed-time coordinate is smooth.
+The total map which replaces time by its absolute value is continuous and has exact left and right
+half formulas; on the two strict sign regions it is a homeomorphism onto the positive radial
+collar.  No smoothness across time zero, nor even strict-half smoothness, is claimed by this layer.
+
+Point-set comparison with the old neck-star pieces is also exact.  Under the established compact
+exterior-to-star homeomorphism, the left cut carrier is precisely the image of the left
+coprojection and the right cut carrier is precisely the image of the right coprojection.  Since
+each old coprojection is embedded, these restrictions give homeomorphisms from the new closed cut
+carriers to the corresponding old star source pieces, commuting literally with inclusion into the
+full star.  This does not transport the new smooth atlases to those old point-set models.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
