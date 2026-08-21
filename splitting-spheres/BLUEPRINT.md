@@ -700,6 +700,15 @@ model boundary is still exactly the zero normal face; for the labelled family it
 the inverse image of that face under the discrete-sheet projection.  This is an intrinsic atlas
 comparison and boundary calculation, not a transported smooth structure on a cut carrier.
 
+The literal Euclidean closed four-ball now also has a direct atlas in the common
+`coordinateUnlinkExteriorModel`.  An explicit singleton chart first presents ambient Euclidean
+four-space in that model; the ball then uses the intrinsic collared-cut construction, with native
+open-ball charts away from the unit sphere and the recharted radial collar at the sphere.  Its
+model boundary is exactly the already established Euclidean-ball boundary, and the same direct
+construction pulls back componentwise to every discrete `ZMod m` family.  This is not an atlas
+transport through an unrelated ball homeomorphism, and it does not yet attach the ball to a cut
+neck side.
+
 The remaining compatibility calculation for the intrinsic cut-side atlas is now automatic under
 the exact geometric overlap hypothesis.  The collar map need only be a local diffeomorphism on
 the preimage of the native off-boundary region; a one-sided collar is correctly not required to
