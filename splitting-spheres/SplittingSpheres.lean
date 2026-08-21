@@ -69,6 +69,8 @@ public import SplittingSpheres.Foundations.TopologicalPushoutProduct
 public import SplittingSpheres.Foundations.TopologicalPushoutSeparation
 public import SplittingSpheres.Geometry.ClosedBall
 public import SplittingSpheres.Geometry.ClosedBallMaps
+public import SplittingSpheres.Geometry.CoordinateUnlinkExteriorPowerSmoothCover
+public import SplittingSpheres.Geometry.CoordinateUnlinkExteriorSmoothAtlas
 public import SplittingSpheres.Geometry.EquatorImmersion
 public import SplittingSpheres.Geometry.ExteriorCompression
 public import SplittingSpheres.Geometry.ExteriorIsotopyTransport

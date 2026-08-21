@@ -325,8 +325,19 @@ through a point-set homeomorphism.  The literal power pullback over the `S1 x B3
 topological covering of the already constructed manifold with corners.  Pulling back the
 one-handle atlas along that projection makes the restricted total space a smooth four-manifold
 with corners and the projection a smooth local diffeomorphism.  Its model boundary is exactly the
-projection preimage of the one-handle boundary.  This does not yet give an atlas on the punctured
-cap, flower pushout, or global closed exterior.
+projection preimage of the one-handle boundary.  This restricted calculation alone does not put a
+smooth structure on the punctured cap or flower pushout.
+
+The literal global radius-`1/8` coordinate exterior now has its own independently constructed
+smooth four-manifold-with-boundary atlas.  Its strict region uses the ambient `S4` charts; its two
+radial faces use the actual polar collars `S2 x S1 x [1/8,1/4)`, all four classes of chart overlap
+are checked explicitly, and the common model is `R2 x (R x R_{>=0})` transported linearly to
+`R4`.  The model boundary is exactly the union of the two faces where one displayed normal
+distance equals `1/8`.  Pulling this atlas back along the actual nonzero-degree exterior power
+cover makes the compact total space a smooth four-manifold with boundary, makes its projection a
+smooth covering local diffeomorphism, and identifies its boundary with the projection preimage of
+those two radial faces.  None of this declares the flower, star, or capping homeomorphisms smooth;
+their smooth compatibility remains a separate cutting-and-gluing obligation.
 
 The first smooth structure crossing this point-set calculation is now explicit.  On the root
 disk `ball (-1) 1`, the rotated logarithm formula
