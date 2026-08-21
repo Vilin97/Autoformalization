@@ -702,6 +702,14 @@ globally smooth, the resulting cut-side inclusion into the ambient manifold is s
 criterion still leaves the concrete neck half-collar overlap and the cut-side model boundary to
 be verified.
 
+The model-boundary calculation for this direct cut-side atlas is now automatic under one exact
+additional equality: the half-collar must pull back the union of the old ambient boundary and
+the new seam to precisely the model boundary of its source.  Both the native off-boundary
+inclusion and the half-collar inclusion are proved to be local diffeomorphisms into the same
+direct atlas, so boundary reflection gives exactly the subtype preimage of that union.  A derived
+form accepts the same overlap-local diffeomorphism used by the automatic manifold theorem; it
+does not assume that the whole one-sided collar has ambient-open range.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
