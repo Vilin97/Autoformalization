@@ -829,10 +829,20 @@ power gauge one.  The coordinate-cap result puts this witness on the compact lef
 existing opposite-half alternative forces raw negative time to be left and raw positive time to
 be right for every label.  Thus the orientation flag is always false, the chosen source
 homeomorphism is the identity, and all open-side, seam, and closed-cut collar laws hold directly
-for the raw smooth collar.  This local conclusion does not yet identify the entire compact sides
-or cut carriers with coordinate-cap or closed-hemisphere preimages: that stronger comparison must
-control the old radial transport throughout the strict interior and then extend across the
-radius-`1/8` ambient boundary.
+for the raw smooth collar.
+
+The global compact comparison is now complete as well.  The old radial exterior homeomorphism
+preserves both coordinate caps: its two radius-`3/8` tube branches remain in their corresponding
+caps, and it is the identity off those tubes.  On the strict compact interior this transports the
+full-cover cap identification directly, while the compact seam is exactly the inverse image of
+the coordinate equator.  The strict interior is dense by the closure-of-interior theorem for
+extended-chart targets together with the explicit radial-boundary formula for the pulled-back
+atlas.  Intersecting any hypothetical wrong compact side with the opposite open cap would
+therefore produce a contradictory strict point.  Consequently the compact left and right sides
+are exactly the projection preimages of coordinate caps zero and one, respectively; the closed
+left cut is the preimage of the complement of cap one, and the closed right cut is the preimage
+of the complement of cap zero.  This remains a point-set use of the old radial homeomorphism and
+makes no smoothness claim about it.
 
 The signed seam source used to glue those halves is itself now given a direct common-model atlas.
 The open interval is presented by the strict interior of the native half-space chart, then crossed
