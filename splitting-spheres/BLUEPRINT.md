@@ -693,6 +693,15 @@ family the same four-dimensional model and an honest manifold structure.  This s
 common source model required by the forthcoming cut-side atlas; it still asserts no atlas on a
 cut carrier or on a glued cap.
 
+The remaining compatibility calculation for the intrinsic cut-side atlas is now automatic under
+the exact geometric overlap hypothesis.  The collar map need only be a local diffeomorphism on
+the preimage of the native off-boundary region; a one-sided collar is correctly not required to
+have ambient-open range at its zero face.  The canonical collar-to-native overlap and its inverse
+then factor every mixed chart transition through maximal-atlas charts.  If the collar map is also
+globally smooth, the resulting cut-side inclusion into the ambient manifold is smooth.  This
+criterion still leaves the concrete neck half-collar overlap and the cut-side model boundary to
+be verified.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
