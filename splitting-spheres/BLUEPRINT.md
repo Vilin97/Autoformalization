@@ -795,6 +795,15 @@ pushouts are honest smooth four-manifolds in direct generated atlases.  No atlas
 from the old product caps, and this step does not yet identify either smooth capped pushout with
 the earlier point-set one-handle calculation or compute its remaining model boundary.
 
+The old product-cap diagrams and the direct smooth cappings are now compared piece by piece.  The
+old attaching spheres are reparametrized by the smooth neck equator, the old uncapped bodies are
+identified with the compact cut carriers, and the product caps are radially reparametrized as the
+genuine Euclidean four-balls.  Exact commutative attaching squares induce homeomorphisms of both
+pushouts, including the reversed coprojection order on the old right capping.  Composing with the
+earlier point-set recognition identifies the new left smooth capping with
+`ZMod m x OneHandlePiece` and the right smooth capping with `OneHandlePiece`.  These are only
+homeomorphisms: no diffeomorphism, atlas transport, or model-boundary conclusion is inferred.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
