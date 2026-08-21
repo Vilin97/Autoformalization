@@ -727,6 +727,14 @@ agrees exactly with both previously fixed `Sphere 3` parametrizations.  The comp
 laws.  This is only the bridge needed to compare the old cap pushout with the new smooth one: it
 does not declare the product-with-corners model diffeomorphic to the direct common-model ball.
 
+The remaining source-parametrization discrepancy is handled rather than suppressed.  Any family
+of homeomorphisms indexed by a discrete type assembles continuously over the product while fixing
+the label.  Applying this to the old-to-smooth neck reparametrization, then extending each sphere
+homeomorphism radially across the Euclidean ball, produces a labelled product-cap-to-Euclidean-cap
+homeomorphism.  On every attaching point it sends the old sphere parameter to exactly the smooth
+neck parameter for the same label.  This supplies the cap leg of a future pushout-congruence
+diagram; the radial extension is only topological and carries no smoothness claim.
+
 The remaining compatibility calculation for the intrinsic cut-side atlas is now automatic under
 the exact geometric overlap hypothesis.  The collar map need only be a local diffeomorphism on
 the preimage of the native off-boundary region; a one-sided collar is correctly not required to
