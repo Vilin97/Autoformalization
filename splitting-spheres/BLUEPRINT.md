@@ -651,6 +651,16 @@ concrete `ChartedSpace` on the topological pushout.  The resulting `IsManifold` 
 explicitly, that every transition between those concrete charts lie in the smooth groupoid.  No
 cut space, cap attachment, or mixed collar transition is inferred by this generic constructor.
 
+The corresponding intrinsic atlas mechanism for a single cut side is also isolated.  A cut side
+is the subtype of a closed ambient subset.  Away from the new boundary it uses restrictions of
+the native ambient charts, while a supplied one-sided collar provides the boundary charts.  The
+atlas has an exact coverage theorem and gives a manifold only after every transition between
+these concrete native and collar charts is proved smooth.  Likewise, smoothness of the subtype
+inclusion is obtained only from explicit inverse-coordinate smoothness.  This construction may
+use a closure-defined side, or the complement of the opposite open side when a full compact
+separation is known; it does not identify either choice with a concrete neck piece, establish a
+collar-sign formula, or attach a four-ball cap.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
