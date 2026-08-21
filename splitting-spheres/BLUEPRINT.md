@@ -339,6 +339,25 @@ smooth covering local diffeomorphism, and identifies its boundary with the proje
 those two radial faces.  None of this declares the flower, star, or capping homeomorphisms smooth;
 their smooth compatibility remains a separate cutting-and-gluing obligation.
 
+The strict interior of this atlas is now compared intrinsically with the ordinary complement of
+the two closed radius-`1/8` tubes.  Restricting the actual preferred ambient charts gives a
+diffeomorphism whose underlying sphere point is literally unchanged; no atlas is transported
+through that identity.  The earlier piecewise-linear radial homeomorphism is retained only for
+the point-set calculation.  Smooth transport instead uses an upward-step diffeomorphism of the
+radius which sends `0` to `1/8` and is exactly the identity from radius `1/4` onward.  Applying it
+in the two disjoint normal tubes and the identity elsewhere gives a genuine `C-infinity`
+diffeomorphism from the strict unlink complement to the closed-tube exterior, fixing the
+coordinate equator exactly.  It is not identified with the old formula on the transition
+annuli.
+
+The literal cyclic pullback over this closed-tube exterior has the atlas pulled back from that
+open four-manifold, so its projection is a smooth covering local diffeomorphism.  The underlying
+literal inclusion into the compact coordinate-exterior power cover is also smooth: after
+restricting the compact projection to the exact strict inverse-image open set, it covers the
+intrinsic base identity above.  Smoothness in both directions is detected through those two
+local-diffeomorphism projections.  Thus the literal strict pullback is diffeomorphic to exactly
+the strict open part of the compact cover; no point on the compact radial boundary is included.
+
 The first smooth structure crossing this point-set calculation is now explicit.  On the root
 disk `ball (-1) 1`, the rotated logarithm formula
 
