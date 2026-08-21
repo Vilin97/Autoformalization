@@ -813,6 +813,14 @@ earlier point-set recognition identifies the new left smooth capping with
 `ZMod m x OneHandlePiece` and the right smooth capping with `OneHandlePiece`.  These are only
 homeomorphisms: no diffeomorphism, atlas transport, or model-boundary conclusion is inferred.
 
+The generic pushout-boundary theorem also applies to both direct smooth cappings.  In their exact
+generated atlases, each model boundary is the union of the cut coprojection image of the compact
+cut boundary with its attaching range removed and the ball coprojection image of the labelled
+four-ball boundary with its attaching range removed.  This proves that the signed seam itself is
+interior without using the point-set one-handle comparison.  The displayed formulas are not yet
+simplified to the exterior radial face: that reduction still requires a public exact
+seam-range/disjointness calculation for the compact cut boundary.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
