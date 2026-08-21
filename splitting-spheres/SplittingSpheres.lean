@@ -23,6 +23,7 @@ public import SplittingSpheres.Foundations.MappingClassFunctor
 public import SplittingSpheres.Foundations.ModelCoordinateBall
 public import SplittingSpheres.Foundations.Orientation
 public import SplittingSpheres.Foundations.OpenDiffeomorphExtension
+public import SplittingSpheres.Foundations.OpenDiffeomorphFamilyExtension
 public import SplittingSpheres.Foundations.RadialDiffeomorph
 public import SplittingSpheres.Foundations.RadialSphereHomeomorphExtension
 public import SplittingSpheres.Foundations.RelationMappingClass
