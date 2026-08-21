@@ -86,6 +86,7 @@ public import SplittingSpheres.Geometry.UnlinkCyclicCover
 public import SplittingSpheres.Geometry.UnlinkDeckGraphIndex
 public import SplittingSpheres.Geometry.UnlinkDeckZMod
 public import SplittingSpheres.Geometry.UnlinkEquatorPowerLift
+public import SplittingSpheres.Geometry.UnlinkEquatorPowerCollar
 public import SplittingSpheres.Geometry.UnlinkSphereIsotopyPowerLift
 public import SplittingSpheres.Geometry.UnlinkSphereIsotopyPowerComplementTransport
 public import SplittingSpheres.Geometry.UnlinkPowerAmbientIsotopyLift

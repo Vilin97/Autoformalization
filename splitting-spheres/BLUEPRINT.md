@@ -394,6 +394,15 @@ source family remains jointly injective and distinct labelled ranges remain disj
 time.  This is not an ambient isotopy of the cover and, by itself, supplies no homeomorphism of
 the slice complements or preservation of their connected components.
 
+The initial lifted equators now also have explicit global smooth collars.  Latitude gives a
+diffeomorphism from `Sphere 3 × (-1/2,1/2)` onto the open band of `Sphere 4` with fourth
+coordinate strictly between `-1/2` and `1/2`; this entire band avoids both unlink components.
+The same rotated principal-log root lifts the band on every deck label.  Each lift is a
+diffeomorphism onto its literal open range in the pulled-back cover atlas, its zero section is
+exactly the corresponding equatorial lift, and different labels have disjoint full collar ranges.
+This is a smooth product neighborhood in the genuine cover, not a smooth structure on the
+compact flower, star, or capping models.
+
 The exact ambient object needed for such preservation was first isolated as a separate structure.
 It consists of an actual continuous ambient isotopy of the power-cover total space whose final
 homeomorphism agrees, on one initial labelled equator, with the time-one lifted sphere.  Under
