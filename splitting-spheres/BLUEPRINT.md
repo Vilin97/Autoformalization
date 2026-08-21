@@ -374,6 +374,16 @@ are equal.  The proof uses the exact projected equator range, one explicit point
 side cylinder, and the correct label shift.  This identifies the embedded neck carriers without
 claiming that the surrounding flower/star is homeomorphic to the entire strict-complement cover.
 
+This carrier comparison also gives the first honest local flattening theorem for the old necks.
+The coordinate equator has an explicit real normal complement; reflecting that complementary
+immersion first through the open unlink-complement inclusion and then through the smooth power
+cover proves the same fixed-codimension statement for every lifted equator.  Local flatness is
+then transported through the exact source homeomorphism above.  Thus every point of every
+transported old neck admits a slice chart in the genuine smooth power cover whose intersection
+with the neck range is the standard codimension-one slice.  This is only a local-flatness theorem
+for the image of the topological parametrization: it supplies neither smoothness of that
+parametrization nor a global collar or smooth pushout-gluing result.
+
 Every hypothetical smooth unlink-avoiding isotopy starting at the standard splitting sphere can
 now be lifted through the same power cover.  First a source diffeomorphism normalizes its
 time-zero parametrization pointwise to `equatorSphereMap`; covering homotopy lifting then starts
