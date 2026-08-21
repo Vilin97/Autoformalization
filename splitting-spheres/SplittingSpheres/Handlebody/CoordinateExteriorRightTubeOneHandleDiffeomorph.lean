@@ -850,6 +850,178 @@ private theorem isLocalDiffeomorph_normalForward :
       (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞ normalForward :=
   normalDiffeomorph.isLocalDiffeomorph
 
+/-! The affine normal map across the radius-`1/8` face. -/
+
+private theorem crossing_forwardRadius_pos
+    (v : UnlinkPuncturedNormalPlane 1) :
+    0 < forwardRadius (polarAngularReal v) (unlinkNormalPolarRadius 1 v) := by
+  have ha := polarAngularReal_bounds v
+  have hA := sourceInnerRadius_lt_targetInnerRayRadius ha.1 ha.2
+  have hk0 := raySlope_pos ha.1 ha.2
+  have hk1 := raySlope_lt_one ha.1 ha.2
+  have hr := unlinkNormalPolarRadius_pos 1 v
+  have hsource : 0 < sourceInnerRadius := by norm_num [sourceInnerRadius]
+  have hsk : sourceInnerRadius * raySlope (polarAngularReal v) <
+      sourceInnerRadius := (mul_lt_iff_lt_one_right hsource).2 hk1
+  have hrk : 0 < unlinkNormalPolarRadius 1 v *
+      raySlope (polarAngularReal v) := mul_pos hr hk0
+  rw [forwardRadius]
+  nlinarith
+
+private theorem crossing_norm_normalForwardMap_sub_center
+    (v : UnlinkPuncturedNormalPlane 1) :
+    ‖normalForwardMap v - standardUnlinkNormalCenter 1‖ =
+      forwardRadius (polarAngularReal v) (unlinkNormalPolarRadius 1 v) := by
+  rw [normalForwardMap_sub_center, norm_smul, Real.norm_eq_abs,
+    abs_of_pos (crossing_forwardRadius_pos v),
+    mem_sphere_zero_iff_norm.mp (unlinkNormalPolarDirection 1 v).2, mul_one]
+
+private theorem crossing_normalForwardMap_ne_center
+    (v : UnlinkPuncturedNormalPlane 1) :
+    normalForwardMap v ≠ standardUnlinkNormalCenter 1 := by
+  intro h
+  have hz : ‖normalForwardMap v - standardUnlinkNormalCenter 1‖ = 0 := by
+    rw [h, sub_self, norm_zero]
+  rw [crossing_norm_normalForwardMap_sub_center] at hz
+  exact (crossing_forwardRadius_pos v).ne' hz
+
+private def crossingNormalTargetOpens : Opens (UnlinkPuncturedNormalPlane 1) :=
+  ⟨{v | 0 < inverseRadius (polarAngularReal v)
+      (unlinkNormalPolarRadius 1 v)},
+    isOpen_lt continuous_const contMDiff_inverseRadius_polar.continuous⟩
+
+private abbrev CrossingNormalTarget := crossingNormalTargetOpens
+
+private def crossingNormalForwardPunctured
+    (v : UnlinkPuncturedNormalPlane 1) : UnlinkPuncturedNormalPlane 1 :=
+  ⟨normalForwardMap v, crossing_normalForwardMap_ne_center v⟩
+
+private theorem crossing_polarRadius_normalForward
+    (v : UnlinkPuncturedNormalPlane 1) :
+    unlinkNormalPolarRadius 1 (crossingNormalForwardPunctured v) =
+      forwardRadius (polarAngularReal v) (unlinkNormalPolarRadius 1 v) :=
+  crossing_norm_normalForwardMap_sub_center v
+
+private theorem crossing_polarDirection_normalForward
+    (v : UnlinkPuncturedNormalPlane 1) :
+    unlinkNormalPolarDirection 1 (crossingNormalForwardPunctured v) =
+      unlinkNormalPolarDirection 1 v := by
+  apply Subtype.ext
+  change ‖normalForwardMap v - standardUnlinkNormalCenter 1‖⁻¹ •
+      (normalForwardMap v - standardUnlinkNormalCenter 1) = _
+  rw [normalForwardMap_sub_center, norm_smul, Real.norm_eq_abs,
+    abs_of_pos (crossing_forwardRadius_pos v),
+    mem_sphere_zero_iff_norm.mp (unlinkNormalPolarDirection 1 v).2,
+    mul_one, smul_smul,
+    inv_mul_cancel₀ (crossing_forwardRadius_pos v).ne', one_smul]
+
+private theorem crossing_polarAngularReal_normalForward
+    (v : UnlinkPuncturedNormalPlane 1) :
+    polarAngularReal (crossingNormalForwardPunctured v) = polarAngularReal v := by
+  rw [polarAngularReal, crossing_polarDirection_normalForward]
+  rfl
+
+private def crossingNormalForward
+    (v : UnlinkPuncturedNormalPlane 1) : CrossingNormalTarget := by
+  refine ⟨crossingNormalForwardPunctured v, ?_⟩
+  change 0 < inverseRadius
+    (polarAngularReal (crossingNormalForwardPunctured v))
+    (unlinkNormalPolarRadius 1 (crossingNormalForwardPunctured v))
+  rw [crossing_polarAngularReal_normalForward,
+    crossing_polarRadius_normalForward]
+  have ha := polarAngularReal_bounds v
+  rw [inverseRadius_forwardRadius ha.1 ha.2]
+  exact unlinkNormalPolarRadius_pos 1 v
+
+private theorem contMDiff_crossingNormalForward :
+    ContMDiff (modelWithCornersSelf ℝ UnlinkNormalPlane)
+      (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞ crossingNormalForward := by
+  apply (ContMDiff.subtypeVal_comp_iff crossingNormalTargetOpens _).mp
+  apply (ContMDiff.subtypeVal_comp_iff (unlinkPuncturedNormalPlane 1) _).mp
+  exact contMDiff_normalForwardMap
+
+private theorem crossing_normalInverseMap_ne_center
+    (v : CrossingNormalTarget) :
+    normalInverseMap v.1 ≠ standardUnlinkNormalCenter 1 := by
+  intro h
+  have hz : ‖normalInverseMap v.1 - standardUnlinkNormalCenter 1‖ = 0 := by
+    rw [h, sub_self, norm_zero]
+  rw [normalInverseMap_sub_center, norm_smul, Real.norm_eq_abs,
+    abs_of_pos v.2, mem_sphere_zero_iff_norm.mp
+      (unlinkNormalPolarDirection 1 v.1).2, mul_one] at hz
+  exact v.2.ne' hz
+
+private def crossingNormalInverse
+    (v : CrossingNormalTarget) : UnlinkPuncturedNormalPlane 1 :=
+  ⟨normalInverseMap v.1, crossing_normalInverseMap_ne_center v⟩
+
+private theorem contMDiff_crossingNormalInverse :
+    ContMDiff (modelWithCornersSelf ℝ UnlinkNormalPlane)
+      (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞ crossingNormalInverse := by
+  apply (ContMDiff.subtypeVal_comp_iff (unlinkPuncturedNormalPlane 1) _).mp
+  exact contMDiff_normalInverseMap.comp contMDiff_subtype_val
+
+private theorem crossing_polarRadius_normalInverse (v : CrossingNormalTarget) :
+    unlinkNormalPolarRadius 1 (crossingNormalInverse v) =
+      inverseRadius (polarAngularReal v.1) (unlinkNormalPolarRadius 1 v.1) := by
+  change ‖normalInverseMap v.1 - standardUnlinkNormalCenter 1‖ = _
+  rw [normalInverseMap_sub_center, norm_smul, Real.norm_eq_abs,
+    abs_of_pos v.2, mem_sphere_zero_iff_norm.mp
+      (unlinkNormalPolarDirection 1 v.1).2, mul_one]
+
+private theorem crossing_polarDirection_normalInverse (v : CrossingNormalTarget) :
+    unlinkNormalPolarDirection 1 (crossingNormalInverse v) =
+      unlinkNormalPolarDirection 1 v.1 := by
+  apply Subtype.ext
+  change ‖normalInverseMap v.1 - standardUnlinkNormalCenter 1‖⁻¹ •
+      (normalInverseMap v.1 - standardUnlinkNormalCenter 1) = _
+  rw [normalInverseMap_sub_center, norm_smul, Real.norm_eq_abs,
+    abs_of_pos v.2, mem_sphere_zero_iff_norm.mp
+      (unlinkNormalPolarDirection 1 v.1).2,
+    mul_one, smul_smul, inv_mul_cancel₀ v.2.ne', one_smul]
+
+private theorem crossing_polarAngularReal_normalInverse (v : CrossingNormalTarget) :
+    polarAngularReal (crossingNormalInverse v) = polarAngularReal v.1 := by
+  rw [polarAngularReal, crossing_polarDirection_normalInverse]
+  rfl
+
+private theorem crossingNormalInverse_forward (v : UnlinkPuncturedNormalPlane 1) :
+    crossingNormalInverse (crossingNormalForward v) = v := by
+  apply Subtype.ext
+  change normalInverseMap (crossingNormalForwardPunctured v) = v.1
+  rw [normalInverseMap, crossing_polarAngularReal_normalForward,
+    crossing_polarRadius_normalForward, crossing_polarDirection_normalForward]
+  have ha := polarAngularReal_bounds v
+  rw [inverseRadius_forwardRadius ha.1 ha.2]
+  exact center_add_polar_reconstruction v
+
+private theorem crossingNormalForward_inverse (v : CrossingNormalTarget) :
+    crossingNormalForward (crossingNormalInverse v) = v := by
+  apply Subtype.ext
+  apply Subtype.ext
+  change normalForwardMap (crossingNormalInverse v) = v.1.1
+  rw [normalForwardMap, crossing_polarAngularReal_normalInverse,
+    crossing_polarRadius_normalInverse, crossing_polarDirection_normalInverse]
+  have ha := polarAngularReal_bounds v.1
+  rw [forwardRadius_inverseRadius ha.1 ha.2]
+  exact center_add_polar_reconstruction v.1
+
+private def crossingNormalDiffeomorph :
+    UnlinkPuncturedNormalPlane 1 ≃ₘ^∞⟮
+      modelWithCornersSelf ℝ UnlinkNormalPlane,
+      modelWithCornersSelf ℝ UnlinkNormalPlane⟯ CrossingNormalTarget where
+  toFun := crossingNormalForward
+  invFun := crossingNormalInverse
+  left_inv := crossingNormalInverse_forward
+  right_inv := crossingNormalForward_inverse
+  contMDiff_toFun := contMDiff_crossingNormalForward
+  contMDiff_invFun := contMDiff_crossingNormalInverse
+
+private theorem isLocalDiffeomorph_crossingNormalForward :
+    IsLocalDiffeomorph (modelWithCornersSelf ℝ UnlinkNormalPlane)
+      (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞ crossingNormalForward :=
+  crossingNormalDiffeomorph.isLocalDiffeomorph
+
 /-! ## The direct lift to the four-sphere -/
 
 private theorem unlinkAlignedSplitEquiv_symm_norm_sq
@@ -3313,6 +3485,1304 @@ private theorem isLocalDiffeomorph_rightTubeClosedBoundaryCollar :
     rightTubeClosedOneHandle_cover
     rightTubeClosedOneHandleAtlas_compatible
 
+/-! Collar-coordinate transition across the right-tube boundary. -/
+
+private def standardCollarSourceNormal
+    (p : RightTubeClosedCollarDomain) : SourceNormalClosed :=
+  rightTubeClosedNormal (rightTubeClosedHalfCollarMap p)
+
+private theorem standardCollarSourceNormal_val
+    (p : RightTubeClosedCollarDomain) :
+    (standardCollarSourceNormal p).1 =
+      standardUnlinkNormalCenter 1 +
+        unlinkExteriorCollarRadiusValue p.2.2 • p.2.1.1 := by
+  exact rightTubeClosedCollarAmbientMap_normal p
+
+private def standardCollarTargetNormal
+    (p : RightTubeClosedCollarDomain) : OneHandleNormalClosed :=
+  normalForwardClosed (standardCollarSourceNormal p)
+
+private theorem standardCollarTargetNormal_val
+    (p : RightTubeClosedCollarDomain) :
+    (standardCollarTargetNormal p).1 =
+      normalForwardMap
+        (sourceNormalClosedToPunctured (standardCollarSourceNormal p)) :=
+  rfl
+
+private theorem standardCollarTargetNormal_ne_zero
+    (p : RightTubeClosedCollarDomain) :
+    (standardCollarTargetNormal p).1 ≠ 0 := by
+  intro h
+  have hp := (standardCollarTargetNormal p).2
+  change sphereHandleRadius ≤ ‖(standardCollarTargetNormal p).1‖ at hp
+  rw [h, norm_zero] at hp
+  exact (not_le_of_gt sphereHandleRadius_pos) hp
+
+private def standardCollarTargetDirection
+    (p : RightTubeClosedCollarDomain) : Sphere 1 :=
+  ⟨‖(standardCollarTargetNormal p).1‖⁻¹ •
+      (standardCollarTargetNormal p).1, by
+    rw [mem_sphere_zero_iff_norm, norm_smul, Real.norm_eq_abs,
+      abs_of_pos (inv_pos.mpr (norm_pos_iff.mpr
+        (standardCollarTargetNormal_ne_zero p))),
+      inv_mul_cancel₀ (norm_ne_zero_iff.mpr
+        (standardCollarTargetNormal_ne_zero p))]⟩
+
+private def standardCollarTargetBallRadius
+    (p : RightTubeClosedCollarDomain) : ℝ :=
+  Real.sqrt (2 * (1 - ‖(standardCollarTargetNormal p).1‖ ^ 2))
+
+private def standardCollarTransitionSourceOpens :
+    Opens RightTubeClosedCollarDomain :=
+  ⟨{p | ‖(standardCollarTargetNormal p).1‖ < 1 ∧
+      (7 / 8 : ℝ) < standardCollarTargetBallRadius p}, by
+    have hsource : Continuous (fun p : RightTubeClosedCollarDomain ↦
+        standardCollarSourceNormal p) := by
+      apply Continuous.subtype_mk
+      change Continuous (fun p : RightTubeClosedCollarDomain ↦
+        standardUnlinkNormalProjection
+          (standardUnlinkExteriorEighthCollarHomeomorph 1 p : Sphere 4))
+      exact continuous_standardUnlinkNormalProjection.comp
+        (continuous_subtype_val.comp
+          (standardUnlinkExteriorEighthCollarHomeomorph 1).continuous)
+    have hnormal : Continuous (fun p : RightTubeClosedCollarDomain ↦
+        (standardCollarTargetNormal p).1) := by
+      exact continuous_subtype_val.comp
+        (continuous_normalForwardClosed.comp
+          hsource)
+    exact (isOpen_lt (continuous_norm.comp hnormal) continuous_const).inter
+      (isOpen_lt continuous_const
+        (Real.continuous_sqrt.comp
+          (continuous_const.mul
+            (continuous_const.sub
+              ((continuous_norm.comp hnormal).pow 2)))))⟩
+
+private abbrev StandardCollarTransitionSource :=
+  standardCollarTransitionSourceOpens
+
+private theorem standardCollarTargetBallRadius_pos
+    (p : StandardCollarTransitionSource) :
+    0 < standardCollarTargetBallRadius p.1 :=
+  lt_trans (by norm_num : (0 : ℝ) < 7 / 8) p.2.2
+
+private theorem standardCollarTargetBallRadius_le_one
+    (p : StandardCollarTransitionSource) :
+    standardCollarTargetBallRadius p.1 ≤ 1 := by
+  have hn := (standardCollarTargetNormal p.1).2
+  have hs : sphereHandleRadius ^ 2 ≤
+      ‖(standardCollarTargetNormal p.1).1‖ ^ 2 :=
+    (sq_le_sq₀ sphereHandleRadius_pos.le (norm_nonneg _)).2 hn
+  have hrad : 0 ≤ 2 * (1 - ‖(standardCollarTargetNormal p.1).1‖ ^ 2) := by
+    exact Real.sqrt_pos.1 (standardCollarTargetBallRadius_pos p) |>.le
+  have hsq := Real.sq_sqrt hrad
+  rw [sphereHandleRadius_sq] at hs
+  change Real.sqrt
+      (2 * (1 - ‖(standardCollarTargetNormal p.1).1‖ ^ 2)) ≤ 1
+  apply (sq_le_sq₀ (Real.sqrt_nonneg _) zero_le_one).mp
+  rw [Real.sq_sqrt hrad]
+  linarith
+
+private def standardCollarTransitionRadius
+    (p : StandardCollarTransitionSource) :
+    CoordinateUnlinkExteriorEighthCollarRadius :=
+  ⟨⟨9 / 8 - standardCollarTargetBallRadius p.1, by
+      constructor
+      · calc
+          (1 / 8 : ℝ) = 9 / 8 - 1 := by norm_num
+          _ ≤ 9 / 8 - standardCollarTargetBallRadius p.1 :=
+            sub_le_sub_left (standardCollarTargetBallRadius_le_one p) _
+      · have hp : (7 / 8 : ℝ) < standardCollarTargetBallRadius p.1 := p.2.2
+        linarith⟩,
+    by
+      have h := sub_lt_sub_left p.2.2 (9 / 8 : ℝ)
+      change 9 / 8 - standardCollarTargetBallRadius p.1 < (1 / 4 : ℝ)
+      convert h using 1
+      norm_num⟩
+
+private def standardCollarTransitionForward
+    (p : StandardCollarTransitionSource) :
+    RightTubeClosedCollarDomain :=
+  (p.1.1, (standardCollarTargetDirection p.1,
+    standardCollarTransitionRadius p))
+
+private theorem contMDiff_standardCollarTransitionForward :
+    ContMDiff coordinateUnlinkExteriorModel coordinateUnlinkExteriorModel ∞
+      standardCollarTransitionForward := by
+  rw [ContinuousLinearEquiv.contMDiff_transContinuousLinearEquiv_left]
+  let _ : Fact (Module.finrank ℝ UnlinkNormalPlane = 1 + 1) := ⟨by simp⟩
+  have hsource : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞
+      (fun p : StandardCollarTransitionSource ↦
+        sourceNormalClosedToPunctured
+          (standardCollarSourceNormal p.1)) := by
+    apply (ContMDiff.subtypeVal_comp_iff (unlinkPuncturedNormalPlane 1) _).mp
+    change ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞
+      (fun p : StandardCollarTransitionSource ↦
+        (standardCollarSourceNormal p.1).1)
+    rw [show (fun p : StandardCollarTransitionSource ↦
+        (standardCollarSourceNormal p.1).1) =
+        (fun p ↦ standardUnlinkNormalCenter 1 +
+          unlinkExteriorCollarRadiusValue p.1.2.2 • p.1.2.1.1) by
+      funext p
+      exact standardCollarSourceNormal_val p.1]
+    have ht : ContMDiff standardUnlinkExteriorCollarModel
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : StandardCollarTransitionSource ↦
+          unlinkExteriorCollarRadiusValue p.1.2.2) :=
+      contMDiff_unlinkExteriorCollarRadiusValue.comp
+        (contMDiff_snd.comp (contMDiff_snd.comp contMDiff_subtype_val))
+    have hu : ContMDiff standardUnlinkExteriorCollarModel
+        (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞
+        (fun p : StandardCollarTransitionSource ↦ p.1.2.1.1) :=
+      (contMDiff_coe_sphere (n := 1)).comp
+        (contMDiff_fst.comp (contMDiff_snd.comp contMDiff_subtype_val))
+    exact (contMDiff_const.add (ht.smul hu)).congr fun _ ↦ rfl
+  have hv : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞
+      (fun p : StandardCollarTransitionSource ↦
+        (standardCollarTargetNormal p.1).1) := by
+    exact (contMDiff_normalForwardMap.comp hsource).congr fun _ ↦ rfl
+  have hn : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : StandardCollarTransitionSource ↦
+        ‖(standardCollarTargetNormal p.1).1‖) := by
+    intro p
+    exact (contDiffAt_norm ℝ (standardCollarTargetNormal_ne_zero p.1)).contMDiffAt.comp
+      p hv.contMDiffAt
+  have huRaw : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞
+      (fun p : StandardCollarTransitionSource ↦
+        ‖(standardCollarTargetNormal p.1).1‖⁻¹ •
+          (standardCollarTargetNormal p.1).1) :=
+    (hn.inv₀ (fun p ↦ (norm_pos_iff.mpr
+      (standardCollarTargetNormal_ne_zero p.1)).ne')).smul hv
+  have hu : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 1))) ∞
+      (fun p : StandardCollarTransitionSource ↦
+        standardCollarTargetDirection p.1) := by
+    exact (huRaw.codRestrict_sphere (n := 1)
+      (fun p ↦ (standardCollarTargetDirection p.1).2)).congr fun _ ↦ rfl
+  have hradicand : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : StandardCollarTransitionSource ↦
+        2 * (1 - ‖(standardCollarTargetNormal p.1).1‖ ^ 2)) := by
+    have hg : ContDiff ℝ ∞ (fun x : ℝ ↦ 2 * (1 - x ^ 2)) := by fun_prop
+    exact hg.contMDiff.comp hn
+  have hrho : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : StandardCollarTransitionSource ↦
+        standardCollarTargetBallRadius p.1) := by
+    intro p
+    have hne : 2 * (1 - ‖(standardCollarTargetNormal p.1).1‖ ^ 2) ≠ 0 := by
+      have hp := p.2.1
+      nlinarith [norm_nonneg (standardCollarTargetNormal p.1).1]
+    exact ((Real.contDiffAt_sqrt hne).contMDiffAt.comp p
+      hradicand.contMDiffAt).congr_of_eventuallyEq
+        (Filter.Eventually.of_forall fun _ ↦ rfl)
+  have ht : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersEuclideanHalfSpace 1) ∞
+      standardCollarTransitionRadius := by
+    apply (ContMDiff.subtypeVal_comp_iff
+      (unlinkExteriorCollarRadius (1 / 8 : ℝ) (1 / 4 : ℝ)) _).mp
+    rw [contMDiff_iff_comp_subtypeVal_Icc]
+    constructor
+    · exact (continuous_const.sub hrho.continuous).subtype_mk _
+    · exact (contMDiff_const.sub hrho).congr fun _ ↦ rfl
+  have hx : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 2))) ∞
+      (fun p : StandardCollarTransitionSource ↦ p.1.1) := by
+    have hval : ContMDiff standardUnlinkExteriorCollarModel
+        standardUnlinkExteriorCollarModel ∞
+        (Subtype.val : StandardCollarTransitionSource →
+          RightTubeClosedCollarDomain) := contMDiff_subtype_val
+    exact contMDiff_fst.comp hval
+  rw [ContinuousLinearEquiv.contMDiff_transContinuousLinearEquiv_right]
+  exact (hx.prodMk (hu.prodMk ht)).congr fun _ ↦ rfl
+
+
+private def targetCollarAlignedNormalValue
+    (p : RightTubeClosedCollarDomain) : UnlinkNormalPlane :=
+  sphereHandleScale (oneHandleCollarRadialValue p) • p.2.1.1
+
+private theorem norm_targetCollarAlignedNormalValue
+    (p : RightTubeClosedCollarDomain) :
+    ‖targetCollarAlignedNormalValue p‖ =
+      sphereHandleScale (oneHandleCollarRadialValue p) := by
+  rw [targetCollarAlignedNormalValue, norm_smul, Real.norm_eq_abs,
+    abs_of_pos (sphereHandleScale_pos
+      (oneHandleCollarRadialValue_pos p).le
+      (oneHandleCollarRadialValue_le_one p)),
+    mem_sphere_zero_iff_norm.mp p.2.1.2, mul_one]
+
+private theorem targetCollarAlignedNormalValue_ne_center
+    (p : RightTubeClosedCollarDomain) :
+    targetCollarAlignedNormalValue p ≠ standardUnlinkNormalCenter 1 := by
+  intro h
+  have hnorm := congrArg norm h
+  rw [norm_targetCollarAlignedNormalValue,
+    norm_standardUnlinkNormalCenter] at hnorm
+  have hle : sphereHandleRadius ≤
+      sphereHandleScale (oneHandleCollarRadialValue p) :=
+    sphereHandleRadius_le_scale_on_unit
+      (oneHandleCollarRadialValue_pos p).le
+      (oneHandleCollarRadialValue_le_one p)
+  exact (not_le_of_gt half_lt_sphereHandleRadius) (hnorm ▸ hle)
+
+private def targetCollarNormalClosed
+    (p : RightTubeClosedCollarDomain) : OneHandleNormalClosed :=
+  ⟨targetCollarAlignedNormalValue p, by
+    change sphereHandleRadius ≤ ‖targetCollarAlignedNormalValue p‖
+    rw [norm_targetCollarAlignedNormalValue]
+    exact sphereHandleRadius_le_scale_on_unit
+      (oneHandleCollarRadialValue_pos p).le
+      (oneHandleCollarRadialValue_le_one p)⟩
+
+private def targetCollarNormalPunctured
+    (p : RightTubeClosedCollarDomain) : UnlinkPuncturedNormalPlane 1 :=
+  ⟨targetCollarAlignedNormalValue p,
+    targetCollarAlignedNormalValue_ne_center p⟩
+
+private theorem targetCollarNormalPunctured_eq_closed
+    (p : RightTubeClosedCollarDomain) :
+    targetCollarNormalPunctured p =
+      oneHandleNormalClosedToPunctured (targetCollarNormalClosed p) := by
+  rfl
+
+private def targetCollarCrossingNormal
+    (p : RightTubeClosedCollarDomain) : CrossingNormalTarget :=
+  ⟨targetCollarNormalPunctured p, by
+    rw [targetCollarNormalPunctured_eq_closed]
+    exact normalInverseClosedRadius_pos (targetCollarNormalClosed p)⟩
+
+private def targetCollarRecoveredNormal
+    (p : RightTubeClosedCollarDomain) : UnlinkPuncturedNormalPlane 1 :=
+  crossingNormalInverse (targetCollarCrossingNormal p)
+
+private def standardCollarTransitionTargetOpens :
+    Opens RightTubeClosedCollarDomain :=
+  ⟨{p | unlinkNormalPolarRadius 1 (targetCollarRecoveredNormal p) < (1 / 4 : ℝ)}, by
+    apply isOpen_lt
+    · have hvalue : Continuous (fun p : RightTubeClosedCollarDomain ↦
+          targetCollarAlignedNormalValue p) := by
+        have hr : Continuous (fun p : RightTubeClosedCollarDomain ↦
+            oneHandleCollarRadialValue p) := by
+          exact continuous_const.sub
+            (continuous_unlinkExteriorCollarRadiusValue.comp
+              (continuous_snd.comp continuous_snd))
+        exact (continuous_sphereHandleScale.comp hr).smul
+          (continuous_subtype_val.comp
+            (continuous_fst.comp continuous_snd))
+      have hp : Continuous targetCollarNormalPunctured :=
+        hvalue.subtype_mk _
+      have hc : Continuous targetCollarCrossingNormal :=
+        hp.subtype_mk _
+      exact (contMDiff_unlinkNormalPolarRadius 1).continuous.comp
+        (contMDiff_crossingNormalInverse.continuous.comp hc)
+    · exact continuous_const⟩
+
+private abbrev StandardCollarTransitionTarget :=
+  standardCollarTransitionTargetOpens
+
+private def standardCollarRecoveredRadius
+    (p : StandardCollarTransitionTarget) :
+    CoordinateUnlinkExteriorEighthCollarRadius :=
+  ⟨⟨unlinkNormalPolarRadius 1 (targetCollarRecoveredNormal p.1), by
+      constructor
+      · have hclosed := (normalInverseClosed (targetCollarNormalClosed p.1)).2
+        change sourceInnerRadius ≤
+          ‖(normalInverseClosed (targetCollarNormalClosed p.1)).1 -
+            standardUnlinkNormalCenter 1‖ at hclosed
+        change (1 / 8 : ℝ) ≤
+          ‖(targetCollarRecoveredNormal p.1).1 -
+            standardUnlinkNormalCenter 1‖
+        exact hclosed
+      · exact p.2.le⟩,
+    p.2⟩
+
+private def standardCollarTransitionInverse
+    (p : StandardCollarTransitionTarget) :
+    RightTubeClosedCollarDomain :=
+  (p.1.1, (unlinkNormalPolarDirection 1
+    (targetCollarRecoveredNormal p.1), standardCollarRecoveredRadius p))
+
+private theorem contMDiff_targetCollarCrossingNormal :
+    ContMDiff coordinateUnlinkExteriorModel
+      (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞
+      targetCollarCrossingNormal := by
+  let _ : Fact (Module.finrank ℝ UnlinkNormalPlane = 1 + 1) := ⟨by simp⟩
+  apply (ContMDiff.subtypeVal_comp_iff crossingNormalTargetOpens _).mp
+  apply (ContMDiff.subtypeVal_comp_iff (unlinkPuncturedNormalPlane 1) _).mp
+  have hr : ContMDiff coordinateUnlinkExteriorModel
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : RightTubeClosedCollarDomain ↦ oneHandleCollarRadialValue p) := by
+    rw [ContinuousLinearEquiv.contMDiff_transContinuousLinearEquiv_left]
+    exact (contMDiff_const.sub
+      (contMDiff_unlinkExteriorCollarRadiusValue.comp
+        (contMDiff_snd.comp contMDiff_snd))).congr fun _ ↦ rfl
+  have hs : ContMDiff coordinateUnlinkExteriorModel
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : RightTubeClosedCollarDomain ↦
+        sphereHandleScale (oneHandleCollarRadialValue p)) := by
+    intro p
+    have hrad : 1 - sphereHandleRadius ^ 2 *
+        oneHandleCollarRadialValue p ^ 2 ≠ 0 := by
+      have hp0 := oneHandleCollarRadialValue_pos p
+      have hp1 := oneHandleCollarRadialValue_le_one p
+      rw [sphereHandleRadius_sq]
+      nlinarith [sq_nonneg (oneHandleCollarRadialValue p)]
+    have hg : ContMDiffAt (modelWithCornersSelf ℝ ℝ)
+        (modelWithCornersSelf ℝ ℝ) ∞ sphereHandleScale
+        (oneHandleCollarRadialValue p) := by
+      exact ((Real.contDiffAt_sqrt hrad).comp
+        (oneHandleCollarRadialValue p)
+          (by fun_prop : ContDiffAt ℝ ∞
+            (fun t : ℝ ↦ 1 - sphereHandleRadius ^ 2 * t ^ 2)
+            (oneHandleCollarRadialValue p))).contMDiffAt
+    exact hg.comp p hr.contMDiffAt
+  have hu : ContMDiff coordinateUnlinkExteriorModel
+      (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞
+      (fun p : RightTubeClosedCollarDomain ↦ p.2.1.1) := by
+    rw [ContinuousLinearEquiv.contMDiff_transContinuousLinearEquiv_left]
+    have hsphere : ContMDiff standardUnlinkExteriorCollarModel
+        (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 1))) ∞
+        (fun p : RightTubeClosedCollarDomain ↦ p.2.1) :=
+      contMDiff_fst.comp contMDiff_snd
+    exact (contMDiff_coe_sphere (n := 1)).comp hsphere
+  exact (hs.smul hu).congr fun _ ↦ rfl
+
+private theorem contMDiff_standardCollarTransitionInverse :
+    ContMDiff coordinateUnlinkExteriorModel coordinateUnlinkExteriorModel ∞
+      standardCollarTransitionInverse := by
+  rw [ContinuousLinearEquiv.contMDiff_transContinuousLinearEquiv_left]
+  have hc : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞
+      (fun p : StandardCollarTransitionTarget ↦
+        targetCollarCrossingNormal p.1) := by
+    have h : ContMDiff coordinateUnlinkExteriorModel
+        (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞
+        (fun p : StandardCollarTransitionTarget ↦
+          targetCollarCrossingNormal p.1) :=
+      contMDiff_targetCollarCrossingNormal.comp contMDiff_subtype_val
+    rwa [ContinuousLinearEquiv.contMDiff_transContinuousLinearEquiv_left] at h
+  have hv : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ UnlinkNormalPlane) ∞
+      (fun p : StandardCollarTransitionTarget ↦
+        targetCollarRecoveredNormal p.1) :=
+    contMDiff_crossingNormalInverse.comp hc
+  have hu : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 1))) ∞
+      (fun p : StandardCollarTransitionTarget ↦
+        unlinkNormalPolarDirection 1 (targetCollarRecoveredNormal p.1)) :=
+    (contMDiff_unlinkNormalPolarDirection 1).comp hv
+  have hr : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : StandardCollarTransitionTarget ↦
+        unlinkNormalPolarRadius 1 (targetCollarRecoveredNormal p.1)) :=
+    (contMDiff_unlinkNormalPolarRadius 1).comp hv
+  have ht : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersEuclideanHalfSpace 1) ∞
+      standardCollarRecoveredRadius := by
+    apply (ContMDiff.subtypeVal_comp_iff
+      (unlinkExteriorCollarRadius (1 / 8 : ℝ) (1 / 4 : ℝ)) _).mp
+    rw [contMDiff_iff_comp_subtypeVal_Icc]
+    exact ⟨hr.continuous.subtype_mk _, hr.congr fun _ ↦ rfl⟩
+  have hx : ContMDiff standardUnlinkExteriorCollarModel
+      (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 2))) ∞
+      (fun p : StandardCollarTransitionTarget ↦ p.1.1) :=
+    contMDiff_fst.comp contMDiff_subtype_val
+  rw [ContinuousLinearEquiv.contMDiff_transContinuousLinearEquiv_right]
+  exact (hx.prodMk (hu.prodMk ht)).congr fun _ ↦ rfl
+
+private def rightTubeStandardPuncturedOverlapOpens :
+    Opens (StandardUnlinkPuncturedTube 1 (1 / 4 : ℝ)) :=
+  ⟨{q | sourceInnerRadius <
+      (standardUnlinkPuncturedTubePolarCoordinates 1 (by norm_num) q).2.2},
+    isOpen_lt continuous_const
+      ((contMDiff_standardUnlinkPuncturedTubePolarCoordinates 1 (by norm_num)).continuous
+        |>.snd.snd)⟩
+
+private abbrev RightTubeStandardPuncturedOverlap :=
+  rightTubeStandardPuncturedOverlapOpens
+
+private def rightTubeStandardPuncturedOverlapPolarCollar
+    (q : RightTubeStandardPuncturedOverlap) :
+    RightTubeClosedCollarDomain := by
+  let polar := standardUnlinkPuncturedTubePolarCoordinates 1 (by norm_num) q.1
+  have hlower : (1 / 8 : ℝ) < polar.2.2 := q.2
+  have hupper : polar.2.2 < (1 / 4 : ℝ) := by
+    rw [standardUnlinkPuncturedTubePolarCoordinates_radius]
+    have hmem := q.1.1.2
+    change standardUnlinkNormalProjection q.1.1.1 ∈
+      ball (standardUnlinkNormalCenter 1) (1 / 4 : ℝ) at hmem
+    simpa only [mem_ball, dist_eq_norm] using hmem
+  exact (polar.1, (polar.2.1, ⟨⟨polar.2.2, hlower.le, hupper.le⟩, hupper⟩))
+
+private theorem contMDiff_rightTubeStandardPuncturedOverlapPolarCollar :
+    ContMDiff (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 4)))
+      coordinateUnlinkExteriorModel ∞
+      rightTubeStandardPuncturedOverlapPolarCollar := by
+  rw [ContinuousLinearEquiv.contMDiff_transContinuousLinearEquiv_right]
+  have hraw :=
+    (contMDiff_standardUnlinkPuncturedTubePolarCoordinates 1 (by norm_num)).comp
+      (contMDiff_subtype_val : ContMDiff
+        (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 4)))
+        (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 4))) ∞
+        (Subtype.val : RightTubeStandardPuncturedOverlap →
+          StandardUnlinkPuncturedTube 1 (1 / 4 : ℝ)))
+  have hbase := contMDiff_fst.comp hraw
+  have hdirection := contMDiff_fst.comp (contMDiff_snd.comp hraw)
+  have hradiusReal := contMDiff_snd.comp (contMDiff_snd.comp hraw)
+  have hradius : ContMDiff
+      (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 4)))
+      (modelWithCornersEuclideanHalfSpace 1) ∞
+      (fun q : RightTubeStandardPuncturedOverlap ↦
+        (rightTubeStandardPuncturedOverlapPolarCollar q).2.2) := by
+    apply (ContMDiff.subtypeVal_comp_iff
+      (unlinkExteriorCollarRadius (1 / 8 : ℝ) (1 / 4 : ℝ)) _).mp
+    rw [contMDiff_iff_comp_subtypeVal_Icc]
+    constructor
+    · apply Continuous.subtype_mk
+      exact hradiusReal.continuous.congr fun _ ↦ rfl
+    · exact hradiusReal.congr fun _ ↦ rfl
+  exact (hbase.prodMk (hdirection.prodMk hradius)).congr fun _ ↦ rfl
+
+private def rightTubeStandardStrictCollarOpens : Opens (Sphere 4) := by
+  let ρ : Sphere 4 → ℝ := fun q ↦
+    ‖standardUnlinkNormalProjection q - standardUnlinkNormalCenter 1‖
+  have hρ : Continuous ρ := continuous_norm.comp
+    (continuous_standardUnlinkNormalProjection.sub continuous_const)
+  exact ⟨{q | sourceInnerRadius < ρ q ∧ ρ q < (1 / 4 : ℝ)},
+    (isOpen_lt continuous_const hρ).inter (isOpen_lt hρ continuous_const)⟩
+
+private theorem mem_rightTubeStandardStrictCollarOpens_iff (q : Sphere 4) :
+    q ∈ rightTubeStandardStrictCollarOpens ↔
+      sourceInnerRadius <
+          ‖standardUnlinkNormalProjection q - standardUnlinkNormalCenter 1‖ ∧
+        ‖standardUnlinkNormalProjection q - standardUnlinkNormalCenter 1‖ <
+          (1 / 4 : ℝ) := by rfl
+
+private def rightTubeStandardStrictCollarAsExteriorCollar
+    (q : rightTubeStandardStrictCollarOpens) :
+    StandardUnlinkExteriorCollar 1 (1 / 8 : ℝ) (1 / 4 : ℝ) := by
+  refine ⟨q.1, ?_⟩
+  rw [mem_standardUnlinkExteriorCollarSet_iff 1 (by norm_num) (by norm_num)]
+  exact ⟨q.2.1.le, q.2.2⟩
+
+private def rightTubeStandardStrictCollarToPuncturedOverlap
+    (q : rightTubeStandardStrictCollarOpens) : RightTubeStandardPuncturedOverlap := by
+  have hq := (mem_rightTubeStandardStrictCollarOpens_iff q.1).mp q.2
+  let qtube : StandardUnlinkOpenTubeSpace 1 (1 / 4 : ℝ) := by
+    refine ⟨q.1, ?_⟩
+    change dist (standardUnlinkNormalProjection q.1)
+      (standardUnlinkNormalCenter 1) < (1 / 4 : ℝ)
+    simpa only [dist_eq_norm] using hq.2
+  let qpunct : StandardUnlinkPuncturedTube 1 (1 / 4 : ℝ) := by
+    refine ⟨qtube, ?_⟩
+    intro heq
+    have hzero : ‖standardUnlinkNormalProjection q.1 - standardUnlinkNormalCenter 1‖ = 0 := by
+      change ‖standardUnlinkNormalProjection qtube.1 - standardUnlinkNormalCenter 1‖ = 0
+      rw [heq, sub_self, norm_zero]
+    have hpos : 0 < ‖standardUnlinkNormalProjection q.1 - standardUnlinkNormalCenter 1‖ :=
+      lt_of_lt_of_le (by norm_num : (0 : ℝ) < sourceInnerRadius) hq.1.le
+    exact hpos.ne' hzero
+  refine ⟨qpunct, ?_⟩
+  change sourceInnerRadius <
+    (standardUnlinkPuncturedTubePolarCoordinates 1 (by norm_num) qpunct).2.2
+  rw [standardUnlinkPuncturedTubePolarCoordinates_radius]
+  exact hq.1
+
+private theorem contMDiff_rightTubeStandardStrictCollarToPuncturedOverlap :
+    letI := coordinateUnlinkExteriorCommonModelSphereChartedSpace
+    ContMDiff coordinateUnlinkExteriorModel
+      (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 4))) ∞
+      rightTubeStandardStrictCollarToPuncturedOverlap := by
+  let _ := coordinateUnlinkExteriorCommonModelSphereChartedSpace
+  apply (ContMDiff.subtypeVal_comp_iff rightTubeStandardPuncturedOverlapOpens _).mp
+  apply (ContMDiff.subtypeVal_comp_iff
+    (standardUnlinkPuncturedTubeOpens 1 (1 / 4 : ℝ)) _).mp
+  apply (ContMDiff.subtypeVal_comp_iff
+    (standardUnlinkOpenTubeOpens 1 (1 / 4 : ℝ)) _).mp
+  apply (coordinateUnlinkExteriorCommonModelToStandardSphereIdentityDiffeomorph.contMDiff.comp
+    contMDiff_subtype_val).congr
+  intro q
+  change q.1 = q.1
+  rfl
+
+private def rightTubeStandardPositiveCollarToStrictCollar
+    (p : rightTubeClosedCollarPositiveOpens) : rightTubeStandardStrictCollarOpens := by
+  refine ⟨rightTubeClosedCollarAmbientMap p.1, ?_⟩
+  change sourceInnerRadius <
+      ‖standardUnlinkNormalProjection
+          (rightTubeClosedCollarAmbientMap p.1) -
+        standardUnlinkNormalCenter 1‖ ∧
+    ‖standardUnlinkNormalProjection
+          (rightTubeClosedCollarAmbientMap p.1) -
+        standardUnlinkNormalCenter 1‖ < (1 / 4 : ℝ)
+  rw [rightTubeClosedCollarAmbientMap_normal,
+    add_sub_cancel_left, norm_smul, Real.norm_eq_abs,
+    abs_of_pos (lt_of_lt_of_le (by norm_num : (0 : ℝ) < 1 / 8)
+      (unlinkExteriorCollarRadiusValue_lower p.1.2.2)),
+    mem_sphere_zero_iff_norm.mp p.1.2.1.2, mul_one]
+  exact ⟨p.2, unlinkExteriorCollarRadiusValue_lt_upper p.1.2.2⟩
+
+private def rightTubeStandardStrictCollarToPositiveCollar
+    (q : rightTubeStandardStrictCollarOpens) : rightTubeClosedCollarPositiveOpens := by
+  have hq := (mem_rightTubeStandardStrictCollarOpens_iff q.1).mp q.2
+  let z := rightTubeStandardStrictCollarAsExteriorCollar q
+  let p := (standardUnlinkExteriorEighthCollarHomeomorph 1).symm z
+  refine ⟨p, ?_⟩
+  have happ := congrArg Subtype.val
+    ((standardUnlinkExteriorEighthCollarHomeomorph 1).apply_symm_apply z)
+  have hnorm :
+      ‖standardUnlinkNormalProjection q.1 - standardUnlinkNormalCenter 1‖ =
+        unlinkExteriorCollarRadiusValue p.2.2 := by
+    change ‖standardUnlinkNormalProjection z.1 - standardUnlinkNormalCenter 1‖ = _
+    rw [← happ]
+    change ‖standardUnlinkNormalProjection
+        (standardUnlinkExteriorCollarHomeomorph 1
+          (r := (1 / 8 : ℝ)) (R := (1 / 4 : ℝ))
+          (by norm_num) (by norm_num) p).1 - standardUnlinkNormalCenter 1‖ = _
+    rw [standardUnlinkNormalProjection_exteriorCollarHomeomorph,
+      add_sub_cancel_left, norm_smul, Real.norm_eq_abs,
+      abs_of_pos (lt_of_lt_of_le (by norm_num : (0 : ℝ) < 1 / 8)
+        (unlinkExteriorCollarRadiusValue_lower p.2.2)),
+      mem_sphere_zero_iff_norm.mp p.2.1.2, mul_one]
+  change sourceInnerRadius < unlinkExteriorCollarRadiusValue p.2.2
+  rw [← hnorm]
+  exact hq.1
+
+@[simp] private theorem rightTubeStandardStrictCollarToPositiveCollar_val
+    (q : rightTubeStandardStrictCollarOpens) :
+    (rightTubeStandardStrictCollarToPositiveCollar q).1 =
+      (standardUnlinkExteriorEighthCollarHomeomorph 1).symm
+        (rightTubeStandardStrictCollarAsExteriorCollar q) := by rfl
+
+@[simp] private theorem rightTubeStandardPositiveCollarToStrictCollar_val
+    (p : rightTubeClosedCollarPositiveOpens) :
+    (rightTubeStandardPositiveCollarToStrictCollar p).1 =
+      rightTubeClosedCollarAmbientMap p.1 := by rfl
+
+private theorem rightTubeStandardStrictCollarToPositiveCollar_eq_polar
+    (q : rightTubeStandardStrictCollarOpens) :
+    (rightTubeStandardStrictCollarToPositiveCollar q).1 =
+      rightTubeStandardPuncturedOverlapPolarCollar
+        (rightTubeStandardStrictCollarToPuncturedOverlap q) := by
+  let z := rightTubeStandardStrictCollarAsExteriorCollar q
+  let p := (standardUnlinkExteriorEighthCollarHomeomorph 1).symm z
+  have happ := (standardUnlinkExteriorEighthCollarHomeomorph 1).apply_symm_apply z
+  have hpunct :
+      (rightTubeStandardStrictCollarToPuncturedOverlap q).1 =
+        standardUnlinkExteriorCollarToPuncturedTube 1
+          (by norm_num) (by norm_num)
+          (standardUnlinkExteriorEighthCollarHomeomorph 1 p) := by
+    apply Subtype.ext
+    apply Subtype.ext
+    change q.1 = (standardUnlinkExteriorEighthCollarHomeomorph 1 p : Sphere 4)
+    exact (congrArg Subtype.val happ).symm
+  have hpolar := standardUnlinkPuncturedTubePolarCoordinates_exteriorCollar
+    1 (r := (1 / 8 : ℝ)) (R := (1 / 4 : ℝ))
+      (by norm_num) (by norm_num) p
+  have hpolar' :
+      standardUnlinkPuncturedTubePolarCoordinates 1 (by norm_num)
+          (rightTubeStandardStrictCollarToPuncturedOverlap q).1 =
+        (p.1, (p.2.1, unlinkExteriorCollarRadiusValue p.2.2)) := by
+    rw [hpunct]
+    exact hpolar
+  have hinvVal : (rightTubeStandardStrictCollarToPositiveCollar q).1 = p := by
+    rw [rightTubeStandardStrictCollarToPositiveCollar_val]
+  rw [hinvVal]
+  apply Prod.ext
+  · exact (congrArg Prod.fst hpolar').symm
+  · apply Prod.ext
+    · exact (congrArg (fun z ↦ z.2.1) hpolar').symm
+    · apply Subtype.ext
+      apply Subtype.ext
+      exact (congrArg (fun z ↦ z.2.2) hpolar').symm
+
+private theorem contMDiff_rightTubeStandardStrictCollarToPositiveCollar :
+    letI := coordinateUnlinkExteriorCommonModelSphereChartedSpace
+    ContMDiff coordinateUnlinkExteriorModel coordinateUnlinkExteriorModel ∞
+      rightTubeStandardStrictCollarToPositiveCollar := by
+  let _ := coordinateUnlinkExteriorCommonModelSphereChartedSpace
+  apply (ContMDiff.subtypeVal_comp_iff rightTubeClosedCollarPositiveOpens _).mp
+  have hpolar := contMDiff_rightTubeStandardPuncturedOverlapPolarCollar.comp
+    contMDiff_rightTubeStandardStrictCollarToPuncturedOverlap
+  exact hpolar.congr rightTubeStandardStrictCollarToPositiveCollar_eq_polar
+
+private theorem contMDiff_rightTubeStandardPositiveCollarToStrictCollar :
+    letI := coordinateUnlinkExteriorCommonModelSphereChartedSpace
+    ContMDiff coordinateUnlinkExteriorModel coordinateUnlinkExteriorModel ∞
+      rightTubeStandardPositiveCollarToStrictCollar := by
+  let _ := coordinateUnlinkExteriorCommonModelSphereChartedSpace
+  apply (ContMDiff.subtypeVal_comp_iff rightTubeStandardStrictCollarOpens _).mp
+  have hstandard : ContMDiff coordinateUnlinkExteriorModel
+      (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 4))) ∞
+      (fun p : rightTubeClosedCollarPositiveOpens ↦
+        rightTubeClosedCollarAmbientMap p.1) := by
+    rw [ContinuousLinearEquiv.contMDiff_transContinuousLinearEquiv_left]
+    exact (contMDiff_standardUnlinkExteriorEighthCollarHomeomorph_ambient 1).comp
+      contMDiff_subtype_val
+  exact
+    (standardToCoordinateUnlinkExteriorCommonModelSphereIdentityDiffeomorph.contMDiff.comp
+      hstandard).congr fun _ ↦ rfl
+
+private theorem rightTubeStandardStrictCollarToPositiveCollar_forward
+    (p : rightTubeClosedCollarPositiveOpens) :
+    rightTubeStandardStrictCollarToPositiveCollar
+      (rightTubeStandardPositiveCollarToStrictCollar p) = p := by
+  apply Subtype.ext
+  have hz : rightTubeStandardStrictCollarAsExteriorCollar
+      (rightTubeStandardPositiveCollarToStrictCollar p) =
+        standardUnlinkExteriorEighthCollarHomeomorph 1 p.1 := by
+    apply Subtype.ext
+    rfl
+  rw [rightTubeStandardStrictCollarToPositiveCollar_val]
+  change (standardUnlinkExteriorEighthCollarHomeomorph 1).symm
+      (rightTubeStandardStrictCollarAsExteriorCollar
+        (rightTubeStandardPositiveCollarToStrictCollar p)) = p.1
+  rw [hz]
+  exact (standardUnlinkExteriorEighthCollarHomeomorph 1).symm_apply_apply p.1
+
+private theorem rightTubeStandardPositiveCollarToStrictCollar_forward
+    (q : rightTubeStandardStrictCollarOpens) :
+    rightTubeStandardPositiveCollarToStrictCollar
+      (rightTubeStandardStrictCollarToPositiveCollar q) = q := by
+  apply Subtype.ext
+  rw [rightTubeStandardPositiveCollarToStrictCollar_val,
+    rightTubeStandardStrictCollarToPositiveCollar_val]
+  exact congrArg Subtype.val
+    ((standardUnlinkExteriorEighthCollarHomeomorph 1).apply_symm_apply
+      (rightTubeStandardStrictCollarAsExteriorCollar q))
+
+section PositiveCommonModelSphere
+
+attribute [local instance] coordinateUnlinkExteriorCommonModelSphereChartedSpace
+
+local instance : IsManifold coordinateUnlinkExteriorModel ∞ (Sphere 4) :=
+  isManifold_coordinateUnlinkExteriorCommonModelSphere
+
+private theorem isLocalDiffeomorph_rightTubeStandardPositiveCollarRestricted :
+    IsLocalDiffeomorph coordinateUnlinkExteriorModel coordinateUnlinkExteriorModel ∞
+      (rightTubeClosedCollarAmbientMap ∘
+        (Subtype.val : rightTubeClosedCollarPositiveOpens →
+          RightTubeClosedCollarDomain)) := by
+  intro p
+  let e : rightTubeClosedCollarPositiveOpens ≃ₘ^∞⟮coordinateUnlinkExteriorModel,
+      coordinateUnlinkExteriorModel⟯ rightTubeStandardStrictCollarOpens :=
+    { toFun := rightTubeStandardPositiveCollarToStrictCollar
+      invFun := rightTubeStandardStrictCollarToPositiveCollar
+      left_inv := rightTubeStandardStrictCollarToPositiveCollar_forward
+      right_inv := rightTubeStandardPositiveCollarToStrictCollar_forward
+      contMDiff_toFun := contMDiff_rightTubeStandardPositiveCollarToStrictCollar
+      contMDiff_invFun := contMDiff_rightTubeStandardStrictCollarToPositiveCollar }
+  have h₁ := e.isLocalDiffeomorph p
+  have h₂ := isLocalDiffeomorph_opensSubtypeVal
+    coordinateUnlinkExteriorModel rightTubeStandardStrictCollarOpens (e p)
+  have hcomp := h₁.comp coordinateUnlinkExteriorModel (Sphere 4) h₂
+  rw [show rightTubeClosedCollarAmbientMap ∘
+      (Subtype.val : rightTubeClosedCollarPositiveOpens →
+        RightTubeClosedCollarDomain) =
+      (Subtype.val : rightTubeStandardStrictCollarOpens → Sphere 4) ∘ e by
+    funext q
+    change rightTubeClosedCollarAmbientMap q.1 =
+      (rightTubeStandardPositiveCollarToStrictCollar q).1
+    exact (rightTubeStandardPositiveCollarToStrictCollar_val q).symm]
+  exact hcomp
+
+private def rightTubeStandardPositiveCollarDiffeomorph :
+    rightTubeClosedCollarPositiveOpens ≃ₘ^∞⟮coordinateUnlinkExteriorModel,
+      coordinateUnlinkExteriorModel⟯ rightTubeStandardStrictCollarOpens where
+  toFun := rightTubeStandardPositiveCollarToStrictCollar
+  invFun := rightTubeStandardStrictCollarToPositiveCollar
+  left_inv := rightTubeStandardStrictCollarToPositiveCollar_forward
+  right_inv := rightTubeStandardPositiveCollarToStrictCollar_forward
+  contMDiff_toFun := contMDiff_rightTubeStandardPositiveCollarToStrictCollar
+  contMDiff_invFun := contMDiff_rightTubeStandardStrictCollarToPositiveCollar
+
+private def rightTubeStandardStrictWithinExteriorOpens :
+    Opens RightTubeExterior :=
+  ⟨{q | ‖standardUnlinkNormalProjection q.1 -
+      standardUnlinkNormalCenter 1‖ < (1 / 4 : ℝ)},
+    isOpen_lt
+      (continuous_norm.comp
+        (continuous_standardUnlinkNormalProjection.comp continuous_subtype_val |>.sub
+          continuous_const)) continuous_const⟩
+
+private abbrev RightTubeStandardStrictWithinExterior :=
+  rightTubeStandardStrictWithinExteriorOpens
+
+private def rightTubeStandardStrictToExterior
+    (q : rightTubeStandardStrictCollarOpens) :
+    RightTubeStandardStrictWithinExterior :=
+  ⟨⟨q.1, q.2.1⟩, q.2.2⟩
+
+private def rightTubeStandardExteriorToStrict
+    (q : RightTubeStandardStrictWithinExterior) :
+    rightTubeStandardStrictCollarOpens :=
+  ⟨q.1.1, ⟨q.1.2, q.2⟩⟩
+
+private def rightTubeStandardStrictToExteriorDiffeomorph :
+    rightTubeStandardStrictCollarOpens ≃ₘ^∞⟮
+      coordinateUnlinkExteriorModel,
+      modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 4))⟯
+      RightTubeStandardStrictWithinExterior where
+  toFun := rightTubeStandardStrictToExterior
+  invFun := rightTubeStandardExteriorToStrict
+  left_inv _ := rfl
+  right_inv _ := rfl
+  contMDiff_toFun := by
+    apply (ContMDiff.subtypeVal_comp_iff
+      rightTubeStandardStrictWithinExteriorOpens _).mp
+    apply (ContMDiff.subtypeVal_comp_iff rightTubeExteriorOpens _).mp
+    exact coordinateUnlinkExteriorCommonModelToStandardSphereIdentityDiffeomorph.contMDiff.comp
+      contMDiff_subtype_val
+  contMDiff_invFun := by
+    apply (ContMDiff.subtypeVal_comp_iff rightTubeStandardStrictCollarOpens _).mp
+    exact standardToCoordinateUnlinkExteriorCommonModelSphereIdentityDiffeomorph.contMDiff.comp
+      (contMDiff_subtype_val.comp contMDiff_subtype_val)
+
+private def rightTubeStandardPositiveCollarToOneHandle
+    (p : rightTubeClosedCollarPositiveOpens) : OneHandlePiece :=
+  ((rightTubeExteriorOneHandleInteriorDiffeomorph
+    ((rightTubeStandardStrictToExteriorDiffeomorph
+      (rightTubeStandardPositiveCollarDiffeomorph p) :
+        RightTubeStandardStrictWithinExterior) : RightTubeExterior) :
+      oneHandlePieceInterior) : OneHandlePiece)
+
+private theorem isLocalDiffeomorph_rightTubeStandardPositiveCollarToOneHandle :
+    IsLocalDiffeomorph coordinateUnlinkExteriorModel oneHandlePieceModel ∞
+      rightTubeStandardPositiveCollarToOneHandle := by
+  intro p
+  have hOne := rightTubeStandardPositiveCollarDiffeomorph.isLocalDiffeomorph p
+  have hTwo := rightTubeStandardStrictToExteriorDiffeomorph.isLocalDiffeomorph
+    (rightTubeStandardPositiveCollarDiffeomorph p)
+  have hThree := isLocalDiffeomorph_opensSubtypeVal
+    (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 4)))
+    rightTubeStandardStrictWithinExteriorOpens
+    (rightTubeStandardStrictToExteriorDiffeomorph
+      (rightTubeStandardPositiveCollarDiffeomorph p))
+  have hFour := rightTubeExteriorOneHandleInteriorDiffeomorph.isLocalDiffeomorph
+    ((rightTubeStandardStrictToExteriorDiffeomorph
+      (rightTubeStandardPositiveCollarDiffeomorph p) :
+        RightTubeStandardStrictWithinExterior) : RightTubeExterior)
+  have hFive := isLocalDiffeomorph_opensSubtypeVal oneHandlePieceModel
+    oneHandlePieceInterior
+    (rightTubeExteriorOneHandleInteriorDiffeomorph
+      ((rightTubeStandardStrictToExteriorDiffeomorph
+        (rightTubeStandardPositiveCollarDiffeomorph p) :
+          RightTubeStandardStrictWithinExterior) : RightTubeExterior))
+  exact hOne.comp
+    (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 4)))
+      RightTubeStandardStrictWithinExterior hTwo |>.comp
+    (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 4)))
+      RightTubeExterior hThree |>.comp
+    oneHandlePieceModel oneHandlePieceInterior hFour |>.comp
+    oneHandlePieceModel OneHandlePiece hFive
+
+private theorem rightTubeStandardPositiveCollarToOneHandle_eq
+    (p : rightTubeClosedCollarPositiveOpens) :
+    rightTubeStandardPositiveCollarToOneHandle p =
+      rightTubeClosedOneHandleHomeomorph
+        (rightTubeClosedHalfCollarMap p.1) := by
+  let q : RightTubeExterior :=
+    ((rightTubeStandardStrictToExteriorDiffeomorph
+      (rightTubeStandardPositiveCollarDiffeomorph p) :
+        RightTubeStandardStrictWithinExterior) : RightTubeExterior)
+  have hclosed : rightTubeExteriorToClosed q =
+      rightTubeClosedHalfCollarMap p.1 := by
+    apply Subtype.ext
+    rfl
+  change ((rightTubeExteriorOneHandleInteriorDiffeomorph q :
+      oneHandlePieceInterior) : OneHandlePiece) = _
+  rw [← rightTubeClosedOneHandleHomeomorph_restrict q, hclosed]
+
+end PositiveCommonModelSphere
+
+private theorem oneHandleCollarRadialValue_transitionForward
+    (p : StandardCollarTransitionSource) :
+    oneHandleCollarRadialValue (standardCollarTransitionForward p) =
+      standardCollarTargetBallRadius p.1 := by
+  rw [oneHandleCollarRadialValue]
+  change 9 / 8 - (9 / 8 - standardCollarTargetBallRadius p.1) = _
+  ring
+
+private theorem sphereHandleScale_targetBallRadius
+    (p : StandardCollarTransitionSource) :
+    sphereHandleScale (standardCollarTargetBallRadius p.1) =
+      ‖(standardCollarTargetNormal p.1).1‖ := by
+  apply (sq_eq_sq₀ (sphereHandleScale_nonneg _) (norm_nonneg _)).mp
+  rw [sphereHandleScale_sq (standardCollarTargetBallRadius_pos p).le
+    (standardCollarTargetBallRadius_le_one p), sphereHandleRadius_sq]
+  have hrad : 0 ≤
+      2 * (1 - ‖(standardCollarTargetNormal p.1).1‖ ^ 2) :=
+    Real.sqrt_pos.1 (standardCollarTargetBallRadius_pos p) |>.le
+  rw [show standardCollarTargetBallRadius p.1 ^ 2 =
+      2 * (1 - ‖(standardCollarTargetNormal p.1).1‖ ^ 2) by
+    exact Real.sq_sqrt hrad]
+  ring
+
+private theorem targetCollarAlignedNormalValue_transitionForward
+    (p : StandardCollarTransitionSource) :
+    targetCollarAlignedNormalValue (standardCollarTransitionForward p) =
+      (standardCollarTargetNormal p.1).1 := by
+  rw [targetCollarAlignedNormalValue,
+    oneHandleCollarRadialValue_transitionForward,
+    sphereHandleScale_targetBallRadius]
+  change ‖(standardCollarTargetNormal p.1).1‖ •
+      (‖(standardCollarTargetNormal p.1).1‖⁻¹ •
+        (standardCollarTargetNormal p.1).1) = _
+  rw [smul_smul, mul_inv_cancel₀
+    (norm_ne_zero_iff.mpr (standardCollarTargetNormal_ne_zero p.1)), one_smul]
+
+private theorem targetCollarCrossingNormal_transitionForward
+    (p : StandardCollarTransitionSource) :
+    targetCollarCrossingNormal (standardCollarTransitionForward p) =
+      crossingNormalForward
+        (sourceNormalClosedToPunctured (standardCollarSourceNormal p.1)) := by
+  apply Subtype.ext
+  apply Subtype.ext
+  exact targetCollarAlignedNormalValue_transitionForward p
+
+private theorem targetCollarRecoveredNormal_transitionForward
+    (p : StandardCollarTransitionSource) :
+    targetCollarRecoveredNormal (standardCollarTransitionForward p) =
+      sourceNormalClosedToPunctured (standardCollarSourceNormal p.1) := by
+  rw [targetCollarRecoveredNormal,
+    targetCollarCrossingNormal_transitionForward,
+    crossingNormalInverse_forward]
+
+private theorem polarRadius_standardCollarSourceNormal
+    (p : RightTubeClosedCollarDomain) :
+    unlinkNormalPolarRadius 1
+        (sourceNormalClosedToPunctured (standardCollarSourceNormal p)) =
+      unlinkExteriorCollarRadiusValue p.2.2 := by
+  change ‖(standardCollarSourceNormal p).1 -
+      standardUnlinkNormalCenter 1‖ = _
+  rw [standardCollarSourceNormal_val, add_sub_cancel_left,
+    norm_smul, Real.norm_eq_abs,
+    abs_of_pos (lt_of_lt_of_le (by norm_num : (0 : ℝ) < 1 / 8)
+      (unlinkExteriorCollarRadiusValue_lower p.2.2)),
+    mem_sphere_zero_iff_norm.mp p.2.1.2, mul_one]
+
+private theorem transitionForward_mem_target
+    (p : StandardCollarTransitionSource) :
+    standardCollarTransitionForward p ∈
+      standardCollarTransitionTargetOpens := by
+  change unlinkNormalPolarRadius 1
+      (targetCollarRecoveredNormal (standardCollarTransitionForward p)) < 1 / 4
+  rw [targetCollarRecoveredNormal_transitionForward,
+    polarRadius_standardCollarSourceNormal]
+  exact unlinkExteriorCollarRadiusValue_lt_upper p.1.2.2
+
+private def standardCollarTransitionForwardToTarget
+    (p : StandardCollarTransitionSource) :
+    StandardCollarTransitionTarget :=
+  ⟨standardCollarTransitionForward p, transitionForward_mem_target p⟩
+
+private theorem standardCollarSourceNormal_transitionInverse
+    (p : StandardCollarTransitionTarget) :
+    sourceNormalClosedToPunctured
+        (standardCollarSourceNormal (standardCollarTransitionInverse p)) =
+      targetCollarRecoveredNormal p.1 := by
+  apply Subtype.ext
+  change (standardCollarSourceNormal
+      (standardCollarTransitionInverse p)).1 =
+    (targetCollarRecoveredNormal p.1).1
+  rw [standardCollarSourceNormal_val]
+  change standardUnlinkNormalCenter 1 +
+      unlinkNormalPolarRadius 1 (targetCollarRecoveredNormal p.1) •
+        (unlinkNormalPolarDirection 1
+          (targetCollarRecoveredNormal p.1)).1 = _
+  exact center_add_polar_reconstruction (targetCollarRecoveredNormal p.1)
+
+private theorem standardCollarTargetNormal_transitionInverse
+    (p : StandardCollarTransitionTarget) :
+    (standardCollarTargetNormal (standardCollarTransitionInverse p)).1 =
+      targetCollarAlignedNormalValue p.1 := by
+  rw [standardCollarTargetNormal_val,
+    standardCollarSourceNormal_transitionInverse]
+  have h := congrArg (fun z : CrossingNormalTarget ↦ z.1.1)
+    (crossingNormalForward_inverse (targetCollarCrossingNormal p.1))
+  exact h
+
+private theorem standardCollarTargetBallRadius_transitionInverse
+    (p : StandardCollarTransitionTarget) :
+    standardCollarTargetBallRadius (standardCollarTransitionInverse p) =
+      oneHandleCollarRadialValue p.1 := by
+  rw [standardCollarTargetBallRadius,
+    standardCollarTargetNormal_transitionInverse,
+    norm_targetCollarAlignedNormalValue]
+  let ρ := oneHandleCollarRadialValue p.1
+  have hρ0 : 0 ≤ ρ := (oneHandleCollarRadialValue_pos p.1).le
+  have hρ1 : ρ ≤ 1 := oneHandleCollarRadialValue_le_one p.1
+  have hscale := sphereHandleScale_sq hρ0 hρ1
+  rw [sphereHandleRadius_sq] at hscale
+  apply (sq_eq_sq₀ (Real.sqrt_nonneg _) hρ0).mp
+  rw [Real.sq_sqrt]
+  · rw [hscale]
+    ring
+  · rw [hscale]
+    nlinarith [sq_nonneg ρ]
+
+private theorem transitionInverse_mem_source
+    (p : StandardCollarTransitionTarget) :
+    standardCollarTransitionInverse p ∈
+      standardCollarTransitionSourceOpens := by
+  constructor
+  · rw [standardCollarTargetNormal_transitionInverse,
+      norm_targetCollarAlignedNormalValue]
+    let ρ := oneHandleCollarRadialValue p.1
+    have hρ0 : 0 < ρ := oneHandleCollarRadialValue_pos p.1
+    have hρ1 : ρ ≤ 1 := oneHandleCollarRadialValue_le_one p.1
+    have hsq := sphereHandleScale_sq hρ0.le hρ1
+    rw [sphereHandleRadius_sq] at hsq
+    have hs0 := sphereHandleScale_nonneg ρ
+    nlinarith [sq_pos_of_pos hρ0]
+  · rw [standardCollarTargetBallRadius_transitionInverse]
+    exact oneHandleCollarRadialValue_gt_sevenEighths p.1
+
+private def standardCollarTransitionInverseToSource
+    (p : StandardCollarTransitionTarget) :
+    StandardCollarTransitionSource :=
+  ⟨standardCollarTransitionInverse p, transitionInverse_mem_source p⟩
+
+private theorem polarDirection_standardCollarSourceNormal
+    (p : RightTubeClosedCollarDomain) :
+    unlinkNormalPolarDirection 1
+        (sourceNormalClosedToPunctured (standardCollarSourceNormal p)) =
+      p.2.1 := by
+  apply Subtype.ext
+  change ‖(standardCollarSourceNormal p).1 -
+      standardUnlinkNormalCenter 1‖⁻¹ •
+        ((standardCollarSourceNormal p).1 -
+          standardUnlinkNormalCenter 1) = p.2.1.1
+  rw [standardCollarSourceNormal_val, add_sub_cancel_left,
+    norm_smul, Real.norm_eq_abs,
+    abs_of_pos (lt_of_lt_of_le (by norm_num : (0 : ℝ) < 1 / 8)
+      (unlinkExteriorCollarRadiusValue_lower p.2.2)),
+    mem_sphere_zero_iff_norm.mp p.2.1.2, mul_one, smul_smul,
+    inv_mul_cancel₀ (ne_of_gt (lt_of_lt_of_le
+      (by norm_num : (0 : ℝ) < 1 / 8)
+      (unlinkExteriorCollarRadiusValue_lower p.2.2))), one_smul]
+
+private theorem standardCollarTargetDirection_transitionInverse
+    (p : StandardCollarTransitionTarget) :
+    standardCollarTargetDirection (standardCollarTransitionInverse p) =
+      p.1.2.1 := by
+  apply Subtype.ext
+  change ‖(standardCollarTargetNormal
+      (standardCollarTransitionInverse p)).1‖⁻¹ •
+        (standardCollarTargetNormal
+          (standardCollarTransitionInverse p)).1 = p.1.2.1.1
+  rw [standardCollarTargetNormal_transitionInverse,
+    norm_targetCollarAlignedNormalValue,
+    targetCollarAlignedNormalValue]
+  rw [smul_smul, inv_mul_cancel₀
+    (sphereHandleScale_pos
+      (oneHandleCollarRadialValue_pos p.1).le
+      (oneHandleCollarRadialValue_le_one p.1)).ne', one_smul]
+
+private theorem standardCollarTransitionInverse_forward
+    (p : StandardCollarTransitionSource) :
+    standardCollarTransitionInverseToSource
+        (standardCollarTransitionForwardToTarget p) = p := by
+  apply Subtype.ext
+  apply Prod.ext
+  · rfl
+  · apply Prod.ext
+    · change unlinkNormalPolarDirection 1
+          (targetCollarRecoveredNormal
+            (standardCollarTransitionForward p)) = p.1.2.1
+      rw [targetCollarRecoveredNormal_transitionForward,
+        polarDirection_standardCollarSourceNormal]
+    · apply Subtype.ext
+      apply Subtype.ext
+      change unlinkNormalPolarRadius 1
+          (targetCollarRecoveredNormal
+            (standardCollarTransitionForward p)) =
+        unlinkExteriorCollarRadiusValue p.1.2.2
+      rw [targetCollarRecoveredNormal_transitionForward,
+        polarRadius_standardCollarSourceNormal]
+
+private theorem standardCollarTransitionForward_inverse
+    (p : StandardCollarTransitionTarget) :
+    standardCollarTransitionForwardToTarget
+        (standardCollarTransitionInverseToSource p) = p := by
+  apply Subtype.ext
+  apply Prod.ext
+  · rfl
+  · apply Prod.ext
+    · exact standardCollarTargetDirection_transitionInverse p
+    · apply Subtype.ext
+      apply Subtype.ext
+      change 9 / 8 - standardCollarTargetBallRadius
+          (standardCollarTransitionInverse p) =
+        unlinkExteriorCollarRadiusValue p.1.2.2
+      rw [standardCollarTargetBallRadius_transitionInverse,
+        oneHandleCollarRadialValue]
+      ring
+
+private theorem contMDiff_standardCollarTransitionForwardToTarget :
+    ContMDiff coordinateUnlinkExteriorModel coordinateUnlinkExteriorModel ∞
+      standardCollarTransitionForwardToTarget := by
+  apply (ContMDiff.subtypeVal_comp_iff standardCollarTransitionTargetOpens _).mp
+  exact contMDiff_standardCollarTransitionForward
+
+private theorem contMDiff_standardCollarTransitionInverseToSource :
+    ContMDiff coordinateUnlinkExteriorModel coordinateUnlinkExteriorModel ∞
+      standardCollarTransitionInverseToSource := by
+  apply (ContMDiff.subtypeVal_comp_iff standardCollarTransitionSourceOpens _).mp
+  exact contMDiff_standardCollarTransitionInverse
+
+private def standardCollarTransitionDiffeomorph :
+    StandardCollarTransitionSource ≃ₘ^∞⟮
+      coordinateUnlinkExteriorModel,
+      coordinateUnlinkExteriorModel⟯ StandardCollarTransitionTarget where
+  toFun := standardCollarTransitionForwardToTarget
+  invFun := standardCollarTransitionInverseToSource
+  left_inv := standardCollarTransitionInverse_forward
+  right_inv := standardCollarTransitionForward_inverse
+  contMDiff_toFun := contMDiff_standardCollarTransitionForwardToTarget
+  contMDiff_invFun := contMDiff_standardCollarTransitionInverseToSource
+
+private theorem isLocalDiffeomorph_standardCollarTransition :
+    IsLocalDiffeomorph coordinateUnlinkExteriorModel
+      coordinateUnlinkExteriorModel ∞
+      standardCollarTransitionForwardToTarget :=
+  standardCollarTransitionDiffeomorph.isLocalDiffeomorph
+
+private theorem standardCollarSourceNormal_mem_unitBall
+    (p : RightTubeClosedCollarDomain) :
+    (standardCollarSourceNormal p).1 ∈
+      ball (0 : UnlinkNormalPlane) 1 := by
+  rw [mem_ball_zero_iff, standardCollarSourceNormal_val]
+  calc
+    ‖standardUnlinkNormalCenter 1 +
+        unlinkExteriorCollarRadiusValue p.2.2 • p.2.1.1‖ ≤
+        ‖standardUnlinkNormalCenter 1‖ +
+          ‖unlinkExteriorCollarRadiusValue p.2.2 • p.2.1.1‖ :=
+      norm_add_le _ _
+    _ = 1 / 2 + unlinkExteriorCollarRadiusValue p.2.2 := by
+      rw [norm_standardUnlinkNormalCenter, norm_smul, Real.norm_eq_abs,
+        abs_of_pos (lt_of_lt_of_le (by norm_num : (0 : ℝ) < 1 / 8)
+          (unlinkExteriorCollarRadiusValue_lower p.2.2)),
+        mem_sphere_zero_iff_norm.mp p.2.1.2, mul_one]
+    _ < 1 := by
+      linarith [unlinkExteriorCollarRadiusValue_lt_upper p.2.2]
+
+private theorem standardCollarAmbient_tangentialBlock
+    (p : RightTubeClosedCollarDomain) :
+    (unlinkAlignedSplitEquiv (rightTubeClosedHalfCollarMap p).1.1).2 =
+      spherePolarScale (standardCollarSourceNormal p).1 • p.1.1 := by
+  rw [unlinkAlignedSplitEquiv_snd]
+  change spherePolarSourceProjection
+      (standardUnlinkExteriorEighthCollarHomeomorph 1 p : Sphere 4) = _
+  rw [standardUnlinkExteriorEighthCollarHomeomorph,
+    standardUnlinkExteriorCollarHomeomorph_coe]
+  change spherePolarSourceProjection
+      (spherePolarForward (spherePolarTubeDomainInclusion 1 (by norm_num)
+        (p.1, unlinkNormalExteriorCollarInDisk 1 (by norm_num) p.2))) = _
+  rw [spherePolarSourceProjection_spherePolarForward]
+  apply congrArg₂ (fun (a : ℝ) (x : EuclideanSpace ℝ (Fin 3)) ↦ a • x)
+  · apply congrArg spherePolarScale
+    exact standardCollarSourceNormal_val p |>.symm
+  · rfl
+
+private theorem standardCollar_tangentialScalar
+    (p : StandardCollarTransitionSource) :
+    sourceTangentialScaleClosed (standardCollarSourceNormal p.1) *
+        spherePolarScale (standardCollarSourceNormal p.1).1 =
+      sphereHandleRadius * standardCollarTargetBallRadius p.1 := by
+  let v := standardCollarSourceNormal p.1
+  let v' := standardCollarTargetNormal p.1
+  let c := sourceTangentialScaleClosed v
+  let s := spherePolarScale v.1
+  let ρ := standardCollarTargetBallRadius p.1
+  have hc : 0 < c := sourceTangentialScaleClosed_pos v
+  have hs : 0 < s := spherePolarScale_pos
+    (standardCollarSourceNormal_mem_unitBall p.1)
+  have hρ : 0 < ρ := standardCollarTargetBallRadius_pos p
+  have hcompat := sourceTangentialScaleClosed_sq_mul_normalDefect v
+  have hssq := spherePolarScale_sq
+    (standardCollarSourceNormal_mem_unitBall p.1)
+  have hρsq : ρ ^ 2 = 2 * (1 - ‖v'.1‖ ^ 2) := by
+    dsimp only [ρ, standardCollarTargetBallRadius]
+    apply Real.sq_sqrt
+    exact Real.sqrt_pos.1 hρ |>.le
+  change c ^ 2 * (1 - ‖v.1‖ ^ 2) = 1 - ‖v'.1‖ ^ 2 at hcompat
+  change s ^ 2 = 1 - ‖v.1‖ ^ 2 at hssq
+  apply (sq_eq_sq₀ (mul_nonneg hc.le hs.le)
+    (mul_nonneg sphereHandleRadius_pos.le hρ.le)).mp
+  rw [mul_pow, mul_pow, hssq, sphereHandleRadius_sq, hρsq]
+  nlinarith
+
+private theorem rightTubeClosedOneHandleHomeomorph_standardTransition_factor
+    (p : StandardCollarTransitionSource) :
+    rightTubeClosedOneHandleHomeomorph (rightTubeClosedHalfCollarMap p.1) =
+      oneHandleCollarMap (standardCollarTransitionForward p) := by
+  apply oneHandleAlignedClosedHomeomorph.injective
+  rw [show oneHandleAlignedClosedHomeomorph
+        (rightTubeClosedOneHandleHomeomorph
+          (rightTubeClosedHalfCollarMap p.1)) =
+      sphereClosedHomeomorph (rightTubeClosedHalfCollarMap p.1) by
+    exact oneHandleAlignedClosedHomeomorph.apply_symm_apply _]
+  apply Subtype.ext
+  apply Subtype.ext
+  apply unlinkAlignedSplitEquiv.injective
+  change unlinkAlignedSplitEquiv
+      (sphereForwardClosed (rightTubeClosedHalfCollarMap p.1)).1.1 =
+    unlinkAlignedSplitEquiv
+      (oneHandleAlignedClosedHomeomorph
+        (oneHandleCollarMap (standardCollarTransitionForward p))).1.1
+  rw [unlinkAlignedSplitEquiv_sphereForwardClosed,
+    oneHandleAlignedClosedHomeomorph_apply_coe,
+    unlinkAlignedSplitEquiv_oneHandleSphereMap]
+  apply Prod.ext
+  · change (standardCollarTargetNormal p.1).1 =
+      sphereHandleScale
+          ‖(oneHandleCollarMap (standardCollarTransitionForward p)).2.1‖ •
+        (oneHandleCollarMap (standardCollarTransitionForward p)).1.1
+    rw [norm_oneHandleCollarMap_snd, oneHandleCollarMap_fst,
+      oneHandleCollarRadialValue_transitionForward]
+    simpa only [targetCollarAlignedNormalValue,
+      oneHandleCollarRadialValue_transitionForward] using
+      (targetCollarAlignedNormalValue_transitionForward p).symm
+  · change sourceTangentialScaleClosed (standardCollarSourceNormal p.1) •
+        (unlinkAlignedSplitEquiv (rightTubeClosedHalfCollarMap p.1).1.1).2 =
+      sphereHandleRadius •
+        (oneHandleCollarMap (standardCollarTransitionForward p)).2.1
+    rw [standardCollarAmbient_tangentialBlock,
+      oneHandleCollarMap_snd_val,
+      oneHandleCollarRadialValue_transitionForward,
+      smul_smul]
+    rw [show (standardCollarTransitionForward p).1.1 = p.1.1.1 by rfl]
+    simp only [smul_smul]
+    change (sourceTangentialScaleClosed (standardCollarSourceNormal p.1) *
+        spherePolarScale (standardCollarSourceNormal p.1).1) •
+          (p.1.1.1 : EuclideanSpace ℝ (Fin 3)) =
+      (sphereHandleRadius * standardCollarTargetBallRadius p.1) •
+        (p.1.1.1 : EuclideanSpace ℝ (Fin 3))
+    rw [standardCollar_tangentialScalar]
+
+private theorem standardCollarTargetNormal_norm_of_boundary
+    (p : RightTubeClosedCollarDomain)
+    (hp : unlinkExteriorCollarRadiusValue p.2.2 = (1 / 8 : ℝ)) :
+    ‖(standardCollarTargetNormal p).1‖ = sphereHandleRadius := by
+  let q := rightTubeClosedHalfCollarMap p
+  have hq : q.1 ∈ rightTubeClosedBoundary := by
+    change ‖standardUnlinkNormalProjection q.1 -
+      standardUnlinkNormalCenter 1‖ = sourceInnerRadius
+    change ‖standardUnlinkNormalProjection
+        (rightTubeClosedCollarAmbientMap p) -
+      standardUnlinkNormalCenter 1‖ = sourceInnerRadius
+    rw [rightTubeClosedCollarAmbientMap_normal, add_sub_cancel_left,
+      norm_smul, Real.norm_eq_abs,
+      abs_of_pos (lt_of_lt_of_le (by norm_num : (0 : ℝ) < 1 / 8)
+        (unlinkExteriorCollarRadiusValue_lower p.2.2)),
+      mem_sphere_zero_iff_norm.mp p.2.1.2, mul_one, hp]
+  have htarget := (sphereForwardClosed_boundary_iff q).mpr hq
+  change ‖standardUnlinkNormalProjection (sphereForwardClosed q).1‖ =
+    sphereHandleRadius at htarget
+  rw [standardUnlinkNormalProjection_sphereForwardClosed] at htarget
+  exact htarget
+
+private theorem standardCollarTargetBallRadius_of_boundary
+    (p : RightTubeClosedCollarDomain)
+    (hp : unlinkExteriorCollarRadiusValue p.2.2 = (1 / 8 : ℝ)) :
+    standardCollarTargetBallRadius p = 1 := by
+  rw [standardCollarTargetBallRadius,
+    standardCollarTargetNormal_norm_of_boundary p hp,
+    sphereHandleRadius_sq]
+  norm_num
+
+private theorem standardCollar_mem_transitionSource_of_boundary
+    (p : RightTubeClosedCollarDomain)
+    (hp : unlinkExteriorCollarRadiusValue p.2.2 = (1 / 8 : ℝ)) :
+    p ∈ standardCollarTransitionSourceOpens := by
+  constructor
+  · rw [standardCollarTargetNormal_norm_of_boundary p hp]
+    apply (sq_lt_sq₀ sphereHandleRadius_pos.le zero_le_one).mp
+    rw [sphereHandleRadius_sq]
+    norm_num
+  · rw [standardCollarTargetBallRadius_of_boundary p hp]
+    norm_num
+
+private theorem isLocalDiffeomorphAt_standardCollarComposite_boundary
+    (p : RightTubeClosedCollarDomain)
+    (hp : unlinkExteriorCollarRadiusValue p.2.2 = (1 / 8 : ℝ)) :
+    IsLocalDiffeomorphAt coordinateUnlinkExteriorModel
+      oneHandlePieceModel ∞
+      (rightTubeClosedOneHandleHomeomorph ∘ rightTubeClosedHalfCollarMap) p := by
+  let pSource : StandardCollarTransitionSource :=
+    ⟨p, standardCollar_mem_transitionSource_of_boundary p hp⟩
+  let c : StandardCollarTransitionSource → RightTubeClosedCollarDomain :=
+    Subtype.val
+  have hc : IsLocalDiffeomorph coordinateUnlinkExteriorModel
+      coordinateUnlinkExteriorModel ∞ c :=
+    isLocalDiffeomorph_opensSubtypeVal coordinateUnlinkExteriorModel
+      standardCollarTransitionSourceOpens
+  have hFc : IsLocalDiffeomorph coordinateUnlinkExteriorModel
+      oneHandlePieceModel ∞
+      ((rightTubeClosedOneHandleHomeomorph ∘ rightTubeClosedHalfCollarMap) ∘ c) := by
+    intro z
+    rw [show ((rightTubeClosedOneHandleHomeomorph ∘ rightTubeClosedHalfCollarMap) ∘ c) =
+        oneHandleCollarMap ∘
+          (Subtype.val : StandardCollarTransitionTarget →
+            RightTubeClosedCollarDomain) ∘
+          standardCollarTransitionForwardToTarget by
+      funext w
+      exact rightTubeClosedOneHandleHomeomorph_standardTransition_factor w]
+    exact standardCollarTransitionDiffeomorph.isLocalDiffeomorph z |>.comp
+      coordinateUnlinkExteriorModel RightTubeClosedCollarDomain
+        (isLocalDiffeomorph_opensSubtypeVal coordinateUnlinkExteriorModel
+          standardCollarTransitionTargetOpens
+          (standardCollarTransitionForwardToTarget z)) |>.comp
+      oneHandlePieceModel OneHandlePiece
+        (isLocalDiffeomorph_oneHandleCollarMap
+          (standardCollarTransitionForward z))
+  exact isLocalDiffeomorphAt_of_localDiffeomorph_parametrization
+    coordinateUnlinkExteriorModel oneHandlePieceModel
+    (rightTubeClosedOneHandleHomeomorph ∘ rightTubeClosedHalfCollarMap)
+    c hc hFc pSource
+
+private theorem isLocalDiffeomorphAt_standardCollarComposite_positive
+    (p : RightTubeClosedCollarDomain)
+    (hp : (1 / 8 : ℝ) < unlinkExteriorCollarRadiusValue p.2.2) :
+    IsLocalDiffeomorphAt coordinateUnlinkExteriorModel
+      oneHandlePieceModel ∞
+      (rightTubeClosedOneHandleHomeomorph ∘ rightTubeClosedHalfCollarMap) p := by
+  let pPositive : rightTubeClosedCollarPositiveOpens := ⟨p, hp⟩
+  let c : rightTubeClosedCollarPositiveOpens →
+      RightTubeClosedCollarDomain := Subtype.val
+  have hc : IsLocalDiffeomorph coordinateUnlinkExteriorModel
+      coordinateUnlinkExteriorModel ∞ c :=
+    isLocalDiffeomorph_opensSubtypeVal coordinateUnlinkExteriorModel
+      rightTubeClosedCollarPositiveOpens
+  have hFc : IsLocalDiffeomorph coordinateUnlinkExteriorModel
+      oneHandlePieceModel ∞
+      ((rightTubeClosedOneHandleHomeomorph ∘ rightTubeClosedHalfCollarMap) ∘ c) := by
+    rw [show ((rightTubeClosedOneHandleHomeomorph ∘ rightTubeClosedHalfCollarMap) ∘ c) =
+        rightTubeStandardPositiveCollarToOneHandle by
+      funext z
+      exact (rightTubeStandardPositiveCollarToOneHandle_eq z).symm]
+    exact isLocalDiffeomorph_rightTubeStandardPositiveCollarToOneHandle
+  exact isLocalDiffeomorphAt_of_localDiffeomorph_parametrization
+    coordinateUnlinkExteriorModel oneHandlePieceModel
+    (rightTubeClosedOneHandleHomeomorph ∘ rightTubeClosedHalfCollarMap)
+    c hc hFc pPositive
+
+private theorem isLocalDiffeomorph_standardCollarComposite :
+    IsLocalDiffeomorph coordinateUnlinkExteriorModel
+      oneHandlePieceModel ∞
+      (rightTubeClosedOneHandleHomeomorph ∘ rightTubeClosedHalfCollarMap) := by
+  intro p
+  by_cases hp :
+      unlinkExteriorCollarRadiusValue p.2.2 = (1 / 8 : ℝ)
+  · exact isLocalDiffeomorphAt_standardCollarComposite_boundary p hp
+  · apply isLocalDiffeomorphAt_standardCollarComposite_positive p
+    exact lt_of_le_of_ne (unlinkExteriorCollarRadiusValue_lower p.2.2) (Ne.symm hp)
+
 private theorem isLocalDiffeomorph_rightTubeClosedOneHandleHomeomorph :
     letI := coordinateUnlinkExteriorCommonModelSphereChartedSpace
     letI := rightTubeClosedOneHandleChartedSpace
@@ -3654,6 +5124,51 @@ noncomputable def coordinateExteriorRightTubeOneHandleHomeomorph :
     CoordinateExteriorRightTubeClosed ≃ₜ OneHandlePiece :=
   RightTubeRadialScout.rightTubeClosedOneHandleHomeomorph
 
+/-! Public-shaped root API for the literal standard-collar bridge. -/
+
+/-- The literal standard right-tube collar point, corestricted to the closed carrier. -/
+public def coordinateExteriorRightTubeLiteralStandardBoundaryCollar
+    (p : CoordinateExteriorRightTubeClosedCollarDomain) :
+    CoordinateExteriorRightTubeClosed :=
+  ⟨(standardUnlinkExteriorEighthCollarHomeomorph 1 p : Sphere 4), by
+    change (1 / 8 : ℝ) ≤
+      ‖standardUnlinkNormalProjection
+          (standardUnlinkExteriorEighthCollarHomeomorph 1 p : Sphere 4) -
+        standardUnlinkNormalCenter 1‖
+    rw [standardUnlinkExteriorEighthCollarHomeomorph,
+      standardUnlinkNormalProjection_exteriorCollarHomeomorph,
+      add_sub_cancel_left, norm_smul, Real.norm_eq_abs,
+      abs_of_pos (lt_of_lt_of_le (by norm_num : (0 : ℝ) < 1 / 8)
+        (unlinkExteriorCollarRadiusValue_lower p.2.2)),
+      mem_sphere_zero_iff_norm.mp p.2.1.2, mul_one]
+    exact unlinkExteriorCollarRadiusValue_lower p.2.2⟩
+
+@[simp] public theorem coordinateExteriorRightTubeLiteralStandardBoundaryCollar_coe
+    (p : CoordinateExteriorRightTubeClosedCollarDomain) :
+    (coordinateExteriorRightTubeLiteralStandardBoundaryCollar p : Sphere 4) =
+      (standardUnlinkExteriorEighthCollarHomeomorph 1 p : Sphere 4) :=
+  rfl
+
+/-- The existing closed homeomorphism after the literal standard right-tube collar. -/
+public noncomputable def coordinateExteriorRightTubeOneHandleStandardCollarMap
+    (p : CoordinateExteriorRightTubeClosedCollarDomain) : OneHandlePiece :=
+  coordinateExteriorRightTubeOneHandleHomeomorph
+    (coordinateExteriorRightTubeLiteralStandardBoundaryCollar p)
+
+/-- The literal standard collar followed by the closed one-handle map is locally
+smooth-invertible. -/
+public theorem isLocalDiffeomorph_coordinateExteriorRightTubeOneHandleStandardCollarMap :
+    IsLocalDiffeomorph coordinateUnlinkExteriorModel oneHandlePieceModel ∞
+      coordinateExteriorRightTubeOneHandleStandardCollarMap := by
+  rw [show coordinateExteriorRightTubeOneHandleStandardCollarMap =
+      RightTubeRadialScout.rightTubeClosedOneHandleHomeomorph ∘
+        RightTubeRadialScout.rightTubeClosedHalfCollarMap by
+    funext p
+    apply congrArg RightTubeRadialScout.rightTubeClosedOneHandleHomeomorph
+    apply Subtype.ext
+    rfl]
+  exact RightTubeClosedFinalProbe.isLocalDiffeomorph_standardCollarComposite
+
 /-- Direct smooth recognition of the closed right-tube exterior as the natural one-handle. -/
 noncomputable def coordinateExteriorRightTubeOneHandleDiffeomorph :
     letI := coordinateExteriorRightTubeClosedChartedSpace
@@ -3667,6 +5182,9 @@ theorem coordinateExteriorRightTubeOneHandleDiffeomorph_toHomeomorph :
     letI := coordinateExteriorRightTubeClosedChartedSpace
     coordinateExteriorRightTubeOneHandleDiffeomorph.toHomeomorph =
       coordinateExteriorRightTubeOneHandleHomeomorph := by
+  let _ := coordinateExteriorRightTubeClosedChartedSpace
+  apply Homeomorph.ext
+  intro q
   rfl
 
 @[simp] theorem coordinateExteriorRightTubeOneHandleDiffeomorph_apply
