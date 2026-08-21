@@ -771,6 +771,13 @@ The total map which replaces time by its absolute value is continuous and has ex
 half formulas; on the two strict sign regions it is a homeomorphism onto the positive radial
 collar.  No smoothness across time zero, nor even strict-half smoothness, is claimed by this layer.
 
+The strict-half smoothness needed by the gluing atlas is proved separately.  After recharting both
+the signed source and the positive radial collar into the common model, the negative half map is a
+local diffeomorphism exactly where `t < 0`, and the positive half map is one exactly where `0 < t`.
+The proof lifts componentwise over every discrete label family, including the unrestricted
+`ZMod 0` case.  The two open results deliberately remain separate: their union still excludes the
+nonsmooth absolute-value crease at time zero.
+
 Point-set comparison with the old neck-star pieces is also exact.  Under the established compact
 exterior-to-star homeomorphism, the left cut carrier is precisely the image of the left
 coprojection and the right cut carrier is precisely the image of the right coprojection.  Since
