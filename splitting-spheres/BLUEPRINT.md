@@ -991,10 +991,19 @@ direct compact-cut regluing comparison, gives a homeomorphism from
 pieces.  This new result is deliberately point-set only: it neither transports a target atlas nor
 identifies the rounded caps with the older product-corner cap model.
 
-The remaining smooth connected-sum step is to equip these literal complements and their pushout
-with direct common-model collar atlases, upgrade the displayed homeomorphism to a diffeomorphism,
-and then identify the simultaneous `m`-sphere gluing with the ordinary iterated interior connected
-sum of the `m` labelled one-handles and the single central one-handle.
+The common-coordinate representatives of both literal rounded-cap complements now carry direct
+collar-generated atlases.  On the right, the ambient atlas is the standard-collar atlas on the
+right-tube power pullback.  On the left, it is the coordinate-exterior discrete-product atlas on
+the labelled closed right-tube family.  In each case the retained open set is proved to be the
+actual image of the off-seam rounded cap, while the complement atlas is generated from the
+ambient off-closed-cap charts and the transported compact-cut half collar.  Collar and native
+overlap calculations upgrade the point-set cancellation maps to diffeomorphisms from the two
+direct compact cuts.  No complement atlas is transported through either homeomorphism.
+
+The remaining smooth connected-sum step is to equip the simultaneous pushout of these two direct
+common-model complements with its collar-generated atlas, upgrade the pushout comparison to a
+diffeomorphism, and then identify the simultaneous `m`-sphere gluing with the ordinary iterated
+interior connected sum of the `m` labelled one-handles and the single central one-handle.
 
 An explicit partial-spin/handle calculation, rather than a graph deformation-retraction
 argument, must prove
