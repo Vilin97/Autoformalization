@@ -646,8 +646,8 @@ from both sides, and connectedness of each strict time half forces the two raw h
 opposite sides.  A noncomputable per-label reflection therefore normalizes negative time to the
 left side and positive time to the right side.  The resulting nonpositive and nonnegative half
 ranges are exactly the corresponding full collar image intersected with the appropriate closed
-cut carrier.  This is still point-set preparation: no smooth structure on either cut carrier and
-no cap gluing is asserted here.
+cut carrier.  These results are the point-set input to the direct smooth cut-side construction
+below; they do not themselves perform the cap gluing.
 
 The genuine Euclidean closed four-ball now has the complementary one-sided collar needed for a
 smooth cap.  The radial formula `(s,t) |-> (1-t)s` is a diffeomorphism from
@@ -716,6 +716,17 @@ inclusion and the half-collar inclusion are proved to be local diffeomorphisms i
 direct atlas, so boundary reflection gives exactly the subtype preimage of that union.  A derived
 form accepts the same overlap-local diffeomorphism used by the automatic manifold theorem; it
 does not assume that the whole one-sided collar has ambient-open range.
+
+The compact neck cut now instantiates all of this infrastructure on the literal power-cover
+exterior.  The labelled one-sided collar maps use the symbolic per-label orientation, retain
+their discrete sheet, and have exact ranges equal to the common collar neighborhood intersected
+with the corresponding closed cut carrier.  They are globally smooth and are local
+diffeomorphisms on exactly the positive-time preimage of the native off-seam stratum.  Hence both
+closed cut carriers have explicit direct `coordinateUnlinkExteriorModel` atlases, are smooth
+four-manifolds with boundary, and include smoothly into the compact power cover.  Their model
+boundaries are exactly the subtype preimages of the old radial boundary union the full labelled
+seam.  No cap, pushout, or identification with a compact handlebody piece is asserted at this
+stage.
 
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
