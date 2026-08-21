@@ -227,6 +227,7 @@ public import SplittingSpheres.Handlebody.PartialSphereSpinFilling
 public import SplittingSpheres.Handlebody.ProductBoundaryAttachment
 public import SplittingSpheres.Handlebody.ProductFourBall
 public import SplittingSpheres.Handlebody.ProductFourBallBoundaryInclusion
+public import SplittingSpheres.Handlebody.ProductFourBallEuclideanHomeomorph
 public import SplittingSpheres.Handlebody.ProductFourBoundaryAttachment
 public import SplittingSpheres.Handlebody.ProductFiveBall
 public import SplittingSpheres.Handlebody.SphereHandleDecomposition

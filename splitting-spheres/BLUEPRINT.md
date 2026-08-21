@@ -719,6 +719,14 @@ construction pulls back componentwise to every discrete `ZMod m` family.  This i
 transport through an unrelated ball homeomorphism, and it does not yet attach the ball to a cut
 neck side.
 
+For comparison with the earlier point-set capping calculation, the cornered product body
+`D1 x B3` is now homeomorphic to this literal Euclidean four-ball.  The map is the established
+linear coordinate splitting followed by the existing gauge rescaling, so on the boundary it
+agrees exactly with both previously fixed `Sphere 3` parametrizations.  The componentwise
+`ZMod m` family comparison preserves every label and has exact forward and inverse attaching
+laws.  This is only the bridge needed to compare the old cap pushout with the new smooth one: it
+does not declare the product-with-corners model diffeomorphic to the direct common-model ball.
+
 The remaining compatibility calculation for the intrinsic cut-side atlas is now automatic under
 the exact geometric overlap hypothesis.  The collar map need only be a local diffeomorphism on
 the preimage of the native off-boundary region; a one-sided collar is correctly not required to
