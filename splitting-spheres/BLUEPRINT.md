@@ -636,6 +636,13 @@ collars for distinct `ZMod m` labels are pairwise disjoint.  Their smooth zero s
 exactly the same ranges as the old point-set neck-sphere maps; this range identification does not
 assert smoothness of the old parametrizations and does not yet perform the cut or cap.
 
+The genuine Euclidean closed four-ball now has the complementary one-sided collar needed for a
+smooth cap.  The radial formula `(s,t) |-> (1-t)s` is a diffeomorphism from
+`S3 x [0,1/2)` onto the relative open shell of radius greater than `1/2` in the existing
+convex-range ball model.  Its zero slice is exactly the model boundary, and local diffeomorphism
+invariance identifies the source and target model boundaries.  This avoids the corners of the
+topological `D1 x B3` cap; it is not yet a theorem gluing the ball to a cut neck boundary.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
