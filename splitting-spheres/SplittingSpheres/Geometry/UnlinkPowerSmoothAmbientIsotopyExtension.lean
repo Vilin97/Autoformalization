@@ -257,6 +257,92 @@ private theorem contMDiff_standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph_
     exact standardUnlinkPowerPullbackProj_liftAmbientIsotopySliceDiffeomorph
       m Phi Psi hPhi p.1 p.2
 
+/-- The endpoint-flattened normalized sphere isotopy has a compactly supported lifted ambient
+extension whose every time slice is exactly a smooth diffeomorphism of the standard unlink power
+cover. -/
+theorem exists_standardUnlinkNormalizedFlattenedPowerSmoothAmbientIsotopy_supported
+    (m : ℕ) [NeZero m] (a : ZMod m)
+    (H : SmoothSphereIsotopy standardSplittingSphere S)
+    (havoid : ∀ q, H.toFun q ∉ standardUnlinkCarrier) :
+    letI : ChartedSpace (EuclideanSpace ℝ (Fin 4))
+        (StandardUnlinkPowerPullback m) :=
+      standardUnlinkPowerPullbackChartedSpace m
+    letI : IsManifold (𝓡 4) ∞ (StandardUnlinkPowerPullback m) :=
+      isManifold_standardUnlinkPowerPullback m
+    ∃ (K : Set StandardUnlinkComplement)
+        (Phi : TauCeti.AmbientIsotopy StandardUnlinkComplement)
+        (Psi : I →
+          StandardUnlinkComplement
+            ≃ₘ^∞⟮(𝓡 4), (𝓡 4)⟯
+            StandardUnlinkComplement)
+        (PhiLift : TauCeti.AmbientIsotopy (StandardUnlinkPowerPullback m))
+        (PsiLift : I →
+          StandardUnlinkPowerPullback m
+            ≃ₘ^∞⟮(𝓡 4), (𝓡 4)⟯
+            StandardUnlinkPowerPullback m),
+      IsCompact K ∧
+      (∀ (t : I) (y : StandardUnlinkComplement), y ∉ K →
+        Phi.toContinuousMap (t, y) = y) ∧
+      (∀ (t : I) (z : StandardUnlinkPowerPullback m),
+        standardUnlinkPowerPullbackProj m z ∉ K →
+          PhiLift.toContinuousMap (t, z) = z) ∧
+      PhiLift = IsCoveringMap.liftAmbientIsotopy
+        (isCoveringMap_standardUnlinkPowerPullbackProj m) Phi ∧
+      (∀ (t : I) (y : StandardUnlinkComplement),
+        Phi.toContinuousMap (t, y) = Psi t y) ∧
+      (∀ (t : I) (x : Sphere 3),
+        Phi.toContinuousMap (t, equatorUnlinkComplementMap x) =
+          standardUnlinkNormalizedComplementHomotopy H havoid
+            (unitInterval.endpointFlatTime t, x)) ∧
+      (∀ (t : I) (z : StandardUnlinkPowerPullback m),
+        PhiLift.toContinuousMap (t, z) = PsiLift t z) ∧
+      (∀ (t : I) (z : StandardUnlinkPowerPullback m),
+        standardUnlinkPowerPullbackProj m (PsiLift t z) =
+          Psi t (standardUnlinkPowerPullbackProj m z)) ∧
+      (∀ (t : I) (x : Sphere 3),
+        PhiLift.toContinuousMap (t, equatorUnlinkPowerLift m a x) =
+          standardUnlinkPowerIsotopyLift m a H havoid
+            (unitInterval.endpointFlatTime t, x)) ∧
+      ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞
+        (fun p : I × StandardUnlinkPowerPullback m ↦ PsiLift p.1 p.2) := by
+  let _ : ChartedSpace (EuclideanSpace ℝ (Fin 4))
+      (StandardUnlinkPowerPullback m) :=
+    standardUnlinkPowerPullbackChartedSpace m
+  let _ : IsManifold (𝓡 4) ∞ (StandardUnlinkPowerPullback m) :=
+    isManifold_standardUnlinkPowerPullback m
+  obtain ⟨K, Phi, Psi, hKcompact, hPhiFixed, hPhi, htrace, hPsi⟩ :=
+    exists_standardUnlinkNormalizedFlattenedComplementSmoothAmbientIsotopy_supported
+      H havoid
+  let PhiLift : TauCeti.AmbientIsotopy (StandardUnlinkPowerPullback m) :=
+    IsCoveringMap.liftAmbientIsotopy
+      (isCoveringMap_standardUnlinkPowerPullbackProj m) Phi
+  let PsiLift : I →
+      StandardUnlinkPowerPullback m
+        ≃ₘ^∞⟮(𝓡 4), (𝓡 4)⟯
+        StandardUnlinkPowerPullback m := fun t ↦
+    standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph m Phi Psi hPhi t
+  have hPsiLift : ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞
+      (fun p : I × StandardUnlinkPowerPullback m ↦ PsiLift p.1 p.2) :=
+    contMDiff_standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph_eval
+      m Phi Psi hPhi hPsi
+  have hPhiLiftFixed : ∀ (t : I) (z : StandardUnlinkPowerPullback m),
+      standardUnlinkPowerPullbackProj m z ∉ K →
+        PhiLift.toContinuousMap (t, z) = z := by
+    intro t z hz
+    exact IsCoveringMap.liftAmbientIsotopy_fixed_of_proj_not_mem
+      (isCoveringMap_standardUnlinkPowerPullbackProj m) Phi K hPhiFixed t z hz
+  refine ⟨K, Phi, Psi, PhiLift, PsiLift, hKcompact, hPhiFixed, hPhiLiftFixed,
+    rfl, hPhi, htrace, ?_, ?_, ?_, hPsiLift⟩
+  · intro t z
+    exact (standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph_apply
+      m Phi Psi hPhi t z).symm
+  · intro t z
+    exact standardUnlinkPowerPullbackProj_liftAmbientIsotopySliceDiffeomorph
+      m Phi Psi hPhi t z
+  · intro t x
+    exact liftAmbientIsotopy_agrees_standardUnlinkPowerIsotopyLift_endpointFlatTime
+      m a H havoid Phi htrace t x
+
 /-- The endpoint-flattened normalized sphere isotopy has a lifted ambient extension whose every
 time slice is exactly a smooth diffeomorphism of the standard unlink power cover. -/
 theorem exists_standardUnlinkNormalizedFlattenedPowerSmoothAmbientIsotopy
@@ -302,30 +388,12 @@ theorem exists_standardUnlinkNormalizedFlattenedPowerSmoothAmbientIsotopy
     standardUnlinkPowerPullbackChartedSpace m
   let _ : IsManifold (𝓡 4) ∞ (StandardUnlinkPowerPullback m) :=
     isManifold_standardUnlinkPowerPullback m
-  obtain ⟨Phi, Psi, hPhi, htrace, hPsi⟩ :=
-    exists_standardUnlinkNormalizedFlattenedComplementSmoothAmbientIsotopy H havoid
-  let PhiLift : TauCeti.AmbientIsotopy (StandardUnlinkPowerPullback m) :=
-    IsCoveringMap.liftAmbientIsotopy
-      (isCoveringMap_standardUnlinkPowerPullbackProj m) Phi
-  let PsiLift : I →
-      StandardUnlinkPowerPullback m
-        ≃ₘ^∞⟮(𝓡 4), (𝓡 4)⟯
-        StandardUnlinkPowerPullback m := fun t ↦
-    standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph m Phi Psi hPhi t
-  have hPsiLift : ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞
-      (fun p : I × StandardUnlinkPowerPullback m ↦ PsiLift p.1 p.2) :=
-    contMDiff_standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph_eval
-      m Phi Psi hPhi hPsi
-  refine ⟨Phi, Psi, PhiLift, PsiLift, rfl, hPhi, htrace, ?_, ?_, ?_, hPsiLift⟩
-  · intro t z
-    exact (standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph_apply
-      m Phi Psi hPhi t z).symm
-  · intro t z
-    exact standardUnlinkPowerPullbackProj_liftAmbientIsotopySliceDiffeomorph
-      m Phi Psi hPhi t z
-  · intro t x
-    exact liftAmbientIsotopy_agrees_standardUnlinkPowerIsotopyLift_endpointFlatTime
-      m a H havoid Phi htrace t x
+  obtain ⟨_, Phi, Psi, PhiLift, PsiLift, _, _, _, hPhiLift, hPhi, htrace,
+      hLift, hproj, hLiftTrace, hJoint⟩ :=
+    exists_standardUnlinkNormalizedFlattenedPowerSmoothAmbientIsotopy_supported
+      m a H havoid
+  exact ⟨Phi, Psi, PhiLift, PsiLift, hPhiLift, hPhi, htrace, hLift, hproj,
+    hLiftTrace, hJoint⟩
 
 end SplittingSpheres
 
