@@ -674,6 +674,17 @@ use a closure-defined side, or the complement of the opposite open side when a f
 separation is known; it does not identify either choice with a concrete neck piece, establish a
 collar-sign formula, or attach a four-ball cap.
 
+The remaining carrier mismatch at a boundary chart is now resolved explicitly.  Projection from
+`D x P` to `P`, for a discrete label type `D`, is a local homeomorphism; pulling back the atlas
+componentwise therefore gives `D x P` the same model and dimension as `P`, rather than adding a
+spurious zero-dimensional factor to the model space.  Separately, a concrete carrier
+homeomorphism identifies the natural `R3 x R>=0` collar model with the associated carrier
+`R2 x (R x R>=0)` of the coordinate exterior, and a continuous-linear equivalence identifies
+their ambient four-dimensional vector spaces.  Exact coordinate identities prove that
+conjugation carries every smooth natural-collar transition into the coordinate-exterior smooth
+groupoid.  These are model-change tools only: they do not yet install the concrete cut-side or
+four-ball atlas.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
