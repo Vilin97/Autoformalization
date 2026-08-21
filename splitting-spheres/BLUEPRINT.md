@@ -643,6 +643,14 @@ convex-range ball model.  Its zero slice is exactly the model boundary, and loca
 invariance identifies the source and target model boundaries.  This avoids the corners of the
 topological `D1 x B3` cap; it is not yet a theorem gluing the ball to a cut neck boundary.
 
+The point-set and atlas mechanism for one such gluing is now isolated generically.  Closed
+attaching embeddings make both coprojections open embeddings away from the seam.  A signed pair
+of one-sided collars gives a literal piecewise seam map; exact boundary detection computes its
+two coprojection preimages and proves its range open.  These three chart classes generate a
+concrete `ChartedSpace` on the topological pushout.  The resulting `IsManifold` theorem requires,
+explicitly, that every transition between those concrete charts lie in the smooth groupoid.  No
+cut space, cap attachment, or mixed collar transition is inferred by this generic constructor.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
