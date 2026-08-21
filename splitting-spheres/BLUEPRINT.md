@@ -791,9 +791,10 @@ form accepts the same overlap-local diffeomorphism used by the automatic manifol
 does not assume that the whole one-sided collar has ambient-open range.
 
 The compact neck cut now instantiates all of this infrastructure on the literal power-cover
-exterior.  The labelled one-sided collar maps use the symbolic per-label orientation, retain
-their discrete sheet, and have exact ranges equal to the common collar neighborhood intersected
-with the corresponding closed cut carrier.  They are globally smooth and are local
+exterior.  The labelled one-sided collar maps use the per-label orientation subsequently proved
+below to be the raw one, retain their discrete sheet, and have exact ranges equal to the common
+collar neighborhood intersected with the corresponding closed cut carrier.  They are globally
+smooth and are local
 diffeomorphisms on exactly the positive-time preimage of the native off-seam stratum.  Hence both
 closed cut carriers have explicit direct `coordinateUnlinkExteriorModel` atlases, are smooth
 four-manifolds with boundary, and include smoothly into the compact power cover.  Their model
@@ -818,9 +819,20 @@ its projected fourth coordinate is `-3/16`.  Preconnectedness of each labelled l
 propagates this sign.  For the other side, a direct path construction in the neck star first moves
 right-grid points while avoiding every labelled attaching range and then joins them through the
 normalized open right annulus; transporting those paths proves that the full right side is path
-connected.  A positive equatorial collar point fixes its cap-one orientation.  These results still
-make no assertion about the raw compact-collar parameter before its noncomputable orientation flip,
-nor do they infer smoothness for the old normalized annular formulas.
+connected.  A positive equatorial collar point fixes its cap-one orientation.  These results do
+not infer smoothness for the old normalized annular formulas.
+
+The previously symbolic compact-collar orientation has now also been resolved.  At raw collar
+time `-1/8`, the normal-coordinate gaps to the two unlink components are `3/8` and `5/8`; both the
+old point-set exterior map and the new smooth exterior map therefore fix the base point and have
+power gauge one.  The coordinate-cap result puts this witness on the compact left side, and the
+existing opposite-half alternative forces raw negative time to be left and raw positive time to
+be right for every label.  Thus the orientation flag is always false, the chosen source
+homeomorphism is the identity, and all open-side, seam, and closed-cut collar laws hold directly
+for the raw smooth collar.  This local conclusion does not yet identify the entire compact sides
+or cut carriers with coordinate-cap or closed-hemisphere preimages: that stronger comparison must
+control the old radial transport throughout the strict interior and then extend across the
+radius-`1/8` ambient boundary.
 
 The signed seam source used to glue those halves is itself now given a direct common-model atlas.
 The open interval is presented by the strict interior of the native half-space chart, then crossed
