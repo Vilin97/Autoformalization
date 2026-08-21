@@ -683,6 +683,13 @@ Convenience forms accept either the established atlas compatibility or the liter
 local-diffeomorphism hypotheses.  This generic theorem does not simplify the two piece-boundary
 sets for any particular capping.
 
+Generic local-diffeomorphism recognition is isolated independently of the pushout construction.
+A local diffeomorphism may be canceled through a local-diffeomorphic parametrization, and three
+such parametrizations covering a source suffice to prove a map locally diffeomorphic everywhere.
+A homeomorphism with that property then packages as a genuine diffeomorphism, including smoothness
+of its global inverse.  This is only a recognition principle: applying it to a capping comparison
+still requires local-diffeomorphism proofs on all three concrete chart families.
+
 The corresponding intrinsic atlas mechanism for a single cut side is also isolated.  A cut side
 is the subtype of a closed ambient subset.  Away from the new boundary it uses restrictions of
 the native ambient charts, while a supplied one-sided collar provides the boundary charts.  The

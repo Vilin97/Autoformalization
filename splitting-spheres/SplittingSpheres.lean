@@ -28,6 +28,7 @@ public import SplittingSpheres.Foundations.DirectionalRadialHomeomorph
 public import SplittingSpheres.Foundations.DirectionalRadialAnnulus
 public import SplittingSpheres.Foundations.DiffeomorphOverLocalDiffeomorph
 public import SplittingSpheres.Foundations.LocalHomeomorphChartedSpace
+public import SplittingSpheres.Foundations.LocalDiffeomorphismRecognition
 public import SplittingSpheres.Foundations.MappingClassFunctor
 public import SplittingSpheres.Foundations.ModelCoordinateBall
 public import SplittingSpheres.Foundations.Orientation
