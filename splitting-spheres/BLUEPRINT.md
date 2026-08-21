@@ -621,6 +621,14 @@ identity, now packages directly as a `TauCeti.AmbientIsotopy`.  The time-space m
 bijection by slice-wise bijectivity, so compact-to-Hausdorff recognition supplies its inverse
 continuity.  This deliberately needs no joint smoothness theorem for the inverse-evaluation family.
 
+The compact support is transported through the smooth strict coordinate-cover diffeomorphism to a
+compact subset of the strict locus in the full coordinate power pullback.  Properness of the power
+map makes that full pullback compact.  Each strict time slice is therefore extended by the identity
+across the two radial faces, and the uniform support condition makes the extended forward family
+jointly smooth even at the frontier.  Compact-family recognition packages these slices as an
+ambient isotopy of the literal compact coordinate exterior.  It fixes the radial boundary
+pointwise and retains the exact endpoint-flattened labelled equator trace.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
