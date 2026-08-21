@@ -785,6 +785,16 @@ each old coprojection is embedded, these restrictions give homeomorphisms from t
 carriers to the corresponding old star source pieces, commuting literally with inclusion into the
 full star.  This does not transport the new smooth atlases to those old point-set models.
 
+Both closed cut carriers are now capped directly by the labelled family of genuine Euclidean
+four-balls.  Their inward half-collars and the radial ball collars agree at time zero and determine
+a signed seam chart whose negative branch lands in the cut body and whose positive branch lands in
+the cap.  The exact seam preimages, boundary detection, and one-sided openness make this chart an
+open embedding.  The strict negative and positive local-diffeomorphism results then discharge all
+mixed transitions in the concrete three-family pushout atlas.  Thus the left and right capped
+pushouts are honest smooth four-manifolds in direct generated atlases.  No atlas is transported
+from the old product caps, and this step does not yet identify either smooth capped pushout with
+the earlier point-set one-handle calculation or compute its remaining model boundary.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
