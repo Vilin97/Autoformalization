@@ -810,6 +810,18 @@ off-seam sets remain disjoint and cover its complement.  This does not yet ident
 left and right star sides with the negative and positive coordinate caps: that orientation is a
 separate point-set comparison, and no smoothness of the old normalized planar annuli is inferred.
 
+That orientation comparison is now complete in the original smooth power cover.  The global left
+off-seam side is exactly the inverse image of coordinate cap zero, while the global right side is
+exactly the inverse image of coordinate cap one.  The left direction is fixed by an explicit
+normalized half-time point: its circle power is `-11/16`, it avoids both closed quarter tubes, and
+its projected fourth coordinate is `-3/16`.  Preconnectedness of each labelled left component then
+propagates this sign.  For the other side, a direct path construction in the neck star first moves
+right-grid points while avoiding every labelled attaching range and then joins them through the
+normalized open right annulus; transporting those paths proves that the full right side is path
+connected.  A positive equatorial collar point fixes its cap-one orientation.  These results still
+make no assertion about the raw compact-collar parameter before its noncomputable orientation flip,
+nor do they infer smoothness for the old normalized annular formulas.
+
 The signed seam source used to glue those halves is itself now given a direct common-model atlas.
 The open interval is presented by the strict interior of the native half-space chart, then crossed
 with `Sphere 3`, recharted to `coordinateUnlinkExteriorModel`, and pulled back componentwise over
