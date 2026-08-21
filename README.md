@@ -1,4 +1,4 @@
-# Clawristotle: Semi-Autonomous Mathematical Research
+# Semi-Autonomous Mathematical Research
 
 <p align="center">
   <img src="landau/artifacts/clawristotle.png" alt="Clawristotle" width="400">
@@ -19,7 +19,7 @@ This repository hosts two completed formalization projects. Each is a self-conta
 | **API cost** | ~$6,300 | ~$15,000 |
 | **Agents** | Claude Code · Gemini DeepThink · Aristotle | Claude Code · Codex CLI · Aristotle |
 | **Paper** | [arXiv:2603.15929](https://arxiv.org/abs/2603.15929) · [HF paper](https://huggingface.co/papers/2603.15929) | [Technical report](grothendieck-vanishing/TECHNICAL_REPORT_GV.md) |
-| **Read more** | [README](landau/README.md) · [Technical report](landau/TECHNICAL_REPORT.md) · [Blueprint](https://vilin97.github.io/Clawristotle/landau/blueprint/) | [README](grothendieck-vanishing/README.md) · [Brian's review](grothendieck-vanishing/review.md) · [Blueprint](https://vilin97.github.io/Clawristotle/grothendieck-vanishing/blueprint/) |
+| **Read more** | [README](landau/README.md) · [Technical report](landau/TECHNICAL_REPORT.md) · [Blueprint](https://vilin97.github.io//landau/blueprint/) | [README](grothendieck-vanishing/README.md) · [Brian's review](grothendieck-vanishing/review.md) · [Blueprint](https://vilin97.github.io//grothendieck-vanishing/blueprint/) |
 
 ## How it works
 
