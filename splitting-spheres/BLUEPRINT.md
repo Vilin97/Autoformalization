@@ -636,6 +636,19 @@ collars for distinct `ZMod m` labels are pairwise disjoint.  Their smooth zero s
 exactly the same ranges as the old point-set neck-sphere maps; this range identification does not
 assert smoothness of the old parametrizations and does not yet perform the cut or cap.
 
+The compact cover is also identified point-set-wise with the literal full neck star.  Pulling
+back the star's two global off-seam sets gives disjoint open sides whose union is exactly the
+complement of the entire labelled neck family.  The two closed cut carriers are the complements
+of the opposite sides; they cover the compact exterior and meet exactly in the full seam, so no
+radial-boundary limit is discarded.  On each labelled smooth collar, the full seam is detected
+exactly by time zero.  Closed normalized-annulus curves approach one common labelled zero point
+from both sides, and connectedness of each strict time half forces the two raw halves to choose
+opposite sides.  A noncomputable per-label reflection therefore normalizes negative time to the
+left side and positive time to the right side.  The resulting nonpositive and nonnegative half
+ranges are exactly the corresponding full collar image intersected with the appropriate closed
+cut carrier.  This is still point-set preparation: no smooth structure on either cut carrier and
+no cap gluing is asserted here.
+
 The genuine Euclidean closed four-ball now has the complementary one-sided collar needed for a
 smooth cap.  The radial formula `(s,t) |-> (1-t)s` is a diffeomorphism from
 `S3 x [0,1/2)` onto the relative open shell of radius greater than `1/2` in the existing
