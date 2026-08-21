@@ -674,6 +674,15 @@ injectivity.  The terminal theorem installs the same generated pushout atlas and
 a manifold, but still requires concrete collars, attaching embeddings, and seam openness from an
 application.
 
+The model boundary of that same generated pushout atlas is computed intrinsically as well.  The
+seam and both off-seam coprojections are local diffeomorphisms for the concrete atlas.  When the
+signed seam source has empty model boundary, boundary reflection through those three chart
+families shows that the glued seam is interior and that the remaining boundary is exactly the
+union of the two coprojection images of each piece boundary with its attaching range removed.
+Convenience forms accept either the established atlas compatibility or the literal signed-branch
+local-diffeomorphism hypotheses.  This generic theorem does not simplify the two piece-boundary
+sets for any particular capping.
+
 The corresponding intrinsic atlas mechanism for a single cut side is also isolated.  A cut side
 is the subtype of a closed ambient subset.  Away from the new boundary it uses restrictions of
 the native ambient charts, while a supplied one-sided collar provides the boundary charts.  The
