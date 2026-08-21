@@ -685,6 +685,14 @@ conjugation carries every smooth natural-collar transition into the coordinate-e
 groupoid.  These are model-change tools only: they do not yet install the concrete cut-side or
 four-ball atlas.
 
+The natural radial four-ball collar is now recharted by those exact carrier coordinates.  Its
+preferred charts are postcomposed with the displayed carrier homeomorphism, and the conjugation
+law proves all resulting transitions smooth in the coordinate-exterior model.  Pulling this atlas
+back componentwise along the discrete `ZMod m` projection gives the full labelled boundary-collar
+family the same four-dimensional model and an honest manifold structure.  This supplies the
+common source model required by the forthcoming cut-side atlas; it still asserts no atlas on a
+cut carrier or on a glued cap.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
