@@ -664,6 +664,16 @@ concrete `ChartedSpace` on the topological pushout.  The resulting `IsManifold` 
 explicitly, that every transition between those concrete charts lie in the smooth groupoid.  No
 cut space, cap attachment, or mixed collar transition is inferred by this generic constructor.
 
+Those transition obligations are now discharged by a second generic layer.  The seam chart has
+canonical open overlaps with each off-seam coprojection chart.  Smoothness of each overlap and
+its inverse proves all nine chart-class transitions: same-family changes come from the native
+maximal atlases, and the two opposite off-seam changes have empty source.  For a literal signed
+seam map, it suffices that its two branch maps be local diffeomorphisms on exactly those overlap
+sources; a local-inverse argument supplies the reverse changes without global branch
+injectivity.  The terminal theorem installs the same generated pushout atlas and recognizes it as
+a manifold, but still requires concrete collars, attaching embeddings, and seam openness from an
+application.
+
 The corresponding intrinsic atlas mechanism for a single cut side is also isolated.  A cut side
 is the subtype of a closed ambient subset.  Away from the new boundary it uses restrictions of
 the native ambient charts, while a supplied one-sided collar provides the boundary charts.  The
