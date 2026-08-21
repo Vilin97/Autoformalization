@@ -403,6 +403,14 @@ exactly the corresponding equatorial lift, and different labels have disjoint fu
 This is a smooth product neighborhood in the genuine cover, not a smooth structure on the
 compact flower, star, or capping models.
 
+Reindexing this collar by the exact constant root shift gives a global smooth collar for the
+point-set image of every transported old neck.  For old label `a`, the smooth collar uses the
+equatorial label `a - smoothNeckShift`; its zero section has exactly the range of the old
+transported neck map.  This strengthens local flatness of that image to an explicit open product
+neighborhood in the genuine smooth power cover.  It still does not make the old source
+parametrization smooth and does not provide a smooth atlas or gluing theorem for the compact
+flower, star, or capping pushouts.
+
 The exact ambient object needed for such preservation was first isolated as a separate structure.
 It consists of an actual continuous ambient isotopy of the power-cover total space whose final
 homeomorphism agrees, on one initial labelled equator, with the time-one lifted sphere.  Under
