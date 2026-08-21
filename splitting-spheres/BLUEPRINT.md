@@ -376,14 +376,13 @@ source family remains jointly injective and distinct labelled ranges remain disj
 time.  This is not an ambient isotopy of the cover and, by itself, supplies no homeomorphism of
 the slice complements or preservation of their connected components.
 
-The exact extra input needed for such preservation is now isolated as a separate conditional
-structure.  It consists of an actual continuous ambient isotopy of the power-cover total space
-whose final homeomorphism agrees, on one initial labelled equator, with the time-one lifted
-sphere.  Under precisely that hypothesis, the final ambient homeomorphism restricts to a
-homeomorphism of the two sphere complements, carries ambient relative connected components
-exactly, and induces a homeomorphism of their `ConnectedComponents` spaces.  No theorem currently
-constructs this ambient isotopy from the smooth family above; that missing constructor is the
-support-controlled isotopy-extension step, not a consequence of covering homotopy lifting.
+The exact ambient object needed for such preservation was first isolated as a separate structure.
+It consists of an actual continuous ambient isotopy of the power-cover total space whose final
+homeomorphism agrees, on one initial labelled equator, with the time-one lifted sphere.  Under
+precisely that hypothesis, the final ambient homeomorphism restricts to a homeomorphism of the two
+sphere complements, carries ambient relative connected components exactly, and induces a
+homeomorphism of their `ConnectedComponents` spaces.  The support-controlled construction of this
+object is now complete below; it is not obtained merely from covering homotopy lifting.
 
 The ambient comparison is now explicit at the level of the whole power cover.  The radial base
 homeomorphism does not preserve the right-normal character: in the left tube its multiplicative
@@ -436,27 +435,25 @@ any one of its points.  Consequently the component space of the actual lifted-eq
 is equivalent to `Fin 2`, and its `Nat.card` is exactly `2`.  This conclusion concerns the strict
 full-cover complement; it does not identify either side with an entire compact star piece.
 
-Composing this calculation with the conditional ambient-extension layer gives an exact equivalence
-from the connected components of the time-one lifted-sphere complement to `Fin 2`, and hence exact
-`Nat.card` equal to `2`.  In particular, such an ambient extension forces the time-one complement
-to be non-preconnected with precisely the same component count.  This is a preservation theorem
-under an explicit ambient-extension witness; it does not yet construct that witness.
+Composing this calculation with the ambient-extension layer gives an exact equivalence from the
+connected components of the time-one lifted-sphere complement to `Fin 2`, and hence exact
+`Nat.card` equal to `2`.  In particular, the time-one complement is non-preconnected with precisely
+the same component count.  The implementation retains the explicit-witness transport theorem as a
+reusable layer and then supplies that witness unconditionally from every unlink-avoiding smooth
+sphere isotopy.
 The covering-space part of this witness is now discharged generically: every downstairs ambient
 isotopy lifts canonically through an arbitrary covering map by lifting it and its pointwise inverse,
 with covering uniqueness proving the two inverse laws.  For the unlink power cover, full-time
 agreement downstairs with the normalized equator isotopy gives full-time agreement with every
-labelled lifted isotopy.  Thus the remaining geometric input is precisely an ambient isotopy of
-`StandardUnlinkComplement` extending the normalized downstairs sphere isotopy; no separate
-cover-label or monodromy hypothesis remains.
+labelled lifted isotopy.  No separate cover-label or monodromy hypothesis remains.
 
 This downstairs problem can be placed in a single Euclidean chart.  A fixed point of component
 zero of the standard unlink is used as a stereographic pole, so every point of
 `StandardUnlinkComplement` lies in that chart.  Restriction gives a genuine smooth diffeomorphism
 from the whole complement onto an explicitly displayed open subset of Euclidean four-space, with
-exact forward, inverse, and range laws.  Therefore the remaining ambient-extension input may be
-formulated entirely as a smooth isotopy-extension theorem for a compact source moving inside an
-open subset of `EuclideanSpace ℝ (Fin 4)`.  The image is not asserted to be all of Euclidean
-four-space, and the one-chart reduction does not itself construct the ambient isotopy.
+exact forward, inverse, and range laws.  This reduces ambient extension to a compact trace inside
+an open subset of `EuclideanSpace ℝ (Fin 4)`.  The image is not asserted to be all of Euclidean
+four-space.
 
 The time-boundary part of the extension problem can be normalized without changing either
 endpoint.  The smooth time change
@@ -468,21 +465,22 @@ product map near the two half-space boundary points; this removes the endpoint o
 later trace-normal-form argument.  Endpoint flattening is still only a source reparametrization,
 not an ambient extension.
 
-The same formula now gives a globally smooth map from real time into the unit interval.  Hence the
+The same formula gives a globally smooth map from real time into the unit interval.  Hence the
 flattened isotopy has a smooth extension over `ℝ × Sphere 3`, literally equal to its initial slice
-before time `1/4` and to its final slice after time `3/4`.  For any jointly smooth real-time family
-into a normed space, its ordinary time Fréchet derivative evaluated on `1` is jointly smooth; this
-velocity is exactly zero wherever the family is locally constant in time.  This supplies the
-globally smooth prescribed velocity used by a later spacetime construction, but does not yet
-extend that velocity away from the trace.
+before time `1/4` and to its final slice after time `3/4`.  Its time-preserving graph is a genuine
+smooth embedding: a chart-level split-derivative calculation supplies the immersion, while
+injectivity and properness supply the closed topological embedding.  For any jointly smooth
+real-time family into a normed space, its ordinary time Fréchet derivative evaluated on `1` is
+jointly smooth; this velocity is exactly zero wherever the family is locally constant in time.
 
-The analytic local-normal-form prerequisite has also been isolated.  The Banach inverse function
+The analytic local-normal-form prerequisite is also formalized.  The Banach inverse function
 theorem is packaged at arbitrary nonzero differentiability order by restricting to the open locus
 where the derivative remains invertible and bootstrapping the inverse there.  Adding a complementary
 linear variable to a map whose derivative is a split inclusion then gives the exact immersion
-normal form required by Mathlib.  This closes the all-orders inverse-chart step; applying it
-pointwise to the time-preserving trace and globalizing the resulting local velocity extensions are
-separate geometric steps.
+normal form required by Mathlib.  Local normal-coordinate extensions along the closed embedded
+trace are patched by a smooth partition of unity.  A compactly supported cutoff, equal to one on
+the compact active trace and supported inside the stereographic spacetime open set, then preserves
+the prescribed velocity exactly while making its support compact.
 
 The global ODE end of that extension is now formalized independently.  A bounded globally
 Lipschitz autonomous field on a complete real normed space has a jointly continuous selected flow
@@ -490,18 +488,20 @@ on a buffered time interval; ODE uniqueness proves the reverse-time inverse and 
 time restriction as a genuine `TauCeti.AmbientIsotopy`.  Applying this to the autonomous lift
 `(τ, x) ↦ (1, V (τ, x))` integrates a time-dependent field.  In particular, a jointly `C^1`,
 compactly supported `V : ℝ × E → E` supplies all global boundedness and Lipschitz estimates and
-hence an ambient isotopy of `E`.  What remains is to construct such a field agreeing with the
-velocity of the flattened trace, with support compactly contained in the stereographic image, and
-then restrict and conjugate its flow.  No vector-field extension or support-invariance theorem is
-claimed by the flow constructor itself.
+hence an ambient isotopy of `E`.  The embedded-extension and cutoff results above construct such a
+field with support compactly contained in the stereographic spacetime image and with exact agreement
+on the trace.  The flow constructor itself remains independently reusable.
 
 ODE uniqueness now also proves that every spatial point at which the field vanishes for all
 buffered times is fixed by the selected flow, including the ends of the closed time interval.
 Consequently, when a compactly supported field vanishes outside an open set, the ambient flow fixes
 that complement pointwise and restricts to an honest ambient isotopy of the open subtype; the
 inverse restriction comes from the inverse total homeomorphism, not from forward invariance alone.
-Thus flow localization and open-chart restriction are complete.  The residual input is precisely
-the smooth, compactly supported extension of the prescribed trace velocity.
+Thus flow localization and open-chart restriction are complete.  ODE uniqueness identifies the
+selected flow with the prescribed flattened trace.  Restriction to the stereographic image and
+conjugation back to `StandardUnlinkComplement` give the downstairs ambient isotopy.  Covering
+uniqueness identifies its lifted endpoint with the existing labelled power-cover lift, producing
+the required ambient extension for every nonzero degree and every sheet.
 
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
@@ -826,7 +826,7 @@ theorem connects it to the smooth embedding/diffeomorphism spaces.
 
 `SplittingSpheres/Proof/Detector.lean`
 
-- convert the frozen range-isotopy to a supported ambient isotopy;
+- use the constructed supported complement ambient isotopy and its cyclic-cover lift;
 - fix the neck collar using Cerf;
 - cut, lift, cap, and prove `cyclicCoverDetector`.
 
@@ -858,7 +858,8 @@ Known missing or incomplete:
   `Diffeomorph.isSmoothEmbedding` as TODOs;
 - there is no ready sphere-latitude smooth-embedding theorem;
 - TauCeti's ambient-isotopy specialization is continuous, explicitly not smooth;
-- there is no smooth isotopy extension theorem with relative support control;
+- there is no ready relative smooth-isotopy-extension theorem for manifolds with boundary and
+  collar control; the compact-source unlink-complement case needed above is now constructed;
 - there is no Euclidean closed-ball manifold instance suitable for this proof;
 - there is no general manifold gluing, connected-sum, handle-attachment, or surgery API;
 - there is no topology on smooth diffeomorphism/embedding spaces adequate for `pi0` and `W3`;
@@ -934,9 +935,9 @@ External repository checks found useful patterns but no proof of the hard input:
 - TauCetiRoadmap independently records global collars, gluing, tubular neighborhoods, connected
   sums, diffeomorphism-group topology, isotopy extension, and surgery as missing infrastructure.
 
-No checked repository provides smooth ambient isotopy extension, Cerf `Gamma4`, barbell maps,
-mapping classes modulo `B4` support, the required smooth cyclic-cover lift, geometric
-configuration-space compactifications, or `W3`.
+No checked external repository provides the required relative collar extension, Cerf `Gamma4`,
+barbell maps, mapping classes modulo `B4` support, the required based cyclic-cover lift
+functoriality, geometric configuration-space compactifications, or `W3`.
 
 ## Milestones and acceptance tests
 
@@ -951,8 +952,9 @@ configuration-space compactifications, or `W3`.
    theorem without diagram assumptions.
 6. **Barbell bridge** -- encode each paper figure as finite data; `native_decide` may discharge only
    finite graph/word equalities after the realization theorems are proved.
-7. **Cerf/isotopy extension** -- detector builds independently of `beta` and `delta` for an abstract
-   `gamma` satisfying cap/lift hypotheses.
+7. **Cerf/collar straightening** -- detector builds independently of `beta` and `delta` for an
+   abstract `gamma` satisfying cap/lift hypotheses; the complement ambient-extension and cyclic
+   cover-lift part is already constructed.
 8. **Budney--Gabai** -- prove `delta` independence, with the `W3` value exposed as a checkable
    algebraic normal form.
 9. **Tatsuoka family** -- instantiate the detector for `beta i * beta j^-1` and prove root
@@ -967,7 +969,7 @@ configuration-space compactifications, or `W3`.
 The short Tatsuoka deduction is not the dominant cost.  The critical path is:
 
 ```text
-smooth gluing and support-controlled isotopy extension
+smooth gluing, relative collar straightening, and capping
   -> graph-thickened 4D handlebodies and framed barbell realization
   -> Cerf for S3
   -> Budney--Gabai W3 independence
