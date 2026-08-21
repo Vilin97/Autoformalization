@@ -510,6 +510,15 @@ hence an ambient isotopy of `E`.  The embedded-extension and cutoff results abov
 field with support compactly contained in the stereographic spacetime image and with exact agreement
 on the trace.  The flow constructor itself remains independently reusable.
 
+The selected flow has now also been upgraded from continuous to smooth spatial dependence.  A
+scaled-displacement Picard germ is smooth at elapsed time zero; ODE uniqueness and the autonomous
+flow-addition law propagate that germ across the entire closed unit-time slab, including its two
+endpoints.  Every autonomous time slice is therefore a genuine diffeomorphism, with reverse time
+as its smooth inverse.  Applying this to the spacetime field `(tau,x) |-> (1,V(tau,x))` proves the
+same result for time-dependent fields: the previously constructed continuous ambient isotopy agrees
+pointwise with a family of spatial diffeomorphisms, and the selected spatial flow is jointly smooth
+on the unit slab.  This does not by itself make the compact flower or capping homeomorphisms smooth.
+
 ODE uniqueness now also proves that every spatial point at which the field vanishes for all
 buffered times is fixed by the selected flow, including the ends of the closed time interval.
 Consequently, when a compactly supported field vanishes outside an open set, the ambient flow fixes
