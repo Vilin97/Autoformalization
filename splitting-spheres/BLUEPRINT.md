@@ -823,10 +823,15 @@ homeomorphisms: no diffeomorphism, atlas transport, or model-boundary conclusion
 The generic pushout-boundary theorem also applies to both direct smooth cappings.  In their exact
 generated atlases, each model boundary is the union of the cut coprojection image of the compact
 cut boundary with its attaching range removed and the ball coprojection image of the labelled
-four-ball boundary with its attaching range removed.  This proves that the signed seam itself is
-interior without using the point-set one-handle comparison.  The displayed formulas are not yet
-simplified to the exterior radial face: that reduction still requires a public exact
-seam-range/disjointness calculation for the compact cut boundary.
+four-ball boundary with its attaching range removed.  The attaching ranges are now identified
+exactly: the cut-side range is the subtype preimage of the transported neck seam, while the
+four-ball attaching range is its entire direct model boundary.  Boundary reflection through the
+smooth two-sided collar proves that the transported seam lies in the ambient model interior and
+is disjoint from the old radial boundary.  Removing the attaching ranges therefore erases the
+whole cap term and the seam part of the cut term.  The boundary of either direct smooth capping is
+exactly the cut coprojection image of the corresponding subtype preimage of the ambient radial
+boundary.  This calculation uses only the direct atlases and does not transport a boundary through
+the point-set one-handle comparison.
 
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
