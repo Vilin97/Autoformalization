@@ -320,6 +320,14 @@ A conventional smooth interior-connected-sum theorem still requires individual r
 charts, corner smoothing, and smooth gluing; none is inferred from these topological
 homeomorphisms.
 
+One actual smooth piece of this decomposition is now available without transporting structure
+through a point-set homeomorphism.  The literal power pullback over the `S1 x B3` one-handle is a
+topological covering of the already constructed manifold with corners.  Pulling back the
+one-handle atlas along that projection makes the restricted total space a smooth four-manifold
+with corners and the projection a smooth local diffeomorphism.  Its model boundary is exactly the
+projection preimage of the one-handle boundary.  This does not yet give an atlas on the punctured
+cap, flower pushout, or global closed exterior.
+
 The first smooth structure crossing this point-set calculation is now explicit.  On the root
 disk `ball (-1) 1`, the rotated logarithm formula
 
