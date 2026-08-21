@@ -530,6 +530,13 @@ conjugation back to `StandardUnlinkComplement` give the downstairs ambient isoto
 uniqueness identifies its lifted endpoint with the existing labelled power-cover lift, producing
 the required ambient extension for every nonzero degree and every sheet.
 
+The same downstairs construction now retains the smooth slices furnished by the supported-flow
+theorem.  Each full-space diffeomorphism preserves the stereographic image in both directions, so
+it restricts there and conjugates to a genuine `C∞` self-diffeomorphism of
+`StandardUnlinkComplement`.  These diffeomorphisms agree pointwise with the continuous ambient
+isotopy and satisfy the exact endpoint-flattened equator law.  This result deliberately asserts no
+joint smoothness in the time parameter; it is a family of smooth spatial slices.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives

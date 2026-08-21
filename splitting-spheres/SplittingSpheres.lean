@@ -77,6 +77,7 @@ public import SplittingSpheres.Geometry.SpherePolarProduct
 public import SplittingSpheres.Geometry.StandardUnlink
 public import SplittingSpheres.Geometry.UnlinkComplement
 public import SplittingSpheres.Geometry.UnlinkComplementAmbientIsotopyExtension
+public import SplittingSpheres.Geometry.UnlinkComplementSmoothAmbientIsotopyExtension
 public import SplittingSpheres.Geometry.UnlinkComplementStereographic
 public import SplittingSpheres.Geometry.UnlinkComplementStereographicTrace
 public import SplittingSpheres.Geometry.UnlinkComplementExteriorHomeomorph
