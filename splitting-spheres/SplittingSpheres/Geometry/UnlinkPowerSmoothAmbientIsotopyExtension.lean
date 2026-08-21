@@ -18,7 +18,8 @@ injectivity of the downstairs diffeomorphism, after which smoothness is reflecte
 Applying this construction to the normalized endpoint-flattened complement extension gives a
 continuous ambient isotopy in every finite power cover whose individual slices are genuine `C∞`
 diffeomorphisms.  The lifted isotopy agrees exactly with the existing labelled sphere lift after
-endpoint flattening.  No joint smoothness in the time parameter is asserted.
+endpoint flattening.  Its forward evaluation is jointly smooth in time and space; no joint
+smoothness of the inverse evaluation is asserted.
 -/
 
 @[expose] public section
@@ -207,6 +208,55 @@ theorem standardUnlinkPowerPullbackProj_liftAmbientIsotopySliceDiffeomorph_symm
   rw [(standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph
     m Phi Psi hPhi t).apply_symm_apply]
 
+private theorem contMDiff_standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph_eval
+    (m : ℕ) [NeZero m]
+    (Phi : TauCeti.AmbientIsotopy StandardUnlinkComplement)
+    (Psi : I →
+      StandardUnlinkComplement ≃ₘ^∞⟮(𝓡 4), (𝓡 4)⟯
+        StandardUnlinkComplement)
+    (hPhi : ∀ (t : I) (y : StandardUnlinkComplement),
+      Phi.toContinuousMap (t, y) = Psi t y)
+    (hPsi : ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞
+      (fun p : I × StandardUnlinkComplement ↦ Psi p.1 p.2)) :
+    letI : ChartedSpace (EuclideanSpace ℝ (Fin 4))
+        (StandardUnlinkPowerPullback m) :=
+      standardUnlinkPowerPullbackChartedSpace m
+    letI : IsManifold (𝓡 4) ∞ (StandardUnlinkPowerPullback m) :=
+      isManifold_standardUnlinkPowerPullback m
+    ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞
+      (fun p : I × StandardUnlinkPowerPullback m ↦
+        standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph
+          m Phi Psi hPhi p.1 p.2) := by
+  let _ : ChartedSpace (EuclideanSpace ℝ (Fin 4))
+      (StandardUnlinkPowerPullback m) :=
+    standardUnlinkPowerPullbackChartedSpace m
+  let _ : IsManifold (𝓡 4) ∞ (StandardUnlinkPowerPullback m) :=
+    isManifold_standardUnlinkPowerPullback m
+  let f : I × StandardUnlinkPowerPullback m →
+      StandardUnlinkPowerPullback m := fun p ↦
+    standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph
+      m Phi Psi hPhi p.1 p.2
+  apply contMDiff_of_comp_isLocalDiffeomorph
+    ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) (𝓡 4)
+    (smoothCover_standardUnlinkPowerPullbackProj m).isLocalDiffeomorph
+  · have hc := (IsCoveringMap.liftAmbientIsotopy
+      (isCoveringMap_standardUnlinkPowerPullbackProj m) Phi).toContinuousMap.continuous
+    apply hc.congr
+    intro p
+    exact (standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph_apply
+      m Phi Psi hPhi p.1 p.2).symm
+  · have hin : ContMDiff ((𝓡∂ 1).prod (𝓡 4))
+        ((𝓡∂ 1).prod (𝓡 4)) ∞
+        (fun p : I × StandardUnlinkPowerPullback m ↦
+          (p.1, standardUnlinkPowerPullbackProj m p.2)) :=
+      contMDiff_fst.prodMk
+        ((smoothCover_standardUnlinkPowerPullbackProj m).contMDiff.comp contMDiff_snd)
+    have hsmooth := hPsi.comp hin
+    apply hsmooth.congr
+    intro p
+    exact standardUnlinkPowerPullbackProj_liftAmbientIsotopySliceDiffeomorph
+      m Phi Psi hPhi p.1 p.2
+
 /-- The endpoint-flattened normalized sphere isotopy has a lifted ambient extension whose every
 time slice is exactly a smooth diffeomorphism of the standard unlink power cover. -/
 theorem exists_standardUnlinkNormalizedFlattenedPowerSmoothAmbientIsotopy
@@ -241,16 +291,18 @@ theorem exists_standardUnlinkNormalizedFlattenedPowerSmoothAmbientIsotopy
       (∀ (t : I) (z : StandardUnlinkPowerPullback m),
         standardUnlinkPowerPullbackProj m (PsiLift t z) =
           Psi t (standardUnlinkPowerPullbackProj m z)) ∧
-      ∀ (t : I) (x : Sphere 3),
+      (∀ (t : I) (x : Sphere 3),
         PhiLift.toContinuousMap (t, equatorUnlinkPowerLift m a x) =
           standardUnlinkPowerIsotopyLift m a H havoid
-            (unitInterval.endpointFlatTime t, x) := by
+            (unitInterval.endpointFlatTime t, x)) ∧
+      ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞
+        (fun p : I × StandardUnlinkPowerPullback m ↦ PsiLift p.1 p.2) := by
   let _ : ChartedSpace (EuclideanSpace ℝ (Fin 4))
       (StandardUnlinkPowerPullback m) :=
     standardUnlinkPowerPullbackChartedSpace m
   let _ : IsManifold (𝓡 4) ∞ (StandardUnlinkPowerPullback m) :=
     isManifold_standardUnlinkPowerPullback m
-  obtain ⟨Phi, Psi, hPhi, htrace⟩ :=
+  obtain ⟨Phi, Psi, hPhi, htrace, hPsi⟩ :=
     exists_standardUnlinkNormalizedFlattenedComplementSmoothAmbientIsotopy H havoid
   let PhiLift : TauCeti.AmbientIsotopy (StandardUnlinkPowerPullback m) :=
     IsCoveringMap.liftAmbientIsotopy
@@ -260,7 +312,11 @@ theorem exists_standardUnlinkNormalizedFlattenedPowerSmoothAmbientIsotopy
         ≃ₘ^∞⟮(𝓡 4), (𝓡 4)⟯
         StandardUnlinkPowerPullback m := fun t ↦
     standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph m Phi Psi hPhi t
-  refine ⟨Phi, Psi, PhiLift, PsiLift, rfl, hPhi, htrace, ?_, ?_, ?_⟩
+  have hPsiLift : ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞
+      (fun p : I × StandardUnlinkPowerPullback m ↦ PsiLift p.1 p.2) :=
+    contMDiff_standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph_eval
+      m Phi Psi hPhi hPsi
+  refine ⟨Phi, Psi, PhiLift, PsiLift, rfl, hPhi, htrace, ?_, ?_, ?_, hPsiLift⟩
   · intro t z
     exact (standardUnlinkPowerLiftAmbientIsotopySliceDiffeomorph_apply
       m Phi Psi hPhi t z).symm

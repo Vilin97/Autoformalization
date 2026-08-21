@@ -551,8 +551,11 @@ The same downstairs construction now retains the smooth slices furnished by the 
 theorem.  Each full-space diffeomorphism preserves the stereographic image in both directions, so
 it restricts there and conjugates to a genuine `C∞` self-diffeomorphism of
 `StandardUnlinkComplement`.  These diffeomorphisms agree pointwise with the continuous ambient
-isotopy and satisfy the exact endpoint-flattened equator law.  This result deliberately asserts no
-joint smoothness in the time parameter; it is a family of smooth spatial slices.
+isotopy and satisfy the exact endpoint-flattened equator law.  The selected flow is jointly smooth
+on its closed unit-time slab; composing the interval-with-boundary inclusion, restricting to the
+invariant open stereographic image, and conjugating back proves that the evaluation map of this
+family is jointly `C∞` in time and space.  Joint smoothness of the inverse-evaluation family is not
+asserted.
 
 Those slices lift smoothly through every nonzero-degree cyclic cover as well.  The underlying
 equivalence is exactly the time-slice homeomorphism of the canonical lifted ambient isotopy.
@@ -560,7 +563,9 @@ Forward smoothness follows by reflecting its projection square through the smoot
 the downstairs inverse first gives the inverse projection square and hence inverse smoothness by
 the same argument.  Thus the lifted continuous ambient isotopy agrees pointwise with genuine
 cover diffeomorphisms and retains the exact labelled endpoint-flat sphere law, without a
-connectivity or chosen-basepoint hypothesis.  Joint smoothness in time is again not asserted.
+connectivity or chosen-basepoint hypothesis.  Reflecting the full evaluation map through the same
+smooth covering projection also proves joint `C∞` dependence of the lifted forward family.  As
+downstairs, no joint smoothness theorem for the inverse-evaluation family is claimed.
 
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after

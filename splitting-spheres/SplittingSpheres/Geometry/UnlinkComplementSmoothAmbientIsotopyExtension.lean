@@ -7,6 +7,7 @@ module
 public import SplittingSpheres.Foundations.RadialDiffeomorph
 public import SplittingSpheres.Foundations.SmoothCompactlySupportedTimeDependentFlow
 public import SplittingSpheres.Geometry.UnlinkComplementAmbientIsotopyExtension
+public import Mathlib.Geometry.Manifold.Instances.Icc
 
 /-!
 # Smooth ambient-isotopy slices on the standard-unlink complement
@@ -20,7 +21,8 @@ diffeomorphisms of `StandardUnlinkComplement`.
 
 The returned diffeomorphism slices agree pointwise with the simultaneously constructed continuous
 ambient isotopy, whose action on the equatorial unlink-complement sphere is the exact
-endpoint-flattened normalized homotopy.  No joint smoothness in the time parameter is asserted.
+endpoint-flattened normalized homotopy.  Their forward evaluation is jointly smooth in time and
+space; no joint smoothness of the inverse evaluation is asserted.
 -/
 
 @[expose] public section
@@ -33,6 +35,70 @@ noncomputable section
 namespace SplittingSpheres
 
 variable {S : SmoothSphereEmbedding 3 4}
+
+private theorem contMDiff_unitInterval_prod_of_contDiffOn
+    {E F : Type*}
+    [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {f : E × ℝ → F}
+    (hf : ContDiffOn ℝ ∞ f (Set.univ ×ˢ Set.Icc (-(1 : ℝ)) 1)) :
+    ContMDiff ((𝓡∂ 1).prod (modelWithCornersSelf ℝ E))
+      (modelWithCornersSelf ℝ F) ∞
+      (fun p : I × E ↦ f (p.2, (p.1 : ℝ))) := by
+  have hfM : ContMDiffOn (modelWithCornersSelf ℝ (E × ℝ))
+      (modelWithCornersSelf ℝ F) ∞ f
+      (Set.univ ×ˢ Set.Icc (-(1 : ℝ)) 1) := hf.contMDiffOn
+  have hg : ContMDiff ((𝓡∂ 1).prod (modelWithCornersSelf ℝ E))
+      (modelWithCornersSelf ℝ (E × ℝ)) ∞
+      (fun p : I × E ↦ (p.2, (p.1 : ℝ))) := by
+    have ht : ContMDiff ((𝓡∂ 1).prod (modelWithCornersSelf ℝ E))
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : I × E ↦ (p.1 : ℝ)) := by
+      have hp : ContMDiff ((𝓡∂ 1).prod (modelWithCornersSelf ℝ E))
+          (𝓡∂ 1) ∞ (Prod.fst : I × E → I) := contMDiff_fst
+      exact (contMDiff_subtypeVal_Icc (x := 0) (y := 1)).comp hp
+    have he : ContMDiff ((𝓡∂ 1).prod (modelWithCornersSelf ℝ E))
+        (modelWithCornersSelf ℝ E) ∞ (Prod.snd : I × E → E) :=
+      contMDiff_snd
+    rw [contMDiff_prod_module_iff]
+    exact ⟨he, ht⟩
+  apply hfM.comp_contMDiff hg
+  intro p
+  exact ⟨Set.mem_univ _, ⟨by linarith [p.1.2.1], by linarith [p.1.2.2]⟩⟩
+
+private theorem contMDiff_restrict_open_unitInterval
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (U : Opens E)
+    (f : I × E → E)
+    (hf : ContMDiff ((𝓡∂ 1).prod (modelWithCornersSelf ℝ E))
+      (modelWithCornersSelf ℝ E) ∞ f)
+    (hmem : ∀ p : I × U, f (p.1, (p.2 : E)) ∈ U) :
+    ContMDiff ((𝓡∂ 1).prod (modelWithCornersSelf ℝ E))
+      (modelWithCornersSelf ℝ E) ∞
+      (fun p : I × U ↦ (⟨f (p.1, (p.2 : E)), hmem p⟩ : U)) := by
+  apply (ContMDiff.subtypeVal_comp_iff U _).mp
+  have hincl : ContMDiff ((𝓡∂ 1).prod (modelWithCornersSelf ℝ E))
+      ((𝓡∂ 1).prod (modelWithCornersSelf ℝ E)) ∞
+      (fun p : I × U ↦ (p.1, (p.2 : E))) := by
+    exact contMDiff_fst.prodMk (contMDiff_subtype_val.comp contMDiff_snd)
+  exact hf.comp hincl
+
+private theorem contMDiff_stereographic_conjugate
+    (f : I × standardUnlinkComplementStereographicImage →
+      standardUnlinkComplementStereographicImage)
+    (hf : ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞ f) :
+    ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞
+      (fun p : I × StandardUnlinkComplement ↦
+        standardUnlinkComplementStereographicDiffeomorph.symm
+          (f (p.1, standardUnlinkComplementStereographicDiffeomorph p.2))) := by
+  have hin : ContMDiff ((𝓡∂ 1).prod (𝓡 4))
+      ((𝓡∂ 1).prod (𝓡 4)) ∞
+      (fun p : I × StandardUnlinkComplement ↦
+        (p.1, standardUnlinkComplementStereographicDiffeomorph p.2)) := by
+    exact contMDiff_fst.prodMk
+      (standardUnlinkComplementStereographicDiffeomorph.contMDiff.comp contMDiff_snd)
+  exact standardUnlinkComplementStereographicDiffeomorph.symm.contMDiff.comp
+    (hf.comp hin)
 
 private theorem hasDerivAt_standardUnlinkNormalizedFlattenedStereographic_smoothSlices
     (H : SmoothSphereIsotopy standardSplittingSphere S)
@@ -62,10 +128,12 @@ theorem exists_standardUnlinkNormalizedFlattenedComplementSmoothAmbientIsotopy
             StandardUnlinkComplement),
       (∀ (t : I) (y : StandardUnlinkComplement),
         Phi.toContinuousMap (t, y) = Psi t y) ∧
-      ∀ (t : I) (x : Sphere 3),
+      (∀ (t : I) (x : Sphere 3),
         Phi.toContinuousMap (t, equatorUnlinkComplementMap x) =
           standardUnlinkNormalizedComplementHomotopy H havoid
-            (unitInterval.endpointFlatTime t, x) := by
+            (unitInterval.endpointFlatTime t, x)) ∧
+      ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞
+        (fun p : I × StandardUnlinkComplement ↦ Psi p.1 p.2) := by
   obtain ⟨V, hVsmooth, hVcompact, hVsupport, hVtrace⟩ :=
     exists_standardUnlinkNormalizedFlattenedStereographicSpacetimeField H havoid
   have hVzeroOutside : ∀ (t : ℝ) (y : EuclideanSpace ℝ (Fin 4)),
@@ -74,9 +142,12 @@ theorem exists_standardUnlinkNormalizedFlattenedComplementSmoothAmbientIsotopy
     by_contra hne
     have hmem : (t, y) ∈ tsupport V := subset_tsupport V hne
     exact hy (hVsupport hmem).2
-  obtain ⟨PhiFull, eFlow, PsiFull, hPhiFull, hPsiFull, _, hflow⟩ :=
+  obtain ⟨PhiFull, eFlow, PsiFull, hPhiFull, hPsiFull, heFlowSmooth, hflow⟩ :=
     TimeDependentFlow.exists_ambientIsotopy_diffeomorph_of_contDiff_hasCompactSupport
       V hVsmooth hVcompact
+  have hJointFull : ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞
+      (fun p : I × EuclideanSpace ℝ (Fin 4) ↦ eFlow (p.2, (p.1 : ℝ))) :=
+    contMDiff_unitInterval_prod_of_contDiffOn heFlowSmooth
   obtain ⟨K, hVlip⟩ :=
     hVsmooth.lipschitzWith_of_hasCompactSupport hVcompact (by norm_num)
   have hflowZero (y : EuclideanSpace ℝ (Fin 4)) : eFlow (y, 0) = y := by
@@ -134,6 +205,27 @@ theorem exists_standardUnlinkNormalizedFlattenedComplementSmoothAmbientIsotopy
     change PhiFull.toContinuousMap (t, (y : EuclideanSpace ℝ (Fin 4))) =
       PsiFull t (y : EuclideanSpace ℝ (Fin 4))
     exact (hPsiPhi t y).symm
+  have hJointChart : ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞
+      (fun p : I × standardUnlinkComplementStereographicImage ↦
+        PsiChart p.1 p.2) := by
+    have hmem : ∀ p : I × standardUnlinkComplementStereographicImage,
+        eFlow ((p.2 : EuclideanSpace ℝ (Fin 4)), (p.1 : ℝ)) ∈
+          standardUnlinkComplementStereographicImage := by
+      intro p
+      rw [← hPhiFull]
+      exact (PhiFull.mem_iff_of_fixed_complement
+        standardUnlinkComplementStereographicImage hPhiFixed
+          p.1 (p.2 : EuclideanSpace ℝ (Fin 4))).mpr p.2.property
+    have hrestrict := contMDiff_restrict_open_unitInterval
+      standardUnlinkComplementStereographicImage
+      (fun p : I × EuclideanSpace ℝ (Fin 4) ↦ eFlow (p.2, (p.1 : ℝ)))
+      hJointFull hmem
+    apply hrestrict.congr
+    intro p
+    apply Subtype.ext
+    change PsiFull p.1 (p.2 : EuclideanSpace ℝ (Fin 4)) =
+      eFlow ((p.2 : EuclideanSpace ℝ (Fin 4)), (p.1 : ℝ))
+    exact hPsiFull p.1 p.2
   have hTrace : ∀ (t : I) (x : Sphere 3),
       (((PhiChart.toContinuousMap
         (t, standardUnlinkNormalizedFlattenedStereographicPoint H havoid (0, x))) :
@@ -197,7 +289,14 @@ theorem exists_standardUnlinkNormalizedFlattenedComplementSmoothAmbientIsotopy
           (modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin 4)))⟯
         StandardUnlinkComplement := fun t ↦
     e.trans ((PsiChart t).trans e.symm)
-  refine ⟨Phi, Psi, ?_, ?_⟩
+  have hJoint : ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞
+      (fun p : I × StandardUnlinkComplement ↦ Psi p.1 p.2) := by
+    change ContMDiff ((𝓡∂ 1).prod (𝓡 4)) (𝓡 4) ∞
+      (fun p : I × StandardUnlinkComplement ↦
+        e.symm (PsiChart p.1 (e p.2)))
+    exact contMDiff_stereographic_conjugate
+      (fun p ↦ PsiChart p.1 p.2) hJointChart
+  refine ⟨Phi, Psi, ?_, ?_, hJoint⟩
   · intro t y
     change e.symm (PhiChart.toContinuousMap (t, e y)) =
       e.symm (PsiChart t (e y))
