@@ -369,6 +369,14 @@ both directions is reflected through the actual pulled-back covering atlases.  T
 genuine diffeomorphism of the full power covers, and it fixes every labelled equatorial lift
 exactly.
 
+Composing this map with the intrinsic strict-interior identification gives a diffeomorphism from
+the entire unlink power pullback onto the exact strict open subset of the compact coordinate-
+exterior power cover.  Its base projection is the smooth radial base map followed by literal
+inclusion, its power coordinate is the same gauge-corrected coordinate, and every equatorial lift
+keeps its original sheet label.  This composition still contains no radial-boundary point; an
+extension by the identity across that boundary requires a uniform closed support strictly inside
+the open image.
+
 The first smooth structure crossing this point-set calculation is now explicit.  On the root
 disk `ball (-1) 1`, the rotated logarithm formula
 
