@@ -820,6 +820,17 @@ earlier point-set recognition identifies the new left smooth capping with
 `ZMod m x OneHandlePiece` and the right smooth capping with `OneHandlePiece`.  These are only
 homeomorphisms: no diffeomorphism, atlas transport, or model-boundary conclusion is inferred.
 
+The exact last formal step for a smooth recognition has been isolated from that geometry.  A
+homeomorphism out of either direct capping upgrades to a genuine diffeomorphism once its
+composites with the signed seam, the cut coprojection away from the attaching range, and the
+four-ball coprojection away from the attaching range are local diffeomorphisms.  These three maps
+are precisely the generators of the direct pushout atlas and cover its underlying space.  The
+right specialization targets the natural atlas on `OneHandlePiece`; the left specialization uses
+the explicit discrete-product atlas on `ZMod m x OneHandlePiece`.  This criterion does not make
+the old comparison smooth: its cap leg still passes through a product-with-corners model and a
+merely topological radial source reparametrization.  A collar-compatible rounded target
+decomposition must supply the three local-diffeomorphism hypotheses.
+
 The generic pushout-boundary theorem also applies to both direct smooth cappings.  In their exact
 generated atlases, each model boundary is the union of the cut coprojection image of the compact
 cut boundary with its attaching range removed and the ball coprojection image of the labelled
