@@ -358,6 +358,17 @@ intrinsic base identity above.  Smoothness in both directions is detected throug
 local-diffeomorphism projections.  Thus the literal strict pullback is diffeomorphic to exactly
 the strict open part of the compact cover; no point on the compact radial boundary is included.
 
+The smooth radial base diffeomorphism also lifts to the whole cyclic power cover.  Its normalized
+right-character ratio is positive real in the right tube, lies in the principal slit plane by an
+explicit `1/8`-displacement versus `5/8`-denominator estimate in the left tube, and is one outside
+the two tubes.  The principal logarithm therefore supplies a continuous `m`th-root gauge, whose
+exact power corrects the lifted character.  Multiplication by this gauge gives a deck-equivariant
+homeomorphism between the two literal power pullbacks.  The gauge itself is not asserted smooth:
+the total homeomorphism covers the already smooth radial base diffeomorphism, so smoothness in
+both directions is reflected through the actual pulled-back covering atlases.  The result is a
+genuine diffeomorphism of the full power covers, and it fixes every labelled equatorial lift
+exactly.
+
 The first smooth structure crossing this point-set calculation is now explicit.  On the root
 disk `ball (-1) 1`, the rotated logarithm formula
 
