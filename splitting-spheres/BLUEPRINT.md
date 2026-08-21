@@ -629,6 +629,13 @@ jointly smooth even at the frontier.  Compact-family recognition packages these 
 ambient isotopy of the literal compact coordinate exterior.  It fixes the radial boundary
 pointwise and retains the exact endpoint-flattened labelled equator trace.
 
+Each old transported neck-sphere carrier now has a genuine two-sided smooth open collar in this
+compact coordinate power cover.  It is obtained by transporting the explicit equatorial
+power-cover collar through the strict diffeomorphism and then including the strict locus.  The
+collars for distinct `ZMod m` labels are pairwise disjoint.  Their smooth zero sections have
+exactly the same ranges as the old point-set neck-sphere maps; this range identification does not
+assert smoothness of the old parametrizations and does not yet perform the cut or cap.
+
 The displayed cyclic deck action on the genuine nonzero-degree power cover is also smooth for the
 pulled-back atlas.  Each roots-of-unity action map, and its inverse, is detected as smooth after
 composition with the covering projection, where it becomes the projection itself.  This gives
